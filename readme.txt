@@ -205,10 +205,6 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Add API tool to clear template cache. woocommerce/woocommerce-rest-api#212
 * Enhancement - Add API tool to verify base DB tables. woocommerce/woocommerce-rest-api#188
 
-**WooCommerce Admin 1.2.4**
-* Tweak - reduce asset filename length and remove tilde characters. #4535
-* Fix - RTL stylesheet loading for split code chunks. #4542
-
 **WooCommerce Admin 1.3.0**
 * Enhancement - Add Jetpack stats to performance indicatorts / homepage #4291
 * Enhancement - New "Store Management" quick links card on WooCommerce home screen. #4350
@@ -249,6 +245,10 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Migrate user store to wp.data #4505
 * Dev - Add options data store to wp.data #4144
 * Dev - Runtime feature config override #4523
+
+**WooCommerce Admin 1.2.4**
+* Tweak - reduce asset filename length and remove tilde characters. #4535
+* Fix - RTL stylesheet loading for split code chunks. #4542
 
 **WooCommerce Blocks 2.7.1**
 * Fix - Use IE11 friendly code for Dashicon component replacement. #2708
