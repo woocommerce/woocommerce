@@ -1,5 +1,20 @@
 == Changelog ==
 
+= 4.3.0 - 2020-07-21 =
+
+**WooCommerce**
+
+* Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775
+* Fix - Encode HTML entities for product attribute name and values. #26754
+* Add template cache clearing. #26752
+* Fixes an issue with attribute value escaping in product CSV exports. #26739
+* Fix comment_type value for reviews created with WordPress 5.5. #26729
+* Enhancement - Add 47 Kenya counties. #26728
+* Accessibility: add aria-disabled attribute to "Update cart" button on checkout page. #26726
+* Fix - Close unbalanced <p> tag in auth "Grant Access" form template file. #26725
+* Fix - Remove check for the existing term when parsing category via CSV & instead catch an existing term error when adding a new category to the database. #26720
+* Update "Subtotal" translation string in wc-template-functions.php. #26706
+
 = 4.2.0 - 2020-06-02 =
 
 **WooCommerce**
