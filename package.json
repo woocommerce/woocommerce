@@ -28,7 +28,7 @@
     "@babel/polyfill": "7.8.7",
     "@babel/preset-env": "7.9.0",
     "@babel/register": "7.9.0",
-    "@jest/test-sequencer": "^25.0.0",
+    "@jest/test-sequencer": "25.1.0",
     "@woocommerce/e2e-environment": "file:tests/e2e/env",
     "@wordpress/e2e-test-utils": "4.3.1",
     "autoprefixer": "9.7.5",
@@ -69,7 +69,7 @@
     "stylelint-config-wordpress": "16.0.0",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11",
-    "wp-textdomain": "^1.0.1"
+    "wp-textdomain": "1.0.1"
   },
   "engines": {
     "node": ">=10.15.0",
