@@ -109,7 +109,7 @@ function InstallJetpackCta( {
 				) }
 			</p>
 			<footer>
-				<Button isPrimary onClick={ install } isBusy={ isInstalling }>
+				<Button isSecondary onClick={ install } isBusy={ isInstalling }>
 					{ getInstallJetpackText() }
 				</Button>
 				<Button onClick={ dismiss } isBusy={ isInstalling }>
