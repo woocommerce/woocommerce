@@ -84,7 +84,6 @@ class ProductCollectionData extends AbstractRoute {
 			}
 
 			$data['attribute_counts'] = [];
-
 			// Or type queries need special handling because the attribute, if set, needs removing from the query first otherwise counts would not be correct.
 			if ( $taxonomy__or_queries ) {
 				foreach ( $taxonomy__or_queries as $taxonomy ) {
@@ -94,7 +93,7 @@ class ProductCollectionData extends AbstractRoute {
 					if ( ! empty( $filter_attributes ) ) {
 						$filter_attributes = array_filter(
 							$filter_attributes,
-							function( $query ) {
+							function( $query ) use ( $taxonomy ) {
 								return $query['attribute'] !== $taxonomy;
 							}
 						);
