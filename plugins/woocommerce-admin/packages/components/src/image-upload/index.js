@@ -5,6 +5,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { Icon, upload } from '@wordpress/icons';
 
 class ImageUpload extends Component {
 	constructor() {
@@ -71,6 +72,7 @@ class ImageUpload extends Component {
 							<img src={ image.url } alt="" />
 						</div>
 						<Button
+							isSecondary
 							className="woocommerce-image-upload__remove-image"
 							onClick={ this.removeImage }
 						>
@@ -89,7 +91,9 @@ class ImageUpload extends Component {
 						<Button
 							className="woocommerce-image-upload__add-image"
 							onClick={ this.openModal }
+							isSecondary
 						>
+							<Icon icon={ upload } />
 							{ __( 'Add an image', 'woocommerce-admin' ) }
 						</Button>
 					</div>

@@ -49,7 +49,7 @@
 			margin-top: 2px;
 		}
 
-		svg {
+		.woocommerce-stepper__step-icon svg {
 			display: none;
 		}
 
@@ -60,7 +60,7 @@
 			min-width: 24px;
 			width: 24px;
 			border-radius: 50%;
-			background: $studio-blue-50;
+			background: $blue-medium-focus;
 		}
 
 		.woocommerce-spinner__circle {
@@ -70,8 +70,12 @@
 		&.is-active,
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
-				background: $studio-blue-50;
+				background: $blue-medium-focus;
 				color: $studio-white;
+			}
+
+			.woocommerce-stepper__step-label {
+				color: $studio-gray-90;
 			}
 		}
 

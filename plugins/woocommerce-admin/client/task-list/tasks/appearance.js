@@ -347,7 +347,10 @@ class Appearance extends Component {
 						>
 							{ __( 'Proceed', 'woocommerce-admin' ) }
 						</Button>
-						<Button onClick={ () => this.completeStep() }>
+						<Button
+							isTertiary
+							onClick={ () => this.completeStep() }
+						>
 							{ __( 'Skip', 'woocommerce-admin' ) }
 						</Button>
 					</Fragment>

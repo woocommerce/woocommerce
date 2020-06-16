@@ -35,11 +35,6 @@
 		color: $core-grey-dark-700;
 	}
 
-	input[type='radio']:checked::before {
-		font-size: 18px;
-		background-color: $studio-white;
-	}
-
 	select.components-select-control__input {
 		max-width: 100%;
 		line-height: 1;

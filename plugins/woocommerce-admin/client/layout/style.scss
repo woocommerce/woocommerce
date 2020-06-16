@@ -82,28 +82,6 @@
 }
 
 .woocommerce-onboarding {
-	.woocommerce-stepper .woocommerce-stepper__step {
-		.woocommerce-stepper__step-label {
-			color: $studio-gray-80;
-		}
-
-		&.is-active,
-		&.is-complete {
-			.woocommerce-stepper__step-icon {
-				background: $blue-medium-focus;
-				color: $studio-white;
-			}
-
-			.woocommerce-stepper__step-label {
-				color: $studio-gray-90;
-			}
-		}
-
-		.woocommerce-spinner {
-			background: $blue-medium-focus;
-		}
-	}
-
 	/* Muriel style overrides */
 	.muriel-component {
 		margin-top: $gap;
