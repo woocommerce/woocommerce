@@ -107,12 +107,20 @@ class Controller extends ReportsController implements ExportableInterface {
 
 		// Figure out file name.
 		// Matches https://github.com/woocommerce/woocommerce/blob/4be0018c092e617c5d2b8c46b800eb71ece9ddef/includes/class-wc-download-handler.php#L197.
-		$product_id                     = intval( $data['product_id'] );
-		$_product                       = wc_get_product( $product_id );
-		$file_path                      = $_product->get_file_download_path( $data['download_id'] );
-		$filename                       = basename( $file_path );
-		$response->data['file_name']    = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
-		$response->data['file_path']    = $file_path;
+		$product_id = intval( $data['product_id'] );
+		$_product   = wc_get_product( $product_id );
+
+		// Make sure the product hasn't been deleted.
+		if ( $_product ) {
+			$file_path                   = $_product->get_file_download_path( $data['download_id'] );
+			$filename                    = basename( $file_path );
+			$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+			$response->data['file_path'] = $file_path;
+		} else {
+			$response->data['file_name'] = '';
+			$response->data['file_path'] = '';
+		}
+
 		$customer                       = new \WC_Customer( $data['user_id'] );
 		$response->data['username']     = $customer->get_username();
 		$response->data['order_number'] = $this->get_order_number( $data['order_id'] );
