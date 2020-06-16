@@ -1,7 +1,7 @@
 # WooCommerce Product Blocks <!-- omit in toc -->
 
 [![Latest Tag](https://img.shields.io/github/tag/woocommerce/woocommerce-gutenberg-products-block.svg?style=flat&label=Latest%20Tag)](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases)
-[![Travis](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block.svg?branch=master)](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block)
+[![Travis](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block.svg?branch=main)](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block)
 [![View](https://img.shields.io/badge/Project%20Components-brightgreen.svg?style=flat)](https://woocommerce.github.io/woocommerce-gutenberg-products-block)
 
 This is the feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
