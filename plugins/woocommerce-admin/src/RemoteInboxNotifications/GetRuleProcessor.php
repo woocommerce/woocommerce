@@ -46,6 +46,8 @@ class GetRuleProcessor {
 				return new WCAdminActiveForRuleProcessor();
 			case 'product_count':
 				return new ProductCountRuleProcessor();
+			case 'onboarding_profile':
+				return new OnboardingProfileRuleProcessor();
 		}
 
 		return new FailRuleProcessor();

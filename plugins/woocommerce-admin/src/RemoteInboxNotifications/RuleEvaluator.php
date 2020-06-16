@@ -30,12 +30,16 @@ class RuleEvaluator {
 	 * Evaluate the given rules as an AND operation - return false early if a
 	 * rule evaluates to false.
 	 *
-	 * @param array  $rules        The rules being processed.
-	 * @param object $stored_state Stored state.
+	 * @param array|object $rules        The rule or rules being processed.
+	 * @param object       $stored_state Stored state.
 	 *
 	 * @return bool The result of the operation.
 	 */
 	public function evaluate( $rules, $stored_state ) {
+		if ( ! is_array( $rules ) ) {
+			$rules = array( $rules );
+		}
+
 		if ( 0 === count( $rules ) ) {
 			return false;
 		}
