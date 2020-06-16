@@ -13,7 +13,7 @@ cache:
 
 branches:
     only:
-        - master
+        - main
         - /release\/.*/
 
 before_install:
@@ -86,7 +86,7 @@ jobs:
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - stage: deploy
-          if: (NOT type IN (pull_request)) AND (branch = master)
+          if: (NOT type IN (pull_request)) AND (branch = main)
           name: Deploy Storybook
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=3
@@ -101,4 +101,4 @@ jobs:
               keep_history: true
               local_dir: storybook/dist
               on:
-                  branch: master
+                  branch: main

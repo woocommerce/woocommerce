@@ -53,7 +53,7 @@ Intermediate:
 
 Advanced:
 - A locally installed version of WordPress.
-- [Node 12.16.1 and npm 6.14.4 installed](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/master/package.json#L149-L150).
+- [Node 12.16.1 and npm 6.14.4 installed](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/package.json#L149-L150).
 - Ability to edit JS source files when needed.
 -->
 

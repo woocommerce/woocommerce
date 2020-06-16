@@ -8,7 +8,7 @@ import { useThrowError } from '@woocommerce/base-hooks';
 
 /**
  * This is a custom hook for loading the selected shipping rate from the cart store and actions for selecting a rate.
-See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/master/src/RestApi/StoreApi
+See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/src/RestApi/StoreApi
  *
  * @param {Array} shippingRates an array of packages with shipping rates.
  * @return {Object} This hook will return an object with two properties:

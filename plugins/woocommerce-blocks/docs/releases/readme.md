@@ -24,7 +24,7 @@ _Outcome_: **You are equipped to ship a release!**
 #### Ensure release development is complete
 
 -   Github milestones are used for all releases. We do releases every two weeks from the latest release milestone - [example](https://github.com/woocommerce/woocommerce-gutenberg-products-block/milestone/43)
--   If a patch release is needed, then the milestone for the patch release is created and a decision will be made whether it just includes `cherry-picked` changes, or all the changes currently slated from the current release milestone. If the latter, then all the issues and pulls in the current release milestone are moved to the patch release, and the the release is built from the patch release branch rebased on master. In **most cases**, patch releases will involve cherry-picking.
+-   If a patch release is needed, then the milestone for the patch release is created and a decision will be made whether it just includes `cherry-picked` changes, or all the changes currently slated from the current release milestone. If the latter, then all the issues and pulls in the current release milestone are moved to the patch release, and the the release is built from the patch release branch rebased on `main`. In **most cases**, patch releases will involve cherry-picking.
 -   Ensure all issues/PRs intended for this release are merged, closed and linked to release.
 -   All PRs should have changelog entry, or `skip-changelog` tag.
 -   Check with the team to confirm any outstanding or in progress work.
@@ -47,26 +47,26 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
 
 #### Create a release pull request
 
-Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to master but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
+Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to the min branch, but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
 
-### Patch releases against latest master
+### Patch releases against latest main branch
 
-If it's determined a patch release will include the latest master:
+If it's determined a patch release will include the latest main branch:
 
 - Ensure your local checkout is updated to the tip of the release branch.
-- Rebase the release branch for the patch release against master.
+- Rebase the release branch for the patch release against `main`.
 - Move all closed issues and pulls from the current release milestone into the patch release milestone.
 - Push the release branch to origin (so changes are in GitHub repo).
 
 ### Patch releases with cherry-picking.
 
-This is for releases where just fixes specific to the branch are released and not the latest changes in master.
+This is for releases where just fixes specific to the branch are released and not the latest changes in `main`.
 
 - Ensure your local checkout is updated to the tip of the release branch.
 - Cherry pick relevant PRs into the release branch:
 -   If PR is already labelled `status: cherry-picked 🍒` then continue to next PR.
 -   Ideally, use GitHub Hub to cherry pick the PR - `hub cherry-pick {PR-COMMIT-URL}`.
--   If there are serious conflicts or extensive differences between `master` and release branch, you may need to take more care:
+-   If there are serious conflicts or extensive differences between `main` and release branch, you may need to take more care:
     -   Manually cherry pick individual commits using git - `git cherry-pick {COMMIT-HASH}`.
     -   Or in some cases, manually craft a new PR with appropriate changes, targeting release branch.
 -   Push the release branch to origin (so changes are in GitHub repo).
@@ -142,11 +142,11 @@ _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to 
 
 ### After release
 
-#### Update `master` with release changes
+#### Update `main` branch with release changes
 
--   Merge the release branch back into master (without the branch being up to date with master). This may have merge conflicts needing resolved if there are cherry-picked commits in the release branch.
+-   Merge the release branch back into `main` (without the branch being up to date with `main`). This may have merge conflicts needing resolved if there are cherry-picked commits in the release branch.
 -   Do not delete the branch (release branches are kept open for potential patch releases for that version)
--   For _major_ & _minor_ releases, update version on master with dev suffix, e.g. [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
+-   For _major_ & _minor_ releases, update version on `main` with dev suffix, e.g. [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
 
 #### Clean up release milestone / Zenhub
 
@@ -165,7 +165,7 @@ If the tagged release should be updated in WooCommerce core, do this immediately
 - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
 - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 
-_Outcome:_ The package is updated in WooCommerce core frequently and successfully merged to WooCommerce master as a stable release.
+_Outcome:_ The package is updated in WooCommerce core frequently and successfully merged to WooCommerce main branch as a stable release.
 
 ## Appendix: Versions
 

@@ -2,7 +2,7 @@
 
 This repo includes [Storybook](https://storybook.js.org) tooling so we can test and develop components in isolation.
 
-The storybook is automatically built and published to [GitHub pages](https://woocommerce.github.io/woocommerce-gutenberg-products-block/) on every push to master. See [travis.yml](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/master/.travis.yml) for details.
+The storybook is automatically built and published to [GitHub pages](https://woocommerce.github.io/woocommerce-gutenberg-products-block/) on every push to the main branch. See [travis.yml](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/.travis.yml) for details.
 
 https://woocommerce.github.io/woocommerce-gutenberg-products-block/
 
