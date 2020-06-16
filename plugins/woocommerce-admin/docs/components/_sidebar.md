@@ -41,7 +41,6 @@
     * [SegmentedSelection](components/packages/segmented-selection/README.md)
     * [SelectControl](components/packages/select-control/README.md)
     * [Spinner](components/packages/spinner/README.md)
-    * [SplitButton](components/packages/split-button/README.md)
     * [Stepper](components/packages/stepper/README.md)
     * [Summary](components/packages/summary/README.md)
     * [Table](components/packages/table/README.md)

@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.3.0
 Tested up to: 5.4.1
 Requires PHP: 5.6.20
-Stable tag: 1.2.3
+Stable tag: 1.3.0-beta.1
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
 
@@ -70,6 +70,47 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.3.0-beta.1 2020-06-15=
+- Enhancement: Add Jetpack stats to performance indicatorts / homepage #4291
+- Enhancement: New "Store Management" quick links card on WooCommerce home screen. #4350
+- Enhancement: Inbox notifications layout updates #4218
+- Enhancement: New Home Screen #4303
+- Enhancement: Use WordPress Core colors for styling accents. #4558
+- Dev: Add jest-dom eslint plugin. #4327
+- Dev: Migrate onboarding data store to wp.data #4433
+- Dev: Remove use of `IconButton` in favor of `Button` #4415
+- Dev: Fix error handling for plugins on server error #4462
+- Dev: update @wordpress/components and @wordpress/base-styles #4427
+- Dev: Migrate user store to wp.data #4505
+- Dev: Add options data store to wp.data #4144
+- Dev: Runtime feature config override #4523
+- Fix: misaligned 'required' text on selects #4307
+- Fix: exception when opening dashboard after selecting extensions to purchase #4357
+- Fix: REST API collections schema #4377
+- Fix: Monetary Advanced Filters in Customers Report with correct currency object prop. #4356
+- Fix: In App purchase "back link" #4301
+- Fix: Search results selectable by clicking on item text or icon #4474
+- Fix: Filters' static query parameters #4458
+- Fix: The WCPay method not appearing as recommended sometimes #4345
+- Fix: Removed URLSearchParams method #4501
+- Fix: REST API collections schema. #4484
+- Fix: null issue in wpNavMenuClassChange #4513 🎉 @gradosevic 
+- Fix: RTL stylesheet loading for split code chunks. #4542
+- Fix: Don't show store location step in tax and shipping tasks if the address has already been provided #4507
+- Fix: Check for enabled methods before payment task completion #4530
+- Fix: Solved a problem with the method onChoose in the last onboarding step. #4583
+- Fix: Only mark purchase task as complete when products exist #4574
+- Tweak: make revenue report total sales column optional #4397
+- Tweak: Adjustments to WooCommerce Payments setup task #4373
+- Tweak: Handling of plugin installs in OBW #4411
+- Tweak: Update design of Setup Checklist #4434
+- Tweak: Add scrollable styling to left side of Table, and keep updated #4179
+- Tweak - Add custom autocompleter support to Search componen #4518
+- Tweak: reduce asset filename length. #4535
+- Tweak: Use single dash for country/state dropdown options #4553
+- Tweak: Use label tag for toggleable shipping zones #4554
+- Tweak: Tweak - Make it easier to add submenu items to the Marketing menu #4561
 
 = 1.2.3 2020-05-22=
 - Tweak: Updates to WooCommerce Payments in Setup Checklist #4293
