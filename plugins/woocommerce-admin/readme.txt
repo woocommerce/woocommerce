@@ -71,7 +71,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 1.3.0-beta.1 2020-06-15=
+= 1.3.0-beta.1 2020-06-15 =
 - Enhancement: Add Jetpack stats to performance indicatorts / homepage #4291
 - Enhancement: New "Store Management" quick links card on WooCommerce home screen. #4350
 - Enhancement: Inbox notifications layout updates #4218
@@ -112,14 +112,18 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Use label tag for toggleable shipping zones #4554
 - Tweak: Tweak - Make it easier to add submenu items to the Marketing menu #4561
 
-= 1.2.3 2020-05-22=
+= 1.2.4 2020-06-11 =
+- Tweak: reduce asset filename length and remove tilde characters. #4535
+- Fix: RTL stylesheet loading for split code chunks. #4542
+
+= 1.2.3 2020-05-22 =
 - Tweak: Updates to WooCommerce Payments in Setup Checklist #4293
 
-= 1.2.2 2020-05-18=
+= 1.2.2 2020-05-18 =
 - Fix: Respect tracking opt-in before new page load. #4368
 - Enhancement: Add Jetpack connection to plugin benefits step #4374
 
-= 1.2.0 2020-05--8 =
+= 1.2.0 2020-05-18 =
 - Enhancement: Add onboarding payments note #4157 
 - Enhancement: Marketing Inbox Note #4030
 - Performance: Use Route based code splitting to reduce bundle size #4094
@@ -149,12 +153,19 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Dynamic Currency with Context API #4027
 - Dev: Remove Duplicate array entry #4049 🎉 @tivnet
 
-= 1.1.1 2020-04-28 =
+= 1.1.3 2020-05-18 =
+- Tweak: Onboarding: Add Jetpack flow back to onboarding profiler. #4382
+- Fix: Respect tracking opt-in before new page load. #4368
+
+= 1.1.2 N/A =
+- Version bumped on Composer/Packagist but not released to WordPress.org.
+
+= 1.1.1 2020-05-05 =
 - Fix: Storefront should show at top of theme options in onboarding wizard. #4187
 - Tweak: Remove Stripe auto-connect from payment task. #4164
 - Tweak: Hide suggested extensions in Marketing Tab if opted out of "Marketplace Suggestions"
 
-= 1.1.0 2020-04-20 =
+= 1.1.0 2020-04-23 =
 - Tweak: Added link to "go shopping" button #3712
 - Fix: Make analytics tables use the site's date format setting #3715
 - Fix: Alignment of select text #3723 🎉 @edmundcwm
@@ -200,7 +211,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: OBW: Allow CBD only for US stores #4117
 
 
-= 1.0.3 2020-03-19 =
+= 1.0.3 2020-03-22 =
 
 - Fix: Stop calling protected has_satisfied_dependencies() on outdated plugin. #3938
 - Fix: Rename image assets in OBW business details step. #3931
