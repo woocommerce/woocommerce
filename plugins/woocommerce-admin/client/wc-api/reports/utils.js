@@ -387,13 +387,13 @@ export function getReportChartData( options ) {
  * Returns a formatting function or string to be used by d3-format
  *
  * @param  {string} type Type of number, 'currency', 'number', 'percent', 'average'
- * @param  {Function} formatCurrency format currency function
+ * @param  {Function} formatAmount format currency function
  * @return {string|Function}  returns a number format based on the type or an overriding formatting function
  */
-export function getTooltipValueFormat( type, formatCurrency ) {
+export function getTooltipValueFormat( type, formatAmount ) {
 	switch ( type ) {
 		case 'currency':
-			return formatCurrency;
+			return formatAmount;
 		case 'percent':
 			return '.0%';
 		case 'number':

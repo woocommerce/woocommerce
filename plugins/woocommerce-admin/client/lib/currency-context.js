@@ -7,23 +7,23 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * WooCommerce dependencies
  */
-import Currency from '@woocommerce/currency';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
-const appCurrency = Currency( CURRENCY );
+const appCurrency = CurrencyFactory( CURRENCY );
 
 export const getFilteredCurrencyInstance = ( query ) => {
-	const config = appCurrency.getCurrency();
+	const config = appCurrency.getCurrencyConfig();
 	const filteredConfig = applyFilters(
 		'woocommerce_admin_report_currency',
 		config,
 		query
 	);
-	return Currency( filteredConfig );
+	return CurrencyFactory( filteredConfig );
 };
 
 export const CurrencyContext = createContext(

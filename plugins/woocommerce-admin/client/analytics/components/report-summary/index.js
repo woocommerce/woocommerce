@@ -33,10 +33,10 @@ import { CurrencyContext } from 'lib/currency-context';
  */
 export class ReportSummary extends Component {
 	formatVal( val, type ) {
-		const { formatCurrency, getCurrency } = this.context;
+		const { formatAmount, getCurrencyConfig } = this.context;
 		return type === 'currency'
-			? formatCurrency( val )
-			: formatValue( getCurrency(), type, val );
+			? formatAmount( val )
+			: formatValue( getCurrencyConfig(), type, val );
 	}
 
 	getValues( key, type ) {
@@ -222,7 +222,7 @@ export default compose(
 			};
 		}
 
-		const fields = charts && charts.map( chart => chart.key );
+		const fields = charts && charts.map( ( chart ) => chart.key );
 
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME

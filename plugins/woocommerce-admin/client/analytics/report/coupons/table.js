@@ -72,9 +72,9 @@ class CouponsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
 		const {
-			formatCurrency,
+			formatAmount,
 			formatDecimal: getCurrencyFormatDecimal,
-			getCurrency,
+			getCurrencyConfig,
 		} = this.context;
 
 		return map( coupons, ( coupon ) => {
@@ -111,7 +111,11 @@ class CouponsReportTable extends Component {
 			} );
 			const ordersLink = (
 				<Link href={ ordersUrl } type="wc-admin">
-					{ formatValue( getCurrency(), 'number', ordersCount ) }
+					{ formatValue(
+						getCurrencyConfig(),
+						'number',
+						ordersCount
+					) }
 				</Link>
 			);
 
@@ -125,7 +129,7 @@ class CouponsReportTable extends Component {
 					value: ordersCount,
 				},
 				{
-					display: formatCurrency( amount ),
+					display: formatAmount( amount ),
 					value: getCurrencyFormatDecimal( amount ),
 				},
 				{
@@ -162,8 +166,8 @@ class CouponsReportTable extends Component {
 			orders_count: ordersCount = 0,
 			amount = 0,
 		} = totals;
-		const { formatCurrency, getCurrency } = this.context;
-		const currency = getCurrency();
+		const { formatAmount, getCurrencyConfig } = this.context;
+		const currency = getCurrencyConfig();
 		return [
 			{
 				label: _n(
@@ -185,7 +189,7 @@ class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'amount discounted', 'woocommerce-admin' ),
-				value: formatCurrency( amount ),
+				value: formatAmount( amount ),
 			},
 		];
 	}
@@ -209,11 +213,7 @@ class CouponsReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
-				summaryFields={ [
-					'coupons_count',
-					'orders_count',
-					'amount',
-				] }
+				summaryFields={ [ 'coupons_count', 'orders_count', 'amount' ] }
 				isRequesting={ isRequesting }
 				itemIdField="coupon_id"
 				query={ query }

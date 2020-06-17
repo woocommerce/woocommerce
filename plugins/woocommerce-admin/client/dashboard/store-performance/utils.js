@@ -32,7 +32,7 @@ export const getIndicatorValues = ( {
 	primaryData,
 	secondaryData,
 	currency,
-	formatCurrency,
+	formatAmount,
 	persistedQuery,
 } ) => {
 	const primaryItem = find(
@@ -59,10 +59,10 @@ export const getIndicatorValues = ( {
 
 	const delta = calculateDelta( primaryItem.value, secondaryItem.value );
 	const primaryValue = isCurrency
-		? formatCurrency( primaryItem.value )
+		? formatAmount( primaryItem.value )
 		: formatValue( currency, primaryItem.format, primaryItem.value );
 	const secondaryValue = isCurrency
-		? formatCurrency( secondaryItem.value )
+		? formatAmount( secondaryItem.value )
 		: formatValue( currency, secondaryItem.format, secondaryItem.value );
 	return {
 		primaryValue,

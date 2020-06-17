@@ -134,8 +134,8 @@ class StorePerformance extends Component {
 			compare === 'previous_period'
 				? __( 'Previous Period:', 'woocommerce-admin' )
 				: __( 'Previous Year:', 'woocommerce-admin' );
-		const { formatCurrency, getCurrency } = this.context;
-		const currency = getCurrency();
+		const { formatAmount, getCurrencyConfig } = this.context;
+		const currency = getCurrencyConfig();
 		return (
 			<SummaryList>
 				{ () =>
@@ -151,7 +151,7 @@ class StorePerformance extends Component {
 							primaryData,
 							secondaryData,
 							currency,
-							formatCurrency,
+							formatAmount,
 							persistedQuery,
 						} );
 

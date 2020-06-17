@@ -110,10 +110,10 @@ class RevenueReportTable extends Component {
 	getRowsContent( data = [] ) {
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
 		const {
-			formatCurrency,
+			formatAmount,
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
-			getCurrency,
+			getCurrencyConfig,
 		} = this.context;
 
 		return data.map( ( row ) => {
@@ -138,7 +138,11 @@ class RevenueReportTable extends Component {
 					}
 					type="wp-admin"
 				>
-					{ formatValue( getCurrency(), 'number', ordersCount ) }
+					{ formatValue(
+						getCurrencyConfig(),
+						'number',
+						ordersCount
+					) }
 				</Link>
 			);
 			return [
@@ -160,11 +164,11 @@ class RevenueReportTable extends Component {
 					value: getCurrencyFormatDecimal( grossSales ),
 				},
 				{
-					display: formatCurrency( refunds ),
+					display: formatAmount( refunds ),
 					value: getCurrencyFormatDecimal( refunds ),
 				},
 				{
-					display: formatCurrency( coupons ),
+					display: formatAmount( coupons ),
 					value: getCurrencyFormatDecimal( coupons ),
 				},
 				{
@@ -198,8 +202,8 @@ class RevenueReportTable extends Component {
 			shipping = 0,
 			net_revenue: netRevenue = 0,
 		} = totals;
-		const { formatCurrency, getCurrency } = this.context;
-		const currency = getCurrency();
+		const { formatAmount, getCurrencyConfig } = this.context;
+		const currency = getCurrencyConfig();
 		return [
 			{
 				label: _n( 'day', 'days', totalResults, 'woocommerce-admin' ),
@@ -216,31 +220,31 @@ class RevenueReportTable extends Component {
 			},
 			{
 				label: __( 'gross sales', 'woocommerce-admin' ),
-				value: formatCurrency( grossSales ),
+				value: formatAmount( grossSales ),
 			},
 			{
 				label: __( 'returns', 'woocommerce-admin' ),
-				value: formatCurrency( refunds ),
+				value: formatAmount( refunds ),
 			},
 			{
 				label: __( 'coupons', 'woocommerce-admin' ),
-				value: formatCurrency( coupons ),
+				value: formatAmount( coupons ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
-				value: formatCurrency( netRevenue ),
+				value: formatAmount( netRevenue ),
 			},
 			{
 				label: __( 'taxes', 'woocommerce-admin' ),
-				value: formatCurrency( taxes ),
+				value: formatAmount( taxes ),
 			},
 			{
 				label: __( 'shipping', 'woocommerce-admin' ),
-				value: formatCurrency( shipping ),
+				value: formatAmount( shipping ),
 			},
 			{
 				label: __( 'total sales', 'woocommerce-admin' ),
-				value: formatCurrency( totalSales ),
+				value: formatAmount( totalSales ),
 			},
 		];
 	}

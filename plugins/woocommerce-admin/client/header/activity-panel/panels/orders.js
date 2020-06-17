@@ -195,7 +195,7 @@ class OrdersPanel extends Component {
 									productsCount
 								) }
 							</span>
-							<span>{ Currency.formatCurrency( total ) }</span>
+							<span>{ Currency.formatAmount( total ) }</span>
 						</div>
 					}
 					actions={

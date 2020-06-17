@@ -35,12 +35,12 @@ export const StatsList = ( {
 	secondaryError,
 	query,
 } ) => {
-	const { formatCurrency, getCurrency } = useContext( CurrencyContext );
+	const { formatAmount, getCurrencyConfig } = useContext( CurrencyContext );
 	if ( primaryError || secondaryError ) {
 		return null;
 	}
 	const persistedQuery = getPersistedQuery( query );
-	const currency = getCurrency();
+	const currency = getCurrencyConfig();
 
 	return (
 		<ul
@@ -68,7 +68,7 @@ export const StatsList = ( {
 					primaryData,
 					secondaryData,
 					currency,
-					formatCurrency,
+					formatAmount,
 					persistedQuery,
 				} );
 

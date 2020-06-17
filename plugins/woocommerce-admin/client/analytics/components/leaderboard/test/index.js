@@ -7,7 +7,7 @@ import { mount, shallow } from 'enzyme';
  * WooCommerce dependencies
  */
 import { numberFormat } from '@woocommerce/number';
-import Currency from '@woocommerce/currency';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import { Leaderboard } from '../';
 import mockData from '../data/top-selling-products-mock-data';
 import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
-const { formatCurrency, formatDecimal } = Currency( CURRENCY );
+const { formatAmount, formatDecimal } = CurrencyFactory( CURRENCY );
 
 const rows = mockData.map( ( row ) => {
 	const {
@@ -39,7 +39,7 @@ const rows = mockData.map( ( row ) => {
 			value: ordersCount,
 		},
 		{
-			display: formatCurrency( netRevenue ),
+			display: formatAmount( netRevenue ),
 			value: formatDecimal( netRevenue ),
 		},
 	];
@@ -107,7 +107,7 @@ describe( 'Leaderboard', () => {
 			numberFormat( CURRENCY, mockData[ 0 ].orders_count )
 		);
 		expect( tableItems.at( 3 ).text() ).toBe(
-			formatCurrency( mockData[ 0 ].net_revenue )
+			formatAmount( mockData[ 0 ].net_revenue )
 		);
 	} );
 } );

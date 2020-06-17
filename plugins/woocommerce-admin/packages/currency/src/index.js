@@ -8,7 +8,7 @@ import { sprintf } from '@wordpress/i18n';
  */
 import { numberFormat } from '@woocommerce/number';
 
-const Currency = ( currencySetting ) => {
+const CurrencyFactory = ( currencySetting ) => {
 	let currency;
 
 	setCurrency( currencySetting );
@@ -39,7 +39,7 @@ const Currency = ( currencySetting ) => {
 	 * @param   {number|string} number number to format
 	 * @return {?string} A formatted string.
 	 */
-	function formatCurrency( number ) {
+	function formatAmount( number ) {
 		const formattedNumber = numberFormat( currency, number );
 
 		if ( formattedNumber === '' ) {
@@ -78,11 +78,11 @@ const Currency = ( currencySetting ) => {
 	}
 
 	return {
-		getCurrency: () => {
+		getCurrencyConfig: () => {
 			return { ...currency };
 		},
 		setCurrency,
-		formatCurrency,
+		formatAmount,
 		getPriceFormat,
 
 		/**
@@ -108,7 +108,7 @@ const Currency = ( currencySetting ) => {
 
 		/**
 		 * Get the string representation of a floating point number to the precision used by the current currency.
-		 * This is different from `formatCurrency` by not returning the currency symbol.
+		 * This is different from `formatAmount` by not returning the currency symbol.
 		 *
 		 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {string}               The original number rounded to a decimal point
@@ -137,16 +137,16 @@ const Currency = ( currencySetting ) => {
 			if ( number < 0 ) {
 				return (
 					<span className="is-negative">
-						{ formatCurrency( number ) }
+						{ formatAmount( number ) }
 					</span>
 				);
 			}
-			return formatCurrency( number );
+			return formatAmount( number );
 		},
 	};
 };
 
-export default Currency;
+export default CurrencyFactory;
 
 /**
  * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.

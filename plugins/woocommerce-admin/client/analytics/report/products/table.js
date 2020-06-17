@@ -105,9 +105,9 @@ class ProductsReportTable extends Component {
 		const {
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
-			getCurrency,
+			getCurrencyConfig,
 		} = this.context;
-		const currency = getCurrency();
+		const currency = getCurrencyConfig();
 
 		return map( data, ( row ) => {
 			const {
@@ -281,8 +281,8 @@ class ProductsReportTable extends Component {
 			net_revenue: netRevenue = 0,
 			orders_count: ordersCount = 0,
 		} = totals;
-		const { formatCurrency, getCurrency } = this.context;
-		const currency = getCurrency();
+		const { formatAmount, getCurrencyConfig } = this.context;
+		const currency = getCurrencyConfig();
 		return [
 			{
 				label: _n(
@@ -304,7 +304,7 @@ class ProductsReportTable extends Component {
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
-				value: formatCurrency( netRevenue ),
+				value: formatAmount( netRevenue ),
 			},
 			{
 				label: _n(

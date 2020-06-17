@@ -162,7 +162,7 @@ class CouponsReportTable extends Component {
 		const after = moment( dates.primary.after );
 		const before = moment( dates.primary.before );
 		const days = before.diff( after, 'days' ) + 1;
-		const currency = this.context.getCurrency();
+		const currency = this.context.getCurrencyConfig();
 
 		return [
 			{

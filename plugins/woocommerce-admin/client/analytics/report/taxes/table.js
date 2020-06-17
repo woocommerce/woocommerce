@@ -73,7 +73,7 @@ class TaxesReportTable extends Component {
 		const {
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
-			getCurrency,
+			getCurrencyConfig,
 		} = this.context;
 
 		return map( taxes, ( tax ) => {
@@ -126,7 +126,7 @@ class TaxesReportTable extends Component {
 				},
 				{
 					display: formatValue(
-						getCurrency(),
+						getCurrencyConfig(),
 						'number',
 						ordersCount
 					),
@@ -144,8 +144,8 @@ class TaxesReportTable extends Component {
 			shipping_tax: shippingTax = 0,
 			orders_count: ordersCount = 0,
 		} = totals;
-		const { formatCurrency, getCurrency } = this.context;
-		const currency = getCurrency();
+		const { formatAmount, getCurrencyConfig } = this.context;
+		const currency = getCurrencyConfig();
 		return [
 			{
 				label: _n(
@@ -158,15 +158,15 @@ class TaxesReportTable extends Component {
 			},
 			{
 				label: __( 'total tax', 'woocommerce-admin' ),
-				value: formatCurrency( totalTax ),
+				value: formatAmount( totalTax ),
 			},
 			{
 				label: __( 'order tax', 'woocommerce-admin' ),
-				value: formatCurrency( orderTax ),
+				value: formatAmount( orderTax ),
 			},
 			{
 				label: __( 'shipping tax', 'woocommerce-admin' ),
-				value: formatCurrency( shippingTax ),
+				value: formatAmount( shippingTax ),
 			},
 			{
 				label: _n(

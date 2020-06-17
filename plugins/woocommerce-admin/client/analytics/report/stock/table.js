@@ -128,7 +128,7 @@ class StockReportTable extends Component {
 				{
 					display: manageStock
 						? formatValue(
-								this.context.getCurrency(),
+								this.context.getCurrencyConfig(),
 								'number',
 								stockQuantity
 						  )
@@ -147,7 +147,7 @@ class StockReportTable extends Component {
 			instock = 0,
 			onbackorder = 0,
 		} = totals;
-		const currency = this.context.getCurrency();
+		const currency = this.context.getCurrencyConfig();
 		return [
 			{
 				label: _n(
