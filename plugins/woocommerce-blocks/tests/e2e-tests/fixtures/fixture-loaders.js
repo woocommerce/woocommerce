@@ -12,15 +12,16 @@ require( 'dotenv' ).config();
 /**
  * Internal dependencies
  */
-
 const fixtures = require( './fixture-data' );
+
+// global.process.env.WORDPRESS_BASE_URL = `${ process.env.WORDPRESS_BASE_URL }:8889`;
 
 /**
  * ConsumerKey and ConsumerSecret are not used, we use basic auth, but
  * not providing them will throw an error.
  */
 const WooCommerce = new WooCommerceRestApi( {
-	url: `${ process.env.WORDPRESS_BASE_URL }:${ process.env.WORDPRESS_PORT }/`,
+	url: `${ process.env.WORDPRESS_BASE_URL }/`,
 	consumerKey: 'consumer_key', // Your consumer key
 	consumerSecret: 'consumer_secret', // Your consumer secret
 	version: 'wc/v3',
@@ -32,7 +33,8 @@ const WooCommerce = new WooCommerceRestApi( {
 	},
 } );
 
-const WPAPI = `${ process.env.WORDPRESS_BASE_URL }:${ process.env.WORDPRESS_PORT }/wp-json/wp/v2/pages`;
+const WPAPI = `${ process.env.WORDPRESS_BASE_URL }/wp-json/wp/v2/pages`;
+
 /**
  * prepare some store settings.
  *
@@ -103,13 +105,14 @@ const deleteCoupons = ( ids ) =>
 /**
  * Create Products and call createReviews.
  *
+ * currently this only creates a single product for the sake of reviews.
+ *
+ * @todo  add more products to e2e fixtures data.
+ *
  * @param {Object[]} fixture An array of objects describing our data, defaults
  * to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created products,
  * or rejects if the request failed.
- *
- * currently this only creates a single product for the sake of reviews.
- * @todo: add more products to e2e fixtures data.
  */
 const createProducts = ( fixture = fixtures.Products() ) =>
 	WooCommerce.post( 'products/batch', {
@@ -136,8 +139,8 @@ const deleteProducts = ( ids ) =>
 
 /**
  * Create Reviews.
- 
-This is not called directly but is called within createProducts.
+ *
+ * This is not called directly but is called within createProducts.
  *
  * @param {number}   id      product id to assign reviews to.
  * @param {Object[]} fixture An array of objects describing our reviews, defaults
@@ -189,16 +192,15 @@ const enablePaymentGateways = () =>
 
 /**
  * Create shipping zones.
- 
-Shipping locations need to be assigned to a zone, and shipping methods need
-to be assigned to a shipping location, this create a shipping zone and location
-and methods.
+ *
+ * Shipping locations need to be assigned to a zone, and shipping methods need
+ * to be assigned to a shipping location, this create a shipping zone and
+ * location and methods.
  *
  * @param {Object[]} fixture An array of objects describing our data, defaults
  *                           to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created shipping
  * zones IDs, or rejects if the request failed.
- 
  */
 const createShippingZones = ( fixture = fixtures.Shipping() ) => {
 	return Promise.all(

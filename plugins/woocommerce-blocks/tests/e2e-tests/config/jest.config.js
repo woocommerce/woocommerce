@@ -17,7 +17,7 @@ module.exports = {
 	roots: [ '<rootDir>/tests/e2e-tests/specs' ],
 	globalSetup: '<rootDir>/tests/e2e-tests/config/setup.js',
 	globalTeardown: '<rootDir>/tests/e2e-tests/config/teardown.js',
-	setupFiles: [ '<rootDir>/tests/e2e-tests/config/env.setup.js' ],
+	setupFiles: [],
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
 	setupFilesAfterEnv: [
