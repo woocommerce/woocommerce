@@ -170,57 +170,57 @@ class Checkout extends AbstractBlock {
 	 */
 	protected function get_skeleton() {
 		return '
-			<div class="wc-block-skeleton wc-block-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton hidden" aria-hidden="true">
-				<div class="wc-block-main wc-block-checkout__main">
+			<div class="wc-block-skeleton wc-block-components-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton hidden" aria-hidden="true">
+				<div class="wc-block-components-main wc-block-checkout__main">
 					<div class="wc-block-components-express-checkout"></div>
 					<div class="wc-block-components-express-checkout-continue-rule"><span></span></div>
-					<form class="wc-block-checkout-form">
-						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<div class="wc-block-checkout-step__heading">
-								<div class="wc-block-checkout-step__title"></div>
+					<form class="wc-block-components-checkout-form">
+						<fieldset class="wc-block-checkout__contact-fields wc-block-components-checkout-step">
+							<div class="wc-block-components-checkout-step__heading">
+								<div class="wc-block-components-checkout-step__title"></div>
 							</div>
-							<div class="wc-block-checkout-step__container">
-								<div class="wc-block-checkout-step__content">
+							<div class="wc-block-components-checkout-step__container">
+								<div class="wc-block-components-checkout-step__content">
 									<span></span>
 								</div>
 							</div>
 						</fieldset>
-						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<div class="wc-block-checkout-step__heading">
-								<div class="wc-block-checkout-step__title"></div>
+						<fieldset class="wc-block-checkout__contact-fields wc-block-components-checkout-step">
+							<div class="wc-block-components-checkout-step__heading">
+								<div class="wc-block-components-checkout-step__title"></div>
 							</div>
-							<div class="wc-block-checkout-step__container">
-								<div class="wc-block-checkout-step__content">
+							<div class="wc-block-components-checkout-step__container">
+								<div class="wc-block-components-checkout-step__content">
 									<span></span>
 								</div>
 							</div>
 						</fieldset>
-						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<div class="wc-block-checkout-step__heading">
-								<div class="wc-block-checkout-step__title"></div>
+						<fieldset class="wc-block-checkout__contact-fields wc-block-components-checkout-step">
+							<div class="wc-block-components-checkout-step__heading">
+								<div class="wc-block-components-checkout-step__title"></div>
 							</div>
-							<div class="wc-block-checkout-step__container">
-								<div class="wc-block-checkout-step__content">
+							<div class="wc-block-components-checkout-step__container">
+								<div class="wc-block-components-checkout-step__content">
 									<span></span>
 								</div>
 							</div>
 						</fieldset>
-						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<div class="wc-block-checkout-step__heading">
-								<div class="wc-block-checkout-step__title"></div>
+						<fieldset class="wc-block-checkout__contact-fields wc-block-components-checkout-step">
+							<div class="wc-block-components-checkout-step__heading">
+								<div class="wc-block-components-checkout-step__title"></div>
 							</div>
-							<div class="wc-block-checkout-step__container">
-								<div class="wc-block-checkout-step__content">
+							<div class="wc-block-components-checkout-step__container">
+								<div class="wc-block-components-checkout-step__content">
 									<span></span>
 								</div>
 							</div>
 						</fieldset>
 					</form>
 				</div>
-				<div class="wc-block-sidebar wc-block-checkout__sidebar">
+				<div class="wc-block-components-sidebar wc-block-checkout__sidebar">
 					<div class="components-card"></div>
 				</div>
-				<div class="wc-block-main wc-block-checkout__main-totals">
+				<div class="wc-block-components-main wc-block-checkout__main-totals">
 					<div class="wc-block-checkout__actions">
 						<button class="components-button button wc-block-button wc-block-components-checkout-place-order-button">&nbsp;</button>
 					</div>

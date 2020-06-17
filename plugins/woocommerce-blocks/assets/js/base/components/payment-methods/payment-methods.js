@@ -98,7 +98,7 @@ const PaymentMethods = () => {
 					} ) }
 					{ customerId > 0 && supports.savePaymentInfo && (
 						<CheckboxControl
-							className="wc-block-checkout__save-card-info"
+							className="wc-block-components-payment-methods__save-card-info"
 							label={ __(
 								'Save payment information to my account for future purchases.',
 								'woo-gutenberg-products-block'

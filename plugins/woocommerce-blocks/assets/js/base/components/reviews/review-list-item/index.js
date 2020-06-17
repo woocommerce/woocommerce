@@ -15,7 +15,7 @@ function getReviewImage( review, imageType, isLoading ) {
 	if ( isLoading || ! review ) {
 		return (
 			<div
-				className="wc-block-review-list-item__image"
+				className="wc-block-review-list-item__image wc-block-components-review-list-item__image"
 				width="48"
 				height="48"
 			/>
@@ -23,13 +23,13 @@ function getReviewImage( review, imageType, isLoading ) {
 	}
 
 	return (
-		<div className="wc-block-review-list-item__image">
+		<div className="wc-block-review-list-item__image wc-block-components-review-list-item__image">
 			{ imageType === 'product' ? (
 				<img
 					aria-hidden="true"
 					alt={ review.product_image?.alt || '' }
 					src={ review.product_image?.src || '' }
-					className="wc-block-review-list-item__image"
+					className="wc-block-review-list-item__image wc-block-components-review-list-item__image"
 					width="48"
 					height="48"
 				/>
@@ -39,14 +39,14 @@ function getReviewImage( review, imageType, isLoading ) {
 					alt=""
 					src={ review.reviewer_avatar_urls[ '48' ] || '' }
 					srcSet={ review.reviewer_avatar_urls[ '96' ] + ' 2x' }
-					className="wc-block-review-list-item__image"
+					className="wc-block-review-list-item__image wc-block-components-review-list-item__image"
 					width="48"
 					height="48"
 				/>
 			) }
 			{ review.verified && (
 				<div
-					className="wc-block-review-list-item__verified"
+					className="wc-block-review-list-item__verified wc-block-components-review-list-item__verified"
 					title={ __(
 						'Verified buyer',
 						'woo-gutenberg-products-block'
@@ -71,7 +71,7 @@ function getReviewContent( review ) {
 				'Hide full review',
 				'woo-gutenberg-products-block'
 			) }
-			className="wc-block-review-list-item__text"
+			className="wc-block-review-list-item__text wc-block-components-review-list-item__text"
 		>
 			<div
 				dangerouslySetInnerHTML={ {
@@ -87,7 +87,7 @@ function getReviewContent( review ) {
 
 function getReviewProductName( review ) {
 	return (
-		<div className="wc-block-review-list-item__product">
+		<div className="wc-block-review-list-item__product wc-block-components-review-list-item__product">
 			<a
 				href={ review.product_permalink }
 				dangerouslySetInnerHTML={ {
@@ -104,7 +104,9 @@ function getReviewProductName( review ) {
 function getReviewerName( review ) {
 	const { reviewer = '' } = review;
 	return (
-		<div className="wc-block-review-list-item__author">{ reviewer }</div>
+		<div className="wc-block-review-list-item__author wc-block-components-review-list-item__author">
+			{ reviewer }
+		</div>
 	);
 }
 
@@ -115,7 +117,7 @@ function getReviewDate( review ) {
 	} = review;
 	return (
 		<time
-			className="wc-block-review-list-item__published-date"
+			className="wc-block-review-list-item__published-date wc-block-components-review-list-item__published-date"
 			dateTime={ dateCreated }
 		>
 			{ formattedDateCreated }
@@ -129,9 +131,9 @@ function getReviewRating( review ) {
 		width: ( rating / 5 ) * 100 + '%' /* stylelint-disable-line */,
 	};
 	return (
-		<div className="wc-block-review-list-item__rating">
+		<div className="wc-block-review-list-item__rating wc-block-components-review-list-item__rating">
 			<div
-				className="wc-block-review-list-item__rating__stars"
+				className="wc-block-review-list-item__rating__stars wc-block-components-review-list-item__rating__stars"
 				role="img"
 			>
 				<span style={ starStyle }>
@@ -164,9 +166,13 @@ const ReviewListItem = ( { attributes, review = {} } ) => {
 
 	return (
 		<li
-			className={ classNames( 'wc-block-review-list-item__item', {
-				'is-loading': isLoading,
-			} ) }
+			className={ classNames(
+				'wc-block-review-list-item__item',
+				'wc-block-components-review-list-item__item',
+				{
+					'is-loading': isLoading,
+				}
+			) }
 			aria-hidden={ isLoading }
 		>
 			{ ( showProductName ||
@@ -174,14 +180,14 @@ const ReviewListItem = ( { attributes, review = {} } ) => {
 				showReviewerName ||
 				showReviewImage ||
 				showReviewRating ) && (
-				<div className="wc-block-review-list-item__info">
+				<div className="wc-block-review-list-item__info wc-block-components-review-list-item__info">
 					{ showReviewImage &&
 						getReviewImage( review, imageType, isLoading ) }
 					{ ( showProductName ||
 						showReviewerName ||
 						showReviewRating ||
 						showReviewDate ) && (
-						<div className="wc-block-review-list-item__meta">
+						<div className="wc-block-review-list-item__meta wc-block-components-review-list-item__meta">
 							{ showReviewRating && getReviewRating( review ) }
 							{ showProductName &&
 								getReviewProductName( review ) }

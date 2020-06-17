@@ -25,7 +25,7 @@ export const ValidationInputError = ( {
 	}
 
 	return (
-		<div className="wc-block-form-input-validation-error" role="alert">
+		<div className="wc-block-components-validation-error" role="alert">
 			<p id={ getValidationErrorId( elementId ) }>{ errorMessage }</p>
 		</div>
 	);

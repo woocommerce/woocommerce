@@ -25,7 +25,7 @@ const ProductSaleBadge = ( { currency, saleAmount } ) => {
 		return null;
 	}
 	return (
-		<div className="wc-block-sale-badge">
+		<div className="wc-block-components-sale-badge">
 			{ __experimentalCreateInterpolateElement(
 				/* translators: <price/> will be replaced by the discount amount */
 				__( 'Save <price/>!', 'woo-gutenberg-products-block' ),

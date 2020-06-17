@@ -4,7 +4,7 @@
  * @param {string} id Icon ID.
  */
 const getIconClassName = ( id ) => {
-	return `wc-blocks-payment-method-icon wc-blocks-payment-method-icon--${ id }`;
+	return `wc-block-components-payment-method-icon wc-block-components-payment-method-icon--${ id }`;
 };
 
 /**

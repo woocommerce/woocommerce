@@ -22,7 +22,7 @@ const Packages = ( {
 	);
 	/* eslint-disable camelcase */
 	return (
-		<div className="wc-block-shipping-rates-control">
+		<div className="wc-block-components-shipping-rates-control">
 			{ shippingRates.map( ( { package_id, ...shippingRate } ) => (
 				<Package
 					key={ package_id }

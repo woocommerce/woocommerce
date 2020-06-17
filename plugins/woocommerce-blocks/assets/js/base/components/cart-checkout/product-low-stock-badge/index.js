@@ -18,7 +18,7 @@ const ProductLowStockBadge = ( { lowStockRemaining } ) => {
 	}
 
 	return (
-		<div className="wc-block-low-stock-badge">
+		<div className="wc-block-components-product-low-stock-badge">
 			{ sprintf(
 				/* translators: %d stock amount (number of items in stock for product) */
 				__( '%d left in stock', 'woo-gutenberg-products-block' ),

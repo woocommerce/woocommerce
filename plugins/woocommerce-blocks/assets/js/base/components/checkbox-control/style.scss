@@ -1,9 +1,9 @@
-.wc-block-checkbox {
+.wc-block-components-checkbox {
 	@include reset-typography();
 	display: block;
 	position: relative;
 
-	.wc-block-checkbox__input[type="checkbox"] {
+	.wc-block-components-checkbox__input[type="checkbox"] {
 		appearance: none;
 		border: 1px solid currentColor;
 		height: 1rem;
@@ -34,7 +34,7 @@
 		}
 	}
 
-	.wc-block-checkbox__input[type="checkbox"] + .wc-block-checkbox__label {
+	.wc-block-components-checkbox__input[type="checkbox"] + .wc-block-components-checkbox__label {
 		padding-left: $gap-smaller;
 		vertical-align: middle;
 	}

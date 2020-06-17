@@ -13,7 +13,8 @@ const DropdownSelectorInput = ( {
 		<input
 			{ ...getInputProps( {
 				ref: inputRef,
-				className: 'wc-block-dropdown-selector__input',
+				className:
+					'wc-block-dropdown-selector__input wc-block-components-dropdown-selector__input',
 				disabled: isDisabled,
 				onFocus,
 				onKeyDown( e ) {

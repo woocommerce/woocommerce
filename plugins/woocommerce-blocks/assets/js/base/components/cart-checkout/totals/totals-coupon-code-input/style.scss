@@ -1,15 +1,15 @@
-.wc-block-coupon-code__form {
+.wc-block-components-totals-coupon__form {
 	display: flex;
 	margin-bottom: 0;
 	width: 100%;
 
-	.wc-block-coupon-code__input {
+	.wc-block-components-totals-coupon__input {
 		margin-bottom: 0;
 		margin-top: 0;
 		flex-grow: 1;
 	}
 
-	.wc-block-coupon-code__button {
+	.wc-block-components-totals-coupon__button {
 		height: 48px;
 		flex-shrink: 0;
 		margin-left: $gap-smaller;
@@ -19,11 +19,11 @@
 	}
 }
 
-.wc-block-coupon-code__content {
+.wc-block-components-totals-coupon__content {
 	flex-direction: column;
 	position: relative;
 
-	.wc-block-form-input-validation-error {
+	.wc-block-components-validation-error {
 		margin-top: $gap-smaller;
 		position: relative;
 		width: 100%;

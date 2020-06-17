@@ -1,34 +1,34 @@
-.wc-block-shipping-totals {
+.wc-block-components-totals-shipping {
 	// Added extra label for specificity.
-	fieldset.wc-block-shipping-totals__fieldset {
+	fieldset.wc-block-components-totals-shipping__fieldset {
 		background-color: transparent;
 		margin: 0;
 		padding: 0;
 		border: 0;
 	}
 
-	.wc-block-shipping-totals__options {
-		.wc-block-radio-control__label,
-		.wc-block-radio-control__description,
-		.wc-block-radio-control__secondary-label,
-		.wc-block-radio-control__secondary-description {
+	.wc-block-components-totals-shipping__options {
+		.wc-block-components-radio-control__label,
+		.wc-block-components-radio-control__description,
+		.wc-block-components-radio-control__secondary-label,
+		.wc-block-components-radio-control__secondary-description {
 			flex-basis: 100%;
 			text-align: left;
 		}
 	}
 
-	.wc-block-radio-control__option,
-	.wc-block-radio-control__option-layout {
+	.wc-block-components-radio-control__option,
+	.wc-block-components-radio-control__option-layout {
 		&:last-child {
 			border-bottom: none;
 		}
 	}
 
-	.wc-block-shipping-rates-control__no-results-notice {
+	.wc-block-components-shipping-rates-control__no-results-notice {
 		margin-bottom: em($gap-small);
 	}
 
-	.wc-block-shipping-totals__change-address-button {
+	.wc-block-components-totals-shipping__change-address-button {
 		@include link-button();
 
 		&:hover,

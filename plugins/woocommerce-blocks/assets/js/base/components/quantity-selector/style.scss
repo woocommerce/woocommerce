@@ -10,7 +10,7 @@
 	}
 }
 
-.wc-block-quantity-selector {
+.wc-block-components-quantity-selector {
 	display: flex;
 	min-width: 100px;
 	border: 1px solid $core-grey-light-600;
@@ -18,7 +18,7 @@
 	border-radius: 4px;
 
 	// Extra label for specificity needed in the editor.
-	input.wc-block-quantity-selector__input {
+	input.wc-block-components-quantity-selector__input {
 		@include font-size(regular);
 		order: 2;
 		min-width: 40px;
@@ -47,7 +47,7 @@
 		-webkit-appearance: none;
 		margin: 0;
 	}
-	.wc-block-quantity-selector__button {
+	.wc-block-components-quantity-selector__button {
 		@include reset-button;
 		@include font-size(regular);
 		min-width: 30px;
@@ -67,10 +67,10 @@
 			@include reset-button;
 		}
 	}
-	.wc-block-quantity-selector__button--minus {
+	.wc-block-components-quantity-selector__button--minus {
 		order: 1;
 	}
-	.wc-block-quantity-selector__button--plus {
+	.wc-block-components-quantity-selector__button--plus {
 		order: 3;
 	}
 }

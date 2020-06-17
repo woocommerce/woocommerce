@@ -53,7 +53,7 @@ const ShippingCalculatorAddress = ( {
 	} );
 
 	return (
-		<form className="wc-block-shipping-calculator-address">
+		<form className="wc-block-components-shipping-calculator-address">
 			<AddressForm
 				fields={ addressFields }
 				fieldConfig={ fieldConfig }
@@ -61,7 +61,7 @@ const ShippingCalculatorAddress = ( {
 				values={ address }
 			/>
 			<Button
-				className="wc-block-shipping-calculator-address__button"
+				className="wc-block-components-shipping-calculator-address__button"
 				disabled={ isShallowEqual( address, initialAddress ) }
 				onClick={ ( e ) => {
 					e.preventDefault();

@@ -21,7 +21,7 @@ const PackageOptions = ( {
 			<Notice
 				isDismissible={ false }
 				className={ classnames(
-					'wc-block-shipping-rates-control__no-results-notice',
+					'wc-block-components-shipping-rates-control__no-results-notice',
 					'woocommerce-message',
 					'woocommerce-info'
 				) }

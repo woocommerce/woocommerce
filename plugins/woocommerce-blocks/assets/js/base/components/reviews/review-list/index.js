@@ -26,7 +26,7 @@ const ReviewList = ( { attributes, reviews } ) => {
 	};
 
 	return (
-		<ul className="wc-block-review-list">
+		<ul className="wc-block-review-list wc-block-components-review-list">
 			{ reviews.length === 0 ? (
 				<ReviewListItem attributes={ attrs } />
 			) : (

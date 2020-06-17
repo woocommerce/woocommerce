@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 
 const Main = ( { children, className } ) => {
 	return (
-		<div className={ classNames( 'wc-block-main', className ) }>
+		<div className={ classNames( 'wc-block-components-main', className ) }>
 			{ children }
 		</div>
 	);

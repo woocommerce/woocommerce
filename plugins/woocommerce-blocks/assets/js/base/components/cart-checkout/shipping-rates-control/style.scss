@@ -1,10 +1,10 @@
-.wc-block-shipping-rates-control__package {
-	.wc-block-shipping-rates-control__package-title {
+.wc-block-components-shipping-rates-control__package {
+	.wc-block-components-shipping-rates-control__package-title {
 		margin: 0;
 	}
 }
 
-.wc-block-shipping-rates-control__package-items {
+.wc-block-components-shipping-rates-control__package-items {
 	@include font-size(small);
 	color: $core-grey-dark-400;
 	display: block;
@@ -13,28 +13,23 @@
 	padding: 0;
 }
 
-.wc-block-shipping-rates-control__package-item {
+.wc-block-components-shipping-rates-control__package-item {
 	@include wrap-break-word();
 	display: inline-block;
 	margin: 0;
 	padding: 0;
 }
 
-.wc-block-shipping-rates-control__package-item:not(:last-child)::after {
+.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
 	content: ", ";
 	white-space: pre;
 }
 
-.wc-block-cart__shipping-address,
-.wc-block-cart__shipping-address button {
-	color: $core-grey-dark-400;
-}
-
-.components-notice.wc-block-shipping-rates-control__no-results-notice {
+.components-notice.wc-block-components-shipping-rates-control__no-results-notice {
 	margin-bottom: 0;
 }
 
-.wc-block-shipping-rates-control {
+.wc-block-components-shipping-rates-control {
 	.wc-blocks-components-panel__content {
 		padding-bottom: 0;
 	}

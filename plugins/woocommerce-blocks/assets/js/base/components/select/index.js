@@ -22,7 +22,7 @@ const Select = ( {
 	return (
 		<div
 			id={ id }
-			className={ classnames( 'wc-block-select', className, {
+			className={ classnames( 'wc-block-components-select', className, {
 				'is-active': value,
 			} ) }
 		>

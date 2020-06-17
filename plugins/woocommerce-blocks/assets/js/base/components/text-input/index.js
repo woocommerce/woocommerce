@@ -37,9 +37,13 @@ const TextInput = forwardRef(
 
 		return (
 			<div
-				className={ classnames( 'wc-block-text-input', className, {
-					'is-active': isActive || value,
-				} ) }
+				className={ classnames(
+					'wc-block-components-text-input',
+					className,
+					{
+						'is-active': isActive || value,
+					}
+				) }
 			>
 				<input
 					type={ type }
@@ -76,7 +80,7 @@ const TextInput = forwardRef(
 				{ !! help && (
 					<p
 						id={ id + '__help' }
-						className="wc-block-text-input__help"
+						className="wc-block-components-text-input__help"
 					>
 						{ help }
 					</p>

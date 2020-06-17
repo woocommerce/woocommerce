@@ -11,16 +11,16 @@ import Title from '@woocommerce/base-components/title';
 import './style.scss';
 
 const StepHeading = ( { title, stepHeadingContent } ) => (
-	<div className="wc-block-checkout-step__heading">
+	<div className="wc-block-components-checkout-step__heading">
 		<Title
 			aria-hidden="true"
-			className="wc-block-checkout-step__title"
+			className="wc-block-components-checkout-step__title"
 			headingLevel="2"
 		>
 			{ title }
 		</Title>
 		{ !! stepHeadingContent && (
-			<span className="wc-block-checkout-step__heading-content">
+			<span className="wc-block-components-checkout-step__heading-content">
 				{ stepHeadingContent }
 			</span>
 		) }
@@ -39,7 +39,10 @@ const FormStep = ( {
 } ) => {
 	return (
 		<fieldset
-			className={ classnames( className, 'wc-block-checkout-step' ) }
+			className={ classnames(
+				className,
+				'wc-block-components-checkout-step'
+			) }
 			id={ id }
 			disabled={ disabled }
 		>
@@ -48,13 +51,13 @@ const FormStep = ( {
 				title={ title }
 				stepHeadingContent={ stepHeadingContent() }
 			/>
-			<div className="wc-block-checkout-step__container">
+			<div className="wc-block-components-checkout-step__container">
 				{ !! description && (
-					<p className="wc-block-checkout-step__description">
+					<p className="wc-block-components-checkout-step__description">
 						{ description }
 					</p>
 				) }
-				<div className="wc-block-checkout-step__content">
+				<div className="wc-block-components-checkout-step__content">
 					{ children }
 				</div>
 			</div>

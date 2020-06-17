@@ -1,16 +1,16 @@
-.wc-block-pagination {
+.wc-block-components-pagination {
 	margin: 0 auto $gap;
 }
 
-.wc-block-pagination-page,
-.wc-block-pagination-ellipsis {
+.wc-block-components-pagination__page,
+.wc-block-components-pagination__ellipsis {
 	@include font-size(regular);
 	color: #333;
 	display: inline-block;
 	font-weight: normal;
 }
 
-.wc-block-pagination-page {
+.wc-block-components-pagination__page {
 	border-color: transparent;
 	padding: 0.3em 0.6em;
 	min-width: 2.2em;
@@ -29,7 +29,7 @@
 	}
 }
 
-.wc-block-pagination-ellipsis {
+.wc-block-components-pagination__ellipsis {
 	padding: 0.3em;
 
 	@include breakpoint( "<782px" ) {
@@ -37,7 +37,7 @@
 	}
 }
 
-.wc-block-pagination-page--active[disabled] {
+.wc-block-components-pagination__page--active[disabled] {
 	color: #333;
 	font-weight: bold;
 	opacity: 1 !important;

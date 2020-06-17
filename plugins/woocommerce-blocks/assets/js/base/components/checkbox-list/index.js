@@ -142,6 +142,7 @@ const CheckboxList = ( {
 
 	const classes = classNames(
 		'wc-block-checkbox-list',
+		'wc-block-components-checkbox-list',
 		{
 			'is-loading': isLoading,
 		},

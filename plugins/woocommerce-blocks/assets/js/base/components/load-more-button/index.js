@@ -12,7 +12,7 @@ import './style.scss';
 
 export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {
 	return (
-		<div className="wp-block-button wc-block-load-more">
+		<div className="wp-block-button wc-block-load-more wc-block-components-load-more">
 			<button className="wp-block-button__link" onClick={ onClick }>
 				<Label
 					label={ label }

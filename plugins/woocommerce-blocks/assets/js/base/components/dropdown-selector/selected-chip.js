@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 	return (
 		<button
-			className="wc-block-dropdown-selector__selected-chip"
+			className="wc-block-dropdown-selector__selected-chip wc-block-components-dropdown-selector__selected-chip"
 			onClick={ () => {
 				onRemoveItem( option.value );
 			} }
@@ -20,10 +20,10 @@ const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 				option.name
 			) }
 		>
-			<span className="wc-block-dropdown-selector__selected-chip__label">
+			<span className="wc-block-dropdown-selector__selected-chip__label wc-block-components-dropdown-selector__selected-chip__label">
 				{ option.label }
 			</span>
-			<span className="wc-block-dropdown-selector__selected-chip__remove">
+			<span className="wc-block-dropdown-selector__selected-chip__remove wc-block-components-dropdown-selector__selected-chip__remove">
 				𝘅
 			</span>
 		</button>

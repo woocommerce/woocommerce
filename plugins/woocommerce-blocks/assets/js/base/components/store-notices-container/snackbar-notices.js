@@ -18,7 +18,7 @@ const NoticesContainer = () => {
 	return (
 		<SnackbarList
 			notices={ snackbarNotices }
-			className={ 'wc-block-notices__snackbar' }
+			className={ 'wc-block-components-notices__snackbar' }
 			onRemove={ removeNotice }
 		/>
 	);

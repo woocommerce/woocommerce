@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import TotalsItem from '../totals-item';
+import './style.scss';
 
 const TotalsDiscountItem = ( {
 	cartCoupons = [],
@@ -36,6 +37,7 @@ const TotalsDiscountItem = ( {
 
 	return (
 		<TotalsItem
+			className="wc-block-components-totals-discount"
 			currency={ currency }
 			description={
 				cartCoupons.length !== 0 && (
@@ -47,11 +49,11 @@ const TotalsDiscountItem = ( {
 						isLoading={ isRemovingCoupon }
 						showSpinner={ false }
 					>
-						<ul className="wc-block-cart-coupon-list">
+						<ul className="wc-block-components-totals-discount__coupon-list">
 							{ cartCoupons.map( ( cartCoupon ) => (
 								<Chip
 									key={ 'coupon-' + cartCoupon.code }
-									className="wc-block-cart-coupon-list__item"
+									className="wc-block-components-totals-discount__coupon-list-item"
 									text={ cartCoupon.code }
 									screenReaderText={ sprintf(
 										/* Translators: %s Coupon code. */

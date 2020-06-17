@@ -10,6 +10,11 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
  * Shows a formatted shipping location.
  */
 const ShippingLocation = ( { address } ) => {
@@ -41,7 +46,7 @@ const ShippingLocation = ( { address } ) => {
 
 	return (
 		formattedLocation && (
-			<span className="wc-block-cart__shipping-address">
+			<span className="wc-block-components-shipping-address">
 				{ sprintf(
 					/* Translators: %s location. */
 					__( 'Shipping to %s', 'woo-gutenberg-products-block' ),

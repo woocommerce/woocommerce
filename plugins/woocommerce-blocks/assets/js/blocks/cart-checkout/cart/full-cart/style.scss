@@ -1,11 +1,11 @@
 .wc-block-cart {
 	color: $core-grey-dark-600;
 
-	.wc-block-cart__shipping-calculator {
+	.wc-block-components-shipping-calculator {
 		white-space: nowrap;
 	}
 
-	.wc-block-product-name {
+	.wc-block-components-product-name {
 		color: inherit;
 	}
 }
@@ -90,8 +90,8 @@ table.wc-block-cart-items {
 			text-align: right;
 			line-height: 1.25;
 
-			.wc-block-product-price,
-			.wc-block-product-price--regular {
+			.wc-block-components-product-price,
+			.wc-block-components-product-price--regular {
 				display: block;
 			}
 		}
@@ -121,7 +121,7 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__price,
 			.wc-block-cart-item__product-metadata,
 			.wc-block-cart-item__image > *,
-			.wc-block-quantity-selector {
+			.wc-block-components-quantity-selector {
 				@include placeholder();
 			}
 			.wc-block-cart-item__product-name {
@@ -159,10 +159,10 @@ table.wc-block-cart-items {
 		min-height: 460px;
 	}
 }
-.wc-block-sidebar-layout.wc-block-cart--skeleton {
+.wc-block-components-sidebar-layout.wc-block-cart--skeleton {
 	display: none;
 }
-.is-loading + .wc-block-sidebar-layout.wc-block-cart--skeleton {
+.is-loading + .wc-block-components-sidebar-layout.wc-block-cart--skeleton {
 	display: flex;
 }
 
@@ -170,7 +170,7 @@ table.wc-block-cart-items {
 .is-small,
 .is-mobile {
 	&.wc-block-cart {
-		.wc-block-sidebar {
+		.wc-block-components-sidebar {
 			.wc-block-cart__totals-title {
 				display: none;
 			}
@@ -225,11 +225,11 @@ table.wc-block-cart-items {
 				grid-row-start: 2;
 				align-self: center;
 
-				.wc-block-formatted-money-amount {
+				.wc-block-components-formatted-money-amount {
 					display: inline-block;
 				}
 
-				.wc-block-sale-badge {
+				.wc-block-components-sale-badge {
 					display: none;
 				}
 			}
@@ -255,27 +255,21 @@ table.wc-block-cart-items {
 }
 
 .is-large.wc-block-cart {
-	.wc-block-radio-control__option {
+	.wc-block-components-radio-control__option {
 		padding-left: $gap-large;
 	}
 
-	.wc-block-radio-control__input {
+	.wc-block-components-radio-control__input {
 		left: 0;
 	}
 
-	.wc-block-sidebar {
+	.wc-block-components-sidebar {
 		> .wc-block-cart__totals-title,
-		.wc-block-cart__shipping-calculator,
-		.wc-block-shipping-rates-control__package:not(.wc-blocks-components-panel),
+		.wc-block-components-shipping-calculator,
+		.wc-block-components-shipping-rates-control__package:not(.wc-blocks-components-panel),
 		> .wc-block-cart__submit-container {
 			padding-left: $gap;
 			padding-right: $gap;
 		}
 	}
-}
-
-.wc-block-cart-coupon-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
 }
