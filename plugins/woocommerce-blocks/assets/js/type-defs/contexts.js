@@ -252,10 +252,35 @@
 /**
  * @typedef {Object} EditorDataContext
  *
- * @property {boolean}                 isEditor           Indicates whether in the editor context.
- * @property {number}                  currentPostId      The post ID being edited.
- * @property {Object}                  previewData        Object containing preview data for the
- *                                                        editor.
+ * @property {number} isEditor      Indicates whether in the editor context.
+ * @property {number} currentPostId The post ID being edited.
+ * @property {Object} previewData   Object containing preview data for the editor.
+ */
+
+/**
+ * @typedef {Object} AddToCartFormContext
+ *
+ * @property {Object}                product          The product object.
+ * @property {number}                productId        The product ID being added to the cart.
+ * @property {number}                variationId      The variation ID being added to the cart, or 0.
+ * @property {Object}                variationData    Object containing variation attribute/value data.
+ * @property {Object}                cartItemData     Object containing custom cart item data.
+ * @property {number}                quantity         Stores the quantity being added to the cart.
+ * @property {number}                minQuantity      Min quantity that can be added to the cart.
+ * @property {number}                maxQuantity      Max quantity than can be added to the cart.
+ * @property {number}                quantityInCart   Stores how many of a product are already in the cart.
+ * @property {function(number):void} setQuantity      Sets the quantity being added to the cart.
+ * @property {function(number):void} setVariationId   Sets the variation ID being added to the cart.
+ * @property {function(Object):void} setVariationData Sets variation data attribute=>value pairs.
+ * @property {function(Object):void} setCartItemData  Sets cart item data attribute=>value pairs.
+ * @property {boolean}               showFormElements True if showing a full add to cart form.
+ * @property {boolean}               formInitialized  True once the cart form is ready.
+ * @property {boolean}               formDisabled     True if the cart form cannot yet be submitted.
+ * @property {boolean}               formSubmitting   True when the cart form is busy adding to the cart.
+ * @property {function():void}       onChange         Triggered when a form element changes.
+ * @property {function():void}       onSubmit         Submits the form.
+ * @property {function():void}       onSuccess        Triggered when the add to cart request is successful.
+ * @property {function():void}       onFail           Triggered when the add to cart request fails.
  */
 
 /**

@@ -308,24 +308,6 @@ class CartItemSchema extends ProductSchema {
 	}
 
 	/**
-	 * Get the quantity limit for an item in the cart.
-	 *
-	 * @param \WC_Product $product Product instance.
-	 * @return int
-	 */
-	protected function get_product_quantity_limit( \WC_Product $product ) {
-		$limits = [ 99 ];
-
-		if ( $product->is_sold_individually() ) {
-			$limits[] = 1;
-		} elseif ( ! $product->backorders_allowed() ) {
-			$limits[] = $this->get_remaining_stock( $product );
-		}
-
-		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
-	}
-
-	/**
 	 * Get an array of pricing data.
 	 *
 	 * @param \WC_Product $product Product instance.

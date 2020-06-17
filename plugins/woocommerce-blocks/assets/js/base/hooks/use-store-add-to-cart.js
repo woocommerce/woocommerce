@@ -49,9 +49,9 @@ export const useStoreAddToCart = ( productId ) => {
 		getQuantityFromCartItems( cartItems, productId )
 	);
 
-	const addToCart = () => {
+	const addToCart = ( quantity = 1 ) => {
 		setAddingToCart( true );
-		addItemToCart( productId )
+		addItemToCart( productId, quantity )
 			.then( ( result ) => {
 				if ( result === true ) {
 					removeNotice( 'add-to-cart' );
@@ -78,7 +78,9 @@ export const useStoreAddToCart = ( productId ) => {
 	}, [ cartItems, productId ] );
 
 	return {
-		cartQuantity: currentCartItemQuantity.current,
+		cartQuantity: Number.isFinite( currentCartItemQuantity.current )
+			? currentCartItemQuantity.current
+			: 0,
 		addingToCart,
 		cartIsLoading,
 		addToCart,

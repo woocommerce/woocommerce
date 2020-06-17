@@ -13,3 +13,4 @@ export * from './use-store-add-to-cart';
 export * from './use-store-notices';
 export * from './use-query-state';
 export * from './use-throw-error';
+export * from './use-trigger-fragment-refresh';
