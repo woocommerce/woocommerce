@@ -14,7 +14,7 @@ import './style.scss';
  */
 const Title = ( { children, className, headingLevel, ...props } ) => {
 	const buttonClassName = classNames(
-		'wc-block-component__title',
+		'wc-block-components-title',
 		className
 	);
 	const TagName = `h${ headingLevel }`;

@@ -1,8 +1,8 @@
-.wc-block-checkout-form {
+.wc-block-components-checkout-form {
 	counter-reset: checkout-step;
 }
 
-.wc-block-checkout-form fieldset.wc-block-checkout-step {
+.wc-block-components-checkout-form fieldset.wc-block-components-checkout-step {
 	position: relative;
 	border: none;
 	padding: 0 0 0 $gap-larger;
@@ -14,19 +14,19 @@
 	}
 }
 
-.wc-block-checkout-step__container {
+.wc-block-components-checkout-step__container {
 	position: relative;
 }
 
-.wc-block-checkout-step__content {
+.wc-block-components-checkout-step__content {
 	padding-bottom: em($gap-large);
 }
 
-.wc-block-checkout-form fieldset.wc-block-checkout-step:disabled {
+.wc-block-components-checkout-form fieldset.wc-block-components-checkout-step:disabled {
 	opacity: 0.6;
 }
 
-.wc-block-checkout-step__heading {
+.wc-block-components-checkout-step__heading {
 	display: flex;
 	justify-content: space-between;
 	align-content: center;
@@ -35,15 +35,15 @@
 	position: relative;
 }
 
-.wc-block-checkout-step:first-child .wc-block-checkout-step__heading {
+.wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
 	margin-top: 0;
 }
 
-.wc-block-checkout-step__title {
+.wc-block-components-checkout-step__title {
 	margin: 0 $gap-small 0 0;
 }
 
-.wc-block-checkout-step__heading-content {
+.wc-block-components-checkout-step__heading-content {
 	@include font-size(smaller);
 	color: $gray-80;
 	position: absolute;
@@ -55,14 +55,14 @@
 	}
 }
 
-.wc-block-checkout-step__description {
+.wc-block-components-checkout-step__description {
 	@include font-size(small);
 	line-height: 1.25;
 	color: $gray-60;
 	margin-bottom: $gap;
 }
 
-.wc-block-checkout-step__title::before {
+.wc-block-components-checkout-step__title::before {
 	@include reset-box();
 	background: transparent;
 	counter-increment: checkout-step;
@@ -76,7 +76,7 @@
 	transform: translateX(-50%);
 }
 
-.wc-block-checkout-step__container::after {
+.wc-block-components-checkout-step__container::after {
 	content: "";
 	height: 100%;
 	border-left: 1px solid;
@@ -85,6 +85,6 @@
 	top: 0;
 }
 
-.wc-block-checkout-step:last-child .wc-block-checkout-step__container::after {
+.wc-block-components-checkout-step:last-child .wc-block-components-checkout-step__container::after {
 	content: none;
 }

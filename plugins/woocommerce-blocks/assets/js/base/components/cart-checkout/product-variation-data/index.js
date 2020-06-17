@@ -3,11 +3,12 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 /**
  * Returns a formatted element containing variation details.
  */
-const ProductVariationData = ( { variation = [] } ) => {
+const ProductVariationData = ( { className, variation = [] } ) => {
 	if ( ! variation ) {
 		return null;
 	}
@@ -25,7 +26,12 @@ const ProductVariationData = ( { variation = [] } ) => {
 		.join( ' / ' );
 
 	return (
-		<div className="wc-block-product-variation-data">
+		<div
+			className={ classNames(
+				'wc-block-components-product-variation-data',
+				className
+			) }
+		>
 			{ variationsText }
 		</div>
 	);

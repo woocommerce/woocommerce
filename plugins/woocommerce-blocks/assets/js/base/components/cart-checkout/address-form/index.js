@@ -100,7 +100,7 @@ const AddressForm = ( {
 	id = id || instanceId;
 
 	return (
-		<div id={ id } className="wc-block-address-form">
+		<div id={ id } className="wc-block-components-address-form">
 			{ sortedAddressFields.map( ( field ) => {
 				if ( field.hidden ) {
 					return null;
@@ -175,7 +175,7 @@ const AddressForm = ( {
 					<ValidatedTextInput
 						key={ field.key }
 						id={ `${ id }-${ field.key }` }
-						className={ `wc-block-address-form__${ field.key }` }
+						className={ `wc-block-components-address-form__${ field.key }` }
 						label={
 							field.required ? field.label : field.optionalLabel
 						}

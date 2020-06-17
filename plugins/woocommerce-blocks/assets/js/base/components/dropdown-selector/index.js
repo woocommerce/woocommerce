@@ -33,10 +33,15 @@ const DropdownSelector = ( {
 } ) => {
 	const inputRef = useRef( null );
 
-	const classes = classNames( className, 'wc-block-dropdown-selector', {
-		'is-disabled': isDisabled,
-		'is-loading': isLoading,
-	} );
+	const classes = classNames(
+		className,
+		'wc-block-dropdown-selector',
+		'wc-block-components-dropdown-selector',
+		{
+			'is-disabled': isDisabled,
+			'is-loading': isLoading,
+		}
+	);
 
 	/**
 	 * State reducer for the downshift component.

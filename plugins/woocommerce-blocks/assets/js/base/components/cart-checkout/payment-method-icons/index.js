@@ -25,10 +25,15 @@ export const PaymentMethodIcons = ( { icons = [], align = 'center' } ) => {
 		return null;
 	}
 
-	const containerClass = classnames( 'wc-block-cart__payment-method-icons', {
-		'wc-block-cart__payment-method-icons--align-left': align === 'left',
-		'wc-block-cart__payment-method-icons--align-right': align === 'right',
-	} );
+	const containerClass = classnames(
+		'wc-block-components-payment-method-icons',
+		{
+			'wc-block-components-payment-method-icons--align-left':
+				align === 'left',
+			'wc-block-components-payment-method-icons--align-right':
+				align === 'right',
+		}
+	);
 
 	return (
 		<div className={ containerClass }>

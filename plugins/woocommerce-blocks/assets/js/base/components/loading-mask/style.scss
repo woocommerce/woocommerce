@@ -1,4 +1,4 @@
-.wc-block-loading-mask {
+.wc-block-components-loading-mask {
 	position: relative;
 	min-height: 18px + $gap;
 
@@ -11,6 +11,6 @@
 	}
 }
 
-.wc-blocks-loading-mask__children {
+.wc-block-components-loading-mask__children {
 	opacity: 0.5;
 }

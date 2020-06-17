@@ -6,12 +6,12 @@ const OptionLayout = ( {
 	id,
 } ) => {
 	return (
-		<div className="wc-block-radio-control__option-layout">
-			<div className="wc-block-radio-control__label-group">
+		<div className="wc-block-components-radio-control__option-layout">
+			<div className="wc-block-components-radio-control__label-group">
 				{ label && (
 					<span
 						id={ id ? `${ id }__label` : null }
-						className="wc-block-radio-control__label"
+						className="wc-block-components-radio-control__label"
 					>
 						{ label }
 					</span>
@@ -19,17 +19,17 @@ const OptionLayout = ( {
 				{ secondaryLabel && (
 					<span
 						id={ id ? `${ id }__secondary-label` : null }
-						className="wc-block-radio-control__secondary-label"
+						className="wc-block-components-radio-control__secondary-label"
 					>
 						{ secondaryLabel }
 					</span>
 				) }
 			</div>
-			<div className="wc-block-radio-control__description-group">
+			<div className="wc-block-components-radio-control__description-group">
 				{ description && (
 					<span
 						id={ id ? `${ id }__description` : null }
-						className="wc-block-radio-control__description"
+						className="wc-block-components-radio-control__description"
 					>
 						{ description }
 					</span>
@@ -37,7 +37,7 @@ const OptionLayout = ( {
 				{ secondaryDescription && (
 					<span
 						id={ id ? `${ id }__secondary-description` : null }
-						className="wc-block-radio-control__secondary-description"
+						className="wc-block-components-radio-control__secondary-description"
 					>
 						{ secondaryDescription }
 					</span>

@@ -16,13 +16,16 @@ const ProductMetadata = ( {
 	variation = [],
 } ) => {
 	return (
-		<div className="wc-block-product-metadata">
+		<div className="wc-block-components-product-metadata">
 			<ProductSummary
-				className="wc-block-product-description"
+				className="wc-block-components-product-metadata__description"
 				shortDescription={ shortDescription }
 				fullDescription={ fullDescription }
 			/>
-			<ProductVariationData variation={ variation } />
+			<ProductVariationData
+				className="wc-block-components-product-metadata__variation-data"
+				variation={ variation }
+			/>
 		</div>
 	);
 };

@@ -1,4 +1,4 @@
-.wc-block-form-input-validation-error {
+.wc-block-components-validation-error {
 	@include font-size(smaller);
 	color: $error-red;
 	max-width: 100%;
@@ -16,6 +16,6 @@
 	}
 }
 
-.wc-block-select + .wc-block-form-input-validation-error {
+.wc-block-components-select + .wc-block-components-validation-error {
 	margin-bottom: $gap-large;
 }

@@ -32,7 +32,12 @@ const CountryInput = ( {
 	} ) );
 
 	return (
-		<div className={ classnames( className, 'wc-block-country-input' ) }>
+		<div
+			className={ classnames(
+				className,
+				'wc-block-components-country-input'
+			) }
+		>
 			<ValidatedSelect
 				id={ id }
 				label={ label }

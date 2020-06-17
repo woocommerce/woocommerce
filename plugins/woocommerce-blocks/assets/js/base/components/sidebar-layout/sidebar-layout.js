@@ -13,7 +13,10 @@ import './style.scss';
 const SidebarLayout = ( { children, className } ) => {
 	return (
 		<ContainerWidthContextProvider
-			className={ classNames( 'wc-block-sidebar-layout', className ) }
+			className={ classNames(
+				'wc-block-components-sidebar-layout',
+				className
+			) }
 		>
 			{ children }
 		</ContainerWidthContextProvider>

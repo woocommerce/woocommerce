@@ -130,8 +130,8 @@ class Cart extends AbstractBlock {
 	 */
 	protected function get_skeleton() {
 		return '
-			<div class="wc-block-skeleton wc-block-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton hidden" aria-hidden="true">
-				<div class="wc-block-main wc-block-cart__main">
+			<div class="wc-block-skeleton wc-block-components-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton hidden" aria-hidden="true">
+				<div class="wc-block-components-main wc-block-cart__main">
 					<h2><span></span></h2>
 					<table class="wc-block-cart-items">
 						<thead>
@@ -152,10 +152,10 @@ class Cart extends AbstractBlock {
 									<div class="wc-block-cart-item__product-metadata"></div>
 								</td>
 								<td class="wc-block-cart-item__quantity">
-								<div class="wc-block-quantity-selector">
-									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								<div class="wc-block-components-quantity-selector">
+									<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 								</div>
 								</td>
 								<td class="wc-block-cart-item__total">
@@ -171,10 +171,10 @@ class Cart extends AbstractBlock {
 									<div class="wc-block-cart-item__product-metadata">&nbsp;</div>
 								</td>
 								<td class="wc-block-cart-item__quantity">
-								<div class="wc-block-quantity-selector">
-									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								<div class="wc-block-components-quantity-selector">
+									<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 								</div>
 								</td>
 								<td class="wc-block-cart-item__total">
@@ -190,10 +190,10 @@ class Cart extends AbstractBlock {
 									<div class="wc-block-cart-item__product-metadata"></div>
 								</td>
 								<td class="wc-block-cart-item__quantity">
-								<div class="wc-block-quantity-selector">
-									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
-									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								<div class="wc-block-components-quantity-selector">
+									<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+									<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 								</div>
 								</td>
 								<td class="wc-block-cart-item__total">
@@ -203,7 +203,7 @@ class Cart extends AbstractBlock {
 						</tbody>
 					</table>
 				</div>
-				<div class="wc-block-sidebar wc-block-cart__sidebar">
+				<div class="wc-block-components-sidebar wc-block-cart__sidebar">
 					<div class="components-card"></div>
 				</div>
 			</div>

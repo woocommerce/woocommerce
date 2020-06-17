@@ -14,7 +14,8 @@ const DropdownSelectorMenu = ( {
 	return (
 		<ul
 			{ ...getMenuProps( {
-				className: 'wc-block-dropdown-selector__list',
+				className:
+					'wc-block-dropdown-selector__list wc-block-components-dropdown-selector__list',
 			} ) }
 		>
 			{ options.map( ( option, index ) => {
@@ -26,6 +27,7 @@ const DropdownSelectorMenu = ( {
 							key: option.value,
 							className: classNames(
 								'wc-block-dropdown-selector__list-item',
+								'wc-block-components-dropdown-selector__list-item',
 								{
 									'is-selected': selected,
 									'is-highlighted':

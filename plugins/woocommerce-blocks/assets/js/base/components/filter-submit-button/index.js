@@ -24,6 +24,7 @@ const FilterSubmitButton = ( {
 			type="submit"
 			className={ classNames(
 				'wc-block-filter-submit-button',
+				'wc-block-components-filter-submit-button',
 				className
 			) }
 			disabled={ disabled }

@@ -1,4 +1,4 @@
-.wc-block-cart__payment-method-label--with-icon {
+.wc-block-components-payment-method-label--with-icon {
 	display: inline-block;
 	vertical-align: middle;
 	> img,
@@ -10,7 +10,7 @@
 
 .is-mobile,
 .is-small {
-	.wc-block-cart__payment-method-label--with-icon {
+	.wc-block-components-payment-method-label--with-icon {
 		> img,
 		> svg {
 			display: none;

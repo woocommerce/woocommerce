@@ -18,13 +18,13 @@ const TotalsFooterItem = ( { currency, values } ) => {
 
 	return (
 		<TotalsItem
-			className="wc-block-totals-footer-item"
+			className="wc-block-components-totals-footer-item"
 			currency={ currency }
 			label={ __( 'Total', 'woo-gutenberg-products-block' ) }
 			value={ parseInt( totalPrice, 10 ) }
 			description={
 				DISPLAY_CART_PRICES_INCLUDING_TAX && (
-					<p className="wc-block-totals-footer-item-tax">
+					<p className="wc-block-components-totals-footer-item-tax">
 						{ __experimentalCreateInterpolateElement(
 							__(
 								'Including <TaxAmount/> in taxes',
@@ -33,7 +33,7 @@ const TotalsFooterItem = ( { currency, values } ) => {
 							{
 								TaxAmount: (
 									<FormattedMonetaryAmount
-										className="wc-block-totals-footer-item-tax-value"
+										className="wc-block-components-totals-footer-item-tax-value"
 										currency={ currency }
 										displayType="text"
 										value={ parseInt( totalTax, 10 ) }

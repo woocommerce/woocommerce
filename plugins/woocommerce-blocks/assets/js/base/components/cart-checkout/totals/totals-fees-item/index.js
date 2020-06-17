@@ -27,6 +27,7 @@ const TotalsFeesItem = ( { currency, values } ) => {
 
 	return (
 		<TotalsItem
+			className="wc-block-components-totals-fees"
 			currency={ currency }
 			label={ __( 'Fees', 'woo-gutenberg-products-block' ) }
 			value={

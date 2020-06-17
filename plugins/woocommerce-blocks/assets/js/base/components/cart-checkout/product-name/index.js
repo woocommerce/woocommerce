@@ -14,7 +14,7 @@ const ProductName = ( { name, permalink, disabled } ) => {
 		// we use tabIndex -1 to prevent the link from being focused, pointer-events
 		// disabled click events, so we get an almost disabled link.
 		<a
-			className="wc-block-product-name"
+			className="wc-block-components-product-name"
 			href={ permalink }
 			tabIndex={ disabled ? -1 : 0 }
 		>

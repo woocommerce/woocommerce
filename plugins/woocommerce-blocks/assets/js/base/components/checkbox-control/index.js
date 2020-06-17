@@ -25,17 +25,22 @@ const CheckboxControl = ( {
 
 	return (
 		<label
-			className={ classNames( 'wc-block-checkbox', className ) }
+			className={ classNames(
+				'wc-block-components-checkbox',
+				className
+			) }
 			htmlFor={ checkboxId }
 		>
 			<input
 				id={ checkboxId }
-				className="wc-block-checkbox__input"
+				className="wc-block-components-checkbox__input"
 				type="checkbox"
 				onChange={ ( event ) => onChange( event.target.checked ) }
 				{ ...rest }
 			/>
-			<span className="wc-block-checkbox__label">{ label }</span>
+			<span className="wc-block-components-checkbox__label">
+				{ label }
+			</span>
 		</label>
 	);
 };

@@ -24,10 +24,15 @@ const LoadingMask = ( {
 	}
 
 	return (
-		<div className={ classNames( className, 'wc-block-loading-mask' ) }>
+		<div
+			className={ classNames(
+				className,
+				'wc-block-components-loading-mask'
+			) }
+		>
 			{ showSpinner && <Spinner /> }
 			<div
-				className="wc-blocks-loading-mask__children"
+				className="wc-block-components-loading-mask__children"
 				aria-hidden={ true }
 			>
 				{ children }

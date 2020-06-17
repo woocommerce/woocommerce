@@ -1,15 +1,15 @@
-.wc-block-totals-footer-item {
-	.wc-block-totals-table-item__value,
-	.wc-block-totals-table-item__label {
+.wc-block-components-totals-footer-item {
+	.wc-block-components-totals-item__value,
+	.wc-block-components-totals-item__label {
 		@include font-size(large);
 		color: #000;
 	}
 
-	.wc-block-totals-table-item__label {
+	.wc-block-components-totals-item__label {
 		font-weight: normal;
 	}
 
-	.wc-block-totals-footer-item-tax {
+	.wc-block-components-totals-footer-item-tax {
 		margin-bottom: 0;
 	}
 }

@@ -26,7 +26,7 @@ const ProductPrice = ( { className, currency, regularValue, value } ) => {
 					</span>
 					<FormattedMonetaryAmount
 						className={ classNames(
-							'wc-block-product-price--regular',
+							'wc-block-components-product-price--regular',
 							className
 						) }
 						currency={ currency }
@@ -41,9 +41,13 @@ const ProductPrice = ( { className, currency, regularValue, value } ) => {
 				</>
 			) }
 			<FormattedMonetaryAmount
-				className={ classNames( 'wc-block-product-price', className, {
-					'is-discounted': isDiscounted,
-				} ) }
+				className={ classNames(
+					'wc-block-components-product-price',
+					className,
+					{
+						'is-discounted': isDiscounted,
+					}
+				) }
 				currency={ currency }
 				value={ value }
 			/>

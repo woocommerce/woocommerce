@@ -29,8 +29,8 @@ export const PaymentMethodLabel = ( { icon = '', text = '' } ) => {
 	const hasIcon = !! icon;
 	const hasNamedIcon =
 		hasIcon && typeof icon === 'string' && namedIcons[ icon ];
-	const className = classnames( 'wc-block-cart__payment-method-label', {
-		'wc-block-cart__payment-method-label--with-icon': hasIcon,
+	const className = classnames( 'wc-block-components-payment-method-label', {
+		'wc-block-components-payment-method-label--with-icon': hasIcon,
 	} );
 
 	return (

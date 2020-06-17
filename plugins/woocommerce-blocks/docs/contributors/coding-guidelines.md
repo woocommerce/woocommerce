@@ -25,12 +25,12 @@ All class names assigned to an element must be prefixed. We use different prefix
 
 As a rule of thumb, this is the relation between location in the source tree and class name used:
 
-| Location in the tree | Class names used | Can be styled by themes?
-| --- | --- | :---: |
-| assets/js/atomic/blocks | `.wc-block-components-` | ✓ |
-| assets/js/base/components | `.wc-block-components-` | ✓ |
-| assets/js/blocks | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` | ✓<br>✘ |
-| assets/js/components |  `.wc-block-editor-components-` | ✘ |
+| Location in the tree      | Class names used                                      | Can be styled by themes? |
+| ------------------------- | ----------------------------------------------------- | :----------------------: |
+| assets/js/atomic/blocks   | `.wc-block-components-`                               |            ✓             |
+| assets/js/base/components | `.wc-block-components-`                               |            ✓             |
+| assets/js/blocks          | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` |          ✓<br>✘          |
+| assets/js/components      | `.wc-block-editor-components-`                        |            ✘             |
 
 After the prefix, class names are built using BEM:
 
@@ -126,7 +126,7 @@ input[type="radio"]:checked { // specificity 0, 2, 1
 And these are the styles of the block:
 
 ```
-.wc-block-radio-control__input { // specificity 0, 1, 0
+.wc-block-components-radio-control__input { // specificity 0, 1, 0
 	background: #fff;
 }
 ```
@@ -139,8 +139,8 @@ As you can see, the styles coming from the themes have higher specificity, so ou
    For example:
 
 ```
-.wc-block-radio-control {
-	.wc-block-radio-control__input { // specificity 0, 2, 0, we win theme A!
+.wc-block-components-radio-control {
+	.wc-block-components-radio-control__input { // specificity 0, 2, 0, we win theme A!
 		background: #fff;
 	}
 }
@@ -149,9 +149,9 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 4. Try adding an extra css class (or tag selector) to increase specificity. When doing so, add a comment explaining it.
 
 ```
-.wc-block-radio-control {
+.wc-block-components-radio-control {
 	// Extra class for specificity.
-	.wc-block-radio-control__option .wc-block-radio-control__input { // specificity 0, 3, 0, we win theme B!
+	.wc-block-components-radio-control__option .wc-block-components-radio-control__input { // specificity 0, 3, 0, we win theme B!
 		background: #fff;
 	}
 }

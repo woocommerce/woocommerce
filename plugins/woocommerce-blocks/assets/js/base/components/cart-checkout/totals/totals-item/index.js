@@ -14,22 +14,27 @@ import './style.scss';
 const TotalsItem = ( { className, currency, label, value, description } ) => {
 	return (
 		<div
-			className={ classnames( 'wc-block-totals-table-item', className ) }
+			className={ classnames(
+				'wc-block-components-totals-item',
+				className
+			) }
 		>
-			<span className="wc-block-totals-table-item__label">{ label }</span>
+			<span className="wc-block-components-totals-item__label">
+				{ label }
+			</span>
 			{ isValidElement( value ) ? (
-				<div className="wc-block-totals-table-item__value">
+				<div className="wc-block-components-totals-item__value">
 					{ value }
 				</div>
 			) : (
 				<FormattedMonetaryAmount
-					className="wc-block-totals-table-item__value"
+					className="wc-block-components-totals-item__value"
 					currency={ currency }
 					displayType="text"
 					value={ value }
 				/>
 			) }
-			<div className="wc-block-totals-table-item__description">
+			<div className="wc-block-components-totals-item__description">
 				{ description }
 			</div>
 		</div>

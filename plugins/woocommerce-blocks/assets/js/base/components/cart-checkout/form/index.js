@@ -20,7 +20,10 @@ const CheckoutForm = ( {
 	};
 	return (
 		<form
-			className={ classnames( 'wc-block-checkout-form', className ) }
+			className={ classnames(
+				'wc-block-components-checkout-form',
+				className
+			) }
 			onSubmit={ formOnSubmit }
 		>
 			{ children }

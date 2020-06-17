@@ -6,7 +6,9 @@ import PropTypes from 'prop-types';
 
 const Sidebar = ( { children, className } ) => {
 	return (
-		<div className={ classNames( 'wc-block-sidebar', className ) }>
+		<div
+			className={ classNames( 'wc-block-components-sidebar', className ) }
+		>
 			{ children }
 		</div>
 	);
