@@ -8,6 +8,7 @@ import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
+import { isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
@@ -26,9 +27,9 @@ import './style.scss';
 const Block = ( { className, ...props } ) => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
-	const product = props.product || productDataContext.product || null;
+	const product = props.product || productDataContext.product || {};
 
-	if ( ! product ) {
+	if ( isEmpty( product ) || ! product.is_purchasable ) {
 		return null;
 	}
 

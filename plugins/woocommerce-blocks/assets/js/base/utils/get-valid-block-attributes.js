@@ -12,7 +12,9 @@ export const getValidBlockAttributes = ( blockAttributes, rawAttributes ) => {
 		if ( typeof rawAttributes[ key ] !== 'undefined' ) {
 			switch ( blockAttributes[ key ].type ) {
 				case 'boolean':
-					attributes[ key ] = rawAttributes[ key ] !== 'false';
+					attributes[ key ] =
+						rawAttributes[ key ] !== 'false' &&
+						rawAttributes[ key ] !== false;
 					break;
 				case 'number':
 					attributes[ key ] = parseInt( rawAttributes[ key ], 10 );

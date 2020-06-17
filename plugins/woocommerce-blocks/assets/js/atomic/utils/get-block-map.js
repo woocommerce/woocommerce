@@ -17,6 +17,7 @@ import ProductSku from '../blocks/product/sku/block';
 import ProductCategoryList from '../blocks/product/category-list/block';
 import ProductTagList from '../blocks/product/tag-list/block';
 import ProductStockIndicator from '../blocks/product/stock-indicator/block';
+import ProductAddToCart from '../blocks/product/add-to-cart/frontend';
 
 /**
  * Map blocks to components suitable for use on the frontend.
@@ -35,5 +36,6 @@ export const getBlockMap = ( blockName ) => ( {
 	'woocommerce/product-category-list': ProductCategoryList,
 	'woocommerce/product-tag-list': ProductTagList,
 	'woocommerce/product-stock-indicator': ProductStockIndicator,
+	'woocommerce/product-add-to-cart': ProductAddToCart,
 	...getRegisteredInnerBlocks( blockName ),
 } );
