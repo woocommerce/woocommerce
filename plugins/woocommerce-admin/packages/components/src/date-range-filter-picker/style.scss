@@ -20,6 +20,7 @@
 
 .woocommerce-filters-date__tabs {
 	height: calc(100% - 42px);
+	border-top: 1px solid $core-grey-light-700;
 
 	.components-tab-panel__tabs {
 		display: flex;
@@ -37,9 +38,7 @@
 		flex-direction: column;
 		align-items: center;
 	}
-}
 
-.woocommerce-filters-date__tab {
 	@include set-grid-item-position( 2, 2 );
 }
 
@@ -74,7 +73,7 @@
 	justify-content: center;
 	width: 100%;
 
-	.woocommerce-filters-date__button.is-button {
+	.woocommerce-filters-date__button {
 		justify-content: center;
 		width: 40%;
 		height: 34px;

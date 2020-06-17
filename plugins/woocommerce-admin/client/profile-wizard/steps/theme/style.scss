@@ -101,13 +101,6 @@
 			min-width: 106px;
 			height: 40px;
 			line-height: 1;
-			box-shadow: none;
-
-			&.is-default {
-				border-color: $studio-pink-50;
-				color: $studio-pink-50;
-				background: transparent;
-			}
 
 			&.is-primary {
 				color: $studio-white;

@@ -16,6 +16,9 @@ import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 class Connect extends Component {
 	constructor( props ) {
 		super( props );
+		this.state = {
+			isConnecting: false,
+		};
 
 		this.connectJetpack = this.connectJetpack.bind( this );
 		props.setIsPending( true );
@@ -59,10 +62,14 @@ class Connect extends Component {
 	async connectJetpack() {
 		const { jetpackConnectUrl, onConnect } = this.props;
 
-		if ( onConnect ) {
-			onConnect();
-		}
-		window.location = jetpackConnectUrl;
+		this.setState( {
+			isConnecting: true,
+		}, () => {
+			if ( onConnect ) {
+				onConnect();
+			}
+			window.location = jetpackConnectUrl;
+		} );
 	}
 
 	render() {
@@ -90,6 +97,7 @@ class Connect extends Component {
 				) : (
 					<Button
 						disabled={ isRequesting }
+						isBusy={ this.state.isConnecting }
 						isPrimary
 						onClick={ this.connectJetpack }
 					>

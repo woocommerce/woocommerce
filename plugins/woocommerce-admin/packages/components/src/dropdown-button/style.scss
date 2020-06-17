@@ -32,11 +32,6 @@
 		background-color: $core-grey-light-100;
 	}
 
-	&.components-button:focus:not(:disabled) {
-		border-color: $studio-woocommerce-purple-60;
-		box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
-	}
-
 	&.is-multi-line .woocommerce-dropdown-button__labels {
 		flex-direction: column;
 	}

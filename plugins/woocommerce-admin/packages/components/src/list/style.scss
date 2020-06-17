@@ -89,8 +89,18 @@
 		fill: $chevron-color;
 	}
 
-	&.is-complete .woocommerce-task__icon {
-		background-color: $theme-color;
+	&.is-complete {
+		.woocommerce-task__icon {
+			background-color: $theme-color;
+		}
+
+		.woocommerce-list__item-title {
+			color: $dark-gray-500;
+		}
+
+		.woocommerce-list__item-content {
+			display: none;
+		}
 	}
 }
 

@@ -13,4 +13,13 @@
 	@media (max-width: 782px) {
 		left: $gap;
 	}
+
+	.woocommerce-profile-wizard__body & {
+		left: unset;
+
+		.components-snackbar {
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
 }

@@ -24,19 +24,34 @@
 	}
 
 	.CalendarDay__selected_span {
-		background: $studio-woocommerce-purple;
+		background: theme(primary);
 		border: 1px solid $core-grey-light-700;
+
+		&:hover {
+			background: theme(secondary);
+			border: 1px solid $core-grey-light-500;
+		}
 	}
 
 	.CalendarDay__selected {
-		background: $studio-woocommerce-purple-70;
+		background: color(theme(primary) shade(20%));
 		border: 1px solid $core-grey-light-700;
+
+		&:hover {
+			background: theme(secondary);
+			border: 1px solid $core-grey-light-500;
+		}
 	}
 
 	.CalendarDay__hovered_span {
-		background: $studio-woocommerce-purple;
+		background: color(theme(primary) shade(15%));
 		border: 1px solid $core-grey-light-500;
 		color: $studio-white;
+
+		&:hover {
+			color: $studio-white;
+			background: theme(primary);
+		}
 	}
 
 	.CalendarDay__blocked_out_of_range {

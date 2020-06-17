@@ -40,13 +40,17 @@
 		margin-bottom: 0;
 	}
 
-	button {
+	button:not(.components-tab-panel__tabs-item) {
 		margin-bottom: $gap-small;
 		align-self: flex-start;
 	}
 
 	.components-base-control__field {
 		display: flex;
+	}
+
+	.woocommerce-filters-date__content-controls {
+		padding-bottom: 0;
 	}
 }
 
