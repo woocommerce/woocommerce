@@ -1,13 +1,12 @@
-language: php
+language: generic
 
-dist: trusty
-
-sudo: false
+services:
+  - docker
 
 cache:
     directories:
-        - vendor
-        - node_modules
+        - $HOME/.jest-cache
+        - $HOME/.nvm/.cache
         - $HOME/.npm
         - $HOME/.composer/cache
 
@@ -16,9 +15,25 @@ branches:
         - main
         - /release\/.*/
 
+# Make sure NodeGit gets the correct C libs.
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libstdc++-4.9-dev
+
 before_install:
     - timedatectl
     - nvm install --latest-npm
+    - |
+      if [[ ! -z "$E2E_TESTS" ]]; then
+        # Upgrade docker-compose.
+        sudo rm /usr/local/bin/docker-compose
+        curl -sL https://github.com/docker/compose/releases/download/1.24.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+        chmod +x docker-compose
+        sudo mv docker-compose /usr/local/bin
+      fi
 
 before_script:
     - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -29,13 +44,25 @@ before_script:
           echo "xdebug.ini does not exist"
         fi
     - |
-        if [[ ! -z "$WP_VERSION" ]] ; then
-          composer install --no-dev
-          bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
-          composer global require "phpunit/phpunit=4.8.*|5.7.*"
+        if [[ ! -z "$PHP_UNIT" ]]; then
+          composer install
         fi
     - |
-        if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
+        if [[ ! -z "$E2E_TESTS" ]]; then
+          composer install --no-dev
+          npm ci
+          if [[ ! -z "$GUTENBERG_LATEST" ]]; then
+            JSON='{"config": { "SCRIPT_DEBUG": false } }'
+          else
+            JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'", "config": { "SCRIPT_DEBUG": false } }'
+          fi
+          echo $JSON > .wp-env.override.json
+          npm run build:e2e-test
+          chmod -R 767 ./
+          npm run wp-env start
+        fi
+    - |
+        if [[ "$WP_TRAVISCI" == "phpcs" ]]; then
           composer install
         fi
 
@@ -48,15 +75,17 @@ jobs:
           env:
               - WP_VERSION=latest
               - WOOCOMMERCE_BLOCKS_PHASE=3
+              - PHP_UNIT=1
           script:
-              - phpunit
+              - npm run phpunit
         - name: PHP 5.6/unit-tests/Latest WP
           php: 5.6
           env:
               - WP_VERSION=latest
               - WOOCOMMERCE_BLOCKS_PHASE=3
+              - PHP_UNIT=1
           script:
-              - phpunit
+              - npm run phpunit
         - name: PHP Linting Check
           php: 7.3
           env:
@@ -78,44 +107,34 @@ jobs:
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.2)
           script:
-              - npm ci
-              - npm run test:e2e:up
-              - composer install
-              - npm run build:e2e-test
               - npm run test:e2e
           env:
               - WP_VERSION=5.2
+              - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.3)
           script:
-              - npm ci
-              - npm run test:e2e:up
-              - composer install
-              - npm run build:e2e-test
               - npm run test:e2e
           env:
               - WP_VERSION=5.3
+              - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.4)
           script:
-              - npm ci
-              - npm run test:e2e:up
-              - composer install
-              - npm run build:e2e-test
               - npm run test:e2e
           env:
               - WP_VERSION=5.4
+              - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.4 with Gutenberg plugin)
           script:
-              - npm ci
-              - npm run test:e2e:up
-              - composer install
-              - npm run build:e2e-test
+              - npm run wp-env run tests-cli "wp plugin install gutenberg --activate"
               - npm install @wordpress/e2e-test-utils@latest
+              - chmod -R 767 ./
               - npm run test:e2e
           env:
               - WP_VERSION=5.4
+              - E2E_TESTS=1
               - GUTENBERG_LATEST=true
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - stage: deploy
