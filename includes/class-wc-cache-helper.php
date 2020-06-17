@@ -40,8 +40,15 @@ class WC_Cache_Helper {
 	 * @since 3.6.0
 	 */
 	public static function additional_nocache_headers( $headers ) {
-		// no-transform: Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
-		$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
+		/**
+		 * Allow CDN plugins to disable nocache headers.
+		 *
+		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: true.
+		 */
+		if ( apply_filters( 'woocommerce_enable_nocache_headers', true ) ) {
+			// no-transform: Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
+			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
+		}
 		return $headers;
 	}
 
