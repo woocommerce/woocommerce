@@ -121,11 +121,11 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		page.click( 'button.woocommerce-profile-wizard__continue' ),
+		page.click( 'button.is-primary' ),
 
 		// Wait for "Tell us about your business" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -186,9 +186,9 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
 
 	// Wait for "No thanks" button to become active
-	await page.waitForSelector( 'button.is-default:not(:disabled)' );
+	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
 	// Click on "No thanks" button to move to the next step
-	await page.click( 'button.is-default' );
+	await page.click( 'button.is-secondary' );
 
 	// End of onboarding wizard
 
