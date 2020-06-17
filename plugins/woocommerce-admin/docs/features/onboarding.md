@@ -2,9 +2,6 @@
 
 The onboarding feature is a reimagined new user setup experience for WooCommerce core. It contains two sections aimed at getting merchants started with their stores. The merchant begins with the "profile wizard", which helps with initial steps like setting a store address, making extension recommendations, and connecting to Jetpack for additional features. Once the profile wizard is complete, the merchant can purchase & install optional extensions via WooCommerce.com, before continuing to the "task list". From the task list, merchants are walked through a variety of items to help them start selling, such as adding their first product and setting up payment methods.
 
-* Master Thread: p6q8Tx-R1-p2
-* Designs: 2317a-pb
-
 ## Enabling Onboarding
 
 If you run the development version of WooCommerce Admin from GitHub directly, no further action should be needed to enable Onboarding.
@@ -122,9 +119,9 @@ If you are running the development version of WooCommerce Admin, and have [`WP_D
 
 The `onboarding` feature flag is enabled in the main WooCommerce Admin plugin build. That means the published version of the plugin on WordPress.org contains the onboarding feature, but it is visually off by default. See the "enable onboarding" section above.
 
-Sometimes, it may be necessary to generate a separate build of the plugin between public releases for internal testing or debugging. This can be done using the [building custom plugin builds](https://github.com/woocommerce/woocommerce-admin/blob/master/docs/feature-flags.md#building-custom-plugin-builds) feature of our build system.
+Sometimes, it may be necessary to generate a separate build of the plugin between public releases for internal testing or debugging. This can be done using the [building custom plugin builds](https://github.com/woocommerce/woocommerce-admin/blob/main/docs/feature-flags.md#building-custom-plugin-builds) feature of our build system.
 
-* Switch to the latest master branch and pull down any changes
+* Switch to the latest `main` branch and pull down any changes
 * Run `npm run build:release -- --slug onboarding --features '{"onboarding":true}'`
 * A special `woocommerce-admin-onboarding.zip` release will be generated, containing the latest onboarding code
 * Make sure to follow the directions in the "enabling onboarding" section above to properly use the build

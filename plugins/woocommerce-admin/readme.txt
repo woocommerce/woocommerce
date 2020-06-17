@@ -6,7 +6,7 @@ Tested up to: 5.4.1
 Requires PHP: 5.6.20
 Stable tag: 1.3.0-beta.1
 License: GPLv3
-License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
+License URI: https://github.com/woocommerce/woocommerce-admin/blob/main/license.txt
 
 == Description ==
 
@@ -412,7 +412,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Retrieve week last year data by calendar date instead of week alignment. #3271 (Analytics, Packages)
 - Bug: Check if extended_info is set for order report items #3315 (REST API)
 - Tweak: remove global settings dependency from Navigation package. #3294 (Components, Packages)
-- Fix: Fix checkout of master branch in CI environment. #3296 (Build)
+- Fix: Fix checkout of main branch in CI environment. #3296 (Build)
 - Fix: decouple Date package from global wcSettings object. #3278 (Components, Packages)
 - Fix: Make the order count between customer and table total consistent. #3290 (Analytics)
 - Fix: decouple Currency and Number packages from global wcSettings object. #3277 (Components, Packages)
@@ -484,7 +484,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add GitHub pages deploy step to Travis config. #2940 (Build, Documentation)
 - Dev: Fix plugin installation when working from a push instead of a pull request. #2950 (Build)
 - Dev: Fix pull request branch detection on CI (try #2) #2944 (Build)
-- Dev: Only build pushes to master branch. #2941 (Build)
+- Dev: Only build pushes to main branch. #2941 (Build)
 - Performance: reduce JS bundle size. #2933 (Build)
 - Dev: Fix pull request branch detection on CI #2942 (Build)
 - Dev: refresh component documentation #2872 (Build, Components, Documentation, Packages)

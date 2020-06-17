@@ -691,7 +691,7 @@ class Onboarding {
 	 * @param array $plugins Array of plugin slugs to be allowed.
 	 *
 	 * @return array
-	 * @todo Handle edgecase of where installed plugins may have versioned folder names (i.e. `jetpack-master/jetpack.php`).
+	 * @todo Handle edgecase of where installed plugins may have versioned folder names (i.e. `jetpack-main/jetpack.php`).
 	 */
 	public static function get_onboarding_allowed_plugins( $plugins ) {
 		$onboarding_plugins = apply_filters(

@@ -9,8 +9,8 @@ console.log( '\nBy contributing to this project, you license the materials you c
 
 const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' ).toString().trim();
 
-if ( 'master' === currentBranch ) {
-	if ( ! readline.keyInYN( "You're about to push !!![ master ]!!!, is that what you intended?" ) ) {
+if ( 'main' === currentBranch ) {
+	if ( ! readline.keyInYN( "You're about to push !!![ main ]!!!, is that what you intended?" ) ) {
 		process.exit( 1 );
 	}
 }

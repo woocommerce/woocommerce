@@ -48,8 +48,7 @@ script:
 
 branches:
   only:
-    - master
-    - version/1.0
+    - main
 
 before_deploy:
   # Remove our unneeded symlink.
@@ -66,6 +65,6 @@ deploy:
   keep_history: true
   on:
     condition: $RUN_JS == 1 # only deploy on the PHP 7.2/JS build
-    branch: master
+    branch: main
   target_branch: gh-pages
   verbose: true

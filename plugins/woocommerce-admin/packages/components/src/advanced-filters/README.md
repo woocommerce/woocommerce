@@ -121,7 +121,7 @@ const config = {
 };
 ```
 
-`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce-admin/tree/master/packages/components/src/search).
+`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/components/src/search).
 `getLabels`: A function returning a Promise resolving to an array of objects with `id` and `label` properties.
 
 

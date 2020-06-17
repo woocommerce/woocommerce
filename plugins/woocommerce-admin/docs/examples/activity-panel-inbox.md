@@ -120,7 +120,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		$note->add_action(
 			'settings',
 			__( 'Learn More', 'wapi-example-plugin-one' ),
-			'https://github.com/woocommerce/woocommerce-admin/tree/master/docs'
+			'https://github.com/woocommerce/woocommerce-admin/tree/main/docs'
 		);
 		$note->save();
 	}
@@ -243,4 +243,4 @@ A limited set of note fields can be updated over the REST API: `status` and `dat
 ## Questions?
 
 This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check
-out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-settings-notes.php) in the woocommerce-admin code itself for other examples of working with this fun new feature.
+out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/main/includes/notes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/main/includes/notes/class-wc-admin-notes-settings-notes.php) in the woocommerce-admin code itself for other examples of working with this fun new feature.

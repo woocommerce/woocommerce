@@ -72,7 +72,7 @@ class DataSourcePoller {
 	 * Merge the specs.
 	 *
 	 * @param Array $specs_to_merge_in The specs to merge in to $specs.
-	 * @param Array $specs             The master list of specs.
+	 * @param Array $specs             The list of specs being merged into.
 	 */
 	private static function merge_specs( $specs_to_merge_in, &$specs ) {
 		foreach ( $specs_to_merge_in as $spec ) {

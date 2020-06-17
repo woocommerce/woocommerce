@@ -38,7 +38,7 @@ To create a new package, add a new folder to `/packages`, containing…
 			"wordpress",
 			"woocommerce"
 		],
-		"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/[_YOUR_PACKAGE_]/README.md",
+		"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/[_YOUR_PACKAGE_]/README.md",
 		"repository": {
 			"type": "git",
 			"url": "https://github.com/woocommerce/woocommerce-admin.git"

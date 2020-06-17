@@ -6,13 +6,13 @@ We rely on a markdown documentation file for [the docs site on github.io,](https
 
 Use `npm run docs` to generate a `README.md` for your new component. This will create a basic documentation file containing the component name, description comment, component props, and a placeholder section for example usage.
 
-Edit the documentation file for completeness. We recommend using a simple component as a reference (like the [Card component](https://raw.githubusercontent.com/woocommerce/woocommerce-admin/master/packages/components/src/card/README.md)).
+Edit the documentation file for completeness. We recommend using a simple component as a reference (like the [Card component](https://raw.githubusercontent.com/woocommerce/woocommerce-admin/main/packages/components/src/card/README.md)).
 
 ## 2. Create a JavaScript example file
 
 The JavaScript example will be rendered in the DevDocs section and serves as interactive documentation for the component. Create a `docs/example.js` file in the component directory.
 
-See [count/docs/example.js](https://github.com/woocommerce/woocommerce-admin/blob/master/packages/components/src/count/docs/example.js) for a simple example, or [table/docs/example.js](https://github.com/woocommerce/woocommerce-admin/blob/master/packages/components/src/table/docs/example.js) for a more detailed example.
+See [count/docs/example.js](https://github.com/woocommerce/woocommerce-admin/blob/main/packages/components/src/count/docs/example.js) for a simple example, or [table/docs/example.js](https://github.com/woocommerce/woocommerce-admin/blob/main/packages/components/src/table/docs/example.js) for a more detailed example.
 
 ## 3. Preview the documentation site
 
