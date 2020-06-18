@@ -34,6 +34,11 @@ class WC_Admin_Notes_Need_Some_Inspiration {
 			return;
 		}
 
+		// We don't want to show the note after 30 days.
+		if ( self::wc_admin_active_for( 30 * DAY_IN_SECONDS ) ) {
+			return;
+		}
+
 		$onboarding_profile = get_option( 'woocommerce_onboarding_profile', array() );
 
 		// Confirm that $onboarding_profile is set.
