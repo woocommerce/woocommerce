@@ -16,8 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Singleton for managing the WC queue instance.
  *
  * @version 3.5.0
- *
- * @deprecated 4.3.0 Use the container to get an instance of WC_Queue_Interface instead.
  */
 class WC_Queue {
 

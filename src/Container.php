@@ -1,80 +1,91 @@
 <?php
 /**
- * ObjectContainer class file.
+ * Container class file.
  *
- * @package Automattic\WooCommerce\Tools\DependencyManagement
+ * @package Automattic\WooCommerce
  */
 
 namespace Automattic\WooCommerce;
 
-use \Automattic\WooCommerce\Tools\DependencyManagement\ReflectionContainer as WooReflectionContainer;
-use League\Container\Definition\DefinitionAggregateInterface;
-use League\Container\Inflector\InflectorAggregateInterface;
-use League\Container\ServiceProvider\ServiceProviderAggregateInterface;
+use Automattic\WooCommerce\Tools\DependencyManagement\ServiceProviders as ServiceProviders;
 
 /**
- * Dependency injection container for WooCommerce.
+ * PSR11 compliant dependency injection container for WooCommerce.
  *
- * This class inherits from PHP League's `Container` adding the following features:
+ * Classes in the `src` directory should specify dependencies from that directory via constructor arguments
+ * with type hints. If an instance of the container itself is needed, the type hint to use is \Psr\Container\ContainerInterface.
  *
- * - Registers itself so it can be resolved via itself as a shared instance.
- * - Registers a reflection container as a delegate so autowiring is available "out of the box".
- * - Adds a `defineAsSharedAutowired` method that allows to declare an individual class as shared while
- *   using autowiring, without having to activate "default to shared".
- * - And as a bonus, uses the `Automattic\WooCommerce` namespace instead of the vendor namespace.
+ * Classes in the `src` directory should interact with anything outside (especially code in the `includes` directory
+ * and WordPress functions) by using the classes in the `Proxies` directory. The exception is idempotent
+ * functions (e.g. `wp_parse_url`), those can be used directly.
  *
- * To register class resolutions for WooCommerce itself, you can use `add` as appropriate in the
- * `WooCommerce::init_container` method. Using service providers for that is however the preferred approach,
- * these should go in the `Src/Tools/DependencyManagement/ServiceProviders` folder and their names be added
- * to the the `WooCommerce::$service_providers` array.
+ * Classes in the `includes` directory should use the `wc_get_container` function to get the instance of the container when
+ * they need to get an instance of a class from the `src` directory.
  *
- * To resolve classes from legacy code use `WooCommerce::get_instance_of`. This should be done ONLY to turn obsolete
- * functions and classes into stubs that redirect its functionality to new code in the `src` directory.
- * New code should always be added to the `src` directory, and the container should be used indirectly via
- * constructor injection (or if delayed resolution is required, the container itself should be injected to be used
- * when appropriate).
- *
- * Note: autowiring means the ability to automatically resolve a class name to an instance of that class via
- *       `get(TheClass::class)` or by adding a typed argument to class constructors.
+ * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Tools\DependencyManagement
+ * and those should go in the `src\Tools\DependencyManagement\ServiceProviders` folder unless there's a good reason
+ * to put them elsewhere. All the service provider class names must be in the `$service_providers` property.
  */
-final class Container extends \League\Container\Container {
+final class Container implements \Psr\Container\ContainerInterface {
 
 	/**
-	 *  The underlying reflection delegate used for autowiring.
+	 * The list of service provider classes to register.
 	 *
-	 * @var WooReflectionContainer
+	 * @var string[]
 	 */
-	private $reflection_container;
+	private $service_providers = array(
+		ServiceProviders\Proxies::class,
+	);
+
+	/**
+	 * The underlying container.
+	 *
+	 * @var \Psr\Container\ContainerInterface
+	 */
+	private $container;
 
 	/**
 	 * Class constructor.
-	 *
-	 * @param DefinitionAggregateInterface|null      $definitions DefinitionAggregateInterface to use.
-	 * @param ServiceProviderAggregateInterface|null $providers   ServiceProviderAggregateInterface to use.
-	 * @param InflectorAggregateInterface|null       $inflectors  InflectorAggregateInterface to use.
 	 */
-	public function __construct(
-		DefinitionAggregateInterface $definitions = null,
-		ServiceProviderAggregateInterface $providers = null,
-		InflectorAggregateInterface $inflectors = null
-	) {
-		parent::__construct( $definitions, $providers, $inflectors );
+	public function __construct() {
+		$this->container = new \League\Container\Container();
 
-		// Register ourselves so we become resolvable as a shared instance.
-		$this->add( __CLASS__, $this );
+		// Add ourselves as the shared instance of ContainerInterface,
+		// register everything else using service providers.
 
-		// Register the reflection container to allow autowiring.
-		$this->reflection_container = new WooReflectionContainer();
-		$this->delegate( $this->reflection_container );
+		$this->container->add( \Psr\Container\ContainerInterface::class, $this );
+
+		foreach ( $this->service_providers as $service_provider_class ) {
+			$this->container->addServiceProvider( $service_provider_class );
+		}
 	}
 
 	/**
-	 * Defines a class as shared while making it available via autowiring. In other words, the class will be resolved
-	 * whenever needed using autowiring, but only one shared instance will be created.
+	 * Finds an entry of the container by its identifier and returns it.
 	 *
-	 * @param string $class_name The name of the class to define as shared.
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
+	 *
+	 * @return mixed Entry.
 	 */
-	public function defineAsSharedAutowired( string $class_name ) {
-		$this->reflection_container->share( $class_name );
+	public function get( $id ) {
+		return $this->container->get( $id );
+	}
+
+	/**
+	 * Returns true if the container can return an entry for the given identifier.
+	 * Returns false otherwise.
+	 *
+	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+	 *
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @return bool
+	 */
+	public function has( $id ) {
+		return $this->container->has( $id );
 	}
 }
