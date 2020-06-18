@@ -762,10 +762,16 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		$choose_pages = array(
-			'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
-			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
-		);
+		if ( current_user_can( 'manage_privacy_options' ) ) {
+			$choose_pages = array(
+				'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
+				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+			);
+		} else {
+			$choose_pages = array(
+				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+			);
+		}
 		$pages        = get_pages(
 			array(
 				'post_type'   => 'page',
