@@ -94,7 +94,7 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'intervals', $properties );
 
 		$totals = $properties['totals']['properties'];
-		$this->assertEquals( 11, count( $totals ) );
+		$this->assertEquals( 10, count( $totals ) );
 		$this->assertArrayHasKey( 'net_revenue', $totals );
 		$this->assertArrayHasKey( 'avg_order_value', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
@@ -102,8 +102,7 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'num_items_sold', $totals );
 		$this->assertArrayHasKey( 'coupons', $totals );
 		$this->assertArrayHasKey( 'coupons_count', $totals );
-		$this->assertArrayHasKey( 'num_returning_customers', $totals );
-		$this->assertArrayHasKey( 'num_new_customers', $totals );
+		$this->assertArrayHasKey( 'total_customers', $totals );
 		$this->assertArrayHasKey( 'products', $totals );
 		$this->assertArrayHasKey( 'segments', $totals );
 
@@ -117,7 +116,7 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subtotals', $intervals );
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
-		$this->assertEquals( 10, count( $subtotals ) );
+		$this->assertEquals( 9, count( $subtotals ) );
 		$this->assertArrayHasKey( 'net_revenue', $subtotals );
 		$this->assertArrayHasKey( 'avg_order_value', $subtotals );
 		$this->assertArrayHasKey( 'orders_count', $subtotals );
@@ -125,8 +124,7 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'num_items_sold', $subtotals );
 		$this->assertArrayHasKey( 'coupons', $subtotals );
 		$this->assertArrayHasKey( 'coupons_count', $subtotals );
-		$this->assertArrayHasKey( 'num_returning_customers', $subtotals );
-		$this->assertArrayHasKey( 'num_new_customers', $subtotals );
+		$this->assertArrayHasKey( 'total_customers', $subtotals );
 		$this->assertArrayHasKey( 'segments', $subtotals );
 	}
 }

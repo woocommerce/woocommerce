@@ -43,8 +43,7 @@ class Query extends ReportsQuery {
 				'num_items_sold',
 				'coupons',
 				'coupons_count',
-				'num_returning_customers',
-				'num_new_customers',
+				'total_customers',
 			),
 		);
 	}

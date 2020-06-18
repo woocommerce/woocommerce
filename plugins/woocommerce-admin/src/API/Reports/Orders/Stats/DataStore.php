@@ -45,22 +45,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'orders_count'            => 'intval',
-		'num_items_sold'          => 'intval',
-		'gross_sales'             => 'floatval',
-		'total_sales'             => 'floatval',
-		'coupons'                 => 'floatval',
-		'coupons_count'           => 'intval',
-		'refunds'                 => 'floatval',
-		'taxes'                   => 'floatval',
-		'shipping'                => 'floatval',
-		'net_revenue'             => 'floatval',
-		'avg_items_per_order'     => 'floatval',
-		'avg_order_value'         => 'floatval',
-		'num_returning_customers' => 'intval',
-		'num_new_customers'       => 'intval',
-		'products'                => 'intval',
-		'segment_id'              => 'intval',
+		'orders_count'        => 'intval',
+		'num_items_sold'      => 'intval',
+		'gross_sales'         => 'floatval',
+		'total_sales'         => 'floatval',
+		'coupons'             => 'floatval',
+		'coupons_count'       => 'intval',
+		'refunds'             => 'floatval',
+		'taxes'               => 'floatval',
+		'shipping'            => 'floatval',
+		'net_revenue'         => 'floatval',
+		'avg_items_per_order' => 'floatval',
+		'avg_order_value'     => 'floatval',
+		'total_customers'     => 'intval',
+		'products'            => 'intval',
+		'segment_id'          => 'intval',
 	);
 
 	/**
@@ -86,21 +85,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			' ) as gross_sales';
 
 		$this->report_columns = array(
-			'orders_count'            => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
-			'num_items_sold'          => "SUM({$table_name}.num_items_sold) as num_items_sold",
-			'gross_sales'             => $gross_sales,
-			'total_sales'             => "SUM({$table_name}.total_sales) AS total_sales",
-			'coupons'                 => 'COALESCE( SUM(discount_amount), 0 ) AS coupons', // SUM() all nulls gives null.
-			'coupons_count'           => 'COALESCE( coupons_count, 0 ) as coupons_count',
-			'refunds'                 => "{$refunds} AS refunds",
-			'taxes'                   => "SUM({$table_name}.tax_total) AS taxes",
-			'shipping'                => "SUM({$table_name}.shipping_total) AS shipping",
-			'net_revenue'             => "SUM({$table_name}.net_total) AS net_revenue",
-			'avg_items_per_order'     => "SUM( {$table_name}.num_items_sold ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
-			'avg_order_value'         => "SUM( {$table_name}.net_total ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
-			// Count returning customers as ( total_customers - new_customers ) to get an accurate number and count customers in with both new and old statuses as new.
-			'num_returning_customers' => "( COUNT( DISTINCT( {$table_name}.customer_id ) ) -  COUNT( DISTINCT( CASE WHEN {$table_name}.returning_customer = 0 THEN {$table_name}.customer_id END ) ) ) AS num_returning_customers",
-			'num_new_customers'       => "COUNT( DISTINCT( CASE WHEN {$table_name}.returning_customer = 0 THEN {$table_name}.customer_id END ) ) AS num_new_customers",
+			'orders_count'        => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
+			'num_items_sold'      => "SUM({$table_name}.num_items_sold) as num_items_sold",
+			'gross_sales'         => $gross_sales,
+			'total_sales'         => "SUM({$table_name}.total_sales) AS total_sales",
+			'coupons'             => 'COALESCE( SUM(discount_amount), 0 ) AS coupons', // SUM() all nulls gives null.
+			'coupons_count'       => 'COALESCE( coupons_count, 0 ) as coupons_count',
+			'refunds'             => "{$refunds} AS refunds",
+			'taxes'               => "SUM({$table_name}.tax_total) AS taxes",
+			'shipping'            => "SUM({$table_name}.shipping_total) AS shipping",
+			'net_revenue'         => "SUM({$table_name}.net_total) AS net_revenue",
+			'avg_items_per_order' => "SUM( {$table_name}.num_items_sold ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
+			'avg_order_value'     => "SUM( {$table_name}.net_total ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
+			'total_customers'     => "COUNT( DISTINCT( {$table_name}.customer_id ) ) as total_customers",
 		);
 	}
 

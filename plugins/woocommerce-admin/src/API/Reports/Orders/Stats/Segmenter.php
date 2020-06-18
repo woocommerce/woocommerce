@@ -50,11 +50,10 @@ class Segmenter extends ReportsSegmenter {
 	 */
 	protected function get_segment_selections_order_level( $unique_orders_table ) {
 		$columns_mapping = array(
-			'orders_count'            => "COUNT($unique_orders_table.order_id) AS orders_count",
-			'avg_items_per_order'     => "AVG($unique_orders_table.num_items_sold) AS avg_items_per_order",
-			'avg_order_value'         => "SUM($unique_orders_table.net_total) / COUNT($unique_orders_table.order_id) AS avg_order_value",
-			'num_returning_customers' => "SUM($unique_orders_table.returning_customer) AS num_returning_customers",
-			'num_new_customers'       => "COUNT($unique_orders_table.returning_customer) - SUM($unique_orders_table.returning_customer) AS num_new_customers",
+			'orders_count'        => "COUNT($unique_orders_table.order_id) AS orders_count",
+			'avg_items_per_order' => "AVG($unique_orders_table.num_items_sold) AS avg_items_per_order",
+			'avg_order_value'     => "SUM($unique_orders_table.net_total) / COUNT($unique_orders_table.order_id) AS avg_order_value",
+			'total_customers'     => "COUNT( DISTINCT( $unique_orders_table.customer_id ) ) AS total_customers",
 		);
 
 		return $columns_mapping;
@@ -71,19 +70,18 @@ class Segmenter extends ReportsSegmenter {
 	 */
 	protected function segment_selections_orders( $order_stats_table, $overrides = array() ) {
 		$columns_mapping = array(
-			'num_items_sold'          => "SUM($order_stats_table.num_items_sold) as num_items_sold",
-			'total_sales'             => "SUM($order_stats_table.total_sales) AS total_sales",
-			'coupons'                 => "SUM($order_stats_table.discount_amount) AS coupons",
-			'coupons_count'           => 'COUNT( DISTINCT(coupon_lookup_left_join.coupon_id) ) AS coupons_count',
-			'refunds'                 => "SUM( CASE WHEN $order_stats_table.parent_id != 0 THEN $order_stats_table.total_sales END ) AS refunds",
-			'taxes'                   => "SUM($order_stats_table.tax_total) AS taxes",
-			'shipping'                => "SUM($order_stats_table.shipping_total) AS shipping",
-			'net_revenue'             => "SUM($order_stats_table.net_total) AS net_revenue",
-			'orders_count'            => "COUNT($order_stats_table.order_id) AS orders_count",
-			'avg_items_per_order'     => "AVG($order_stats_table.num_items_sold) AS avg_items_per_order",
-			'avg_order_value'         => "SUM($order_stats_table.net_total) / COUNT($order_stats_table.order_id) AS avg_order_value",
-			'num_returning_customers' => "SUM($order_stats_table.returning_customer) AS num_returning_customers",
-			'num_new_customers'       => "COUNT($order_stats_table.returning_customer) - SUM($order_stats_table.returning_customer) AS num_new_customers",
+			'num_items_sold'      => "SUM($order_stats_table.num_items_sold) as num_items_sold",
+			'total_sales'         => "SUM($order_stats_table.total_sales) AS total_sales",
+			'coupons'             => "SUM($order_stats_table.discount_amount) AS coupons",
+			'coupons_count'       => 'COUNT( DISTINCT(coupon_lookup_left_join.coupon_id) ) AS coupons_count',
+			'refunds'             => "SUM( CASE WHEN $order_stats_table.parent_id != 0 THEN $order_stats_table.total_sales END ) AS refunds",
+			'taxes'               => "SUM($order_stats_table.tax_total) AS taxes",
+			'shipping'            => "SUM($order_stats_table.shipping_total) AS shipping",
+			'net_revenue'         => "SUM($order_stats_table.net_total) AS net_revenue",
+			'orders_count'        => "COUNT($order_stats_table.order_id) AS orders_count",
+			'avg_items_per_order' => "AVG($order_stats_table.num_items_sold) AS avg_items_per_order",
+			'avg_order_value'     => "SUM($order_stats_table.net_total) / COUNT($order_stats_table.order_id) AS avg_order_value",
+			'total_customers'     => "COUNT( DISTINCT( $order_stats_table.customer_id ) ) AS total_customers",
 		);
 
 		if ( $overrides ) {
@@ -130,7 +128,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		// Order level numbers.
 		// As there can be 2 same product ids (or variation ids) per one order, the orders first need to be uniqued before calculating averages, customer counts, etc.
@@ -145,7 +143,8 @@ class Segmenter extends ReportsSegmenter {
 				        $segmenting_groupby AS $segmenting_dimension_name,
 				        MAX( num_items_sold ) AS num_items_sold,
 				        MAX( net_total ) as net_total,
-				        MAX( returning_customer ) AS returning_customer
+				        MAX( returning_customer ) AS returning_customer,
+						MAX( $table_name.customer_id ) as customer_id
 				    FROM
 				        $table_name
 				        $segmenting_from
@@ -161,7 +160,7 @@ class Segmenter extends ReportsSegmenter {
 				GROUP BY
 				    $unique_orders_table.$segmenting_dimension_name",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		$totals_segments = $this->merge_segment_totals_results( $segmenting_dimension_name, $segments_products, $segments_orders );
 		return $totals_segments;
@@ -211,7 +210,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		// Order level numbers.
 		// As there can be 2 same product ids (or variation ids) per one order, the orders first need to be uniqued before calculating averages, customer counts, etc.
@@ -229,7 +228,8 @@ class Segmenter extends ReportsSegmenter {
 				        $segmenting_groupby AS $segmenting_dimension_name,
 				        MAX( num_items_sold ) AS num_items_sold,
 				        MAX( net_total ) as net_total,
-				        MAX( returning_customer ) AS returning_customer
+				        MAX( returning_customer ) AS returning_customer,
+						MAX( $table_name.customer_id ) as customer_id
 				    FROM
 				        $table_name
 				        $segmenting_from
@@ -246,7 +246,7 @@ class Segmenter extends ReportsSegmenter {
 				    time_interval, $unique_orders_table.$segmenting_dimension_name
 				$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		$intervals_segments = $this->merge_segment_intervals_results( $segmenting_dimension_name, $segments_products, $segments_orders );
 		return $intervals_segments;
@@ -283,7 +283,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		// Reformat result.
 		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
@@ -330,7 +330,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 		// Reformat result.
 		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );
