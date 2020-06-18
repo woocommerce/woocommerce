@@ -46,7 +46,7 @@ class WC_Cache_Helper {
 		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: true.
 		 */
 		if ( apply_filters( 'woocommerce_enable_nocache_headers', true ) ) {
-			// no-transform: Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
+			// no-transform: Opt-out of Google weblight. https://support.google.com/webmasters/answer/6211428?hl=en.
 			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
 		}
 		return $headers;
