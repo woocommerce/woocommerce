@@ -4,7 +4,7 @@
 import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
-import { Icon, moreVertical } from '@wordpress/icons';
+import { Icon, more } from '@wordpress/icons';
 import PropTypes from 'prop-types';
 
 /**
@@ -33,7 +33,7 @@ class EllipsisMenu extends Component {
 					title={ label }
 					aria-expanded={ isOpen }
 				>
-					<Icon icon={ moreVertical } />
+					<Icon icon={ more } />
 				</Button>
 			);
 		};

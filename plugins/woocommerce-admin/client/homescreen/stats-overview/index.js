@@ -3,14 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { TabPanel } from '@wordpress/components';
+import {
+	TabPanel,
+	Card,
+	CardHeader,
+	CardBody,
+	CardFooter,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { get, xor } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
 import {
-	Card,
 	EllipsisMenu,
 	MenuItem,
 	MenuTitle,
@@ -38,7 +44,11 @@ const stats = performanceIndicators.filter( ( indicator ) => {
 
 export const StatsOverview = () => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
-	const hiddenStats = get( userPrefs, [ 'homepage_stats', 'hiddenStats' ], DEFAULT_HIDDEN_STATS );
+	const hiddenStats = get(
+		userPrefs,
+		[ 'homepage_stats', 'hiddenStats' ],
+		DEFAULT_HIDDEN_STATS
+	);
 
 	const toggleStat = ( stat ) => {
 		const nextHiddenStats = xor( hiddenStats, [ stat ] );
@@ -57,9 +67,13 @@ export const StatsOverview = () => {
 
 	return (
 		<Card
-			className="woocommerce-analytics__card woocommerce-stats-overview"
-			title={ __( 'Stats overview', 'woocommerce-admin' ) }
-			menu={
+			size="large"
+			className="woocommerce-stats-overview woocommerce-homescreen-card"
+		>
+			<CardHeader size="medium">
+				<Text variant="title.small">
+					{ __( 'Stats overview', 'woocommerce-admin' ) }
+				</Text>
 				<EllipsisMenu
 					label={ __(
 						'Choose which values to display',
@@ -92,44 +106,45 @@ export const StatsOverview = () => {
 						</Fragment>
 					) }
 				/>
-			}
-		>
-			<TabPanel
-				className="woocommerce-stats-overview__tabs"
-				onSelect={ ( period ) => {
-					recordEvent( 'statsoverview_date_picker_update', {
-						period,
-					} );
-				} }
-				tabs={ [
-					{
-						title: __( 'Today', 'woocommerce-admin' ),
-						name: 'today',
-					},
-					{
-						title: __( 'Week to date', 'woocommerce-admin' ),
-						name: 'week',
-					},
-					{
-						title: __( 'Month to date', 'woocommerce-admin' ),
-						name: 'month',
-					},
-				] }
-			>
-				{ ( tab ) => (
-					<Fragment>
-						<InstallJetpackCta />
-						<StatsList
-							query={ {
-								period: tab.name,
-								compare: 'previous_period',
-							} }
-							stats={ activeStats }
-						/>
-					</Fragment>
-				) }
-			</TabPanel>
-			<div className="woocommerce-stats-overview__footer">
+			</CardHeader>
+			<CardBody>
+				<TabPanel
+					className="woocommerce-stats-overview__tabs"
+					onSelect={ ( period ) => {
+						recordEvent( 'statsoverview_date_picker_update', {
+							period,
+						} );
+					} }
+					tabs={ [
+						{
+							title: __( 'Today', 'woocommerce-admin' ),
+							name: 'today',
+						},
+						{
+							title: __( 'Week to date', 'woocommerce-admin' ),
+							name: 'week',
+						},
+						{
+							title: __( 'Month to date', 'woocommerce-admin' ),
+							name: 'month',
+						},
+					] }
+				>
+					{ ( tab ) => (
+						<Fragment>
+							<InstallJetpackCta />
+							<StatsList
+								query={ {
+									period: tab.name,
+									compare: 'previous_period',
+								} }
+								stats={ activeStats }
+							/>
+						</Fragment>
+					) }
+				</TabPanel>
+			</CardBody>
+			<CardFooter>
 				<Link
 					className="woocommerce-stats-overview__more-btn"
 					href={ getNewPath( {}, '/analytics/overview' ) }
@@ -142,7 +157,7 @@ export const StatsOverview = () => {
 				>
 					{ __( 'View detailed stats' ) }
 				</Link>
-			</div>
+			</CardFooter>
 		</Card>
 	);
 };

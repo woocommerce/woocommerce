@@ -5,17 +5,9 @@
 
 	.woocommerce-task-dashboard__container {
 		.woocommerce-task-card {
-			.components-card__header.is-size-large {
-				min-height: unset;
+			.components-card__header.is-size-medium {
 				padding-top: 0;
-				display: grid;
-				grid-template-columns: auto 24px;
 			}
-
-			.components-card__body.is-size-large {
-				padding: 0;
-			}
-
 			.woocommerce-list__item:not(.is-complete) {
 				.woocommerce-task__icon {
 					border: 1px solid $core-grey-light-500;

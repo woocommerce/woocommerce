@@ -33,26 +33,6 @@
 		margin-right: -16px;
 		flex-direction: column-reverse;
 	}
-
-	.components-card {
-		.components-card__header.is-size-large {
-			display: grid;
-			// to maintain consistent height with or without an ellipsis menu
-			min-height: 63px;
-			// to match alignment of `Card` from `@woocommerce/components`
-			padding: $gap-small $gap;
-
-			// IE doesn't support `align-items` on grid container
-			& > * {
-				align-self: center;
-			}
-
-			h2 {
-				// to match height of `Card` from `@woocommerce/components`
-				margin: 0;
-			}
-		}
-	}
 }
 .woocommerce-homescreen-column {
 	width: 50%;
@@ -70,3 +50,27 @@
 	height: 225px;
 	background-color: #6495ed;
 }
+
+.woocommerce-homescreen-card {
+	.components-card__header.is-size-large,
+	.components-card__header.is-size-medium {
+		min-height: 63px;
+		min-height: unset;
+		display: grid;
+		grid-template-columns: auto 24px;
+
+		// IE doesn't support `align-items` on grid container
+		& > * {
+			align-self: center;
+		}
+	}
+
+	.components-card__body.is-size-large {
+		padding: 0;
+	}
+
+	.components-card__footer.is-size-large {
+		padding: 0 $gap-smaller;
+	}
+}
+

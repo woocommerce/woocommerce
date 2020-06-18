@@ -12,6 +12,7 @@ import {
 	CardBody,
 	CardHeader,
 	Modal,
+	__experimentalText as Text,
 } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { Icon, check, chevronRight } from '@wordpress/icons';
@@ -19,7 +20,7 @@ import { Icon, check, chevronRight } from '@wordpress/icons';
 /**
  * WooCommerce dependencies
  */
-import { H, List, EllipsisMenu } from '@woocommerce/components';
+import { List, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
@@ -348,20 +349,20 @@ class TaskDashboard extends Component {
 						<Fragment>
 							<Card
 								size="large"
-								className="woocommerce-task-card"
+								className="woocommerce-task-card woocommerce-homescreen-card"
 							>
 								<progress
 									className={ progressBarClass }
 									max={ listTasks.length }
 									value={ numCompleteTasks }
 								/>
-								<CardHeader>
-									<H>
+								<CardHeader size="medium">
+									<Text variant="title.small">
 										{ __(
 											'Finish setup',
 											'woocommerce-admin'
 										) }
-									</H>
+									</Text>
 									{ this.renderMenu() }
 								</CardHeader>
 								<CardBody>

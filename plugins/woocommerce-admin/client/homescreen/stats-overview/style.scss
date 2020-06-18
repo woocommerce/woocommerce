@@ -12,10 +12,6 @@ $promo-actions-border-bottom: $light-gray-tertiary;
 	}
 }
 
-.woocommerce-stats-overview__footer {
-	border-top: 1px solid $outer-border;
-}
-
 .woocommerce-stats-overview__more-btn {
 	display: inline-block;
 	padding: $gap;
@@ -29,6 +25,8 @@ $promo-actions-border-bottom: $light-gray-tertiary;
 
 		.components-button {
 			width: 33.33%;
+			padding-right: $gap-large;
+			padding-left: $gap-large;
 		}
 	}
 }
@@ -67,22 +65,37 @@ $promo-actions-border-bottom: $light-gray-tertiary;
 }
 
 article.woocommerce-stats-overview__install-jetpack-promo {
-	h3 {
-		margin: $gap $gap-large $gap-smaller;
+	.woocommerce-stats-overview__install-jetpack-promo__content {
+		padding: $gap $gap-large;
+	}
+
+	h2 {
+		color: $dark-gray-primary;
+		@include font-size( 16 );
+		font-style: normal;
+		line-height: 1.5;
+		font-weight: normal;
+		margin: $gap-smaller 0;
 	}
 	p {
-		margin: 0 $gap-large $gap;
+		color: $medium-gray-text;
+		font-style: normal;
+		font-weight: normal;
+		@include font-size( 14 );
+		line-height: 20px;
+		margin: $gap-smaller 0;
 	}
 	footer {
+		padding: $gap $gap-large;
 		border-top: 1px solid $promo-actions-border-top;
 		border-bottom: 1px solid $promo-actions-border-bottom;
 
-		.components-button {
-			margin: $gap $gap-smallest;
-		}
+		button {
+			margin-left: $gap-smaller;
 
-		.woocommerce-layout & button.components-button.is-secondary {
-			margin-left: $gap-large;
+			&:first-child {
+				margin-left: 0;
+			}
 		}
 	}
 }
