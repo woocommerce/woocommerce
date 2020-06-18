@@ -110,24 +110,6 @@ final class WooCommerce {
 	public $deprecated_hook_handlers = array();
 
 	/**
-	 * The shared instance of the dependency injection container.
-	 *
-	 * @var \Automattic\WooCommerce\Container
-	 */
-	private static $container;
-
-	/**
-	 * The list of service providers used to initialize the dependency injection container,
-	 * as names of classes in the Automattic\WooCommerce\Tools\DependencyManagement\ServiceProviders namespaced
-	 * and without the 'ServiceProvider' suffix.
-	 *
-	 * @var string[]
-	 */
-	private static $service_providers = array(
-		'Queue',
-	);
-
-	/**
 	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
@@ -831,8 +813,6 @@ final class WooCommerce {
 	 * Get queue instance.
 	 *
 	 * @return WC_Queue_Interface
-	 *
-	 * @deprecated 4.3.0 Use the container to get an instance of WC_Queue_Interface instead.
 	 */
 	public function queue() {
 		return WC_Queue::instance();
@@ -921,49 +901,5 @@ final class WooCommerce {
 	 */
 	public function is_wc_admin_active() {
 		return function_exists( 'wc_admin_url' );
-	}
-
-	/**
-	 * Initialize the dependency injection container.
-	 */
-	public static function init_container() {
-		global $wp_actions;
-
-		if ( ! function_exists( 'did_action' ) || did_action( 'plugins_loaded' ) ) {
-			self::_init_container();
-		} else {
-			// TODO: This is a hack to overcome the inability to use the autoloader before plugins have been loaded, remove after https://github.com/Automattic/jetpack/pull/15106 is merged.
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$wp_actions['plugins_loaded'] = 1;
-			self::_init_container();
-			unset( $wp_actions['plugins_loaded'] );
-		}
-	}
-
-	/**
-	 * Initialize the dependency injection container.
-	 */
-	private static function _init_container() {
-		self::$container = new \Automattic\WooCommerce\Container();
-
-		foreach ( self::$service_providers as $name ) {
-			self::$container->addServiceProvider( "\\Automattic\\WooCommerce\\Tools\\DependencyManagement\\ServiceProviders\\{$name}ServiceProvider" );
-		}
-	}
-
-	/**
-	 * Get an instance of a class from the dependency injection container.
-	 *
-	 * This method should be used ONLY to turn obsolete functions and classes into stubs that redirect its functionality
-	 * to new code in the `src` directory. New code should always be added to the `src` directory, and the container
-	 * should be used indirectly via constructor injection (or if delayed resolution is required, the container itself
-	 * should be injected to be used when appropriate).
-	 *
-	 * @param string $class_name Name of the class to resolve.
-	 *
-	 * @return object The resolved object.
-	 */
-	public static function get_instance_of( $class_name ) {
-		return self::$container->get( $class_name );
 	}
 }

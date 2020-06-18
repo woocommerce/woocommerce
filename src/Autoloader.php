@@ -43,7 +43,7 @@ class Autoloader {
 			return false;
 		}
 
-		self::register_psr4_autoloader();
+		self::registerPsr4Autoloader();
 
 		return $autoloader_result;
 	}
@@ -52,7 +52,7 @@ class Autoloader {
 	 * Define a PSR4 autoloader for the dependency injection engine to work.
 	 * Function grabbed from https://container.thephpleague.com/3.x
 	 */
-	protected static function register_psr4_autoloader() {
+	protected static function registerPsr4Autoloader() {
 		spl_autoload_register(
 			function ( $class ) {
 				$prefix   = 'Automattic\\WooCommerce\\';

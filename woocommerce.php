@@ -35,7 +35,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 }
 
 // Initialize dependency injection.
-WooCommerce::init_container();
+$GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
 /**
  * Returns the main instance of WC.
@@ -45,6 +45,16 @@ WooCommerce::init_container();
  */
 function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 	return WooCommerce::instance();
+}
+
+/**
+ * Returns the WooCommerce PSR11-compatible object container.
+ * Code in the `includes` directory should use the container to get instances of classes in the `src` directory.
+ *
+ * @return \Psr\Container\ContainerInterface The WooCommerce PSR11 container.
+ */
+function wc_get_container() {
+	return $GLOBALS['wc_container'];
 }
 
 // Global for backwards compatibility.
