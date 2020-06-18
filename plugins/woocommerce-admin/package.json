@@ -180,7 +180,7 @@
 		"concurrently": "5.2.0",
 		"copy-webpack-plugin": "5.1.1",
 		"cross-env": "7.0.2",
-		"css-loader": "3.5.3",
+		"css-loader": "3.6.0",
 		"deasync": "0.1.20",
 		"deep-freeze": "0.0.1",
 		"docsify-cli": "4.4.1",
