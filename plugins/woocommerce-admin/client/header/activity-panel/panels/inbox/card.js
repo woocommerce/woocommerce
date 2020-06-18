@@ -27,6 +27,7 @@ class InboxNoteCard extends Component {
 		this.state = {
 			isDismissModalOpen: false,
 			dismissType: null,
+			clickedActionText: null,
 		};
 		this.openDismissModal = this.openDismissModal.bind( this );
 		this.closeDismissModal = this.closeDismissModal.bind( this );
@@ -148,6 +149,12 @@ class InboxNoteCard extends Component {
 	}
 
 	renderDismissButton() {
+		const { clickedActionText } = this.state;
+
+		if ( ! clickedActionText ) {
+			return null;
+		}
+
 		return (
 			<Dropdown
 				contentClassName="woocommerce-admin-dismiss-dropdown"
@@ -247,9 +254,16 @@ class InboxNoteCard extends Component {
 
 	renderActions( note ) {
 		const { actions: noteActions, id: noteId } = note;
+		const { clickedActionText } = this.state;
+
+		if ( !! clickedActionText ) {
+			return clickedActionText;
+		}
+
 		if ( ! noteActions ) {
 			return;
 		}
+
 		return (
 			<Fragment>
 				{ noteActions.map( ( action, index ) => (
@@ -257,11 +271,22 @@ class InboxNoteCard extends Component {
 						key={ index }
 						noteId={ noteId }
 						action={ action }
+						onClick={ () => this.onActionClicked( action ) }
 					/>
 				) ) }
 			</Fragment>
 		);
 	}
+
+	onActionClicked = ( action ) => {
+		if ( ! action.actioned_text ) {
+			return;
+		}
+
+		this.setState( {
+			clickedActionText: action.actioned_text,
+		} );
+	};
 
 	render() {
 		const { lastRead, note } = this.props;

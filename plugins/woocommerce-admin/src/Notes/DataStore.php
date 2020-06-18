@@ -216,7 +216,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		$db_actions = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT action_id, name, label, query, status, is_primary
+				"SELECT action_id, name, label, query, status, is_primary, actioned_text
 				FROM {$wpdb->prefix}wc_admin_note_actions
 				WHERE note_id = %d",
 				$note->get_id()
@@ -228,12 +228,13 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		if ( $db_actions ) {
 			foreach ( $db_actions as $action ) {
 				$note_actions[] = (object) array(
-					'id'      => (int) $action->action_id,
-					'name'    => $action->name,
-					'label'   => $action->label,
-					'query'   => $action->query,
-					'status'  => $action->status,
-					'primary' => (bool) $action->is_primary,
+					'id'            => (int) $action->action_id,
+					'name'          => $action->name,
+					'label'         => $action->label,
+					'query'         => $action->query,
+					'status'        => $action->status,
+					'primary'       => (bool) $action->is_primary,
+					'actioned_text' => $action->actioned_text,
 				);
 			}
 		}
@@ -284,12 +285,13 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		// Update/insert the actions in this changeset.
 		foreach ( $changed_actions as $action ) {
 			$action_data = array(
-				'note_id'    => $note->get_id(),
-				'name'       => $action->name,
-				'label'      => $action->label,
-				'query'      => $action->query,
-				'status'     => $action->status,
-				'is_primary' => $action->primary,
+				'note_id'       => $note->get_id(),
+				'name'          => $action->name,
+				'label'         => $action->label,
+				'query'         => $action->query,
+				'status'        => $action->status,
+				'is_primary'    => $action->primary,
+				'actioned_text' => $action->actioned_text,
 			);
 
 			$data_format = array(
@@ -299,6 +301,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 				'%s',
 				'%s',
 				'%d',
+				'%s',
 			);
 
 			if ( ! empty( $action->id ) ) {
