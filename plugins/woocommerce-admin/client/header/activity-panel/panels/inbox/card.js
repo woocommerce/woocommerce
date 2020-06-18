@@ -151,7 +151,7 @@ class InboxNoteCard extends Component {
 	renderDismissButton() {
 		const { clickedActionText } = this.state;
 
-		if ( ! clickedActionText ) {
+		if ( clickedActionText ) {
 			return null;
 		}
 
