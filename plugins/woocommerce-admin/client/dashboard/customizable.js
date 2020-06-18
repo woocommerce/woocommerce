@@ -73,6 +73,7 @@ const mergeSectionsWithDefaults = ( prefSections ) => {
 
 const CustomizableDashboard = ( {
 	defaultDateRange,
+	homepageEnabled,
 	path,
 	query,
 	taskListComplete,
@@ -92,7 +93,7 @@ const CustomizableDashboard = ( {
 
 	const sections = dashSections || defaultSections;
 
-	const isTaskListEnabled = isOnboardingEnabled() && ! taskListHidden;
+	const isTaskListEnabled = ! homepageEnabled && isOnboardingEnabled() && ! taskListHidden;
 
 	const isDashboardShown =
 		! isTaskListEnabled || ( ! query.task && taskListComplete );
