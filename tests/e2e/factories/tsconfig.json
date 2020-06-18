@@ -9,5 +9,9 @@
     "strict": true,
     "esModuleInterop": true
   },
-  "include": [ "./src/**/*" ]
+  "include": [ "./src/**/*" ],
+  "exclude": [ 
+    "**/*.spec.ts", 
+    "**/*.test.ts" 
+  ]
 }
