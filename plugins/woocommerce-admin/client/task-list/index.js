@@ -313,6 +313,10 @@ class TaskDashboard extends Component {
 				</div>
 			);
 
+			task.title = (
+				<Text as="div" variant={ task.completed ? 'body.small' : 'button' }>{ task.title }</Text>
+			);
+
 			if ( ! task.completed ) {
 				task.after = task.time ? (
 					<span className="woocommerce-task-estimated-time">

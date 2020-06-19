@@ -149,7 +149,10 @@ List.propTypes = {
 			/**
 			 * Title displayed for the list item.
 			 */
-			title: PropTypes.string.isRequired,
+			title: PropTypes.oneOfType( [
+				PropTypes.string,
+				PropTypes.node,
+			] ),
 		} )
 	).isRequired,
 };

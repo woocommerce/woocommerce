@@ -60,6 +60,7 @@
 		grid-template-columns: auto 24px;
 
 		// IE doesn't support `align-items` on grid container
+		
 		& > * {
 			align-self: center;
 		}

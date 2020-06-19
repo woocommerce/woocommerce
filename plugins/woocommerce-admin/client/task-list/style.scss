@@ -15,6 +15,12 @@
 				}
 			}
 
+			.woocommerce-list__item.is-complete {
+				.woocommerce-list__item-title {
+					color: $medium-gray-text;
+				}
+			}
+
 			.woocommerce-list__item-before .woocommerce-task__icon {
 				border-radius: 50%;
 				width: 32px;
@@ -32,6 +38,10 @@
 				min-width: unset;
 			}
 		}
+	}
+
+	.woocommerce-task-estimated-time {
+		color: $medium-gray-text;
 	}
 
 	.woocommerce-card.is-narrow {
