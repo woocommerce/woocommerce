@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
-    "incremental": true,
     "target": "es2015",
     "module": "commonjs",
-    "types": [ "node", "jest" ],
+    "types": [ "node", "jest", "axios", "moxios", "create-hmac" ],
     "outDir": "dist",
     "declaration": true,
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noEmit": true
   },
   "include": [ "./src/**/*" ],
   "exclude": [ 
-    "**/*.spec.ts", 
-    "**/*.test.ts" 
+    "node_modules"
   ]
 }

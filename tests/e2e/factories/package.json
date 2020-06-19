@@ -16,14 +16,21 @@
   "main": "dist/index.js",
   "sideEffects": false,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "jest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "axios": "0.19.2",
+    "create-hmac": "1.1.7",
+    "oauth-1.0a": "2.2.6"
+  },
   "devDependencies": {
+    "@types/create-hmac": "1.1.0",
     "@types/jest": "25.2.1",
+    "@types/moxios": "0.4.9",
     "@types/node": "13.13.5",
     "jest": "25.5.4",
+    "moxios": "0.4.0",
     "ts-jest": "25.5.0",
     "typescript": "3.8.3"
   }
