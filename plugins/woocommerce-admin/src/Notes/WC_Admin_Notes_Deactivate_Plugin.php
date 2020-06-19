@@ -39,7 +39,7 @@ class WC_Admin_Notes_Deactivate_Plugin {
 		$note = new WC_Admin_Note();
 		$note->set_title( __( 'Deactivate old WooCommerce Admin version', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', 'woocommerce-admin' ) );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
