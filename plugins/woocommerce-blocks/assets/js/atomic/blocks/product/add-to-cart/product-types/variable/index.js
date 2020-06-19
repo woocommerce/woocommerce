@@ -12,7 +12,7 @@ import {
 	QuantityInput,
 	ProductUnavailable,
 } from '../../shared';
-import VariationPicker from './variation-picker';
+import VariationAttributes from './variation-attributes';
 
 /**
  * Variable Product Add To Cart Form
@@ -44,7 +44,7 @@ const Variable = () => {
 
 	return (
 		<>
-			<VariationPicker />
+			<VariationAttributes product={ product } />
 			<QuantityInput
 				value={ quantity }
 				min={ minQuantity }

@@ -4,14 +4,6 @@
 		display: flex;
 		flex-wrap: wrap;
 
-		.wc-block-components-product-add-to-cart-variation-picker,
-		.wc-block-components-product-add-to-cart-group-list {
-			margin: 0 0 em($gap-small) 0;
-			flex-basis: 100%;
-			border: 1px solid #000;
-			padding: 2em;
-		}
-
 		.wc-block-components-product-add-to-cart-button {
 			margin: 0 0 em($gap-small) 0;
 

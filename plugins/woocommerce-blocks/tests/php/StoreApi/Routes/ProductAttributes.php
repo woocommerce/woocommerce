@@ -51,7 +51,7 @@ class ProductAttributes extends TestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $this->attributes[0]->id, $data['id'] );
 		$this->assertEquals( $this->attributes[0]->name, $data['name'] );
-		$this->assertEquals( $this->attributes[0]->slug, $data['slug'] );
+		$this->assertEquals( $this->attributes[0]->slug, $data['taxonomy'] );
 		$this->assertEquals( $this->attributes[0]->type, $data['type'] );
 		$this->assertEquals( $this->attributes[0]->order_by, $data['order'] );
 		$this->assertEquals( $this->attributes[0]->has_archives, $data['has_archives'] );
@@ -68,7 +68,7 @@ class ProductAttributes extends TestCase {
 		$this->assertEquals( 2, count( $data ) );
 		$this->assertArrayHasKey( 'id', $data[0] );
 		$this->assertArrayHasKey( 'name', $data[0] );
-		$this->assertArrayHasKey( 'slug', $data[0] );
+		$this->assertArrayHasKey( 'taxonomy', $data[0] );
 		$this->assertArrayHasKey( 'type', $data[0] );
 		$this->assertArrayHasKey( 'order', $data[0] );
 		$this->assertArrayHasKey( 'has_archives', $data[0] );
@@ -85,7 +85,7 @@ class ProductAttributes extends TestCase {
 
 		$this->assertArrayHasKey( 'id', $data );
 		$this->assertArrayHasKey( 'name', $data );
-		$this->assertArrayHasKey( 'slug', $data );
+		$this->assertArrayHasKey( 'taxonomy', $data );
 		$this->assertArrayHasKey( 'type', $data );
 		$this->assertArrayHasKey( 'order', $data );
 		$this->assertArrayHasKey( 'has_archives', $data );
