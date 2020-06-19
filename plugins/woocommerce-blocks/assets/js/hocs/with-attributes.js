@@ -88,7 +88,7 @@ const withAttributes = ( OriginalComponent ) => {
 					newTerms = newTerms.map( ( term ) => ( {
 						...term,
 						parent: expandedAttribute,
-						attr_slug: attributeData.slug,
+						attr_slug: attributeData.taxonomy,
 					} ) );
 
 					setTermsList( {

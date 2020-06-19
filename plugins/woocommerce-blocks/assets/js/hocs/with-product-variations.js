@@ -121,7 +121,8 @@ const withProductVariations = createHigherOrderComponent(
 				const { products } = this.props;
 				const parentProduct = products.filter(
 					( p ) =>
-						p.variations && p.variations.includes( variationId )
+						p.variations &&
+						p.variations.find( ( { id } ) => id === variationId )
 				);
 				return parentProduct[ 0 ].id;
 			}

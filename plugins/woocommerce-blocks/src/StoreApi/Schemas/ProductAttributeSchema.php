@@ -41,8 +41,8 @@ class ProductAttributeSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'slug'         => array(
-				'description' => __( 'String based identifier for the attribute, and its WordPress taxonomy.', 'woo-gutenberg-products-block' ),
+			'taxonomy'     => array(
+				'description' => __( 'The attribute taxonomy name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -84,7 +84,7 @@ class ProductAttributeSchema extends AbstractSchema {
 		return [
 			'id'           => (int) $attribute->id,
 			'name'         => $this->prepare_html_response( $attribute->name ),
-			'slug'         => $attribute->slug,
+			'taxonomy'     => $attribute->slug,
 			'type'         => $attribute->type,
 			'order'        => $attribute->order_by,
 			'has_archives' => $attribute->has_archives,
