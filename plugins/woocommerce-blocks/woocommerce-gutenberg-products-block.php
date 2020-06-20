@@ -13,7 +13,7 @@
  * WC tested up to: 4.2
  *
  * @package WooCommerce\Blocks
- * @internal This file is only used when running the REST API as a feature plugin.
+ * @internal This file is only used when running as a feature plugin.
  */
 
 defined( 'ABSPATH' ) || exit;
