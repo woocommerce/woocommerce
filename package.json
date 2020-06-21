@@ -77,8 +77,9 @@
   },
   "husky": {
     "hooks": {
+      "post-merge": "./bin/post-merge.sh",
       "pre-commit": "lint-staged",
-      "post-merge": "./bin/post-merge.sh"
+      "pre-push": "./bin/pre-push.sh"
     }
   },
   "lint-staged": {
