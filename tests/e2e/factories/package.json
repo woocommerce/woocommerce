@@ -14,6 +14,15 @@
   ],
   "license": "GPL-3.0+",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist/",
+    "!*.tsbuildinfo",
+    "!*.spec.js",
+    "!*.spec.d.ts",
+    "!*.test.js",
+    "!*.test.d.ts"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

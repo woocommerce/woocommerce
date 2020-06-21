@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "incremental": true,
+    "target": "es5",
     "module": "commonjs",
     "types": [ "node", "jest", "axios", "moxios", "create-hmac" ],
     "outDir": "dist",
     "declaration": true,
     "strict": true,
-    "esModuleInterop": true,
-    "noEmit": true
+    "esModuleInterop": true
   },
   "include": [ "./src/**/*" ],
   "exclude": [ 
