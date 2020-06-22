@@ -181,7 +181,7 @@ class WC_Admin_Notes_Order_Milestones {
 	public function get_note_title_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
-				return __( 'First order', 'woocommerce-admin' );
+				return __( 'First order received', 'woocommerce-admin' );
 			case 10:
 			case 100:
 			case 250:
@@ -210,7 +210,7 @@ class WC_Admin_Notes_Order_Milestones {
 	public function get_note_content_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
-				return __( 'Congratulations on getting your first order from a customer! Learn how to manage your orders.', 'woocommerce-admin' );
+				return __( "Congratulations on getting your first order! Now is a great time to learn how to manage your orders.", 'woocommerce-admin' );
 			case 10:
 				return __( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' );
 			case 100:
@@ -239,13 +239,13 @@ class WC_Admin_Notes_Order_Milestones {
 				return array(
 					'name'  => 'learn-more',
 					'label' => __( 'Learn more', 'woocommerce-admin' ),
-					'query' => 'https://docs.woocommerce.com/document/managing-orders/',
+					'query' => 'https://docs.woocommerce.com/document/managing-orders/?utm_source=inbox',
 				);
 			case 10:
 				return array(
 					'name'  => 'browse',
 					'label' => __( 'Browse', 'woocommerce-admin' ),
-					'query' => 'https://woocommerce.com/success-stories/',
+					'query' => 'https://woocommerce.com/success-stories/?utm_source=inbox',
 				);
 			case 100:
 			case 250:
