@@ -5,10 +5,11 @@
  * @package Automattic/WooCommerce/Tools/DependencyManagement/ServiceProviders
  */
 
-namespace Automattic\WooCommerce\Tools\DependencyManagement\ServiceProviders;
+namespace Automattic\WooCommerce\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Tools\DependencyManagement\AbstractServiceProvider;
-use Automattic\WooCommerce\Tools\Proxies as ProxyClasses;
+use Automattic\WooCommerce\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Proxies\ActionsProxy;
 
 /**
  * Service provider for the classes in the Automattic\WooCommerce\Tools\Proxies namespace.
@@ -21,15 +22,15 @@ class ProxiesServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
-		ProxyClasses\LegacyProxy::class,
-		ProxyClasses\ActionsProxy::class,
+		LegacyProxy::class,
+		ActionsProxy::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( ProxyClasses\ActionsProxy::class );
-		$this->shareWithAutoArguments( ProxyClasses\LegacyProxy::class );
+		$this->share( ActionsProxy::class );
+		$this->shareWithAutoArguments( LegacyProxy::class );
 	}
 }

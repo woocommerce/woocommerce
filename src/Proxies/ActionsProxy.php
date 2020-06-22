@@ -5,7 +5,7 @@
  * @package Automattic/WooCommerce/Tools/Proxies
  */
 
-namespace Automattic\WooCommerce\Tools\Proxies;
+namespace Automattic\WooCommerce\Proxies;
 
 /**
  * Proxy for interacting with WordPress actions and filters.

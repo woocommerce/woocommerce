@@ -5,7 +5,7 @@
  * @package Automattic/WooCommerce/Tools/DependencyManagement
  */
 
-namespace Automattic\WooCommerce\Tools\DependencyManagement;
+namespace Automattic\WooCommerce\DependencyManagement;
 
 use League\Container\Argument\RawArgument;
 use League\Container\Definition\DefinitionInterface;
