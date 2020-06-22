@@ -1,5 +1,84 @@
 == Changelog ==
 
+= 4.2.0 - 2020-06-02 =
+
+**WooCommerce**
+* Enhancement - Added Ghanaian regions to the state dropdown. #26273
+* Enhancement - Added Mozambique provinces to the state dropdown. #26162
+* Enhancement - Added support for the new group descriptions available on WordPress privacy exporters as of WP 5.3. #25575
+* Fix - Fixed false positives when checking if uploads directory is public. #26600
+* Fix - Introduced a new admin body class for supporting styling issues in WP 5.3+. #26251
+* Fix - Removed case conversion of meta keys from CSV imports. #25517
+* Fix - Allow schedule coupons via CRUD. #26387
+* Fix - Password visibility toggle when password strength check fails. #26132
+* Fix - Cross-sell placement when product has no description. #26334
+* Fix - Display of the rate limit warning during payment method creation. #26411
+* Fix - Made the shipping zone matching query's `zone_id` field more specific. #26308
+* Fix - Corrected the display of RTL languages on the WooCommerce.com addons page. #26080
+* Fix - Removed the postcode field for Ghana. #26272
+* Fix - Made the hiding of state fields more explicit for Germany, Denmark, and Sweden. #25598
+* Fix - Ensured that global attribute prefixes are passed to the `woocommerce_attribute_label` filter. #26022
+* Dev - Increased WordPress minimum version to 5.2 according to policy. #26550
+* Dev - Added the customer as a third argument to the `woocommerce_matched_rates` filter. #26361
+* Dev - Introduced `woocommerce_menu_order_count` filter. #26044
+* Dev - Introduced `should_send_ajax_request.adding_to_cart `cart event to allow short-circuiting cart addition. #25760
+* Dev - Made the jQuery selector for checkout form rows less specific. #25654
+* Dev - Changed the `{site_address}` placeholder to `{site_url}` for clarity. #25630
+* Dev - Deprecated `.wp-policy-help` and replaced with with the `.privacy-policy-tutorial` and `.wp-suggested-text` classes added in WP 5.1. #26072
+* Dev - Updated `automattic/jetpack-autoloader` to 1.7.0. #26559
+* Dev - Add a way to fetch basic object data. #26025
+
+**REST API 1.0.8**
+* Enhancement - Add support for trash status for products in V2 and V3 API. #184
+* Dev - Updated minimum PHP requirement to 7.0 to keep up with WooCommerce Core.
+* Dev - Fixed failing unit tests. #105
+
+**WooCommerce Admin 1.2.3**
+* Enhancement - Add onboarding payments note #4157 
+* Enhancement - Marketing Inbox Note #4030
+* Performance - Use Route based code splitting to reduce bundle size #4094
+* Performance - trim down inbox note API request. #3977
+* Fix - Proper display of elements in wc-admin pages when in a RTL environment. #4051
+* Fix - Update UX when knowledge base articles fail to retrieve #4133
+* Fix - Updated messaging after last step in OBW. #4148
+* Fix - Reset profiler when visiting old OBW URL #4166.
+* Fix - Dashboard flash before OBW chunk loads #4259
+* Tweak - Enable the default homepage template to be filtered #4072
+* Tweak - Create admin note if Jetpack or WooCommerce Services plugin doesn't get installed due to an error during OBW #3888
+* Tweak - Update Email Marketing note. #4167
+* Tweak - Adjust "demo products" verbiage to "Sample Products" #4184
+* Tweak - Don't reschedule imports on failed imports #4263
+* Tweak - Remove obsolete inbox messages #4182
+* Tweak - Updates to WooCommerce Payments in Setup Checklist #4293
+* Dev - Make query selector for admin alerts more specific #4289
+* Dev - Guard against null themes in OBW #4244
+* Dev - Update wcadmin db version after db callback #4323
+* Dev - Only migrate options on version change #4324
+* Dev - Use `PAGE_ROOT` constant to reduce redundant strings #4238
+* Dev - Decouple Plugins DataStore from onboarding feature #4048
+* Dev - Move API out of Onboarding #4093
+* Dev - Add Profiler Step View Tracks #4141
+* Dev - Add React Testing Library #4221
+* Dev - Add List and Link components to Storybook #4219
+* Dev - Cast Shipping Total to float #4042
+* Dev - Dynamic Currency with Context API #4027
+* Dev - Remove Duplicate array entry #4049
+
+= 4.1.1 - 2020-05-19 =
+
+* Enhancement - Added notice about public uploads directory. #26207
+* Tweak - Disallow directory listing in woocommerce_uploads when "Redirect only" it's the selected download method. #26399
+* Fix - Added correct handling of nonces to database update notice dismissal. #26500
+* Dev - Updated WooCommerce admin version to 1.1.3 and Action Scheduler to 3.1.6.
+* Dev - Add prop `isEnabled` and a function to dynamically enable tracks. #26493
+
+**WooCommerce Admin**
+* Tweak - Onboarding: Add Jetpack flow back to onboarding profiler. #4382
+* Fix - Respect tracking opt-in before new page load. #4368
+
+**ActionScheduler**
+* Fix - Shutdown deprecated notice changed to a warning when as_* functions called without data store initialization. #546
+
 = 4.1.0 - 2020-05-05 =
 
 **WooCommerce**
@@ -8,6 +87,7 @@
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
 * Enhancement - Use new Setup Wizard for all users. #26016
+* Security - Fixed unescaped meta data while duplicating products. Reported by Slavco.
 * Tweak - Show notice for WP min version to WP 5.2. #26094
 * Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
 * Tweak - Updated KZT (₸) symbol. #25609

@@ -8,6 +8,10 @@ assignees: ''
 
 ---
 
+<!--  Make sure to look through existing issues to see whether your idea is already being discussed. Feel free to contribute to any existing issues. -->
+
+<!-- Search tip: You can filter issues using our enhancement label https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+label%3Aenhancement -->
+
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 

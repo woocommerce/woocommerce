@@ -91,7 +91,6 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		$note->set_title( 'WooCommerce database update required' );
 		$note->set_content( 'To keep things running smoothly, we have to update your database to the newest version.' );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
-		$note->set_icon( 'info' );
 		$note->set_name( WC_Notes_Run_Db_Update::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-core' );

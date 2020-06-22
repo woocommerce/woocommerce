@@ -283,7 +283,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_log_file_path() {
 		$log_dir     = trailingslashit( WC_LOG_DIR );
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
-		$date_suffix = date( 'Y-m-d', time() );
+		$date_suffix = date( 'Y-m-d', time() ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
 	}
@@ -570,6 +570,81 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the wc_tokenize_path function.
+	 */
+	public function test_wc_tokenize_path() {
+		$path = wc_tokenize_path( ABSPATH . 'test', array() );
+		$this->assertEquals( ABSPATH . 'test', $path );
+
+		$path = wc_tokenize_path(
+			ABSPATH . 'test',
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
+		$this->assertEquals( '{{ABSPATH}}test', $path );
+
+		$path = wc_tokenize_path(
+			ABSPATH . 'test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+			)
+		);
+		$this->assertEquals( ABSPATH . 'test', $path );
+
+		$path = wc_tokenize_path(
+			WP_CONTENT_DIR . 'test',
+			array(
+				'ABSPATH'        => ABSPATH,
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+			)
+		);
+		$this->assertEquals( '{{WP_CONTENT_DIR}}test', $path );
+	}
+
+	/**
+	 * Tests the wc_untokenize_path function.
+	 */
+	public function test_wc_untokenize_path() {
+		$path = wc_untokenize_path( '{{ABSPATH}}test', array() );
+		$this->assertEquals( '{{ABSPATH}}test', $path );
+
+		$path = wc_untokenize_path(
+			'{{ABSPATH}}test',
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
+		$this->assertEquals( ABSPATH . 'test', $path );
+
+		$path = wc_untokenize_path(
+			'{{ABSPATH}}test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+			)
+		);
+		$this->assertEquals( '{{ABSPATH}}test', $path );
+
+		$path = wc_untokenize_path(
+			'{{WP_CONTENT_DIR}}test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+				'ABSPATH'        => ABSPATH,
+			)
+		);
+		$this->assertEquals( WP_CONTENT_DIR . 'test', $path );
+	}
+
+	/**
+	 * Tests the wc_get_path_define_tokens function.
+	 */
+	public function test_wc_get_path_define_tokens() {
+		$defines = wc_get_path_define_tokens();
+		$this->assertArrayHasKey( 'ABSPATH', $defines );
+		$this->assertEquals( ABSPATH, $defines['ABSPATH'] );
+	}
+
+	/**
 	 * Test wc_get_template.
 	 *
 	 * @expectedIncorrectUsage wc_get_template
@@ -604,6 +679,28 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		);
 		$template = ob_get_clean();
 		$this->assertNotEmpty( $template );
+	}
+
+	/**
+	 * This test ensures that the absolute path to template files is replaced with a token. We do this so
+	 * that the path can be made relative to each installation, and the cache can be shared.
+	 */
+	public function test_wc_get_template_cleans_absolute_path() {
+		add_filter( 'woocommerce_locate_template', array( $this, 'force_template_path' ), 10, 2 );
+
+		ob_start();
+		try {
+			wc_get_template( 'global/wrapper-start.php' );
+		} catch ( \Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Since the file doesn't really exist this is going to throw an exception (which is fine for our test).
+		}
+		ob_end_clean();
+
+		remove_filter( 'woocommerce_locate_template', array( $this, 'force_template_path' ) );
+
+		$file_path = wp_cache_get( sanitize_key( 'template-global/wrapper-start.php---' . WC_VERSION ), 'woocommerce' );
+
+		$this->assertEquals( '{{ABSPATH}}global/wrapper-start.php', $file_path );
 	}
 
 	/**
@@ -956,7 +1053,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 
-		$this->wc->cart = $this->wc->customer = $this->wc->session = null;
+		$this->wc->cart     = null;
+		$this->wc->customer = null;
+		$this->wc->session  = null;
 		$this->assertNull( $this->wc->cart );
 		$this->assertNull( $this->wc->customer );
 		$this->assertNull( $this->wc->session );
@@ -966,5 +1065,17 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 
+	}
+
+	/**
+	 * Allows us to force the template path. Since the ABSPATH is to /tmp/wordpress in tests, we need to do this
+	 * in order to keep the paths consistent for testing purposes.
+	 *
+	 * @param string $template The path to the template file.
+	 * @param string $template_name The name of the template file.
+	 * @return string The path to be used instead.
+	 */
+	public function force_template_path( $template, $template_name ) {
+		return ABSPATH . $template_name;
 	}
 }

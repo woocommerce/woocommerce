@@ -404,9 +404,9 @@ class WC_Meta_Box_Order_Data {
 									}
 
 									if ( ! $found_method && ! empty( $payment_method ) ) {
-										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									} else {
-										echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									}
 									?>
 								</select>
