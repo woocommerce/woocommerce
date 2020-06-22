@@ -96,7 +96,7 @@ class LegacyProxy {
 	 * @return mixed The result from the function.
 	 */
 	public function callFunction( $function_name, ...$parameters ) {
-		return call_user_func( $function_name, ...$parameters );
+		return call_user_func_array( $function_name, $parameters );
 	}
 
 	/**
@@ -110,6 +110,6 @@ class LegacyProxy {
 	 * @return mixed The result from the method.
 	 */
 	public function callStatic( $class_name, $method_name, ...$parameters ) {
-		return $class_name::$method_name( ...$parameters );
+		return call_user_func_array( "$class_name::$method_name", $parameters );
 	}
 }

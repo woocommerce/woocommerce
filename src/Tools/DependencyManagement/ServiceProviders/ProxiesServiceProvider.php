@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Tools\Proxies as ProxyClasses;
 /**
  * Service provider for the classes in the Automattic\WooCommerce\Tools\Proxies namespace.
  */
-class Proxies extends AbstractServiceProvider {
+class ProxiesServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.

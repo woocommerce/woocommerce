@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Tools\DependencyManagement;
 
+use League\Container\Argument\RawArgument;
 use League\Container\Definition\DefinitionInterface;
 use League\Container\Definition\Definition;
 
@@ -27,21 +28,24 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	/**
 	 * Register a class in the container and use reflection to guess the constructor arguments.
 	 *
+	 * WARNING: this method uses reflection, so please have performance in mind when using it.
+	 *
 	 * @param string $class_name Class name to register.
+	 * @param mixed  $concrete   The concrete to register. Can be a shared instance, a factory callback, or a class name.
 	 * @param bool   $shared Whether to register the class as shared (`get` always returns the same instance) or not.
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function addWithAutoArguments( string $class_name, bool $shared = false ) : DefinitionInterface {
+	public function addWithAutoArguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		try {
 			$reflector = new \ReflectionClass( $class_name );
 		} catch ( \ReflectionException $ex ) {
 			throw new \Exception( get_class( $this ) . "::addWithAutoArguments: error when reflecting class '$class_name': {$ex->getMessage()}" );
 		}
 
-		$definition = new Definition( $class_name, null );
+		$definition = new Definition( $class_name, $concrete );
 
 		$constructor = $reflector->getConstructor();
 
@@ -52,12 +56,17 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 
 			$constructor_arguments = $constructor->getParameters();
 			foreach ( $constructor_arguments as $argument ) {
-				$argument_class = $argument->getClass();
-				if ( is_null( $argument_class ) ) {
-					throw new \Exception( get_class( $this ) . "::addWithAutoArguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
-				}
+				if ( $argument->isDefaultValueAvailable() ) {
+					$default_value = $argument->getDefaultValue();
+					$definition->addArgument( new RawArgument( $default_value ) );
+				} else {
+					$argument_class = $argument->getClass();
+					if ( is_null( $argument_class ) ) {
+						throw new \Exception( get_class( $this ) . "::addWithAutoArguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
+					}
 
-				$definition->addArgument( $argument_class->name );
+					$definition->addArgument( $argument_class->name );
+				}
 			}
 		}
 
@@ -72,14 +81,17 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 * Register a class in the container and use reflection to guess the constructor arguments.
 	 * The class is registered as shared, so `get` on the container always returns the same instance.
 	 *
+	 * WARNING: this method uses reflection, so please have performance in mind when using it.
+	 *
 	 * @param string $class_name Class name to register.
+	 * @param mixed  $concrete   The concrete to register. Can be a shared instance, a factory callback, or a class name.
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function shareWithAutoArguments( string $class_name ) : DefinitionInterface {
-		return $this->addWithAutoArguments( $class_name, true );
+	public function shareWithAutoArguments( string $class_name, $concrete = null ) : DefinitionInterface {
+		return $this->addWithAutoArguments( $class_name, $concrete, true );
 	}
 
 	/**
@@ -104,6 +116,6 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 * @return DefinitionInterface The generated container definition.
 	 */
 	public function share( string $id, $concrete = null ) : DefinitionInterface {
-		return $this->getContainer()->share( $id, $concrete );
+		return $this->add( $id, $concrete, true );
 	}
 }

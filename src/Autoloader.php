@@ -7,8 +7,6 @@
 
 namespace Automattic\WooCommerce;
 
-use PHPUnit\Exception;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -22,6 +20,12 @@ class Autoloader {
 	 * Static-only class.
 	 */
 	private function __construct() {}
+
+	const NON_CORE_WOO_NAMESPACES = array(
+		'Automattic\\WooCommerce\\Admin\\',
+		'Automattic\\WooCommerce\\Blocks\\',
+		'Automattic\\WooCommerce\\RestApi\\',
+	);
 
 	/**
 	 * Require the autoloader and return the result.
@@ -38,12 +42,12 @@ class Autoloader {
 			return false;
 		}
 
+		self::registerPsr4Autoloader();
+
 		$autoloader_result = require $autoloader;
 		if ( ! $autoloader_result ) {
 			return false;
 		}
-
-		self::registerPsr4Autoloader();
 
 		return $autoloader_result;
 	}
@@ -51,10 +55,19 @@ class Autoloader {
 	/**
 	 * Define a PSR4 autoloader for the dependency injection engine to work.
 	 * Function grabbed from https://container.thephpleague.com/3.x
+	 *
+	 * TODO: Assess if this is still needed after https://github.com/Automattic/jetpack/pull/15106 is merged.
+	 *       If it still is, remove this notice. If it isn't, remove the method.
 	 */
 	protected static function registerPsr4Autoloader() {
 		spl_autoload_register(
 			function ( $class ) {
+				foreach ( self::NON_CORE_WOO_NAMESPACES as $non_core_namespace ) {
+					if ( $non_core_namespace === substr( $class, 0, strlen( $non_core_namespace ) ) ) {
+						return;
+					}
+				}
+
 				$prefix   = 'Automattic\\WooCommerce\\';
 				$base_dir = __DIR__ . '/';
 				$len      = strlen( $prefix );
@@ -64,9 +77,7 @@ class Autoloader {
 				}
 				$relative_class = substr( $class, $len );
 				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
-				if ( file_exists( $file ) ) {
-					require $file;
-				}
+				require $file;
 			}
 		);
 	}
