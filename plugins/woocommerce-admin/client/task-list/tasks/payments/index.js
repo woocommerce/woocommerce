@@ -22,6 +22,7 @@ import {
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	pluginNames,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 
 /**
@@ -388,12 +389,13 @@ export default compose(
 		const { getActivePlugins, isJetpackConnected } = select(
 			PLUGINS_STORE_NAME
 		);
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: generalSettings = {} } = getSettings( 'general' );
 
 		const activePlugins = getActivePlugins();
 		const profileItems = getProfileItems();
 
 		const optionNames = [
-			'woocommerce_default_country',
 			'woocommerce_woocommerce_payments_settings',
 			'woocommerce_stripe_settings',
 			'woocommerce_ppec_paypal_settings',
@@ -412,7 +414,7 @@ export default compose(
 			return result;
 		}, {} );
 		const countryCode = getCountryCode(
-			options.woocommerce_default_country
+			generalSettings.woocommerce_default_country
 		);
 
 		const methods = getPaymentMethods( {

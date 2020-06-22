@@ -14,7 +14,6 @@ import { updateQueryString } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
-	withSettingsHydration,
 	withPluginsHydration,
 } from '@woocommerce/data';
 
@@ -240,10 +239,6 @@ class ProfileWizard extends Component {
 	}
 }
 
-const hydrateSettings =
-	window.wcSettings.preloadSettings &&
-	window.wcSettings.preloadSettings.general;
-
 export default compose(
 	withSelect( ( select ) => {
 		const { getNotes } = select( 'wc-api' );
@@ -279,11 +274,6 @@ export default compose(
 			updateProfileItems,
 		};
 	} ),
-	hydrateSettings
-		? withSettingsHydration( 'general', {
-				general: window.wcSettings.preloadSettings.general,
-		  } )
-		: identity,
 	window.wcSettings.plugins
 		? withPluginsHydration( {
 				...window.wcSettings.plugins,

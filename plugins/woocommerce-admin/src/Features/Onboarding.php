@@ -607,7 +607,6 @@ class Onboarding {
 		$options[] = 'wc_square_refresh_tokens';
 		$options[] = 'woocommerce_square_credit_card_settings';
 		$options[] = 'woocommerce_payfast_settings';
-		$options[] = 'woocommerce_default_country';
 		$options[] = 'woocommerce_kco_settings';
 		$options[] = 'woocommerce_klarna_payments_settings';
 		$options[] = 'woocommerce_cod_settings';
@@ -625,10 +624,6 @@ class Onboarding {
 	 * @return array
 	 */
 	public function preload_settings( $options ) {
-		if ( ! self::should_show_profiler() ) {
-			return $options;
-		}
-
 		$options[] = 'general';
 
 		return $options;
