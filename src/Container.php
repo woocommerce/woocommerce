@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce;
 
-use Automattic\WooCommerce\Tools\DependencyManagement\ServiceProviders as ServiceProviders;
+use Automattic\WooCommerce\Tools\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -34,13 +34,13 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 * @var string[]
 	 */
 	private $service_providers = array(
-		ServiceProviders\Proxies::class,
+		ProxiesServiceProvider::class,
 	);
 
 	/**
 	 * The underlying container.
 	 *
-	 * @var \Psr\Container\ContainerInterface
+	 * @var \League\Container\Container
 	 */
 	private $container;
 
@@ -53,7 +53,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		// Add ourselves as the shared instance of ContainerInterface,
 		// register everything else using service providers.
 
-		$this->container->add( \Psr\Container\ContainerInterface::class, $this );
+		$this->container->share( \Psr\Container\ContainerInterface::class, $this );
 
 		foreach ( $this->service_providers as $service_provider_class ) {
 			$this->container->addServiceProvider( $service_provider_class );
