@@ -49,6 +49,7 @@ import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import {
 	CHECKOUT_SHOW_LOGIN_REMINDER,
 	CHECKOUT_ALLOWS_GUEST,
+	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
 
 /**
@@ -78,18 +79,23 @@ const Block = ( props ) => {
  *
  * @param {Object} option Shipping Rate.
  */
-const renderShippingRatesControlOption = ( option ) => ( {
-	label: decodeEntities( option.name ),
-	value: option.rate_id,
-	description: decodeEntities( option.description ),
-	secondaryLabel: (
-		<FormattedMonetaryAmount
-			currency={ getCurrencyFromPriceResponse( option ) }
-			value={ option.price }
-		/>
-	),
-	secondaryDescription: decodeEntities( option.delivery_time ),
-} );
+const renderShippingRatesControlOption = ( option ) => {
+	const priceWithTaxes = DISPLAY_CART_PRICES_INCLUDING_TAX
+		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
+		: parseInt( option.price, 10 );
+	return {
+		label: decodeEntities( option.name ),
+		value: option.rate_id,
+		description: decodeEntities( option.description ),
+		secondaryLabel: (
+			<FormattedMonetaryAmount
+				currency={ getCurrencyFromPriceResponse( option ) }
+				value={ priceWithTaxes }
+			/>
+		),
+		secondaryDescription: decodeEntities( option.delivery_time ),
+	};
+};
 
 /**
  * Main Checkout Component.

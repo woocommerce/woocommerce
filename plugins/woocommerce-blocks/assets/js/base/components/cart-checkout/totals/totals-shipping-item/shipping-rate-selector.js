@@ -6,23 +6,31 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import { decodeEntities } from '@wordpress/html-entities';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
+import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 
-const renderShippingRatesControlOption = ( option ) => ( {
-	label: decodeEntities( option.name ),
-	value: option.rate_id,
-	description: (
-		<>
-			{ option.price && (
-				<FormattedMonetaryAmount
-					currency={ getCurrencyFromPriceResponse( option ) }
-					value={ option.price }
-				/>
-			) }
-			{ option.price && option.delivery_time ? ' — ' : null }
-			{ decodeEntities( option.delivery_time ) }
-		</>
-	),
-} );
+const renderShippingRatesControlOption = ( option ) => {
+	const priceWithTaxes = DISPLAY_CART_PRICES_INCLUDING_TAX
+		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
+		: parseInt( option.price, 10 );
+	return {
+		label: decodeEntities( option.name ),
+		value: option.rate_id,
+		description: (
+			<>
+				{ Number.isFinite( priceWithTaxes ) && (
+					<FormattedMonetaryAmount
+						currency={ getCurrencyFromPriceResponse( option ) }
+						value={ priceWithTaxes }
+					/>
+				) }
+				{ Number.isFinite( priceWithTaxes ) && option.delivery_time
+					? ' — '
+					: null }
+				{ decodeEntities( option.delivery_time ) }
+			</>
+		),
+	};
+};
 
 const ShippingRateSelector = ( {
 	hasRates,
