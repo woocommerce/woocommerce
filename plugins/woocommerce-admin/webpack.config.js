@@ -19,6 +19,7 @@ const UnminifyWebpackPlugin = require( './unminify' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 
 const externals = {
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
@@ -218,7 +219,7 @@ const webpackConfig = {
 			startYear: 2000, // This strips out timezone data before the year 2000 to make a smaller file.
 		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
-		new UnminifyWebpackPlugin( {
+		WC_ADMIN_PHASE !== 'core' && new UnminifyWebpackPlugin( {
 			test: /\.js($|\?)/i,
 			mainEntry: 'app/index.min.js',
 		} ),
@@ -229,7 +230,10 @@ const webpackConfig = {
 	},
 };
 
-if ( webpackConfig.mode !== 'production' ) {
+if (
+	webpackConfig.mode !== 'production' &&
+	WC_ADMIN_PHASE !== 'core'
+) {
 	webpackConfig.devtool = process.env.SOURCEMAP || 'source-map';
 }
 
