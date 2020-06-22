@@ -91,6 +91,15 @@ export const useUserPreferences = () => {
 					};
 				}
 
+				// Optimistically propagate new woocommerce_meta to the store for instant update.
+				receiveCurrentUser( {
+					...user,
+					woocommerce_meta: {
+						...user.woocommerce_meta,
+						...metaData,
+					},
+				} );
+
 				// Use saveUser() to update WooCommerce meta values.
 				const updatedUser = await saveUser( {
 					id: user.id,
@@ -110,9 +119,6 @@ export const useUserPreferences = () => {
 						updatedUser,
 					};
 				}
-
-				// Propagate the updated User object to the store.
-				receiveCurrentUser( updatedUser );
 
 				// Decode the WooCommerce meta after save.
 				const updatedUserResponse = {
