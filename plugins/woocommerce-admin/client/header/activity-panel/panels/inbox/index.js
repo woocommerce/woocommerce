@@ -70,7 +70,7 @@ const renderNotes = ( {
 			/>
 		);
 	} );
-}
+};
 
 const InboxPanel = ( props ) => {
 	const {
@@ -87,7 +87,7 @@ const InboxPanel = ( props ) => {
 
 	useEffect( () => {
 		const mountTime = Date.now();
-	
+
 		return () => {
 			const userDataFields = {
 				activity_panel_inbox_last_read: mountTime,
@@ -106,8 +106,6 @@ const InboxPanel = ( props ) => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();
 		};
-
-		
 
 		return (
 			<Fragment>
@@ -130,6 +128,8 @@ const InboxPanel = ( props ) => {
 		isPanelEmpty( ! hasNotes && ! isActivityHeaderVisible );
 	}
 
+	// @todo After having a pagination implemented we should call the method "getNotes" with a different query since
+	// the current one is only getting 25 notes and the count of unread notes only will refer to this 25 and not all the existing ones.
 	return (
 		<Fragment>
 			{ isActivityHeaderVisible && (
@@ -139,10 +139,7 @@ const InboxPanel = ( props ) => {
 						'Insights and growth tips for your business',
 						'woocommerce-admin'
 					) }
-					unreadMessages={ getUnreadNotesCount(
-						notes,
-						lastRead
-					) }
+					unreadMessages={ getUnreadNotesCount( notes, lastRead ) }
 				/>
 			) }
 			<div className="woocommerce-homepage-notes-wrapper">
@@ -165,7 +162,7 @@ const InboxPanel = ( props ) => {
 			</div>
 		</Fragment>
 	);
-}
+};
 
 export default compose(
 	withSelect( ( select ) => {
@@ -181,7 +178,6 @@ export default compose(
 			type: QUERY_DEFAULTS.noteTypes,
 			orderby: 'date',
 			order: 'desc',
-			status: 'unactioned',
 			_fields: [
 				'id',
 				'name',

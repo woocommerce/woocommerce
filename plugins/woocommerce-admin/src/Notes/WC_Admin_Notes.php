@@ -165,7 +165,6 @@ class WC_Admin_Notes {
 				'per_page'   => 25,
 				'page'       => 1,
 				'type'       => array( 'info', 'marketing', 'warning' ),
-				'status'     => array( 'unactioned' ),
 				'is_deleted' => 0,
 			)
 		);

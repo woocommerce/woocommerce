@@ -9,38 +9,40 @@ import { SETTINGS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import { DEFAULT_ACTIONABLE_STATUSES } from 'analytics/settings/config';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { getUnreadNotesCount } from './panels/inbox/utils';
 
 export function getUnreadNotes( select ) {
-	const {
-		getNotes,
-		getNotesError,
-		isGetNotesRequesting,
-	} = select( 'wc-api' );
+	const { getNotes, getNotesError, isGetNotesRequesting } = select(
+		'wc-api'
+	);
 
 	const { getCurrentUser } = select( USER_STORE_NAME );
 	const userData = getCurrentUser();
 	const lastRead = parseInt(
 		userData &&
-		userData.woocommerce_meta &&
-		userData.woocommerce_meta.activity_panel_inbox_last_read,
+			userData.woocommerce_meta &&
+			userData.woocommerce_meta.activity_panel_inbox_last_read,
 		10
 	);
 
 	if ( ! lastRead ) {
 		return null;
 	}
+
+	// @todo This method would be more performant if we ask only for 1 item per page with status "unactioned".
+	// This change should be applied after having pagination implemented.
 	const notesQuery = {
 		page: 1,
-		per_page: 1,
+		per_page: QUERY_DEFAULTS.pageSize,
 		type: QUERY_DEFAULTS.noteTypes,
 		orderby: 'date',
 		order: 'desc',
 	};
 
-	// Disable eslint rule requiring `latestNote` to be defined below because the next two statements
+	// Disable eslint rule requiring `latestNotes` to be defined below because the next two statements
 	// depend on `getNotes` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const latestNote = getNotes( notesQuery );
+	const latestNotes = getNotes( notesQuery );
 	const isError = Boolean( getNotesError( notesQuery ) );
 	const isRequesting = isGetNotesRequesting( notesQuery );
 
@@ -48,10 +50,9 @@ export function getUnreadNotes( select ) {
 		return null;
 	}
 
-	return (
-		latestNote[ 0 ] &&
-		new Date( latestNote[ 0 ].date_created_gmt + 'Z' ).getTime() > lastRead
-	);
+	const unreadNotesCount = getUnreadNotesCount( latestNotes, lastRead );
+
+	return unreadNotesCount > 0;
 }
 
 export function getUnreadOrders( select ) {
