@@ -33,6 +33,7 @@ if $(wp core is-installed);
 then
     echo "Wordpress is already installed..."
 else
+    WORDPRESS_INSTALLING=1
     declare -p WORDPRESS_TITLE >/dev/null
     declare -p WORDPRESS_LOGIN >/dev/null
     declare -p WORDPRESS_PASSWORD >/dev/null
@@ -59,6 +60,15 @@ declare -r CURRENT_DOMAIN=$(wp option get siteurl)
 if ! [[ ${CURRENT_DOMAIN} == ${URL} ]]; then
     echo "Replacing ${CURRENT_DOMAIN} with ${URL} in database..."
     wp search-replace ${CURRENT_DOMAIN} ${URL}
+fi
+
+if [[ $WORDPRESS_INSTALLING ]];
+then
+    wp post create \
+        --post_type=page \
+        --post_status=publish \
+        --post_title='Ready' \
+        --post_content='E2E-tests.'
 fi
 
 echo "Visit $(wp option get siteurl)"

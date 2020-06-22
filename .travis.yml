@@ -36,6 +36,7 @@ jobs:
     script:
       - composer require wp-cli/i18n-command
       - npm run build
+      - npm run build:packages
       - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
