@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.2.1 - 2020-06-x =
+= 4.2.1 - 2020-06-22 =
 
 **WooCommerce**
 * Security - Escape HTML in SelectWoo.
