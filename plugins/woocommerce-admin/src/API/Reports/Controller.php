@@ -185,6 +185,10 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_order_number( $order_id ) {
 		$order = wc_get_order( $order_id );
 
+		if ( ! $order instanceof \WC_Order ) {
+			return null;
+		}
+
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$order = wc_get_order( $order->get_parent_id() );
 		}
