@@ -14,4 +14,7 @@ module.exports = {
 		'plugin:@wordpress/eslint-plugin/recommended',
 		'plugin:jest/recommended'
 	],
+	overrides: [
+		{ "files": [ '**/*.ts' ] }
+	]
 }

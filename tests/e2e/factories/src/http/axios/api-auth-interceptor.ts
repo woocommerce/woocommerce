@@ -55,9 +55,10 @@ export class APIAuthInterceptor {
 	/**
 	 * Adds WooCommerce API authentication details to the outgoing request.
 	 *
-	 * @param {AxiosRequestConfig} request
+	 * @param {AxiosRequestConfig} request The request that was intercepted.
+	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
-	protected handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
+	private handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
 		if ( request.url!.startsWith( 'https' ) ) {
 			request.auth = {
 				username: this.oauth.consumer.key,

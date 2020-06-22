@@ -56,21 +56,11 @@ describe( 'APIAuthInterceptor', () => {
 
 		const request = moxios.requests.mostRecent();
 
-		expect( request.headers ).toHaveProperty( 'Authorization' );
-		expect( request.headers.Authorization ).toMatch( /^OAuth / );
-		const header = request.headers.Authorization;
-
 		// We're going to assume that the oauth-1.0a package added the signature data correctly so we will
 		// focus on ensuring that the header looks roughly correct given what we readily know.
-		const oauthArgs: any = {};
-		for ( const arg of header.matchAll( /([A-Za-z0-9_]+)="([^"]+)"/g ) ) {
-			oauthArgs[ arg[ 1 ] ] = arg[ 2 ];
-		}
-
-		expect( oauthArgs ).toMatchObject( {
-			oauth_consumer_key: 'consumer_key',
-			oauth_signature_method: 'HMAC-SHA256',
-			oauth_version: '1.0',
-		} );
+		expect( request.headers ).toHaveProperty( 'Authorization' );
+		expect( request.headers.Authorization ).toMatch(
+			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/
+		);
 	} );
 } );
