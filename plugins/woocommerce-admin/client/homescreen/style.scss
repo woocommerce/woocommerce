@@ -11,6 +11,7 @@
 
 	.woocommerce-task-dashboard__container {
 		width: 100%;
+		margin-bottom: $gap-large;
 	}
 
 	&.hasInbox .woocommerce-homescreen-column {
@@ -21,10 +22,6 @@
 			width: 100%;
 			position: inherit;
 			top: auto;
-		}
-
-		& > * {
-			margin-bottom: 24px;
 		}
 	}
 

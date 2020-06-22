@@ -29,20 +29,11 @@
 }
 
 .woocommerce-layout__inbox-panel-header {
-	padding: 15px 43px 10px;
-	h3 {
-		margin: 5px 0;
-		font-weight: 500;
-	}
-	span {
-		margin-left: 7px;
-		background: #40464d;
-		border-radius: 0.8em;
-		color: $core-grey-light-200;
-		display: inline-block;
-		text-align: center;
-		width: 1.6em;
-		font-size: 14px;
-		vertical-align: top;
+	h2.woocommerce-layout__activity-panel-header-title,
+	h3.woocommerce-layout__activity-panel-header-title {
+		margin: 0 0 $gap-small / 2;
+		font-size: 20px;
+		line-height: 28px;
+		font-weight: 400;
 	}
 }
