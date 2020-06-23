@@ -23,7 +23,7 @@ describe( 'APIAuthInterceptor', () => {
 	} );
 
 	it( 'should not run unless started', async () => {
-		moxios.stubRequest( 'https://api.test', { status: 200 } );
+		moxios.stubOnce( 'GET', 'https://api.test', { status: 200 } );
 
 		apiAuthInterceptor.stop();
 		await axiosInstance.get( 'https://api.test' );
@@ -39,7 +39,7 @@ describe( 'APIAuthInterceptor', () => {
 	} );
 
 	it( 'should use basic auth for HTTPS', async () => {
-		moxios.stubRequest( 'https://api.test', { status: 200 } );
+		moxios.stubOnce( 'GET', 'https://api.test', { status: 200 } );
 		await axiosInstance.get( 'https://api.test' );
 
 		const request = moxios.requests.mostRecent();
@@ -51,7 +51,7 @@ describe( 'APIAuthInterceptor', () => {
 	} );
 
 	it( 'should use OAuth 1.0a for HTTP', async () => {
-		moxios.stubRequest( 'http://api.test', { status: 200 } );
+		moxios.stubOnce( 'GET', 'http://api.test', { status: 200 } );
 		await axiosInstance.get( 'http://api.test' );
 
 		const request = moxios.requests.mostRecent();
@@ -61,6 +61,22 @@ describe( 'APIAuthInterceptor', () => {
 		expect( request.headers ).toHaveProperty( 'Authorization' );
 		expect( request.headers.Authorization ).toMatch(
 			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/
+		);
+	} );
+
+	it( 'should work with base URL', async () => {
+		moxios.stubOnce( 'GET', '/test', { status: 200 } );
+		await axiosInstance.request( {
+			method: 'GET',
+			baseURL: 'https://api.test/',
+			url: '/test',
+		} );
+
+		const request = moxios.requests.mostRecent();
+
+		expect( request.headers ).toHaveProperty( 'Authorization' );
+		expect( request.headers.Authorization ).toEqual(
+			'Basic ' + btoa( 'consumer_key:consumer_secret' )
 		);
 	} );
 } );

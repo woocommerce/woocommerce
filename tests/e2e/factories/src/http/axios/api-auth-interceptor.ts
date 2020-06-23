@@ -59,7 +59,8 @@ export class APIAuthInterceptor {
 	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
 	private handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
-		if ( request.url!.startsWith( 'https' ) ) {
+		const url = request.baseURL || '' + request.url || '';
+		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
 				username: this.oauth.consumer.key,
 				password: this.oauth.consumer.secret,
@@ -67,7 +68,7 @@ export class APIAuthInterceptor {
 		} else {
 			request.headers.Authorization = this.oauth.toHeader(
 				this.oauth.authorize( {
-					url: request.url!,
+					url,
 					method: request.method!,
 				} )
 			).Authorization;
