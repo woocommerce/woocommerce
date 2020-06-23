@@ -483,20 +483,18 @@ class WC_Post_Types {
 	/**
 	 * Customize taxonomies update messages.
 	 *
-	 * @access public
 	 * @param array $messages The list of available messages.
-	 * @since 4.1.2
+	 * @since 4.4.0
 	 * @return bool
 	 */
 	public function updated_term_messages( $messages ) {
-
 		$messages['product_cat'] = array(
 			0 => '',
 			1 => __( 'Category added.', 'woocommerce' ),
 			2 => __( 'Category deleted.', 'woocommerce' ),
 			3 => __( 'Category updated.', 'woocommerce' ),
 			4 => __( 'Category not added.', 'woocommerce' ),
-			5 => __( 'Category not updated.', 'woocommerce-' ),
+			5 => __( 'Category not updated.', 'woocommerce' ),
 			6 => __( 'Category not deleted.', 'woocommerce' ),
 		);
 
@@ -520,7 +518,7 @@ class WC_Post_Types {
 				if ( $name ) {
 					$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
-					$messages[$name] = array(
+					$messages[ $name ] = array(
 						0 => '',
 						/* translators: %s: taxonomy label */
 						1 => sprintf( __( '%s added', 'woocommerce' ), $label ),
