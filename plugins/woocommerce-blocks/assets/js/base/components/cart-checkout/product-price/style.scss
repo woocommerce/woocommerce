@@ -1,12 +1,5 @@
-.wc-block-components-product-price {
-	color: $black;
-
+.wc-block-components-product-price__value {
 	&.is-discounted {
 		margin-left: 0.5em;
 	}
-}
-
-.wc-block-components-product-price--regular {
-	color: $core-grey-dark-400;
-	text-decoration: line-through;
 }

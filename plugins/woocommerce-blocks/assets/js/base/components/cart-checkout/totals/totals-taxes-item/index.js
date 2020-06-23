@@ -12,6 +12,7 @@ import {
  * Internal dependencies
  */
 import TotalsItem from '../totals-item';
+import './style.scss';
 
 const TotalsTaxesItem = ( { currency, values } ) => {
 	const { total_tax: totalTax, tax_lines: taxLines } = values;

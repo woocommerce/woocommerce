@@ -1,6 +1,4 @@
 .wc-block-cart {
-	color: $core-grey-dark-600;
-
 	.wc-block-components-shipping-calculator {
 		white-space: nowrap;
 	}
@@ -24,23 +22,7 @@ table.wc-block-cart-items td {
 table.wc-block-cart-items {
 	table-layout: fixed;
 	width: 100%;
-	border-bottom: 1px solid $core-grey-light-600;
 
-	th {
-		padding: 0.25rem $gap 0.25rem 0;
-		white-space: nowrap;
-		border-collapse: collapse;
-	}
-	td {
-		border-top: 1px solid $core-grey-light-600;
-		padding: $gap $gap $gap 0;
-		vertical-align: top;
-		border-collapse: collapse;
-	}
-	th:last-child,
-	td:last-child {
-		padding-right: 0;
-	}
 	.wc-block-cart-items__header {
 		@include font-size(smaller);
 		text-transform: uppercase;
@@ -70,14 +52,12 @@ table.wc-block-cart-items {
 				@include link-button;
 				@include font-size(smaller);
 
-				color: $core-grey-dark-400;
 				text-transform: none;
 				white-space: nowrap;
 			}
 			.wc-block-cart-item__remove-icon {
 				@include link-button;
 
-				color: $core-grey-dark-400;
 				fill: currentColor;
 				position: absolute;
 				top: $gap;
@@ -90,8 +70,8 @@ table.wc-block-cart-items {
 			text-align: right;
 			line-height: 1.25;
 
-			.wc-block-components-product-price,
-			.wc-block-components-product-price--regular {
+			.wc-block-components-product-price__regular,
+			.wc-block-components-product-price__value {
 				display: block;
 			}
 		}
@@ -179,7 +159,6 @@ table.wc-block-cart-items {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
-			border: 0;
 		}
 		.wc-block-cart-items__header {
 			display: none;
@@ -188,11 +167,10 @@ table.wc-block-cart-items {
 			display: none;
 		}
 		.wc-block-cart-items__row {
+			@include with-translucent-border(0 0 1px);
 			display: grid;
 			grid-template-columns: 80px 132px;
-			border-top: 1px solid $core-grey-light-600;
 			padding: $gap 0;
-			position: relative;
 
 			.wc-block-cart-item__image {
 				grid-column-start: 1;
@@ -255,6 +233,23 @@ table.wc-block-cart-items {
 }
 
 .is-large.wc-block-cart {
+	.wc-block-cart-items {
+		@include with-translucent-border(0 0 1px);
+
+		th {
+			padding: 0.25rem $gap 0.25rem 0;
+			white-space: nowrap;
+		}
+		td {
+			@include with-translucent-border(1px 0 0);
+			padding: $gap $gap $gap 0;
+			vertical-align: top;
+		}
+		th:last-child,
+		td:last-child {
+			padding-right: 0;
+		}
+	}
 	.wc-block-components-radio-control__option {
 		padding-left: $gap-large;
 	}

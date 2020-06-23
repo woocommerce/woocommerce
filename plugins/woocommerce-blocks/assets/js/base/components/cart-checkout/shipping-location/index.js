@@ -10,11 +10,6 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
- * Internal dependencies
- */
-import './style.scss';
-
-/**
  * Shows a formatted shipping location.
  */
 const ShippingLocation = ( { address } ) => {

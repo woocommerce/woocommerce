@@ -122,6 +122,27 @@ $fontSizes: (
 	-ms-word-break: break-all;
 }
 
+// Shows a border with the current color and a custom opacity. That can't be achieved
+// with normal border because `currentColor` doesn't allow tweaking the opacity, and
+// setting the opacity of the entire element would change the children's opacity too.
+@mixin with-translucent-border($border-width: 1px, $opacity: 0.3) {
+	position: relative;
+
+	&::after {
+		border-style: solid;
+		border-width: $border-width;
+		bottom: 0;
+		content: "";
+		display: block;
+		left: 0;
+		opacity: $opacity;
+		pointer-events: none;
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+}
+
 // Converts a px unit to em.
 @function em($size, $base: 16px) {
 	@return $size / $base * 1em;
