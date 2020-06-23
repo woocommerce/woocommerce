@@ -62,10 +62,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
-		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+
+		WC_Helper_Shipping::force_customer_us_address();
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -177,9 +175,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// Create tax classes first.
 		WC_Tax::create_tax_class( '23percent' );
@@ -620,9 +616,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
 		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -767,9 +761,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
 		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -872,9 +864,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$full_coupon->set_amount( 100 );
 		$full_coupon->save();
 
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -941,7 +931,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_country( $country ) {
-		return 'US';
+		return WC_Helper_Shipping::force_customer_us_country( $country );
 	}
 
 	/**
@@ -952,7 +942,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_state( $state ) {
-		return 'NY';
+		return WC_Helper_Shipping::force_customer_us_state( $state );
 	}
 
 	/**
@@ -963,7 +953,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_postcode( $postcode ) {
-		return '12345';
+		return WC_Helper_Shipping::force_customer_us_postcode( $postcode );
 	}
 
 	/**
@@ -989,9 +979,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// 19% tax.
 		$tax_rate = array(
@@ -1549,9 +1537,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// Set the flat_rate shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
@@ -1562,6 +1548,48 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 20.
 		$this->assertEquals( 20, WC()->cart->total );
+	}
+
+	/**
+	 * Test that shipping tax rounding does not round down when price are inclusive of taxes.
+	 */
+	public function test_calculate_totals_shipping_tax_rounded_26654() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '25.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 0 );
+		$product->save();
+
+		WC_Helper_Shipping::create_simple_flat_rate( 75.10 );
+		WC_Helper_Shipping::force_customer_us_address();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+
+		// Set the flat_rate shipping method.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+
+		// Test if the shipping total amount is equal 20.
+		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
+
+		// Test if the cart total amount is equal 20.
+		$this->assertEquals( 93.88, WC()->cart->total );
 	}
 
 	/**
