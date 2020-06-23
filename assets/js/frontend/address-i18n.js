@@ -103,8 +103,8 @@ jQuery( function( $ ) {
 				}
 
 				// Class changes.
-				field.removeClass('form-row-first form-row-last form-row-wide');
-				field.addClass(fieldLocale.class.join(' '));
+				field.removeClass( 'form-row-first form-row-last form-row-wide' );
+				field.addClass( fieldLocale.class.join( ' ' ) );
 			});
 
 			var fieldsets = $(
