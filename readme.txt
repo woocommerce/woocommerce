@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.2.1
+Stable tag: 4.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,14 +179,10 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.2.1 - 2020-06-22 =
+= 4.2.2 - 2020-06-23 =
 
 **WooCommerce**
-* Security - Escape HTML in SelectWoo.
-
-**WooCommerce Admin 1.2.4**
-* Tweak: reduce asset filename length and remove tilde characters. #4535
-* Fix: RTL stylesheet loading for split code chunks. #4542
+* Fix - Put back the remove element for multiselects on selectWoo. #26849
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
