@@ -49,7 +49,7 @@ export async function visitBlockPage( title ) {
 		await page.type( '#post-search-input', title );
 		await page.click( '#search-submit', { waitUntil: 'domcontentloaded' } );
 		const pageLink = await page.$x( `//a[contains(text(), '${ title }')]` );
-		if ( ( await pageLink.length ) > 0 ) {
+		if ( pageLink.length > 0 ) {
 			// clicking the link directly caused racing issues, so I used goto.
 			link = await page.evaluate(
 				( a ) => a.getAttribute( 'href' ),
