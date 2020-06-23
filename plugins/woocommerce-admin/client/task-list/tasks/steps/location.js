@@ -30,10 +30,12 @@ export default class StoreLocation extends Component {
 			createNotice,
 			isSettingsError,
 			updateAndPersistSettingsForGroup,
+			settings,
 		} = this.props;
 
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
+				...settings,
 				woocommerce_store_address: values.addressLine1,
 				woocommerce_store_address_2: values.addressLine2,
 				woocommerce_default_country: values.countryState,

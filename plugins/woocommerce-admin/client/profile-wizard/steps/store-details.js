@@ -86,6 +86,7 @@ class StoreDetails extends Component {
 			isProfileItemsError,
 			updateAndPersistSettingsForGroup,
 			profileItems,
+			settings,
 		} = this.props;
 
 		const currencySettings = this.deriveCurrencySettings(
@@ -102,6 +103,7 @@ class StoreDetails extends Component {
 
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
+				...settings,
 				woocommerce_store_address: values.addressLine1,
 				woocommerce_store_address_2: values.addressLine2,
 				woocommerce_default_country: values.countryState,
@@ -240,13 +242,14 @@ export default compose(
 			getSettingsError,
 			isGetSettingsRequesting,
 		} = select( SETTINGS_STORE_NAME );
-		const {
-			getOnboardingError,
-			getProfileItems
-		} = select( ONBOARDING_STORE_NAME );
+		const { getOnboardingError, getProfileItems } = select(
+			ONBOARDING_STORE_NAME
+		);
 
 		const profileItems = getProfileItems();
-		const isProfileItemsError = Boolean( getOnboardingError( 'updateProfileItems' ) );
+		const isProfileItemsError = Boolean(
+			getOnboardingError( 'updateProfileItems' )
+		);
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );

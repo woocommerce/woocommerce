@@ -180,6 +180,7 @@ class Tax extends Component {
 			this.setState( { isPending: true } );
 			await updateAndPersistSettingsForGroup( 'general', {
 				general: {
+					...generalSettings,
 					woocommerce_calc_taxes: 'yes',
 				},
 			} );
@@ -191,17 +192,24 @@ class Tax extends Component {
 	}
 
 	async updateAutomatedTax() {
-		const { createNotice, updateAndPersistSettingsForGroup } = this.props;
+		const {
+			createNotice,
+			updateAndPersistSettingsForGroup,
+			generalSettings,
+			taxSettings,
+		} = this.props;
 		const { automatedTaxEnabled } = this.state;
 
 		await updateAndPersistSettingsForGroup( 'tax', {
 			tax: {
+				...taxSettings,
 				wc_connect_taxes_enabled: automatedTaxEnabled ? 'yes' : 'no',
 			},
 		} );
 
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
+				...generalSettings,
 				woocommerce_calc_taxes: 'yes',
 			},
 		} );
