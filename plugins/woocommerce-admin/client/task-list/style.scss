@@ -245,13 +245,6 @@
 		font-weight: 400;
 	}
 
-	.components-button.is-primary {
-		min-width: 328px;
-		@include breakpoint('<782px') {
-			min-width: auto;
-		}
-	}
-
 	p {
 		margin-top: 0;
 		font-size: 16px;

@@ -89,12 +89,7 @@ class Tax extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const {
-			generalSettings,
-			isJetpackConnected,
-			taxSettings,
-			isGeneralSettingsRequesting,
-		} = this.props;
+		const { generalSettings, isJetpackConnected, taxSettings } = this.props;
 		const {
 			woocommerce_calc_taxes: calcTaxes,
 			woocommerce_store_address: storeAddress,
@@ -105,17 +100,11 @@ class Tax extends Component {
 		const currentStep = this.getSteps()[ stepIndex ];
 		const currentStepKey = currentStep && currentStep.key;
 
-		// If general settings have stopped requesting, check if we should show success screen.
-		if (
-			prevProps.isGeneralSettingsRequesting &&
-			! isGeneralSettingsRequesting
-		) {
-			if ( this.shouldShowSuccessScreen() ) {
-				/* eslint-disable react/no-did-update-set-state */
-				this.setState( { stepIndex: null } );
-				/* eslint-enable react/no-did-update-set-state */
-				return;
-			}
+		if ( stepIndex !== null && this.shouldShowSuccessScreen() ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( { stepIndex: null } );
+			/* eslint-enable react/no-did-update-set-state */
+			return;
 		}
 
 		if (
@@ -255,11 +244,7 @@ class Tax extends Component {
 	}
 
 	getSteps() {
-		const {
-			generalSettings,
-			isGeneralSettingsRequesting,
-			isJetpackConnected,
-		} = this.props;
+		const { generalSettings, isJetpackConnected } = this.props;
 		const { isPending, pluginsToActivate } = this.state;
 
 		const steps = [
@@ -287,7 +272,7 @@ class Tax extends Component {
 								this.completeStep();
 							}
 						} }
-						isSettingsRequesting={ isGeneralSettingsRequesting }
+						isSettingsRequesting={ false }
 						settings={ generalSettings }
 					/>
 				),
@@ -413,11 +398,7 @@ class Tax extends Component {
 
 	render() {
 		const { isPending, stepIndex } = this.state;
-		const {
-			isGeneralSettingsRequesting,
-			isTaxSettingsRequesting,
-			taxSettings,
-		} = this.props;
+		const { isTaxSettingsRequesting, taxSettings } = this.props;
 		const step = this.getSteps()[ stepIndex ];
 
 		return (
@@ -425,11 +406,7 @@ class Tax extends Component {
 				<Card className="is-narrow">
 					{ step ? (
 						<Stepper
-							isPending={
-								isPending ||
-								isGeneralSettingsRequesting ||
-								isTaxSettingsRequesting
-							}
+							isPending={ isPending || isTaxSettingsRequesting }
 							isVertical={ true }
 							currentStep={ step.key }
 							steps={ this.getSteps() }
@@ -520,9 +497,6 @@ export default compose(
 
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const isGeneralSettingsError = Boolean( getSettingsError( 'general' ) );
-		const isGeneralSettingsRequesting = isGetSettingsRequesting(
-			'general'
-		);
 		const countryCode = getCountryCode(
 			generalSettings.woocommerce_default_country
 		);
@@ -543,7 +517,6 @@ export default compose(
 
 		return {
 			isGeneralSettingsError,
-			isGeneralSettingsRequesting,
 			generalSettings,
 			countryCode,
 			taxSettings,
