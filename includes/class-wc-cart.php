@@ -1902,7 +1902,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
 				continue;
 			}
-			$total += wc_round_tax_total( $tax );
+			$total += $tax;
 		}
 		if ( $display ) {
 			$total = wc_format_decimal( $total, wc_get_price_decimals() );
