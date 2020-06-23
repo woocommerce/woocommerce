@@ -208,6 +208,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Product description display fix when multiple products shortcodes are present on a page. #26250
 * Fix - Using the add-to-cart parameter with a product variant id will now have the variation attributes populated correctly. #26237
 * Fix - Better template caching support for multi-server environments. #23971
+* Fix - Fix updating the wc_reserve_stock stock_quantity value after making changes to the cart in between checkouts. #26807
 * Dev - Adjusted the WC tested up to check to only apply to major versions. #26685
 * Dev - Make shipping calculations more flexible by providing actions. #26542
 * Dev - Trigger check_variations with custom values. #26525
