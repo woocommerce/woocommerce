@@ -982,15 +982,15 @@ class WC_Countries {
 					),
 					'HU' => array(
 						'last_name' => array(
-							'class' => array( 'form-row-first' ),
+							'class'    => array( 'form-row-first' ),
 							'priority' => 10,
 						),
 						'first_name' => array(
-							'class' => array( 'form-row-last' ),
+							'class'    => array( 'form-row-last' ),
 							'priority' => 20,
 						),
 						'postcode' => array(
-							'class' => array( 'form-row-first', 'address-field' ),
+							'class'    => array( 'form-row-first', 'address-field' ),
 							'priority' => 65,
 						),
 						'city' => array(
