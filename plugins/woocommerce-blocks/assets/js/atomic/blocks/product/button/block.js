@@ -101,7 +101,9 @@ const AddToCartButton = ( { product } ) => {
 		buttonProps.href = permalink;
 		buttonProps.rel = 'nofollow';
 	} else {
-		buttonProps.onClick = addToCart;
+		buttonProps.onClick = () => {
+			addToCart();
+		};
 	}
 
 	return (
