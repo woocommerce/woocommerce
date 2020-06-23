@@ -407,7 +407,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 					$deleted_user = get_user_by( 'ID', $user_id );
 					wp_delete_user( $user_id );
 					$subject = __( 'Contents of a deleted inactive user transferred to admin', 'woocommerce' );
-					$message = '<h1>' . $subject . '</h1><p>' . sprintf(
+					$message = '<h1>' . esc_html( $subject ) . '</h1><p>' . sprintf(
 						/* translators: 1: deleted user username 2: deleted user email 3: list of all post types 4: admin username 5: admin email */
 						__( 'An inactive user (%1$s - %2$s) who had published content (%3$s), before to be demoted to subscriber or customer role, was automatically deleted by WooCommerce data retention policy. All the contents of the deleted user were transferred to the administrator: %4$s - %5$s.', 'woocommerce' ),
 						esc_html( $deleted_user->user_login ),
@@ -415,7 +415,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 						esc_html( implode( ', ', $post_types_to_assign ) ),
 						esc_html( $admin_users[0]->user_login ),
 						esc_html( $admin_users[0]->user_email )
-					) . '</p><h2>' . __( 'Transferred contents list', 'woocommerce' ) . '</h2>' . $posts_made_prior_list;
+					) . '</p><h2>' . esc_html__( 'Transferred contents list', 'woocommerce' ) . '</h2>' . $posts_made_prior_list;
 
 					foreach ( $admin_users as $admin ) {
 						wc_mail( $admin->user_email, $subject, $message );
