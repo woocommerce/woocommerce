@@ -66,12 +66,10 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * @since 3.4.0
 	 */
 	public function get_privacy_message() {
-		$content = '
-			<div contenteditable="false">' .
-				'<p class="wp-policy-help">' .
-					__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
-				'</p>' .
-			'</div>' .
+		$content = '<div class="wp-suggested-text">' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We collect information about you during the checkout process on our store.', 'woocommerce' ) . '</p>' .
 			'<h2>' . __( 'What we collect and store', 'woocommerce' ) . '</h2>' .
 			'<p>' . __( 'While you visit our site, we’ll track:', 'woocommerce' ) . '</p>' .
@@ -81,9 +79,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 				'<li>' . __( 'Shipping address: we’ll ask you to enter this so we can, for instance, estimate shipping before you place an order, and send you the order!', 'woocommerce' ) . '</li>' .
 			'</ul>' .
 			'<p>' . __( 'We’ll also use cookies to keep track of cart contents while you’re browsing our site.', 'woocommerce' ) . '</p>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information for purposes, such as, to:', 'woocommerce' ) . '</p>' .
 			'<ul>' .
 				'<li>' . __( 'Send you information about your account and order', 'woocommerce' ) . '</li>' .
@@ -105,16 +103,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			'</ul>' .
 			'<p>' . __( 'Our team members have access to this information to help fulfill orders, process refunds and support you.', 'woocommerce' ) . '</p>' .
 			'<h2>' . __( 'What we share with others', 'woocommerce' ) . '</h2>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We share information with third parties who help us provide our orders and store services to you; for example --', 'woocommerce' ) . '</p>' .
 			'<h3>' . __( 'Payments', 'woocommerce' ) . '</h3>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.', 'woocommerce' ) . '</p>' .
-			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>';
+			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>' .
+			'</div>';
 
 		return apply_filters( 'wc_privacy_policy_content', $content );
 	}
@@ -169,12 +168,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_pending_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-pending',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_pending_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-pending',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -191,12 +195,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_failed_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-failed',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_failed_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-failed',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -213,12 +222,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_cancelled_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-cancelled',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_cancelled_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-cancelled',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -256,13 +270,18 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::anonymize_orders_query( apply_filters( 'woocommerce_anonymize_completed_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-completed',
-			'anonymized'   => false,
-			'type'         => 'shop_order',
-		) ) );
+		return self::anonymize_orders_query(
+			apply_filters(
+				'woocommerce_anonymize_completed_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-completed',
+					'anonymized'   => false,
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -313,33 +332,42 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 */
 	protected static function delete_inactive_accounts_query( $timestamp, $limit = 20 ) {
 		$count      = 0;
-		$user_query = new WP_User_Query( array(
-			'fields'     => 'ID',
-			'number'     => $limit,
-			'role__in'   => apply_filters( 'woocommerce_delete_inactive_account_roles', array(
-				'Customer',
-				'Subscriber',
-			) ),
-			'meta_query' => array(
-				'relation' => 'AND',
-				array(
-					'key'     => 'wc_last_active',
-					'value'   => (string) $timestamp,
-					'compare' => '<',
-					'type'    => 'NUMERIC',
+		$user_query = new WP_User_Query(
+			array(
+				'fields'     => 'ID',
+				'number'     => $limit,
+				'role__in'   => apply_filters(
+					'woocommerce_delete_inactive_account_roles',
+					array(
+						'Customer',
+						'Subscriber',
+					)
 				),
-				array(
-					'key'     => 'wc_last_active',
-					'value'   => '0',
-					'compare' => '>',
-					'type'    => 'NUMERIC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					array(
+						'key'     => 'wc_last_active',
+						'value'   => (string) $timestamp,
+						'compare' => '<',
+						'type'    => 'NUMERIC',
+					),
+					array(
+						'key'     => 'wc_last_active',
+						'value'   => '0',
+						'compare' => '>',
+						'type'    => 'NUMERIC',
+					),
 				),
-			),
-		) );
+			)
+		);
 
 		$user_ids = $user_query->get_results();
 
 		if ( $user_ids ) {
+			if ( ! function_exists( 'wp_delete_user' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/user.php';
+			}
+
 			foreach ( $user_ids as $user_id ) {
 				wp_delete_user( $user_id );
 				$count ++;

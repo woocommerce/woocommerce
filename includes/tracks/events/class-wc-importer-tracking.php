@@ -24,7 +24,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_REQUEST['step'] ) ) {
 			return;
 		}
@@ -45,7 +45,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer_start() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
 			return;
 		}
@@ -65,7 +65,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer_complete() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_REQUEST['nonce'] ) ) {
 			return;
 		}

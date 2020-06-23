@@ -59,7 +59,17 @@
 
 					if ( 'done' === response.data.position ) {
 						var file_name = wc_product_import_params.file.split( '/' ).pop();
-						window.location = response.data.url + '&products-imported=' + parseInt( $this.imported, 10 ) + '&products-failed=' + parseInt( $this.failed, 10 ) + '&products-updated=' + parseInt( $this.updated, 10 ) + '&products-skipped=' + parseInt( $this.skipped, 10 ) + '&file-name=' + file_name;
+						window.location = response.data.url +
+							'&products-imported=' +
+							parseInt( $this.imported, 10 ) +
+							'&products-failed=' +
+							parseInt( $this.failed, 10 ) +
+							'&products-updated=' +
+							parseInt( $this.updated, 10 ) +
+							'&products-skipped=' +
+							parseInt( $this.skipped, 10 ) +
+							'&file-name=' +
+              file_name;
 					} else {
 						$this.run_import();
 					}

@@ -288,10 +288,10 @@ class WC_Query {
 						$q->is_singular = true;
 					}
 				}
-			} elseif ( ! empty( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			} elseif ( ! empty( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
-				$q->is_page = true;
-				$q->is_home = false;
+				$q->is_page     = true;
+				$q->is_home     = false;
 				$q->is_singular = true;
 			}
 		}

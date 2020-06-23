@@ -30,7 +30,13 @@ jQuery( function( $ ) {
 	};
 
 	$( document ).ajaxComplete( function( event, request, options ) {
-		if ( request && 4 === request.readyState && 200 === request.status && options.data && ( 0 <= options.data.indexOf( '_inline_edit' ) || 0 <= options.data.indexOf( 'add-tag' ) ) ) {
+		if (
+			request &&
+			4 === request.readyState &&
+			200 === request.status &&
+			options.data &&
+			( 0 <= options.data.indexOf( '_inline_edit' ) || 0 <= options.data.indexOf( 'add-tag' ) )
+		) {
 			$.wc_add_missing_sort_handles();
 			$( document.body ).trigger( 'init_tooltips' );
 		}
@@ -80,25 +86,41 @@ jQuery( function( $ ) {
 				}
 			}
 
-			// If previous and next not at same tree level, or next not at same tree level and the previous is the parent of the next, or just moved item beneath its own children
-			if ( ( prevtermid === undefined && nexttermid === undefined ) || ( nexttermid === undefined && nexttermparent === prevtermid ) || ( nexttermid !== undefined && prevtermparent === termid ) ) {
+			// If previous and next not at same tree level, or next not at same tree level and
+			// the previous is the parent of the next, or just moved item beneath its own children.
+			if (
+				( prevtermid === undefined && nexttermid === undefined ) ||
+				( nexttermid === undefined && nexttermparent === prevtermid ) ||
+				( nexttermid !== undefined && prevtermparent === termid )
+			) {
 				$( table_selector ).sortable( 'cancel' );
 				return;
 			}
 
 			// Show Spinner
 			ui.item.find( '.check-column input' ).hide();
-			ui.item.find( '.check-column' ).append( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
+			ui.item
+				.find( '.check-column' )
+				.append( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
 
-			// Go do the sorting stuff via ajax
-			$.post( ajaxurl, { action: 'woocommerce_term_ordering', id: termid, nextid: nexttermid, thetaxonomy: woocommerce_term_ordering_params.taxonomy }, function(response){
-				if ( response === 'children' ) {
-					window.location.reload();
-				} else {
-					ui.item.find( '.check-column input' ).show();
-					ui.item.find( '.check-column' ).find( 'img' ).remove();
+			// Go do the sorting stuff via ajax.
+			$.post(
+				ajaxurl,
+				{
+					action: 'woocommerce_term_ordering',
+					id: termid,
+					nextid: nexttermid,
+					thetaxonomy: woocommerce_term_ordering_params.taxonomy
+				},
+				function(response) {
+					if ( response === 'children' ) {
+						window.location.reload();
+					} else {
+						ui.item.find( '.check-column input' ).show();
+						ui.item.find( '.check-column' ).find( 'img' ).remove();
+					}
 				}
-			});
+			);
 
 			// Fix cell colors
 			$( 'table.widefat tbody tr' ).each( function() {

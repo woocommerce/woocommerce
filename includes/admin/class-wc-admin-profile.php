@@ -37,7 +37,8 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 */
 		public function get_customer_meta_fields() {
 			$show_fields = apply_filters(
-				'woocommerce_customer_meta_fields', array(
+				'woocommerce_customer_meta_fields',
+				array(
 					'billing'  => array(
 						'title'  => __( 'Customer billing address', 'woocommerce' ),
 						'fields' => array(
@@ -70,11 +71,11 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								'description' => '',
 							),
 							'billing_country'    => array(
-								'label'       => __( 'Country', 'woocommerce' ),
+								'label'       => __( 'Country / Region', 'woocommerce' ),
 								'description' => '',
 								'class'       => 'js_field-country',
 								'type'        => 'select',
-								'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+								'options'     => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 							),
 							'billing_state'      => array(
 								'label'       => __( 'State / County', 'woocommerce' ),
@@ -130,11 +131,11 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								'description' => '',
 							),
 							'shipping_country'    => array(
-								'label'       => __( 'Country', 'woocommerce' ),
+								'label'       => __( 'Country / Region', 'woocommerce' ),
 								'description' => '',
 								'class'       => 'js_field-country',
 								'type'        => 'select',
-								'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+								'options'     => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 							),
 							'shipping_state'      => array(
 								'label'       => __( 'State / County', 'woocommerce' ),

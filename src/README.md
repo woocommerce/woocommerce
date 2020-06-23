@@ -2,7 +2,7 @@
 
 This directory is home to new WooCommerce class files under the \Automattic\WooCommerce\ namespace using PSR-4 file naming. This is to take full advantage of autoloading.
 
-Currently, these classes have a PHP 5.6 requirement. No required core classes will be added here until this PHP version is enforced. If running an older version of PHP, these class files will not be used.
+Currently, these classes have a PHP 7.0 requirement. No required core classes will be added here until this PHP version is enforced. If running an older version of PHP, these class files will not be used.
 
 ## Installing Composer
 

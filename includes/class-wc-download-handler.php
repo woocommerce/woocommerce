@@ -31,7 +31,7 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
-		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated
+		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
@@ -44,12 +44,13 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
+		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
+		$order    = wc_get_order( $order_id );
+
 		if ( isset( $_GET['email'] ) ) { // WPCS: input var ok, CSRF ok.
 			$email_address = wp_unslash( $_GET['email'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		} else {
 			// Get email address from order to verify hash.
-			$order_id      = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
-			$order         = wc_get_order( $order_id );
 			$email_address = is_a( $order, 'WC_Order' ) ? $order->get_billing_email() : null;
 
 			// Prepare email address hash.
@@ -79,7 +80,25 @@ class WC_Download_Handler {
 
 		$download = new WC_Customer_Download( current( $download_ids ) );
 
-		$file_path        = $product->get_file_download_path( $download->get_download_id() );
+		/**
+		 * Filter download filepath.
+		 *
+		 * @since 4.0.0
+		 * @param string $file_path File path.
+		 * @param string $email_address Email address.
+		 * @param WC_Order|bool $order Order object or false.
+		 * @param WC_Product $product Product object.
+		 * @param WC_Customer_Download $download Download data.
+		 */
+		$file_path = apply_filters(
+			'woocommerce_download_product_filepath',
+			$product->get_file_download_path( $download->get_download_id() ),
+			$email_address,
+			$order,
+			$product,
+			$download
+		);
+
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // @codingStandardsIgnoreLine.
 
@@ -144,7 +163,7 @@ class WC_Download_Handler {
 	 * @param WC_Customer_Download $download Download instance.
 	 */
 	private static function check_download_expiry( $download ) {
-		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', current_time( 'timestamp', true ) ) ) {
+		if ( ! is_null( $download->get_access_expires() ) && $download->get_access_expires()->getTimestamp() < strtotime( 'midnight', time() ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
@@ -280,6 +299,16 @@ class WC_Download_Handler {
 	 */
 	public static function download_file_xsendfile( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
+
+		/**
+		 * Fallback on force download method for remote files. This is because:
+		 * 1. xsendfile needs proxy configuration to work for remote files, which cannot be assumed to be available on most hosts.
+		 * 2. Force download method is more secure than redirect method if `allow_url_fopen` is enabled in `php.ini`. We fallback to redirect method in force download method anyway in case `allow_url_fopen` is not enabled.
+		 */
+		if ( $parsed_file_path['remote_file'] && ! apply_filters( 'woocommerce_use_xsendfile_for_remote', false ) ) {
+			do_action( 'woocommerce_download_file_force', $file_path, $filename );
+			return;
+		}
 
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules(), true ) ) {
 			self::download_headers( $parsed_file_path['file_path'], $filename );

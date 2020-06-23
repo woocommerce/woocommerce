@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -37,7 +39,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product_Variation $product Product object.
-	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status (via read_product_data).
+	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status (via read_product_data), or when passing an invalid ID.
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -53,7 +55,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		if ( 'product_variation' !== $post_object->post_type ) {
-			throw new Exception( 'Invalid product type: passed ID does not correspond to a product variation.' );
+			throw new WC_Data_Exception( 'variation_invalid_id', __( 'Invalid product type: passed ID does not correspond to a product variation.', 'woocommerce' ) );
 		}
 
 		$product->set_props(
@@ -333,7 +335,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function update_version_and_type( &$product ) {
 		wp_set_object_terms( $product->get_id(), '', 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 	}
 
 	/**

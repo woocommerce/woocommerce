@@ -216,7 +216,7 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
-			$price_valid_until = date( 'Y-12-31', current_time( 'timestamp', true ) + YEAR_IN_SECONDS );
+			$price_valid_until = date( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
@@ -305,7 +305,9 @@ class WC_Structured_Data {
 						'@type'         => 'Review',
 						'reviewRating'  => array(
 							'@type'       => 'Rating',
+							'bestRating'  => '5',
 							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
+							'worstRating' => '1',
 						),
 						'author'        => array(
 							'@type' => 'Person',
@@ -350,7 +352,9 @@ class WC_Structured_Data {
 		if ( $rating ) {
 			$markup['reviewRating'] = array(
 				'@type'       => 'Rating',
+				'bestRating'  => '5',
 				'ratingValue' => $rating,
+				'worstRating' => '1',
 			);
 		} elseif ( $comment->comment_parent ) {
 			return;

@@ -39,11 +39,11 @@ class WC_Form_Handler {
 	 * Remove key and user ID (or user login, as a fallback) from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
-		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			// If available, get $user_id from query string parameter for fallback purposes.
-			if ( isset( $_GET['login'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-				$user    = get_user_by( 'login', sanitize_user( wp_unslash( $_GET['login'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			if ( isset( $_GET['login'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$user    = get_user_by( 'login', sanitize_user( wp_unslash( $_GET['login'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$user_id = $user ? $user->ID : 0;
 			} else {
 				$user_id = absint( $_GET['id'] );
@@ -459,6 +459,10 @@ class WC_Form_Handler {
 				return;
 			}
 
+			if ( ! apply_filters( 'woocommerce_add_payment_method_form_is_valid', true ) ) {
+				return;
+			}
+
 			// Test rate limit.
 			$current_user_id = get_current_user_id();
 			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
@@ -466,12 +470,15 @@ class WC_Form_Handler {
 
 			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
 				wc_add_notice(
-					/* translators: %d number of seconds */
-					_n(
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
-						$delay,
-						'woocommerce'
+					sprintf(
+						/* translators: %d number of seconds */
+						_n(
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
+							$delay,
+							'woocommerce'
+						),
+						$delay
 					),
 					'error'
 				);
@@ -580,10 +587,10 @@ class WC_Form_Handler {
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['remove_item'] ) );
@@ -745,13 +752,13 @@ class WC_Form_Handler {
 	 * @param bool $url (default: false) URL to redirect to.
 	 */
 	public static function add_to_cart_action( $url = false ) {
-		if ( ! isset( $_REQUEST['add-to-cart'] ) || ! is_numeric( wp_unslash( $_REQUEST['add-to-cart'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ! isset( $_REQUEST['add-to-cart'] ) || ! is_numeric( wp_unslash( $_REQUEST['add-to-cart'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			return;
 		}
 
 		wc_nocache_headers();
 
-		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( wp_unslash( $_REQUEST['add-to-cart'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( wp_unslash( $_REQUEST['add-to-cart'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$was_added_to_cart = false;
 		$adding_to_cart    = wc_get_product( $product_id );
 
@@ -793,7 +800,7 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
-		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
@@ -813,7 +820,7 @@ class WC_Form_Handler {
 	private static function add_to_cart_handler_grouped( $product_id ) {
 		$was_added_to_cart = false;
 		$added_to_cart     = array();
-		$items             = isset( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ? wp_unslash( $_REQUEST['quantity'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$items             = isset( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ? wp_unslash( $_REQUEST['quantity'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! empty( $items ) ) {
 			$quantity_set = false;
@@ -862,11 +869,12 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
 		try {
-			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$missing_attributes = array();
-			$variations         = array();
-			$adding_to_cart     = wc_get_product( $product_id );
+			$variation_id         = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$quantity             = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$missing_attributes   = array();
+			$variations           = array();
+			$variation_attributes = array();
+			$adding_to_cart       = wc_get_product( $product_id );
 
 			if ( ! $adding_to_cart ) {
 				return false;
@@ -874,6 +882,9 @@ class WC_Form_Handler {
 
 			// If the $product_id was in fact a variation ID, update the variables.
 			if ( $adding_to_cart->is_type( 'variation' ) ) {
+				$variation_attributes = $adding_to_cart->get_variation_attributes();
+				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
+				$variation_attributes = array_filter( $variation_attributes );
 				$variation_id   = $product_id;
 				$product_id     = $adding_to_cart->get_parent_id();
 				$adding_to_cart = wc_get_product( $product_id );
@@ -892,17 +903,20 @@ class WC_Form_Handler {
 				}
 				$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
 
-				if ( isset( $_REQUEST[ $attribute_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+				if ( isset( $_REQUEST[ $attribute_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					if ( $attribute['is_taxonomy'] ) {
 						// Don't use wc_clean as it destroys sanitized characters.
-						$value = sanitize_title( wp_unslash( $_REQUEST[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+						$value = sanitize_title( wp_unslash( $_REQUEST[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					} else {
-						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					}
 
 					$posted_attributes[ $attribute_key ] = $value;
 				}
 			}
+
+			// Merge variation attributes and posted attributes.
+			$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
 
 			// If no variation ID is set, attempt to get a variation ID from posted attributes.
 			if ( empty( $variation_id ) ) {
@@ -932,8 +946,8 @@ class WC_Form_Handler {
 				 *
 				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
 				 */
-				if ( isset( $posted_attributes[ $attribute_key ] ) ) {
-					$value = $posted_attributes[ $attribute_key ];
+				if ( isset( $posted_and_variation_attributes[ $attribute_key ] ) ) {
+					$value = $posted_and_variation_attributes[ $attribute_key ];
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {
@@ -1010,9 +1024,7 @@ class WC_Form_Handler {
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
-					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', $message );
-					throw new Exception( $message );
+					throw new Exception( $user->get_error_message() );
 				} else {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
@@ -1114,8 +1126,8 @@ class WC_Form_Handler {
 	 * @throws Exception On registration error.
 	 */
 	public static function process_registration() {
-		$nonce_value = isset( $_POST['_wpnonce'] ) ? wp_unslash( $_POST['_wpnonce'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.NoNonceVerification
-		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? wp_unslash( $_POST['woocommerce-register-nonce'] ) : $nonce_value; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.NoNonceVerification
+		$nonce_value = isset( $_POST['_wpnonce'] ) ? wp_unslash( $_POST['_wpnonce'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$nonce_value = isset( $_POST['woocommerce-register-nonce'] ) ? wp_unslash( $_POST['woocommerce-register-nonce'] ) : $nonce_value; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( isset( $_POST['register'], $_POST['email'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-register' ) ) {
 			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) && isset( $_POST['username'] ) ? wp_unslash( $_POST['username'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

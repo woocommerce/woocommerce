@@ -1,0 +1,52 @@
+{
+  "name": "@woocommerce/e2e-environment",
+  "version": "0.1.5",
+  "description": "WooCommerce End to End Testing Environment Configuration.",
+  "author": "Automattic",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "e2e",
+    "puppeteer"
+  ],
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce.git"
+  },
+  "bugs": {
+    "url": "https://github.com/woocommerce/woocommerce/issues"
+  },
+  "main": "index.js",
+  "module": "build-module/index.js",
+  "dependencies": {
+    "@wordpress/e2e-test-utils": "^4.6.0",
+    "@wordpress/jest-preset-default": "^5.4.0",
+    "app-root-path": "^3.0.0",
+    "jest": "^25.1.0",
+    "jest-puppeteer": "^4.4.0",
+    "puppeteer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/polyfill": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@wordpress/eslint-plugin": "^4.0.0",
+    "ndb": "^1.1.5",
+    "woocommerce": "git+https://github.com/woocommerce/woocommerce.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "docker:up": "./bin/docker-compose.js up",
+    "docker:down": "./bin/docker-compose.js down",
+    "docker:clear-all": "docker rmi --force $(docker images -q)",
+    "docker:ssh": "docker exec -it woocommerce_wordpress-www /bin/bash",
+    "install-wp-tests": "./bin/install-wp-tests.sh",
+    "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
+    "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+  }
+}

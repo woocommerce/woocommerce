@@ -51,6 +51,12 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'install' ),
 					'permission_callback' => array( $this, 'check_permission' ),
+					'args'                => array(
+						'products' => array(
+							'required' => true,
+							'type'     => 'object',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
