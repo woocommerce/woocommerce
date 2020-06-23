@@ -1585,10 +1585,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
-		// Test if the shipping total amount is equal 20.
 		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
 
-		// Test if the cart total amount is equal 20.
 		$this->assertEquals( 93.88, WC()->cart->total );
 	}
 
