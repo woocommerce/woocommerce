@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 4.2.1 - 2020-06-22 =
+
+**WooCommerce**
+* Security - Escape HTML in SelectWoo.
+
+**WooCommerce Admin 1.2.4**
+* Tweak: reduce asset filename length and remove tilde characters. #4535
+* Fix: RTL stylesheet loading for split code chunks. #4542
+
 = 4.2.0 - 2020-06-02 =
 
 **WooCommerce**
