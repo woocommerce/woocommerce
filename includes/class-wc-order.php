@@ -1731,6 +1731,8 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
+		do_action( 'woocommerce_order_note_added', $comment_id, $this );
+
 		return $comment_id;
 	}
 
