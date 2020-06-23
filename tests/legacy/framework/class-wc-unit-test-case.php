@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 
 /**
@@ -149,5 +150,47 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$result = copy( $source, $dest );
 		self::reenable_code_hacker();
 		return $result;
+	}
+
+	/**
+	 * Reset all the cached resolutions in the dependency injection container, so any further "get"
+	 * for shared definitions will generate the instance again.
+	 * This may be needed when registering mocks for already resolved shared classes.
+	 */
+	public function reset_container_resolutions() {
+		wc_get_container()->reset_resolved();
+	}
+
+	/**
+	 * Register the function mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are function names and values are function replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_function_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks( $mocks );
+	}
+
+	/**
+	 * Register the static method mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are associative arrays, in which keys are method names and values are method replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_static_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_static_mocks( $mocks );
+	}
+
+	/**
+	 * Register the class mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are either factory callbacks (optionally with a $class_name argument) or objects.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_class_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
 	}
 }

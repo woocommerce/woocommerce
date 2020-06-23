@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
+use Automattic\WooCommerce\DependencyManagement\ExtendedContainer;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -24,9 +25,14 @@ use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ProxiesServiceP
  *
  * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Tools\DependencyManagement
  * and those should go in the `src\Tools\DependencyManagement\ServiceProviders` folder unless there's a good reason
- * to put them elsewhere. All the service provider class names must be in the `$service_providers` property.
+ * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
  */
 final class Container implements \Psr\Container\ContainerInterface {
+
+	/**
+	 * The root namespace of all WooCommerce classes in the `src` directory.
+	 */
+	const WOOCOMMERCE_ROOT_NAMESPACE = 'Automattic\\WooCommerce';
 
 	/**
 	 * The list of service provider classes to register.
@@ -48,7 +54,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->container = new \League\Container\Container();
+		$this->container = new ExtendedContainer();
 
 		// Add ourselves as the shared instance of ContainerInterface,
 		// register everything else using service providers.
