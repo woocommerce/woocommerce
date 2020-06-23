@@ -32,12 +32,14 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 */
 	public function get_settings() {
 		$erasure_text = esc_html__( 'account erasure request', 'woocommerce' );
+		$privacy_text = esc_html__( 'privacy page', 'woocommerce' );
 		if ( current_user_can( 'manage_privacy_options' ) ) {
 			if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
 				$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
 			} else {
 				$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'erase-personal-data.php' ) ), $erasure_text );
 			}
+			$privacy_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'options-privacy.php' ) ), $privacy_text );
 		}
 
 		$account_settings = array(
@@ -136,18 +138,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title' => __( 'Privacy policy', 'woocommerce' ),
 				'type'  => 'title',
 				'id'    => 'privacy_policy_options',
-				'desc'  => __( 'This section controls the display of your website privacy policy. The privacy notices below will not show up unless a privacy page is first set.', 'woocommerce' ),
-			),
-
-			array(
-				'title'    => __( 'Privacy page', 'woocommerce' ),
-				'desc'     => __( 'Choose a page to act as your privacy policy.', 'woocommerce' ),
-				'id'       => 'wp_page_for_privacy_policy',
-				'type'     => 'single_select_page',
-				'default'  => '',
-				'class'    => 'wc-enhanced-select-nostd',
-				'css'      => 'min-width:300px;',
-				'desc_tip' => true,
+				/* translators: %s: privacy page link. */
+				'desc'  => sprintf( esc_html__( 'This section controls the display of your website privacy policy. The privacy notices below will not show up unless a %s is set.', 'woocommerce' ), $privacy_text ),
 			),
 
 			array(
