@@ -370,7 +370,7 @@ return array(
 	),
 	'GP' => array(),
 	'GR' => array( // Greek Regions.
-		'I' => __( 'Attica Department', 'woocommerce' ),
+		'I' => __( 'Attica', 'woocommerce' ),
 		'A' => __( 'East Macedonia and Thrace', 'woocommerce' ),
 		'B' => __( 'Central Macedonia', 'woocommerce' ),
 		'C' => __( 'West Macedonia', 'woocommerce' ),
