@@ -1,0 +1,77 @@
+version: '3.3'
+
+services:
+
+  db:
+    image: mariadb:10.5
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+    - db:/var/lib/mysql
+    
+  wordpress-unit-tests:
+    container_name: wordpress_test
+    depends_on:
+      - db
+    build:
+      context: ./tests/bin
+    ports:
+      - 8085:80
+    restart: on-failure
+    environment:
+      WORDPRESS_DB_HOST:
+      WORDPRESS_DB_NAME:
+      WORDPRESS_DB_USER:
+      WORDPRESS_DB_PASSWORD:
+      WORDPRESS_TABLE_PREFIX: wp_test_
+      WP_CORE_DIR: /var/www/html
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+    volumes:
+      - './:/var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block'
+      - wordpress:/var/www/html
+
+  wordpress-www:
+    depends_on:
+      - db
+    build:
+      context: ./bin/docker/wordpress
+    ports:
+      - ${WORDPRESS_PORT}:80
+    restart: on-failure
+    environment:
+      WORDPRESS_DB_HOST:
+      WORDPRESS_DB_NAME:
+      WORDPRESS_DB_USER:
+      WORDPRESS_DB_PASSWORD:
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - "./:/var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block"
+      - wordpress:/var/www/html
+
+  wordpress-cli:
+    depends_on:
+      - db
+      - wordpress-www
+    build:
+        context: ./bin/docker/wp-cli
+    restart: on-failure
+    environment:
+        WORDPRESS_HOST:
+        WORDPRESS_TITLE:
+        WORDPRESS_LOGIN:
+        WORDPRESS_PASSWORD:
+        WORDPRESS_PORT:
+        WORDPRESS_EMAIL:
+        DOMAIN_NAME:
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block
+      - wordpress:/var/www/html
+
+volumes:
+  db:
+  wordpress:

@@ -1,0 +1,64 @@
+.wc-block-shipping-rates-control__package {
+	.wc-block-shipping-rates-control__package-title {
+		margin: 0;
+	}
+}
+
+.wc-block-shipping-rates-control__package-items {
+	@include font-size(small);
+	color: $core-grey-dark-400;
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-shipping-rates-control__package-item {
+	@include wrap-break-word();
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-shipping-rates-control__package-item:not(:last-child)::after {
+	content: ", ";
+	white-space: pre;
+}
+
+.wc-block-cart__shipping-address,
+.wc-block-cart__shipping-address button {
+	color: $core-grey-dark-400;
+}
+
+.components-notice.wc-block-shipping-rates-control__no-results-notice {
+	margin-bottom: 0;
+}
+
+// Resets when it's inside a panel.
+.wc-block-shipping-rates-control {
+	.wc-block-shipping-rates-control__package.components-panel__body {
+		border-bottom: none;
+
+		&,
+		&.is-opened {
+			padding-bottom: 0;
+		}
+
+		.wc-block-shipping-rates-control__package-items {
+			margin: 0;
+		}
+
+		.wc-block-radio-control {
+			width: 100%;
+		}
+
+		.wc-block-radio-control__option {
+			margin-right: 0;
+			max-width: none;
+
+			&:first-child {
+				border-top: 1px solid $core-grey-light-600;
+			}
+		}
+	}
+}

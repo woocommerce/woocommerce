@@ -1,0 +1,44 @@
+.wc-block-components-chip {
+	display: inline-block;
+	background: $core-grey-light-500;
+	padding: 0.365em 0.5em;
+	margin: 0 0.365em 0.365em 0;
+	color: $core-grey-dark-800;
+	border-radius: 0;
+	line-height: 1em;
+	max-width: 100%;
+
+	&.wc-block-components-chip--radius-small {
+		border-radius: 3px;
+	}
+	&.wc-block-components-chip--radius-medium {
+		border-radius: 0.433em;
+	}
+	&.wc-block-components-chip--radius-large {
+		border-radius: 0.865em;
+		padding: 0.365em 0.75em;
+	}
+	.wc-block-components-chip__text {
+		padding-right: 0.5em;
+	}
+	.wc-block-components-chip__remove {
+		@include font-size(smaller);
+		background: transparent;
+		border: 0;
+		appearance: none;
+		float: none;
+		vertical-align: middle;
+		line-height: 1.33em;
+		padding: 0.66em; // Should equate to ~8px; chip has ~6px padding, and font size difference/2 is 2px.
+		margin: -0.66em;
+
+		&:hover,
+		&:focus {
+			color: #d94f4f;
+		}
+		&:disabled {
+			color: $core-grey-dark-100;
+			cursor: not-allowed;
+		}
+	}
+}

@@ -1,0 +1,68 @@
+.wc-block-sidebar-layout {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 auto $gap;
+	position: relative;
+
+	.wc-block-main {
+		margin: 0;
+		padding-right: percentage($gap-largest / 1060px); // ~1060px is the default width of the content area in Storefront.
+		width: 65%;
+	}
+}
+
+.wc-block-sidebar {
+	margin: 0;
+	padding-left: percentage($gap-large / 1060px);
+	width: 35%;
+
+	.wc-blocks-components-panel {
+		border-top: 1px solid $core-grey-light-600;
+		border-bottom: 1px solid $core-grey-light-600;
+
+		+ .wc-blocks-components-panel {
+			border-top: none;
+		}
+
+		> h2 {
+			@include font-size(large);
+			@include reset-box();
+		}
+	}
+}
+
+.is-medium,
+.is-small,
+.is-mobile {
+	&.wc-block-sidebar-layout {
+		flex-direction: column;
+		margin: 0 auto $gap;
+
+		.wc-block-main {
+			padding: 0;
+			width: 100%;
+		}
+		.wc-block-sidebar {
+			padding: 0;
+			width: 100%;
+		}
+	}
+}
+
+.is-large {
+	.wc-block-sidebar {
+		.wc-block-totals-table-item,
+		.wc-blocks-components-panel {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+	}
+}
+
+// For Twenty Twenty we need to increase specificity a bit more.
+.theme-twentytwenty {
+	.wc-block-sidebar .wc-blocks-components-panel > h2 {
+		@include font-size(large);
+		@include reset-box();
+	}
+}
