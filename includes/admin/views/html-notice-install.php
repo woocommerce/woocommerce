@@ -1,6 +1,8 @@
 <?php
 /**
  * Admin View: Notice - Install
+ *
+ * @deprecated 4.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

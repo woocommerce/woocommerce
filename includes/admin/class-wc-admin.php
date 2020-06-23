@@ -74,15 +74,6 @@ class WC_Admin {
 			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
 		}
 
-		// Setup/welcome.
-		if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			switch ( $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				case 'wc-setup':
-					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
-					break;
-			}
-		}
-
 		// Helper.
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
 
@@ -152,28 +143,6 @@ class WC_Admin {
 			exit;
 		}
 
-		// Setup wizard redirect.
-		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
-			$do_redirect  = true;
-			$current_page = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false;
-
-			// On these pages, or during these events, postpone the redirect.
-			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
-				$do_redirect = false;
-			}
-
-			// On these pages, or during these events, disable the redirect.
-			if ( 'wc-setup' === $current_page || ! WC_Admin_Notices::has_notice( 'install' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) || isset( $_GET['activate-multi'] ) ) {
-				delete_transient( '_wc_activation_redirect' );
-				$do_redirect = false;
-			}
-
-			if ( $do_redirect ) {
-				delete_transient( '_wc_activation_redirect' );
-				wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
-				exit;
-			}
-		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
