@@ -30,6 +30,7 @@ import './style.scss';
  */
 const Block = ( {
 	className,
+	imageSizing = 'full-size',
 	productLink = true,
 	showSaleBadge,
 	saleBadgeAlign = 'right',
@@ -78,6 +79,7 @@ const Block = ( {
 						image={ image }
 						onLoad={ () => setImageLoaded( true ) }
 						loaded={ imageLoaded }
+						showFullSize={ imageSizing !== 'cropped' }
 					/>
 				</a>
 			) : (
@@ -92,6 +94,7 @@ const Block = ( {
 						image={ image }
 						onLoad={ () => setImageLoaded( true ) }
 						loaded={ imageLoaded }
+						showFullSize={ imageSizing !== 'cropped' }
 					/>
 				</>
 			) }
@@ -103,19 +106,28 @@ const ImagePlaceholder = () => {
 	return <img src={ PLACEHOLDER_IMG_SRC } alt="" />;
 };
 
-const Image = ( { image, onLoad, loaded } ) => {
-	const { thumbnail, srcset, sizes, alt } = image || {};
+const Image = ( { image, onLoad, loaded, showFullSize } ) => {
+	const { thumbnail, src, srcset, sizes, alt } = image || {};
+
+	let imageProps = {
+		alt,
+		onLoad,
+		hidden: ! loaded,
+		src: thumbnail,
+	};
+	if ( showFullSize ) {
+		imageProps = {
+			...imageProps,
+			src,
+			srcSet: srcset,
+			sizes,
+		};
+	}
 
 	return (
 		<>
-			<img
-				src={ thumbnail }
-				srcSet={ srcset }
-				sizes={ sizes }
-				alt={ alt }
-				onLoad={ onLoad }
-				hidden={ ! loaded }
-			/>
+			{ /* eslint-disable-next-line jsx-a11y/alt-text */ }
+			<img { ...imageProps } />
 			{ ! loaded && <ImagePlaceholder /> }
 		</>
 	);
