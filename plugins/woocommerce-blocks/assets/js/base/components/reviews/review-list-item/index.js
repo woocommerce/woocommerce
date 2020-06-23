@@ -28,10 +28,7 @@ function getReviewImage( review, imageType, isLoading ) {
 				<img
 					aria-hidden="true"
 					alt={ review.product_image?.alt || '' }
-					src={ review.product_image?.src || '' }
-					className="wc-block-review-list-item__image wc-block-components-review-list-item__image"
-					width="48"
-					height="48"
+					src={ review.product_image?.thumbnail || '' }
 				/>
 			) : (
 				<img
@@ -39,9 +36,6 @@ function getReviewImage( review, imageType, isLoading ) {
 					alt=""
 					src={ review.reviewer_avatar_urls[ '48' ] || '' }
 					srcSet={ review.reviewer_avatar_urls[ '96' ] + ' 2x' }
-					className="wc-block-review-list-item__image wc-block-components-review-list-item__image"
-					width="48"
-					height="48"
 				/>
 			) }
 			{ review.verified && (

@@ -4,7 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,7 +14,12 @@ import ToggleButtonControl from '@woocommerce/block-components/toggle-button-con
 import Block from './block';
 
 export default ( { attributes, setAttributes } ) => {
-	const { productLink, showSaleBadge, saleBadgeAlign } = attributes;
+	const {
+		productLink,
+		imageSizing,
+		showSaleBadge,
+		saleBadgeAlign,
+	} = attributes;
 
 	return (
 		<>
@@ -87,6 +94,50 @@ export default ( { attributes, setAttributes } ) => {
 							}
 						/>
 					) }
+					<ToggleButtonControl
+						label={ __(
+							'Image Sizing',
+							'woo-gutenberg-products-block'
+						) }
+						help={ __experimentalCreateInterpolateElement(
+							__(
+								'Product image cropping can be modified in the <a>Customizer</a>.',
+								'woo-gutenberg-products-block'
+							),
+							{
+								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content
+									<a
+										href={ `${ getAdminLink(
+											'customize.php'
+										) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
+										target="_blank"
+										rel="noopener noreferrer"
+									/>
+								),
+							}
+						) }
+						value={ imageSizing }
+						options={ [
+							{
+								label: __(
+									'Full Size',
+									'woo-gutenberg-products-block'
+								),
+								value: 'full-size',
+							},
+							{
+								label: __(
+									'Cropped',
+									'woo-gutenberg-products-block'
+								),
+								value: 'cropped',
+							},
+						] }
+						onChange={ ( value ) =>
+							setAttributes( { imageSizing: value } )
+						}
+					/>
 				</PanelBody>
 			</InspectorControls>
 			<Disabled>

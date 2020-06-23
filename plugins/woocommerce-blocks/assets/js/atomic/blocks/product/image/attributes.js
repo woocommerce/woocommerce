@@ -11,6 +11,10 @@ export const blockAttributes = {
 		type: 'string',
 		default: 'right',
 	},
+	imageSizing: {
+		type: 'string',
+		default: 'full-size',
+	},
 };
 
 export default blockAttributes;
