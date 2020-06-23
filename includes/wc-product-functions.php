@@ -203,7 +203,7 @@ function wc_get_featured_product_ids() {
 /**
  * Returns a list of product groups that a specific product belongs to.
  *
- * @since 4.2.0
+ * @since 4.4.0
  * @param int $product Product Object.
  * @return int[] a list of product groups that a specific product belongs to
  */
