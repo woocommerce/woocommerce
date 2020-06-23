@@ -20,7 +20,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-		//phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->id    = 'checkout'; // @todo In future versions this may make more sense as 'payment' however to avoid breakage lets leave this alone until we refactor settings APIs in general.
 		$this->label = _x( 'Payments', 'Settings tab label', 'woocommerce' );
 
