@@ -183,7 +183,7 @@ INTERESTED IN DEVELOPMENT?
 
 **WooCommerce**
 * Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775
-* Enhancement -Add template cache clearing. #26752
+* Enhancement - Add template cache clearing. #26752
 * Enhancement - Add 47 Kenya counties. #26728
 * Enhancement - Accessibility: add aria-disabled attribute to "Update cart" button on checkout page. #26726
 * Enhancement - Update "Subtotal" translation string in wc-template-functions.php. #26706
@@ -237,6 +237,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Use single dash for country/state dropdown options #4553
 * Tweak - Use label tag for toggleable shipping zones #4554
 * Tweak - Make it easier to add submenu items to the Marketing menu #4561
+* Tweak - Tag remove button style so it is properly centered. #4651
 * Fix - misaligned 'required' text on selects #4307
 * Fix - exception when opening dashboard after selecting extensions to purchase #4357
 * Fix - REST API collections schema #4377
@@ -253,6 +254,11 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Check for enabled methods before payment task completion #4530
 * Fix - Solved a problem with the method onChoose in the last onboarding step. #4583
 * Fix - Only mark purchase task as complete when products exist #4574
+* Fix - WCPay sometimes not appearing on the task list. #4647
+* Fix - Fix inbox spacing. #4632
+* Fix - Don't include sourcemaps or unminified JS for "core" builds. #4642
+* Fix - Add a bottom border to the Install Jetpack CTA. #4589
+* Fix - Style cleanup from components update. #4606
 * Dev - Add jest-dom eslint plugin. #4327
 * Dev - Migrate onboarding data store to wp.data #4433
 * Dev - Remove use of `IconButton` in favor of `Button` #4415
