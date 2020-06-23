@@ -9,20 +9,19 @@
 			flex: auto;
 			background: transparent;
 			padding: $gap-small $gap;
-			color: $black;
+			color: inherit;
 			outline-offset: -1px;
 			text-align: center;
 			transition: box-shadow 0.1s linear;
-			box-shadow: inset 0 -2px $core-grey-light-600;
+			box-shadow: inset 0 -1px currentColor;
 			&.is-active {
-				box-shadow: inset 0 -3px $black;
+				box-shadow: inset 0 -3px currentColor;
 				font-weight: 600;
 				position: relative;
 			}
 			&:focus {
-				color: $black;
 				outline-offset: -1px;
-				outline: 1px dotted $gray-60;
+				outline: 1px dotted currentColor;
 			}
 			.wc-block-components-tabs__item-content {
 				@include font-size(regular);

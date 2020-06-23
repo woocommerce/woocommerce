@@ -40,7 +40,8 @@
 	&::after {
 		content: " ";
 		flex: 1;
-		border-bottom: 1px solid $core-grey-light-600;
+		border-bottom: 1px solid;
+		opacity: 0.3;
 	}
 }
 
@@ -79,7 +80,7 @@
 	.wc-block-components-express-checkout {
 		min-height: 150px;
 	}
-	.wc-block-components-express-checkout-continue-rule span {
+	.wc-block-components-express-checkout-continue-rule > span {
 		@include placeholder();
 		@include force-content();
 		width: 150px;

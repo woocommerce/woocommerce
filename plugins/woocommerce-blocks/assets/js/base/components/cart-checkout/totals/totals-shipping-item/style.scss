@@ -19,8 +19,8 @@
 
 	.wc-block-components-radio-control__option,
 	.wc-block-components-radio-control__option-layout {
-		&:last-child {
-			border-bottom: none;
+		&:last-child::after {
+			display: none;
 		}
 	}
 
@@ -36,5 +36,9 @@
 		&:active {
 			opacity: 0.8;
 		}
+	}
+
+	.wc-blocks-components-panel:last-child::after {
+		border-bottom-width: 0;
 	}
 }

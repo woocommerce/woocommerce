@@ -18,6 +18,7 @@ Some classes that were introduced in 2.6.0 and 2.7.0 and didn't ship in WooComme
 | `wc-block-product-metadata`            | `wc-block-components-product-metadata`                |
 | `wc-block-product-name`                | `wc-block-components-product-name`                    |
 | `wc-block-product-price`               | `wc-block-components-product-price`                   |
+| `wc-block-product-price--regular`      | `wc-block-components-product-price__regular`          |
 | `wc-block-sale-badge`                  | `wc-block-components-sale-badge`                      |
 | `wc-block-product-variation-data`      | `wc-block-components-product-variation-data`          |
 | `wc-block-cart__shipping-calculator`   | `wc-block-components-shipping-calculator`             |

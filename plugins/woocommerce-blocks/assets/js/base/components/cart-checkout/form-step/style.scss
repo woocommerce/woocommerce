@@ -45,20 +45,18 @@
 
 .wc-block-components-checkout-step__heading-content {
 	@include font-size(smaller);
-	color: $gray-80;
 	position: absolute;
 	right: 0;
 
 	a {
 		font-weight: bold;
-		color: $gray-80;
+		color: inherit;
 	}
 }
 
 .wc-block-components-checkout-step__description {
 	@include font-size(small);
 	line-height: 1.25;
-	color: $gray-60;
 	margin-bottom: $gap;
 }
 
@@ -80,6 +78,7 @@
 	content: "";
 	height: 100%;
 	border-left: 1px solid;
+	opacity: 0.3;
 	position: absolute;
 	left: -$gap-larger/2;
 	top: 0;

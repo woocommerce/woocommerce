@@ -11,17 +11,18 @@
 }
 
 .wc-block-components-order-summary-item {
+	@include with-translucent-border(0 0 1px);
 	display: table-row;
+	padding-bottom: 1px;
 	width: 100%;
-
-	> div {
-		border-bottom: 1px solid $core-grey-light-600;
-	}
 
 	&:last-child {
 		> div {
-			border-bottom: none;
 			padding-bottom: 0;
+		}
+
+		&::after {
+			display: none;
 		}
 	}
 }

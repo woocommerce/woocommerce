@@ -1,21 +1,22 @@
 @mixin radio-control-styles {
 	.wc-block-components-radio-control__option {
 		@include reset-typography();
-		border-bottom: 1px solid $core-grey-light-600;
+		@include with-translucent-border(0 0 1px);
 		display: block;
 		padding: $gap-small $gap-small 0 #{$gap-larger * 2};
-		position: relative;
 	}
 
 	.wc-block-components-radio-control__option-layout {
+		@include with-translucent-border(0 0 1px);
 		display: table;
 		width: 100%;
-		border-bottom: 1px solid $core-grey-light-600;
 		padding-bottom: $gap-small;
 	}
 
 	.wc-block-components-radio-control__option .wc-block-components-radio-control__option-layout {
-		border-bottom: 0;
+		&::after {
+			display: none;
+		}
 	}
 
 	.wc-block-components-radio-control__input {
@@ -45,14 +46,12 @@
 		// Currently, max() CSS function calls need to be wrapped with unquote.
 		// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
 		line-height: unquote("max(1rem, 20px)");
-		color: $core-grey-dark-600;
 	}
 
 	.wc-block-components-radio-control__description,
 	.wc-block-components-radio-control__secondary-description {
 		@include font-size(small);
 		line-height: 20px;
-		color: $core-grey-dark-400;
 	}
 }
 

@@ -1,4 +1,5 @@
 $border-width: 1px;
+$border-radius: 5px;
 
 .wc-block-components-express-checkout {
 	margin: auto;
@@ -10,30 +11,32 @@ $border-width: 1px;
 		left: 0;
 		position: absolute;
 		right: 0;
-		top: 0;
+		top: -$border-radius;
 		vertical-align: middle;
 
 		// Pseudo-elements used to show the border before and after the title.
 		&::before {
-			border: $border-width solid transparent;
-			border-left-color: currentColor;
-			border-top-color: currentColor;
-			border-radius: 5px 0 0 0;
+			border-left: $border-width solid currentColor;
+			border-top: $border-width solid currentColor;
+			border-radius: $border-radius 0 0 0;
 			content: "";
 			display: block;
+			height: $border-radius - $border-width;
 			margin-right: $gap-small;
+			opacity: 0.3;
 			pointer-events: none;
 			width: #{$gap-larger - $gap-small - $border-width * 2};
 		}
 
 		&::after {
-			border: $border-width solid transparent;
-			border-right-color: currentColor;
-			border-top-color: currentColor;
-			border-radius: 0 5px 0 0;
+			border-right: $border-width solid currentColor;
+			border-top: $border-width solid currentColor;
+			border-radius: 0 $border-radius 0 0;
 			content: "";
 			display: block;
+			height: $border-radius - $border-width;
 			margin-left: $gap-small;
+			opacity: 0.3;
 			pointer-events: none;
 			flex-grow: 1;
 		}
@@ -45,11 +48,13 @@ $border-width: 1px;
 	}
 
 	.wc-block-components-express-checkout__content {
-		border: $border-width solid currentColor;
-		border-top-width: 0;
-		border-radius: 5px;
-		margin-top: 0.75em;
+		@include with-translucent-border(0 $border-width $border-width);
+		margin-top: calc(0.75em + #{$border-radius});
 		padding: em($gap-large) #{$gap-larger - $border-width} em($gap) #{$gap-larger - $border-width};
+
+		&::after {
+			border-radius: 0 0 $border-radius $border-radius;
+		}
 
 		> p {
 			margin-bottom: em($gap);

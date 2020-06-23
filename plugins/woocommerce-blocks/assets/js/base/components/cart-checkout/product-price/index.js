@@ -14,35 +14,51 @@ import './style.scss';
 const ProductPrice = ( { className, currency, regularValue, value } ) => {
 	const isDiscounted =
 		Number.isFinite( regularValue ) && regularValue !== value;
-	return (
-		<>
-			{ isDiscounted && (
-				<>
-					<span className="screen-reader-text">
-						{ __(
-							'Previous price:',
-							'woo-gutenberg-products-block'
-						) }
-					</span>
+
+	if ( isDiscounted ) {
+		return (
+			<span className="price wc-block-components-product-price">
+				<span className="screen-reader-text">
+					{ __( 'Previous price:', 'woo-gutenberg-products-block' ) }
+				</span>
+				<del>
 					<FormattedMonetaryAmount
 						className={ classNames(
-							'wc-block-components-product-price--regular',
+							'wc-block-components-product-price__regular',
 							className
 						) }
 						currency={ currency }
 						value={ regularValue }
 					/>
-					<span className="screen-reader-text">
-						{ __(
-							'Discounted price:',
-							'woo-gutenberg-products-block'
+				</del>
+				<span className="screen-reader-text">
+					{ __(
+						'Discounted price:',
+						'woo-gutenberg-products-block'
+					) }
+				</span>
+				<ins>
+					<FormattedMonetaryAmount
+						className={ classNames(
+							'wc-block-components-product-price__value',
+							className,
+							{
+								'is-discounted': isDiscounted,
+							}
 						) }
-					</span>
-				</>
-			) }
+						currency={ currency }
+						value={ value }
+					/>
+				</ins>
+			</span>
+		);
+	}
+
+	return (
+		<span className="price wc-block-components-product-price">
 			<FormattedMonetaryAmount
 				className={ classNames(
-					'wc-block-components-product-price',
+					'wc-block-components-product-price__value',
 					className,
 					{
 						'is-discounted': isDiscounted,
@@ -51,7 +67,7 @@ const ProductPrice = ( { className, currency, regularValue, value } ) => {
 				currency={ currency }
 				value={ value }
 			/>
-		</>
+		</span>
 	);
 };
 
