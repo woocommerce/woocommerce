@@ -1748,12 +1748,14 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
+      var removeItemTag = $selection.html();
       var formatted = this.display(selection, $selection);
       if ('string' === typeof formatted) {
         formatted = Utils.entityDecode(formatted.trim());
       }
 
       $selection.text(formatted);
+      $selection.prepend(removeItemTag);
       $selection.prop('title', selection.title || selection.text);
 
       $selection.data('data', selection);
