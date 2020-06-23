@@ -437,12 +437,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_subtotal() {
-		$subtotal = 0;
-
-		foreach ( $this->get_items() as $item ) {
-			$subtotal += wc_remove_number_precision( self::round_item_subtotal( wc_add_number_precision( $item->get_subtotal() ) ) );
-		}
-
+		$subtotal = round( $this->get_cart_subtotal_for_order(), wc_get_price_decimals() );
 		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
@@ -1672,18 +1667,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
 		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs without rounding.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += $item->get_subtotal();
-			$cart_total    += $item->get_total();
-		}
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {

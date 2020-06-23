@@ -388,12 +388,30 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			/**
+			 * Action hook fired after an order is created used to add custom meta to the order.
+			 *
+			 * @since 3.0.0
+			 */
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
+
+			/**
+			 * Action hook fired after an order is created.
+			 *
+			 * @since 4.3.0
+			 */
+			do_action( 'woocommerce_checkout_order_created', $order );
 
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
 				$order->get_data_store()->release_held_coupons( $order );
+				/**
+				 * Action hook fired when an order is discarded due to Exception.
+				 *
+				 * @since 4.3.0
+				 */
+				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
@@ -748,14 +766,14 @@ class WC_Checkout {
 								/* translators: %s: field name */
 								$postcode_validation_notice = sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' );
 						}
-						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ), array( 'id' => $key ) );
+						$errors->add( $key . '_validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ), array( 'id' => $key ) );
 					}
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
+						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 					}
 				}
 
@@ -765,7 +783,7 @@ class WC_Checkout {
 
 					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
+						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 						continue;
 					}
 				}
@@ -785,14 +803,14 @@ class WC_Checkout {
 
 						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_values, true ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ), array( 'id' => $key ) );
+							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ), array( 'id' => $key ) );
 						}
 					}
 				}
 
 				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
+					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
 				}
 			}
 		}

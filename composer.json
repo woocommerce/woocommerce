@@ -8,15 +8,15 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "^1.6.0",
+    "automattic/jetpack-autoloader": "^1.7.0",
     "automattic/jetpack-constants": "^1.1",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "^3.1",
-    "woocommerce/action-scheduler": "3.1.5",
-    "woocommerce/woocommerce-blocks": "2.5.16",
-    "woocommerce/woocommerce-rest-api": "1.0.7",
-    "woocommerce/woocommerce-admin": "1.1.1"
+    "woocommerce/action-scheduler": "3.1.6",
+    "woocommerce/woocommerce-admin": "1.3.0-rc.1",
+    "woocommerce/woocommerce-blocks": "2.7.1",
+    "woocommerce/woocommerce-rest-api": "1.0.10"
   },
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
@@ -43,6 +43,12 @@
       "Automattic\\WooCommerce\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Tests\\": "tests/php/src",
+      "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools"
+    }
+  },
   "scripts": {
     "post-install-cmd": [
       "sh ./bin/package-update.sh"
@@ -63,7 +69,7 @@
       "phpcbf -p"
     ],
     "makepot-audit": [
-      "wp i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+      "wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
     ],
     "makepot": [
       "@makepot-audit --skip-audit"
@@ -80,8 +86,8 @@
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
-      "makepot-audit": "Generate i18n/langauges/woocommerce.pot file and run audit",
-      "makepot": "Generate i18n/langauges/woocommerce.pot file"
+      "makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
+      "makepot": "Generate i18n/languages/woocommerce.pot file"
     }
   }
 }
