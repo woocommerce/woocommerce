@@ -35,5 +35,16 @@
 		font-size: 20px;
 		line-height: 28px;
 		font-weight: 400;
+		span {
+			margin-left: $gap-small / 2;
+			background: $core-grey-dark-600;
+			border-radius: 13px;
+			color: $core-grey-light-200;
+			display: inline-block;
+			text-align: center;
+			width: 27px;
+			font-size: 16px;
+			vertical-align: top;
+		}
 	}
 }
