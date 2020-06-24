@@ -36,6 +36,10 @@
 	top: 130px;
 	margin: 0 auto;
 	align-self: flex-start;
+
+	> div {
+		margin-bottom: $gap-large;
+	}
 }
 .temp-content {
 	width: 100%;
@@ -71,4 +75,3 @@
 		padding: 0 $gap-smaller;
 	}
 }
-
