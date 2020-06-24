@@ -64,8 +64,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_id( $item->get_id() );
 		} elseif ( is_numeric( $item ) && $item > 0 ) {
 			$this->set_id( $item );
+		} elseif ( is_object( $item ) && isset( $item->order_item_id ) ) {
+			// TODO: Could this cause issue with child classes. Should be fine as long as they are calling parent::__construct.
+			$this->set_id( $item->order_item_id );
 		} else {
 			$this->set_object_read( true );
+		}
+
+		if ( isset( $item->metadata ) && is_array( $item->metadata ) ) {
+			$meta_cache_key = $this->get_meta_cache_key();
+			wp_cache_set( $meta_cache_key, $item->metadata, $this->cache_group );
 		}
 
 		$type             = 'line_item' === $this->get_type() ? 'product' : $this->get_type();
