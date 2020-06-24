@@ -1,13 +1,13 @@
-import { APIResponse, APIError, APIService } from '../api-service';
-import { APIAuthInterceptor } from './api-auth-interceptor';
-import { APIResponseInterceptor } from './api-response-interceptor';
 import axios, { AxiosInstance } from 'axios';
+import { APIAuthInterceptor } from './api-auth-interceptor';
+import { APIError, APIResponse, APIService } from '../api-service';
+import { APIResponseInterceptor } from './api-response-interceptor';
 
 /**
  * An API service implementation that uses Axios to make requests to the WordPress API.
  */
 export class AxiosAPIService implements APIService {
-	private client: AxiosInstance;
+	private readonly client: AxiosInstance;
 	private authInterceptor: APIAuthInterceptor;
 	private responseInterceptor: APIResponseInterceptor;
 
