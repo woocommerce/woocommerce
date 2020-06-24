@@ -121,10 +121,6 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
 			// Load the controllers if accessing outside the REST API.
-			if ( ! did_action( 'rest_api_init' ) ) {
-				do_action( 'rest_api_init' );
-			}
-
 			return new $controller_map[ $this->report_type ]();
 		}
 
