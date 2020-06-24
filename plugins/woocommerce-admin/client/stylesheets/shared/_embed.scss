@@ -1,9 +1,18 @@
 
 
 .woocommerce-embed-page {
+	#wpbody .woocommerce-layout,
+	.woocommerce-layout__notice-list-hide + .wrap {
+		padding-top: $header-height + 10;
+	}
+
 	#wpcontent,
 	#wpbody-content {
 		overflow-x: initial !important;
+	}
+
+	#wpbody-content {
+		padding-top: 0;
 	}
 
 	#wpbody-content .notice {
@@ -11,7 +20,7 @@
 	}
 
 	.wrap {
-		padding: 20px 20px 0;
+		padding: 0 20px;
 
 		@include breakpoint( '<782px' ) {
 			p.search-box {
@@ -72,7 +81,6 @@
 
 	.woocommerce-layout__primary {
 		margin: 0;
-		padding-top: $header-height + 20;
 
 		@include breakpoint( '<782px' ) {
 			padding-top: 10px;
