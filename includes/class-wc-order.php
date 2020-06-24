@@ -1731,6 +1731,14 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
+		/**
+		 * Action hook fired after an order note is added.
+		 *
+		 * @param int      $order_note_id Order note ID.
+		 * @param WC_Order $order         Order data.
+		 *
+		 * @since 4.4.0
+		 */
 		do_action( 'woocommerce_order_note_added', $comment_id, $this );
 
 		return $comment_id;
