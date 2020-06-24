@@ -221,13 +221,13 @@ $border: $light-gray-tertiary;
 
 	&.is-placeholder {
 		.woocommerce-summary__item {
-			height: 101px;
+			height: 117px;
 		}
 
 		.woocommerce-summary__item-label {
 			@include placeholder();
 			display: inline-block;
-			height: 16px;
+			height: 20px;
 			margin-top: 2.2px;
 			max-width: 110px;
 			width: 70%;
@@ -240,18 +240,15 @@ $border: $light-gray-tertiary;
 		.woocommerce-summary__item-value {
 			@include placeholder();
 			display: inline-block;
-			height: 16px;
+			height: 28px;
+			width: 60px;
+			max-width: 60px;
 		}
 
 		.woocommerce-summary__item-delta {
 			@include placeholder();
-			width: 40px;
-		}
-
-		.woocommerce-summary__item-value {
-			margin-top: 2.2px;
 			width: 60px;
-			max-width: 60px;
+			border-radius: 2px;
 		}
 	}
 }
