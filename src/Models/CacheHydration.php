@@ -138,4 +138,35 @@ class CacheHydration {
 		$this->collection_hydration[ $key ][ $object_id ][] = $row;
 	}
 
+	/**
+	 * Get full collection for a key.
+	 *
+	 * @param string $key Collection key.
+	 *
+	 * @return mixed|null Collection Array (or null if key is not present).
+	 */
+	public function get_collection( $key ) {
+		if ( ! isset( $this->collection_hydration[ $key ] ) ) {
+			return null;
+		}
+
+		return $this->collection_hydration[ $key ];
+	}
+
+	/**
+	 * Get collection for object and key.
+	 *
+	 * @param string     $key        Collection key.
+	 * @param int|string $object_id  Object ID.
+	 *
+	 * @return mixed|null Collection (or null if key or object ID is not present).
+	 */
+	public function get_collection_for_object( $key, $object_id ) {
+		if ( ! isset( $this->collection_hydration[ $key ] ) || ! isset( $this->collection_hydration[ $key ][ $object_id ] ) ) {
+			return null;
+		}
+
+		return $this->collection_hydration[ $key ][ $object_id ];
+	}
+
 }
