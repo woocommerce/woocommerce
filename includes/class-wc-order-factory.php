@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Models\CacheHydration;
+
 /**
  * Order factory class
  */
@@ -41,6 +43,43 @@ class WC_Order_Factory {
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
+		}
+	}
+
+	/**
+	 * Get order using hydration object to initialize some of the data. Falls back to get_order method in case of error.
+	 *
+	 * @param mixed          $order           Order ID to get.
+	 * @param CacheHydration $cache_hydration Object to initialize caches from.
+	 *
+	 * @return WC_Order|bool
+	 */
+	public static function get_order_from_hydration( $order, $cache_hydration ) {
+		$order_id = self::get_order_id( $order );
+
+		if ( ! $order_id ) {
+			return false;
+		}
+
+		$order_type = WC_Data_Store::load( 'order' )->get_order_type( $order );
+		$classname = self::get_class_name_for_order( $order_id, $order_type );
+
+		try {
+			// Lets create an empty object first to see if data store supports post hydration.
+			// We do this code gymnastics because we don't know if data store for this class (which could be modified by a filter) supports loading from WP_Post or not.
+			$order_object = new $classname( new stdClass() );
+			$order_object->set_id( $order_id );
+			$data_store = $order_object->get_data_store();
+
+			if ( method_exists( $data_store, 'read_from_hydration' ) ) {
+				$data_store->read_from_hydration( $order_object, $cache_hydration );
+			} else {
+				return new $classname( $order_id );
+			}
+		} catch ( Exception $e ) {
+			// Fallback to `wc_get_order` because looks like this class does not support initializing from hydration.
+			wc_caught_exception( $e, __FUNCTION__, array( $order_id, $classname ) );
+			return self::get_order( $order_id ); // TODO: Is this fallback necessary?
 		}
 	}
 
