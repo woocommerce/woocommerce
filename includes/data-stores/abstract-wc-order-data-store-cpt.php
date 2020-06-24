@@ -122,22 +122,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param CacheHydration $hydration Hydration object.
 	 */
 	public function read_from_hydration( $order, $hydration ) {
-		$post_object = $hydration->get_post( $order->get_id() );
+		$post_object = $hydration->get_data_for_object( 'post', $order->get_id() );
 		$order->set_id( $post_object->ID );
 		$order->set_defaults();
 
 		$this->read_from_post( $order, $post_object );
 
-		if ( $hydration->has_data( 'raw_meta_data', $post_object->ID ) ) {
-			$raw_meta_data = $hydration->get_data_for_object( 'raw_meta_data', $post_object->ID );
+		if ( $hydration->has_collection( 'raw_meta_data', $post_object->ID ) ) {
+			$raw_meta_data = $hydration->get_collection_for_object( 'raw_meta_data', $post_object->ID );
 			$order->set_meta_data_from_raw_data( $raw_meta_data );
 		}
 
-		if ( $hydration->has_data( 'order-items', $post_object->ID ) ) {
+		if ( $hydration->has_collection( 'order-items', $post_object->ID ) ) {
 			$this->read_items_from_hydration( $order, $hydration );
 		}
 
-		if ( $hydration->has_data( 'refunds' ) ) {
+		if ( $hydration->has_collection( 'refunds' ) ) {
 			$refunds = $hydration->get_data_for_object( 'refunds', $post_object->ID ) ?? array();
 			$order->prime_refunds_cache( $refunds );
 		}
@@ -186,7 +186,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param CacheHydration $cache_hydration Hydration Object.
 	 */
 	private function read_items_from_hydration( $order, $cache_hydration ) {
-		$items = $cache_hydration->get_data_for_object( 'order-items', $order->get_id() );
+		$items = $cache_hydration->get_collection_for_object( 'order-items', $order->get_id() );
 
 		if ( ! is_array( $items ) ) {
 			return;
@@ -195,9 +195,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order_items = array();
 		foreach ( $items as $order_item ) {
 			$class_name = WC_Order_Factory::get_order_item_class( $order_item );
-			if ( $cache_hydration->has_key( 'order-item-meta-data', $order_item->order_item_id ) ) {
-				$order_item->metadata = $cache_hydration->get_data_for_object( 'order-item-meta-data', $order_item->order_item_id );
-			}
+			$order_item->metadata = $cache_hydration->get_collection_for_object( 'order-item-meta-data', $order_item->order_item_id );
 			if ( $class_name && class_exists( $class_name ) ) {
 				$order_items[] = new $class_name( $order_item );
 			}
