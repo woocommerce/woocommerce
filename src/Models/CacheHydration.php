@@ -98,6 +98,9 @@ class CacheHydration {
 	 * @param string $index_key Name of the index key.
 	 * */
 	public function add_to_collection( $data, $key, $index_key ) {
+		if ( ! isset( $this->collection_hydration[ $key ] ) ) {
+			$this->collection_hydration[ $key ] = array();
+		}
 		foreach ( $data as $row ) {
 			$index = $row->$index_key;
 			$this->append_collection_for_object( $key, $index, $row );
