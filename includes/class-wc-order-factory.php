@@ -18,17 +18,41 @@ class WC_Order_Factory {
 	/**
 	 * Get order.
 	 *
-	 * @param  mixed $order_id (default: false) Order ID to get.
+	 * @param  mixed $order (default: false) Order ID to get.
+	 *
 	 * @return WC_Order|bool
 	 */
-	public static function get_order( $order_id = false ) {
-		$order_id = self::get_order_id( $order_id );
+	public static function get_order( $order = false ) {
+		$order_id = self::get_order_id( $order );
 
 		if ( ! $order_id ) {
 			return false;
 		}
 
-		$order_type      = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
+		$order_type = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
+		$classname  = self::get_class_name_for_order( $order_id, $order_type );
+
+		if ( ! $classname ) {
+			return false;
+		}
+
+		try {
+			return new $classname( $order_id );
+		} catch ( Exception $e ) {
+			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			return false;
+		}
+	}
+
+	/**
+	 * Helper method to fetch class name for an order.
+	 *
+	 * @param int    $order_id   Order ID.
+	 * @param string $order_type Order type.
+	 *
+	 * @return bool|mixed|void
+	 */
+	private static function get_class_name_for_order( $order_id, $order_type ) {
 		$order_type_data = wc_get_order_type( $order_type );
 		if ( $order_type_data ) {
 			$classname = $order_type_data['class_name'];
@@ -43,21 +67,17 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		try {
-			return new $classname( $order_id );
-		} catch ( Exception $e ) {
-			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
-			return false;
-		}
+		return $classname;
 	}
 
 	/**
-	 * Get order item.
+	 * Helper method to fetch class for order item.
 	 *
-	 * @param int $item_id Order item ID to get.
-	 * @return WC_Order_Item|false if not found
+	 * @param int $item_id Order Item ID.
+	 *
+	 * @return bool|mixed|string|void Class name.
 	 */
-	public static function get_order_item( $item_id = 0 ) {
+	public static function get_order_item_class( $item_id = 0 ) {
 		if ( is_numeric( $item_id ) ) {
 			$item_type = WC_Data_Store::load( 'order-item' )->get_order_item_type( $item_id );
 			$id        = $item_id;
@@ -71,9 +91,9 @@ class WC_Order_Factory {
 			$item_type = false;
 			$id        = false;
 		}
+		$classname = false;
 
 		if ( $id && $item_type ) {
-			$classname = false;
 			switch ( $item_type ) {
 				case 'line_item':
 				case 'product':
@@ -92,15 +112,25 @@ class WC_Order_Factory {
 					$classname = 'WC_Order_Item_Tax';
 					break;
 			}
-
 			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
+		}
 
-			if ( $classname && class_exists( $classname ) ) {
-				try {
-					return new $classname( $id );
-				} catch ( Exception $e ) {
-					return false;
-				}
+		return $classname;
+	}
+
+	/**
+	 * Get order item.
+	 *
+	 * @param int $item_id Order item ID to get.
+	 * @return WC_Order_Item|false if not found
+	 */
+	public static function get_order_item( $item_id = 0 ) {
+		$classname = self::get_order_item_class( $item_id );
+		if ( $classname && class_exists( $classname ) ) {
+			try {
+				return new $classname( $item_id );
+			} catch ( Exception $e ) {
+				return false;
 			}
 		}
 		return false;
