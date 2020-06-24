@@ -915,6 +915,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				)
 			);
 			$cache_hydration->add_to_collection( $refunds, 'refunds', 'parent' );
+			$refunds_by_order_id = $cache_hydration->get_collection( 'refunds' );
+			foreach ( $order_ids as $order_id ) {
+				if ( ! isset( $refunds_by_order_id[ $order_id ] ) ) {
+					// Set empty rows where refund is empty.
+					$cache_hydration->append_collection_for_object( 'refunds', $order_id, array() );
+				}
+			}
 		}
 
 		self::prime_order_item_caches_for_orders( $order_ids, $cache_hydration, true );
@@ -942,24 +949,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		global $wpdb;
 		$order_ids       = esc_sql( $order_ids );
 		$order_id_string = implode( ',', $order_ids );
-		$order_items = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id in ( $order_id_string ) ORDER BY order_item_id;"
-			)
+		$order_items_collection = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id in ( $order_id_string ) ORDER BY order_item_id;"
 		);
-		foreach ( $order_items as $item ) {
+		foreach ( $order_items_collection as $item ) {
 			wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
 		}
+		$cache_hydration->add_to_collection( $order_items_collection, 'order-items', 'order_id' );
 
 		foreach ( $cache_hydration->get_collection( 'order-items' ) as $order_id => $order_items ) {
 			wp_cache_set( 'order-items-' . $order_id, $order_items, 'orders' );
 		}
 
-		$cache_hydration->add_to_collection( $order_items, 'order-items', 'order_id' );
-
 		if ( $prime_meta_cache ) {
-			$order_item_ids = wp_list_pluck( $order_items, 'order_item_id' );
+			$order_item_ids = wp_list_pluck( $order_items_collection, 'order_item_id' );
 			self::prime_order_item_meta_caches_for_orders( $order_item_ids, $cache_hydration );
 		}
 	}
@@ -980,12 +984,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			update_meta_cache( 'order_item', $order_item_ids );
 			$items_meta_data = $wpdb->get_results(
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$wpdb->prepare(
-					"SELECT order_item_id, meta_id, meta_key, meta_value
-					FROM {$wpdb->prefix}woocommerce_order_itemmeta
-					WHERE order_item_id in ( $order_item_ids_string )
-					ORDER BY meta_id"
-				)
+				"SELECT order_item_id, meta_id, meta_key, meta_value
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta
+				WHERE order_item_id in ( $order_item_ids_string )
+				ORDER BY meta_id"
 				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			);
 
@@ -1008,12 +1010,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$order_ids_in  = "'" . implode( $order_ids, "', '" ) . "'";
 		$raw_meta_data = $wpdb->get_results(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare(
-				"SELECT post_id as object_id, meta_id, meta_key, meta_value
-					FROM {$wpdb->postmeta}
-					WHERE post_id IN ( $order_ids_in )
-					ORDER BY post_id"
-			)
+			"SELECT post_id as object_id, meta_id, meta_key, meta_value
+				FROM {$wpdb->postmeta}
+				WHERE post_id IN ( $order_ids_in )
+				ORDER BY post_id"
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 		return $raw_meta_data;

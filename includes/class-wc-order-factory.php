@@ -70,9 +70,9 @@ class WC_Order_Factory {
 			$order_object = new $classname( new stdClass() );
 			$order_object->set_id( $order_id );
 			$data_store = $order_object->get_data_store();
-
-			if ( method_exists( $data_store, 'read_from_hydration' ) ) {
-				$data_store->read_from_hydration( $order_object, $cache_hydration );
+			$data_store->read_from_hydration( $order_object, $cache_hydration );
+			if ( $order_object->get_object_read() ) {
+				return $order_object;
 			} else {
 				return new $classname( $order_id );
 			}
