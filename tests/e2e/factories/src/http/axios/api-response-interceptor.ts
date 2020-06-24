@@ -18,7 +18,7 @@ export class APIResponseInterceptor {
 			this.interceptorID = this.client.interceptors.response.use(
 				// @ts-ignore: We WANT to change the type of response returned.
 				( response ) => this.onFulfilled( response ),
-				( error: any ) => this.onRejected( error )
+				( error: any ) => this.onRejected( error ),
 			);
 		}
 	}
@@ -39,9 +39,9 @@ export class APIResponseInterceptor {
 	 * @param {AxiosResponse} response The respons ethat we need to transform.
 	 * @return {Promise} A promise containing the APIResponse.
 	 */
-	private onFulfilled( response: AxiosResponse ): Promise< APIResponse > {
-		return Promise.resolve< APIResponse >(
-			new APIResponse( response.status, response.headers, response.data )
+	private onFulfilled( response: AxiosResponse ): Promise<APIResponse> {
+		return Promise.resolve<APIResponse>(
+			new APIResponse( response.status, response.headers, response.data ),
 		);
 	}
 
@@ -51,14 +51,14 @@ export class APIResponseInterceptor {
 	 * @param {*} error The error
 	 * @return {Promise} A promise containing the APIError.
 	 */
-	private onRejected( error: any ): Promise< APIError > {
+	private onRejected( error: any ): Promise<APIError> {
 		let apiResponse: APIResponse | null = null;
 		let message: string | null = null;
 		if ( error.response ) {
 			apiResponse = new APIResponse(
 				error.response.status,
 				error.response.headers,
-				error.response.data
+				error.response.data,
 			);
 		} else if ( error.request ) {
 			message = 'No response was received from the server.';

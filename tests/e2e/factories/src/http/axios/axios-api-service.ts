@@ -1,14 +1,7 @@
 import { APIResponse, APIError, APIService } from '../api-service';
 import { APIAuthInterceptor } from './api-auth-interceptor';
 import { APIResponseInterceptor } from './api-response-interceptor';
-import axios, {
-	AxiosInstance,
-	AxiosTransformer,
-	AxiosResponse,
-	AxiosError,
-	Method,
-	AxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 /**
  * An API service implementation that uses Axios to make requests to the WordPress API.
@@ -21,7 +14,7 @@ export class AxiosAPIService implements APIService {
 	public constructor(
 		baseAPIURL: string,
 		consumerKey: string,
-		consumerSecret: string
+		consumerSecret: string,
 	) {
 		this.client = axios.create( {
 			baseURL: baseAPIURL,
@@ -29,7 +22,7 @@ export class AxiosAPIService implements APIService {
 		this.authInterceptor = new APIAuthInterceptor(
 			this.client,
 			consumerKey,
-			consumerSecret
+			consumerSecret,
 		);
 		this.authInterceptor.start();
 		this.responseInterceptor = new APIResponseInterceptor( this.client );
@@ -43,10 +36,10 @@ export class AxiosAPIService implements APIService {
 	 * @param {*}      params Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
 	 */
-	public get< T >(
+	public get<T>(
 		endpoint: string,
-		params?: any
-	): Promise< APIResponse< T > | APIError< T > > {
+		params?: any,
+	): Promise<APIResponse<T> | APIError<T>> {
 		return this.client.get( endpoint, { params } );
 	}
 
@@ -57,10 +50,10 @@ export class AxiosAPIService implements APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
 	 */
-	public post< T >(
+	public post<T>(
 		endpoint: string,
-		data?: any
-	): Promise< APIResponse< T > | APIError< T > > {
+		data?: any,
+	): Promise<APIResponse<T> | APIError<T>> {
 		return this.client.post( endpoint, { data } );
 	}
 
@@ -71,10 +64,10 @@ export class AxiosAPIService implements APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
 	 */
-	public put< T >(
+	public put<T>(
 		endpoint: string,
-		data?: any
-	): Promise< APIResponse< T > | APIError< T > > {
+		data?: any,
+	): Promise<APIResponse<T> | APIError<T>> {
 		return this.client.put( endpoint, { data } );
 	}
 
@@ -85,10 +78,10 @@ export class AxiosAPIService implements APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
 	 */
-	public patch< T >(
+	public patch<T>(
 		endpoint: string,
-		data?: any
-	): Promise< APIResponse< T > | APIError< T > > {
+		data?: any,
+	): Promise<APIResponse<T> | APIError<T>> {
 		return this.client.patch( endpoint, { data } );
 	}
 
@@ -99,10 +92,10 @@ export class AxiosAPIService implements APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
 	 */
-	public delete< T >(
+	public delete<T>(
 		endpoint: string,
-		data?: any
-	): Promise< APIResponse< T > | APIError< T > > {
+		data?: any,
+	): Promise<APIResponse<T> | APIError<T>> {
 		return this.client.delete( endpoint, { data } );
 	}
 }

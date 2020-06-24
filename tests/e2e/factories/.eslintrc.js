@@ -11,8 +11,7 @@ module.exports = {
 		'no-unused-vars': 'off',
 	},
 	extends: [
-		'plugin:@wordpress/eslint-plugin/recommended',
-		'plugin:jest/recommended'
+		'plugin:@wordpress/eslint-plugin/recommended-with-formatting'
 	],
 	overrides: [
 		{ "files": [ '**/*.ts' ] }

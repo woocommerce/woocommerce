@@ -13,7 +13,7 @@ export class APIAuthInterceptor {
 	public constructor(
 		client: AxiosInstance,
 		consumerKey: string,
-		consumerSecret: string
+		consumerSecret: string,
 	) {
 		this.client = client;
 		this.interceptorID = null;
@@ -24,9 +24,7 @@ export class APIAuthInterceptor {
 			},
 			signature_method: 'HMAC-SHA256',
 			hash_function: ( base: any, key: any ) => {
-				return createHmac( 'sha256', key )
-					.update( base )
-					.digest( 'base64' );
+				return createHmac( 'sha256', key ).update( base ).digest( 'base64' );
 			},
 		} );
 	}
@@ -37,7 +35,7 @@ export class APIAuthInterceptor {
 	public start(): void {
 		if ( null === this.interceptorID ) {
 			this.interceptorID = this.client.interceptors.request.use(
-				( request ) => this.handleRequest( request )
+				( request ) => this.handleRequest( request ),
 			);
 		}
 	}
@@ -70,7 +68,7 @@ export class APIAuthInterceptor {
 				this.oauth.authorize( {
 					url,
 					method: request.method!,
-				} )
+				} ),
 			).Authorization;
 		}
 

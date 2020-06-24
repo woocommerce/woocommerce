@@ -1,6 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { APIResponse, APIError } from './../api-service';
+import { APIResponse } from './../api-service';
 import { AxiosAPIService } from './axios-api-service';
 
 describe( 'AxiosAPIService', () => {
@@ -11,7 +10,7 @@ describe( 'AxiosAPIService', () => {
 		apiClient = new AxiosAPIService(
 			'https://test.test/wp-json/',
 			'consumer_key',
-			'consumer_secret'
+			'consumer_secret',
 		);
 	} );
 

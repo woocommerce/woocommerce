@@ -12,7 +12,7 @@ describe( 'APIAuthInterceptor', () => {
 		apiAuthInterceptor = new APIAuthInterceptor(
 			axiosInstance,
 			'consumer_key',
-			'consumer_secret'
+			'consumer_secret',
 		);
 		apiAuthInterceptor.start();
 	} );
@@ -46,7 +46,8 @@ describe( 'APIAuthInterceptor', () => {
 
 		expect( request.headers ).toHaveProperty( 'Authorization' );
 		expect( request.headers.Authorization ).toEqual(
-			'Basic ' + btoa( 'consumer_key:consumer_secret' )
+			'Basic ' +
+				Buffer.from( 'consumer_key:consumer_secret' ).toString( 'base64' ),
 		);
 	} );
 
@@ -60,7 +61,7 @@ describe( 'APIAuthInterceptor', () => {
 		// focus on ensuring that the header looks roughly correct given what we readily know.
 		expect( request.headers ).toHaveProperty( 'Authorization' );
 		expect( request.headers.Authorization ).toMatch(
-			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/
+			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/,
 		);
 	} );
 
@@ -76,7 +77,8 @@ describe( 'APIAuthInterceptor', () => {
 
 		expect( request.headers ).toHaveProperty( 'Authorization' );
 		expect( request.headers.Authorization ).toEqual(
-			'Basic ' + btoa( 'consumer_key:consumer_secret' )
+			'Basic ' +
+				Buffer.from( 'consumer_key:consumer_secret' ).toString( 'base64' ),
 		);
 	} );
 } );

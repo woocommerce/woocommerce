@@ -56,10 +56,10 @@ describe( 'APIResponseInterceptor', () => {
 					new APIResponse(
 						404,
 						{ 'content-type': 'application/json' },
-						{ message: 'value' }
+						{ message: 'value' },
 					),
-					null
-				)
+					null,
+				),
 			);
 		} );
 	} );
