@@ -28,6 +28,7 @@ _Outcome_: **You are equipped to ship a release!**
 -   Ensure all issues/PRs intended for this release are merged, closed and linked to release.
 -   All PRs should have changelog entry, or `skip-changelog` tag.
 -   Check with the team to confirm any outstanding or in progress work.
+-   Review recent [dependency updates](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pulls?q=is%3Apr+is%3Aclosed+author%3Aapp%2Frenovate) to be included in this release, and ensure they have been adequately tested. 
 
 Note: changelog should be formatted like this in PR description. Note the preceding `>` - this is required by changelog script.
 
@@ -49,7 +50,7 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
 
 Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to the min branch, but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
 
-### Patch releases against latest main branch
+##### Patch releases against latest main branch
 
 If it's determined a patch release will include the latest main branch:
 
@@ -58,7 +59,7 @@ If it's determined a patch release will include the latest main branch:
 - Move all closed issues and pulls from the current release milestone into the patch release milestone.
 - Push the release branch to origin (so changes are in GitHub repo).
 
-### Patch releases with cherry-picking.
+##### Patch releases with cherry-picking.
 
 This is for releases where just fixes specific to the branch are released and not the latest changes in `main`.
 
@@ -72,7 +73,7 @@ This is for releases where just fixes specific to the branch are released and no
 -   Push the release branch to origin (so changes are in GitHub repo).
 -   Label the PR: `status: cherry-picked 🍒`.
 
-### Minor/Major releases
+##### Minor/Major releases
 
 - Ensure your local checkout is updated to the tip of the release branch.
 
