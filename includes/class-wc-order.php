@@ -1793,6 +1793,16 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Prime refunds cache, can be used before get_refunds to skip DB query.
+	 *
+	 * @param array $refunds array of WC_Order_Refund objects.
+	 */
+	public function prime_refunds_cache( $refunds ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		wp_cache_set( $cache_key, $refunds, $this->cache_group );
+	}
+
+	/**
 	 * Get order refunds.
 	 *
 	 * @since 2.2
