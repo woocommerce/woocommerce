@@ -19,7 +19,7 @@ describe( 'AxiosAPIService', () => {
 		moxios.uninstall();
 	} );
 
-	it( 'should transform responses into APIResponse', async () => {
+	it( 'should add interceptors', async () => {
 		moxios.stubOnce( 'GET', '/wc/v2/product', {
 			status: 200,
 			headers: {
@@ -28,39 +28,10 @@ describe( 'AxiosAPIService', () => {
 			responseText: JSON.stringify( { test: 'value' } ),
 		} );
 
-		const response = await apiClient.request( 'GET', '/wc/v2/product' );
+		const response = await apiClient.get( '/wc/v2/product' );
+		expect( response ).toBeInstanceOf( APIResponse );
 
-		expect( response ).toMatchObject( {
-			status: 200,
-			headers: {
-				'content-type': 'application/json',
-			},
-			data: {
-				test: 'value',
-			},
-		} );
-	} );
-
-	it( 'should transform response errors into APIError', async () => {
-		moxios.stubOnce( 'GET', '/wc/v2/product', {
-			status: 404,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			responseText: JSON.stringify( { message: 'value' } ),
-		} );
-
-		await apiClient.request( 'GET', '/wc/v2/product' ).catch( ( error ) => {
-			expect( error ).toMatchObject(
-				new APIError(
-					new APIResponse(
-						404,
-						{ 'content-type': 'application/json' },
-						{ message: 'value' }
-					),
-					null
-				)
-			);
-		} );
+		const request = moxios.requests.mostRecent();
+		expect( request.headers ).toHaveProperty( 'Authorization' );
 	} );
 } );

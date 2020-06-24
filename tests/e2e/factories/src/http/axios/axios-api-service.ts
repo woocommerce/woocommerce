@@ -1,5 +1,6 @@
 import { APIResponse, APIError, APIService } from '../api-service';
 import { APIAuthInterceptor } from './api-auth-interceptor';
+import { APIResponseInterceptor } from './api-response-interceptor';
 import axios, {
 	AxiosInstance,
 	AxiosTransformer,
@@ -15,6 +16,7 @@ import axios, {
 export class AxiosAPIService implements APIService {
 	private client: AxiosInstance;
 	private authInterceptor: APIAuthInterceptor;
+	private responseInterceptor: APIResponseInterceptor;
 
 	public constructor(
 		baseAPIURL: string,
@@ -30,6 +32,8 @@ export class AxiosAPIService implements APIService {
 			consumerSecret
 		);
 		this.authInterceptor.start();
+		this.responseInterceptor = new APIResponseInterceptor( this.client );
+		this.responseInterceptor.start();
 	}
 
 	/**
@@ -43,7 +47,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		params?: any
 	): Promise< APIResponse< T > | APIError< T > > {
-		return this.request( 'GET', endpoint, params );
+		return this.client.get( endpoint, { params } );
 	}
 
 	/**
@@ -57,7 +61,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any
 	): Promise< APIResponse< T > | APIError< T > > {
-		return this.request( 'POST', endpoint, data );
+		return this.client.post( endpoint, { data } );
 	}
 
 	/**
@@ -71,7 +75,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any
 	): Promise< APIResponse< T > | APIError< T > > {
-		return this.request( 'PUT', endpoint, data );
+		return this.client.put( endpoint, { data } );
 	}
 
 	/**
@@ -85,7 +89,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any
 	): Promise< APIResponse< T > | APIError< T > > {
-		return this.request( 'PATCH', endpoint, data );
+		return this.client.patch( endpoint, { data } );
 	}
 
 	/**
@@ -99,80 +103,6 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any
 	): Promise< APIResponse< T > | APIError< T > > {
-		return this.request( 'DELETE', endpoint, data );
-	}
-
-	/**
-	 * Performs an HTTP request against the WordPress API.
-	 *
-	 * @param {string} method The HTTP method we should use in the request.
-	 * @param {string} endpoint The API endpoint we should query.
-	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
-	 */
-	public request< T >(
-		method: Method,
-		endpoint: string,
-		data?: any
-	): Promise< APIResponse< T > | APIError< T > > {
-		const config: AxiosRequestConfig = {
-			method,
-			url: endpoint,
-		};
-		if ( data ) {
-			if ( 'GET' === method ) {
-				config.params = data;
-			} else {
-				config.data = data;
-			}
-		}
-
-		return this.client.request( config ).then(
-			( response ) => this.onFulfilled< T >( response ),
-			( error ) => this.onRejected< T >( error )
-		);
-	}
-
-	/**
-	 * Transforms the Axios response into our API response to be consumed in a consistent manner.
-	 *
-	 * @param {AxiosResponse} response The respons ethat we need to transform.
-	 * @return {Promise} A promise containing the APIResponse.
-	 */
-	private onFulfilled< T >(
-		response: AxiosResponse
-	): Promise< APIResponse< T > > {
-		return Promise.resolve< APIResponse< T > >(
-			new APIResponse< T >(
-				response.status,
-				response.headers,
-				response.data
-			)
-		);
-	}
-
-	/**
-	 * Transforms the Axios error into our API error to be consumed in a consistent manner.
-	 *
-	 * @param {*} error The error
-	 * @return {Promise} A promise containing the APIError.
-	 */
-	private onRejected< T >( error: any ): Promise< APIError< T > > {
-		let apiResponse: APIResponse< T > | null = null;
-		let message: string | null = null;
-		if ( error.response ) {
-			apiResponse = new APIResponse< T >(
-				error.response.status,
-				error.response.headers,
-				error.response.data
-			);
-		} else if ( error.request ) {
-			message = 'No response was received from the server.';
-		} else {
-			// Keep bubbling up the errors that we aren't handling.
-			throw error;
-		}
-
-		return Promise.reject( new APIError< T >( apiResponse, message ) );
+		return this.client.delete( endpoint, { data } );
 	}
 }
