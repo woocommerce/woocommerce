@@ -314,7 +314,12 @@ class TaskDashboard extends Component {
 			);
 
 			task.title = (
-				<Text as="div" variant={ task.completed ? 'body.small' : 'button' }>{ task.title }</Text>
+				<Text
+					as="div"
+					variant={ task.completed ? 'body.small' : 'button' }
+				>
+					{ task.title }
+				</Text>
 			);
 
 			if ( ! task.completed ) {
@@ -353,7 +358,7 @@ class TaskDashboard extends Component {
 						<Fragment>
 							<Card
 								size="large"
-								className="woocommerce-task-card woocommerce-homescreen-card"
+								className="woocommerce-task-card woocommerce-dashboard-card"
 							>
 								<progress
 									className={ progressBarClass }
