@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Models\CacheHydration;
+
 /**
  * WC Order Data Store: Stored in CPT.
  *
@@ -734,11 +736,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get the order type based on Order ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $order_id Order ID.
+	 * @param int|WP_Post $order Order | Order id.
+	 *
 	 * @return string
 	 */
-	public function get_order_type( $order_id ) {
-		return get_post_type( $order_id );
+	public function get_order_type( $order ) {
+		return get_post_type( $order );
 	}
 
 	/**
@@ -865,7 +868,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$query = new WP_Query( $args );
 		}
 
-		$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			$orders = $query->posts;
+		} else {
+			$order_ids = wp_list_pluck( $query->posts, 'ID' );
+			$orders = $this->compile_orders( $order_ids, $query_vars, $query );
+		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
 			return (object) array(
@@ -876,6 +884,139 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $orders;
+	}
+
+	/**
+	 * Compile order response and set caches as needed for order ids.
+	 *
+	 * @param array    $order_ids  List of order IDS to compile.
+	 * @param array    $query_vars Original query arguments.
+	 * @param WP_Query $query      Query object.
+	 *
+	 * @return array Orders.
+	 */
+	protected function compile_orders( $order_ids, $query_vars, $query ) {
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+		$orders = array();
+
+		$cache_hydration = new CacheHydration();
+
+		$raw_meta_data = self::fetch_raw_meta_cache_for_orders( $order_ids );
+		$cache_hydration->add_to_collection( $raw_meta_data, 'raw_meta_data', 'object_id' );
+
+		if ( isset( $query_vars['type'] ) && 'shop_order' === $query_vars['type'] ) {
+			$refunds = wc_get_orders(
+				array(
+					'type'   => 'shop_order_refund',
+					'post_parent__in' => $order_ids,
+					'limit'  => - 1,
+				)
+			);
+			$cache_hydration->add_to_collection( $refunds, 'refunds', 'parent' );
+		}
+
+		self::prime_order_item_caches_for_orders( $order_ids, $cache_hydration, true );
+
+		foreach ( $query->posts as $post ) {
+			// Lets do some hydrations so that we don't have to fetch data from DB later.
+			$cache_hydration->set_data_for_object( 'post', $post->ID, $post );
+			$orders[] = wc_get_order( $post, $cache_hydration );
+		}
+
+		return $orders;
+	}
+
+	/**
+	 * Prime following caches:
+	 *  1. item-$order_item_id   For individual items.
+	 *  2. order-items-$order-id For fetching items associated with an order.
+	 *  3. (Optionally) order-item meta.
+	 *
+	 * @param array          $order_ids       Array of order ids.
+	 * @param CacheHydration $cache_hydration Cache hydration object.
+	 * @param bool           $prime_meta_cache Whether to also prime order item meta cache.
+	 */
+	private static function prime_order_item_caches_for_orders( $order_ids, $cache_hydration, $prime_meta_cache ) {
+		global $wpdb;
+		$order_ids       = esc_sql( $order_ids );
+		$order_id_string = implode( ',', $order_ids );
+		$order_items = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id in ( $order_id_string ) ORDER BY order_item_id;"
+			)
+		);
+		foreach ( $order_items as $item ) {
+			wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
+		}
+
+		foreach ( $cache_hydration->get_collection( 'order-items' ) as $order_id => $order_items ) {
+			wp_cache_set( 'order-items-' . $order_id, $order_items, 'orders' );
+		}
+
+		$cache_hydration->add_to_collection( $order_items, 'order-items', 'order_id' );
+
+		if ( $prime_meta_cache ) {
+			$order_item_ids = wp_list_pluck( $order_items, 'order_item_id' );
+			self::prime_order_item_meta_caches_for_orders( $order_item_ids, $cache_hydration );
+		}
+	}
+
+	/**
+	 * Prime cache for order item meta and store in CacheHydration object.
+	 *
+	 * @param array          $order_item_ids  Array of order ids.
+	 * @param CacheHydration $cache_hydration Cache hydration object.
+	 */
+	private static function prime_order_item_meta_caches_for_orders( $order_item_ids, CacheHydration $cache_hydration ) {
+		global $wpdb;
+		if ( ! empty( $order_item_ids ) ) {
+			$order_item_ids_string = implode( ',', $order_item_ids );
+
+			// Next two lines fetches same data, but as of now its very complicated to use same results in both of these.
+			// This is because `update_meta_cache` discards `meta_id` which we need while priming order-item-meta-data.
+			update_meta_cache( 'order_item', $order_item_ids );
+			$items_meta_data = $wpdb->get_results(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->prepare(
+					"SELECT order_item_id, meta_id, meta_key, meta_value
+					FROM {$wpdb->prefix}woocommerce_order_itemmeta
+					WHERE order_item_id in ( $order_item_ids_string )
+					ORDER BY meta_id"
+				)
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			);
+
+			$cache_hydration->add_to_collection( $items_meta_data, 'order-item-meta-data', 'order_item_id' );
+		} else {
+			$cache_hydration->add_to_collection( array(), 'order-item-meta-data', 'order_item_id' );
+		}
+	}
+
+	/**
+	 * Fetch metadata for posts in bulk.
+	 *
+	 * @param array $order_ids Array of order IDs.
+	 *
+	 * @return array|object|null Raw meta data for orders.
+	 */
+	private static function fetch_raw_meta_cache_for_orders( $order_ids ) {
+		global $wpdb;
+		$order_ids     = esc_sql( $order_ids );
+		$order_ids_in  = "'" . implode( $order_ids, "', '" ) . "'";
+		$raw_meta_data = $wpdb->get_results(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				"SELECT post_id as object_id, meta_id, meta_key, meta_value
+					FROM {$wpdb->postmeta}
+					WHERE post_id IN ( $order_ids_in )
+					ORDER BY post_id"
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+		return $raw_meta_data;
 	}
 
 	/**

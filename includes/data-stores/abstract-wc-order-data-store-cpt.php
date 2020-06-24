@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Models\CacheHydration;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -93,14 +94,75 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Method to read an order from the database.
 	 *
-	 * @param WC_Data $order Order object.
+	 * @param WC_Order $order Order object.
 	 *
 	 * @throws Exception If passed order is invalid.
 	 */
 	public function read( &$order ) {
 		$order->set_defaults();
 		$post_object = get_post( $order->get_id() );
+		$this->read_from_post( $order, $post_object );
+		$order->read_meta_data();
+		$order->set_object_read( true );
 
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored. @todo When meta is flattened, handle this during migration.
+		 */
+		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
+			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
+	}
+
+	/**
+	 * Initialize objects using hydration.
+	 *
+	 * @param WC_Order       $order     Order object.
+	 * @param CacheHydration $hydration Hydration object.
+	 */
+	public function read_from_hydration( $order, $hydration ) {
+		$post_object = $hydration->get_post( $order->get_id() );
+		$order->set_id( $post_object->ID );
+		$order->set_defaults();
+
+		$this->read_from_post( $order, $post_object );
+
+		if ( $hydration->has_data( 'raw_meta_data', $post_object->ID ) ) {
+			$raw_meta_data = $hydration->get_data_for_object( 'raw_meta_data', $post_object->ID );
+			$order->set_meta_data_from_raw_data( $raw_meta_data );
+		}
+
+		if ( $hydration->has_data( 'order-items', $post_object->ID ) ) {
+			$this->read_items_from_hydration( $order, $hydration );
+		}
+
+		if ( $hydration->has_data( 'refunds' ) ) {
+			$refunds = $hydration->get_data_for_object( 'refunds', $post_object->ID ) ?? array();
+			$order->prime_refunds_cache( $refunds );
+		}
+
+		$order->set_object_read( true );
+
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored. @todo When meta is flattened, handle this during migration.
+		 */
+		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
+			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
+	}
+
+	/**
+	 * Helper function to read data from post_object.
+	 *
+	 * @param WC_Order $order       Order object.
+	 * @param WP_Post  $post_object Post object.
+	 *
+	 * @throws Exception When passed order object is invalid.
+	 */
+	private function read_from_post( $order, $post_object ) {
 		if ( ! $order->get_id() || ! $post_object || ! in_array( $post_object->post_type, wc_get_order_types(), true ) ) {
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
@@ -115,18 +177,33 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		$this->read_order_data( $order, $post_object );
-		$order->read_meta_data();
-		$order->set_object_read( true );
+	}
 
-		/**
-		 * In older versions, discounts may have been stored differently.
-		 * Update them now so if the object is saved, the correct values are
-		 * stored. @todo When meta is flattened, handle this during migration.
-		 */
-		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
-			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+	/**
+	 * Initialize objects from Hydration.
+	 *
+	 * @param WC_Order       $order           Order object.
+	 * @param CacheHydration $cache_hydration Hydration Object.
+	 */
+	private function read_items_from_hydration( $order, $cache_hydration ) {
+		$items = $cache_hydration->get_data_for_object( 'order-items', $order->get_id() );
+
+		if ( ! is_array( $items ) ) {
+			return;
+		}
+
+		$order_items = array();
+		foreach ( $items as $order_item ) {
+			$class_name = WC_Order_Factory::get_order_item_class( $order_item );
+			if ( $cache_hydration->has_key( 'order-item-meta-data', $order_item->order_item_id ) ) {
+				$order_item->metadata = $cache_hydration->get_data_for_object( 'order-item-meta-data', $order_item->order_item_id );
+			}
+			if ( $class_name && class_exists( $class_name ) ) {
+				$order_items[] = new $class_name( $order_item );
+			}
 		}
 	}
+
 
 	/**
 	 * Method to update an order in the database.
