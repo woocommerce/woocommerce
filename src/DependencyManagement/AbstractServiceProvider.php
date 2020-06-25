@@ -38,11 +38,11 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
+	protected function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		try {
 			$reflector = new \ReflectionClass( $class_name );
 		} catch ( \ReflectionException $ex ) {
-			throw new \Exception( get_class( $this ) . "::addWithAutoArguments: error when reflecting class '$class_name': {$ex->getMessage()}" );
+			throw new \Exception( "AbstractServiceProvider::addWithAutoArguments: error when reflecting class '$class_name': {$ex->getMessage()}" );
 		}
 
 		$definition = new Definition( $class_name, $concrete );
@@ -51,7 +51,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 
 		if ( ! is_null( $constructor ) ) {
 			if ( ! $constructor->isPublic() ) {
-				throw new \Exception( get_class( $this ) . "::addWithAutoArguments: constructor of class '$class_name' isn't public, instances can't be created." );
+				throw new \Exception( "AbstractServiceProvider::addWithAutoArguments: constructor of class '$class_name' isn't public, instances can't be created." );
 			}
 
 			$constructor_arguments = $constructor->getParameters();
@@ -62,7 +62,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 				} else {
 					$argument_class = $argument->getClass();
 					if ( is_null( $argument_class ) ) {
-						throw new \Exception( get_class( $this ) . "::addWithAutoArguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
+						throw new \Exception( "AbstractServiceProvider::addWithAutoArguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
 					}
 
 					$definition->addArgument( $argument_class->name );
@@ -90,7 +90,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function share_with_auto_arguments( string $class_name, $concrete = null ) : DefinitionInterface {
+	protected function share_with_auto_arguments( string $class_name, $concrete = null ) : DefinitionInterface {
 		return $this->add_with_auto_arguments( $class_name, $concrete, true );
 	}
 
@@ -103,7 +103,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 */
-	public function add( string $id, $concrete = null, bool $shared = null ) : DefinitionInterface {
+	protected function add( string $id, $concrete = null, bool $shared = null ) : DefinitionInterface {
 		return $this->getContainer()->add( $id, $concrete, $shared );
 	}
 
@@ -115,7 +115,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 */
-	public function share( string $id, $concrete = null ) : DefinitionInterface {
+	protected function share( string $id, $concrete = null ) : DefinitionInterface {
 		return $this->add( $id, $concrete, true );
 	}
 }
