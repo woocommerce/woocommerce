@@ -22,26 +22,7 @@ describe( `${ block.name } Block`, () => {
 	} );
 
 	it( 'renders without crashing', async () => {
-		// Gutenberg error
-		expect(
-			( await page.content() ).match(
-				/Your site doesn’t include support for/gi
-			)
-		).toBeNull();
-		// Our ErrorBoundary
-		expect(
-			( await page.content() ).match(
-				/There was an error whilst rendering/gi
-			)
-		).toBeNull();
-		// Validation Error
-		expect(
-			( await page.content() ).match(
-				/This block contains unexpected or invalid content/gi
-			)
-		).toBeNull();
-
-		await expect( page ).toMatchElement( block.class );
+		await expect( page ).toRenderBlock( block );
 	} );
 
 	it( 'can toggle field label', async () => {
