@@ -310,6 +310,16 @@ class Onboarding {
 					'use_description'   => false,
 					'description_label' => '',
 				),
+				'education-and-learning'          => array(
+					'label'             => __( 'Education and learning', 'woocommerce-admin' ),
+					'use_description'   => false,
+					'description_label' => '',
+				),
+				'travel-and-tourism'              => array(
+					'label'             => __( 'Travel and tourism', 'woocommerce-admin' ),
+					'use_description'   => false,
+					'description_label' => '',
+				),
 				'other'                           => array(
 					'label'             => __( 'Other', 'woocommerce-admin' ),
 					'use_description'   => true,
