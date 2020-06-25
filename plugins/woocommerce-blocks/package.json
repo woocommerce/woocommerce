@@ -59,11 +59,11 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
-		"@babel/cli": "7.10.1",
-		"@babel/core": "7.10.2",
+		"@babel/cli": "7.10.3",
+		"@babel/core": "7.10.3",
 		"@babel/plugin-proposal-class-properties": "7.10.1",
 		"@babel/polyfill": "7.10.1",
-		"@babel/preset-env": "7.10.2",
+		"@babel/preset-env": "7.10.3",
 		"@octokit/graphql": "4.5.1",
 		"@storybook/addon-a11y": "5.3.18",
 		"@storybook/addon-actions": "5.3.18",
