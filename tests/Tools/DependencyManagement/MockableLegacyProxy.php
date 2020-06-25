@@ -118,12 +118,12 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	 *
 	 * @return mixed The result from the function or mock callback.
 	 */
-	public function callFunction( $function_name, ...$parameters ) {
+	public function call_function( $function_name, ...$parameters ) {
 		if ( array_key_exists( $function_name, $this->mocked_functions ) ) {
 			return call_user_func_array( $this->mocked_functions[ $function_name ], $parameters );
 		}
 
-		return parent::callFunction( $function_name, ...$parameters );
+		return parent::call_function( $function_name, ...$parameters );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	 *
 	 * @return mixed The result from the method or mock callback.
 	 */
-	public function callStatic( $class_name, $method_name, ...$parameters ) {
+	public function call_static( $class_name, $method_name, ...$parameters ) {
 		if ( array_key_exists( $class_name, $this->mocked_statics ) ) {
 			$class_mocks = $this->mocked_statics[ $class_name ];
 			if ( array_key_exists( $method_name, $class_mocks ) ) {
@@ -148,7 +148,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 			}
 		}
 
-		return parent::callStatic( $class_name, $method_name, ...$parameters );
+		return parent::call_static( $class_name, $method_name, ...$parameters );
 	}
 
 	/**
@@ -163,12 +163,12 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	 * @return object The (possibly mocked) instance of the class.
 	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
 	 */
-	public function getInstanceOf( string $class_name ) {
+	public function get_instance_of( string $class_name ) {
 		if ( array_key_exists( $class_name, $this->mocked_classes ) ) {
 			$mock = $this->mocked_classes[ $class_name ];
 			return is_callable( $mock ) ? call_user_func( $mock, $class_name ) : $mock;
 		}
 
-		return parent::getInstanceOf( $class_name );
+		return parent::get_instance_of( $class_name );
 	}
 }

@@ -17,8 +17,8 @@ use League\Container\Definition\Definition;
  * See the documentation of the original class this one is based on (https://container.thephpleague.com/3.x/service-providers)
  * for basic usage details. What this class adds is:
  *
- * - The `addWithAutoArguments` method that allows to register classes without having to specify the constructor arguments.
- * - The `shareWithAutoArguments` method, sibling of the above.
+ * - The `add_with_auto_arguments` method that allows to register classes without having to specify the constructor arguments.
+ * - The `share_with_auto_arguments` method, sibling of the above.
  * - Convenience `add` and `share` methods that are just proxies for the same methods in `$this->getContainer()`.
  *
  * @package Automattic\WooCommerce\Tools\DependencyManagement
@@ -38,7 +38,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function addWithAutoArguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
+	public function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		try {
 			$reflector = new \ReflectionClass( $class_name );
 		} catch ( \ReflectionException $ex ) {
@@ -90,8 +90,8 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
-	public function shareWithAutoArguments( string $class_name, $concrete = null ) : DefinitionInterface {
-		return $this->addWithAutoArguments( $class_name, $concrete, true );
+	public function share_with_auto_arguments( string $class_name, $concrete = null ) : DefinitionInterface {
+		return $this->add_with_auto_arguments( $class_name, $concrete, true );
 	}
 
 	/**

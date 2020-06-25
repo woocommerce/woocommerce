@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 
 /**
@@ -127,6 +126,7 @@ class WC_Unit_Tests_Bootstrap {
 		$inner_container = $inner_container_property->getValue( wc_get_container() );
 
 		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
+		$inner_container->reset_resolved();
 
 		$GLOBALS['wc_container'] = $inner_container;
 	}
