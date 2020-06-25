@@ -42,7 +42,7 @@ class Autoloader {
 			return false;
 		}
 
-		self::registerPsr4Autoloader();
+		self::register_psr4_autoloader();
 
 		$autoloader_result = require $autoloader;
 		if ( ! $autoloader_result ) {
@@ -59,11 +59,11 @@ class Autoloader {
 	 * TODO: Assess if this is still needed after https://github.com/Automattic/jetpack/pull/15106 is merged.
 	 *       If it still is, remove this notice. If it isn't, remove the method.
 	 */
-	protected static function registerPsr4Autoloader() {
+	protected static function register_psr4_autoloader() {
 		spl_autoload_register(
 			function ( $class ) {
 				foreach ( self::NON_CORE_WOO_NAMESPACES as $non_core_namespace ) {
-					if ( $non_core_namespace === substr( $class, 0, strlen( $non_core_namespace ) ) ) {
+					if ( substr( $class, 0, strlen( $non_core_namespace ) ) === $non_core_namespace ) {
 						return;
 					}
 				}

@@ -67,6 +67,9 @@ class WC_Unit_Tests_Bootstrap {
 		// load WC testing framework.
 		$this->includes();
 
+		// register autoloader for tests in 'src'.
+		$this->register_psr4_autoloader();
+
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 	}
@@ -129,6 +132,26 @@ class WC_Unit_Tests_Bootstrap {
 		$inner_container->reset_resolved();
 
 		$GLOBALS['wc_container'] = $inner_container;
+	}
+
+	/**
+	 * Register autoloader for the files in the 'tests/php/src' directory.
+	 */
+	protected static function register_psr4_autoloader() {
+		spl_autoload_register(
+			function ( $class ) {
+				$prefix   = 'Automattic\\WooCommerce\\Tests\\';
+				$base_dir = __DIR__ . '/php/src/';
+				$len      = strlen( $prefix );
+				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+					// no, move to the next registered autoloader.
+					return;
+				}
+				$relative_class = substr( $class, $len );
+				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				require $file;
+			}
+		);
 	}
 
 	/**
