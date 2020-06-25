@@ -3,10 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import {
-	Button,
-	PaymentMethodIcons,
-} from '@woocommerce/base-components/cart-checkout';
+import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
+import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import { usePaymentMethods } from '@woocommerce/base-hooks';

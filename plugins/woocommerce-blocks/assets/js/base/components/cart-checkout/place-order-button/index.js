@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useCheckoutSubmit } from '@woocommerce/base-hooks';
 import { Icon, done } from '@woocommerce/icons';
-
-/**
- * Internal dependencies
- */
-import Button from '../button';
+import Button from '@woocommerce/base-components/button';
 
 const PlaceOrderButton = () => {
 	const {

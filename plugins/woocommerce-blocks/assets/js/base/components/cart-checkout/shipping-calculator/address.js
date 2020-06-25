@@ -3,10 +3,8 @@
  */
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import {
-	AddressForm,
-	Button,
-} from '@woocommerce/base-components/cart-checkout';
+import { AddressForm } from '@woocommerce/base-components/cart-checkout';
+import Button from '@woocommerce/base-components/button';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useValidationContext } from '@woocommerce/base-context';

@@ -4,12 +4,8 @@
 import Button from '../';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/cart-checkout/Button',
+	title: 'WooCommerce Blocks/@base-components/Button',
 	component: Button,
 };
 
-export const Default = () => (
-	<div className="wc-block-cart">
-		<Button>Buy now</Button>
-	</div>
-);
+export const Default = () => <Button>Buy now</Button>;
