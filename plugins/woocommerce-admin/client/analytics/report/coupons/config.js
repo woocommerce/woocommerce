@@ -34,7 +34,7 @@ export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [ 'chartType', 'paged', 'per_page' ],
+		staticParams: [ 'chartType', 'paged', 'per_page', 'coupons' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

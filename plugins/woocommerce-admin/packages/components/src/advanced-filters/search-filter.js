@@ -28,7 +28,14 @@ class SearchFilter extends Component {
 		if ( filter.value.length ) {
 			config.input
 				.getLabels( filter.value, query )
-				.then( this.updateLabels );
+				.then( ( selected ) => {
+					const selectedWithKeys = selected.map( ( s ) => ( {
+						key: s.id,
+						...s,
+					} ) );
+
+					this.updateLabels( selectedWithKeys );
+				} );
 		}
 	}
 

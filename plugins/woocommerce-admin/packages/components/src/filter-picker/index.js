@@ -198,11 +198,30 @@ class FilterPicker extends Component {
 		};
 
 		const selectSubFilter = partial( this.selectSubFilter, filter.value );
+		const selectedFilter = this.getFilter();
+		const buttonIsSelected =
+			selectedFilter.value === filter.value ||
+			( selectedFilter.path &&
+				includes( selectedFilter.path, filter.value ) );
+		const onClick = ( event ) => {
+			if ( buttonIsSelected ) {
+				// Don't navigate if the button is already selected.
+				onClose( event );
+				return;
+			}
+
+			if ( filter.subFilters ) {
+				selectSubFilter( event );
+				return;
+			}
+
+			selectFilter( event );
+		};
 
 		return (
 			<Button
 				className="woocommerce-filters-filter__button"
-				onClick={ filter.subFilters ? selectSubFilter : selectFilter }
+				onClick={ onClick }
 			>
 				{ filter.label }
 			</Button>
