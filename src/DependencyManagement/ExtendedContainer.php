@@ -37,7 +37,7 @@ class ExtendedContainer extends \League\Container\Container {
 	 * @throws \Exception Invalid parameters.
 	 */
 	public function add( string $id, $concrete = null, bool $shared = null ) : DefinitionInterface {
-		if ( ! $this->class_is_in_root_namespace( $id ) && ! in_array( $id, $this->registration_whitelist ) ) {
+		if ( ! $this->class_is_in_root_namespace( $id ) && ! in_array( $id, $this->registration_whitelist, true ) ) {
 			throw new \Exception( "Can't use the container to register '$id', only objects in the " . Container::WOOCOMMERCE_ROOT_NAMESPACE . ' namespace are allowed for registration.' );
 		}
 
@@ -81,5 +81,22 @@ class ExtendedContainer extends \League\Container\Container {
 			$concrete = $definition->getConcrete();
 			$definition->setConcrete( $concrete );
 		}
+	}
+
+	/**
+	 * Get an instance of a registered class.
+	 *
+	 * @param string $id The class name.
+	 * @param bool   $new True to generate a new instance even if the class was registered as shared.
+	 *
+	 * @return object An instance of the requested class.
+	 * @throws \Exception Attempt to get an instance of a non-namespaced class.
+	 */
+	public function get( $id, bool $new = false ) {
+		if ( false === strpos( $id, '\\' ) ) {
+			throw new \Exception( "Attempt to get an instance of the non-namespaced class '$id' from the container, did you forget to add a namespace import?" );
+		}
+
+		return parent::get( $id, $new );
 	}
 }

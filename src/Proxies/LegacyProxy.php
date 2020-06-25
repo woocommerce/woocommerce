@@ -23,22 +23,6 @@ use \Psr\Container\ContainerInterface as Container;
 class LegacyProxy {
 
 	/**
-	 * Holds the instance of the container to use.
-	 *
-	 * @var Container
-	 */
-	private $container;
-
-	/**
-	 * Creates a new instance of the class.
-	 *
-	 * @param Container $container The container to use.
-	 */
-	public function __construct( Container $container ) {
-		$this->container = $container;
-	}
-
-	/**
 	 * Gets an instance of a given legacy class.
 	 * This must not be used to get instances of classes in the `src` directory.
 	 *
@@ -47,14 +31,14 @@ class LegacyProxy {
 	 * @return object The instance of the class.
 	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
 	 */
-	public function getInstanceOf( string $class_name ) {
-		if ( $this->container->has( $class_name ) ) {
+	public function get_instance_of( string $class_name ) {
+		if ( false !== strpos( $class_name, '\\' ) ) {
 			throw new \Exception( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use constructor injection or the instance of \\Psr\\Container\\ContainerInterface for that.' );
 		}
 
 		try {
 			// If a class has a special procedure to obtain a instance, use it.
-			$instance = $this->getSpecialInstanceOf( $class_name );
+			$instance = $this->get_special_instance_of( $class_name );
 			if ( ! is_null( $instance ) ) {
 				return $instance;
 			}
@@ -78,7 +62,7 @@ class LegacyProxy {
 	 *
 	 * @return object|null The instance, or null if there's no special procedure for that class.
 	 */
-	private function getSpecialInstanceOf( string $class_name ) {
+	private function get_special_instance_of( string $class_name ) {
 		if ( \WC_Queue_Interface::class === $class_name ) {
 			return \WC_Queue::instance();
 		}
@@ -95,7 +79,7 @@ class LegacyProxy {
 	 *
 	 * @return mixed The result from the function.
 	 */
-	public function callFunction( $function_name, ...$parameters ) {
+	public function call_function( $function_name, ...$parameters ) {
 		return call_user_func_array( $function_name, $parameters );
 	}
 
@@ -109,7 +93,7 @@ class LegacyProxy {
 	 *
 	 * @return mixed The result from the method.
 	 */
-	public function callStatic( $class_name, $method_name, ...$parameters ) {
+	public function call_static( $class_name, $method_name, ...$parameters ) {
 		return call_user_func_array( "$class_name::$method_name", $parameters );
 	}
 }

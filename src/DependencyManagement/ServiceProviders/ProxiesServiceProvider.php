@@ -31,6 +31,6 @@ class ProxiesServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( ActionsProxy::class );
-		$this->shareWithAutoArguments( LegacyProxy::class );
+		$this->share_with_auto_arguments( LegacyProxy::class );
 	}
 }

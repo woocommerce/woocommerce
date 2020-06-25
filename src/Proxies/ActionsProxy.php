@@ -25,7 +25,7 @@ class ActionsProxy {
 	 *
 	 * @return int The number of times action hook $tag is fired.
 	 */
-	public function didAction( $tag ) {
+	public function did_action( $tag ) {
 		return did_action( $tag );
 	}
 
@@ -38,7 +38,7 @@ class ActionsProxy {
 	 *
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
-	public function applyFilters( $tag, $value, ...$parameters ) {
+	public function apply_filters( $tag, $value, ...$parameters ) {
 		return apply_filters( $tag, $value, ...$parameters );
 	}
 

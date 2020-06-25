@@ -153,12 +153,44 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Get an instance of a class that has been registered in the dependency injection container.
+	 * To get an instance of a legacy class (such as the ones in the 'íncludes' directory) use
+	 * 'get_legacy_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_instance_of( string $class_name ) {
+		return wc_get_container()->get( $class_name );
+	}
+
+	/**
+	 * Get an instance of  legacy class (such as the ones in the 'íncludes' directory).
+	 * To get an instance of a class registered in the dependency injection container use 'get_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_legacy_instance_of( string $class_name ) {
+		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name );
+	}
+
+	/**
 	 * Reset all the cached resolutions in the dependency injection container, so any further "get"
 	 * for shared definitions will generate the instance again.
 	 * This may be needed when registering mocks for already resolved shared classes.
 	 */
 	public function reset_container_resolutions() {
 		wc_get_container()->reset_resolved();
+	}
+
+	/**
+	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
+	 */
+	public function reset_legacy_proxy_mocks() {
+		wc_get_container()->get( LegacyProxy::class )->reset();
 	}
 
 	/**
