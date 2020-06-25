@@ -21,6 +21,7 @@ module.exports = {
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
 	setupFilesAfterEnv: [
+		'<rootDir>/tests/e2e-tests/config/custom-matchers/index.js',
 		'<rootDir>/tests/e2e-tests/config/jest.setup.js',
 		'expect-puppeteer',
 	],
