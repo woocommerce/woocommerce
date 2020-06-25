@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Theming\ThemeSupport;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -733,38 +734,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  * @return mixed  Value of prop(s).
  */
 function wc_get_theme_support( $prop = '', $default = null ) {
-	$theme_support = get_theme_support( 'woocommerce' );
-	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
-	if ( ! $theme_support ) {
-		return $default;
-	}
-
-	if ( $prop ) {
-		$prop_stack = explode( '::', $prop );
-		$prop_key   = array_shift( $prop_stack );
-
-		if ( isset( $theme_support[ $prop_key ] ) ) {
-			$value = $theme_support[ $prop_key ];
-
-			if ( count( $prop_stack ) ) {
-				foreach ( $prop_stack as $prop_key ) {
-					if ( is_array( $value ) && isset( $value[ $prop_key ] ) ) {
-						$value = $value[ $prop_key ];
-					} else {
-						$value = $default;
-						break;
-					}
-				}
-			}
-		} else {
-			$value = $default;
-		}
-
-		return $value;
-	}
-
-	return $theme_support;
+	return wc_get_container()->get( ThemeSupport::class )->get_option( $prop, $default );
 }
 
 /**

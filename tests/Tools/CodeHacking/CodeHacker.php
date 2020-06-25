@@ -32,8 +32,7 @@ use \ReflectionException;
  */
 final class CodeHacker {
 
-	const PROTOCOL                     = 'file';
-	const HACK_CALLBACK_ARGUMENT_COUNT = 2;
+	const PROTOCOL = 'file';
 
 	/**
 	 * Value of "context" parameter to be passed to the native PHP filesystem related functions.
@@ -162,7 +161,11 @@ final class CodeHacker {
 		}
 		self::$paths_with_files_to_hack = array_map(
 			function( $path ) {
-				return realpath( $path );
+				$realpath = realpath( $path );
+				if ( false === $realpath ) {
+					throw new \Exception( "CodeHacker::initialize: couldn't get the full path of file '$path' (does the file really exist?)" );
+				}
+				return $realpath;
 			},
 			$paths
 		);
