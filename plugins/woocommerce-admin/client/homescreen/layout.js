@@ -24,6 +24,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import QuickLinks from '../quick-links';
 import StatsOverview from './stats-overview';
 import './style.scss';
+import '../dashboard/style.scss';
 import { isOnboardingEnabled } from 'dashboard/utils';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../header/activity-panel/panels/inbox';
@@ -143,9 +144,7 @@ Layout.propTypes = {
 
 export default compose(
 	withWCApiSelect( ( select ) => {
-		const {
-			getUndoDismissRequesting,
-		} = select( 'wc-api' );
+		const { getUndoDismissRequesting } = select( 'wc-api' );
 		const { isUndoRequesting } = getUndoDismissRequesting();
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 
