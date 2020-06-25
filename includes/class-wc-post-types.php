@@ -466,7 +466,7 @@ class WC_Post_Types {
 						'map_meta_cap'        => true,
 						'publicly_queryable'  => false,
 						'exclude_from_search' => true,
-						'show_in_menu'        => current_user_can( 'edit_others_shop_coupons' ) ? 'woocommerce' : true,
+						'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
 						'hierarchical'        => false,
 						'rewrite'             => false,
 						'query_var'           => false,
