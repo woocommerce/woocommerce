@@ -75,7 +75,7 @@
 		"@storybook/addons": "5.3.18",
 		"@storybook/react": "5.3.18",
 		"@testing-library/jest-dom": "5.10.1",
-		"@testing-library/react": "10.2.1",
+		"@testing-library/react": "10.4.3",
 		"@types/jest": "25.2.3",
 		"@types/react": "16.9.37",
 		"@types/wordpress__data": "4.6.7",
