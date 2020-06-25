@@ -24,21 +24,11 @@ class Connect extends Component {
 		props.setIsPending( true );
 	}
 
-	componentDidMount() {
-		const { autoConnect, jetpackConnectUrl } = this.props;
-
-		if ( autoConnect && jetpackConnectUrl ) {
-			this.connectJetpack();
-		}
-	}
-
 	componentDidUpdate( prevProps ) {
 		const {
-			autoConnect,
 			createNotice,
 			error,
 			isRequesting,
-			jetpackConnectUrl,
 			onError,
 			setIsPending,
 		} = this.props;
@@ -53,37 +43,26 @@ class Connect extends Component {
 			}
 			createNotice( 'error', error );
 		}
-
-		if ( autoConnect && jetpackConnectUrl ) {
-			this.connectJetpack();
-		}
 	}
 
 	async connectJetpack() {
 		const { jetpackConnectUrl, onConnect } = this.props;
 
-		this.setState( {
-			isConnecting: true,
-		}, () => {
-			if ( onConnect ) {
-				onConnect();
+		this.setState(
+			{
+				isConnecting: true,
+			},
+			() => {
+				if ( onConnect ) {
+					onConnect();
+				}
+				window.location = jetpackConnectUrl;
 			}
-			window.location = jetpackConnectUrl;
-		} );
+		);
 	}
 
 	render() {
-		const {
-			autoConnect,
-			hasErrors,
-			isRequesting,
-			onSkip,
-			skipText,
-		} = this.props;
-
-		if ( autoConnect ) {
-			return null;
-		}
+		const { hasErrors, isRequesting, onSkip, skipText } = this.props;
 
 		return (
 			<Fragment>
@@ -115,10 +94,6 @@ class Connect extends Component {
 }
 
 Connect.propTypes = {
-	/**
-	 * If connection should happen automatically, or requires user confirmation.
-	 */
-	autoConnect: PropTypes.bool,
 	/**
 	 * Method to create a displayed notice.
 	 */
@@ -166,7 +141,6 @@ Connect.propTypes = {
 };
 
 Connect.defaultProps = {
-	autoConnect: false,
 	setIsPending: () => {},
 };
 
