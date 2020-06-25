@@ -91,33 +91,42 @@ class CouponsReportTable extends Component {
 				discount_type: discountType,
 			} = extendedInfo;
 
-			const couponUrl = getNewPath(
-				persistedQuery,
-				'/analytics/coupons',
-				{
-					filter: 'single_coupon',
-					coupons: couponId,
-				}
-			);
-			const couponLink = (
-				<Link href={ couponUrl } type="wc-admin">
-					{ code }
-				</Link>
-			);
+			const couponUrl =
+				couponId > 0
+					? getNewPath( persistedQuery, '/analytics/coupons', {
+							filter: 'single_coupon',
+							coupons: couponId,
+					  } )
+					: null;
 
-			const ordersUrl = getNewPath( persistedQuery, '/analytics/orders', {
-				filter: 'advanced',
-				coupon_includes: couponId,
-			} );
-			const ordersLink = (
-				<Link href={ ordersUrl } type="wc-admin">
-					{ formatValue(
-						getCurrencyConfig(),
-						'number',
-						ordersCount
-					) }
-				</Link>
-			);
+			const couponLink =
+				couponUrl === null ? (
+					code
+				) : (
+					<Link href={ couponUrl } type="wc-admin">
+						{ code }
+					</Link>
+				);
+
+			const ordersUrl =
+				couponId > 0
+					? getNewPath( persistedQuery, '/analytics/orders', {
+							filter: 'advanced',
+							coupon_includes: couponId,
+					  } )
+					: null;
+			const ordersLink =
+				ordersUrl === null ? (
+					ordersCount
+				) : (
+					<Link href={ ordersUrl } type="wc-admin">
+						{ formatValue(
+							getCurrencyConfig(),
+							'number',
+							ordersCount
+						) }
+					</Link>
+				);
 
 			return [
 				{
@@ -133,11 +142,13 @@ class CouponsReportTable extends Component {
 					value: getCurrencyFormatDecimal( amount ),
 				},
 				{
-					display: (
+					display: dateCreated ? (
 						<Date
 							date={ dateCreated }
 							visibleFormat={ dateFormat }
 						/>
+					) : (
+						__( 'N/A', 'woocommerce-admin' )
 					),
 					value: dateCreated,
 				},
@@ -200,7 +211,7 @@ class CouponsReportTable extends Component {
 			fixed_cart: __( 'Fixed cart', 'woocommerce-admin' ),
 			fixed_product: __( 'Fixed product', 'woocommerce-admin' ),
 		};
-		return couponTypes[ discountType ];
+		return couponTypes[ discountType ] || __( 'N/A', 'woocommerce-admin' );
 	}
 
 	render() {

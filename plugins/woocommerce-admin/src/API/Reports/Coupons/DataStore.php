@@ -69,7 +69,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 5 );
-		add_action( 'delete_post', array( __CLASS__, 'delete_coupon' ) );
 	}
 
 	/**
@@ -165,38 +164,50 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$coupon_id = $coupon_datum['coupon_id'];
 				$coupon    = new \WC_Coupon( $coupon_id );
 
-				$gmt_timzone = new \DateTimeZone( 'UTC' );
-
-				$date_expires = $coupon->get_date_expires();
-				if ( is_a( $date_expires, 'DateTime' ) ) {
-					$date_expires     = $date_expires->format( TimeInterval::$iso_datetime_format );
-					$date_expires_gmt = new \DateTime( $date_expires );
-					$date_expires_gmt->setTimezone( $gmt_timzone );
-					$date_expires_gmt = $date_expires_gmt->format( TimeInterval::$iso_datetime_format );
+				if ( 0 === $coupon->get_id() ) {
+					// Deleted or otherwise invalid coupon.
+					$extended_info = array(
+						'code'             => __( '(Deleted)', 'woocommerce-admin' ),
+						'date_created'     => '',
+						'date_created_gmt' => '',
+						'date_expires'     => '',
+						'date_expires_gmt' => '',
+						'discount_type'    => __( 'N/A', 'woocommerce-admin' ),
+					);
 				} else {
-					$date_expires     = '';
-					$date_expires_gmt = '';
-				}
+					$gmt_timzone = new \DateTimeZone( 'UTC' );
 
-				$date_created = $coupon->get_date_created();
-				if ( is_a( $date_created, 'DateTime' ) ) {
-					$date_created     = $date_created->format( TimeInterval::$iso_datetime_format );
-					$date_created_gmt = new \DateTime( $date_created );
-					$date_created_gmt->setTimezone( $gmt_timzone );
-					$date_created_gmt = $date_created_gmt->format( TimeInterval::$iso_datetime_format );
-				} else {
-					$date_created     = '';
-					$date_created_gmt = '';
-				}
+					$date_expires = $coupon->get_date_expires();
+					if ( is_a( $date_expires, 'DateTime' ) ) {
+						$date_expires     = $date_expires->format( TimeInterval::$iso_datetime_format );
+						$date_expires_gmt = new \DateTime( $date_expires );
+						$date_expires_gmt->setTimezone( $gmt_timzone );
+						$date_expires_gmt = $date_expires_gmt->format( TimeInterval::$iso_datetime_format );
+					} else {
+						$date_expires     = '';
+						$date_expires_gmt = '';
+					}
 
-				$extended_info = array(
-					'code'             => $coupon->get_code(),
-					'date_created'     => $date_created,
-					'date_created_gmt' => $date_created_gmt,
-					'date_expires'     => $date_expires,
-					'date_expires_gmt' => $date_expires_gmt,
-					'discount_type'    => $coupon->get_discount_type(),
-				);
+					$date_created = $coupon->get_date_created();
+					if ( is_a( $date_created, 'DateTime' ) ) {
+						$date_created     = $date_created->format( TimeInterval::$iso_datetime_format );
+						$date_created_gmt = new \DateTime( $date_created );
+						$date_created_gmt->setTimezone( $gmt_timzone );
+						$date_created_gmt = $date_created_gmt->format( TimeInterval::$iso_datetime_format );
+					} else {
+						$date_created     = '';
+						$date_created_gmt = '';
+					}
+
+					$extended_info = array(
+						'code'             => $coupon->get_code(),
+						'date_created'     => $date_created,
+						'date_created_gmt' => $date_created_gmt,
+						'date_expires'     => $date_expires,
+						'date_expires_gmt' => $date_expires_gmt,
+						'discount_type'    => $coupon->get_discount_type(),
+					);
+				}
 			}
 			$coupon_data[ $idx ]['extended_info'] = $extended_info;
 		}
@@ -315,6 +326,28 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Get coupon ID for an order.
+	 *
+	 * Tries to get the ID from order item meta, then falls back to a query of published coupons.
+	 *
+	 * @param \WC_Order_Item_Coupon $coupon_item The coupon order item object.
+	 * @return int Coupon ID on success, 0 on failure.
+	 */
+	public static function get_coupon_id( \WC_Order_Item_Coupon $coupon_item ) {
+		// First attempt to get coupon ID from order item data.
+		$coupon_data = $coupon_item->get_meta( 'coupon_data', true );
+
+		// Normal checkout orders should have this data.
+		// See: https://github.com/woocommerce/woocommerce/blob/3dc7df7af9f7ca0c0aa34ede74493e856f276abe/includes/abstracts/abstract-wc-order.php#L1206.
+		if ( isset( $coupon_data['id'] ) ) {
+			return $coupon_data['id'];
+		}
+
+		// Try to get the coupon ID using the code.
+		return wc_get_coupon_id_by_code( $coupon_item->get_code() );
+	}
+
+	/**
 	 * Create or update an an entry in the wc_order_coupon_lookup table for an order.
 	 *
 	 * @since 3.5.0
@@ -347,14 +380,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$coupon_items       = $order->get_items( 'coupon' );
 		$coupon_items_count = count( $coupon_items );
 		$num_updated        = 0;
+		$num_deleted        = 0;
 
 		foreach ( $coupon_items as $coupon_item ) {
-			$coupon_id = wc_get_coupon_id_by_code( $coupon_item->get_code() );
+			$coupon_id = self::get_coupon_id( $coupon_item );
 			unset( $existing_items[ $coupon_id ] );
 
 			if ( ! $coupon_id ) {
-				$coupon_items_count--;
-				continue;
+				// Insert a unique, but obviously invalid ID for this deleted coupon.
+				$num_deleted++;
+				$coupon_id = -1 * $num_deleted;
 			}
 
 			$result = $wpdb->replace(
@@ -418,27 +453,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @param int $order_id  Order ID.
 		 */
 		do_action( 'woocommerce_analytics_delete_coupon', 0, $order_id );
-
-		ReportsCache::invalidate();
-	}
-
-	/**
-	 * Deletes the coupon lookup information when a coupon is deleted.
-	 * This keeps data consistent if it gets resynced at any point.
-	 *
-	 * @param int $post_id Post ID.
-	 */
-	public static function delete_coupon( $post_id ) {
-		global $wpdb;
-
-		if ( 'shop_coupon' !== get_post_type( $post_id ) ) {
-			return;
-		}
-
-		$wpdb->delete(
-			self::get_db_table_name(),
-			array( 'coupon_id' => $post_id )
-		);
 
 		ReportsCache::invalidate();
 	}

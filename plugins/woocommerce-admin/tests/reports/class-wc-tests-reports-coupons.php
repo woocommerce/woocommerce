@@ -62,8 +62,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new CouponsDataStore();
-		$start_time = date( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
-		$end_time   = date( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
+		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
 		$args       = array(
 			'after'  => $start_time,
 			'before' => $end_time,
@@ -288,7 +288,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$coupon_2_response['orders_count'],
 			$coupon_2_response['amount'],
 			$coupon_2_response['extended_info']['date_created'],
-			$coupon_2_response['extended_info']['date_expires'] ? : 'N/A',
+			$coupon_2_response['extended_info']['date_expires'] ? $coupon_2_response['extended_info']['date_expires'] : 'N/A',
 			$coupon_2_response['extended_info']['discount_type'],
 		);
 
@@ -298,7 +298,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$coupon_1_response['orders_count'],
 			$coupon_1_response['amount'],
 			$coupon_1_response['extended_info']['date_created'],
-			$coupon_1_response['extended_info']['date_expires'] ? : 'N/A',
+			$coupon_1_response['extended_info']['date_expires'] ? $coupon_1_response['extended_info']['date_expires'] : 'N/A',
 			$coupon_1_response['extended_info']['discount_type'],
 		);
 
@@ -319,5 +319,197 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, $export->get_percent_complete() );
 		$this->assertEquals( 2, $export->get_total_exported() );
 		$this->assertEquals( $expected_csv, $actual_csv );
+	}
+
+	/**
+	 * Test that calculations and querying works correctly when coupons are deleted.
+	 */
+	public function test_deleted_coupons() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Simple product.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		// Coupons.
+		$coupon_1_amount = 3; // by default in create_coupon.
+		$coupon_1        = WC_Helper_Coupon::create_coupon( 'coupon_1' );
+		$coupon_1->set_amount( $coupon_1_amount );
+		$coupon_1->save();
+
+		// Coupon that will be deleted.
+		$coupon_2_amount = 7;
+		$coupon_2        = WC_Helper_Coupon::create_coupon( 'coupon_2' );
+		$coupon_2->set_amount( $coupon_2_amount );
+		$coupon_2->save();
+
+		// Coupon that will be deleted, but order item will have metadata that will preserve its ID.
+		$coupon_3_amount = 1;
+		$coupon_3        = WC_Helper_Coupon::create_coupon( 'coupon_3' );
+		$coupon_3->set_amount( $coupon_3_amount );
+		$coupon_3->save();
+		$coupon_3_id = $coupon_3->get_id();
+
+		// Order with coupons.
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->apply_coupon( $coupon_1 );
+		$order->apply_coupon( $coupon_2 );
+		$order->apply_coupon( $coupon_3 );
+		$order->calculate_totals();
+		$order->save();
+
+		// Add coupon_3 metadata to its order item.
+		$coupon_items = $order->get_items( 'coupon' );
+
+		// This would normally happen at checkout.
+		foreach ( $coupon_items as $coupon_item ) {
+			if ( 'coupon_3' !== $coupon_item->get_code() ) {
+				continue;
+			}
+
+			$coupon_3_data = $coupon_3->get_data();
+			unset( $coupon_3_data['used_by'] );
+			$coupon_item->add_meta_data( 'coupon_data', $coupon_3_data );
+			$coupon_item->save();
+		}
+
+		// Delete the coupons.
+		$coupon_2->delete( true );
+		$coupon_3->delete( true );
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new CouponsDataStore();
+		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
+		$args       = array(
+			'after'  => $start_time,
+			'before' => $end_time,
+		);
+
+		// Test retrieving the stats through the data store.
+		$coupon_1_response = array(
+			'coupon_id'     => $coupon_1->get_id(),
+			'amount'        => floatval( $coupon_1_amount ),
+			'orders_count'  => 1,
+			'extended_info' => new ArrayObject(),
+		);
+		$coupon_2_response = array(
+			'coupon_id'     => -1, // coupon_2 was deleted, so a new ID was created.
+			'amount'        => floatval( $coupon_2_amount ),
+			'orders_count'  => 1,
+			'extended_info' => new ArrayObject(),
+		);
+		$coupon_3_response = array(
+			'coupon_id'     => $coupon_3_id, // coupon_3 was deleted, but has metadata containing the ID.
+			'amount'        => floatval( $coupon_3_amount ),
+			'orders_count'  => 1,
+			'extended_info' => new ArrayObject(),
+		);
+
+		// Order by coupon id DESC is the default.
+		$data          = $data_store->get_data( $args );
+		$expected_data = (object) array(
+			'total'   => 3,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				// Order is 3, 1, 2 since query is sorted by coupon ID descending.
+				0 => $coupon_3_response,
+				1 => $coupon_1_response,
+				2 => $coupon_2_response,
+			),
+		);
+		$this->assertEquals( $expected_data, $data );
+
+		// Test extended info.
+		$gmt_timezone    = new DateTimeZone( 'UTC' );
+		$c1_date_created = $coupon_1->get_date_created();
+		if ( null === $c1_date_created ) {
+			$c1_date_created     = '';
+			$c1_date_created_gmt = '';
+		} else {
+			$c1_date_created_gmt = new DateTime( $c1_date_created );
+			$c1_date_created_gmt->setTimezone( $gmt_timezone );
+
+			$c1_date_created     = $c1_date_created->format( TimeInterval::$iso_datetime_format );
+			$c1_date_created_gmt = $c1_date_created_gmt->format( TimeInterval::$iso_datetime_format );
+		}
+
+		$c1_date_expires = $coupon_1->get_date_expires();
+		if ( null === $c1_date_expires ) {
+			$c1_date_expires     = '';
+			$c1_date_expires_gmt = '';
+		} else {
+			$c1_date_expires_gmt = new DateTime( $c1_date_expires );
+			$c1_date_expires_gmt->setTimezone( $gmt_timezone );
+
+			$c1_date_expires     = $c1_date_expires->format( TimeInterval::$iso_datetime_format );
+			$c1_date_expires_gmt = $c1_date_expires_gmt->format( TimeInterval::$iso_datetime_format );
+		}
+
+		$coupon_1_response = array(
+			'coupon_id'     => $coupon_1->get_id(),
+			'amount'        => floatval( $coupon_1_amount ),
+			'orders_count'  => 1,
+			'extended_info' => array(
+				'code'             => $coupon_1->get_code(),
+				'date_created'     => $c1_date_created,
+				'date_created_gmt' => $c1_date_created_gmt,
+				'date_expires'     => $c1_date_expires,
+				'date_expires_gmt' => $c1_date_expires_gmt,
+				'discount_type'    => $coupon_1->get_discount_type(),
+			),
+		);
+
+		$coupon_2_response = array(
+			'coupon_id'     => -1,
+			'amount'        => floatval( $coupon_2_amount ),
+			'orders_count'  => 1,
+			'extended_info' => array(
+				'code'             => '(Deleted)',
+				'date_created'     => '',
+				'date_created_gmt' => '',
+				'date_expires'     => '',
+				'date_expires_gmt' => '',
+				'discount_type'    => 'N/A',
+			),
+		);
+
+		$coupon_3_response = array(
+			'coupon_id'     => $coupon_3_id, // coupon_3 was deleted, but has metadata containing the ID.
+			'amount'        => floatval( $coupon_3_amount ),
+			'orders_count'  => 1,
+			'extended_info' => array(
+				'code'             => '(Deleted)',
+				'date_created'     => '',
+				'date_created_gmt' => '',
+				'date_expires'     => '',
+				'date_expires_gmt' => '',
+				'discount_type'    => 'N/A',
+			),
+		);
+
+		$args          = array(
+			'after'         => $start_time,
+			'before'        => $end_time,
+			'extended_info' => true,
+		);
+		$data          = $data_store->get_data( $args );
+		$expected_data = (object) array(
+			'total'   => 3,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				// Order is 3, 1, 2 since query is sorted by coupon ID descending.
+				0 => $coupon_3_response,
+				1 => $coupon_1_response,
+				2 => $coupon_2_response,
+			),
+		);
+		$this->assertEquals( $expected_data, $data );
 	}
 }
