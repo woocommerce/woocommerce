@@ -1,3 +1,9 @@
+/**
+ * Get the URL params.
+ *
+ * @param {string} locationSearch - Querystring part of a URL, including the question mark (?).
+ * @return {Object} - URL params.
+ */
 export function getUrlParams( locationSearch ) {
 	if ( locationSearch ) {
 		return locationSearch
@@ -12,4 +18,26 @@ export function getUrlParams( locationSearch ) {
 			}, {} );
 	}
 	return {};
+}
+
+
+/**
+ * Get the current screen name.
+ *
+ * @return {string} - Screen name.
+ */
+export function getScreenName() {
+	let screenName = '';
+	const { page, path, post_type: postType } = getUrlParams(
+		window.location.search
+	);
+	if ( page ) {
+		const currentPage = page === 'wc-admin' ? 'home_screen' : page;
+		screenName = path
+			? path.replace( /\//g, '_' ).substring( 1 )
+			: currentPage;
+	} else if ( postType ) {
+		screenName = postType;
+	}
+	return screenName;
 }

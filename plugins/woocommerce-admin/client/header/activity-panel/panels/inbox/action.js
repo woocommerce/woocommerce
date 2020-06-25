@@ -12,10 +12,6 @@ import PropTypes from 'prop-types';
  */
 import { ADMIN_URL as adminUrl } from '@woocommerce/wc-admin-settings';
 
-/**
- * Internal dependencies
- */
-
 class InboxNoteAction extends Component {
 	constructor( props ) {
 		super( props );
