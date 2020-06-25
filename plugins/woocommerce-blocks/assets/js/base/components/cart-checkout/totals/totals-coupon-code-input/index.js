@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { Button } from '@woocommerce/base-components/cart-checkout';
+import Button from '@woocommerce/base-components/button';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import { ValidationInputError } from '@woocommerce/base-components/validation';
