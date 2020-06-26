@@ -25,6 +25,7 @@ class Autoloader {
 		'Automattic\\WooCommerce\\Admin\\',
 		'Automattic\\WooCommerce\\Blocks\\',
 		'Automattic\\WooCommerce\\RestApi\\',
+		'Automattic\\WooCommerce\\Tests\\',
 	);
 
 	/**
