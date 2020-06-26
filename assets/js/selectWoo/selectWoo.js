@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 1.0.1
+ * SelectWoo 1.0.6
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
@@ -754,6 +754,12 @@ S2.define('select2/utils',[
       return replaceMap[match];
     });
   };
+
+  Utils.entityDecode = function(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  }
 
   // Append an array of jQuery nodes to a given element.
   Utils.appendMany = function ($element, $nodes) {
@@ -1611,9 +1617,9 @@ S2.define('select2/selection/single',[
     var selection = data[0];
 
     var $rendered = this.$selection.find('.select2-selection__rendered');
-    var formatted = this.display(selection, $rendered);
+    var formatted = Utils.entityDecode(this.display(selection, $rendered));
 
-    $rendered.empty().append(formatted);
+    $rendered.empty().text(formatted);
     $rendered.prop('title', selection.title || selection.text);
   };
 
@@ -1742,12 +1748,14 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
+      var removeItemTag = $selection.html();
       var formatted = this.display(selection, $selection);
       if ('string' === typeof formatted) {
-        formatted = formatted.trim();
+        formatted = Utils.entityDecode(formatted.trim());
       }
 
-      $selection.append(formatted);
+      $selection.text(formatted);
+      $selection.prepend(removeItemTag);
       $selection.prop('title', selection.title || selection.text);
 
       $selection.data('data', selection);
@@ -1786,7 +1794,7 @@ S2.define('select2/selection/placeholder',[
   Placeholder.prototype.createPlaceholder = function (decorated, placeholder) {
     var $placeholder = this.selectionContainer();
 
-    $placeholder.html(this.display(placeholder));
+    $placeholder.text(Utils.entityDecode(this.display(placeholder)));
     $placeholder.addClass('select2-selection__placeholder')
                 .removeClass('select2-selection__choice');
 
@@ -1924,7 +1932,7 @@ S2.define('select2/selection/search',[
     var $search = $(
       '<li class="select2-search select2-search--inline">' +
         '<input class="select2-search__field" type="text" tabindex="-1"' +
-        ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
         ' spellcheck="false" role="textbox" aria-autocomplete="list" />' +
       '</li>'
     );
@@ -3992,7 +4000,7 @@ S2.define('select2/dropdown/search',[
     var $search = $(
       '<span class="select2-search select2-search--dropdown">' +
         '<input class="select2-search__field" type="text" tabindex="-1"' +
-        ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
         ' spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="true" />' +
       '</span>'
     );
@@ -4047,7 +4055,7 @@ S2.define('select2/dropdown/search',[
     });
 
     container.on('focus', function () {
-      if (container.isOpen()) {
+      if (!container.isOpen()) {
         self.$search.focus();
       }
     });

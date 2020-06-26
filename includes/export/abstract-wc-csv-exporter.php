@@ -72,6 +72,13 @@ abstract class WC_CSV_Exporter {
 	protected $columns_to_export = array();
 
 	/**
+	 * The delimiter parameter sets the field delimiter (one character only).
+	 *
+	 * @var string
+	 */
+	protected $delimiter = ',';
+
+	/**
 	 * Prepare data that will be exported.
 	 */
 	abstract public function prepare_data_to_export();
@@ -108,6 +115,16 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function get_columns_to_export() {
 		return $this->columns_to_export;
+	}
+
+	/**
+	 * Return the delimiter to use in CSV file
+	 *
+	 * @since 3.9.0
+	 * @return string
+	 */
+	public function get_delimiter() {
+		return apply_filters( "woocommerce_{$this->export_type}_export_delimiter", $this->delimiter );
 	}
 
 	/**
@@ -171,7 +188,7 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
-			gc_enable(); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.gc_enableFound
+			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 ); // @codingStandardsIgnoreLine
@@ -354,7 +371,7 @@ abstract class WC_CSV_Exporter {
 		$active_content_triggers = array( '=', '+', '-', '@' );
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
-			$data = "'" . $data . "'";
+			$data = "'" . $data;
 		}
 
 		return $data;
@@ -379,7 +396,6 @@ abstract class WC_CSV_Exporter {
 		}
 
 		$use_mb = function_exists( 'mb_convert_encoding' );
-		$data   = (string) urldecode( $data );
 
 		if ( $use_mb ) {
 			$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
@@ -469,20 +485,23 @@ abstract class WC_CSV_Exporter {
 	 * @see https://bugs.php.net/bug.php?id=50686
 	 * @see https://github.com/woocommerce/woocommerce/issues/19514
 	 * @since 3.4.0
+	 * @see https://github.com/woocommerce/woocommerce/issues/24579
+	 * @since 3.9.0
 	 * @param resource $buffer Resource we are writing to.
 	 * @param array    $export_row Row to export.
 	 */
 	protected function fputcsv( $buffer, $export_row ) {
+
 		if ( version_compare( PHP_VERSION, '5.5.4', '<' ) ) {
 			ob_start();
 			$temp = fopen( 'php://output', 'w' ); // @codingStandardsIgnoreLine
-    		fputcsv( $temp, $export_row, ",", '"' ); // @codingStandardsIgnoreLine
+    		fputcsv( $temp, $export_row, $this->get_delimiter(), '"' ); // @codingStandardsIgnoreLine
 			fclose( $temp ); // @codingStandardsIgnoreLine
 			$row = ob_get_clean();
 			$row = str_replace( '\\"', '\\""', $row );
 			fwrite( $buffer, $row ); // @codingStandardsIgnoreLine
 		} else {
-			fputcsv( $buffer, $export_row, ",", '"', "\0" ); // @codingStandardsIgnoreLine
+			fputcsv( $buffer, $export_row, $this->get_delimiter(), '"', "\0" ); // @codingStandardsIgnoreLine
 		}
 	}
 }

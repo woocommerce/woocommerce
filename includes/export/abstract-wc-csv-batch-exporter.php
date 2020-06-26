@@ -8,9 +8,7 @@
  * @version  3.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Include dependencies.

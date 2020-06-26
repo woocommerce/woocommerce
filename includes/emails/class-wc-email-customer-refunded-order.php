@@ -48,7 +48,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -102,7 +101,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
 			}
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object );
+			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
 		}
 
 		/**
@@ -116,7 +115,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$heading = $this->get_option( 'heading_full', $this->get_default_heading() );
 			}
-			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object );
+			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object, $this );
 		}
 
 		/**
@@ -186,14 +185,16 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'order'          => $this->object,
-					'refund'         => $this->refund,
-					'partial_refund' => $this->partial_refund,
-					'email_heading'  => $this->get_heading(),
-					'sent_to_admin'  => false,
-					'plain_text'     => false,
-					'email'          => $this,
+				$this->template_html,
+				array(
+					'order'              => $this->object,
+					'refund'             => $this->refund,
+					'partial_refund'     => $this->partial_refund,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -205,66 +206,85 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'order'          => $this->object,
-					'refund'         => $this->refund,
-					'partial_refund' => $this->partial_refund,
-					'email_heading'  => $this->get_heading(),
-					'sent_to_admin'  => false,
-					'plain_text'     => true,
-					'email'          => $this,
+				$this->template_plain,
+				array(
+					'order'              => $this->object,
+					'refund'             => $this->refund,
+					'partial_refund'     => $this->partial_refund,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'We hope to see you again soon.', 'woocommerce' );
 		}
 
 		/**
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
-				'enabled'         => array(
+				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
 					'default' => 'yes',
 				),
-				'subject_full'    => array(
+				'subject_full'       => array(
 					'title'       => __( 'Full refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
-				'subject_partial' => array(
+				'subject_partial'    => array(
 					'title'       => __( 'Partial refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject( true ),
 					'default'     => '',
 				),
-				'heading_full'    => array(
+				'heading_full'       => array(
 					'title'       => __( 'Full refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading(),
 					'default'     => '',
 				),
-				'heading_partial' => array(
+				'heading_partial'    => array(
 					'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading( true ),
 					'default'     => '',
 				),
-				'email_type'      => array(
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => $this->get_default_additional_content(),
+					'desc_tip'    => true,
+				),
+				'email_type'         => array(
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

@@ -50,7 +50,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_payment_gateways_settings', array(
+				'woocommerce_payment_gateways_settings',
+				array(
 					array(
 						'title' => __( 'Payment methods', 'woocommerce' ),
 						'desc'  => __( 'Installed payment methods are listed below and can be sorted to control their display order on the frontend.', 'woocommerce' ),
@@ -94,10 +95,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					break;
 				}
 			}
-		} else {
-			$settings = $this->get_settings();
-			WC_Admin_Settings::output_fields( $settings );
 		}
+		$settings = $this->get_settings( $current_section );
+		WC_Admin_Settings::output_fields( $settings );
 	}
 
 	/**
@@ -213,20 +213,22 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
 
+		// Save settings fields based on section.
+		WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
+
 		if ( ! $current_section ) {
-			WC_Admin_Settings::save_fields( $this->get_settings() );
+			// If section is empty, we're on the main settings page. This makes sure 'gateway ordering' is saved.
 			$wc_payment_gateways->process_admin_options();
 			$wc_payment_gateways->init();
 		} else {
+			// There is a section - this may be a gateway or custom section.
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
 				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}
 			}
-		}
 
-		if ( $current_section ) {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
 	}

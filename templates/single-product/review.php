@@ -13,7 +13,6 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
  */
@@ -22,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 ?>
-<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
@@ -49,7 +48,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_meta - 10
-			 * @hooked WC_Structured_Data::generate_review_data() - 20
 			 */
 			do_action( 'woocommerce_review_meta', $comment );
 
@@ -62,7 +60,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 */
 			do_action( 'woocommerce_review_comment_text', $comment );
 
-			do_action( 'woocommerce_review_after_comment_text', $comment ); ?>
+			do_action( 'woocommerce_review_after_comment_text', $comment );
+			?>
 
 		</div>
 	</div>

@@ -224,8 +224,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 */
 	protected function query_filters( $query_vars ) {
 		if ( ! empty( $_GET['coupon_type'] ) ) { // WPCS: input var ok, sanitization ok.
-			$query_vars['meta_key']   = 'discount_type'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-			$query_vars['meta_value'] = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value, WordPress.VIP.SuperGlobalInputUsage.AccessDetected
+			$query_vars['meta_key']   = 'discount_type'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$query_vars['meta_value'] = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		}
 		return $query_vars;
 	}

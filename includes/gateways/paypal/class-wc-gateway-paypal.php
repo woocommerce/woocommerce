@@ -10,6 +10,8 @@
  * @package     WooCommerce/Classes/Payment
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -68,10 +70,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->description  = trim( $this->description );
 		}
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_payment' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_payment' ) );
+		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
@@ -83,6 +85,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
+		}
+
+		if ( 'yes' === $this->enabled ) {
+			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
 		}
 	}
 
@@ -249,7 +255,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if this gateway is enabled and available in the user's country.
+	 * Check if this gateway is available in the user's country based on currency.
 	 *
 	 * @return bool
 	 */
@@ -380,17 +386,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
-		switch ( strtolower( $result->ACK ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		switch ( strtolower( $result->ACK ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			case 'success':
 			case 'successwithwarning':
 				$order->add_order_note(
 					/* translators: 1: Refund amount, 2: Refund ID */
-					sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+					sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				);
 				return true;
 		}
 
-		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
 
 	/**
@@ -401,20 +407,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( 'paypal' === $order->get_payment_method() && 'pending' === get_post_meta( $order->get_id(), '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'paypal' === $order->get_payment_method() && 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
 			if ( is_wp_error( $result ) ) {
 				$this->log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
 				/* translators: %s: Paypal gateway error message */
-				$order->add_order_note( sprintf( __( 'Payment could not captured: %s', 'woocommerce' ), $result->get_error_message() ) );
+				$order->add_order_note( sprintf( __( 'Payment could not be captured: %s', 'woocommerce' ), $result->get_error_message() ) );
 				return;
 			}
 
 			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
-			// phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {
 					case 'Completed':
@@ -425,7 +431,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						break;
 					default:
 						/* translators: 1: Authorization ID, 2: Payment status */
-						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
+						$order->add_order_note( sprintf( __( 'Payment could not be captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
 						break;
 				}
 			}
@@ -446,8 +452,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version = Constants::get_constant( 'WC_VERSION' );
 
-		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), WC_VERSION, true );
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
+	}
+
+	/**
+	 * Custom PayPal order received text.
+	 *
+	 * @since 3.9.0
+	 * @param string   $text Default text.
+	 * @param WC_Order $order Order data.
+	 * @return string
+	 */
+	public function order_received_text( $text, $order ) {
+		if ( $order && $this->id === $order->get_payment_method() ) {
+			return esc_html__( 'Thank you for your payment. Your transaction has been completed, and a receipt for your purchase has been emailed to you. Log into your PayPal account to view transaction details.', 'woocommerce' );
+		}
+
+		return $text;
 	}
 }

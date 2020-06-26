@@ -28,11 +28,12 @@ class WC_Payment_Tokens {
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
 	 * }
-	 * @return array
+	 * @return WC_Payment_Token[]
 	 */
 	public static function get_tokens( $args ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'token_id'   => '',
 				'user_id'    => '',
 				'gateway_id' => '',
@@ -62,7 +63,7 @@ class WC_Payment_Tokens {
 	 * @since 2.6.0
 	 * @param  int    $customer_id Customer ID.
 	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
-	 * @return array               Array of token objects.
+	 * @return WC_Payment_Token[]  Array of token objects.
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {
 		if ( $customer_id < 1 ) {
@@ -105,8 +106,8 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed order ID.
 	 *
 	 * @since 2.6.0
-	 * @param int $order_id Order ID.
-	 * @return array Array of token objects.
+	 * @param int $order_id       Order ID.
+	 * @return WC_Payment_Token[] Array of token objects.
 	 */
 	public static function get_order_tokens( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -150,7 +151,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		$token_class = 'WC_Payment_Token_' . $token_result->type;
+		$token_class = self::get_token_classname( $token_result->type );
 
 		if ( class_exists( $token_class ) ) {
 			$meta        = $data_store->get_metadata( $token_id );
@@ -170,12 +171,12 @@ class WC_Payment_Tokens {
 	 * Remove a payment token from the database by ID.
 	 *
 	 * @since 2.6.0
-	 * @param WC_Payment_Token $token_id Token ID.
+	 * @param int $token_id Token ID.
 	 */
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
 		if ( ! empty( $type ) ) {
-			$class = 'WC_Payment_Token_' . $type;
+			$class = self::get_token_classname( $type );
 			$token = new $class( $token_id );
 			$token->delete();
 		}
@@ -211,5 +212,23 @@ class WC_Payment_Tokens {
 	public static function get_token_type_by_id( $token_id ) {
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		return $data_store->get_token_type_by_id( $token_id );
+	}
+
+	/**
+	 * Get classname based on token type.
+	 *
+	 * @since 3.8.0
+	 * @param string $type Token type.
+	 * @return string
+	 */
+	protected static function get_token_classname( $type ) {
+		/**
+		 * Filter payment token class per type.
+		 *
+		 * @since 3.8.0
+		 * @param string $class Payment token class.
+		 * @param string $type Token type.
+		 */
+		return apply_filters( 'woocommerce_payment_token_class', 'WC_Payment_Token_' . $type, $type );
 	}
 }

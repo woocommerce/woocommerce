@@ -61,9 +61,9 @@ abstract class WC_Abstract_Privacy {
 	 * @param int    $erase_priority  Erase priority.
 	 */
 	public function __construct( $name = '', $export_priority = 5, $erase_priority = 10 ) {
-		$this->name = $name;
+		$this->name            = $name;
 		$this->export_priority = $export_priority;
-		$this->erase_priority = $erase_priority;
+		$this->erase_priority  = $erase_priority;
 		$this->init();
 	}
 

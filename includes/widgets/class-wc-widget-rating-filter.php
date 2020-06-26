@@ -91,7 +91,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			return;
 		}
 
-		if ( ! wc()->query->get_main_query()->post_count ) {
+		if ( ! WC()->query->get_main_query()->post_count ) {
 			return;
 		}
 
@@ -99,6 +99,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		$found         = false;
 		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$base_link     = remove_query_arg( 'paged', $this->get_current_page_url() );
 
 		$this->widget_start( $args, $instance );
 
@@ -110,7 +111,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				continue;
 			}
 			$found = true;
-			$link  = $this->get_current_page_url();
+			$link  = $base_link;
 
 			if ( in_array( $rating, $rating_filter, true ) ) {
 				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );
@@ -119,9 +120,16 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			}
 
 			$class       = in_array( $rating, $rating_filter, true ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
-			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' ) );
+			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings, $link ) : remove_query_arg( 'rating_filter' ) );
 			$rating_html = wc_get_star_rating_html( $rating );
-			$count_html  = esc_html( apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ) );
+			$count_html  = wp_kses(
+				apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ),
+				array(
+					'em'     => array(),
+					'span'   => array(),
+					'strong' => array(),
+				)
+			);
 
 			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // WPCS: XSS ok.
 		}

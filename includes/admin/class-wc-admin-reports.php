@@ -29,7 +29,7 @@ class WC_Admin_Reports {
 	public static function output() {
 		$reports        = self::get_reports();
 		$first_tab      = array_keys( $reports );
-		$current_tab    = ! empty( $_GET['tab'] ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
+		$current_tab    = ! empty( $_GET['tab'] ) && array_key_exists( $_GET['tab'], $reports ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( $_GET['report'] ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
 
 		include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';

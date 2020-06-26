@@ -62,12 +62,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->title      = $this->get_option( 'title' );
-		$this->min_amount = $this->get_option( 'min_amount', 0 );
-		$this->requires   = $this->get_option( 'requires' );
+		$this->title            = $this->get_option( 'title' );
+		$this->min_amount       = $this->get_option( 'min_amount', 0 );
+		$this->requires         = $this->get_option( 'requires' );
+		$this->ignore_discounts = $this->get_option( 'ignore_discounts' );
 
 		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'admin_footer', array( 'WC_Shipping_Free_Shipping', 'enqueue_admin_js' ), 10 ); // Priority needs to be higher than wc_print_js (25).
 	}
 
 	/**
@@ -103,6 +105,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'default'     => '0',
 				'desc_tip'    => true,
 			),
+			'ignore_discounts' => array(
+				'title'       => __( 'Coupons discounts', 'woocommerce' ),
+				'label'       => __( 'Apply minimum order rule before coupon discount', 'woocommerce' ),
+				'type'        => 'checkbox',
+				'description' => __( 'If checked, free shipping would be available based on pre-discount order amount.', 'woocommerce' ),
+				'default'     => 'no',
+				'desc_tip'    => true,
+			),
 		);
 	}
 
@@ -112,34 +122,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
-		if ( is_admin() ) {
-			wc_enqueue_js(
-				"jQuery( function( $ ) {
-					function wcFreeShippingShowHideMinAmountField( el ) {
-						var form = $( el ).closest( 'form' );
-						var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
-						if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
-							minAmountField.hide();
-						} else {
-							minAmountField.show();
-						}
-					}
-
-					$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
-						wcFreeShippingShowHideMinAmountField( this );
-					});
-
-					// Change while load.
-					$( '#woocommerce_free_shipping_requires' ).change();
-					$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
-						if ( 'wc-modal-shipping-method-settings' === target ) {
-							wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
-						}
-					} );
-				});"
-			);
-		}
-
 		return parent::get_instance_form_fields();
 	}
 
@@ -170,10 +152,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
-				$total = round( $total - ( WC()->cart->get_discount_total() + WC()->cart->get_discount_tax() ), wc_get_price_decimals() );
-			} else {
-				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
+				$total = $total - WC()->cart->get_discount_tax();
 			}
+
+			if ( 'no' === $this->ignore_discounts ) {
+				$total = $total - WC()->cart->get_discount_total();
+			}
+
+			$total = round( $total, wc_get_price_decimals() );
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;
@@ -216,6 +202,42 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'taxes'   => false,
 				'package' => $package,
 			)
+		);
+	}
+
+	/**
+	 * Enqueue JS to handle free shipping options.
+	 *
+	 * Static so that's enqueued only once.
+	 */
+	public static function enqueue_admin_js() {
+		wc_enqueue_js(
+			"jQuery( function( $ ) {
+				function wcFreeShippingShowHideMinAmountField( el ) {
+					var form = $( el ).closest( 'form' );
+					var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+					var ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
+					if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
+						minAmountField.hide();
+						ignoreDiscountField.hide();
+					} else {
+						minAmountField.show();
+						ignoreDiscountField.show();
+					}
+				}
+
+				$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
+					wcFreeShippingShowHideMinAmountField( this );
+				});
+
+				// Change while load.
+				$( '#woocommerce_free_shipping_requires' ).change();
+				$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
+					if ( 'wc-modal-shipping-method-settings' === target ) {
+						wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
+					}
+				} );
+			});"
 		);
 	}
 }

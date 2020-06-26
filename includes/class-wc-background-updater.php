@@ -3,6 +3,7 @@
  * Background Updater
  *
  * @version 2.6.0
+ * @deprecated 3.6.0 Replaced with queue.
  * @package WooCommerce/Classes
  */
 

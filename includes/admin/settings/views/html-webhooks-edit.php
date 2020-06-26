@@ -136,8 +136,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</th>
 				<td class="forminp">
 					<select name="webhook_api_version" id="webhook_api_version">
-						<option value="wp_api_v2" <?php selected( 'wp_api_v2', $webhook->get_api_version(), true ); ?>><?php esc_html_e( 'WP REST API Integration v2', 'woocommerce' ); ?></option>
-						<option value="wp_api_v1" <?php selected( 'wp_api_v1', $webhook->get_api_version(), true ); ?>><?php esc_html_e( 'WP REST API Integration v1', 'woocommerce' ); ?></option>
+						<?php foreach ( array_reverse( wc_get_webhook_rest_api_versions() ) as $version ) : ?>
+							<option value="<?php echo esc_attr( $version ); ?>" <?php selected( $version, $webhook->get_api_version(), true ); ?>>
+								<?php
+									/* translators: %d: rest api version number */
+									echo esc_html( sprintf( __( 'WP REST API Integration v%d', 'woocommerce' ), str_replace( 'wp_api_v', '', $version ) ) );
+								?>
+							</option>
+						<?php endforeach; ?>
 						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php esc_html_e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?></option>
 					</select>
 				</td>

@@ -41,7 +41,6 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 			$this->template_html  = 'emails/customer-note.php';
 			$this->template_plain = 'emails/plain/customer-note.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -118,13 +117,15 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'customer_note' => $this->customer_note,
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+				$this->template_html,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'customer_note'      => $this->customer_note,
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -136,15 +137,27 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'customer_note' => $this->customer_note,
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+				$this->template_plain,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'customer_note'      => $this->customer_note,
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for reading.', 'woocommerce' );
 		}
 	}
 

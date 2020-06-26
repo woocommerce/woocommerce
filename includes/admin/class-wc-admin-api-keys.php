@@ -56,8 +56,15 @@ class WC_Admin_API_Keys {
 		if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
 			$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0; // WPCS: input var okay, CSRF ok.
 			$key_data = self::get_key_data( $key_id );
+			$user_id  = (int) $key_data['user_id'];
 
-			include 'settings/views/html-keys-edit.php';
+			if ( $key_id && $user_id && ! current_user_can( 'edit_user', $user_id ) ) {
+				if ( get_current_user_id() !== $user_id ) {
+					wp_die( esc_html__( 'You do not have permission to edit this API Key', 'woocommerce' ) );
+				}
+			}
+
+			include dirname( __FILE__ ) . '/settings/views/html-keys-edit.php';
 		} else {
 			self::table_list_output();
 		}
@@ -74,7 +81,8 @@ class WC_Admin_API_Keys {
 
 			// Add screen option.
 			add_screen_option(
-				'per_page', array(
+				'per_page',
+				array(
 					'default' => 10,
 					'option'  => 'woocommerce_keys_per_page',
 				)
@@ -88,7 +96,7 @@ class WC_Admin_API_Keys {
 	private static function table_list_output() {
 		global $wpdb, $keys_table_list;
 
-		echo '<h2>' . esc_html__( 'REST API', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
+		echo '<h2 class="wc-table-list-header">' . esc_html__( 'REST API', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
 
 		// Get the API keys count.
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1;" );
@@ -141,7 +149,8 @@ class WC_Admin_API_Keys {
 				FROM {$wpdb->prefix}woocommerce_api_keys
 				WHERE key_id = %d",
 				$key_id
-			), ARRAY_A
+			),
+			ARRAY_A
 		);
 
 		if ( is_null( $key ) ) {
@@ -184,13 +193,18 @@ class WC_Admin_API_Keys {
 	 * Revoke key.
 	 */
 	private function revoke_key() {
+		global $wpdb;
+
 		check_admin_referer( 'revoke' );
 
 		if ( isset( $_REQUEST['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
-			$key_id = absint( $_REQUEST['revoke-key'] ); // WPCS: input var okay, CSRF ok.
+			$key_id  = absint( $_REQUEST['revoke-key'] ); // WPCS: input var okay, CSRF ok.
+			$user_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d", $key_id ) );
 
-			if ( $key_id ) {
+			if ( $key_id && $user_id && ( current_user_can( 'edit_user', $user_id ) || get_current_user_id() === $user_id ) ) {
 				$this->remove_key( $key_id );
+			} else {
+				wp_die( esc_html__( 'You do not have permission to revoke this API Key', 'woocommerce' ) );
 			}
 		}
 
@@ -224,6 +238,10 @@ class WC_Admin_API_Keys {
 	 * @param array $keys API Keys.
 	 */
 	private function bulk_revoke_key( $keys ) {
+		if ( ! current_user_can( 'remove_users' ) ) {
+			wp_die( esc_html__( 'You do not have permission to revoke API Keys', 'woocommerce' ) );
+		}
+
 		$qty = 0;
 		foreach ( $keys as $key_id ) {
 			$result = $this->remove_key( $key_id );

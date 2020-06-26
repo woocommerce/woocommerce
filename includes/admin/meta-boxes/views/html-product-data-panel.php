@@ -9,9 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<style type="text/css">
-	#post-preview { display:none }
-</style>
+
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;

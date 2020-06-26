@@ -8,6 +8,8 @@
  * @version     2.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -93,7 +95,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 	function is_cart() {
 		$page_id = wc_get_page_id( 'cart' );
 
-		return ( $page_id && is_page( $page_id ) ) || defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
+		return ( $page_id && is_page( $page_id ) ) || Constants::is_defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
 	}
 }
 
@@ -107,7 +109,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	function is_checkout() {
 		$page_id = wc_get_page_id( 'checkout' );
 
-		return ( $page_id && is_page( $page_id ) ) || wc_post_content_has_shortcode( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false ) || defined( 'WOOCOMMERCE_CHECKOUT' );
+		return ( $page_id && is_page( $page_id ) ) || wc_post_content_has_shortcode( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false ) || Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' );
 	}
 }
 
@@ -262,7 +264,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	 * @return bool
 	 */
 	function is_ajax() {
-		return function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : defined( 'DOING_AJAX' );
+		return function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : Constants::is_defined( 'DOING_AJAX' );
 	}
 }
 
@@ -361,7 +363,7 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	 * @return bool
 	 */
 	function wc_prices_include_tax() {
-		return wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		return wc_tax_enabled() && apply_filters( 'woocommerce_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) === 'yes' );
 	}
 }
 
@@ -417,4 +419,78 @@ function wc_post_content_has_shortcode( $tag = '' ) {
 	global $post;
 
 	return is_singular() && is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, $tag );
+}
+
+/**
+ * Check if reviews are enabled.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_reviews_enabled() {
+	return 'yes' === get_option( 'woocommerce_enable_reviews' );
+}
+
+/**
+ * Check if reviews ratings are enabled.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_review_ratings_enabled() {
+	return wc_reviews_enabled() && 'yes' === get_option( 'woocommerce_enable_review_rating' );
+}
+
+/**
+ * Check if review ratings are required.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_review_ratings_required() {
+	return 'yes' === get_option( 'woocommerce_review_rating_required' );
+}
+
+/**
+ * Check if a CSV file is valid.
+ *
+ * @since 3.6.5
+ * @param string $file       File name.
+ * @param bool   $check_path If should check for the path.
+ * @return bool
+ */
+function wc_is_file_valid_csv( $file, $check_path = true ) {
+	/**
+	 * Filter check for CSV file path.
+	 *
+	 * @since 3.6.4
+	 * @param bool $check_import_file_path If requires file path check. Defaults to true.
+	 */
+	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true );
+
+	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
+		return false;
+	}
+
+	/**
+	 * Filter CSV valid file types.
+	 *
+	 * @since 3.6.5
+	 * @param array $valid_filetypes List of valid file types.
+	 */
+	$valid_filetypes = apply_filters(
+		'woocommerce_csv_import_valid_filetypes',
+		array(
+			'csv' => 'text/csv',
+			'txt' => 'text/plain',
+		)
+	);
+
+	$filetype = wp_check_filetype( $file, $valid_filetypes );
+
+	if ( in_array( $filetype['type'], $valid_filetypes, true ) ) {
+		return true;
+	}
+
+	return false;
 }
