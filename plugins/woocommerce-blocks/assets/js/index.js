@@ -3,7 +3,7 @@
  */
 import { getCategories, setCategories } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { woo as Icon } from '@woocommerce/icons';
+import { woo, Icon } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +19,6 @@ setCategories( [
 	{
 		slug: 'woocommerce',
 		title: __( 'WooCommerce', 'woo-gutenberg-products-block' ),
-		icon: <Icon />,
+		icon: <Icon srcElement={ woo } />,
 	},
 ] );
