@@ -3,7 +3,8 @@
  */
 import { SVG } from 'wordpress-components';
 import classnames from 'classnames';
-const noAlt = ( { className, size, ...extraProps } ) => {
+
+const Component = ( { className, size, ...extraProps } ) => {
 	const iconClass = classnames(
 		'dashicon',
 		'dashicons-arrow-down-alt2',
@@ -22,5 +23,7 @@ const noAlt = ( { className, size, ...extraProps } ) => {
 		</SVG>
 	);
 };
+
+const noAlt = <Component />;
 
 export default noAlt;

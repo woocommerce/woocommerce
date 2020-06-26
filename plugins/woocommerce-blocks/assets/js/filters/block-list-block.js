@@ -4,9 +4,8 @@
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { compareWithWpVersion } from '@woocommerce/settings';
-
-const { getBlockType } = wp.blocks;
-const { addFilter } = wp.hooks;
+import { getBlockType } from '@wordpress/blocks';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * withDefaultAttributes HOC for editor.BlockListBlock.

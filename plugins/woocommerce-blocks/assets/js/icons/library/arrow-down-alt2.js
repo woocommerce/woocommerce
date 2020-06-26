@@ -4,7 +4,7 @@
 import { SVG } from 'wordpress-components';
 import classnames from 'classnames';
 
-const arrowDownAlt2 = ( { className, size, ...extraProps } ) => {
+const Component = ( { className, size = 20, ...extraProps } ) => {
 	const iconClass = classnames(
 		'dashicon',
 		'dashicons-arrow-down-alt2',
@@ -23,5 +23,7 @@ const arrowDownAlt2 = ( { className, size, ...extraProps } ) => {
 		</SVG>
 	);
 };
+
+const arrowDownAlt2 = <Component />;
 
 export default arrowDownAlt2;

@@ -1,4 +1,7 @@
-const { addFilter } = wp.hooks;
+/**
+ * External dependencies
+ */
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Adjust attributes on load to set defaults so default attributes get saved.
