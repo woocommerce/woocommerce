@@ -1,19 +1,19 @@
 <?php
 /**
- * Theming class file.
+ * ThemeManagementServiceProvider class file.
  *
  * @package Automattic/WooCommerce/Tools/DependencyManagement/ServiceProviders
  */
 
 namespace Automattic\WooCommerce\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Theming\ThemeSupport;
+use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
 use Automattic\WooCommerce\DependencyManagement\AbstractServiceProvider;
 
 /**
- * Service provider for the classes in the Automattic\WooCommerce\Theming namespace.
+ * Service provider for the classes in the Automattic\WooCommerce\ThemeManagement namespace.
  */
-class ThemingServiceProvider extends AbstractServiceProvider {
+class ThemeManagementServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.

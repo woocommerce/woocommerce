@@ -5,12 +5,14 @@
  * @package Automattic\WooCommerce\Tests\ThemeSupport
  */
 
-use Automattic\WooCommerce\Theming\ThemeSupport;
+namespace Automattic\WooCommerce\Tests\ThemeManagement;
+
+use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
 
 /**
  * Tests for ThemeSupport
  */
-class ThemeSupportTests extends WC_Unit_Test_Case {
+class ThemeSupportTests extends \WC_Unit_Test_Case {
 
 	/**
 	 * The system under test.

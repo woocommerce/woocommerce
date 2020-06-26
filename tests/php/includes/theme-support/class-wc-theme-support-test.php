@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\ThemeSupport
  */
 
-use Automattic\WooCommerce\Theming\ThemeSupport;
+use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
 
 /**
  * Tests for the theme support classes.

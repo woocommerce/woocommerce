@@ -7,7 +7,7 @@
 
 // This comment is needed to prevent a code sniffer error.
 
-use Automattic\WooCommerce\Theming\ThemeSupport;
+use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
 
 require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 require_once ABSPATH . WPINC . '/class-wp-customize-control.php';

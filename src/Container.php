@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\DependencyManagement\ExtendedContainer;
-use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ThemingServiceProvider;
+use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ThemeManagementServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -42,7 +42,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 */
 	private $service_providers = array(
 		ProxiesServiceProvider::class,
-		ThemingServiceProvider::class,
+		ThemeManagementServiceProvider::class,
 	);
 
 	/**

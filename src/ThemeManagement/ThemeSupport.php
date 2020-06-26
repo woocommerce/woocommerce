@@ -2,18 +2,16 @@
 /**
  * ThemeSupport class file.
  *
- * @package WooCommerce\Theming
+ * @package Automattic\WooCommerce\ThemeManagement
  */
 
-namespace Automattic\WooCommerce\Theming;
+namespace Automattic\WooCommerce\ThemeManagement;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utils\ArrayUtils;
 
 /**
  * Provides methods for theme support.
- *
- * @package Automattic\WooCommerce\Theming
  */
 class ThemeSupport {
 
