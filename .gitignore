@@ -13,7 +13,7 @@ project.properties
 *.swp
 
 # Grunt
-/node_modules/
+node_modules/
 none
 
 # Sass
@@ -47,6 +47,8 @@ tests/cli/vendor
 /tests/e2e/config/local.json
 /tests/e2e/docker
 /tests/e2e/env/docker/wp-cli/initialize.sh
+/tests/e2e/env/build/
+/tests/e2e/env/build-module/
 
 # Logs
 /logs
@@ -54,6 +56,7 @@ tests/cli/vendor
 # Composer
 /vendor/
 contributors.md
+contributors.html
 
 # Packages
 /packages/*
@@ -64,3 +67,6 @@ contributors.md
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Build
+build/

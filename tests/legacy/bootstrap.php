@@ -6,6 +6,12 @@
  * @package WooCommerce Tests
  */
 
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
+use Composer\Autoload\ClassLoader;
+
 /**
  * Class WC_Unit_Tests_Bootstrap
  */
@@ -29,6 +35,8 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
+		$this->tests_dir = dirname( __FILE__ );
+		$this->initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
@@ -40,8 +48,6 @@ class WC_Unit_Tests_Bootstrap {
 		}
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-		$this->tests_dir    = dirname( __FILE__ );
-		$this->plugin_dir   = dirname( dirname( $this->tests_dir ) );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
 
 		// load test function so tests_add_filter() is available.
@@ -58,6 +64,39 @@ class WC_Unit_Tests_Bootstrap {
 
 		// load WC testing framework.
 		$this->includes();
+	}
+
+	/**
+	 * Initialize the code hacker.
+	 *
+	 * @throws Exception Error when initializing one of the hacks.
+	 */
+	private function initialize_code_hacker() {
+		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+
+		$hacking_base = $this->plugin_dir . '/tests/Tools/CodeHacking';
+		require_once $hacking_base . '/CodeHacker.php';
+		require_once $hacking_base . '/Hacks/CodeHack.php';
+		require_once $hacking_base . '/Hacks/StaticMockerHack.php';
+		require_once $hacking_base . '/Hacks/FunctionsMockerHack.php';
+		require_once $hacking_base . '/Hacks/BypassFinalsHack.php';
+
+		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
+		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
+		if ( ! empty( $replaceable_functions ) ) {
+			FunctionsMockerHack::initialize( $replaceable_functions );
+			CodeHacker::add_hack( FunctionsMockerHack::get_hack_instance() );
+		}
+
+		$mockable_static_classes = include_once __DIR__ . '/classes-with-mockable-static-methods.php';
+		if ( ! empty( $mockable_static_classes ) ) {
+			StaticMockerHack::initialize( $mockable_static_classes );
+			CodeHacker::add_hack( StaticMockerHack::get_hack_instance() );
+		}
+
+		CodeHacker::add_hack( new BypassFinalsHack() );
+
+		CodeHacker::enable();
 	}
 
 	/**

@@ -459,6 +459,10 @@ class WC_Form_Handler {
 				return;
 			}
 
+			if ( ! apply_filters( 'woocommerce_add_payment_method_form_is_valid', true ) ) {
+				return;
+			}
+
 			// Test rate limit.
 			$current_user_id = get_current_user_id();
 			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
@@ -865,11 +869,12 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
 		try {
-			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$missing_attributes = array();
-			$variations         = array();
-			$adding_to_cart     = wc_get_product( $product_id );
+			$variation_id         = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$quantity             = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$missing_attributes   = array();
+			$variations           = array();
+			$variation_attributes = array();
+			$adding_to_cart       = wc_get_product( $product_id );
 
 			if ( ! $adding_to_cart ) {
 				return false;
@@ -877,6 +882,9 @@ class WC_Form_Handler {
 
 			// If the $product_id was in fact a variation ID, update the variables.
 			if ( $adding_to_cart->is_type( 'variation' ) ) {
+				$variation_attributes = $adding_to_cart->get_variation_attributes();
+				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
+				$variation_attributes = array_filter( $variation_attributes );
 				$variation_id   = $product_id;
 				$product_id     = $adding_to_cart->get_parent_id();
 				$adding_to_cart = wc_get_product( $product_id );
@@ -907,6 +915,9 @@ class WC_Form_Handler {
 				}
 			}
 
+			// Merge variation attributes and posted attributes.
+			$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
+
 			// If no variation ID is set, attempt to get a variation ID from posted attributes.
 			if ( empty( $variation_id ) ) {
 				$data_store   = WC_Data_Store::load( 'product' );
@@ -935,8 +946,8 @@ class WC_Form_Handler {
 				 *
 				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
 				 */
-				if ( isset( $posted_attributes[ $attribute_key ] ) ) {
-					$value = $posted_attributes[ $attribute_key ];
+				if ( isset( $posted_and_variation_attributes[ $attribute_key ] ) ) {
+					$value = $posted_and_variation_attributes[ $attribute_key ];
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {

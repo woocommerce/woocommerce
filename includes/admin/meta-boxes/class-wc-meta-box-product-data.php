@@ -244,7 +244,7 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 				$attribute_id   = 0;
-				$attribute_name = wc_clean( $attribute_names[ $i ] );
+				$attribute_name = wc_clean( esc_html( $attribute_names[ $i ] ) );
 
 				if ( 'pa_' === substr( $attribute_name, 0, 3 ) ) {
 					$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
@@ -257,7 +257,7 @@ class WC_Meta_Box_Product_Data {
 					$options = wp_parse_id_list( $options );
 				} else {
 					// Terms or text sent in textarea.
-					$options = 0 < $attribute_id ? wc_sanitize_textarea( wc_sanitize_term_text_based( $options ) ) : wc_sanitize_textarea( $options );
+					$options = 0 < $attribute_id ? wc_sanitize_textarea( esc_html( wc_sanitize_term_text_based( $options ) ) ) : wc_sanitize_textarea( esc_html( $options ) );
 					$options = wc_get_text_attributes( $options );
 				}
 

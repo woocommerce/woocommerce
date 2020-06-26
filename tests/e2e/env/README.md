@@ -15,7 +15,7 @@ The `@woocommerce/e2e-environment` package exports configuration objects that ca
 
 ### Babel Config
 
-Extend your project's Babel config to contain the expected presets for E2E testing.
+Make sure you `npm install @babel/preset-env --save` if you have not already done so. Afterwards, extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
 const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
@@ -109,7 +109,7 @@ module.exports = {
 The E2E environment will look for a `docker-compose.yaml` file in your project root. This will be combined with the base Docker config in the package. This is where you'll map your local project files into the Docker container(s).
 
 ```yaml
-version: '3.7'
+version: '3.3'
 
 services:
 
@@ -136,8 +136,14 @@ echo "Initializing WooCommerce E2E"
 wp plugin install woocommerce --activate
 wp theme install twentynineteen --activate
 wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=customer --path=/var/www/html
-wp post create --post_type=page --post_status=publish --post_title='Ready' --post_content='E2E-tests.'
 ```
+
+### Additional Packages
+
+There are a few packages you may find useful in writing tests scripts. You can see these in use in the `tests/e2e/utils` and `tests/e2e/specs` folders.
+
+- `@wordpress/e2e-test-utils`
+- `config`
 
 ### Travis CI
 
@@ -185,3 +191,7 @@ Stop Docker
 ```bash
 npm explore @woocommerce/e2e-environment -- npm run docker:down
 ```
+
+## Additional information
+
+Refer to [`tests/e2e/specs`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/specs) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) for general information on e2e tests.

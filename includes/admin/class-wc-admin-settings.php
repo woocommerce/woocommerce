@@ -869,25 +869,29 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * If using force or x-sendfile, this ensures the .htaccess is in place.
 		 */
 		public static function check_download_folder_protection() {
-			$upload_dir      = wp_upload_dir();
-			$downloads_url   = $upload_dir['basedir'] . '/woocommerce_uploads';
+			$upload_dir      = wp_get_upload_dir();
+			$downloads_path  = $upload_dir['basedir'] . '/woocommerce_uploads';
 			$download_method = get_option( 'woocommerce_file_download_method' );
+			$file_path       = $downloads_path . '/.htaccess';
+			$file_content    = 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all';
+			$create          = false;
 
-			if ( 'redirect' === $download_method ) {
-
-				// Redirect method - don't protect.
-				if ( file_exists( $downloads_url . '/.htaccess' ) ) {
-					unlink( $downloads_url . '/.htaccess' ); // @codingStandardsIgnoreLine
-				}
+			if ( wp_mkdir_p( $downloads_path ) && ! file_exists( $file_path ) ) {
+				$create = true;
 			} else {
+				$current_content = @file_get_contents( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Force method - protect, add rules to the htaccess file.
-				if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
-					$file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ); // @codingStandardsIgnoreLine
-					if ( $file_handle ) {
-						fwrite( $file_handle, 'deny from all' ); // @codingStandardsIgnoreLine
-						fclose( $file_handle ); // @codingStandardsIgnoreLine
-					}
+				if ( $current_content !== $file_content ) {
+					unlink( $file_path );
+					$create = true;
+				}
+			}
+
+			if ( $create ) {
+				$file_handle = @fopen( $file_path, 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				if ( $file_handle ) {
+					fwrite( $file_handle, $file_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 				}
 			}
 		}
