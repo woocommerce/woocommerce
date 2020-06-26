@@ -204,45 +204,58 @@ class WC_Helper_Updater {
 			$timeout = 3 + (int) ( count( $plugins ) / 10 );
 		}
 
-		$translations = array();
+		$request_body = array(
+			'locales' => $locales,
+			'plugins' => array(),
+		);
 
 		foreach ( $active as $active_plugin ) {
-			$plugin       = $plugins[ $active_plugin ];
-			$url          = 'https://translate.wordpress.com/api/projects/woocommerce/' . $plugin['slug'];
-			$raw_response = wp_remote_post( $url );
-			if ( is_wp_error( $raw_response ) ) {
-				continue; // Something went wrong!
-			}
+			$plugin = $plugins[ $active_plugin ];
+			$request_body['plugins'][ $plugin['slug'] ] = array( 'version' => $plugin['Version'] );
+		}
 
-			$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
-			if ( array_key_exists( 'success', $response ) && false === $response['success'] ) {
-				continue; // For projects we have not set up yet!
-			}
-			foreach ( $response['translation_sets'] as $set ) {
-				if ( ! in_array( $set['wp_locale'], $locales ) ) {
+		$raw_response = wp_remote_post(
+			'https://translate.wordpress.com/api/translations/wccom-api/translations_updates',
+			array(
+				'body'        => json_encode( $request_body ),
+				'headers'     => array( 'Content-Type: application/json' ),
+				'timeout'     => $timeout,
+			)
+		);
+
+		$response_code = wp_remote_retrieve_response_code( $raw_response );
+		if ( 200 !== $response_code ) {
+			return array();
+		}
+
+		// General error.
+		if ( is_wp_error( $raw_response ) ) {
+			return array();
+		}
+
+		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+
+		// API error, api returned but something was wrong.
+		if ( array_key_exists( 'success', $response ) && false === $response['success'] ) {
+			return array();
+		}
+
+		foreach ( $response['data'] as $plugin_name => $plugin_data ) {
+			foreach ( $plugin_data as $data ) {
+				$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin_name ][ $set['wp_locale'] ]['PO-Revision-Date'] );
+				$new_translation_revision_time       = new DateTime( $set['last_modified'] );
+				// Skip if translation set is not newer than what is installed already.
+				if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
 					continue;
 				}
-
-				$is_plugin_locale_installed = in_array( $plugin['slug'], $installed_translations ) && array_key_exists( $set['wp_locale'], $installed_translations[ $plugin['slug'] ] );
-				if ( $is_plugin_locale_installed ) {
-					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin['slug'] ][ $set['wp_locale'] ]['PO-Revision-Date'] );
-					$new_translation_revision_time       = new DateTime( $set['last_modified'] );
-					// Skip if translation set is not newer than what is installed already.
-					if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
-						continue;
-					}
-				}
-
-				$package = 'https://translate.wordpress.com/projects/woocommerce/' . $plugin['slug'] . '/' . $set['locale'] . '/default/export-translations/?format=language-pack';
-
 				$translations[] = array(
 					'type'       => 'plugin',
-					'slug'       => $plugin['slug'],
-					'language'   => $set['wp_locale'],
-					'version'    => $plugin['Version'],
-					'updated'    => $set['last_modified'], // This needs a check because if we already have such set instaelled we should skipp.
-					'package'    => $package,
-					'autoupdate' => true, // No idea if this should be here.
+					'slug'       => $plugin_name,
+					'language'   => $data['wp_locale'],
+					'version'    => $data['version'],
+					'updated'    => $data['last_modified'],
+					'package'    => $data['package'],
+					'autoupdate' => true,
 				);
 			}
 		}
