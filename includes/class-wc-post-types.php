@@ -59,6 +59,7 @@ class WC_Post_Types {
 					'query_var'         => is_admin(),
 					'rewrite'           => false,
 					'public'            => false,
+					'label'             => _x( 'Product type', 'Taxonomy name', 'woocommerce' ),
 				)
 			)
 		);
@@ -75,6 +76,7 @@ class WC_Post_Types {
 					'query_var'         => is_admin(),
 					'rewrite'           => false,
 					'public'            => false,
+					'label'             => _x( 'Product visibility', 'Taxonomy name', 'woocommerce' ),
 				)
 			)
 		);

@@ -151,6 +151,86 @@ function wc_update_order( $args ) {
 }
 
 /**
+ * Given a path, this will convert any of the subpaths into their corresponding tokens.
+ *
+ * @since 4.3.0
+ * @param string $path The absolute path to tokenize.
+ * @param array  $path_tokens An array keyed with the token, containing paths that should be replaced.
+ * @return string The tokenized path.
+ */
+function wc_tokenize_path( $path, $path_tokens ) {
+	// Order most to least specific so that the token can encompass as much of the path as possible.
+	uasort(
+		$path_tokens,
+		function ( $a, $b ) {
+			$a = strlen( $a );
+			$b = strlen( $b );
+
+			if ( $a > $b ) {
+				return -1;
+			}
+
+			if ( $b > $a ) {
+				return 1;
+			}
+
+			return 0;
+		}
+	);
+
+	foreach ( $path_tokens as $token => $token_path ) {
+		if ( 0 !== strpos( $path, $token_path ) ) {
+			continue;
+		}
+
+		$path = str_replace( $token_path, '{{' . $token . '}}', $path );
+	}
+
+	return $path;
+}
+
+/**
+ * Given a tokenized path, this will expand the tokens to their full path.
+ *
+ * @since 4.3.0
+ * @param string $path The absolute path to expand.
+ * @param array  $path_tokens An array keyed with the token, containing paths that should be expanded.
+ * @return string The absolute path.
+ */
+function wc_untokenize_path( $path, $path_tokens ) {
+	foreach ( $path_tokens as $token => $token_path ) {
+		$path = str_replace( '{{' . $token . '}}', $token_path, $path );
+	}
+
+	return $path;
+}
+
+/**
+ * Fetches an array containing all of the configurable path constants to be used in tokenization.
+ *
+ * @return array The key is the define and the path is the constant.
+ */
+function wc_get_path_define_tokens() {
+	$defines = array(
+		'ABSPATH',
+		'WP_CONTENT_DIR',
+		'WP_PLUGIN_DIR',
+		'WPMU_PLUGIN_DIR',
+		'PLUGINDIR',
+		'WP_THEME_DIR',
+	);
+
+	$path_tokens = array();
+	foreach ( $defines as $define ) {
+		if ( defined( $define ) ) {
+			$path_tokens[ $define ] = constant( $define );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_path_define_tokens', $path_tokens );
+}
+
+/**
  * Get template part (for templates like the shop-loop).
  *
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
@@ -187,7 +267,13 @@ function wc_get_template_part( $slug, $name = '' ) {
 			);
 		}
 
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		// Don't cache the absolute path so that it can be shared between web servers with different paths.
+		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
+
+		wc_set_template_cache( $cache_key, $cache_path );
+	} else {
+		// Make sure that the absolute path to the template is resolved.
+		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -212,7 +298,14 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	if ( ! $template ) {
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+
+		// Don't cache the absolute path so that it can be shared between web servers with different paths.
+		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
+
+		wc_set_template_cache( $cache_key, $cache_path );
+	} else {
+		// Make sure that the absolute path to the template is resolved.
+		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
@@ -308,6 +401,42 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 
 	// Return what we found.
 	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
+}
+
+/**
+ * Add a template to the template cache.
+ *
+ * @since 4.3.0
+ * @param string $cache_key Object cache key.
+ * @param string $template Located template.
+ */
+function wc_set_template_cache( $cache_key, $template ) {
+	wp_cache_set( $cache_key, $template, 'woocommerce' );
+
+	$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
+	if ( is_array( $cached_templates ) ) {
+		$cached_templates[] = $cache_key;
+	} else {
+		$cached_templates = array( $cache_key );
+	}
+
+	wp_cache_set( 'cached_templates', $cached_templates, 'woocommerce' );
+}
+
+/**
+ * Clear the template cache.
+ *
+ * @since 4.3.0
+ */
+function wc_clear_template_cache() {
+	$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
+	if ( is_array( $cached_templates ) ) {
+		foreach ( $cached_templates as $cache_key ) {
+			wp_cache_delete( $cache_key, 'woocommerce' );
+		}
+
+		wp_cache_delete( 'cached_templates', 'woocommerce' );
+	}
 }
 
 /**
@@ -1493,9 +1622,12 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
  *
  * @since  2.6.0
  * @param  bool $include_legacy Count legacy shipping methods too.
+ * @param  bool $enabled_only   Whether non-legacy shipping methods should be
+ *                              restricted to enabled ones. It doesn't affect
+ *                              legacy shipping methods. @since 4.3.0.
  * @return int
  */
-function wc_get_shipping_method_count( $include_legacy = false ) {
+function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = false ) {
 	global $wpdb;
 
 	$transient_name    = $include_legacy ? 'wc_shipping_method_count_legacy' : 'wc_shipping_method_count';
@@ -1506,7 +1638,8 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		return absint( $transient_value['value'] );
 	}
 
-	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+	$where_clause = $enabled_only ? 'WHERE is_enabled=1' : '';
+	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods ${where_clause}" ) );
 
 	if ( $include_legacy ) {
 		// Count activated methods that don't support shipping zones.

@@ -3,11 +3,13 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 4.1.0
+ * Version: 4.3.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
+ * Requires at least: 5.2
+ * Requires PHP: 7.0
  *
  * @package WooCommerce
  */
@@ -18,24 +20,14 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
 
-/**
- * Load core packages and the autoloader.
- *
- * The new packages and autoloader require PHP 5.6+. If this dependency is not met, do not include them. Users will be warned
- * that they are using an older version of PHP. WooCommerce will continue to load, but some functionality such as the REST API
- * and Blocks will be missing.
- *
- * This requirement will be enforced in future versions of WooCommerce.
- */
-if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
-	require __DIR__ . '/src/Autoloader.php';
-	require __DIR__ . '/src/Packages.php';
+// Load core packages and the autoloader.
+require __DIR__ . '/src/Autoloader.php';
+require __DIR__ . '/src/Packages.php';
 
-	if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
-		return;
-	}
-	\Automattic\WooCommerce\Packages::init();
+if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
+	return;
 }
+\Automattic\WooCommerce\Packages::init();
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {

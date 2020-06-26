@@ -507,7 +507,7 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Set product as visible when quering for hidden products.
+	 * Set product as visible when querying for hidden products.
 	 *
 	 * @since  3.2.0
 	 * @param  bool $visibility Product visibility.

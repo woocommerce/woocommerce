@@ -106,9 +106,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'ignore_discounts' => array(
-				'title'       => __( 'Ignore coupons discounts', 'woocommerce' ),
+				'title'       => __( 'Coupons discounts', 'woocommerce' ),
+				'label'       => __( 'Apply minimum order rule before coupon discount', 'woocommerce' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Discounts will not be applied to the minimum order amount.', 'woocommerce' ),
+				'description' => __( 'If checked, free shipping would be available based on pre-discount order amount.', 'woocommerce' ),
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),

@@ -304,7 +304,7 @@ function wc_get_held_stock_quantity( WC_Product $product, $exclude_order_id = 0 
 	 * Filter: woocommerce_hold_stock_for_checkout
 	 * Allows enable/disable hold stock functionality on checkout.
 	 *
-	 * @since 4.1.0
+	 * @since 4.3.0
 	 * @param bool $enabled Default to true if managing stock globally.
 	 */
 	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
@@ -345,7 +345,7 @@ add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' )
 /**
  * Release held stock for an order.
  *
- * @since 4.1.0
+ * @since 4.3.0
  * @param \WC_Order|int $order Order ID or instance.
  */
 function wc_release_stock_for_order( $order ) {
@@ -353,7 +353,7 @@ function wc_release_stock_for_order( $order ) {
 	 * Filter: woocommerce_hold_stock_for_checkout
 	 * Allows enable/disable hold stock functionality on checkout.
 	 *
-	 * @since 4.1.0
+	 * @since 4.3.0
 	 * @param bool $enabled Default to true if managing stock globally.
 	 */
 	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
