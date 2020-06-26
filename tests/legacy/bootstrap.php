@@ -38,6 +38,9 @@ class WC_Unit_Tests_Bootstrap {
 	public function __construct() {
 		$this->tests_dir  = dirname( __FILE__ );
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+
+		$this->register_autoloader_for_testing_tools();
+
 		$this->initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
@@ -67,9 +70,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load WC testing framework.
 		$this->includes();
 
-		// register autoloader for tests in 'src'.
-		$this->register_psr4_autoloader();
-
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 	}
@@ -80,13 +80,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
 	private function initialize_code_hacker() {
-		$hacking_base = $this->plugin_dir . '/tests/Tools/CodeHacking';
-		require_once $hacking_base . '/CodeHacker.php';
-		require_once $hacking_base . '/Hacks/CodeHack.php';
-		require_once $hacking_base . '/Hacks/StaticMockerHack.php';
-		require_once $hacking_base . '/Hacks/FunctionsMockerHack.php';
-		require_once $hacking_base . '/Hacks/BypassFinalsHack.php';
-
 		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
@@ -135,13 +128,13 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Register autoloader for the files in the 'tests/php/src' directory.
+	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
 	 */
-	protected static function register_psr4_autoloader() {
-		spl_autoload_register(
+	protected static function register_autoloader_for_testing_tools() {
+		return spl_autoload_register(
 			function ( $class ) {
-				$prefix   = 'Automattic\\WooCommerce\\Tests\\';
-				$base_dir = __DIR__ . '/php/src/';
+				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
+				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
@@ -149,6 +142,9 @@ class WC_Unit_Tests_Bootstrap {
 				}
 				$relative_class = substr( $class, $len );
 				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				if ( ! file_exists( $file ) ) {
+					throw new \Exception( 'Autoloader for unit tests: file not found: ' . $file );
+				}
 				require $file;
 			}
 		);

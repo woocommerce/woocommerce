@@ -61,8 +61,4 @@
 		<exclude-pattern>tests/php</exclude-pattern>
 		<exclude-pattern>tests/Tools/</exclude-pattern>
 	</rule>
-
-	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
-		<exclude-pattern>src/</exclude-pattern>
-	</rule>
 </ruleset>
