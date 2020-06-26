@@ -1,13 +1,13 @@
 /**
+ * External dependencies
+ */
+import deepFreeze from 'deep-freeze';
+
+/**
  * Internal dependencies
  */
 import { receiveRoutes } from '../reducers';
 import { ACTION_TYPES as types } from '../action-types';
-
-/**
- * External dependencies
- */
-import deepFreeze from 'deep-freeze';
 
 describe( 'receiveRoutes', () => {
 	it( 'returns original state when action type is not a match', () => {

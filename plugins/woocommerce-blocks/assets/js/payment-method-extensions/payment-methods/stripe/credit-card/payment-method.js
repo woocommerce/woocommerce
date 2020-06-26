@@ -1,16 +1,16 @@
 /**
+ * External dependencies
+ */
+import { Elements, useStripe } from '@stripe/react-stripe-js';
+import { useState } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 import { getStripeServerData } from '../stripe-utils';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
 import { InlineCard, CardElements } from './elements';
-
-/**
- * External dependencies
- */
-import { Elements, useStripe } from '@stripe/react-stripe-js';
-import { useState } from '@wordpress/element';
 
 /**
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe

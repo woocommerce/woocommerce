@@ -1,12 +1,12 @@
 /**
- * Internal dependencies
- */
-import { getValueForQueryKey, getValueForQueryContext } from '../selectors';
-
-/**
  * External dependencies
  */
 import deepFreeze from 'deep-freeze';
+
+/**
+ * Internal dependencies
+ */
+import { getValueForQueryKey, getValueForQueryContext } from '../selectors';
 
 const testState = deepFreeze( {
 	contexta: JSON.stringify( {

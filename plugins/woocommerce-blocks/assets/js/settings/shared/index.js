@@ -1,12 +1,12 @@
 /**
- * Internal dependencies
- */
-import { getSetting } from './get-setting';
-
-/**
  * External dependencies
  */
 import compareVersions from 'compare-versions';
+
+/**
+ * Internal dependencies
+ */
+import { getSetting } from './get-setting';
 
 export * from './default-constants';
 export { setSetting } from './set-setting';

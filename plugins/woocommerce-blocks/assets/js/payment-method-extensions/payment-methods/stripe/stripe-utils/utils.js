@@ -1,14 +1,14 @@
 /**
- * Internal dependencies
- */
-import { normalizeLineItems } from './normalize';
-import { errorTypes, errorCodes } from './constants';
-
-/**
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { normalizeLineItems } from './normalize';
+import { errorTypes, errorCodes } from './constants';
 
 /**
  * @typedef {import('./type-defs').StripeServerData} StripeServerData
