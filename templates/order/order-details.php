@@ -100,9 +100,15 @@ if ( $show_downloads ) {
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 </section>
 
-<?php do_action( 'woocommerce_after_order_details', $order ); ?>
-
 <?php
+/**
+ * Action hook fired after the order details.
+ *
+ * @since 4.4.0
+ * @param WC_Order $order Order data.
+ */
+do_action( 'woocommerce_after_order_details', $order );
+
 if ( $show_customer_details ) {
 	wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) );
 }
