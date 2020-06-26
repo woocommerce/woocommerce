@@ -1,14 +1,14 @@
 /**
+ * External dependencies
+ */
+import { Elements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
+
+/**
  * Internal dependencies
  */
 import { getStripeServerData } from '../stripe-utils';
 import { useInitialization } from './use-initialization';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
-
-/**
- * External dependencies
- */
-import { Elements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
 
 /**
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe

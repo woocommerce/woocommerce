@@ -1,4 +1,21 @@
 /**
+ * External dependencies
+ */
+import {
+	createContext,
+	useContext,
+	useState,
+	useReducer,
+	useCallback,
+	useEffect,
+	useRef,
+	useMemo,
+} from '@wordpress/element';
+import { getSetting } from '@woocommerce/settings';
+import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
+import { useEditorContext } from '@woocommerce/base-context';
+
+/**
  * Internal dependencies
  */
 import {
@@ -30,23 +47,6 @@ import {
 	reducer as emitReducer,
 } from './event-emit';
 import { useValidationContext } from '../validation';
-
-/**
- * External dependencies
- */
-import {
-	createContext,
-	useContext,
-	useState,
-	useReducer,
-	useCallback,
-	useEffect,
-	useRef,
-	useMemo,
-} from '@wordpress/element';
-import { getSetting } from '@woocommerce/settings';
-import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
-import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
