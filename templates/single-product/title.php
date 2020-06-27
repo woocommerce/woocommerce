@@ -19,4 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-the_title( '<h1 class="product_title entry-title">', '</h1>' );
+?>
+<h1 class="product_title entry-title">
+	<?php esc_html_e( get_the_title() ); ?>
+</h1>
