@@ -46,7 +46,6 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// If this is not being called during an update routine, save the product so stock status etc is in sync, and caches are cleared.
 		if ( ! $updating ) {
-			$product_with_stock->set_stock_status();
 			$product_with_stock->save();
 		}
 
