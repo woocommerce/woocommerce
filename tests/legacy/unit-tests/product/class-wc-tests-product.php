@@ -44,11 +44,11 @@ class WC_Tests_Product extends WC_Unit_Test_Case {
 		};
 
 		$product = $this->getMockBuilder( WC_Product::class )
-		                ->setMethods( array( 'maybe_defer_product_sync' ) )
-		                ->getMock();
+						->setMethods( array( 'maybe_defer_product_sync' ) )
+						->getMock();
 
 		$product->method( 'maybe_defer_product_sync' )
-		        ->will( $this->returnCallback( $defer_product_callback ) );
+				->will( $this->returnCallback( $defer_product_callback ) );
 
 		$product->$operation();
 
