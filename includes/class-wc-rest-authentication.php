@@ -594,6 +594,14 @@ class WC_REST_Authentication {
 	 * @return mixed
 	 */
 	public function check_user_permissions( $result, $server, $request ) {
+		if ( $this->is_request_to_rest_api() && empty( $this->auth_method ) && empty( $this->user ) ) {
+			// Authentication hasn't occurred during `determine_current_user`, so check auth.
+			$user_id = $this->authenticate( false );
+			if ( $user_id ) {
+				wp_set_current_user( $user_id );
+			}
+		}
+
 		if ( $this->user ) {
 			// Check API Key permissions.
 			$allowed = $this->check_permissions( $request->get_method() );
