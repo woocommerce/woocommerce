@@ -63,10 +63,10 @@ abstract class WC_Legacy_Cart {
 				'tax_display_cart',
 				'fees',
 			),
-			array_keys( $this->cart_session_data )
+			is_array( $this->cart_session_data ) ? array_keys( $this->cart_session_data ) : array()
 		);
 
-		if ( in_array( $key, $legacy_keys, true ) ) {
+		if ( in_array( $name, $legacy_keys, true ) ) {
 			return true;
 		}
 
