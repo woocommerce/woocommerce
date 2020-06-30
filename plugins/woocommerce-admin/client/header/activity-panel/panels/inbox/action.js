@@ -68,7 +68,11 @@ class InboxNoteAction extends Component {
 				isSecondary
 				isBusy={ this.state.inAction }
 				disabled={ this.state.inAction }
-				href={ action ? action.url : undefined }
+				href={
+					action && action.url && action.url.length
+						? action.url
+						: undefined
+				}
 				onClick={ this.handleActionClick }
 			>
 				{ dismiss ? label : action.label }
