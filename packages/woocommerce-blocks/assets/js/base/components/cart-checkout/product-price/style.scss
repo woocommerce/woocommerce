@@ -1,0 +1,12 @@
+.wc-block-product-price {
+	color: $black;
+
+	&.is-discounted {
+		margin-left: 0.5em;
+	}
+}
+
+.wc-block-product-price--regular {
+	color: $core-grey-dark-400;
+	text-decoration: line-through;
+}

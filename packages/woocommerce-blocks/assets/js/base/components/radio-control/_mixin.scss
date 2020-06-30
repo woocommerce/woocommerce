@@ -1,0 +1,107 @@
+@mixin radio-control-styles {
+	.wc-block-radio-control__option {
+		@include reset-typography();
+		border-bottom: 1px solid $core-grey-light-600;
+		display: block;
+		padding: $gap-small $gap-small 0 #{$gap-larger * 2};
+		position: relative;
+	}
+
+	.wc-block-radio-control__option-layout {
+		display: table;
+		width: 100%;
+		border-bottom: 1px solid $core-grey-light-600;
+		padding-bottom: $gap-small;
+	}
+
+	.wc-block-radio-control__option .wc-block-radio-control__option-layout {
+		border-bottom: 0;
+	}
+
+	.wc-block-radio-control__input {
+		left: $gap-large;
+		position: absolute;
+		top: $gap-small;
+	}
+
+	.wc-block-radio-control__label-group,
+	.wc-block-radio-control__description-group {
+		display: table-row;
+
+		> span {
+			display: table-cell;
+		}
+
+		.wc-block-radio-control__secondary-label,
+		.wc-block-radio-control__secondary-description {
+			text-align: right;
+			min-width: 50%;
+		}
+	}
+
+	.wc-block-radio-control__label,
+	.wc-block-radio-control__secondary-label {
+		line-height: 20px;
+		// Currently, max() CSS function calls need to be wrapped with unquote.
+		// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
+		line-height: unquote("max(1rem, 20px)");
+		color: $core-grey-dark-600;
+	}
+
+	.wc-block-radio-control__description,
+	.wc-block-radio-control__secondary-description {
+		@include font-size(small);
+		line-height: 20px;
+		color: $core-grey-dark-400;
+	}
+}
+
+@mixin radio-control-input-styles {
+	// Extra class for specificity.
+	.wc-block-radio-control {
+		.wc-block-radio-control__input {
+			appearance: none;
+			background: #fff;
+			border: 2px solid currentColor;
+			border-radius: 50%;
+			display: inline-block;
+			height: 1.25rem;
+			min-height: 20px;
+			min-width: 20px;
+			width: 1.25rem;
+
+			&:checked::before {
+				background: currentColor;
+				border-radius: 50%;
+				content: "";
+				display: block;
+				height: 0.625em;
+				left: 50%;
+				margin: 0;
+				min-height: 10px;
+				min-width: 10px;
+				position: absolute;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				width: 0.625em;
+			}
+		}
+
+		@include breakpoint( ">782px" ) {
+			.wc-block-radio-control__input {
+				height: 1rem;
+				margin-top: 2px;
+				min-height: 16px;
+				min-width: 16px;
+				width: 1rem;
+
+				&:checked::before {
+					height: 0.5em;
+					min-height: 8px;
+					min-width: 8px;
+					width: 0.5em;
+				}
+			}
+		}
+	}
+}
