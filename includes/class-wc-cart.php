@@ -849,7 +849,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$taxes      = $this->get_taxes();
+		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
+		$taxes = $this->get_taxes();
 		$tax_totals = array();
 
 		foreach ( $taxes as $key => $tax ) {
@@ -860,9 +861,17 @@ class WC_Cart extends WC_Legacy_Cart {
 					$tax_totals[ $code ]         = new stdClass();
 					$tax_totals[ $code ]->amount = 0;
 				}
-				$tax_totals[ $code ]->tax_rate_id      = $key;
-				$tax_totals[ $code ]->is_compound      = WC_Tax::is_compound( $key );
-				$tax_totals[ $code ]->label            = WC_Tax::get_rate_label( $key );
+
+				$tax_totals[ $code ]->tax_rate_id = $key;
+				$tax_totals[ $code ]->is_compound = WC_Tax::is_compound( $key );
+				$tax_totals[ $code ]->label       = WC_Tax::get_rate_label( $key );
+
+				if ( isset( $shipping_taxes[ $key ] ) ) {
+					$tax -= $shipping_taxes[ $key ];
+					$tax  = wc_round_tax_total( $tax );
+					$tax += round( $shipping_taxes[ $key ], wc_get_price_decimals() );
+					unset( $shipping_taxes[ $key ] );
+				}
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
 				$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount );
 			}
