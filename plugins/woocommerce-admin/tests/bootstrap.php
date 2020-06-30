@@ -1,128 +1,178 @@
 <?php
 /**
- * PHPUnit bootstrap file
+ * WooCommerce Admin Unit Tests Bootstrap
  *
- * @package WC_Admin
+ * @package WooCommerce Admin Tests
  */
-
-$_tests_dir = getenv( 'WP_TESTS_DIR' );
-
-if ( ! $_tests_dir ) {
-	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
-}
-
-if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
-	echo "Could not find $_tests_dir/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-	exit( 1 );
-}
-
-// Give access to tests_add_filter() function.
-require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Returns WooCommerce main directory.
- *
- * @return string
+ * Class WC_Admin_Unit_Tests_Bootstrap
  */
-function wc_dir() {
-	return dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce';
-}
+class WC_Admin_Unit_Tests_Bootstrap {
 
-/**
- * Install wc admin.
- */
-function wc_admin_install() {
-	// Clean existing install first.
-	define( 'WP_UNINSTALL_PLUGIN', true );
-	define( 'WC_REMOVE_ALL_DATA', true );
+	/** @var WC_Admin_Unit_Tests_Bootstrap instance */
+	protected static $instance = null;
 
-	// Initialize the WC API extensions.
-	\Automattic\WooCommerce\Admin\Install::create_tables();
-	\Automattic\WooCommerce\Admin\Install::create_events();
+	/** @var string directory where wordpress-tests-lib is installed */
+	public $wp_tests_dir;
 
-	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
-	$GLOBALS['wp_roles'] = null; // phpcs:ignore override ok.
-	wp_roles();
+	/** @var string testing directory */
+	public $tests_dir;
 
-	echo esc_html( 'Installing woocommerce-admin...' . PHP_EOL );
-}
+	/** @var string plugin directory */
+	public $plugin_dir;
 
-/**
- * Adds WooCommerce testing framework classes.
- */
-function wc_test_includes() {
-	$wc_tests_framework_base_dir = wc_dir() . '/tests';
-	if ( ! is_dir( $wc_tests_framework_base_dir . '/framework' ) ) {
-		$wc_tests_framework_base_dir .= '/legacy';
+	/** @var string WC core directory */
+	public $wc_core_dir;
+
+	/**
+	 * Setup the unit testing environment.
+	 */
+	public function __construct() {
+		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
+		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+
+		// Ensure server variable is set for WP email functions.
+		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
+		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
+			$_SERVER['SERVER_NAME'] = 'localhost';
+		}
+		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
+
+		$this->tests_dir    = dirname( __FILE__ );
+		$this->plugin_dir   = dirname( $this->tests_dir );
+		$this->wc_core_dir  = dirname( $this->plugin_dir ) . '/woocommerce';
+		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
+
+		$wc_tests_framework_base_dir = $this->wc_core_dir . '/tests';
+		if ( ! is_dir( $wc_tests_framework_base_dir . '/framework' ) ) {
+			$wc_tests_framework_base_dir .= '/legacy';
+		}
+		$this->wc_core_tests_dir = $wc_tests_framework_base_dir;
+
+		// load test function so tests_add_filter() is available.
+		require_once $this->wp_tests_dir . '/includes/functions.php';
+
+		// load WC.
+		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
+
+		// install WC.
+		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
+
+		// Set up WC-Admin config.
+		tests_add_filter( 'wc_admin_get_feature_config', array( $this, 'add_development_features' ) );
+
+		// load the WP testing environment.
+		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
+
+		// load WC testing framework.
+		$this->includes();
 	}
 
-	// WooCommerce test classes.
-	// Framework.
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-unit-test-factory.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-session-handler.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-wc-data.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-wc-object-query.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-payment-gateway.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-payment-token-stub.php';
-	require_once $wc_tests_framework_base_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
+	/**
+	 * Load WooCommerce Admin.
+	 */
+	public function load_wc() {
+		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
+		define( 'WC_USE_TRANSACTIONS', false );
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
-	// Test cases.
-	require_once $wc_tests_framework_base_dir . '/includes/wp-http-testcase.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-unit-test-case.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-api-unit-test-case.php';
-	require_once $wc_tests_framework_base_dir . '/framework/class-wc-rest-unit-test-case.php';
-
-	// Helpers.
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-product.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-coupon.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-fee.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-shipping.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-customer.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-order.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-payment-token.php';
-	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-settings.php';
-}
-
-/**
- * Manually load the plugin being tested.
- */
-function _manually_load_plugin() {
-	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
-	define( 'WC_USE_TRANSACTIONS', false );
-	update_option( 'woocommerce_enable_coupons', 'yes' );
-	update_option( 'woocommerce_calc_taxes', 'yes' );
-	update_option( 'woocommerce_onboarding_opt_in', 'yes' );
-
-	require_once wc_dir() . '/woocommerce.php';
-	require dirname( __DIR__ ) . '/vendor/autoload.php';
-
-	wc_admin_install();
-
-	require dirname( dirname( __FILE__ ) ) . '/woocommerce-admin.php';
-}
-tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
-
-// Start up the WP testing environment.
-require $_tests_dir . '/includes/bootstrap.php';
-
-wc_test_includes();
-
-// Include wc-admin helpers.
-require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-reports.php';
-require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-admin-notes.php';
-require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-test-action-queue.php';
-require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-queue.php';
-
-/**
- * Use the `development` features for testing.
- */
-function wc_admin_add_development_features() {
-	$config = json_decode( file_get_contents( dirname( dirname( __FILE__ ) ) . '/config/development.json' ) ); // @codingStandardsIgnoreLine.
-	$flags  = array();
-	foreach ( $config->features as $feature => $bool ) {
-		$flags[ $feature ] = $bool;
+		require_once $this->wc_core_dir . '/woocommerce.php';
+		require $this->plugin_dir . '/vendor/autoload.php';
+		require $this->plugin_dir . '/woocommerce-admin.php';
 	}
-	return $flags;
+
+	/**
+	 * Install WooCommerce after the test environment and WC have been loaded.
+	 */
+	public function install_wc() {
+		// Clean existing install first.
+		define( 'WP_UNINSTALL_PLUGIN', true );
+		define( 'WC_REMOVE_ALL_DATA', true );
+		include $this->plugin_dir . '/uninstall.php';
+
+		WC_Install::install();
+
+		// Initialize the WC API extensions.
+		\Automattic\WooCommerce\Admin\Install::create_tables();
+		\Automattic\WooCommerce\Admin\Install::create_events();
+
+		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
+		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+			$GLOBALS['wp_roles']->reinit();
+		} else {
+			$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			wp_roles();
+		}
+
+		echo esc_html( 'Installing WooCommerce and WooCommerce Admin...' . PHP_EOL );
+	}
+
+	/**
+	 * Load WC-specific test cases and factories.
+	 */
+	public function includes() {
+		// WooCommerce test classes.
+		$wc_tests_framework_base_dir = $this->wc_core_tests_dir;
+
+		// Framework.
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-unit-test-factory.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-session-handler.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-wc-data.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-wc-object-query.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-mock-payment-gateway.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-payment-token-stub.php';
+		require_once $wc_tests_framework_base_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
+
+		// Test cases.
+		require_once $wc_tests_framework_base_dir . '/includes/wp-http-testcase.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-unit-test-case.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-api-unit-test-case.php';
+		require_once $wc_tests_framework_base_dir . '/framework/class-wc-rest-unit-test-case.php';
+
+		// Helpers.
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-product.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-coupon.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-fee.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-shipping.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-customer.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-order.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-payment-token.php';
+		require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-settings.php';
+
+		// Include wc-admin helpers.
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-reports.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-admin-notes.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-test-action-queue.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-queue.php';
+	}
+
+	/**
+	 * Use the `development` features for testing.
+	 */
+	public function add_development_features() {
+		$config = json_decode( file_get_contents( $this->plugin_dir . '/config/development.json' ) ); // @codingStandardsIgnoreLine.
+		$flags  = array();
+		foreach ( $config->features as $feature => $bool ) {
+			$flags[ $feature ] = $bool;
+		}
+		return $flags;
+	}
+
+	/**
+	 * Get the single class instance.
+	 * @return WC_Admin_Unit_Tests_Bootstrap
+	 */
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
 }
-tests_add_filter( 'wc_admin_get_feature_config', 'wc_admin_add_development_features' );
+
+WC_Admin_Unit_Tests_Bootstrap::instance();
