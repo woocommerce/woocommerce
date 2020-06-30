@@ -136,7 +136,7 @@ class Header extends Component {
 					} ) }
 				</h1>
 				{ window.wcAdminFeatures[ 'activity-panels' ] && (
-					<ActivityPanel />
+					<ActivityPanel isEmbedded={ isEmbedded } />
 				) }
 			</div>
 		);

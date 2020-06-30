@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import clickOutside from 'react-click-outside';
 import { Component, lazy, Suspense } from '@wordpress/element';
 import { Button, NavigableMenu } from '@wordpress/components';
+import { compose } from '@wordpress/compose';
 import { partial, uniqueId, find } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import PagesIcon from 'gridicons/dist/pages';
@@ -17,6 +18,7 @@ import CrossIcon from 'gridicons/dist/cross-small';
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
 import { H, Section, Spinner } from '@woocommerce/components';
+import { getHistory } from '@woocommerce/navigation';
 import {
 	getUnreadNotes,
 	getUnreadOrders,
@@ -112,14 +114,22 @@ class ActivityPanel extends Component {
 			hasUnreadOrders,
 			hasUnapprovedReviews,
 			hasUnreadStock,
+			isEmbedded,
 		} = this.props;
+
+		// Don't show the inbox on the Home screen.
+		const { location } = getHistory();
+		const showInbox = isEmbedded || ! window.wcAdminFeatures.homescreen || location.pathname !== '/';
+
 		return [
-			{
-				name: 'inbox',
-				title: __( 'Inbox', 'woocommerce-admin' ),
-				icon: <i className="material-icons-outlined">inbox</i>,
-				unread: hasUnreadNotes,
-			},
+			showInbox
+				? {
+					name: 'inbox',
+					title: __( 'Inbox', 'woocommerce-admin' ),
+					icon: <i className="material-icons-outlined">inbox</i>,
+					unread: hasUnreadNotes,
+				}
+				: null,
 			{
 				name: 'orders',
 				title: __( 'Orders', 'woocommerce-admin' ),
@@ -315,16 +325,19 @@ class ActivityPanel extends Component {
 	}
 }
 
-export default withSelect( ( select ) => {
-	const hasUnreadNotes = getUnreadNotes( select );
-	const hasUnreadOrders = getUnreadOrders( select );
-	const hasUnreadStock = getUnreadStock();
-	const hasUnapprovedReviews = getUnapprovedReviews( select );
-
-	return {
-		hasUnreadNotes,
-		hasUnreadOrders,
-		hasUnreadStock,
-		hasUnapprovedReviews,
-	};
-} )( clickOutside( ActivityPanel ) );
+export default compose(
+	withSelect( ( select ) => {
+		const hasUnreadNotes = getUnreadNotes( select );
+		const hasUnreadOrders = getUnreadOrders( select );
+		const hasUnreadStock = getUnreadStock();
+		const hasUnapprovedReviews = getUnapprovedReviews( select );
+	
+		return {
+			hasUnreadNotes,
+			hasUnreadOrders,
+			hasUnreadStock,
+			hasUnapprovedReviews,
+		};
+	} ),
+	clickOutside
+)( ActivityPanel );
