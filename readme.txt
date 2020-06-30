@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.2.1
+Stable tag: 4.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -193,6 +193,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Allow checkout even if reserved table is not present. #26705
 * Tweak - Add note to Products Importer description that TXT files are also supported. #26670
 * Tweak - Allow set different notice types with WC_Admin_Notices. #26410
+* Tweak - Fix redundant setting of object cache when attribute taxonomies are not being used. #26518
 * Fix - Encode HTML entities for product attribute name and values. #26754
 * Fix - Fix an issue with attribute value escaping in product CSV exports. #26739
 * Fix - Fix comment_type value for reviews created with WordPress 5.5. #26729
@@ -239,6 +240,8 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Use label tag for toggleable shipping zones #4554
 * Tweak - Make it easier to add submenu items to the Marketing menu #4561
 * Tweak - Tag remove button style so it is properly centered. #4651
+* Tweak - Tweak the embed page CSS so the top content sits better. #4622
+* Tweak - Update summary number placeholder styles. #4682
 * Fix - misaligned 'required' text on selects #4307
 * Fix - exception when opening dashboard after selecting extensions to purchase #4357
 * Fix - REST API collections schema #4377
@@ -260,6 +263,11 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Don't include sourcemaps or unminified JS for "core" builds. #4642
 * Fix - Add a bottom border to the Install Jetpack CTA. #4589
 * Fix - Style cleanup from components update. #4606
+* Fix - Check that the possibly_add_note function exists before calling it. #4680
+* Fix - Remove unnecessary rest_api_init action that caused incompatibility issues with other plugins. #4691
+* Fix - Fix dashboard task list menu placement. #4664
+* Fix - Added styles to the unread notes counter in the inbox panel. #4690
+* Fix - Fix spacing between stats overview and store management cards. #4681
 * Dev - Add jest-dom eslint plugin. #4327
 * Dev - Migrate onboarding data store to wp.data #4433
 * Dev - Remove use of `IconButton` in favor of `Button` #4415
