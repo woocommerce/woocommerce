@@ -28,7 +28,7 @@ describe( 'APIModelCreator', () => {
 		const result = await adapter.create( new MockModel() );
 
 		expect( result ).toBeInstanceOf( MockModel );
-		expect( result.id ).toBe( 1 );
+		expect( result.ID ).toBe( 1 );
 		expect( mockService.post.mock.calls[ 0 ][ 0 ] ).toBe( '/wc/v3/product' );
 		expect( mockService.post.mock.calls[ 0 ][ 1 ] ).toBe( 'test' );
 	} );
@@ -42,9 +42,9 @@ describe( 'APIModelCreator', () => {
 
 		expect( result ).toBeInstanceOf( Array );
 		expect( result ).toHaveLength( 3 );
-		expect( result[ 0 ].id ).toBe( 1 );
-		expect( result[ 1 ].id ).toBe( 2 );
-		expect( result[ 2 ].id ).toBe( 3 );
+		expect( result[ 0 ].ID ).toBe( 1 );
+		expect( result[ 1 ].ID ).toBe( 2 );
+		expect( result[ 2 ].ID ).toBe( 3 );
 		expect( mockService.post.mock.calls[ 0 ][ 0 ] ).toBe( '/wc/v3/product' );
 		expect( mockService.post.mock.calls[ 0 ][ 1 ] ).toBe( 'test' );
 		expect( mockService.post.mock.calls[ 1 ][ 0 ] ).toBe( '/wc/v3/product' );

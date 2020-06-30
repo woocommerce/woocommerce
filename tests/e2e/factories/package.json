@@ -25,12 +25,13 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc",
     "test": "jest"
   },
   "dependencies": {
     "axios": "0.19.2",
     "create-hmac": "1.1.7",
+    "fishery": "1.0.0",
     "oauth-1.0a": "2.2.6"
   },
   "devDependencies": {
