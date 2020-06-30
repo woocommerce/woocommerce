@@ -18,7 +18,7 @@ export class APIResponseInterceptor {
 			this.interceptorID = this.client.interceptors.response.use(
 				// @ts-ignore: We WANT to change the type of response returned.
 				( response ) => this.onFulfilled( response ),
-				( error: any ) => this.onRejected( error ),
+				( error: any ) => APIResponseInterceptor.onRejected( error ),
 			);
 		}
 	}
@@ -46,27 +46,24 @@ export class APIResponseInterceptor {
 	}
 
 	/**
-	 * Transforms the Axios error into our API error to be consumed in a consistent manner.
+	 * Transforms HTTP errors into an API error if the error came from the API.
 	 *
-	 * @param {*} error The error
-	 * @return {Promise} A promise containing the APIError.
+	 * @param {*} error The error that was caught.
 	 */
-	private onRejected( error: any ): Promise<APIError> {
-		let apiResponse: APIResponse | null = null;
-		let message: string | null = null;
-		if ( error.response ) {
-			apiResponse = new APIResponse(
-				error.response.status,
-				error.response.headers,
-				error.response.data,
-			);
-		} else if ( error.request ) {
-			message = 'No response was received from the server.';
-		} else {
-			// Keep bubbling up the errors that we aren't handling.
+	private static onRejected( error: any ): Promise<APIResponse> {
+		// Only transform API errors.
+		if ( ! error.response ) {
 			throw error;
 		}
 
-		return Promise.reject( new APIError( apiResponse, message ) );
+		throw new APIResponse(
+			error.response.status,
+			error.response.headers,
+			new APIError(
+				error.response.data.code,
+				error.response.data.message,
+				error.response.data.data,
+			),
+		);
 	}
 }

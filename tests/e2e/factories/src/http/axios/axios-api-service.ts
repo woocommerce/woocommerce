@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { APIAuthInterceptor } from './api-auth-interceptor';
 import { APIResponse, APIService } from '../api-service';
 import { APIResponseInterceptor } from './api-response-interceptor';
+import { Agent } from 'https';
 
 /**
  * An API service implementation that uses Axios to make requests to the WordPress API.
@@ -18,6 +19,9 @@ export class AxiosAPIService implements APIService {
 	) {
 		this.client = axios.create( {
 			baseURL: baseAPIURL,
+			httpsAgent: new Agent( {
+				rejectUnauthorized: false,
+			} ),
 		} );
 		this.authInterceptor = new APIAuthInterceptor(
 			this.client,
@@ -34,7 +38,7 @@ export class AxiosAPIService implements APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      params Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	public get<T>(
 		endpoint: string,
@@ -48,7 +52,7 @@ export class AxiosAPIService implements APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	public post<T>(
 		endpoint: string,
@@ -62,7 +66,7 @@ export class AxiosAPIService implements APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	public put<T>(
 		endpoint: string,
@@ -76,7 +80,7 @@ export class AxiosAPIService implements APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	public patch<T>(
 		endpoint: string,
@@ -90,7 +94,7 @@ export class AxiosAPIService implements APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and throws an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	public delete<T>(
 		endpoint: string,

@@ -19,7 +19,10 @@ module.exports = {
 			'files': [ '**/*.ts' ]
 		},
 		{
-			'files': [ '**/*.spec.ts' ],
+			'files': [
+				'**/*.spec.ts',
+				'**/*.test.ts'
+			],
 			'rules': {
 				'no-console': 'off',
 			}

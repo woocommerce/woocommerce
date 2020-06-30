@@ -4,9 +4,9 @@
 export class APIResponse<T = any> {
 	public readonly status: number;
 	public readonly headers: any;
-	public readonly data: T | null;
+	public readonly data: T;
 
-	public constructor( status: number, headers: any, data: T | null ) {
+	public constructor( status: number, headers: any, data: T ) {
 		this.status = status;
 		this.headers = headers;
 		this.data = data;
@@ -16,17 +16,25 @@ export class APIResponse<T = any> {
 /**
  * A structured error from the API.
  */
-export class APIError<T = any> extends Error {
-	public readonly response: APIResponse<T> | null;
+export class APIError {
+	public readonly code: string;
+	public readonly message: string;
+	public readonly data: any;
 
-	public constructor(
-		response: APIResponse<T> | null,
-		message: string | null,
-	) {
-		super( message || 'An error has been returned by the API.' );
-
-		this.response = response;
+	public constructor( code: string, message: string, data: any ) {
+		this.code = code;
+		this.message = message;
+		this.data = data;
 	}
+}
+
+/**
+ * Checks whether or not an APIResponse contains an error.
+ *
+ * @param {APIResponse} response The response to evaluate.
+ */
+export function isAPIError( response: APIResponse ): response is APIResponse<APIError> {
+	return response.status < 200 || response.status >= 400;
 }
 
 /**
@@ -38,7 +46,7 @@ export interface APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      params Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	get<T>(
 		endpoint: string,
@@ -50,7 +58,7 @@ export interface APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	post<T>(
 		endpoint: string,
@@ -62,7 +70,7 @@ export interface APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	put<T>( endpoint: string, data?: any ): Promise<APIResponse<T>>;
 
@@ -71,7 +79,7 @@ export interface APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	patch<T>(
 		endpoint: string,
@@ -83,7 +91,7 @@ export interface APIService {
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
+	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
 	delete<T>(
 		endpoint: string,
