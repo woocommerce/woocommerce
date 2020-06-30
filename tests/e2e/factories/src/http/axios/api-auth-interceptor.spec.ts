@@ -45,7 +45,7 @@ describe( 'APIAuthInterceptor', () => {
 		const request = moxios.requests.mostRecent();
 
 		expect( request.headers ).toHaveProperty( 'Authorization' );
-		expect( request.headers.Authorization ).toEqual(
+		expect( request.headers.Authorization ).toBe(
 			'Basic ' +
 				Buffer.from( 'consumer_key:consumer_secret' ).toString( 'base64' ),
 		);
@@ -76,7 +76,7 @@ describe( 'APIAuthInterceptor', () => {
 		const request = moxios.requests.mostRecent();
 
 		expect( request.headers ).toHaveProperty( 'Authorization' );
-		expect( request.headers.Authorization ).toEqual(
+		expect( request.headers.Authorization ).toBe(
 			'Basic ' +
 				Buffer.from( 'consumer_key:consumer_secret' ).toString( 'base64' ),
 		);

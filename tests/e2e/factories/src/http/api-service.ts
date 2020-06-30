@@ -43,7 +43,7 @@ export interface APIService {
 	get<T>(
 		endpoint: string,
 		params?: any
-	): Promise<APIResponse<T> | APIError<T>>;
+	): Promise<APIResponse<T>>;
 
 	/**
 	 * Performs a POST request against the WordPress API.
@@ -55,7 +55,7 @@ export interface APIService {
 	post<T>(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T> | APIError<T>>;
+	): Promise<APIResponse<T>>;
 
 	/**
 	 * Performs a PUT request against the WordPress API.
@@ -64,7 +64,7 @@ export interface APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
 	 */
-	put<T>( endpoint: string, data?: any ): Promise<APIResponse<T> | APIError<T>>;
+	put<T>( endpoint: string, data?: any ): Promise<APIResponse<T>>;
 
 	/**
 	 * Performs a PATCH request against the WordPress API.
@@ -76,17 +76,17 @@ export interface APIService {
 	patch<T>(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T> | APIError<T>>;
+	): Promise<APIResponse<T>>;
 
 	/**
 	 * Performs a DELETE request against the WordPress API.
 	 *
 	 * @param {string} endpoint The API endpoint we should query.
-	 * @param {*}      params Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and rejects an APIError.
 	 */
 	delete<T>(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T> | APIError<T>>;
+	): Promise<APIResponse<T>>;
 }

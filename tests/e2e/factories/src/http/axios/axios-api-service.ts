@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { APIAuthInterceptor } from './api-auth-interceptor';
-import { APIError, APIResponse, APIService } from '../api-service';
+import { APIResponse, APIService } from '../api-service';
 import { APIResponseInterceptor } from './api-response-interceptor';
 
 /**
@@ -39,7 +39,7 @@ export class AxiosAPIService implements APIService {
 	public get<T>(
 		endpoint: string,
 		params?: any,
-	): Promise<APIResponse<T> | APIError<T>> {
+	): Promise<APIResponse<T>> {
 		return this.client.get( endpoint, { params } );
 	}
 
@@ -53,7 +53,7 @@ export class AxiosAPIService implements APIService {
 	public post<T>(
 		endpoint: string,
 		data?: any,
-	): Promise<APIResponse<T> | APIError<T>> {
+	): Promise<APIResponse<T>> {
 		return this.client.post( endpoint, { data } );
 	}
 
@@ -67,7 +67,7 @@ export class AxiosAPIService implements APIService {
 	public put<T>(
 		endpoint: string,
 		data?: any,
-	): Promise<APIResponse<T> | APIError<T>> {
+	): Promise<APIResponse<T>> {
 		return this.client.put( endpoint, { data } );
 	}
 
@@ -81,7 +81,7 @@ export class AxiosAPIService implements APIService {
 	public patch<T>(
 		endpoint: string,
 		data?: any,
-	): Promise<APIResponse<T> | APIError<T>> {
+	): Promise<APIResponse<T>> {
 		return this.client.patch( endpoint, { data } );
 	}
 
@@ -95,7 +95,7 @@ export class AxiosAPIService implements APIService {
 	public delete<T>(
 		endpoint: string,
 		data?: any,
-	): Promise<APIResponse<T> | APIError<T>> {
+	): Promise<APIResponse<T>> {
 		return this.client.delete( endpoint, { data } );
 	}
 }
