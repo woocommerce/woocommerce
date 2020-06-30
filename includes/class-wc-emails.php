@@ -611,6 +611,16 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Action hook fired to determine if the current product should trigger a
+		 * low stock notification
+		 *
+		 * @param WC_Product $product - The out of stock product object
+		 *
+		 * @since 4.4.0
+		 */
+		do_action( 'woocommerce_should_notify_low_stock', $product );
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
 			/* translators: 1: product name 2: items in stock */
