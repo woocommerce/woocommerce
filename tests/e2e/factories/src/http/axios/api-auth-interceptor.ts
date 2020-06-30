@@ -57,7 +57,7 @@ export class APIAuthInterceptor {
 	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
 	private handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
-		const url = request.baseURL || '' + request.url || '';
+		const url = ( request.baseURL || '' ) + ( request.url || '' );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
 				username: this.oauth.consumer.key,
