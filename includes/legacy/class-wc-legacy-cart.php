@@ -100,6 +100,8 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Magic getters.
 	 *
+	 * If you add/remove cases here please update $legacy_keys in __isset accordingly.
+	 *
 	 * @param string $name Property name.
 	 * @return mixed
 	 */
