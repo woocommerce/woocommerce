@@ -60,8 +60,32 @@ abstract class WC_Legacy_Cart {
 	public function __isset( $name ) {
 		$legacy_keys = array_merge(
 			array(
-				'tax_display_cart',
+				'dp',
+				'prices_include_tax',
+				'round_at_subtotal',
+				'cart_contents_total',
+				'total',
+				'subtotal',
+				'subtotal_ex_tax',
+				'tax_total',
+				'fee_total',
+				'discount_cart',
+				'discount_cart_tax',
+				'shipping_total',
+				'shipping_tax_total',
+				'display_totals_ex_tax',
+				'display_cart_ex_tax',
+				'cart_contents_weight',
+				'cart_contents_count',
+				'coupons',
+				'taxes',
+				'shipping_taxes',
+				'coupon_discount_amounts',
+				'coupon_discount_tax_amounts',
 				'fees',
+				'tax',
+				'discount_total',
+				'tax_display_cart',
 			),
 			is_array( $this->cart_session_data ) ? array_keys( $this->cart_session_data ) : array()
 		);
