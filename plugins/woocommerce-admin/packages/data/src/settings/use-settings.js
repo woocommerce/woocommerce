@@ -1,4 +1,3 @@
-
 /**
  * External dependencies
  */
@@ -7,18 +6,23 @@ import { STORE_NAME } from './constants';
 import { useCallback } from '@wordpress/element';
 
 export const useSettings = ( group, settingsKeys = [] ) => {
-	const { requestedSettings, settingsError, isRequesting, isDirty } = useSelect(
-		select => {
+	const {
+		requestedSettings,
+		settingsError,
+		isRequesting,
+		isDirty,
+	} = useSelect(
+		( select ) => {
 			const {
 				getLastSettingsErrorForGroup,
 				getSettingsForGroup,
 				getIsDirty,
-				isGetSettingsRequesting,
+				isUpdateSettingsRequesting,
 			} = select( STORE_NAME );
 			return {
 				requestedSettings: getSettingsForGroup( group, settingsKeys ),
 				settingsError: Boolean( getLastSettingsErrorForGroup( group ) ),
-				isRequesting: isGetSettingsRequesting( group ),
+				isRequesting: isUpdateSettingsRequesting( group ),
 				isDirty: getIsDirty( group, settingsKeys ),
 			};
 		},
@@ -35,14 +39,11 @@ export const useSettings = ( group, settingsKeys = [] ) => {
 		},
 		[ group ]
 	);
-	const persistSettings = useCallback(
-		() => {
-			// this action would simply persist all settings marked as dirty in the
-			// store state and then remove the dirty record in the isDirtyMap
-			persistSettingsForGroup( group );
-		},
-		[ group ]
-	);
+	const persistSettings = useCallback( () => {
+		// this action would simply persist all settings marked as dirty in the
+		// store state and then remove the dirty record in the isDirtyMap
+		persistSettingsForGroup( group );
+	}, [ group ] );
 	const updateAndPersistSettings = useCallback(
 		( name, data ) => {
 			updateAndPersistSettingsForGroup( group, { [ name ]: data } );

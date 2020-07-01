@@ -696,11 +696,7 @@ BusinessDetails.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getSettings,
-			getSettingsError,
-			isGetSettingsRequesting,
-		} = select( SETTINGS_STORE_NAME );
+		const { getSettings, getSettingsError } = select( SETTINGS_STORE_NAME );
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
@@ -716,7 +712,6 @@ export default compose(
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 			isSettingsError: Boolean( getSettingsError( 'general' ) ),
-			isSettingsRequesting: isGetSettingsRequesting( 'general' ),
 			settings,
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||

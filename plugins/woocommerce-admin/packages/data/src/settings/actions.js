@@ -2,6 +2,7 @@
  * External Dependencies
  */
 
+import { __ } from '@wordpress/i18n';
 import { apiFetch, select } from '@wordpress/data-controls';
 import { concat } from 'lodash';
 
@@ -65,11 +66,16 @@ export function* persistSettingsForGroup( group ) {
 	}
 
 	// get data slice for keys
-	const dirtyData = yield select( STORE_NAME, 'getSettingsForGroup', group, dirtyKeys );
+	const dirtyData = yield select(
+		STORE_NAME,
+		'getSettingsForGroup',
+		group,
+		dirtyKeys
+	);
 	const url = `${ NAMESPACE }/settings/${ group }/batch`;
 
 	const update = dirtyKeys.reduce( ( updates, key ) => {
-		const u = Object.keys( dirtyData[ key ] ).map( k => {
+		const u = Object.keys( dirtyData[ key ] ).map( ( k ) => {
 			return { id: k, value: dirtyData[ key ][ k ] };
 		} );
 		return concat( updates, u );
@@ -80,16 +86,25 @@ export function* persistSettingsForGroup( group ) {
 			method: 'POST',
 			data: { update },
 		} );
+
+		yield setIsRequesting( group, false );
+
 		if ( ! results ) {
-			throw new Error( 'settings did not update' );
+			throw new Error(
+				__(
+					'There was a problem updating your settings.',
+					'woocommerce-admin'
+				)
+			);
 		}
+
 		// remove dirtyKeys from map - note we're only doing this if there is no error.
 		yield clearIsDirty( group );
 	} catch ( e ) {
 		yield updateErrorForGroup( group, null, e );
+		yield setIsRequesting( group, false );
+		throw e;
 	}
-	// finally set the persisting state
-	yield setIsRequesting( group, false );
 }
 
 export function clearSettings() {

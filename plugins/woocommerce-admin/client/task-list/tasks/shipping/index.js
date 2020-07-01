@@ -302,13 +302,13 @@ class Shipping extends Component {
 
 	render() {
 		const { isPending, step } = this.state;
-		const { isSettingsRequesting } = this.props;
+		const { isUpdateSettingsRequesting } = this.props;
 
 		return (
 			<div className="woocommerce-task-shipping">
 				<Card className="is-narrow">
 					<Stepper
-						isPending={ isPending || isSettingsRequesting }
+						isPending={ isPending || isUpdateSettingsRequesting }
 						isVertical
 						currentStep={ step }
 						steps={ this.getSteps() }
@@ -321,19 +321,14 @@ class Shipping extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getSettings,
-			getSettingsError,
-			isGetSettingsRequesting,
-		} = select( SETTINGS_STORE_NAME );
+		const { getSettings, isUpdateSettingsRequesting } = select(
+			SETTINGS_STORE_NAME
+		);
 		const { getActivePlugins, isJetpackConnected } = select(
 			PLUGINS_STORE_NAME
 		);
 
 		const { general: settings = {} } = getSettings( 'general' );
-		const isSettingsError = Boolean( getSettingsError( 'general' ) );
-		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
-
 		const countryCode = getCountryCode(
 			settings.woocommerce_default_country
 		);
@@ -348,8 +343,7 @@ export default compose(
 		return {
 			countryCode,
 			countryName,
-			isSettingsError,
-			isSettingsRequesting,
+			isUpdateSettingsRequesting: isUpdateSettingsRequesting( 'general' ),
 			settings,
 			activePlugins,
 			isJetpackConnected: isJetpackConnected(),
