@@ -69,7 +69,7 @@
 							'&products-skipped=' +
 							parseInt( $this.skipped, 10 ) +
 							'&file-name=' +
-              file_name;
+							file_name;
 					} else {
 						$this.run_import();
 					}
