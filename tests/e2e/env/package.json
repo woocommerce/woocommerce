@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-environment",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "description": "WooCommerce End to End Testing Environment Configuration.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",
@@ -19,19 +19,22 @@
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
   "main": "index.js",
+  "module": "build-module/index.js",
+  "dependencies": {
+    "@wordpress/e2e-test-utils": "^4.6.0",
+    "@wordpress/jest-preset-default": "^5.4.0",
+    "app-root-path": "^3.0.0",
+    "jest": "^25.1.0",
+    "jest-puppeteer": "^4.4.0",
+    "puppeteer": "^2.1.1"
+  },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
     "@babel/polyfill": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
-    "@wordpress/e2e-test-utils": "^4.3.0",
     "@wordpress/eslint-plugin": "^4.0.0",
-    "@wordpress/jest-preset-default": "^5.4.0",
-    "app-root-path": "^3.0.0",
-    "jest": "^25.1.0",
-    "jest-puppeteer": "^4.4.0",
     "ndb": "^1.1.5",
-    "puppeteer": "^2.1.1",
     "woocommerce": "git+https://github.com/woocommerce/woocommerce.git"
   },
   "publishConfig": {

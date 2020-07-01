@@ -13,12 +13,13 @@ program
     .command( 'up', 'Start and build the Docker container' )
     .command( 'down', 'Stop the Docker container and remove volumes' )
     .action( ( cmd, options ) => {
-        if ( 'up' === options[ 0 ] ) {
+        arg = options.args ? options.args[ 0 ] : options[ 0 ];
+        if ( 'up' === arg ) {
             command = 'up';
             dockerArgs.push( 'up', '--build', '-d' );
         }
 
-        if ( 'down' === options[ 0 ] ) {
+        if ( 'down' === arg ) {
             command = 'down';
             dockerArgs.push( 'down', '-v' );
         }
