@@ -474,3 +474,17 @@ function wc_render_invalid_variation_notice( $product_object ) {
 		<?php
 	}
 }
+
+/**
+ * Check if WooCommerce.com account is connected.
+ *
+ * @since 4.4.0
+ * @return bool Whether account is connected.
+ */
+function wc_get_wccom_connected() {
+	$helper_options    = get_option( 'woocommerce_helper_data', array() );
+	if ( array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
+		return true;
+	}
+	return false;
+}
