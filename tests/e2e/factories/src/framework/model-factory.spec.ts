@@ -1,6 +1,7 @@
 import { ModelFactory } from './model-factory';
 import { Adapter } from './adapter';
 import { Product } from '../models/product';
+import { SimpleProduct } from '../models/simple-product';
 
 class MockAdapter implements Adapter<Product> {
 	public create = jest.fn();
@@ -14,7 +15,7 @@ describe( 'ModelFactory', () => {
 		mockAdapter = new MockAdapter();
 		factory = ModelFactory.define<Product, any, ModelFactory<Product>>(
 			( { params } ) => {
-				return new Product( params );
+				return new SimpleProduct( params );
 			},
 		);
 	} );
@@ -26,7 +27,7 @@ describe( 'ModelFactory', () => {
 	it( 'should create using adapter', async () => {
 		factory.setAdapter( mockAdapter );
 
-		const expectedModel = new Product( { Name: 'test2' } );
+		const expectedModel = new SimpleProduct( { Name: 'test2' } );
 		expectedModel.onCreated( { id: 1 } );
 		mockAdapter.create.mockReturnValueOnce( Promise.resolve( expectedModel ) );
 

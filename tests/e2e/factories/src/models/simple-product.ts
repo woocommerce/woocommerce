@@ -1,0 +1,42 @@
+import { DeepPartial } from 'fishery';
+import { Product } from './product';
+import { AdapterTypes, ModelRegistry } from '../framework/model-registry';
+import { ModelFactory } from '../framework/model-factory';
+import { APIAdapter } from '../framework/api-adapter';
+
+export class SimpleProduct extends Product {
+	public constructor( partial: DeepPartial<SimpleProduct> = {} ) {
+		super( partial );
+		Object.assign( this, partial );
+	}
+}
+
+/**
+ * Registers the simple product factory and adapters.
+ *
+ * @param {ModelRegistry} registry The registry to hold the model reference.
+ */
+export function registerSimpleProduct( registry: ModelRegistry ) {
+	if ( null !== registry.getFactory( SimpleProduct ) ) {
+		return;
+	}
+
+	const factory = ModelFactory.define<SimpleProduct, any, ModelFactory<SimpleProduct>>(
+		( { params } ) => {
+			return new SimpleProduct( params );
+		},
+	);
+	registry.registerFactory( SimpleProduct, factory );
+
+	const apiAdapter = new APIAdapter<SimpleProduct>(
+		'/wc/v3/products',
+		( model ) => {
+			return {
+				type: 'simple',
+				name: model.Name,
+				regular_price: model.RegularPrice,
+			};
+		},
+	);
+	registry.registerAdapter( SimpleProduct, AdapterTypes.API, apiAdapter );
+}

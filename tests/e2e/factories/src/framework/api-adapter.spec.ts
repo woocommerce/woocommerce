@@ -1,7 +1,7 @@
 import { Model } from '../models/model';
 import { APIResponse, APIService } from '../index';
 import { APIAdapter } from './api-adapter';
-import { Product } from '../models/product';
+import { SimpleProduct } from '../models/simple-product';
 
 class MockAPI implements APIService {
 	public get = jest.fn();
@@ -24,20 +24,21 @@ describe( 'APIModelCreator', () => {
 	it( 'should create single instance', async () => {
 		mockService.post.mockReturnValueOnce( new APIResponse( 200, {}, { id: 1 } ) );
 
-		const result = await adapter.create( new Product() );
+		const result = await adapter.create( new SimpleProduct() );
 
-		expect( result ).toBeInstanceOf( Product );
+		expect( result ).toBeInstanceOf( SimpleProduct );
 		expect( result.ID ).toBe( 1 );
 		expect( mockService.post.mock.calls[ 0 ][ 0 ] ).toBe( '/wc/v3/product' );
 		expect( mockService.post.mock.calls[ 0 ][ 1 ] ).toBe( 'test' );
 	} );
 
 	it( 'should create multiple instances', async () => {
-		mockService.post.mockReturnValueOnce( new APIResponse( 200, {}, { id: 1 } ) )
+		mockService.post
+			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 1 } ) )
 			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 2 } ) )
 			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 3 } ) );
 
-		const result = await adapter.create( [ new Product(), new Product(), new Product() ] );
+		const result = await adapter.create( [ new SimpleProduct(), new SimpleProduct(), new SimpleProduct() ] );
 
 		expect( result ).toBeInstanceOf( Array );
 		expect( result ).toHaveLength( 3 );

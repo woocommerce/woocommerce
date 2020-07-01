@@ -21,7 +21,7 @@ export enum AdapterTypes {
 /**
  * A registry that allows for us to easily manage all of our factories and related state.
  */
-export class FactoryRegistry {
+export class ModelRegistry {
 	private readonly registry: Registry<ModelFactory<any>> = {};
 	private readonly adapters: { [key in AdapterTypes]: Registry<Adapter<any>> } = {
 		api: {},
