@@ -1562,16 +1562,18 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '25.0000',
-			'tax_rate_name'     => 'VAT',
+			'tax_rate_name'     => 'Tax @ 25%',
 			'tax_rate_priority' => '1',
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'standard',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 0 );
+		$product->set_regular_price( 242 );
+		$product->set_tax_class( 'product' );
 		$product->save();
 
 		WC_Helper_Shipping::create_simple_flat_rate( 75.10 );
@@ -1580,21 +1582,31 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
-
-		// Set the flat_rate shipping method.
-		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
 		$this->assertEquals( 18.775, WC()->cart->get_shipping_tax() );
-		$this->assertEquals( 93.88, WC()->cart->get_total( 'edit' ) );
-		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
+		$this->assertEquals( 335.88, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
+
+		$checkout = WC_Checkout::instance();
+		$order = new WC_Order();
+		$checkout->set_data_from_cart( $order );
+		$this->assertEquals( 67.18, $order->get_total_tax() );
+		$this->assertEquals( 335.88, $order->get_total() );
+		$this->assertEquals( 18.775, $order->get_shipping_tax() );
 
 		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
 		WC()->cart->calculate_totals();
 
 		$this->assertEquals( 18.78, WC()->cart->get_shipping_tax() );
-		$this->assertEquals( 93.88, WC()->cart->get_total( 'edit' ) );
-		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
+		$this->assertEquals( 335.88, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
+
+		$order = new WC_Order();
+		$checkout->set_data_from_cart( $order );
+		$this->assertEquals( 67.18, $order->get_total_tax() );
+		$this->assertEquals( 335.88, $order->get_total() );
+		$this->assertEquals( 18.78, $order->get_shipping_tax() );
 	}
 
 	/**
