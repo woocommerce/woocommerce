@@ -58,7 +58,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any,
 	): Promise<APIResponse<T>> {
-		return this.client.post( endpoint, { data } );
+		return this.client.post( endpoint, data );
 	}
 
 	/**
@@ -72,7 +72,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any,
 	): Promise<APIResponse<T>> {
-		return this.client.put( endpoint, { data } );
+		return this.client.put( endpoint, data );
 	}
 
 	/**
@@ -86,7 +86,7 @@ export class AxiosAPIService implements APIService {
 		endpoint: string,
 		data?: any,
 	): Promise<APIResponse<T>> {
-		return this.client.patch( endpoint, { data } );
+		return this.client.patch( endpoint, data );
 	}
 
 	/**
