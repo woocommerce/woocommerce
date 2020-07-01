@@ -10,7 +10,7 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
-    "build": "grunt && npm run makepot",
+    "build": "grunt && npm run makepot && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "node ./tests/e2e/bin/build.js",
     "build:zip": "./bin/build-zip.sh",
