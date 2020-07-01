@@ -4,9 +4,8 @@ language: php
 dist: xenial
 
 cache:
-    directories:
-        - vendor
-        - $HOME/.composer/cache
+  directories:
+    - $HOME/.composer/cache
 
 # Since Xenial services are not started by default, we need to instruct it below to start.
 services:
@@ -64,7 +63,7 @@ jobs:
   - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
-before_script:
+install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     # Remove Xdebug for a huge performance increase:
