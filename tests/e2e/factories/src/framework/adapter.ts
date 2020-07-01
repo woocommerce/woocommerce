@@ -1,5 +1,8 @@
 import { Model } from '../models/model';
 
+/**
+ * An interface for implementing adapters to create models.
+ */
 export interface Adapter<T extends Model> {
 	/**
 	 * Creates a model or array of models using a service..
