@@ -4,7 +4,13 @@
 import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, FormToggle } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	FormToggle,
+	Popover,
+} from '@wordpress/components';
+import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { keys, get, pickBy } from 'lodash';
 
@@ -47,6 +53,10 @@ class BusinessDetails extends Component {
 			false
 		);
 
+		this.state = {
+			isPopoverVisible: false,
+		};
+
 		this.initialValues = {
 			other_platform: profileItems.other_platform || '',
 			other_platform_name: profileItems.other_platform_name || '',
@@ -62,6 +72,7 @@ class BusinessDetails extends Component {
 			'kliken-marketing-for-google': businessExtensions
 				? businessExtensions.includes( 'kliken-marketing-for-google' )
 				: true,
+			install_extensions: true,
 		};
 
 		this.extensions = [
@@ -70,6 +81,7 @@ class BusinessDetails extends Component {
 			'kliken-marketing-for-google',
 		];
 
+		this.bundleInstall = false;
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
 		this.getNumberRangeString = this.getNumberRangeString.bind( this );
@@ -84,6 +96,7 @@ class BusinessDetails extends Component {
 			updateProfileItems,
 		} = this.props;
 		const {
+			install_extensions: installExtensions,
 			other_platform: otherPlatform,
 			other_platform_name: otherPlatformName,
 			product_count: productCount,
@@ -100,9 +113,21 @@ class BusinessDetails extends Component {
 			revenue,
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
-			install_facebook: values[ 'facebook-for-woocommerce' ],
-			install_mailchimp: values[ 'mailchimp-for-woocommerce' ],
-			install_google_ads: values[ 'kliken-marketing-for-google' ],
+			install_woocommerce_services: businessExtensions.includes(
+				'facebook-for-woocommerce'
+			),
+			install_jetpack: businessExtensions.includes( 'jetpack' ),
+			install_facebook: businessExtensions.includes(
+				'facebook-for-woocommerce'
+			),
+			install_mailchimp: businessExtensions.includes(
+				'mailchimp-for-woocommerce'
+			),
+			install_google_ads: businessExtensions.includes(
+				'kliken-marketing-for-google'
+			),
+			install_extensions: installExtensions,
+			bundle_install: this.bundleInstall,
 		} );
 
 		const _updates = {
@@ -143,9 +168,6 @@ class BusinessDetails extends Component {
 						createNoticesFromResponse( response );
 					} )
 					.catch( ( error ) => {
-						this.setState( {
-							hasInstallActivateError: true,
-						} );
 						createNoticesFromResponse( error );
 						throw new Error();
 					} )
@@ -160,62 +182,75 @@ class BusinessDetails extends Component {
 	validate( values ) {
 		const errors = {};
 
-		Object.keys( values ).forEach( ( name ) => {
-			if ( name === 'other_platform' ) {
-				if (
-					! values.other_platform.length &&
-					[ 'other', 'brick-mortar-other' ].includes(
-						values.selling_venues
-					)
-				) {
-					errors.other_platform = __(
-						'This field is required',
-						'woocommerce-admin'
-					);
-				}
-			} else if ( name === 'other_platform_name' ) {
-				if (
-					! values.other_platform_name &&
-					values.other_platform === 'other' &&
-					[ 'other', 'brick-mortar-other' ].includes(
-						values.selling_venues
-					)
-				) {
-					errors.other_platform_name = __(
-						'This field is required',
-						'woocommerce-admin'
-					);
-				}
-			} else if ( name === 'revenue' ) {
-				if (
-					! values.revenue.length &&
-					[
-						'other',
-						'brick-mortar',
-						'brick-mortar-other',
-						'other-woocommerce',
-					].includes( values.selling_venues )
-				) {
-					errors.revenue = __(
-						'This field is required',
-						'woocommerce-admin'
-					);
-				}
-			} else if (
-				! this.extensions.includes( name ) &&
-				! values[ name ].length
-			) {
-				errors[ name ] = __(
-					'This field is required',
-					'woocommerce-admin'
-				);
-			}
-		} );
+		if ( ! values.product_count.length ) {
+			errors.product_count = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
+
+		if ( ! values.selling_venues.length ) {
+			errors.selling_venues = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
+
+		if (
+			! values.other_platform.length &&
+			[ 'other', 'brick-mortar-other' ].includes( values.selling_venues )
+		) {
+			errors.other_platform = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
+
+		if (
+			! values.other_platform_name &&
+			values.other_platform === 'other' &&
+			[ 'other', 'brick-mortar-other' ].includes( values.selling_venues )
+		) {
+			errors.other_platform_name = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
+
+		if (
+			! values.revenue.length &&
+			[
+				'other',
+				'brick-mortar',
+				'brick-mortar-other',
+				'other-woocommerce',
+			].includes( values.selling_venues )
+		) {
+			errors.revenue = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
 
 		return errors;
 	}
 
 	getBusinessExtensions( values ) {
+		if ( this.bundleInstall ) {
+			return values.install_extensions
+				? [
+						'jetpack',
+						'woocommerce-services',
+						'woocommerce-payments',
+						...this.extensions,
+				  ]
+				: [];
+		}
+
+		if ( values.selling_venues === '' ) {
+			return [];
+		}
+
 		return keys( pickBy( values ) ).filter( ( name ) =>
 			this.extensions.includes( name )
 		);
@@ -313,21 +348,36 @@ class BusinessDetails extends Component {
 		}
 
 		return (
-			<p>
-				{ sprintf(
-					_n(
-						'The following plugin will be installed for free: %s',
-						'The following plugins will be installed for free: %s',
-						extensions.length,
-						'woocommerce-admin'
-					),
-					extensionsList
+			<Fragment>
+				<p>
+					{ sprintf(
+						_n(
+							'The following plugin will be installed for free: %s',
+							'The following plugins will be installed for free: %s',
+							extensions.length,
+							'woocommerce-admin'
+						),
+						extensionsList
+					) }
+				</p>
+				{ this.bundleInstall && (
+					<p>
+						{ __(
+							'An account is required to use these features.',
+							'woocommerce-admin'
+						) }
+					</p>
 				) }
-			</p>
+			</Fragment>
 		);
 	}
 
 	renderBusinessExtensions( values, getInputProps ) {
+		// Show extensions when the currently selling elsewhere checkbox has been answered.
+		if ( values.selling_venues === '' ) {
+			return null;
+		}
+
 		const extensionBenefits = [
 			{
 				slug: 'facebook-for-woocommerce',
@@ -389,6 +439,133 @@ class BusinessDetails extends Component {
 					</div>
 				) ) }
 			</Fragment>
+		);
+	}
+
+	renderBusinessExtensionsBundle( values, getInputProps ) {
+		const { isPopoverVisible } = this.state;
+
+		return (
+			<div className="woocommerce-business-extensions">
+				<label htmlFor="woocommerce-business-extensions__checkbox">
+					<CheckboxControl
+						id="woocommerce-business-extensions__checkbox"
+						{ ...getInputProps( 'install_extensions' ) }
+					/>
+					<span className="woocommerce-business-extensions__label-text">
+						{ interpolateComponents( {
+							mixedString: __(
+								'Install recommended {{strong}}free{{/strong}} business features',
+								'woocommerce-admin'
+							),
+							components: {
+								strong: <strong />,
+							},
+						} ) }
+						<span className="woocommerce-business-extensions__label-subtext">
+							{ __( 'Requires an account', 'woocommerce-admin' ) }
+						</span>
+					</span>
+				</label>
+
+				<div className="woocommerce-business-extensions__popover-wrapper">
+					<Button
+						isTertiary
+						onClick={ () => {
+							recordEvent(
+								'storeprofiler_store_business_details_popover'
+							);
+							this.setState( { isPopoverVisible: true } );
+						} }
+					>
+						<i className="material-icons-outlined">info</i>
+					</Button>
+					{ isPopoverVisible && (
+						<Popover
+							className="woocommerce-business-extensions__popover"
+							position="top center"
+							onClose={ () =>
+								this.setState( { isPopoverVisible: false } )
+							}
+						>
+							<div className="woocommerce-business-extensions__benefits">
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Manage your store on the go with the WooCommerce mobile app',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Accept credit cards with WooCommerce Payments',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Speed & security enhancements',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Automatic sales taxes',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Market on Facebook',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Contact customers with Mailchimp',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Drive sales with Google Ads',
+										'woocommerce-admin'
+									) }
+								</div>
+								<div className="woocommerce-business-extensions__benefit">
+									<i className="material-icons-outlined">
+										check
+									</i>
+									{ __(
+										'Print shipping labels at home',
+										'woocommerce-admin'
+									) }
+								</div>
+							</div>
+						</Popover>
+					) }
+				</div>
+			</div>
 		);
 	}
 
@@ -554,8 +731,6 @@ class BusinessDetails extends Component {
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {
-					// Show extensions when the currently selling elsewhere checkbox has been answered.
-					const showExtensions = values.selling_venues !== '';
 					return (
 						<Fragment>
 							<H className="woocommerce-profile-wizard__header-title">
@@ -645,11 +820,15 @@ class BusinessDetails extends Component {
 										</Fragment>
 									) }
 
-									{ showExtensions &&
-										this.renderBusinessExtensions(
-											values,
-											getInputProps
-										) }
+									{ this.bundleInstall
+										? this.renderBusinessExtensionsBundle(
+												values,
+												getInputProps
+										  )
+										: this.renderBusinessExtensions(
+												values,
+												getInputProps
+										  ) }
 
 									<div className="woocommerce-profile-wizard__card-actions">
 										<Button
@@ -682,8 +861,7 @@ class BusinessDetails extends Component {
 								</Fragment>
 							</Card>
 
-							{ showExtensions &&
-								this.renderBusinessExtensionHelpText( values ) }
+							{ this.renderBusinessExtensionHelpText( values ) }
 						</Fragment>
 					);
 				} }

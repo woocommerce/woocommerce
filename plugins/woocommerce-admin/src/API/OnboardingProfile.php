@@ -334,6 +334,9 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
 					'enum' => array(
+						'jetpack',
+						'woocommerce-services',
+						'woocommerce-payments',
 						'mailchimp-for-woocommerce',
 						'facebook-for-woocommerce',
 						'kliken-marketing-for-google',

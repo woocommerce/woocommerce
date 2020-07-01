@@ -94,7 +94,8 @@
 		}
 
 		.woocommerce-card ~ p {
-			font-size: 14px;
+			font-size: 12px;
+			color: $core-grey-dark-150;
 		}
 	}
 
@@ -445,6 +446,56 @@
 
 		button.is-primary {
 			align-self: flex-end;
+		}
+	}
+}
+
+.woocommerce-business-extensions {
+	margin-left: -$gap;
+	margin-right: -$gap;
+	padding: $gap-large $gap;
+	border-top: 1px solid $light-gray-tertiary;
+	border-bottom: 1px solid $light-gray-tertiary;
+	display: flex;
+	align-items: center;
+
+	label {
+		display: flex;
+		color: $dark-gray-primary;
+		align-items: center;
+	}
+
+	.components-checkbox-control__input-container {
+		margin-right: $gap;
+	}
+
+	.woocommerce-business-extensions__label-subtext {
+		display: block;
+		color: $core-grey-dark-150;
+		font-size: 14px;
+	}
+
+	.woocommerce-business-extensions__popover-wrapper {
+		margin-left: auto;
+	}
+
+	.woocommerce-business-extensions__benefits {
+		padding: 4px;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		width: 600px;
+		max-width: 100%;
+		font-size: 14px;
+
+		.woocommerce-business-extensions__benefit {
+			padding: 10px;
+			font-size: 14px;
+			display: inline-flex;
+
+			i {
+				color: $blue-medium-focus;
+				margin-right: $gap;
+			}
 		}
 	}
 }
