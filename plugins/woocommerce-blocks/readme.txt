@@ -12,68 +12,33 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
 
+For more information on what blocks are available, and how to use them, check out the official documentation: https://docs.woocommerce.com/document/woocommerce-blocks/
+
 **Note: Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.**
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
-**Featured Product Block**
-Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo.
-
-**Featured Category Block**
-Visually highlight a product category to increase traffic to that specific section on your shop.
-
-**Hand-Picked products Block**
-Display a grid of hand picked products. Products can be ordered in various ways.
-
-**Best Selling Products Block**
-Display a grid of your best selling products, filterable by category.
-
-**Top Rated Products Block**
-Display a grid of your top rated products, filterable by category.
-
-**Newest Products Block**
-Display a grid of your newest products, filterable by category.
-
-**On Sale Products Block**
-Display a grid of on sale products, filterable by category.
-
-**Products by Category Block**
-Display a grid of products from your selected category, or categories. Products can be ordered in various ways.
-
-**Products by Tag Block**
-Show a grid of products based on a specific tag that allows you to highlight products based on finer classification options.
-
-**Products by Attribute Block**
-Display a grid of products from your selected attributes.
-
-**Product Categories List Block**
-Display all your product categories as a list or dropdown and help shoppers to find a specific category.
-
-**Reviews by Product**
-Display reviews of a specific product to build trust in your product and brand.
-
-**Reviews by Category**
-Highlight reviews from specific categories and help merchants making an informed purchasing decision.
-
-**All Reviews**
-Show a list of all product reviews on a landing page, blog post or any other page in your site.
-
-**Product Search**
-Help shoppers find your products by placing a search box in specific locations.
-
-**All Products**
-Display all products from your store as a grid with pagination and sorting options. Requires WordPress 5.3.
-
-**Filter Products by Price**
-Display a slider to filter products in your store by price. Works in combination with the _All Products_ block. Requires WordPress 5.3.
-
-**Filter Products by Attribute**
-Display a list of filters based on a chosen product attribute. Works in combination with the _All Products_ block. Requires WordPress 5.3.
-
-**Active Product Filters**
-Display a list of active product filters. Works in combination with the _Filter Products by Price_ and _Filter Products by Attribute_ blocks. Requires WordPress 5.3.
-
-We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories.
+- **Featured Product Block**
+- **Featured Category Block**
+- **Hand-Picked products Block**
+- **Best Selling Products Block**
+- **Top Rated Products Block**
+- **Newest Products Block**
+- **On Sale Products Block**
+- **Products by Category Block**
+- **Products by Tag Block**
+- **Products by Attribute Block**
+- **Product Categories List Block**
+- **Reviews by Product**
+- **Reviews by Category**
+- **All Reviews**
+- **Product Search**
+- **All Products**
+- **Filter Products by Price**
+- **Filter Products by Attribute**
+- **Active Product Filters**
+- **Cart**
+- **Checkout**
 
 == Getting Started ==
 
