@@ -1,5 +1,5 @@
 import { ModelFactory } from './model-factory';
-import { Adapter } from '../adapters/adapter';
+import { Adapter } from './adapter';
 import { Product } from '../models/product';
 
 class MockAdapter implements Adapter<Product> {

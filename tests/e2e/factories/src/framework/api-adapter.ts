@@ -1,4 +1,4 @@
-import { APIService } from '..';
+import { APIService } from '../index';
 import { Model } from '../models/model';
 import { Adapter } from './adapter';
 
@@ -62,7 +62,7 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 	 */
 	private async createSingle( model: T ): Promise<T> {
 		return new Promise<T>( async ( resolve ) => {
-			const response = await this.apiService!.post<any>(
+			const response = await this.apiService!.post(
 				this.endpoint,
 				this.transformer( model ),
 			);

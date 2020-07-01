@@ -5,7 +5,7 @@ import OAuth from 'oauth-1.0a';
 /**
  * A utility class for managing the lifecycle of an authentication interceptor.
  */
-export class APIAuthInterceptor {
+export class AxiosAuthInterceptor {
 	private readonly client: AxiosInstance;
 	private interceptorID: number | null;
 	private oauth: OAuth;

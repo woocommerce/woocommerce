@@ -1,5 +1,5 @@
 import { Model } from '../models/model';
-import { APIResponse, APIService } from '..';
+import { APIResponse, APIService } from '../index';
 import { APIAdapter } from './api-adapter';
 import { Product } from '../models/product';
 

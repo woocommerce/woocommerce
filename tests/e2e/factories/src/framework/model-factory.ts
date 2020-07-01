@@ -1,6 +1,6 @@
 import { DeepPartial, Factory, BuildOptions } from 'fishery';
 import { Model } from '../models/model';
-import { Adapter } from '../adapters/adapter';
+import { Adapter } from './adapter';
 
 /**
  * A factory that can be used to create models using an adapter.

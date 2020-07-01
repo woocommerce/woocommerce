@@ -1,15 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { APIAuthInterceptor } from './api-auth-interceptor';
+import { AxiosAuthInterceptor } from './axios-auth-interceptor';
 
-describe( 'APIAuthInterceptor', () => {
-	let apiAuthInterceptor: APIAuthInterceptor;
+describe( 'AxiosAuthInterceptor', () => {
+	let apiAuthInterceptor: AxiosAuthInterceptor;
 	let axiosInstance: AxiosInstance;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
 		moxios.install( axiosInstance );
-		apiAuthInterceptor = new APIAuthInterceptor(
+		apiAuthInterceptor = new AxiosAuthInterceptor(
 			axiosInstance,
 			'consumer_key',
 			'consumer_secret',

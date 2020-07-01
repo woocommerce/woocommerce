@@ -1,5 +1,5 @@
 import moxios from 'moxios';
-import { APIResponse } from './../api-service';
+import { APIResponse } from '../api-service';
 import { AxiosAPIService } from './axios-api-service';
 
 describe( 'AxiosAPIService', () => {

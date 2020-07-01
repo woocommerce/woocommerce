@@ -1,2 +1,2 @@
-export { APIService, APIResponse, APIError } from './http/api-service';
-export { AxiosAPIService } from './http/axios/axios-api-service';
+export { APIService, APIResponse, APIError } from './framework/api-service';
+export { AxiosAPIService } from './framework/axios/axios-api-service';

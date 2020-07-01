@@ -1,16 +1,16 @@
 import axios, { AxiosInstance } from 'axios';
-import { APIAuthInterceptor } from './api-auth-interceptor';
 import { APIResponse, APIService } from '../api-service';
-import { APIResponseInterceptor } from './api-response-interceptor';
 import { Agent } from 'https';
+import { AxiosAuthInterceptor } from './axios-auth-interceptor';
+import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
 /**
  * An API service implementation that uses Axios to make requests to the WordPress API.
  */
 export class AxiosAPIService implements APIService {
 	private readonly client: AxiosInstance;
-	private authInterceptor: APIAuthInterceptor;
-	private responseInterceptor: APIResponseInterceptor;
+	private authInterceptor: AxiosAuthInterceptor;
+	private responseInterceptor: AxiosResponseInterceptor;
 
 	public constructor(
 		baseAPIURL: string,
@@ -23,13 +23,13 @@ export class AxiosAPIService implements APIService {
 				rejectUnauthorized: false,
 			} ),
 		} );
-		this.authInterceptor = new APIAuthInterceptor(
+		this.authInterceptor = new AxiosAuthInterceptor(
 			this.client,
 			consumerKey,
 			consumerSecret,
 		);
 		this.authInterceptor.start();
-		this.responseInterceptor = new APIResponseInterceptor( this.client );
+		this.responseInterceptor = new AxiosResponseInterceptor( this.client );
 		this.responseInterceptor.start();
 	}
 

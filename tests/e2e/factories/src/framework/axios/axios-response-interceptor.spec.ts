@@ -1,16 +1,16 @@
 import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { APIResponse, APIError } from './../api-service';
-import { APIResponseInterceptor } from './api-response-interceptor';
+import { APIResponse, APIError } from '../api-service';
+import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
-describe( 'APIResponseInterceptor', () => {
-	let apiResponseInterceptor: APIResponseInterceptor;
+describe( 'AxiosResponseInterceptor', () => {
+	let apiResponseInterceptor: AxiosResponseInterceptor;
 	let axiosInstance: AxiosInstance;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
 		moxios.install( axiosInstance );
-		apiResponseInterceptor = new APIResponseInterceptor( axiosInstance );
+		apiResponseInterceptor = new AxiosResponseInterceptor( axiosInstance );
 		apiResponseInterceptor.start();
 	} );
 

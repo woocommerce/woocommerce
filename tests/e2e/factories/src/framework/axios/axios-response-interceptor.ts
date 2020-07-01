@@ -1,7 +1,7 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { APIError, APIResponse } from '../api-service';
 
-export class APIResponseInterceptor {
+export class AxiosResponseInterceptor {
 	private readonly client: AxiosInstance;
 	private interceptorID: number | null;
 
@@ -18,7 +18,7 @@ export class APIResponseInterceptor {
 			this.interceptorID = this.client.interceptors.response.use(
 				// @ts-ignore: We WANT to change the type of response returned.
 				( response ) => this.onFulfilled( response ),
-				( error: any ) => APIResponseInterceptor.onRejected( error ),
+				( error: any ) => AxiosResponseInterceptor.onRejected( error ),
 			);
 		}
 	}
