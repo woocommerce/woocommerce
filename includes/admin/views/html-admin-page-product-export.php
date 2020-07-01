@@ -74,6 +74,7 @@ $exporter = new WC_Product_CSV_Exporter();
 									echo '<option value="' . esc_attr( $category->slug ) . '">' . esc_html( $category->name ) . '</option>';
 								}
 								?>
+								</select>
 							</td>
 						</tr>
 						<tr>
