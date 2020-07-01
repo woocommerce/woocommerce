@@ -1520,4 +1520,23 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 	}
+
+	/**
+	 * Test wc_generate_order_key().
+	 *
+	 * @since 4.3.0
+	 */
+	public function test_wc_generate_order_key() {
+		// Test custom key.
+		$key       = 'foo123bar';
+		$order_key = wc_generate_order_key( $key );
+		$expected  = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
+		$this->assertEquals( $expected, $order_key );
+
+		// Test default key.
+		$order_key = wc_generate_order_key();
+		$prefix    = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
+		$this->assertStringStartsWith( $prefix, $order_key );
+		$this->assertEquals( 13, strlen( str_replace( $prefix, '', $order_key ) ) );
+	}
 }

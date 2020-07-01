@@ -149,13 +149,18 @@ function wc_get_order_status_name( $status ) {
 }
 
 /**
- * Generate an order key.
+ * Generate an order key with prefix.
  *
  * @since 3.5.4
+ * @param string $key Order key without a prefix. By default generates a 13 digit secret.
  * @return string The order key.
  */
-function wc_generate_order_key() {
-	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . wp_generate_password( 13, false ) );
+function wc_generate_order_key( $key = '' ) {
+	if ( '' === $key ) {
+		$key = wp_generate_password( 13, false );
+	}
+
+	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 }
 
 /**
