@@ -914,7 +914,7 @@ return array(
 		'HA' => __( 'Hardap', 'woocommerce' ),
 		'KA' => __( 'Karas', 'woocommerce' ),
 		'KE' => __( 'Kavango East', 'woocommerce' ),
-		'KW' => __( 'Kavanga West', 'woocommerce' ),
+		'KW' => __( 'Kavango West', 'woocommerce' ),
 		'KH' => __( 'Khomas', 'woocommerce' ),
 		'KU' => __( 'Kunene', 'woocommerce' ),
 		'OW' => __( 'Ohangwena', 'woocommerce' ),
