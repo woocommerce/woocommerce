@@ -1,8 +1,8 @@
-import { Factory } from 'fishery';
 import { Product } from '../models/product';
 import { APIAdapter } from '../adapters/api-adapter';
+import { ModelFactory } from '../factories/model-factory';
 
-const productFactory = Factory.define<Product>( ( { params } ) => {
+const productFactory: ModelFactory<Product> = ModelFactory.define<Product, any, ModelFactory<Product>>( ( { params } ) => {
 	return new Product( params );
 } );
 

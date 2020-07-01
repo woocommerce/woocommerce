@@ -1,15 +1,13 @@
+import { DeepPartial } from 'fishery';
+
 /**
  * A base class for all models.
  */
-import { DeepPartial } from 'fishery';
-
 export abstract class Model {
 	private _id: number = 0;
 
-	public constructor( partial?: DeepPartial<Model> ) {
-		if ( partial ) {
-			Object.assign( this, partial );
-		}
+	protected constructor( partial: DeepPartial<any> = {} ) {
+		Object.assign( this, partial );
 	}
 
 	public get ID(): number {

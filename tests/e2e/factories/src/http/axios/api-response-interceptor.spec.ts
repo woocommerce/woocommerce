@@ -50,14 +50,12 @@ describe( 'APIResponseInterceptor', () => {
 			responseText: JSON.stringify( { code: 'error_code', message: 'value', data: null } ),
 		} );
 
-		await axiosInstance.get( 'http://test.test' ).catch( ( error ) => {
-			expect( error ).toMatchObject(
-				new APIResponse(
-					404,
-					{ 'content-type': 'application/json' },
-					new APIError( 'error_code', 'value', null ),
-				),
-			);
-		} );
+		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject(
+			new APIResponse(
+				404,
+				{ 'content-type': 'application/json' },
+				new APIError( 'error_code', 'value', null ),
+			),
+		);
 	} );
 } );
