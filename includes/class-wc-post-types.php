@@ -519,19 +519,19 @@ class WC_Post_Types {
 					$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
 					$messages[ $name ] = array(
-						0 => '',
+						0 => ''
 						/* translators: %s: taxonomy label */
-						1 => sprintf( __( '%s added', 'woocommerce' ), $label ),
+						1 => sprintf( _x( '%s added', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						2 => sprintf( __( '%s deleted', 'woocommerce' ), $label ),
+						2 => sprintf( _x( '%s deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						3 => sprintf( __( '%s updated', 'woocommerce' ), $label ),
+						3 => sprintf( _x( '%s updated', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						4 => sprintf( __( '%s not added', 'woocommerce' ), $label ),
+						4 => sprintf( _x( '%s not added', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						5 => sprintf( __( '%s not updated', 'woocommerce' ), $label ),
+						5 => sprintf( _x( '%s not updated', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						6 => sprintf( __( '%s not deleted', 'woocommerce' ), $label ),
+						6 => sprintf( _x( '%s not deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
 					);
 				}
 			}
