@@ -521,7 +521,7 @@ class WC_Post_Types {
 					$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
 					$messages[ $name ] = array(
-						0 => ''
+						0 => '',
 						/* translators: %s: taxonomy label */
 						1 => sprintf( _x( '%s added', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
