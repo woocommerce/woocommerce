@@ -22,7 +22,7 @@ export enum AdapterTypes {
  * A registry that allows for us to easily manage all of our factories and related state.
  */
 export class ModelRegistry {
-	private readonly registry: Registry<ModelFactory<any>> = {};
+	private readonly factories: Registry<ModelFactory<any>> = {};
 	private readonly adapters: { [key in AdapterTypes]: Registry<Adapter<any>> } = {
 		api: {},
 		database: {},
@@ -36,11 +36,11 @@ export class ModelRegistry {
 	 * @param {ModelFactory} factory The factory that we're registering.
 	 */
 	public registerFactory<T extends Model>( modelClass: new () => T, factory: ModelFactory<T> ): void {
-		if ( this.registry.hasOwnProperty( modelClass.name ) ) {
+		if ( this.factories.hasOwnProperty( modelClass.name ) ) {
 			throw new Error( 'A factory of this type has already been registered for the model class.' );
 		}
 
-		this.registry[ modelClass.name ] = factory;
+		this.factories[ modelClass.name ] = factory;
 	}
 
 	/**
@@ -49,8 +49,8 @@ export class ModelRegistry {
 	 * @param {Function} modelClass The class of model for the factory we're fetching.
 	 */
 	public getFactory<T extends Model>( modelClass: new () => T ): ModelFactory<T> | null {
-		if ( this.registry.hasOwnProperty( modelClass.name ) ) {
-			return this.registry[ modelClass.name ];
+		if ( this.factories.hasOwnProperty( modelClass.name ) ) {
+			return this.factories[ modelClass.name ];
 		}
 
 		return null;
@@ -83,5 +83,46 @@ export class ModelRegistry {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Fetches all of the adapters of a given type from the registry.
+	 *
+	 * @param {AdapterTypes} type The type of adapters to fetch.
+	 */
+	public getAdapters( type: AdapterTypes ): Adapter<any>[] {
+		return Object.values( this.adapters[ type ] );
+	}
+
+	/**
+	 * Changes the adapter a factory is using.
+	 *
+	 * @param {Function} modelClass The class of the model factory we're changing.
+	 * @param {AdapterTypes} type The type of adapter to set.
+	 */
+	public changeFactoryAdapter<T extends Model>( modelClass: new () => T, type: AdapterTypes ): void {
+		const factory = this.getFactory( modelClass );
+		if ( ! factory ) {
+			throw new Error( 'No factory defined for this model class.' );
+		}
+		const adapter = this.getAdapter( modelClass, type );
+		if ( ! adapter ) {
+			throw new Error( 'No adapter of this type registered for this model class.' );
+		}
+
+		factory.setAdapter( adapter );
+	}
+
+	/**
+	 * Changes the adapters of all factories to the given type or null if one is not registered for that type.
+	 *
+	 * @param {AdapterTypes} type The type of adapter to set.
+	 */
+	public changeAllFactoryAdapters( type: AdapterTypes ): void {
+		for ( const key in this.factories ) {
+			this.factories[ key ].setAdapter(
+				this.adapters[ type ][ key ] || null,
+			);
+		}
 	}
 }

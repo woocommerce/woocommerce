@@ -16,7 +16,7 @@ export class SimpleProduct extends Product {
  *
  * @param {ModelRegistry} registry The registry to hold the model reference.
  */
-export function registerSimpleProduct( registry: ModelRegistry ) {
+export function registerSimpleProduct( registry: ModelRegistry ): void {
 	if ( null !== registry.getFactory( SimpleProduct ) ) {
 		return;
 	}
