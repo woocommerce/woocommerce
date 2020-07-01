@@ -84,17 +84,20 @@ class Checkout extends AbstractBlock {
 			AssetDataRegistry::class
 		);
 
-		$block_data = [
-			'allowedCountries'  => [ WC()->countries, 'get_allowed_countries' ],
-			'shippingCountries' => [ WC()->countries, 'get_shipping_countries' ],
-			'allowedStates'     => [ WC()->countries, 'get_allowed_country_states' ],
-			'shippingStates'    => [ WC()->countries, 'get_shipping_country_states' ],
-		];
+		if ( ! $data_registry->exists( 'allowedCountries' ) ) {
+			$data_registry->add( 'allowedCountries', $this->deep_sort_with_accents( WC()->countries->get_allowed_countries() ) );
+		}
 
-		foreach ( $block_data as $key => $callback ) {
-			if ( ! $data_registry->exists( $key ) ) {
-				$data_registry->add( $key, call_user_func( $callback ) );
-			}
+		if ( ! $data_registry->exists( 'allowedStates' ) ) {
+			$data_registry->add( 'allowedStates', $this->deep_sort_with_accents( WC()->countries->get_allowed_country_states() ) );
+		}
+
+		if ( ! $data_registry->exists( 'shippingCountries' ) ) {
+			$data_registry->add( 'shippingCountries', $this->deep_sort_with_accents( WC()->countries->get_shipping_countries() ) );
+		}
+
+		if ( ! $data_registry->exists( 'shippingStates' ) ) {
+			$data_registry->add( 'shippingStates', $this->deep_sort_with_accents( WC()->countries->get_shipping_country_states() ) );
 		}
 
 		$permalink = ! empty( $attributes['cartPageId'] ) ? get_permalink( $attributes['cartPageId'] ) : false;
@@ -119,6 +122,26 @@ class Checkout extends AbstractBlock {
 		}
 
 		do_action( 'woocommerce_blocks_checkout_enqueue_data' );
+	}
+
+	/**
+	 * Removes accents from an array of values, sorts by the values, then returns the original array values sorted.
+	 *
+	 * @param array $array Array of values to sort.
+	 * @return array Sorted array.
+	 */
+	protected function deep_sort_with_accents( $array ) {
+		if ( ! is_array( $array ) || empty( $array ) ) {
+			return $array;
+		}
+
+		if ( is_array( reset( $array ) ) ) {
+			return array_map( [ $this, 'deep_sort_with_accents' ], $array );
+		}
+
+		$array_without_accents = array_map( 'remove_accents', array_map( 'wc_strtolower', array_map( 'html_entity_decode', $array ) ) );
+		asort( $array_without_accents );
+		return array_replace( $array_without_accents, $array );
 	}
 
 	/**
