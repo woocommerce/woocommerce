@@ -1585,9 +1585,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
+		$this->assertEquals( 18.775, WC()->cart->get_shipping_tax() );
+		$this->assertEquals( 93.88, WC()->cart->get_total( 'edit' ) );
 		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
 
-		$this->assertEquals( 93.88, WC()->cart->total );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( 18.78, WC()->cart->get_shipping_tax() );
+		$this->assertEquals( 93.88, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 18.78, WC()->cart->get_taxes_total() );
 	}
 
 	/**
