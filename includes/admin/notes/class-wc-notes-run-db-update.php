@@ -89,19 +89,15 @@ class WC_Notes_Run_Db_Update {
 	 *  - actions are set up for the first 'Update database' notice, and
 	 *  - URL for note's action is equal to the given URL (to check for potential nonce update).
 	 *
-	 * @param WC_Admin_Note   $note            Note to check.
-	 * @param string          $update_url      URL to check the note against.
-	 * @param array( string ) $current_actions List of actions to check for.
+	 * @param WC_Admin_Note      $note            Note to check.
+	 * @param string             $update_url      URL to check the note against.
+	 * @param array<int, string> $current_actions List of actions to check for.
 	 * @return bool
 	 */
 	private static function note_up_to_date( $note, $update_url, $current_actions ) {
 		$actions = $note->get_actions();
-		if ( count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
-			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ), true ) ) {
-			return true;
-		}
-
-		return false;
+		return count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
+			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ), true );
 	}
 
 	/**
