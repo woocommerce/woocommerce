@@ -14,11 +14,11 @@ Consumers of this package should rely on an instance of `ModelRegistry` to acces
 Here is an example of how to initialize and use the package to generate a simple product:
 
 ```javascript
-import {
-	AdapterTypes,
-	initializeUsingBasicAuth,
-	ModelRegistry,
-	registerSimpleProduct,
+import { 
+    AdapterTypes,
+    initializeUsingBasicAuth,
+    ModelRegistry,
+    registerSimpleProduct,
     SimpleProduct
 } from '@woocommerce/model-factories';
 
