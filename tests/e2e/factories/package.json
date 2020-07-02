@@ -25,8 +25,11 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
+    "compile": "tsc -b",
+    "build": "npm run clean && npm run compile",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "axios": "0.19.2",
