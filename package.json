@@ -10,7 +10,7 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
-    "build": "grunt && npm run makepot",
+    "build": "grunt && npm run makepot && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
     "build:zip": "./bin/build-zip.sh",
@@ -39,7 +39,7 @@
     "@wordpress/babel-preset-default": "3.0.2",
     "@wordpress/e2e-test-utils": "4.6.0",
     "@wordpress/eslint-plugin": "7.1.0",
-    "autoprefixer": "9.7.5",
+    "autoprefixer": "9.8.4",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",

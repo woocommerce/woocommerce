@@ -76,11 +76,11 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that variable products have the correct status when syncing with their children.
+	 * Create a variable product with two variations.
 	 *
-	 * @since 3.3.0
+	 * @return array An array containing first the main product, and then the two variation products.
 	 */
-	public function test_variable_product_stock_status_sync() {
+	private function get_variable_product_with_children() {
 		$product = new WC_Product_Variable();
 		$product->save();
 
@@ -93,6 +93,17 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		$child2->save();
 
 		$product->set_children( array( $child1->get_id(), $child2->get_id() ) );
+
+		return array( $product, $child1, $child2 );
+	}
+
+	/**
+	 * Test that variable products have the correct status when syncing with their children.
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_variable_product_stock_status_sync() {
+		list($product, $child1, $child2) = $this->get_variable_product_with_children();
 
 		// Product should be in stock if a child is in stock.
 		$child1->set_stock_status( 'instock' );
@@ -130,5 +141,39 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		$child2->save();
 		WC_Product_Variable::sync( $product );
 		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox Test that stock status is set to the proper value when saving, if the product manages stock levels.
+	 *
+	 * @testWith [5, 4, true, "instock"]
+	 *           [5, 4, false, "instock"]
+	 *           [4, 4, true, "onbackorder"]
+	 *           [4, 4, false, "outofstock"]
+	 *           [3, 4, true, "onbackorder"]
+	 *           [3, 4, false, "outofstock"]
+	 *
+	 * @param int    $stock_quantity Current stock quantity for the product.
+	 * @param bool   $notify_no_stock_amount Value for the woocommerce_notify_no_stock_amount option.
+	 * @param bool   $accepts_backorders Whether the product accepts backorders or not.
+	 * @param string $expected_stock_status The expected stock status of the product after being saved.
+	 */
+	public function test_stock_status_on_save_when_managing_stock( $stock_quantity, $notify_no_stock_amount, $accepts_backorders, $expected_stock_status ) {
+		list($product, $child1, $child2) = $this->get_variable_product_with_children();
+
+		update_option( 'woocommerce_notify_no_stock_amount', $notify_no_stock_amount );
+
+		$child1->set_stock_status( '' );
+		$child1->save();
+		$child2->set_stock_status( '' );
+		$child2->save();
+
+		$product->set_manage_stock( 'yes' );
+		$product->set_stock_status( '' );
+		$product->set_backorders( $accepts_backorders ? 'yes' : 'no' );
+		$product->set_stock_quantity( $stock_quantity );
+		$product->save();
+
+		$this->assertEquals( $expected_stock_status, $product->get_stock_status() );
 	}
 }

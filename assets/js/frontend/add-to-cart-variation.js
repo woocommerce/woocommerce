@@ -293,7 +293,18 @@
 			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).change();
 			$qty.hide();
 		} else {
-			$qty.find( 'input.qty' ).attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty ).val( variation.min_qty ).change();
+
+			var $qty_input = $qty.find( 'input.qty' ),
+				qty_val    = parseFloat( $qty_input.val() );
+
+			if ( isNaN( qty_val ) ) {
+				qty_val = variation.min_qty;
+			} else {
+				qty_val = qty_val > parseFloat( variation.max_qty ) ? variation.max_qty : qty_val;
+				qty_val = qty_val < parseFloat( variation.min_qty ) ? variation.min_qty : qty_val;
+			}
+
+			$qty_input.attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty ).val( qty_val ).change();
 			$qty.show();
 		}
 

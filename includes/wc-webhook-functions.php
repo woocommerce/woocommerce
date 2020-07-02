@@ -9,6 +9,23 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Process the synchronous web hooks at the end of the request.
+ *
+ * @since 4.4.0
+ */
+function wc_webhook_execute_synchronous_queue() {
+	global $wc_queued_sync_webhooks;
+	if ( empty( $wc_queued_sync_webhooks ) ) {
+		return;
+	}
+
+	foreach ( $wc_queued_sync_webhooks as $data ) {
+		$data['webhook']->deliver( $data['arg'] );
+	}
+}
+register_shutdown_function( 'wc_webhook_execute_synchronous_queue' );
+
+/**
  * Process webhook delivery.
  *
  * @since 3.3.0
@@ -33,8 +50,16 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 			WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
 		}
 	} else {
-		// Deliver immediately.
-		$webhook->deliver( $arg );
+		// We need to queue the webhook so that it can be ran after the request has finished processing.
+		// This must be done in order to keep parity with how they are executed asynchronously.
+		global $wc_queued_sync_webhooks;
+		if ( ! isset( $wc_queued_sync_webhooks ) ) {
+			$wc_queued_sync_webhooks = array();
+		}
+		$wc_queued_sync_webhooks[] = array(
+			'webhook' => $webhook,
+			'arg'     => $arg,
+		);
 	}
 }
 add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10, 2 );

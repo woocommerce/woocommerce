@@ -239,6 +239,29 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Verify that a webhook is queued when intended to be delivered synchronously. This allows us to then execute them
+	 * all in a `register_shutdown_function` after the request has processed. Since async jobs are handled in
+	 * this way, we can be more confident that it is consistent.
+	 */
+	public function test_woocommerce_webhook_synchronous_is_queued() {
+		add_filter( 'woocommerce_webhook_deliver_async', '__return_false' );
+		$webhook = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
+		wc_load_webhooks( 'active' );
+		add_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
+		$customer = WC_Helper_Customer::create_customer( 'test1', 'pw1', 'user1@example.com' );
+
+		global $wc_queued_sync_webhooks;
+		$this->assertCount( 1, $wc_queued_sync_webhooks );
+		$this->assertEquals( $webhook->get_id(), $wc_queued_sync_webhooks[0]['webhook']->get_id() );
+		$this->assertEquals( $customer->get_id(), $wc_queued_sync_webhooks[0]['arg'] );
+
+		$wc_queued_sync_webhooks = null;
+		remove_filter( 'woocommerce_webhook_deliver_async', '__return_false' );
+		$webhook->delete( true );
+		$customer->delete( true );
+	}
+
+	/**
 	 * Helper function to keep track of which webhook (and corresponding arg) has been delivered
 	 * within the current request.
 	 *

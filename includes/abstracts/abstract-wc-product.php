@@ -1336,19 +1336,21 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
 			$this->set_low_stock_amount( '' );
-
-			// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
-			$this->set_stock_status( 'outofstock' );
-
-			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'onbackorder' );
-
-			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) {
-			$this->set_stock_status( 'instock' );
+			return;
 		}
+
+		$stock_is_above_notification_threshold = ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+		$backorders_are_allowed                = ( 'no' !== $this->get_backorders() );
+
+		if ( $stock_is_above_notification_threshold ) {
+			$new_stock_status = 'instock';
+		} elseif ( $backorders_are_allowed ) {
+			$new_stock_status = 'onbackorder';
+		} else {
+			$new_stock_status = 'outofstock';
+		}
+
+		$this->set_stock_status( $new_stock_status );
 	}
 
 	/**
@@ -1378,9 +1380,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->data_store->create( $this );
 		}
 
-		if ( $this->get_parent_id() ) {
-			wc_deferred_product_sync( $this->get_parent_id() );
-		}
+		$this->maybe_defer_product_sync();
 
 		/**
 		 * Trigger action after saving to the DB.
@@ -1391,6 +1391,32 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Delete the product, set its ID to 0, and return result.
+	 *
+	 * @param  bool $force_delete Should the product be deleted permanently.
+	 * @return bool result
+	 */
+	public function delete( $force_delete = false ) {
+		$deleted = parent::delete( $force_delete );
+
+		if ( $deleted ) {
+			$this->maybe_defer_product_sync();
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * If this is a child product, queue its parent for syncing at the end of the request.
+	 */
+	protected function maybe_defer_product_sync() {
+		$parent_id = $this->get_parent_id();
+		if ( $parent_id ) {
+			wc_deferred_product_sync( $parent_id );
+		}
 	}
 
 	/*
@@ -1871,7 +1897,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_shipping_class() {
-		if ( $class_id = $this->get_shipping_class_id() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		$class_id = $this->get_shipping_class_id();
+		if ( $class_id ) {
 			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
 
 			if ( $term && ! is_wp_error( $term ) ) {
@@ -1963,7 +1990,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
-		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		$suffix = get_option( 'woocommerce_price_display_suffix' );
+		if ( $suffix && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}

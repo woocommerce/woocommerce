@@ -87,8 +87,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
-	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
-	 * should be used. It is possible, but the aforementioned are preferred and are the only.
+	 * This class should NOT be instantiated, but the wc_get_order function or new WC_Order_Factory
+	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
 	 * @param  int|object|WC_Order $order Order to read.

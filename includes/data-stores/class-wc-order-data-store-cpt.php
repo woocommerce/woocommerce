@@ -81,7 +81,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
-		$order->set_order_key( wc_generate_order_key() );
+		if ( '' === $order->get_order_key() ) {
+			$order->set_order_key( wc_generate_order_key() );
+		}
 		parent::create( $order );
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
@@ -300,6 +302,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function get_post_excerpt( $order ) {
 		return $order->get_customer_note();
+	}
+
+	/**
+	 * Get order key.
+	 *
+	 * @since 4.3.0
+	 * @param WC_order $order Order object.
+	 * @return string
+	 */
+	protected function get_order_key( $order ) {
+		if ( '' !== $order->get_order_key() ) {
+			return $order->get_order_key();
+		}
+
+		return parent::get_order_key( $order );
 	}
 
 	/**

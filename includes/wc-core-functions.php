@@ -314,7 +314,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	if ( $filter_template !== $template ) {
 		if ( ! file_exists( $filter_template ) ) {
 			/* translators: %s template */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $template . '</code>' ), '2.1' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $filter_template . '</code>' ), '2.1' );
 			return;
 		}
 		$template = $filter_template;
@@ -2417,6 +2417,10 @@ function wc_load_cart() {
 		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_load_cart', 'woocommerce_init' ), '3.7' );
 		return;
 	}
+
+	// Ensure dependencies are loaded in all contexts.
+	include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+	include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
 
 	WC()->initialize_session();
 	WC()->initialize_cart();

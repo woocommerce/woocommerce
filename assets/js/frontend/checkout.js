@@ -657,6 +657,7 @@ jQuery( function( $ ) {
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );
 
+						$( document.body ).trigger( 'removed_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 
 						// Remove coupon code from coupon field

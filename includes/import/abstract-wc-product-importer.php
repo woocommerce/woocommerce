@@ -120,7 +120,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_parsed_data() {
-		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this->get_raw_data() );
+		/**
+		 * Filter product importer parsed data.
+		 *
+		 * @param array $parsed_data Parsed data.
+		 * @param WC_Product_Importer $importer Importer instance.
+		 */
+		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this );
 	}
 
 	/**
