@@ -7,8 +7,8 @@
 
 namespace Automattic\WooCommerce;
 
-use Automattic\WooCommerce\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
-use Automattic\WooCommerce\DependencyManagement\ExtendedContainer;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.

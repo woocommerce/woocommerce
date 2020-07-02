@@ -2,14 +2,14 @@
 /**
  * ExtendedContainerTests class file.
  *
- * @package Automattic\WooCommerce\Tests\DependencyManagement
+ * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement
  */
 
-namespace Automattic\WooCommerce\Tests\DependencyManagement;
+namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 
-use Automattic\WooCommerce\DependencyManagement\ExtendedContainer;
-use Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses\ClassWithDependencies;
-use Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses\DependencyClass;
+use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
 
 /**
  * Tests for ExtendedContainer.

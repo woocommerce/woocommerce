@@ -8,7 +8,7 @@
 namespace Automattic\WooCommerce\Tests\Proxies;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses\DependencyClass;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
 
 /**
  * Tests for LegacyProxy

@@ -2,10 +2,10 @@
 /**
  * ExtendedContainer class file.
  *
- * @package Automattic\WooCommerce\DependencyManagement
+ * @package Automattic\WooCommerce\Internal\DependencyManagement
  */
 
-namespace Automattic\WooCommerce\DependencyManagement;
+namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
 use Automattic\WooCommerce\Container;
 use League\Container\Definition\DefinitionInterface;

@@ -2,10 +2,10 @@
 /**
  * ClassWithConstructorArgumentWithoutTypeHint class file.
  *
- * @package Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses
+ * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
 
-namespace Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses;
+namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
  * An example class that has a constructor argument without type hint.

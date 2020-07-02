@@ -2,10 +2,10 @@
 /**
  * AbstractServiceProvider class file.
  *
- * @package Automattic/WooCommerce/Tools/DependencyManagement
+ * @package Automattic\WooCommerce\Internal\DependencyManagement
  */
 
-namespace Automattic\WooCommerce\DependencyManagement;
+namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
 use League\Container\Argument\RawArgument;
 use League\Container\Definition\DefinitionInterface;
@@ -20,8 +20,6 @@ use League\Container\Definition\Definition;
  * - The `add_with_auto_arguments` method that allows to register classes without having to specify the constructor arguments.
  * - The `share_with_auto_arguments` method, sibling of the above.
  * - Convenience `add` and `share` methods that are just proxies for the same methods in `$this->getContainer()`.
- *
- * @package Automattic\WooCommerce\Tools\DependencyManagement
  */
 abstract class AbstractServiceProvider extends \League\Container\ServiceProvider\AbstractServiceProvider {
 

@@ -2,12 +2,12 @@
 /**
  * Proxies class file.
  *
- * @package Automattic/WooCommerce/Tools/DependencyManagement/ServiceProviders
+ * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
  */
 
-namespace Automattic\WooCommerce\DependencyManagement\ServiceProviders;
+namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Proxies\ActionsProxy;
 

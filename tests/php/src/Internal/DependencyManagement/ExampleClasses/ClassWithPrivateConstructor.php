@@ -2,10 +2,10 @@
 /**
  * ClassWithPrivateConstructor class file.
  *
- * @package Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses
+ * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
 
-namespace Automattic\WooCommerce\Tests\DependencyManagement\ExampleClasses;
+namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
  * An example of a class with a private constructor.
