@@ -58,14 +58,49 @@ abstract class WC_Legacy_Cart {
 	 * @param mixed  $value Value to set.
 	 */
 	public function __isset( $name ) {
-		if ( array_key_exists( $name, $this->cart_session_data ) || 'fees' === $name ) {
+		$legacy_keys = array_merge(
+			array(
+				'dp',
+				'prices_include_tax',
+				'round_at_subtotal',
+				'cart_contents_total',
+				'total',
+				'subtotal',
+				'subtotal_ex_tax',
+				'tax_total',
+				'fee_total',
+				'discount_cart',
+				'discount_cart_tax',
+				'shipping_total',
+				'shipping_tax_total',
+				'display_totals_ex_tax',
+				'display_cart_ex_tax',
+				'cart_contents_weight',
+				'cart_contents_count',
+				'coupons',
+				'taxes',
+				'shipping_taxes',
+				'coupon_discount_amounts',
+				'coupon_discount_tax_amounts',
+				'fees',
+				'tax',
+				'discount_total',
+				'tax_display_cart',
+			),
+			is_array( $this->cart_session_data ) ? array_keys( $this->cart_session_data ) : array()
+		);
+
+		if ( in_array( $name, $legacy_keys, true ) ) {
 			return true;
 		}
+
 		return false;
 	}
 
 	/**
 	 * Magic getters.
+	 *
+	 * If you add/remove cases here please update $legacy_keys in __isset accordingly.
 	 *
 	 * @param string $name Property name.
 	 * @return mixed
@@ -163,6 +198,10 @@ abstract class WC_Legacy_Cart {
 			case 'discount_total':
 				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
 				$value = 0;
+				break;
+			case 'tax_display_cart':
+				wc_deprecated_argument( 'WC_Cart->tax_display_cart', '4.3', 'Use WC_Cart->is_tax_displayed() instead.' );
+				$value = $this->is_tax_displayed();
 				break;
 		}
 		return $value;

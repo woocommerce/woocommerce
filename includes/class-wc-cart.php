@@ -42,13 +42,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * Are prices in the cart displayed inc or excl tax?
-	 *
-	 * @var string
-	 */
-	public $tax_display_cart = 'incl';
-
-	/**
 	 * This stores the chosen shipping methods for the cart item packages.
 	 *
 	 * @var array
@@ -102,9 +95,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
-		$this->session          = new WC_Cart_Session( $this );
-		$this->fees_api         = new WC_Cart_Fees( $this );
-		$this->tax_display_cart = $this->is_tax_displayed();
+		$this->session  = new WC_Cart_Session( $this );
+		$this->fees_api = new WC_Cart_Fees( $this );
 
 		// Register hooks for the objects.
 		$this->session->init();
@@ -363,7 +355,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function display_prices_including_tax() {
 		$customer_exempt = $this->get_customer() && $this->get_customer()->get_is_vat_exempt();
 
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->tax_display_cart && ! $customer_exempt );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->is_tax_displayed() && ! $customer_exempt );
 	}
 
 	/*
