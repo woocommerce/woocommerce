@@ -94,7 +94,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	/**
 	 * Register the class mocks to use.
 	 *
-	 * @param array $mocks An associative array where keys are class names and values are either factory callbacks (optionally with a $class_name argument) or objects.
+	 * @param array $mocks An associative array where keys are class names and values are either factory callbacks (with any extra arguments that get_instance_of would accept) or objects.
 	 *
 	 * @throws \Exception Invalid parameter.
 	 */
@@ -157,20 +157,21 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	 * Gets an instance of a given legacy class.
 	 * This must not be used to get instances of classes in the `src` directory.
 	 *
-	 * If an mock has been defined for the requested class using `register_class_mocks`, then the registered
+	 * If a mock has been defined for the requested class using `register_class_mocks`, then the registered
 	 * object will be returned or the registered callback will be used to generate the instance to return.
 	 *
 	 * @param string $class_name The name of the class to get an instance for.
+	 * @param mixed  ...$args Parameters to be passed to the callback function or to the parent class method.
 	 *
 	 * @return object The (possibly mocked) instance of the class.
 	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
 	 */
-	public function get_instance_of( string $class_name ) {
+	public function get_instance_of( string $class_name, ...$args ) {
 		if ( array_key_exists( $class_name, $this->mocked_classes ) ) {
 			$mock = $this->mocked_classes[ $class_name ];
-			return is_callable( $mock ) ? call_user_func( $mock, $class_name ) : $mock;
+			return is_callable( $mock ) ? call_user_func_array( $mock, $args ) : $mock;
 		}
 
-		return parent::get_instance_of( $class_name );
+		return parent::get_instance_of( $class_name, ...$args );
 	}
 }

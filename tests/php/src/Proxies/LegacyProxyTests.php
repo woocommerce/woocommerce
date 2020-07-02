@@ -39,11 +39,32 @@ class LegacyProxyTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_instance_of' can be used to get an instance of a non-namespaced class.
+	 * @testdox 'get_instance_of' can be used to get an instance of a class by using its constructor and passing constructor arguments.
 	 */
-	public function test_get_instance_of_can_be_used_to_get_a_non_namespaced_class() {
-		$instance = $this->sut->get_instance_of( \WC_Query::class );
-		$this->assertInstanceOf( \WC_Query::class, $instance );
+	public function test_get_instance_of_can_be_used_to_get_a_non_namespaced_class_with_constructor_parameters() {
+		$instance = $this->sut->get_instance_of( \WC_Data_Exception::class, 1234, 'Error!', 432 );
+		$this->assertInstanceOf( \WC_Data_Exception::class, $instance );
+		$this->assertEquals( 1234, $instance->getErrorCode() );
+		$this->assertEquals( 'Error!', $instance->getMessage() );
+		$this->assertEquals( 432, $instance->getCode() );
+	}
+
+	/**
+	 * @testdox 'get_instance_of' uses the 'instance' static method in classes that implement it.
+	 */
+	public function test_get_instance_of_class_with_instance_method_gets_an_instance_of_the_appropriate_class() {
+		$instance1 = $this->sut->get_instance_of( \WooCommerce::class );
+		$instance2 = $this->sut->get_instance_of( \WooCommerce::class );
+		$this->assertSame( \WooCommerce::instance(), $instance1 );
+		$this->assertSame( $instance1, $instance2 );
+	}
+
+	/**
+	 * @testdox 'get_instance_of' can be used to get an instance of a class implementing WC_Queue_Interface.
+	 */
+	public function test_get_instance_of_wc_queue_interface_gets_an_instance_of_the_appropriate_class() {
+		$instance = $this->sut->get_instance_of( \WC_Queue_Interface::class, 34 );
+		$this->assertInstanceOf( \WC_Action_Queue::class, $instance );
 	}
 
 	/**

@@ -33,8 +33,11 @@ class MockableLegacyProxyTests extends \WC_Unit_Test_Case {
 	 * @testdox 'get_instance_of' works as in LegacyProxy if no class mocks are registered.
 	 */
 	public function test_get_instance_of_works_as_regular_legacy_proxy_if_no_mock_registered() {
-		$instance = $this->sut->get_instance_of( \WC_Query::class );
-		$this->assertInstanceOf( \WC_Query::class, $instance );
+		$instance = $this->sut->get_instance_of( \WC_Data_Exception::class, 1234, 'Error!', 432 );
+		$this->assertInstanceOf( \WC_Data_Exception::class, $instance );
+		$this->assertEquals( 1234, $instance->getErrorCode() );
+		$this->assertEquals( 'Error!', $instance->getMessage() );
+		$this->assertEquals( 432, $instance->getCode() );
 	}
 
 	/**
@@ -77,12 +80,11 @@ class MockableLegacyProxyTests extends \WC_Unit_Test_Case {
 	 * @testdox 'register_class_mocks' can be used to return class mocks by passing mock factory callbacks.
 	 */
 	public function test_register_class_mocks_can_be_used_so_that_get_instance_of_uses_a_factory_function_to_return_the_instance() {
-		$mock         = new \stdClass();
-		$mock_factory = function() use ( $mock ) {
-			return $mock;
+		$mock_factory = function( $code, $message, $http_status_code = 400, $data = array() ) {
+			return "$code, $message, $http_status_code";
 		};
-		$this->sut->register_class_mocks( array( \WC_Query::class => $mock_factory ) );
-		$this->assertSame( $mock, $this->sut->get_instance_of( \WC_Query::class ) );
+		$this->sut->register_class_mocks( array( \WC_Data_Exception::class => $mock_factory ) );
+		$this->assertEquals( '1234, Error!, 432', $this->sut->get_instance_of( \WC_Data_Exception::class, 1234, 'Error!', 432 ) );
 	}
 
 	/**
