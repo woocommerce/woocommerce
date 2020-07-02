@@ -61,14 +61,12 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 	 * @return {Promise} Resolves to the created input model.
 	 */
 	private async createSingle( model: T ): Promise<T> {
-		return new Promise<T>( async ( resolve ) => {
-			const response = await this.apiService!.post(
-				this.endpoint,
-				this.transformer( model ),
-			);
-
-			model.onCreated( response.data );
-			resolve( model );
+		return this.apiService!.post(
+			this.endpoint,
+			this.transformer( model ),
+		).then( ( data ) => {
+			model.onCreated( data );
+			return model;
 		} );
 	}
 
