@@ -141,8 +141,6 @@ final class FunctionsMockerHack extends CodeHack {
 	 * @param array $mocks Mocks as an associative array of function name => mock function with the same arguments as the original function.
 	 *
 	 * @throws \Exception Invalid input.
-	 *
-	 * @public
 	 */
 	public static function add_function_mocks( $mocks ) {
 		self::$instance->register_function_mocks( $mocks );

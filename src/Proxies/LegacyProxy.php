@@ -17,8 +17,6 @@ use \Psr\Container\ContainerInterface as Container;
  * Idempotent functions can be executed directly.
  *
  * @package Automattic\WooCommerce\Tools\Proxies
- *
- * @public
  */
 class LegacyProxy {
 

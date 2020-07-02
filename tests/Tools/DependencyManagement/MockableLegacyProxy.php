@@ -15,8 +15,6 @@ namespace Automattic\WooCommerce\Testing\Tools\DependencyManagement;
  * By default, and unless any mock is registered, this class acts exactly as LegacyProxy does.
  *
  * @package Automattic\WooCommerce\Testing\Tools\DependencyManagement
- *
- * @public
  */
 class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 
