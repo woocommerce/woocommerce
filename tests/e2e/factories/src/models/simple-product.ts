@@ -3,6 +3,7 @@ import { Product } from './product';
 import { AdapterTypes, ModelRegistry } from '../framework/model-registry';
 import { ModelFactory } from '../framework/model-factory';
 import { APIAdapter } from '../framework/api/api-adapter';
+import faker from 'faker/locale/en';
 
 export class SimpleProduct extends Product {
 	public constructor( partial: DeepPartial<SimpleProduct> = {} ) {
@@ -23,7 +24,12 @@ export function registerSimpleProduct( registry: ModelRegistry ): void {
 
 	const factory = ModelFactory.define<SimpleProduct, any, ModelFactory<SimpleProduct>>(
 		( { params } ) => {
-			return new SimpleProduct( params );
+			return new SimpleProduct(
+				{
+					name: params.name ?? faker.commerce.productName(),
+					regularPrice: params.regularPrice ?? faker.commerce.price(),
+				},
+			);
 		},
 	);
 	registry.registerFactory( SimpleProduct, factory );
