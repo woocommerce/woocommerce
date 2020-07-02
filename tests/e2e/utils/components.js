@@ -8,7 +8,7 @@
 import { StoreOwnerFlow } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
 import modelRegistry from './factories';
-import { SimpleProduct } from '@woocommerce/e2e-factories';
+import { SimpleProduct } from '@woocommerce/model-factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );

@@ -25,7 +25,6 @@ const getBabelConfig = require( './get-babel-config' );
  * Module Constants
  */
 const PACKAGE_DIR = process.cwd();
-const PACKAGE_NAME = PACKAGE_DIR.split( path.sep ).pop();
 const SRC_DIR = 'src';
 const BUILD_DIR = {
 	main: 'build',
@@ -126,7 +125,13 @@ function buildJsFileFor( file, silent, environment ) {
 function buildPackage( packagePath ) {
 	const srcDir = path.resolve( packagePath, SRC_DIR );
 
-	process.stdout.write( chalk.inverse( `>> Building package: ${ PACKAGE_NAME }\n` ) );
+	let packageName;
+	try {
+		packageName = require( path.resolve( PACKAGE_DIR, 'package.json' ) ).name;
+	} catch ( e ) {
+		packageName = PACKAGE_DIR.split( path.sep ).pop();
+	}
+	process.stdout.write( chalk.inverse( `>> Building package: ${ packageName }\n` ) );
 
 	const jsFiles = glob.sync( `${ srcDir }/**/*.js`, {
 		ignore: [

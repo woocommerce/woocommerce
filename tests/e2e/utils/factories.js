@@ -3,7 +3,7 @@ import {
 	initializeUsingBasicAuth,
 	ModelRegistry,
 	registerSimpleProduct
-} from '@woocommerce/e2e-factories';
+} from '@woocommerce/model-factories';
 
 const config = require( 'config' );
 
