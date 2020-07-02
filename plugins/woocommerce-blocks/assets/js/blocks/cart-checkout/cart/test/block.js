@@ -13,7 +13,7 @@ import { defaultCartState } from '../../../../data/default-states';
 
 describe( 'Testing cart', () => {
 	beforeEach( async () => {
-		fetchMock.mockResponseOnce( ( req ) => {
+		fetchMock.mockResponse( ( req ) => {
 			if ( req.url.match( /wc\/store\/cart/ ) ) {
 				return Promise.resolve( JSON.stringify( previewCart ) );
 			}
@@ -21,6 +21,9 @@ describe( 'Testing cart', () => {
 		// need to clear the store resolution state between tests.
 		await dispatch( storeKey ).invalidateResolutionForStore();
 		await dispatch( storeKey ).receiveCart( defaultCartState );
+	} );
+	afterEach( () => {
+		fetchMock.resetMocks();
 	} );
 	it( 'renders cart if there are items in the cart', async () => {
 		render(
@@ -32,14 +35,21 @@ describe( 'Testing cart', () => {
 				} }
 			/>
 		);
-		await waitFor( () => {
-			expect(
-				screen.getByText( /Proceed to Checkout/ )
-			).toBeInTheDocument();
-		} );
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect(
+			await screen.getByText( /Proceed to Checkout/i )
+		).toBeInTheDocument();
+
+		/**
+		 * @todo Investigate extra POST request on initial cart render.
+		 *
+		 * We have an unfixed bug in our test in which the full cart triggers a POST
+		 * request to `wc/store/cart/update-item` causing the fetch to be called twice.
+		 */
+		expect( fetchMock ).toHaveBeenCalledTimes( 2 );
 	} );
 	it( 'renders empty cart if there are no items in the cart', async () => {
-		fetchMock.mockResponseOnce( ( req ) => {
+		fetchMock.mockResponse( ( req ) => {
 			if ( req.url.match( /wc\/store\/cart/ ) ) {
 				return Promise.resolve( JSON.stringify( defaultCartState ) );
 			}
@@ -53,6 +63,9 @@ describe( 'Testing cart', () => {
 				} }
 			/>
 		);
-		expect( await screen.findByText( /Empty Cart/ ) ).toBeInTheDocument();
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( await screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
+		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 } );
