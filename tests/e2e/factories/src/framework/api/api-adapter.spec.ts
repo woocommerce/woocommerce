@@ -22,7 +22,7 @@ describe( 'APIModelCreator', () => {
 	} );
 
 	it( 'should create single instance', async () => {
-		mockService.post.mockReturnValueOnce( new APIResponse( 200, {}, { id: 1 } ) );
+		mockService.post.mockReturnValueOnce( Promise.resolve( new APIResponse( 200, {}, { id: 1 } ) ) );
 
 		const result = await adapter.create( new SimpleProduct() );
 
@@ -34,9 +34,9 @@ describe( 'APIModelCreator', () => {
 
 	it( 'should create multiple instances', async () => {
 		mockService.post
-			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 1 } ) )
-			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 2 } ) )
-			.mockReturnValueOnce( new APIResponse( 200, {}, { id: 3 } ) );
+			.mockReturnValueOnce( Promise.resolve( new APIResponse( 200, {}, { id: 1 } ) ) )
+			.mockReturnValueOnce( Promise.resolve( new APIResponse( 200, {}, { id: 2 } ) ) )
+			.mockReturnValueOnce( Promise.resolve( new APIResponse( 200, {}, { id: 3 } ) ) );
 
 		const result = await adapter.create( [ new SimpleProduct(), new SimpleProduct(), new SimpleProduct() ] );
 

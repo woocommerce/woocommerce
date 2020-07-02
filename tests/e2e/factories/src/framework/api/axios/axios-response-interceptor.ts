@@ -1,45 +1,15 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { APIResponse, APIError } from '../api-service';
+import { AxiosInterceptor } from './axios-interceptor';
 
-export class AxiosResponseInterceptor {
-	private readonly client: AxiosInstance;
-	private interceptorID: number | null;
-
-	public constructor( client: AxiosInstance ) {
-		this.client = client;
-		this.interceptorID = null;
-	}
-
-	/**
-	 * Starts transforming the response and errors into a consistent format.
-	 */
-	public start(): void {
-		if ( null === this.interceptorID ) {
-			this.interceptorID = this.client.interceptors.response.use(
-				// @ts-ignore: We WANT to change the type of response returned.
-				( response ) => this.onFulfilled( response ),
-				( error: any ) => AxiosResponseInterceptor.onRejected( error ),
-			);
-		}
-	}
-
-	/**
-	 * Stops transforming the response and errors into a consistent format.
-	 */
-	public stop(): void {
-		if ( null !== this.interceptorID ) {
-			this.client.interceptors.response.eject( this.interceptorID );
-			this.interceptorID = null;
-		}
-	}
-
+export class AxiosResponseInterceptor extends AxiosInterceptor {
 	/**
 	 * Transforms the Axios response into our API response to be consumed in a consistent manner.
 	 *
 	 * @param {AxiosResponse} response The respons ethat we need to transform.
 	 * @return {Promise} A promise containing the APIResponse.
 	 */
-	private onFulfilled( response: AxiosResponse ): Promise<APIResponse> {
+	protected onResponseSuccess( response: AxiosResponse ): Promise<APIResponse> {
 		return Promise.resolve<APIResponse>(
 			new APIResponse( response.status, response.headers, response.data ),
 		);
@@ -50,7 +20,7 @@ export class AxiosResponseInterceptor {
 	 *
 	 * @param {*} error The error that was caught.
 	 */
-	private static onRejected( error: any ): Promise<APIResponse> {
+	protected onResponseRejected( error: any ): Promise<APIResponse> {
 		// Only transform API errors.
 		if ( ! error.response ) {
 			throw error;

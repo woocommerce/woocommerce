@@ -21,7 +21,7 @@ export function initializeAPIAdapters(
 		return;
 	}
 
-	const apiService = new AxiosAPIService( apiURL, consumerKey, consumerSecret );
+	const apiService = AxiosAPIService.createUsingOAuth( apiURL, consumerKey, consumerSecret );
 	for ( const adapter of adapters ) {
 		adapter.setAPIService( apiService );
 	}

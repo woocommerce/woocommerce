@@ -10,12 +10,12 @@ describe( 'AxiosResponseInterceptor', () => {
 	beforeEach( () => {
 		axiosInstance = axios.create();
 		moxios.install( axiosInstance );
-		apiResponseInterceptor = new AxiosResponseInterceptor( axiosInstance );
-		apiResponseInterceptor.start();
+		apiResponseInterceptor = new AxiosResponseInterceptor();
+		apiResponseInterceptor.start( axiosInstance );
 	} );
 
 	afterEach( () => {
-		apiResponseInterceptor.stop();
+		apiResponseInterceptor.stop( axiosInstance );
 		moxios.uninstall();
 	} );
 

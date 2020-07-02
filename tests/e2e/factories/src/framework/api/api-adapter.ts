@@ -65,7 +65,7 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 			this.endpoint,
 			this.transformer( model ),
 		).then( ( data ) => {
-			model.onCreated( data );
+			model.onCreated( data.data );
 			return model;
 		} );
 	}

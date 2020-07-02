@@ -1,6 +1,7 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { APIResponse, APIService } from '../api-service';
-import { AxiosAuthInterceptor } from './axios-auth-interceptor';
+import { AxiosOAuthInterceptor } from './axios-oauth-interceptor';
+import { AxiosInterceptor } from './axios-interceptor';
 import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
 /**
@@ -8,25 +9,50 @@ import { AxiosResponseInterceptor } from './axios-response-interceptor';
  */
 export class AxiosAPIService implements APIService {
 	private readonly client: AxiosInstance;
-	private authInterceptor: AxiosAuthInterceptor;
-	private responseInterceptor: AxiosResponseInterceptor;
+	private readonly interceptors: AxiosInterceptor[];
 
-	public constructor(
-		baseAPIURL: string,
-		consumerKey: string,
-		consumerSecret: string,
-	) {
-		this.client = axios.create( {
-			baseURL: baseAPIURL,
-		} );
-		this.authInterceptor = new AxiosAuthInterceptor(
-			this.client,
-			consumerKey,
-			consumerSecret,
+	public constructor( config: AxiosRequestConfig, interceptors: AxiosInterceptor[] = [] ) {
+		this.client = axios.create( config );
+		this.interceptors = interceptors;
+		for ( const interceptor of this.interceptors ) {
+			interceptor.start( this.client );
+		}
+	}
+
+	/**
+	 * Creates a new Axios API Service using OAuth 1.0a one-legged authentication.
+	 *
+	 * @param {string} apiURL The base URL for the API requests to be sent.
+	 * @param {string} consumerKey The OAuth consumer key.
+	 * @param {string} consumerSecret The OAuth consumer secret.
+	 * @return {AxiosAPIService} The created service.
+	 */
+	public static createUsingOAuth( apiURL: string, consumerKey: string, consumerSecret: string ): AxiosAPIService {
+		return new AxiosAPIService(
+			{ baseURL: apiURL },
+			[
+				new AxiosOAuthInterceptor( consumerKey, consumerSecret ),
+				new AxiosResponseInterceptor(),
+			],
 		);
-		this.authInterceptor.start();
-		this.responseInterceptor = new AxiosResponseInterceptor( this.client );
-		this.responseInterceptor.start();
+	}
+
+	/**
+	 * Creates a new Axios API Service using basic authentication.
+	 *
+	 * @param {string} apiURL The base URL for the API requests to be sent.
+	 * @param {string} username The username for authentication.
+	 * @param {string} password The password for authentication.
+	 * @return {AxiosAPIService} The created service.
+	 */
+	public static createUsingBasicAuth( apiURL: string, username: string, password: string ): AxiosAPIService {
+		return new AxiosAPIService(
+			{
+				baseURL: apiURL,
+				auth: { username, password },
+			},
+			[ new AxiosResponseInterceptor() ],
+		);
 	}
 
 	/**

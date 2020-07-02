@@ -1,37 +1,36 @@
 import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { AxiosAuthInterceptor } from './axios-auth-interceptor';
+import { AxiosOAuthInterceptor } from './axios-oauth-interceptor';
 
-describe( 'AxiosAuthInterceptor', () => {
-	let apiAuthInterceptor: AxiosAuthInterceptor;
+describe( 'AxiosOAuthInterceptor', () => {
+	let apiAuthInterceptor: AxiosOAuthInterceptor;
 	let axiosInstance: AxiosInstance;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
 		moxios.install( axiosInstance );
-		apiAuthInterceptor = new AxiosAuthInterceptor(
-			axiosInstance,
+		apiAuthInterceptor = new AxiosOAuthInterceptor(
 			'consumer_key',
 			'consumer_secret',
 		);
-		apiAuthInterceptor.start();
+		apiAuthInterceptor.start( axiosInstance );
 	} );
 
 	afterEach( () => {
-		apiAuthInterceptor.stop();
+		apiAuthInterceptor.stop( axiosInstance );
 		moxios.uninstall( axiosInstance );
 	} );
 
 	it( 'should not run unless started', async () => {
 		moxios.stubOnce( 'GET', 'https://api.test', { status: 200 } );
 
-		apiAuthInterceptor.stop();
+		apiAuthInterceptor.stop( axiosInstance );
 		await axiosInstance.get( 'https://api.test' );
 
 		let request = moxios.requests.mostRecent();
 		expect( request.headers ).not.toHaveProperty( 'Authorization' );
 
-		apiAuthInterceptor.start();
+		apiAuthInterceptor.start( axiosInstance );
 		await axiosInstance.get( 'https://api.test' );
 
 		request = moxios.requests.mostRecent();

@@ -1,22 +1,17 @@
-import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import createHmac from 'create-hmac';
 import OAuth from 'oauth-1.0a';
+import { AxiosInterceptor } from './axios-interceptor';
 
 /**
  * A utility class for managing the lifecycle of an authentication interceptor.
  */
-export class AxiosAuthInterceptor {
-	private readonly client: AxiosInstance;
-	private interceptorID: number | null;
+export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	private oauth: OAuth;
 
-	public constructor(
-		client: AxiosInstance,
-		consumerKey: string,
-		consumerSecret: string,
-	) {
-		this.client = client;
-		this.interceptorID = null;
+	public constructor( consumerKey: string, consumerSecret: string ) {
+		super();
+
 		this.oauth = new OAuth( {
 			consumer: {
 				key: consumerKey,
@@ -30,33 +25,12 @@ export class AxiosAuthInterceptor {
 	}
 
 	/**
-	 * Starts adding WooCommerce API authentication details to requests made using the contained client.
-	 */
-	public start(): void {
-		if ( null === this.interceptorID ) {
-			this.interceptorID = this.client.interceptors.request.use(
-				( request ) => this.handleRequest( request ),
-			);
-		}
-	}
-
-	/**
-	 * Stops adding WooCommerce API authentication details to requests made using the contained client.
-	 */
-	public stop(): void {
-		if ( null !== this.interceptorID ) {
-			this.client.interceptors.request.eject( this.interceptorID );
-			this.interceptorID = null;
-		}
-	}
-
-	/**
 	 * Adds WooCommerce API authentication details to the outgoing request.
 	 *
 	 * @param {AxiosRequestConfig} request The request that was intercepted.
 	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
-	private handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
+	protected handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
 		const url = ( request.baseURL || '' ) + ( request.url || '' );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
