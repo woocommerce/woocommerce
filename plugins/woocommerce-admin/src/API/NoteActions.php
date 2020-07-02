@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 
 /**

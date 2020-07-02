@@ -35,9 +35,9 @@ class WC_Admin_Notes_Insight_First_Sale {
 		}
 
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'Insight', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Did you know?', 'woocommerce-admin' ) );
 		$note->set_content( __( 'A WooCommerce powered store needs on average 31 days to get the first sale. You\'re on the right track! Do you find this type of insight useful?', 'woocommerce-admin' ) );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_SURVEY );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );

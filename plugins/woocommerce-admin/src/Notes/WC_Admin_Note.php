@@ -22,6 +22,7 @@ class WC_Admin_Note extends \WC_Data {
 	const E_WC_ADMIN_NOTE_UPDATE        = 'update';    // i.e. used when a new version is available.
 	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';      // used for presenting informational messages.
 	const E_WC_ADMIN_NOTE_MARKETING     = 'marketing'; // used for adding marketing messages.
+	const E_WC_ADMIN_NOTE_SURVEY        = 'survey';    // used for adding survey messages.
 
 	// Note status codes.
 	const E_WC_ADMIN_NOTE_PENDING    = 'pending';    // the note is pending - hidden but not actioned.
@@ -126,6 +127,7 @@ class WC_Admin_Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_UPDATE,
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
 			self::E_WC_ADMIN_NOTE_MARKETING,
+			self::E_WC_ADMIN_NOTE_SURVEY,
 		);
 
 		return apply_filters( 'woocommerce_note_types', $allowed_types );
