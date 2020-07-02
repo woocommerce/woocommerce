@@ -14,4 +14,4 @@ export * from './models';
  * UTILITIES
  * These exports relate to common utilities that can be used to utilize the package.
  */
-export { initializeAPIAdapters } from './utils';
+export { initializeUsingOAuth, initializeUsingBasicAuth } from './utils';

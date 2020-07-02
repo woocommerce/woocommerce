@@ -7,6 +7,12 @@
  */
 import { StoreOwnerFlow } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
+import {
+	AdapterTypes,
+	initializeUsingBasicAuth,
+	ModelRegistry,
+	registerSimpleProduct, SimpleProduct
+} from '@woocommerce/e2e-factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -347,22 +353,19 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
-
-	// Make sure we're on the add order page
-	await expect( page.title() ).resolves.toMatch( 'Add new product' );
-
-	// Set product data
-	await expect( page ).toFill( '#title', simpleProductName );
-	await clickTab( 'General' );
-	await expect( page ).toFill( '#_regular_price', '9.99' );
-
-	await verifyAndPublish();
-
-	const simplePostId = await page.$( '#post_ID' );
-	let simplePostIdValue = ( await ( await simplePostId.getProperty( 'value' ) ).jsonValue() );
-	return simplePostIdValue;
+	const registry = new ModelRegistry()
+	registerSimpleProduct( registry );
+	initializeUsingBasicAuth( registry,
+		config.get( 'url' ) + '/wp-json',
+		config.get( 'users.admin.username' ),
+		config.get( 'users.admin.password' )
+	);
+	registry.changeAllFactoryAdapters( AdapterTypes.API );
+	const product = await registry.getFactory( SimpleProduct ).create( {
+		Name: config.get( 'products.simple.name' ),
+		RegularPrice: '9.99'
+	} );
+	return product.ID;
 } ;
 
 /**
