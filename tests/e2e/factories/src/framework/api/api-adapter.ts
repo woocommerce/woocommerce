@@ -1,4 +1,4 @@
-import { APIService } from './api-service';
+import { APIResponse, APIService } from './api-service';
 import { Model } from '../model';
 import { Adapter } from '../adapter';
 
@@ -64,8 +64,8 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 		return this.apiService!.post(
 			this.endpoint,
 			this.transformer( model ),
-		).then( ( data ) => {
-			model.onCreated( data.data );
+		).then( ( data: APIResponse ) => {
+			model.setID( data.data.id );
 			return model;
 		} );
 	}

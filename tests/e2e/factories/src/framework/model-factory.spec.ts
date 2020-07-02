@@ -27,15 +27,15 @@ describe( 'ModelFactory', () => {
 	it( 'should create using adapter', async () => {
 		factory.setAdapter( mockAdapter );
 
-		const expectedModel = new SimpleProduct( { Name: 'test2' } );
-		expectedModel.onCreated( { id: 1 } );
+		const expectedModel = new SimpleProduct( { name: 'test2' } );
+		expectedModel.setID( 1 );
 		mockAdapter.create.mockReturnValueOnce( Promise.resolve( expectedModel ) );
 
-		const created = await factory.create( { Name: 'test' } );
+		const created = await factory.create( { name: 'test' } );
 
 		expect( mockAdapter.create.mock.calls ).toHaveLength( 1 );
 		expect( created ).toBeInstanceOf( Product );
-		expect( created.ID ).toBe( 1 );
-		expect( created.Name ).toBe( 'test2' );
+		expect( created.id ).toBe( 1 );
+		expect( created.name ).toBe( 'test2' );
 	} );
 } );

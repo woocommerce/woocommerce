@@ -33,8 +33,8 @@ export function registerSimpleProduct( registry: ModelRegistry ): void {
 		( model ) => {
 			return {
 				type: 'simple',
-				name: model.Name,
-				regular_price: model.RegularPrice,
+				name: model.name,
+				regular_price: model.regularPrice,
 			};
 		},
 	);

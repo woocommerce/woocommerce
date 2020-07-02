@@ -5,8 +5,8 @@ import { DeepPartial } from 'fishery';
  * The base class for all product types.
  */
 export abstract class Product extends Model {
-	public readonly Name: string = '';
-	public readonly RegularPrice: string = '';
+	public readonly name: string = '';
+	public readonly regularPrice: string = '';
 
 	protected constructor( partial: DeepPartial<Product> = {} ) {
 		super( partial );
