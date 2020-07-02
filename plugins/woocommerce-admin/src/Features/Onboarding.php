@@ -337,25 +337,37 @@ class Onboarding {
 	public static function get_allowed_product_types() {
 		$product_types = self::append_product_data(
 			array(
-				'physical'      => array(
+				'physical'        => array(
 					'label'       => __( 'Physical products', 'woocommerce-admin' ),
 					'description' => __( 'Products you ship to customers.', 'woocommerce-admin' ),
 				),
-				'downloads'     => array(
+				'downloads'       => array(
 					'label'       => __( 'Downloads', 'woocommerce-admin' ),
 					'description' => __( 'Virtual products that customers download.', 'woocommerce-admin' ),
 				),
-				'subscriptions' => array(
+				'subscriptions'   => array(
 					'label'   => __( 'Subscriptions', 'woocommerce-admin' ),
 					'product' => 27147,
 				),
-				'memberships'   => array(
+				'memberships'     => array(
 					'label'   => __( 'Memberships', 'woocommerce-admin' ),
 					'product' => 958589,
 				),
-				'bookings'      => array(
+				'composite'       => array(
+					'label'   => __( 'Composite Products', 'woocommerce-admin' ),
+					'product' => 216836,
+				),
+				'bookings'        => array(
 					'label'   => __( 'Bookings', 'woocommerce-admin' ),
 					'product' => 390890,
+				),
+				'product-bundles' => array(
+					'label'   => __( 'Bundles', 'woocommerce-admin' ),
+					'product' => 18716,
+				),
+				'product-add-ons' => array(
+					'label'   => __( 'Customizable products', 'woocommerce-admin' ),
+					'product' => 18618,
 				),
 			)
 		);
@@ -508,7 +520,7 @@ class Onboarding {
 	public static function append_product_data( $product_types ) {
 		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
 		if ( false === $woocommerce_products ) {
-			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=product-type' );
+			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' );
 			if ( is_wp_error( $woocommerce_products ) ) {
 				return $product_types;
 			}
