@@ -11,6 +11,7 @@ import {
 	createTaxes,
 	createCoupons,
 	createProducts,
+	createReviews,
 	createShippingZones,
 	createBlockPages,
 	enablePaymentGateways,
@@ -36,6 +37,12 @@ module.exports = async ( globalConfig ) => {
 			enablePaymentGateways(),
 		] );
 		const [ , taxes, coupons, products, shippingZones, pages ] = results;
+
+		/**
+		 * Create fixture reviews data on first product.
+		 */
+		await createReviews( products[ 0 ] );
+
 		global.fixtureData = {
 			taxes,
 			coupons,
