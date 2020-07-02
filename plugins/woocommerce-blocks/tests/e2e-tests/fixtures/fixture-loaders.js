@@ -103,7 +103,7 @@ const deleteCoupons = ( ids ) =>
 		delete: ids,
 	} );
 /**
- * Create Products and call createReviews.
+ * Create Products.
  *
  * currently this only creates a single product for the sake of reviews.
  *
@@ -118,7 +118,6 @@ const createProducts = ( fixture = fixtures.Products() ) =>
 	WooCommerce.post( 'products/batch', {
 		create: fixture,
 	} ).then( ( products ) => {
-		createReviews( products.data.create[ 0 ].id );
 		return products.data.create.map( ( product ) => product.id );
 	} );
 
@@ -308,6 +307,7 @@ module.exports = {
 	deleteCoupons,
 	createProducts,
 	deleteProducts,
+	createReviews,
 	enablePaymentGateways,
 	createShippingZones,
 	deleteShippingZones,
