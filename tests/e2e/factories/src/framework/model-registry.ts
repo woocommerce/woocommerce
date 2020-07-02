@@ -9,12 +9,10 @@ type Registry<T> = { [key: string ]: T };
  *
  * @typedef AdapterTypes
  * @property {string} API      "api"
- * @property {string} Database "database"
  * @property {string} Custom   "custom"
  */
 export enum AdapterTypes {
 	API = 'api',
-	Database = 'database',
 	Custom = 'custom'
 }
 
@@ -25,7 +23,6 @@ export class ModelRegistry {
 	private readonly factories: Registry<ModelFactory<any>> = {};
 	private readonly adapters: { [key in AdapterTypes]: Registry<Adapter<any>> } = {
 		api: {},
-		database: {},
 		custom: {},
 	};
 
