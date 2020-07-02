@@ -7,12 +7,8 @@
  */
 import { StoreOwnerFlow } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
-import {
-	AdapterTypes,
-	initializeUsingBasicAuth,
-	ModelRegistry,
-	registerSimpleProduct, SimpleProduct
-} from '@woocommerce/e2e-factories';
+import modelRegistry from './factories';
+import { SimpleProduct } from '@woocommerce/e2e-factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -353,19 +349,11 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	const registry = new ModelRegistry()
-	registerSimpleProduct( registry );
-	initializeUsingBasicAuth( registry,
-		config.get( 'url' ) + '/wp-json',
-		config.get( 'users.admin.username' ),
-		config.get( 'users.admin.password' )
-	);
-	registry.changeAllFactoryAdapters( AdapterTypes.API );
-	const product = await registry.getFactory( SimpleProduct ).create( {
-		Name: config.get( 'products.simple.name' ),
-		RegularPrice: '9.99'
+	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
+		name: simpleProductName,
+		regularPrice: '9.99'
 	} );
-	return product.ID;
+	return product.id;
 } ;
 
 /**
