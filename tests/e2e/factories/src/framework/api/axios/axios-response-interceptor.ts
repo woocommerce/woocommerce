@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { APIError, APIResponse } from '../api-service';
+import { APIResponse, APIError } from '../api-service';
 
 export class AxiosResponseInterceptor {
 	private readonly client: AxiosInstance;

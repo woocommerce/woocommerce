@@ -2,7 +2,7 @@ import { DeepPartial } from 'fishery';
 import { Product } from './product';
 import { AdapterTypes, ModelRegistry } from '../framework/model-registry';
 import { ModelFactory } from '../framework/model-factory';
-import { APIAdapter } from '../framework/api-adapter';
+import { APIAdapter } from '../framework/api/api-adapter';
 
 export class SimpleProduct extends Product {
 	public constructor( partial: DeepPartial<SimpleProduct> = {} ) {

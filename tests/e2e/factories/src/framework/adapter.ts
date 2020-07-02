@@ -1,4 +1,4 @@
-import { Model } from '../models/model';
+import { Model } from './model';
 
 /**
  * An interface for implementing adapters to create models.

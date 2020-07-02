@@ -1,7 +1,7 @@
 import { AdapterTypes, ModelRegistry } from './model-registry';
 import { ModelFactory } from './model-factory';
 import { Product } from '../models/product';
-import { APIAdapter } from './api-adapter';
+import { APIAdapter } from './api/api-adapter';
 import { SimpleProduct } from '../models/simple-product';
 
 describe( 'ModelRegistry', () => {

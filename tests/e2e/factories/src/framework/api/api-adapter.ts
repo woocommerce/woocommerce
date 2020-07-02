@@ -1,6 +1,6 @@
-import { APIService } from '../index';
-import { Model } from '../models/model';
-import { Adapter } from './adapter';
+import { APIService } from './api-service';
+import { Model } from '../model';
+import { Adapter } from '../adapter';
 
 /**
  * A callback for transforming models into an API request body.

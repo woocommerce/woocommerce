@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
 import { APIResponse, APIService } from '../api-service';
-import { Agent } from 'https';
 import { AxiosAuthInterceptor } from './axios-auth-interceptor';
 import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
@@ -19,9 +18,6 @@ export class AxiosAPIService implements APIService {
 	) {
 		this.client = axios.create( {
 			baseURL: baseAPIURL,
-			httpsAgent: new Agent( {
-				rejectUnauthorized: false,
-			} ),
 		} );
 		this.authInterceptor = new AxiosAuthInterceptor(
 			this.client,

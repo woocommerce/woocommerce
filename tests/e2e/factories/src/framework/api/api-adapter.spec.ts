@@ -1,7 +1,7 @@
-import { Model } from '../models/model';
-import { APIResponse, APIService } from '../index';
+import { Model } from '../model';
 import { APIAdapter } from './api-adapter';
-import { SimpleProduct } from '../models/simple-product';
+import { SimpleProduct } from '../../models/simple-product';
+import { APIResponse, APIService } from './api-service';
 
 class MockAPI implements APIService {
 	public get = jest.fn();

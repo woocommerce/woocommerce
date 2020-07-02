@@ -1,5 +1,5 @@
 import { DeepPartial, Factory, BuildOptions } from 'fishery';
-import { Model } from '../models/model';
+import { Model } from './model';
 import { Adapter } from './adapter';
 
 /**

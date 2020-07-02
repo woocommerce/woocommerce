@@ -1,5 +1,5 @@
 import { Adapter } from './adapter';
-import { Model } from '../models/model';
+import { Model } from './model';
 import { ModelFactory } from './model-factory';
 
 type Registry<T> = { [key: string ]: T };

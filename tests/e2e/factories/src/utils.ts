@@ -1,6 +1,6 @@
-import { AdapterTypes, ModelRegistry } from './model-registry';
-import { APIAdapter } from './api-adapter';
-import { AxiosAPIService } from './axios/axios-api-service';
+import { AdapterTypes, ModelRegistry } from './framework/model-registry';
+import { APIAdapter } from './framework/api/api-adapter';
+import { AxiosAPIService } from './framework/api/axios/axios-api-service';
 
 /**
  * Initializes all of the APIAdapters with a client to communicate with the API.
