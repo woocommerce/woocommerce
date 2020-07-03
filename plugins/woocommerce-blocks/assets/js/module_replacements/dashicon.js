@@ -13,9 +13,7 @@ import { cloneElement } from '@wordpress/element';
 // the Webpack NormalModuleReplacementPlugin plugin.
 
 export default function( props ) {
-	let Icon = function() {
-		return null;
-	};
+	let Icon;
 	switch ( props.icon ) {
 		case 'arrow-down-alt2':
 			Icon = ArrowDownIcon;
@@ -24,6 +22,11 @@ export default function( props ) {
 			Icon = DismissIcon;
 			break;
 	}
+
+	if ( ! Icon ) {
+		return null;
+	}
+
 	return cloneElement( Icon, {
 		size: props.size || 20,
 		className: props.className,
