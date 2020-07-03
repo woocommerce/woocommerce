@@ -38,7 +38,7 @@ Since these drive the user interface, they need to run against a test environmen
 
 To set up to run e2e tests:
 
-- `npm run build:e2e-test` to build container images used for e2e
+- `npm run build:e2e-test` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
 - `npm run wp-env start` to start the test environment
 
 Then, to run the tests:
