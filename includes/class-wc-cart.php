@@ -763,7 +763,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
 			
-			if ( in_array($product->get_id(), $cart_item_ids_to_ignore) ) {
+			if ( in_array( $product->get_id(), $cart_item_ids_to_ignore ) ) {
 				continue;
 			}
 
