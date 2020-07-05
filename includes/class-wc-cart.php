@@ -758,9 +758,14 @@ class WC_Cart extends WC_Legacy_Cart {
 		$error                    = new WP_Error();
 		$product_qty_in_cart      = $this->get_cart_item_quantities();
 		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
+		$cart_item_ids_to_ignore = apply_filters( 'woocommerce_check_cart_item_stock_ignore_ids', array() );
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
+			
+			if ( in_array($product->get_id(), $cart_item_ids_to_ignore) ) {
+				continue;
+			}
 
 			// Check stock based on stock-status.
 			if ( ! $product->is_in_stock() ) {
