@@ -459,7 +459,7 @@ class Loader {
 			return;
 		}
 
-		$features        = self::get_features();
+		$features         = self::get_features();
 		$enabled_features = array();
 		foreach ( $features as $key ) {
 			$enabled_features[ $key ] = self::is_feature_enabled( $key );
@@ -618,13 +618,6 @@ class Loader {
 	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
 	 */
 	public static function embed_page_header() {
-		if (
-			self::is_feature_enabled( 'navigation' ) &&
-			\Automattic\WooCommerce\Admin\Features\Navigation::instance()->is_woocommerce_page()
-		) {
-			self::embed_navigation_menu();
-		}
-
 		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
 			return;
 		}
@@ -651,16 +644,6 @@ class Loader {
 				</div>
 			</div>
 		</div>
-		<?php
-	}
-
-	/**
-	 * Set up a div for the navigation menu.
-	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
-	 */
-	protected static function embed_navigation_menu() {
-		?>
-		<div id="woocommerce-embedded-navigation"></div>
 		<?php
 	}
 
