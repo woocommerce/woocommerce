@@ -130,10 +130,10 @@ class WC_Admin_Notes_WooCommerce_Payments {
 	 * @param WC_Admin_Note $note Note being acted upon.
 	 */
 	public function install( $note ) {
-		if ( self::NOTE_NAME === $note->get_name() ) {
-			$install_request = array( 'plugin' => self::PLUGIN_SLUG );
+		if ( self::NOTE_NAME === $note->get_name() && current_user_can( 'install_plugins' ) ) {
+			$install_request = array( 'plugins' => self::PLUGIN_SLUG );
 			$installer       = new \Automattic\WooCommerce\Admin\API\Plugins();
-			$result          = $installer->install_plugin( $install_request );
+			$result          = $installer->install_plugins( $install_request );
 
 			if ( is_wp_error( $result ) ) {
 				return;
