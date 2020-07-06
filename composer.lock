@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fbf33d1f1bf847639d9871512aaf0158",
+    "content-hash": "e23970af9ccfb7399b4aded769d90ce0",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -44,16 +44,16 @@
         },
         {
             "name": "automattic/jetpack-constants",
-            "version": "v1.2.0",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "881618defb04134ddba120e7835af1a474a11edc"
+                "reference": "77e4a85601c63dc98b3dd282090eb8558a61685c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/881618defb04134ddba120e7835af1a474a11edc",
-                "reference": "881618defb04134ddba120e7835af1a474a11edc",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/77e4a85601c63dc98b3dd282090eb8558a61685c",
+                "reference": "77e4a85601c63dc98b3dd282090eb8558a61685c",
                 "shasum": ""
             },
             "require-dev": {
@@ -71,7 +71,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "time": "2020-04-15T18:58:53+00:00"
+            "time": "2020-06-22T11:37:41+00:00"
         },
         {
             "name": "composer/installers",
@@ -419,16 +419,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "v1.3.0-rc.2",
+            "version": "v1.3.0-rc.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "241b8b14a40f1fb426b57747fd72e245a86cd608"
+                "reference": "4d493f643f61ca49112391ff05ab1786eab4f2ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/241b8b14a40f1fb426b57747fd72e245a86cd608",
-                "reference": "241b8b14a40f1fb426b57747fd72e245a86cd608",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/4d493f643f61ca49112391ff05ab1786eab4f2ca",
+                "reference": "4d493f643f61ca49112391ff05ab1786eab4f2ca",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +462,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-06-25T01:22:20+00:00"
+            "time": "2020-07-06T22:09:40+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -891,20 +891,20 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.9.5",
+            "version": "1.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "b2c28789e80a97badd14145fda39b545d83ca3ef"
+                "reference": "969b211f9a51aa1f6c01d1d2aef56d3bd91598e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/b2c28789e80a97badd14145fda39b545d83ca3ef",
-                "reference": "b2c28789e80a97badd14145fda39b545d83ca3ef",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/969b211f9a51aa1f6c01d1d2aef56d3bd91598e5",
+                "reference": "969b211f9a51aa1f6c01d1d2aef56d3bd91598e5",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^7.1 || ^8.0"
             },
             "replace": {
                 "myclabs/deep-copy": "self.version"
@@ -935,7 +935,7 @@
                 "object",
                 "object graph"
             ],
-            "time": "2020-01-17T21:11:47+00:00"
+            "time": "2020-06-29T13:22:24+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -2654,16 +2654,16 @@
         },
         {
             "name": "wp-cli/i18n-command",
-            "version": "v2.2.3",
+            "version": "v2.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/i18n-command.git",
-                "reference": "7a5d483d872dfec1b89d88d348666ecd59454d52"
+                "reference": "9784ff2c074d1765442b618e6d3a43fee2093a05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/7a5d483d872dfec1b89d88d348666ecd59454d52",
-                "reference": "7a5d483d872dfec1b89d88d348666ecd59454d52",
+                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/9784ff2c074d1765442b618e6d3a43fee2093a05",
+                "reference": "9784ff2c074d1765442b618e6d3a43fee2093a05",
                 "shasum": ""
             },
             "require": {
@@ -2707,7 +2707,7 @@
             ],
             "description": "Provides internationalization tools for WordPress projects.",
             "homepage": "https://github.com/wp-cli/i18n-command",
-            "time": "2020-06-04T07:07:10+00:00"
+            "time": "2020-06-12T00:17:09+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
