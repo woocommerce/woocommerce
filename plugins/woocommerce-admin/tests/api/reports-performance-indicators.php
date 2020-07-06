@@ -32,7 +32,8 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		// Mock the Jetpack endpoints and permissions.
 		$wp_user = get_userdata( $this->user );
 		$wp_user->add_cap( 'view_stats' );
-		$this->getMockBuilder( 'Jetpack_Core_Json_Api_Endpoints' )->getMock();
+		$this->mock_jetpack_modules();
+
 		add_filter( 'rest_post_dispatch', array( $this, 'mock_rest_responses' ), 10, 3 );
 	}
 
@@ -273,17 +274,6 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 	 * @return WP_Rest_Response
 	 */
 	public function mock_rest_responses( $response, $rest_server, $request ) {
-		if ( 'GET' === $request->get_method() && '/jetpack/v4/module/all' === $request->get_route() ) {
-			$response->set_status( 200 );
-			$response->set_data(
-				array(
-					'stats' => array(
-						'activated' => 1,
-					),
-				)
-			);
-		}
-
 		if ( 'GET' === $request->get_method() && '/jetpack/v4/module/stats/data' === $request->get_route() ) {
 			$general                 = new \stdClass();
 			$general->visits         = new \stdClass();
@@ -331,5 +321,15 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Mock the Jetpack stats module as active.
+	 */
+	public function mock_jetpack_modules() {
+		$api_init        = \Automattic\WooCommerce\Admin\API\Init::instance();
+		$controller_name = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
+
+		$api_init->$controller_name->set_active_jetpack_modules( array( 'stats' ) );
 	}
 }

@@ -173,7 +173,7 @@ class FeaturePlugin {
 		ReportsSync::init();
 		Install::init();
 		Events::instance()->init();
-		new API\Init();
+		API\Init::instance();
 		ReportExporter::init();
 
 		// CRUD classes.

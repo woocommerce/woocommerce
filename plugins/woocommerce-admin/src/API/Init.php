@@ -15,6 +15,24 @@ use \Automattic\WooCommerce\Admin\Loader;
  * Init class.
  */
 class Init {
+	/**
+	 * The single instance of the class.
+	 *
+	 * @var object
+	 */
+	protected static $instance = null;
+
+	/**
+	 * Get class instance.
+	 *
+	 * @return object Instance.
+	 */
+	final public static function instance() {
+		if ( null === static::$instance ) {
+			static::$instance = new static();
+		}
+		return static::$instance;
+	}
 
 	/**
 	 * Boostrap REST API.
