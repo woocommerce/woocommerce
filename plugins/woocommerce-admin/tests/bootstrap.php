@@ -60,7 +60,7 @@ class WC_Admin_Unit_Tests_Bootstrap {
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 
 		// Set up WC-Admin config.
-		tests_add_filter( 'wc_admin_get_feature_config', array( $this, 'add_development_features' ) );
+		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
@@ -152,10 +152,12 @@ class WC_Admin_Unit_Tests_Bootstrap {
 
 	/**
 	 * Use the `development` features for testing.
+	 *
+	 * @param array $flags Existing feature flags.
+	 * @return array Filtered feature flags.
 	 */
-	public function add_development_features() {
+	public function add_development_features( $flags ) {
 		$config = json_decode( file_get_contents( $this->plugin_dir . '/config/development.json' ) ); // @codingStandardsIgnoreLine.
-		$flags  = array();
 		foreach ( $config->features as $feature => $bool ) {
 			$flags[ $feature ] = $bool;
 		}

@@ -204,7 +204,7 @@ class FeaturePlugin {
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ), 0 );
 		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
 
-		new Loader();
+		Loader::get_instance();
 	}
 
 	/**

@@ -193,6 +193,22 @@ class Loader {
 	}
 
 	/**
+	 * Determines if a minified JS file should be served.
+	 *
+	 * @param  boolean $script_debug Only serve unminified files if script debug is on.
+	 * @return boolean If js asset should use minified version.
+	 */
+	public static function should_use_minified_js_file( $script_debug ) {
+		// un-minified files are only shipped in non-core versions of wc-admin, return true if unminified files are not available.
+		if ( ! self::is_feature_enabled( 'unminified-js' ) ) {
+			return true;
+		}
+
+		// Otherwise we will serve un-minified files if SCRIPT_DEBUG is on, or if anything truthy is passed in-lieu of SCRIPT_DEBUG.
+		return ! $script_debug;
+	}
+
+	/**
 	 * Gets the URL to an asset file.
 	 *
 	 * @param  string $file File name (without extension).
@@ -204,7 +220,8 @@ class Loader {
 
 		// Potentially enqueue minified JavaScript.
 		if ( 'js' === $ext ) {
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+			$suffix = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
