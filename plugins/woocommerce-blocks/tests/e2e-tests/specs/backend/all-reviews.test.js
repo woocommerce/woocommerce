@@ -30,6 +30,6 @@ describe( `${ block.name } Block`, () => {
 				'.wc-block-review-list .wc-block-review-list-item__item',
 				( reviews ) => reviews.length
 			)
-		).toBeGreaterThanOrEqual( 3 ); // Fixture data has three reviews.
+		).toBeGreaterThanOrEqual( 6 ); // Fixture data has three reviews per product.
 	} );
 } );
