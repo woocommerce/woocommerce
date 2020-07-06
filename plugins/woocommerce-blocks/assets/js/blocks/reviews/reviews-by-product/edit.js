@@ -125,6 +125,7 @@ const ReviewsByProductEditor = ( {
 					'Reviews by Product',
 					'woo-gutenberg-products-block'
 				) }
+				className="wc-block-reviews-by-product"
 			>
 				{ __(
 					'Show reviews of your product to build trust',
@@ -161,7 +162,7 @@ const ReviewsByProductEditor = ( {
 			{ getInspectorControls() }
 			<EditorContainerBlock
 				attributes={ attributes }
-				className="wc-block-all-reviews"
+				className="wc-block-reviews-by-product"
 				icon={
 					<Icon
 						icon={ comment }

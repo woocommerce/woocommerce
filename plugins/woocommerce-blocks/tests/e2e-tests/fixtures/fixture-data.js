@@ -79,6 +79,17 @@ const ReviewsInProduct = ( id ) => [
 ];
 
 /**
+ * Product category fixture data, using the create batch endpoint
+ *
+ * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-product-categories|Batch update product categories}
+ */
+const Categories = () => [
+	{
+		name: 'Music',
+	},
+];
+
+/**
  * Product fixture data, using the create batch endpoint
  *
  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-products|Batch update products}
@@ -103,6 +114,28 @@ const Products = () => [
 					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
+		categories: [ 'Music' ],
+	},
+	{
+		name: 'Woo Single #2',
+		type: 'simple',
+		regular_price: '25.99',
+		virtual: true,
+		downloadable: true,
+		downloads: [
+			{
+				name: 'Woo Single 2',
+				file:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		images: [
+			{
+				src:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		categories: [ 'Music' ],
 	},
 ];
 
@@ -225,6 +258,7 @@ const Taxes = () => [
 module.exports = {
 	Coupons,
 	ReviewsInProduct,
+	Categories,
 	Products,
 	Settings,
 	Shipping,

@@ -102,6 +102,36 @@ const deleteCoupons = ( ids ) =>
 	WooCommerce.post( 'coupons/batch', {
 		delete: ids,
 	} );
+
+/**
+ * Create Product Categories.
+ *
+ * @param {Object[]} fixture An array of objects describing our data, defaults
+ * to our fixture.
+ * @return {Promise} a promise that resolves to an array of newly created categories,
+ * or rejects if the request failed.
+ */
+const createCategories = ( fixture = fixtures.Categories() ) =>
+	WooCommerce.post( 'products/categories/batch', {
+		create: fixture,
+	} ).then( ( response ) => response.data.create );
+
+/**
+ * Delete Product Categories.
+ *
+ * @param {Object[]} categories an array of categories to delete.
+ *
+ * @return {Promise} return a promise that resolves to the deleted data or
+ * reject if the request failed.
+ */
+const deleteCategories = ( categories ) => {
+	const ids = categories.map( ( category ) => category.id );
+
+	return WooCommerce.post( 'products/categories/batch', {
+		delete: ids,
+	} );
+};
+
 /**
  * Create Products.
  *
@@ -109,17 +139,29 @@ const deleteCoupons = ( ids ) =>
  *
  * @todo  add more products to e2e fixtures data.
  *
+ * @param {Array}    categories Array of category objects so we can replace names with ids in the request.
  * @param {Object[]} fixture An array of objects describing our data, defaults
  * to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created products,
  * or rejects if the request failed.
  */
-const createProducts = ( fixture = fixtures.Products() ) =>
-	WooCommerce.post( 'products/batch', {
-		create: fixture,
+const createProducts = ( categories, fixture = fixtures.Products() ) => {
+	const hydratedFixture = fixture.map( ( product ) => {
+		if ( categories && product.categories ) {
+			product.categories = product.categories.map( ( categoryName ) =>
+				categories.find(
+					( category ) => category.name === categoryName
+				)
+			);
+		}
+		return product;
+	} );
+	return WooCommerce.post( 'products/batch', {
+		create: hydratedFixture,
 	} ).then( ( products ) => {
 		return products.data.create.map( ( product ) => product.id );
 	} );
+};
 
 /**
  * Delete products.
@@ -138,8 +180,6 @@ const deleteProducts = ( ids ) =>
 
 /**
  * Create Reviews.
- *
- * This is not called directly but is called within createProducts.
  *
  * @param {number}   id      product id to assign reviews to.
  * @param {Object[]} fixture An array of objects describing our reviews, defaults
@@ -305,6 +345,8 @@ module.exports = {
 	deleteTaxes,
 	createCoupons,
 	deleteCoupons,
+	createCategories,
+	deleteCategories,
 	createProducts,
 	deleteProducts,
 	createReviews,
