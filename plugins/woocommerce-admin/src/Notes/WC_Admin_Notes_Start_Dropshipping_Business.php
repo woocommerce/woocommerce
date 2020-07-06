@@ -43,15 +43,22 @@ class WC_Admin_Notes_Start_Dropshipping_Business {
 		}
 
 		// Make sure that the person who filled out the OBW was not setting up the store for their customer/client.
-		if ( $onboarding_profile['setup_client'] ) {
+		if (
+			! isset( $onboarding_profile['setup_client'] ) ||
+			$onboarding_profile['setup_client']
+		) {
 			return;
 		}
 
 		// We need to show the notification when product number is 0 or the revenue is 'none' or 'up to 2500'.
 		if (
-			0 !== (int) $onboarding_profile['product_count'] &&
-			'none' !== $onboarding_profile['revenue'] &&
-			'up-to-2500' !== $onboarding_profile['revenue']
+			! isset( $onboarding_profile['product_count'] ) ||
+			! isset( $onboarding_profile['revenue'] ) ||
+			(
+				0 !== (int) $onboarding_profile['product_count'] &&
+				'none' !== $onboarding_profile['revenue'] &&
+				'up-to-2500' !== $onboarding_profile['revenue']
+			)
 		) {
 			return;
 		}
@@ -60,7 +67,6 @@ class WC_Admin_Notes_Start_Dropshipping_Business {
 		$note->set_title( __( 'Are you considering starting a dropshipping business?', 'woocommerce-admin' ) );
 		$note->set_content( __( 'The ability to add inventory without having to deal with production, stocking, or fulfilling orders may seem like a dream. But is dropshipping worth it? Let’s explore some of the advantages and disadvantages to help you make the best decision for your business.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );

@@ -48,7 +48,10 @@ class WC_Admin_Notes_Need_Some_Inspiration {
 
 		// Make sure that the person who filled out the OBW was not setting up
 		// the store for their customer/client.
-		if ( $onboarding_profile['setup_client'] ) {
+		if (
+			! isset( $onboarding_profile['setup_client'] ) ||
+			$onboarding_profile['setup_client']
+		) {
 			return;
 		}
 

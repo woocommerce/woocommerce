@@ -45,7 +45,6 @@ class WC_Admin_Notes_WooCommerce_Subscriptions {
 		$note->set_title( __( 'Do you need more info about WooCommerce Subscriptions?', 'woocommerce-admin' ) );
 		$note->set_content( __( 'WooCommerce Subscriptions allows you to introduce a variety of subscriptions for physical or virtual products and services. Create product-of-the-month clubs, weekly service subscriptions or even yearly software billing packages. Add sign-up fees, offer free trials, or set expiration periods.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
