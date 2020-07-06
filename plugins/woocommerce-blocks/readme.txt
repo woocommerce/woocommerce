@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.9.0-dev
+Stable tag: 2.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 2.9.0 - 2020-07-07 =
+- bug: Correctly sort translated state and country drop-down menus in Checkout block. [#2779](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2779) 
+- dev: Add storybook story for icon library. [#2787](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2787) 
+- dev: Add custom jest matcher `toRenderBlock`, used for confirming blocks are available in the editor in e2e tests. [#2780](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2780) 
+- dev: Use consistent Button component in Cart & Checkout blocks. [#2781](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2781) 
+
 
 = 2.8.0 - 2020-06-23 =
 - bug: Cart and Checkout blocks display shipping methods with tax rates if that's how it's set in the settings. [#2748](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2748)
