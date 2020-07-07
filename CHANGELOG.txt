@@ -1,6 +1,6 @@
 == Changelog ==
 
-= 4.3.0 - 2020-07-07 =
+= 4.3.0 - 2020-07-0x =
 
 **WooCommerce**
 * Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775
@@ -39,6 +39,7 @@
 * Dev - Added action before the "Add payment method" save button and a filter to validate manually added fields when adding payment method. #26445
 * Dev - `wc_get_shipping_method_count() has a new argument (`$enabled_only`) which allows restricting the non-legacy shipping methods to the enabled ones. #25753
 * Dev - Added pre query filters for WP dashboard WooCommerce status widget. #25321
+* Dev - Removed type hints from src folder. #26963
 
 **REST API 1.0.10**
 * Enhancement - Add API tool to clear template cache. woocommerce/woocommerce-rest-api#212
@@ -89,6 +90,8 @@
 * Fix - Fix dashboard task list menu placement. #4664
 * Fix - Added styles to the unread notes counter in the inbox panel. #4690
 * Fix - Fix spacing between stats overview and store management cards. #4681
+* Fix - Added default value to the note icon. #4745
+* Fix - Unnecessary REST API usage leading to potential overflow of Jetpack option sizes. #4755
 * Dev - Add jest-dom eslint plugin. #4327
 * Dev - Migrate onboarding data store to wp.data #4433
 * Dev - Remove use of `IconButton` in favor of `Button` #4415
@@ -97,6 +100,8 @@
 * Dev - Migrate user store to wp.data #4505
 * Dev - Add options data store to wp.data #4144
 * Dev - Runtime feature config override #4523
+* Dev - Add deprecation notice for install_plugin() #4713
+* Dev - Only load non-minified js files when SCRIPT_DEBUG is on, and env is development or plugin. #4747
 
 **WooCommerce Admin 1.2.4**
 * Tweak - reduce asset filename length and remove tilde characters. #4535
