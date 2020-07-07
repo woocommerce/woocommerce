@@ -7,7 +7,8 @@ const path = require( 'path' );
 /**
  * Internal dependencies
  */
-const { getAlias, getMainConfig } = require( '../bin/webpack-helpers.js' );
+const { getAlias } = require( '../bin/webpack-helpers.js' );
+const { getMainConfig } = require( '../bin/webpack-configs.js' );
 const tsConfig = require( '../tsconfig.json' );
 
 const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
