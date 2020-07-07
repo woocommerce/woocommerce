@@ -220,12 +220,22 @@ table.wc-block-cart-items {
 	.wc-block-cart__submit-container {
 		background: $white;
 		bottom: 0;
-		box-shadow: 0 -10px 20px 10px transparentize($core-grey-light-700, 0.5);
 		left: 0;
 		padding: $gap;
 		position: fixed;
 		width: 100%;
 		z-index: 9999;
+
+		&::before {
+			box-shadow: 0 -10px 20px 10px currentColor;
+			color: transparentize($core-grey-light-700, 0.5);
+			content: "";
+			height: 100%;
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
 	}
 	.wc-block-cart__submit-container-push {
 		height: 100px;
