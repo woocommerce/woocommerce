@@ -69,7 +69,7 @@ class Library {
 		];
 		// Note: as a part of refactoring dynamic block registration, this will be moved
 		// to block level config.
-		if ( version_compare( $wp_version, '5.2', '>' ) ) {
+		if ( version_compare( $wp_version, '5.3', '>=' ) ) {
 			$blocks[] = 'AllProducts';
 			$blocks[] = 'PriceFilter';
 			$blocks[] = 'AttributeFilter';
