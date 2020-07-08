@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e23970af9ccfb7399b4aded769d90ce0",
+    "content-hash": "2d107fda36234fb7f603e981aa476498",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -419,16 +419,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "v1.3.0-rc.3",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "4d493f643f61ca49112391ff05ab1786eab4f2ca"
+                "reference": "ff7166c9c047a638bd0bee35d3df31026a2d9aa1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/4d493f643f61ca49112391ff05ab1786eab4f2ca",
-                "reference": "4d493f643f61ca49112391ff05ab1786eab4f2ca",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ff7166c9c047a638bd0bee35d3df31026a2d9aa1",
+                "reference": "ff7166c9c047a638bd0bee35d3df31026a2d9aa1",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +462,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-07-06T22:09:40+00:00"
+            "time": "2020-07-08T16:34:54+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2654,16 +2654,16 @@
         },
         {
             "name": "wp-cli/i18n-command",
-            "version": "v2.2.4",
+            "version": "v2.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/i18n-command.git",
-                "reference": "9784ff2c074d1765442b618e6d3a43fee2093a05"
+                "reference": "b02ecdc9a57f9633740c254d19749118b7411f0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/9784ff2c074d1765442b618e6d3a43fee2093a05",
-                "reference": "9784ff2c074d1765442b618e6d3a43fee2093a05",
+                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/b02ecdc9a57f9633740c254d19749118b7411f0f",
+                "reference": "b02ecdc9a57f9633740c254d19749118b7411f0f",
                 "shasum": ""
             },
             "require": {
@@ -2707,7 +2707,7 @@
             ],
             "description": "Provides internationalization tools for WordPress projects.",
             "homepage": "https://github.com/wp-cli/i18n-command",
-            "time": "2020-06-12T00:17:09+00:00"
+            "time": "2020-07-08T15:20:38+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
