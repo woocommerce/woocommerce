@@ -1,0 +1,45 @@
+.wc-block-cart__payment-method-icons {
+	display: block;
+	text-align: center;
+	margin: 0 0 #{$gap - 2px};
+
+	.wc-blocks-payment-method-icon {
+		display: inline-block;
+		margin: 0 4px 2px;
+		padding: 0;
+		width: auto;
+		height: 24px;
+		vertical-align: middle;
+	}
+
+	&--align-left {
+		text-align: left;
+
+		.wc-blocks-payment-method-icon {
+			margin-left: 0;
+			margin-right: 8px;
+		}
+	}
+
+	&--align-right {
+		text-align: right;
+
+		.wc-blocks-payment-method-icon {
+			margin-right: 0;
+			margin-left: 8px;
+		}
+	}
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.is-mobile,
+.is-small {
+	.wc-block-cart__payment-method-icons {
+		.wc-blocks-payment-method-icon {
+			height: 16px;
+		}
+	}
+}

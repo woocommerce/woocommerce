@@ -1,0 +1,76 @@
+@mixin reset-button {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	background: none transparent;
+	box-shadow: none;
+
+	&:focus {
+		outline: 2px solid $core-grey-light-600;
+	}
+}
+
+.wc-block-quantity-selector {
+	display: flex;
+	min-width: 100px;
+	border: 1px solid $core-grey-light-600;
+	background: #fff;
+	border-radius: 4px;
+
+	// Extra label for specificity needed in the editor.
+	input.wc-block-quantity-selector__input {
+		@include font-size(regular);
+		order: 2;
+		min-width: 40px;
+		flex: 1 1 auto;
+		border: 0;
+		padding: 0.4em 0;
+		margin: 0;
+		text-align: center;
+		background: transparent;
+		box-shadow: none;
+		color: #000;
+		line-height: 1;
+		vertical-align: middle;
+		-moz-appearance: textfield;
+
+		&:focus {
+			background: $core-grey-light-200;
+			outline: 1px solid $core-grey-light-600;
+		}
+		&:disabled {
+			color: $core-grey-dark-100;
+		}
+	}
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	.wc-block-quantity-selector__button {
+		@include reset-button;
+		@include font-size(regular);
+		min-width: 30px;
+		cursor: pointer;
+		color: $core-grey-dark-700;
+		font-style: normal;
+		text-align: center;
+
+		&:hover,
+		&:focus {
+			@include reset-button;
+			color: $core-grey-dark-900;
+		}
+		&:disabled {
+			color: $core-grey-dark-100;
+			cursor: default;
+			@include reset-button;
+		}
+	}
+	.wc-block-quantity-selector__button--minus {
+		order: 1;
+	}
+	.wc-block-quantity-selector__button--plus {
+		order: 3;
+	}
+}

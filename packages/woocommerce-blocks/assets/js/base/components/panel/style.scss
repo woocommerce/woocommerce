@@ -1,0 +1,37 @@
+.wc-blocks-components-panel__button {
+	&,
+	&:hover,
+	&:focus,
+	&:active {
+		@include reset-box();
+		@include reset-typography();
+		background: transparent;
+		box-shadow: none;
+		height: auto;
+		line-height: 1;
+		margin-bottom: em(6px);
+		margin-top: em(6px);
+		padding-bottom: em($gap-small - 6px);
+		padding-right: #{24px + $gap-smaller};
+		padding-top: em($gap-small - 6px);
+		position: relative;
+		text-align: left;
+		width: 100%;
+	}
+
+	> .wc-blocks-components-panel__button-icon {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: auto;
+	}
+}
+
+.wc-blocks-components-panel__content {
+	padding-bottom: em($gap);
+}
+
+.theme-twentytwenty .wc-blocks-components-panel__button {
+	background: transparent;
+}

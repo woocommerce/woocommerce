@@ -1,0 +1,224 @@
+.wc-block-components-express-checkout {
+	margin: auto;
+	border: 2px solid $black;
+	border-radius: 5px;
+	padding: 8px;
+	position: relative;
+
+	.wc-block-components-express-checkout__title {
+		background-color: $white;
+		padding-left: $gap-small;
+		padding-right: $gap-small;
+		margin-left: $gap-small;
+		display: inline-block;
+		vertical-align: middle;
+		transform: translateY(-50%);
+		position: absolute;
+		top: 0;
+		margin-top: -2px; // Same as container border width.
+	}
+
+	.wc-block-components-express-checkout__content {
+		padding: $gap $gap-large 0;
+	}
+
+	.wc-block-components-express-checkout-payment-event-buttons {
+		list-style: none;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		width: 100%;
+		padding: 0;
+		margin: 0 0 $gap;
+		overflow: hidden;
+		> li {
+			display: inline-block;
+			width: 50%;
+			> img {
+				width: 100%;
+				height: 48px;
+			}
+		}
+		> li:nth-child(even) {
+			padding-left: $gap-smaller;
+		}
+		> li:nth-child(odd) {
+			padding-right: $gap-smaller;
+		}
+	}
+}
+
+.wc-block-card-elements {
+	display: flex;
+	width: 100%;
+}
+
+.wc-block-gateway-container {
+	position: relative;
+	margin-bottom: em($gap-large);
+	white-space: nowrap;
+
+	&.wc-card-number-element {
+		flex: auto;
+	}
+
+	&.wc-card-expiry-element,
+	&.wc-card-cvc-element {
+		width: $card-element-width;
+		margin-left: $gap-small;
+	}
+
+	.wc-block-gateway-input {
+		@include font-size(regular);
+		line-height: 1.375; // =22px when font-size is 16px.
+		background-color: #fff;
+		padding: em($gap-small) $gap;
+		border-radius: 4px;
+		border: 1px solid $input-border-gray;
+		width: 100%;
+		font-family: inherit;
+		margin: 0;
+		box-sizing: border-box;
+		height: 3em;
+		color: $input-text-active;
+		cursor: text;
+
+		&:focus {
+			background-color: #fff;
+		}
+	}
+
+	&:focus {
+		background-color: #fff;
+	}
+
+	label {
+		@include reset-typography();
+		@include font-size(regular);
+		line-height: 1.375; // =22px when font-size is 16px.
+		position: absolute;
+		transform: translateY(0.75em);
+		left: 0;
+		top: 0;
+		transform-origin: top left;
+		color: $gray-50;
+		transition: transform 200ms ease;
+		margin: 0 0 0 #{$gap + 1px};
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap});
+		cursor: text;
+
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	&.wc-inline-card-element {
+		label {
+			margin-left: $gap-largest;
+		}
+		.wc-block-gateway-input.focused.empty,
+		.wc-block-gateway-input:not(.empty) {
+			& + label {
+				margin-left: $gap;
+				transform: translateY(#{$gap-smallest}) scale(0.75);
+			}
+		}
+		& + .wc-block-form-input-validation-error {
+			position: static;
+			margin-top: -$gap-large;
+		}
+	}
+
+	.wc-block-gateway-input.focused.empty,
+	.wc-block-gateway-input:not(.empty) {
+		padding: em($gap-large) $gap em($gap-smallest);
+		& + label {
+			transform: translateY(#{$gap-smallest}) scale(0.75);
+		}
+	}
+
+	.wc-block-gateway-input.has-error {
+		border-color: $error-red;
+		&:focus {
+			outline-color: $error-red;
+		}
+	}
+
+	.wc-block-gateway-input.has-error + label {
+		color: $error-red;
+	}
+}
+
+// These elements have available space below, so we can display errors with a
+// larger line height.
+.is-medium,
+.is-large {
+	.wc-card-expiry-element,
+	.wc-card-cvc-element {
+		.wc-block-form-input-validation-error > p {
+			line-height: 16px;
+			padding-top: 4px;
+		}
+	}
+}
+
+.is-mobile,
+.is-small {
+	.wc-card-expiry-element,
+	.wc-card-cvc-element {
+		.wc-block-form-input-validation-error > p {
+			min-height: 28px;
+		}
+	}
+}
+
+.wc-blocks-credit-card-images {
+	padding-top: $gap-small;
+	display: flex;
+
+	.wc-blocks-credit-cart-icon {
+		height: 18px;
+		width: auto;
+		margin-right: $gap-small;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+}
+
+.wc-block-components-checkout-payment-methods * {
+	pointer-events: all; // Overrides parent disabled component in editor context
+}
+
+@include breakpoint( "<782px" ) {
+	.wc-block-card-elements {
+		flex-wrap: wrap;
+	}
+
+	.wc-block-gateway-container.wc-card-number-element {
+		flex-basis: 100%;
+	}
+
+	.wc-block-gateway-container.wc-card-expiry-element {
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: 0;
+		margin-right: $gap-smaller;
+	}
+
+	.wc-block-gateway-container.wc-card-cvc-element {
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: $gap-smaller;
+	}
+}
+
+// For Twenty Twenty we need to increase specificity of the title.
+.theme-twentytwenty {
+	.wc-block-components-express-checkout .wc-block-components-express-checkout__title {
+		padding-left: $gap-small;
+		padding-right: $gap-small;
+		margin-left: $gap-small;
+	}
+}
