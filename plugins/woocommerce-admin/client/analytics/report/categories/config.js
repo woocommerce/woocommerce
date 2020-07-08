@@ -43,7 +43,7 @@ export const charts = applyFilters( CATEGORY_REPORT_CHARTS_FILTER, [
 export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [ 'chartType', 'paged', 'per_page', 'categories' ],
+		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

@@ -49,21 +49,7 @@ export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 export const filters = applyFilters( ORDERS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [
-			'chartType',
-			'paged',
-			'per_page',
-			'product_includes',
-			'product_excludes',
-			'status_is',
-			'status_is_not',
-			'coupon_includes',
-			'coupon_excludes',
-			'refunds',
-			'tax_rate_includes',
-			'tax_rate_excludes',
-			'customer_type',
-		],
+		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

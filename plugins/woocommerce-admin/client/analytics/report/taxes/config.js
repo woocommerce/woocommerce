@@ -50,7 +50,7 @@ export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [ 'chartType', 'paged', 'per_page', 'taxes' ],
+		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
