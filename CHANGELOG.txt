@@ -1,6 +1,6 @@
 == Changelog ==
 
-= 4.3.0 - 2020-07-0x =
+= 4.3.0 - 2020-07-08 =
 
 **WooCommerce**
 * Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775

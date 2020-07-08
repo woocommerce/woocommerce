@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.2.2
+Stable tag: 4.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.3.0 - 2020-07-0x =
+= 4.3.0 - 2020-07-08 =
 
 **WooCommerce**
 * Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775
