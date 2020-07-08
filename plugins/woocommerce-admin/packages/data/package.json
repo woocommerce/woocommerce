@@ -21,7 +21,7 @@
   "module": "build-module/index.js",
   "react-native": "src/index",
   "dependencies": {
-    "@babel/runtime-corejs2": "7.10.2"
+    "@babel/runtime-corejs2": "7.10.4"
   },
   "publishConfig": {
     "access": "public"
