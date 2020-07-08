@@ -183,7 +183,7 @@ class WC_Admin_Menus {
 			unset( $submenu['woocommerce'][0] );
 
 			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) ) {
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
 				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
 				if ( $order_count ) {
