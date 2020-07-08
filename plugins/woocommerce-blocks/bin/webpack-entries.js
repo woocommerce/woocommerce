@@ -76,6 +76,8 @@ const stable = {
 			'./assets/js/payment-method-extensions/payment-methods/cheque/index.js',
 		'wc-payment-method-paypal':
 			'./assets/js/payment-method-extensions/payment-methods/paypal/index.js',
+		'wc-payment-method-bacs':
+			'./assets/js/payment-method-extensions/payment-methods/bacs/index.js',
 	},
 };
 
