@@ -192,7 +192,7 @@
 		"eslint-plugin-jest-dom": "2.1.0",
 		"eslint-plugin-jsx-a11y": "6.3.1",
 		"eslint-plugin-react": "7.20.0",
-		"eslint-plugin-testing-library": "3.2.3",
+		"eslint-plugin-testing-library": "3.3.1",
 		"eslint-plugin-wpcalypso": "4.1.0",
 		"fs-extra": "8.1.0",
 		"grunt": "1.1.0",
