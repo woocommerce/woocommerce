@@ -340,6 +340,7 @@ class Onboarding {
 				'physical'        => array(
 					'label'       => __( 'Physical products', 'woocommerce-admin' ),
 					'description' => __( 'Products you ship to customers.', 'woocommerce-admin' ),
+					'default'     => true,
 				),
 				'downloads'       => array(
 					'label'       => __( 'Downloads', 'woocommerce-admin' ),
