@@ -195,7 +195,7 @@
 		"eslint-plugin-testing-library": "3.3.1",
 		"eslint-plugin-wpcalypso": "4.1.0",
 		"fs-extra": "8.1.0",
-		"grunt": "1.1.0",
+		"grunt": "1.2.1",
 		"grunt-checktextdomain": "1.0.1",
 		"grunt-wp-i18n": "1.0.3",
 		"husky": "4.2.5",
