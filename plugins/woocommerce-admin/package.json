@@ -190,7 +190,7 @@
 		"eslint-loader": "3.0.4",
 		"eslint-plugin-jest": "23.18.0",
 		"eslint-plugin-jest-dom": "2.1.0",
-		"eslint-plugin-jsx-a11y": "6.2.3",
+		"eslint-plugin-jsx-a11y": "6.3.1",
 		"eslint-plugin-react": "7.20.0",
 		"eslint-plugin-testing-library": "3.2.3",
 		"eslint-plugin-wpcalypso": "4.1.0",
