@@ -1,11 +1,12 @@
 # Handling Releases
 
-This document outlines the process of releasing new versions of the blocks plugin.
+This document (and the [related PR template](../../.github/release_pull_request_template.md)) outlines the process of releasing new versions of the blocks plugin.
 
 ## Prerequisites - what you need to release WooCommerce Blocks
 
 -   You should be set up for development - for more info see [this doc](../contributors/getting-started.md).
 -   Install & set up [GitHub hub](https://hub.github.com) tools.
+-   You will need `svn` installed for pushing to WPORG.
 -   Configure a GitHub token for release scripts to use.
     -   https://github.com/settings/tokens
     -   Select the following permissions:
@@ -46,9 +47,13 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
     -   For _major_ and _minor_ releases, create branch: `release/X.X`.
     -   For _patch_ releases, the branch should already exist.
 
+_Outcome_: __There is a branch on origin repo for the release.__ (Note - it may not have all changes on it yet - that's next.)
+
 #### Create a release pull request
 
-Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to the min branch, but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
+Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch. This contains a checklist to go over, and serves as a place to contain all planning/communication around the release. The release process can span a few days, so this PR is an essential way for the team to keep track.
+
+You'll work through the checklist over the rest of the process below. The PR will remain open and unmerged until the release is live - you'll merge it much later (see `After release` below).
 
 ##### Patch releases against latest main branch
 
@@ -77,7 +82,6 @@ This is for releases where just fixes specific to the branch are released and no
 
 - Ensure your local checkout is updated to the tip of the release branch.
 
-
 _Outcome_: **Release branch has all relevant changes merged & pushed and there is a corresponding release pull request created for the release.**
 
 ### Prepare release
@@ -88,7 +92,10 @@ _Outcome_: **Release branch has all relevant changes merged & pushed and there i
     -   The above script will automatically generate changelog entries from a milestone (you will be asked about the milestone name in the script).
 -   Add changelog section for release, e.g. [`= 2.5.11 - 2020-01-20 =`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/74a41881bfa456a2167a52aaeb4871352255e328).
 -   Copy-paste the changelog content into `readme.txt`.
--   Make any other changes to readme as needed - e.g. support versions changing, new blocks.
+-   Make any other changes to metadata as needed:
+    -   `readme.txt` - support versions changing, add any new blocks.
+    -   `woocommerce-gutenberg-products-block.php` – requirements/tested up to versions etc.
+    -   Note: no need to edit plugin version number - this happens automatically later (`npm run deploy`).
 -   Push readme changes to release branch on origin repo.
     -   Note: you can push your readme changes directly to branch – no need for a PR & review process.
 -   Create testing notes for the release (you might be able to copy some from the pulls included in the release). Add the notes to [`docs/testing/releases`](../testing/releases/) (and update the [README.md index](../testing/releases/README.md) there)
@@ -113,6 +120,12 @@ _Outcome_: **Release branch has `readme.txt` is updated with release details.**
 -   Ask a team member to review the changes in the release pull request and for anyone who has done testing that they approve the pull request.
 
 _Outcome_: **Confident that source code is ready for release: intended fixes are working correctly, no release blockers or build issues.**
+
+### Complete pull request checklist
+
+Now's your last chance to tick off everything in the PR checklist! These are all important to consider. If something is not applicable, add info to the description. Otherwise provide info and relevant details for each item. Any questions - ping your team in slack :)
+
+Note - the PR is not merged here either - read on :)
 
 ### Release!
 
@@ -146,19 +159,29 @@ _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to 
 #### Update `main` branch with release changes
 
 -   Merge the release branch back into `main` (without the branch being up to date with `main`). This may have merge conflicts needing resolved if there are cherry-picked commits in the release branch.
--   Do not delete the branch (release branches are kept open for potential patch releases for that version)
+-   Restore the branch if it is deleted. Release branches are kept open for potential patch releases for that version.
 -   For _major_ & _minor_ releases, update version on `main` with dev suffix, e.g. [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
+
+_Outcome:_ __Main branch contains all changes and metadata tweaks for the release.__
+
+_Outcome:_ __Release branch is available for subsequent patch/bug fix releases.__
+
+_Outcome:_ __Dev version number on new builds of `main` branch.__
 
 #### Clean up release milestone / Zenhub
 
--   Edit the milestone and add the current date as the due date (this basically is used for easy reference of when the milestone was completed).
+-   Edit the (GitHub) milestone and add the current date as the due date (this basically is used for easy reference of when the milestone was completed).
 -   Close the milestone.
 -   If you didn't release a patch release, create a milestone for the next minor release.
 -   Close any epics that are completed as of this release and remove any unfinished issues in that from the epic.
 
+_Outcome:_ __The release milestone is archived and is an accurate record of what was included.__
+
+_Outcome:_ __There is a new release milestone ready for the next iteration.__
+
 #### Create pull request for updating the package in WooCommerce core.
 
-If the tagged release should be updated in WooCommerce core, do this immediately following our release.
+All releases (except RCs, betas etc) should be included in WooCommerce core. We do this by adding a PR on WooCommerce Core repo immediately after our release is completed.
 
 - Create the pull request in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/master/composer.json) for the blocks package to the version being pulled in.
 - Copy the release pull request notes for that tag (and merge any notes from previous tags if you're bumping up from non consecutive versions) into the pull request description.
@@ -166,7 +189,16 @@ If the tagged release should be updated in WooCommerce core, do this immediately
 - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
 - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 
-_Outcome:_ The package is updated in WooCommerce core frequently and successfully merged to WooCommerce main branch as a stable release.
+_Outcome:_ __The package is updated in WooCommerce core frequently and successfully merged to WooCommerce main branch as a stable release.__
+
+#### Post release announcement on [WooCommerce Developer Blog](https://woocommerce.wordpress.com/category/blocks/)
+
+Use previous posts for inspiration. If the release contains new features, or API changes, explain what's new so Woo devs/builders/merchants can get excited about it. This post can take time to get right - get feedback from the team, and don't rush it :)
+
+- Ensure the release notes are included in the post verbatim.
+- Don't forget to use category `Blocks` for the post.
+
+_Outcome:_ __There's a public release announcement, with clear info about what's new, roughly within a day of actual release.__
 
 ## Appendix: Versions
 
