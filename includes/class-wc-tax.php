@@ -491,7 +491,7 @@ class WC_Tax {
 	 * @param array  $location  Location to compute rates for. Should be in form: array( country, state, postcode, city).
 	 * @param object $customer  Only used to maintain backward compatibility for filter `woocommerce-matched_rates`.
 	 *
-	 * @return mixed|void
+	 * @return mixed|void Tax rates.
 	 */
 	public static function get_rates_from_location( $tax_class, $location, $customer = null ) {
 		$tax_class         = sanitize_title( $tax_class );
