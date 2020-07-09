@@ -132,23 +132,25 @@ class WC_Helper_Product {
 		$product->set_attributes( $attributes );
 		$product->save();
 
-		$variation_1 = self::create_product_variation_object(
+		$variations = array();
+
+		$variations[] = self::create_product_variation_object(
 			$product->get_id(),
 			'DUMMY SKU VARIABLE SMALL',
 			10,
 			array( 'pa_size' => 'small' )
 		);
 
-		$variation_2 = self::create_product_variation_object(
+		$variations[] = self::create_product_variation_object(
 			$product->get_id(),
 			'DUMMY SKU VARIABLE LARGE',
 			15,
 			array( 'pa_size' => 'large' )
 		);
 
-		$variation_3 = self::create_product_variation_object(
+		$variations[] = self::create_product_variation_object(
 			$product->get_id(),
-			'DUMMY SKU VARIABLE RED 0',
+			'DUMMY SKU VARIABLE HUGE RED 0',
 			16,
 			array(
 				'pa_size'   => 'huge',
@@ -157,9 +159,9 @@ class WC_Helper_Product {
 			)
 		);
 
-		$variation_4 = self::create_product_variation_object(
+		$variations[] = self::create_product_variation_object(
 			$product->get_id(),
-			'DUMMY SKU VARIABLE RED 2',
+			'DUMMY SKU VARIABLE HUGE RED 2',
 			17,
 			array(
 				'pa_size'   => 'huge',
@@ -168,11 +170,39 @@ class WC_Helper_Product {
 			)
 		);
 
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE BLUE 2',
+			18,
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'blue',
+				'pa_number' => '2',
+			)
+		);
+
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE BLUE ANY NUMBER',
+			19,
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'blue',
+				'pa_number' => '',
+			)
+		);
+
 		if ( $is_new_product ) {
 			return wc_get_product( $product->get_id() );
 		}
 
-		$product->set_children( array( $variation_1->get_id(), $variation_2->get_id(), $variation_3->get_id(), $variation_4->get_id() ) );
+		$variation_ids = array_map(
+			function( $variation ) {
+				return $variation->get_id();
+			},
+			$variations
+		);
+		$product->set_children( $variation_ids );
 		return $product;
 	}
 
