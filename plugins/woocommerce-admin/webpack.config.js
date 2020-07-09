@@ -93,6 +93,7 @@ const webpackConfig = {
 		path: path.join( __dirname, 'dist' ),
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',
+		jsonpFunction: '__wcAdmin_webpackJsonp',
 	},
 	externals,
 	module: {
