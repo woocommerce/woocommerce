@@ -1935,7 +1935,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @return string
 	 */
-	private function is_tax_displayed() {
+	public function is_tax_displayed() {
 		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
 			return 'excl';
 		}
