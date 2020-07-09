@@ -175,6 +175,7 @@ export default compose(
 		const inboxQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
+			status: 'unactioned',
 			type: QUERY_DEFAULTS.noteTypes,
 			orderby: 'date',
 			order: 'desc',

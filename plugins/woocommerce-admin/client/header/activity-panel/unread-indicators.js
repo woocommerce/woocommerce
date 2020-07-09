@@ -34,6 +34,7 @@ export function getUnreadNotes( select ) {
 	const notesQuery = {
 		page: 1,
 		per_page: QUERY_DEFAULTS.pageSize,
+		status: 'unactioned',
 		type: QUERY_DEFAULTS.noteTypes,
 		orderby: 'date',
 		order: 'desc',
