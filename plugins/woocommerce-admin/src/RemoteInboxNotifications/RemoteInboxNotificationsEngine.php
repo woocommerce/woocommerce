@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
 use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Admin\Features\Onboarding;
 
 /**
  * Remote Inbox Notifications engine.
@@ -27,6 +28,34 @@ class RemoteInboxNotificationsEngine {
 	public static function init() {
 		// Continue init via admin_init.
 		add_action( 'admin_init', array( __CLASS__, 'on_admin_init' ) );
+
+		// Trigger when the profile data option is updated (during onboarding).
+		add_action(
+			'update_option_' . Onboarding::PROFILE_DATA_OPTION,
+			array( __CLASS__, 'update_profile_option' ),
+			10,
+			2
+		);
+	}
+
+	/**
+	 * This is triggered when the profile option is updated and if the
+	 * profiler is being completed, triggers a run of the engine.
+	 *
+	 * @param mixed $old_value Old value.
+	 * @param mixed $new_value New value.
+	 */
+	public static function update_profile_option( $old_value, $new_value ) {
+		// Return early if we're not completing the profiler.
+		if (
+			( isset( $old_value['completed'] ) && $old_value['completed'] ) ||
+			! isset( $new_value['completed'] ) ||
+			! $new_value['completed']
+		) {
+			return;
+		}
+
+		self::run();
 	}
 
 	/**
