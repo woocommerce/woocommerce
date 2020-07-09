@@ -44,6 +44,16 @@ class WC_Admin_Notes_Choose_Niche {
 			return;
 		}
 
+		// Make sure that the product count is set in the onboarding profile.
+		if ( ! isset( $onboarding_profile['product_count'] ) ) {
+			return;
+		}
+
+		// Make sure that the revenue is set in the onboarding profile.
+		if ( ! isset( $onboarding_profile['revenue'] ) ) {
+			return;
+		}
+
 		// We need to show the notification when product number is 0 or the revenue is 'none' or 'up to 2500'.
 		if (
 			0 !== (int) $onboarding_profile['product_count'] &&
