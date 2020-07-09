@@ -374,6 +374,7 @@ class WC_Query {
 	 *
 	 * We also cache the post visibility so that it isn't checked again when displaying the posts list.
 	 *
+	 * @since 4.4.0
 	 * @param int $count Original posts count, as supplied by the found_posts filter.
 	 *
 	 * @return int Adjusted posts count.
@@ -728,11 +729,11 @@ class WC_Query {
 			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Filter by rating.
 		if ( isset( $_GET['rating_filter'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) );
 			$rating_terms  = array();
 			for ( $i = 1; $i <= 5; $i ++ ) {
 				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
@@ -749,7 +750,7 @@ class WC_Query {
 				);
 			}
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! empty( $product_visibility_not_in ) ) {
 			$tax_query[] = array(

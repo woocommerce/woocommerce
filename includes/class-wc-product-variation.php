@@ -587,7 +587,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Delete variation, set the ID to 0, and return result.
 	 *
-	 * @since  2.6.0
+	 * @since  4.4.0
 	 * @param  bool $force_delete Should the variation be deleted permanently.
 	 * @return bool result
 	 */

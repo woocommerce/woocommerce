@@ -2136,7 +2136,7 @@ function wc_update_400_db_version() {
  *
  * @return bool true if there are more products to process.
  */
-function wc_update_420_insert_attribute_terms_for_variable_products() {
+function wc_update_440_insert_attribute_terms_for_variable_products() {
 	$state_option_name = 'woocommerce_' . __FUNCTION__ . '_state';
 
 	$page     = intval( get_option( $state_option_name, 1 ) );
@@ -2172,6 +2172,6 @@ function wc_update_420_insert_attribute_terms_for_variable_products() {
 /**
  * Update DB version.
  */
-function wc_update_420_db_version() {
-	WC_Install::update_db_version( '4.2.0' );
+function wc_update_440_db_version() {
+	WC_Install::update_db_version( '4.4.0' );
 }

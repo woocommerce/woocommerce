@@ -149,9 +149,9 @@ class WC_Install {
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
 		),
-		'4.2.0' => array(
-			'wc_update_420_insert_attribute_terms_for_variable_products',
-			'wc_update_420_db_version',
+		'4.4.0' => array(
+			'wc_update_440_insert_attribute_terms_for_variable_products',
+			'wc_update_440_db_version',
 		),
 	);
 

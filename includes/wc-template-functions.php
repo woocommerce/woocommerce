@@ -8,8 +8,6 @@
  * @version  2.5.0
  */
 
-// phpcs:disable Generic.Commenting.Todo.TaskFound
-
 use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
@@ -241,6 +239,7 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 /**
  * Set the current visbility for a product in the woocommerce_loop global.
  *
+ * @since 4.4.0
  * @param int  $product_id Product it to cache visbiility for.
  * @param bool $value The poduct visibility value to cache.
  */
@@ -251,6 +250,7 @@ function wc_set_loop_product_visibility( $product_id, $value ) {
 /**
  * Gets the cached current visibility for a product from the woocommerce_loop global.
  *
+ * @since 4.4.0
  * @param int $product_id Product id to get the cached visibility for.
  *
  * @return bool|null The cached product visibility, or null if on visibility has been cached for that product.
@@ -731,9 +731,8 @@ function wc_product_class( $class = '', $product_id = null ) {
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$values = $_GET;
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	} elseif ( is_string( $values ) ) {
 		$url_parts = wp_parse_url( $values );
 		$values    = array();

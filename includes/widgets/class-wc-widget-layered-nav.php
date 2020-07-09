@@ -485,6 +485,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Wrapper for WC_Query::get_main_tax_query() to ease unit testing.
 	 *
+	 * @since 4.4.0
 	 * @return array
 	 */
 	protected function get_main_tax_query() {
@@ -494,6 +495,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Wrapper for WC_Query::get_main_search_query_sql() to ease unit testing.
 	 *
+	 * @since 4.4.0
 	 * @return string
 	 */
 	protected function get_main_search_query_sql() {
@@ -503,6 +505,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Wrapper for WC_Query::get_main_search_queryget_main_meta_query to ease unit testing.
 	 *
+	 * @since 4.4.0
 	 * @return array
 	 */
 	protected function get_main_meta_query() {
@@ -513,6 +516,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * Get a tax query SQL for a given set of taxonomy, terms and operator.
 	 * Uses an intermediate WP_Tax_Query object.
 	 *
+	 * @since 4.4.0
 	 * @param string $taxonomy Taxonomy name.
 	 * @param array  $terms Terms to include in the query.
 	 * @param string $operator Query operator, as supported by WP_Tax_Query; e.g. "NOT IN".
@@ -536,6 +540,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Convert a tax query array to SQL using an intermediate WP_Tax_Query object.
 	 *
+	 * @since 4.4.0
 	 * @param array $query Query array in the same format accepted by WP_Tax_Query constructor.
 	 *
 	 * @return array Query SQL as returned by WP_Tax_Query->get_sql.
