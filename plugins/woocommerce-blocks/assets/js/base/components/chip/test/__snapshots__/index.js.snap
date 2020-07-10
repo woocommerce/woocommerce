@@ -107,7 +107,7 @@ exports[`RemovableChip should render custom aria label 1`] = `
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
@@ -149,7 +149,7 @@ exports[`RemovableChip should render default aria label if text is a node 1`] = 
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
@@ -189,7 +189,7 @@ exports[`RemovableChip should render screen reader text aria label 1`] = `
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
@@ -224,7 +224,7 @@ exports[`RemovableChip should render text and the remove button 1`] = `
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
@@ -259,7 +259,7 @@ exports[`RemovableChip should render with disabled remove button 1`] = `
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
@@ -295,7 +295,7 @@ exports[`RemovableChip with removeOnAnyClick should be a button when removeOnAny
   >
     <svg
       aria-hidden="true"
-      className="dashicon dashicons-arrow-down-alt2"
+      className="wc-block-components-chip__remove-icon"
       focusable="false"
       height={16}
       role="img"
