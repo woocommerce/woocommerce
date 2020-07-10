@@ -1,6 +1,6 @@
 {
     "name": "@woocommerce/e2e-utils",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "End-To-End (E2E) test utils for WooCommerce",
     "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-utils/README.md",
     "repository": {
@@ -8,8 +8,9 @@
       "url": "https://github.com/woocommerce/woocommerce.git"
     },
     "license": "GPL-3.0+",
-    "main": "index.js",
+    "main": "build/index.js",
+    "module": "build-module/index.js",
     "dependencies": {
-      "@wordpress/e2e-test-utils": "4.3.1"
+      "@wordpress/e2e-test-utils": "4.6.0"
     }
   }
