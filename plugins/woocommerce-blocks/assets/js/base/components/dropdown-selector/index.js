@@ -91,6 +91,8 @@ const DropdownSelector = ( {
 					className={ classNames( classes, {
 						'is-multiple': multiple,
 						'is-single': ! multiple,
+						'has-checked': checked.length > 0,
+						'is-open': isOpen,
 					} ) }
 				>
 					{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }

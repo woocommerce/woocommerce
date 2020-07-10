@@ -41,6 +41,7 @@ const ActiveFiltersBlock = ( {
 				setMinPrice( undefined );
 				setMaxPrice( undefined );
 			},
+			displayStyle: blockAttributes.displayStyle,
 		} );
 	}, [ minPrice, maxPrice, formatPriceRange ] );
 
@@ -52,6 +53,7 @@ const ActiveFiltersBlock = ( {
 			return (
 				<ActiveAttributeFilters
 					attributeObject={ attributeObject }
+					displayStyle={ blockAttributes.displayStyle }
 					slugs={ attribute.slug }
 					key={ attribute.attribute }
 					operator={ attribute.operator }
@@ -96,6 +98,7 @@ const ActiveFiltersBlock = ( {
 									'Small',
 									'woo-gutenberg-products-block'
 								),
+								displayStyle: blockAttributes.displayStyle,
 							} ) }
 							{ renderRemovableListItem( {
 								type: __(
@@ -106,6 +109,7 @@ const ActiveFiltersBlock = ( {
 									'Blue',
 									'woo-gutenberg-products-block'
 								),
+								displayStyle: blockAttributes.displayStyle,
 							} ) }
 						</Fragment>
 					) : (

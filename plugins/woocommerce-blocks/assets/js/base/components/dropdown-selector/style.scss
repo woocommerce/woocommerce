@@ -1,3 +1,7 @@
+// 18px is the minimum input field line-height and 14px is the font-size of
+// the drop down selector elements.
+$dropdown-selector-line-height: 18/14;
+
 .wc-block-components-dropdown-selector {
 	max-width: 300px;
 	position: relative;
@@ -5,34 +9,37 @@
 }
 
 .wc-block-components-dropdown-selector__input-wrapper {
+	background: #fff;
+	border: 1px solid $input-border-gray;
+	color: $input-text-active;
 	align-items: center;
-	border: 1px solid #9f9f9f;
 	border-radius: 4px;
 	cursor: text;
 	display: flex;
 	flex-wrap: wrap;
-	padding: 2px;
+	padding: 2px $gap-smaller;
 
 	.is-disabled & {
 		background-color: $core-grey-light-500;
 	}
-}
 
-.wc-block-components-dropdown-selector__placeholder {
-	@include font-size(small);
-	height: 1.8em;
-	margin: 0 $gap-smallest;
-	white-space: nowrap;
+	.is-multiple.has-checked > & {
+		padding: 2px $gap-smallest;
+	}
+
+	.is-open > & {
+		border-radius: 4px 4px 0 0;
+	}
 }
 
 .wc-block-components-dropdown-selector__input {
 	@include font-size(small);
-	height: 1.8em;
+	line-height: $dropdown-selector-line-height;
+	margin: em($gap-small/4) 0;
 	min-width: 0;
+	padding: em($gap-smallest * 0.75) 0 em($gap-smallest * 0.75);
 
 	.is-single & {
-		margin: 0 4px;
-		padding: 0;
 		width: 100%;
 
 		&:hover,
@@ -40,24 +47,23 @@
 		&:active {
 			outline: 0;
 		}
+	}
 
-		&:not(:first-child):focus {
-			margin-bottom: 1.5px;
-			margin-top: 1.5px;
-		}
+	.is-single.has-checked.is-open & {
+		margin-bottom: 1.5px;
+		margin-top: 1.5px;
+	}
 
-		&:not(:first-child):not(:focus) {
-			@include visually-hidden();
-			// Fixes an issue in Firefox that `flex: wrap` in the container was making
-			// this element to still occupy one line.
-			position: absolute;
-		}
+	.is-single.has-checked:not(.is-open) & {
+		@include visually-hidden();
+		// Fixes an issue in Firefox that `flex: wrap` in the container was making
+		// this element to still occupy one line.
+		position: absolute;
 	}
 
 	.is-multiple & {
 		flex: 1;
 		min-width: 0;
-		margin: 1.5px;
 	}
 }
 
@@ -76,7 +82,6 @@
 
 .wc-block-components-dropdown-selector {
 	// Reset <button> styles
-	.wc-block-components-dropdown-selector__selected-chip,
 	.wc-block-components-dropdown-selector__selected-value__label,
 	.wc-block-components-dropdown-selector__selected-value__remove {
 		background-color: transparent;
@@ -95,50 +100,39 @@
 	}
 
 	.wc-block-components-dropdown-selector__selected-value {
+		@include font-size(small);
 		align-items: center;
 		color: $core-grey-dark-600;
 		display: inline-flex;
-		height: 1.8em;
-		padding: 1.5px 1.5px 1.5px 4px;
+		margin: em($gap-small/4) 0;
+		padding: em($gap-smallest * 0.75) 0 em($gap-smallest * 0.75);
 		width: 100%;
 	}
 
-	.wc-block-components-dropdown-selector__selected-chip {
-		align-items: center;
-		background-color: $core-grey-light-600;
-		border: 1px solid #9f9f9f;
-		border-radius: 4px;
-		color: $core-grey-dark-600;
-		display: inline-flex;
-		height: 1.8em;
-		margin: 1.5px;
-		padding: 0 0 0 4px;
-		white-space: nowrap;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background-color: $core-grey-light-400;
-			border: 1px solid #9f9f9f;
-			color: $core-grey-dark-600;
-		}
-	}
-
-	.wc-block-components-dropdown-selector__selected-value__label,
-	.wc-block-components-dropdown-selector__selected-chip__label {
-		@include font-size(small);
+	.wc-block-components-dropdown-selector__selected-value__label {
 		flex-grow: 1;
+		line-height: $dropdown-selector-line-height;
 		padding: 0;
 		text-align: left;
 	}
 
-	.wc-block-components-dropdown-selector__selected-value__remove,
-	.wc-block-components-dropdown-selector__selected-chip__remove {
+	.wc-block-components-dropdown-selector__selected-value__remove {
 		background-color: transparent;
 		border: 0;
 		display: inline-block;
 		line-height: 1;
-		padding: 0 0.3em;
+		padding: 0 0 0 0.3em;
+
+		> .dashicon {
+			display: block;
+		}
+	}
+
+	.wc-block-components-dropdown-selector__selected-chip {
+		@include font-size(small);
+		margin-top: em($gap-small/4);
+		margin-bottom: em($gap-small/4);
+		line-height: $dropdown-selector-line-height;
 	}
 }
 

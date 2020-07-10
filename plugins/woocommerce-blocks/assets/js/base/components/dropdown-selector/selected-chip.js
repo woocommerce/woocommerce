@@ -2,31 +2,23 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { RemovableChip } from '@woocommerce/base-components/chip';
 
 const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 	return (
-		<button
+		<RemovableChip
 			className="wc-block-dropdown-selector__selected-chip wc-block-components-dropdown-selector__selected-chip"
-			onClick={ () => {
+			removeOnAnyClick={ true }
+			onRemove={ () => {
 				onRemoveItem( option.value );
 			} }
-			onKeyDown={ ( e ) => {
-				if ( e.key === 'Backspace' || e.key === 'Delete' ) {
-					onRemoveItem( option.value );
-				}
-			} }
-			aria-label={ sprintf(
+			ariaLabel={ sprintf(
 				__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
 				option.name
 			) }
-		>
-			<span className="wc-block-dropdown-selector__selected-chip__label wc-block-components-dropdown-selector__selected-chip__label">
-				{ option.label }
-			</span>
-			<span className="wc-block-dropdown-selector__selected-chip__remove wc-block-components-dropdown-selector__selected-chip__remove">
-				𝘅
-			</span>
-		</button>
+			text={ option.label }
+			radius="large"
+		/>
 	);
 };
 
