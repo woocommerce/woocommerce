@@ -72,7 +72,11 @@ const RemovableChip = ( {
 				className="wc-block-components-chip__remove"
 				{ ...removeProps }
 			>
-				<Icon srcElement={ noAlt } size={ 16 } />
+				<Icon
+					className="wc-block-components-chip__remove-icon"
+					srcElement={ noAlt }
+					size={ 16 }
+				/>
 			</RemoveElement>
 		</Chip>
 	);
