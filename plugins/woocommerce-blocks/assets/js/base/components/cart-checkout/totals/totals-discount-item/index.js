@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import Chip from '@woocommerce/base-components/chip';
+import { RemovableChip } from '@woocommerce/base-components/chip';
 import PropTypes from 'prop-types';
 
 /**
@@ -51,7 +51,7 @@ const TotalsDiscountItem = ( {
 					>
 						<ul className="wc-block-components-totals-discount__coupon-list">
 							{ cartCoupons.map( ( cartCoupon ) => (
-								<Chip
+								<RemovableChip
 									key={ 'coupon-' + cartCoupon.code }
 									className="wc-block-components-totals-discount__coupon-list-item"
 									text={ cartCoupon.code }
@@ -68,6 +68,14 @@ const TotalsDiscountItem = ( {
 										removeCoupon( cartCoupon.code );
 									} }
 									radius="large"
+									ariaLabel={ sprintf(
+										/* Translators: %s is a coupon code. */
+										__(
+											'Remove coupon "%s"',
+											'woo-gutenberg-products-block'
+										),
+										cartCoupon.code
+									) }
 								/>
 							) ) }
 						</ul>

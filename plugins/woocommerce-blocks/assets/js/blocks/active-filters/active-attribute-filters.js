@@ -18,6 +18,7 @@ const ActiveAttributeFilters = ( {
 	attributeObject = {},
 	slugs = [],
 	operator = 'in',
+	displayStyle,
 } ) => {
 	const { results, isLoading } = useCollection( {
 		namespace: '/wc/store',
@@ -74,6 +75,7 @@ const ActiveAttributeFilters = ( {
 							);
 						},
 						showLabel: false,
+						displayStyle,
 					} );
 				} ) }
 			</ul>
