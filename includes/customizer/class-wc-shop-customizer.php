@@ -226,7 +226,7 @@ class WC_Shop_Customizer {
 								'max_rows_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( $min_notice, $max_rows ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $max_notice, $max_rows ) ); ?>'
 								}
 							) );
 						} else {
