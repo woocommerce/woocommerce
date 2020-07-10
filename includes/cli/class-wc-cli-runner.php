@@ -114,6 +114,7 @@ class WC_CLI_Runner {
 			'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
 			'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
 			'id'           => __( 'ID.', 'woocommerce' ),
+			'instance_id'  => __( 'Instance ID.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
 		$positional_args = array_keys( $supported_ids );
