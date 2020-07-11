@@ -982,7 +982,14 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 				$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
 			}
 
-			$return_price = round( $line_price + $taxes_total, wc_get_price_decimals() );
+			/**
+			 * If the customer is excempt from VAT, remove the taxes here.
+			*/
+			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // 
+				$return_price = round( $line_price, wc_get_price_decimals() );
+			} else {
+				$return_price = round( $line_price + $taxes_total, wc_get_price_decimals() );
+			}
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
