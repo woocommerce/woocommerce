@@ -178,4 +178,14 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $expected_html, $actual_html );
 	}
+
+	public function test_hidden_field() {
+		$actual_html = woocommerce_form_field('test',
+		array(
+			'type' => 'hidden',
+			'class' => 'test-field',
+			'id' => 'test_field',
+		), 'test value');
+		$expected_html = '<input type="hidden" class="input-hidden test-field" name="test" id="test_field"  value="test value" />';
+	}
 }
