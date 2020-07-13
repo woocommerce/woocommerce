@@ -4,7 +4,7 @@ PROTECTED_BRANCH="master"
 REMOTE_REF=$(echo "$HUSKY_GIT_STDIN" | cut -d " " -f 3)
 
 if [ -n "$REMOTE_REF" ]; then
-	if [ -z "${REMOTE_REF##*$PROTECTED_BRANCH*}" ]; then
+	if [ -z "${REMOTE_REF##$PROTECTED_BRANCH}" ]; then
 		printf "%sYou're about to push to master, is that what you intended? [y/N]: %s" "$(tput setaf 3)" "$(tput sgr0)"
 		read -r PROCEED < /dev/tty
 		echo
