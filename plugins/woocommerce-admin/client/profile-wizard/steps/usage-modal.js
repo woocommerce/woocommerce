@@ -94,6 +94,14 @@ class UsageModal extends Component {
 	}
 
 	render() {
+		// Bail if site has already opted in to tracking
+		if ( this.props.allowTracking ) {
+			const { onClose, onContinue } = this.props;
+			onClose();
+			onContinue();
+			return null;
+		}
+
 		const { allowTracking } = this.state;
 		const { isRequesting } = this.props;
 		const trackingMessage = interpolateComponents( {
