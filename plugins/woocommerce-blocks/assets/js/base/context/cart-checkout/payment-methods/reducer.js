@@ -107,10 +107,7 @@ const reducer = (
 		case SET_REGISTERED_PAYMENT_METHODS:
 			return {
 				...state,
-				paymentMethods: {
-					...state.paymentMethods,
-					...paymentMethods,
-				},
+				paymentMethods,
 			};
 		case SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
 			return {

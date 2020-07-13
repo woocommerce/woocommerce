@@ -11,7 +11,7 @@ import {
 	useEditorContext,
 	useShippingDataContext,
 } from '@woocommerce/base-context';
-import { useStoreCart } from '@woocommerce/base-hooks';
+import { useStoreCart, useShallowEqual } from '@woocommerce/base-hooks';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 
 /**
@@ -54,12 +54,14 @@ const usePaymentMethodRegistration = (
 ) => {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { isEditor } = useEditorContext();
-	const { shippingAddress } = useShippingDataContext();
+	const { selectedRates, shippingAddress } = useShippingDataContext();
+	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const { cartTotals, cartNeedsShipping } = useStoreCart();
 	const canPayArgument = useRef( {
 		cartTotals,
 		cartNeedsShipping,
 		shippingAddress,
+		selectedShippingMethods,
 	} );
 
 	useEffect( () => {
@@ -67,51 +69,64 @@ const usePaymentMethodRegistration = (
 			cartTotals,
 			cartNeedsShipping,
 			shippingAddress,
+			selectedShippingMethods,
 		};
-	}, [ cartTotals, cartNeedsShipping, shippingAddress ] );
+	}, [
+		cartTotals,
+		cartNeedsShipping,
+		shippingAddress,
+		selectedShippingMethods,
+	] );
 
-	const resolveCanMakePayments = useCallback( async () => {
-		let initializedPaymentMethods = {},
-			canPay;
-		const setInitializedPaymentMethods = ( paymentMethod ) => {
-			initializedPaymentMethods = {
-				...initializedPaymentMethods,
+	const refreshCanMakePayments = useCallback( async () => {
+		let availablePaymentMethods = {};
+		const addAvailablePaymentMethod = ( paymentMethod ) => {
+			availablePaymentMethods = {
+				...availablePaymentMethods,
 				[ paymentMethod.name ]: paymentMethod,
 			};
 		};
 		for ( const paymentMethodName in registeredPaymentMethods ) {
-			const current = registeredPaymentMethods[ paymentMethodName ];
+			const paymentMethod = registeredPaymentMethods[ paymentMethodName ];
 
+			// In editor, shortcut so all payment methods show as available.
 			if ( isEditor ) {
-				setInitializedPaymentMethods( current );
+				addAvailablePaymentMethod( paymentMethod );
 				continue;
 			}
 
+			// In front end, ask payment method if it should be available.
 			try {
-				canPay = await Promise.resolve(
-					current.canMakePayment( canPayArgument.current )
+				const canPay = await Promise.resolve(
+					paymentMethod.canMakePayment( canPayArgument.current )
 				);
 				if ( canPay ) {
 					if ( canPay.error ) {
 						throw new Error( canPay.error.message );
 					}
-					setInitializedPaymentMethods( current );
+					addAvailablePaymentMethod( paymentMethod );
 				}
 			} catch ( e ) {
+				// If user is admin, show payment `canMakePayment` errors as a notice.
 				handleRegistrationError( e );
 			}
 		}
-		// all payment methods have been initialized so dispatch and set
-		dispatcher( initializedPaymentMethods );
+
+		// Re-dispatch available payment methods to store.
+		dispatcher( availablePaymentMethods );
+
+		// Note: some payment methods use the `canMakePayment` callback to initialize / setup.
+		// Example: Stripe CC, Stripe Payment Request.
+		// That's why we track "is initialised" state here.
 		setIsInitialized( true );
 	}, [ dispatcher, isEditor, registeredPaymentMethods ] );
 
-	// if not initialized invoke the callback to kick off resolving the payments.
+	// Determine which payment methods are available initially and whenever
+	// shipping methods change.
+	// Some payment methods (e.g. COD) can be disabled for specific shipping methods.
 	useEffect( () => {
-		if ( ! isInitialized ) {
-			resolveCanMakePayments();
-		}
-	}, [ resolveCanMakePayments, isInitialized ] );
+		refreshCanMakePayments();
+	}, [ refreshCanMakePayments, selectedShippingMethods ] );
 
 	return isInitialized;
 };
