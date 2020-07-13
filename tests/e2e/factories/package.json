@@ -48,5 +48,8 @@
     "moxios": "0.4.0",
     "ts-jest": "25.5.0",
     "typescript": "3.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
