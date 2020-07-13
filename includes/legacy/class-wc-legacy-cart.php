@@ -200,8 +200,8 @@ abstract class WC_Legacy_Cart {
 				$value = 0;
 				break;
 			case 'tax_display_cart':
-				wc_deprecated_argument( 'WC_Cart->tax_display_cart', '4.3', 'Use WC_Cart->is_tax_displayed() instead.' );
-				$value = $this->is_tax_displayed();
+				wc_deprecated_argument( 'WC_Cart->tax_display_cart', '4.4', 'Use WC_Cart->get_tax_price_display_mode() instead.' );
+				$value = $this->get_tax_price_display_mode();
 				break;
 		}
 		return $value;
