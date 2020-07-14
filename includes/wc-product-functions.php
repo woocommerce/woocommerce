@@ -974,7 +974,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
 
-			// If the customer is VAT-exempt, set tax total to 0
+			// If the customer is VAT-exempt, set tax total to zero.
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
 				$taxes_total = 0.00;
 			} else {
