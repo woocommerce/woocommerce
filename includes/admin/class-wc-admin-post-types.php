@@ -88,9 +88,8 @@ class WC_Admin_Post_Types {
 			$screen_id = isset( $screen, $screen->id ) ? $screen->id : '';
 		}
 
-		$screen_data = $request_data['screen'];
-		if ( ! empty( $screen_data ) ) {
-			$screen_id = wc_clean( wp_unslash( $screen_data ) );
+		if ( ! empty( $request_data['screen'] ) ) {
+			$screen_id = wc_clean( wp_unslash( $request_data['screen'] ) );
 		}
 
 		switch ( $screen_id ) {
@@ -936,7 +935,7 @@ class WC_Admin_Post_Types {
 			case 2:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
-					$new_price = $old_price + ( round( $old_price * $percent, wc_get_price_decimals() ) );
+					$new_price = $old_price + ( $old_price * $percent );
 				} else {
 					$new_price = $old_price + $price;
 				}
@@ -944,7 +943,7 @@ class WC_Admin_Post_Types {
 			case 3:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
-					$new_price = max( 0, $old_price - ( round( $old_price * $percent, wc_get_price_decimals() ) ) );
+					$new_price = max( 0, $old_price - ( $old_price * $percent ) );
 				} else {
 					$new_price = max( 0, $old_price - $price );
 				}
