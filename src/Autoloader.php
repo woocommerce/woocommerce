@@ -21,11 +21,31 @@ class Autoloader {
 	 */
 	private function __construct() {}
 
-	const NON_CORE_WOO_NAMESPACES = array(
+	/**
+	 * These namespaces are autoloaded by our temporary PSR-4 autoloader. This enables us to bypass the limitations
+	 * imposed by the 1.x branch of the Jetpack Autoloader until the 2.x branch is in-use.
+	 *
+	 * Note: Due to the way we load the files you must place more specific namespaces first or they won't be used!
+	 *
+	 * @var string[]
+	 */
+	private static $autoloaded_namespaces = array(
+		'Psr\\Container\\'                        => __DIR__ . '/../vendor/psr/container/src/',
+		'League\\Container\\'                     => __DIR__ . '/../vendor/league/container/src/',
+		'Automattic\\WooCommerce\\Tests\\'        => __DIR__ . '/../tests/php/src/',
+		'Automattic\\WooCommerce\\Testing\\Tools' => __DIR__ . '/../tests/Tools/',
+		'Automattic\\WooCommerce\\'               => __DIR__ . '/',
+	);
+
+	/**
+	 * These namespaces are excluded from being autoloaded by our temporary PSR-4 autoloader.
+	 *
+	 * @var string[]
+	 */
+	private static $excluded_namespaces = array(
 		'Automattic\\WooCommerce\\Admin\\',
 		'Automattic\\WooCommerce\\Blocks\\',
 		'Automattic\\WooCommerce\\RestApi\\',
-		'Automattic\\WooCommerce\\Tests\\',
 	);
 
 	/**
@@ -54,31 +74,30 @@ class Autoloader {
 	}
 
 	/**
-	 * Define a PSR4 autoloader for the dependency injection engine to work.
-	 * Function grabbed from https://container.thephpleague.com/3.x
+	 * Define a PSR-4 autoloader to load any desired classes before the Jetpack Autoloader to avoid triggering its
+	 * error messages.
 	 *
 	 * TODO: Remove after the JetPack Autoloader dependency has been updated to v2.
 	 */
 	protected static function register_psr4_autoloader() {
 		spl_autoload_register(
 			function ( $class ) {
-				foreach ( self::NON_CORE_WOO_NAMESPACES as $non_core_namespace ) {
-					if ( substr( $class, 0, strlen( $non_core_namespace ) ) === $non_core_namespace ) {
+				foreach ( self::$excluded_namespaces as $namespace ) {
+					if ( substr( $class, 0, strlen( $namespace ) ) === $namespace ) {
 						return;
 					}
 				}
 
-				$prefix   = 'Automattic\\WooCommerce\\';
-				$base_dir = __DIR__ . '/';
-				$len      = strlen( $prefix );
-				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
-					// no, move to the next registered autoloader.
-					return;
+				foreach ( self::$autoloaded_namespaces as $namespace => $directory ) {
+					$len = strlen( $namespace );
+					if ( substr( $class, 0, $len ) === $namespace ) {
+						require $directory . str_replace( '\\', '/', substr( $class, $len ) ) . '.php';
+						return;
+					}
 				}
-				$relative_class = substr( $class, $len );
-				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
-				require $file;
-			}
+			},
+			true,
+			true
 		);
 	}
 
