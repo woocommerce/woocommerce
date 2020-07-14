@@ -63,6 +63,12 @@ class Cart extends AbstractBlock {
 			}
 		);
 
+		// Deregister core cart scripts and styles.
+		wp_deregister_script( 'wc-cart' );
+		wp_deregister_script( 'wc-password-strength-meter' );
+		wp_deregister_script( 'selectWoo' );
+		wp_deregister_style( 'select2' );
+
 		return $this->inject_html_data_attributes( $content . $this->get_skeleton(), $block_attributes );
 	}
 
