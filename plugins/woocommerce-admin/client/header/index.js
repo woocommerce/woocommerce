@@ -99,7 +99,7 @@ class Header extends Component {
 	}
 
 	render() {
-		const { sections, isEmbedded } = this.props;
+		const { sections, isEmbedded, query } = this.props;
 		const { isScrolled } = this.state;
 		const _sections = Array.isArray( sections ) ? sections : [ sections ];
 
@@ -136,7 +136,7 @@ class Header extends Component {
 					} ) }
 				</h1>
 				{ window.wcAdminFeatures[ 'activity-panels' ] && (
-					<ActivityPanel isEmbedded={ isEmbedded } />
+					<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
 				) }
 			</div>
 		);

@@ -7,6 +7,7 @@ import { Component, lazy, Suspense } from '@wordpress/element';
 import { Router, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity } from 'lodash';
+import { parse } from 'qs';
 
 /**
  * WooCommerce dependencies
@@ -108,9 +109,20 @@ class _Layout extends Component {
 		} );
 	}
 
+	getQuery( searchString ) {
+		if ( ! searchString ) {
+			return {};
+		}
+
+		const search = searchString.substring( 1 );
+		return parse( search );
+	}
+
 	render() {
 		const { isEmbedded, ...restProps } = this.props;
-		const { breadcrumbs } = this.props.page;
+		const { location, page } = this.props;
+		const { breadcrumbs } = page;
+		const query = this.getQuery( location && location.search );
 
 		return (
 			<div className="woocommerce-layout">
@@ -121,12 +133,13 @@ class _Layout extends Component {
 							: breadcrumbs
 					}
 					isEmbedded={ isEmbedded }
+					query={ query }
 				/>
 				<TransientNotices />
 				{ ! isEmbedded && (
 					<PrimaryLayout>
 						<div className="woocommerce-layout__main">
-							<Controller { ...restProps } />
+							<Controller { ...restProps } query={ query } />
 						</div>
 					</PrimaryLayout>
 				) }
