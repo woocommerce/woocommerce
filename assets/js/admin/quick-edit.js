@@ -59,7 +59,7 @@ jQuery(
 				).removeAttr( 'selected' );
 
 				var is_variable_product = 'variable' === product_type;
-				$( 'select[name="_stock_status"] ~ .quick-edit-warning', '.inline-edit-row' ).toggle( is_variable_product );
+				$( 'select[name="_stock_status"] ~ .wc-quick-edit-warning', '.inline-edit-row' ).toggle( is_variable_product );
 				$( 'select[name="_stock_status"] option[value="' + (is_variable_product ? '' : stock_status) + '"]', '.inline-edit-row' )
 					.attr( 'selected', 'selected' );
 

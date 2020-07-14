@@ -181,7 +181,7 @@ defined( 'ABSPATH' ) || exit;
 					}
 					?>
 				</select>
-				<div class="quick-edit-warning" style="display:none">
+				<div class="wc-quick-edit-warning" style="display:none">
 					<?php echo esc_html__( 'This will change the stock status of all variations.', 'woocommerce' ); ?></p>
 				</div>
 			</span>
