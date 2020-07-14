@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\De
 /**
  * Tests for MockableLegacyProxy
  */
-class MockableLegacyProxyTests extends \WC_Unit_Test_Case {
+class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The system under test.

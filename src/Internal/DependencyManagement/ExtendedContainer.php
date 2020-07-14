@@ -75,7 +75,7 @@ class ExtendedContainer extends \League\Container\Container {
 	/**
 	 * Reset all the cached resolutions, so any further "get" for shared definitions will generate the instance again.
 	 */
-	public function reset_resolved() {
+	public function reset_all_resolved() {
 		foreach ( $this->definitions->getIterator() as $definition ) {
 			// setConcrete causes the cached resolved value to be forgotten.
 			$concrete = $definition->getConcrete();

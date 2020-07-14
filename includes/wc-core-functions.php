@@ -1954,10 +1954,10 @@ function wc_print_r( $expression, $return = false ) {
 		if ( function_exists( $alternative['func'] ) ) {
 			$res = $alternative['func']( ...$alternative['args'] );
 			if ( $return ) {
-				return $res; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+				return $res; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 
-			echo $res;
+			echo $res; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			return true;
 		}
 	}
@@ -2126,7 +2126,7 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed Value sanitized by wc_clean.
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	// phpcs:ignore
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
 	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ], $default ) ) );
 }
 

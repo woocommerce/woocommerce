@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\De
 /**
  * Tests for ExtendedContainer.
  */
-class ExtendedContainerTests extends \WC_Unit_Test_Case {
+class ExtendedContainerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The system under test.
@@ -82,9 +82,9 @@ class ExtendedContainerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'reset_resolved' should discard cached resolutions for classes registered as 'shared'.
+	 * @testdox 'reset_all_resolved' should discard cached resolutions for classes registered as 'shared'.
 	 */
-	public function test_reset_resolved_discards_cached_shared_resolutions() {
+	public function test_reset_all_resolved_discards_cached_shared_resolutions() {
 		$this->sut->add( DependencyClass::class );
 		$this->sut->add( ClassWithDependencies::class, null, true )->addArgument( DependencyClass::class );
 		ClassWithDependencies::$instances_count = 0;
@@ -94,7 +94,7 @@ class ExtendedContainerTests extends \WC_Unit_Test_Case {
 		$this->sut->get( ClassWithDependencies::class );
 		$this->assertEquals( 1, ClassWithDependencies::$instances_count );
 
-		$this->sut->reset_resolved();
+		$this->sut->reset_all_resolved();
 
 		$this->sut->get( ClassWithDependencies::class );
 		$this->assertEquals( 2, ClassWithDependencies::$instances_count );

@@ -57,8 +57,7 @@ class Autoloader {
 	 * Define a PSR4 autoloader for the dependency injection engine to work.
 	 * Function grabbed from https://container.thephpleague.com/3.x
 	 *
-	 * TODO: Assess if this is still needed after https://github.com/Automattic/jetpack/pull/15106 is merged.
-	 *       If it still is, remove this notice. If it isn't, remove the method.
+	 * TODO: Remove after the JetPack Autoloader dependency has been updated to v2.
 	 */
 	protected static function register_psr4_autoloader() {
 		spl_autoload_register(

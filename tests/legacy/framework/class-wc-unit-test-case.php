@@ -183,7 +183,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * This may be needed when registering mocks for already resolved shared classes.
 	 */
 	public function reset_container_resolutions() {
-		wc_get_container()->reset_resolved();
+		wc_get_container()->reset_all_resolved();
 	}
 
 	/**

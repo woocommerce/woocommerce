@@ -144,8 +144,6 @@ final class StaticMockerHack extends CodeHack {
 	 * @param array $mocks Mocks as an associative array of class name => associative array of method name => mock method with the same arguments as the original method.
 	 *
 	 * @throws \Exception Invalid input.
-	 *
-	 * @oublic
 	 */
 	public static function add_method_mocks( $mocks ) {
 		self::$instance->register_method_mocks( $mocks );
