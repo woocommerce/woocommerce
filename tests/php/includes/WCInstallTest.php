@@ -89,4 +89,19 @@ class WCInstallTest extends \WC_Unit_Test_Case {
 		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
 	}
 
+	/**
+	 * Test that premium support link is shown only when wccom is connected.
+	 */
+	public function test_plugin_row_meta() {
+		// Simulate connection break.
+		delete_option( 'woocommerce_helper_data' );
+		$plugin_row_data = \WC_Install::plugin_row_meta( array(), WC_PLUGIN_BASENAME );
+
+		$this->assertNotContains( 'premium_support', array_keys( $plugin_row_data ) );
+
+		update_option( 'woocommerce_helper_data', array( 'auth' => 'random token' ) );
+		$plugin_row_data = \WC_Install::plugin_row_meta( array(), WC_PLUGIN_BASENAME );
+		$this->assertContains( 'premium_support', array_keys( $plugin_row_data ) );
+	}
+
 }
