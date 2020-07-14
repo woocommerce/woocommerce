@@ -973,7 +973,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
-			
+
 			// If the customer is VAT-exempt, set tax total to 0
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
 				$taxes_total = 0.00;
@@ -987,7 +987,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 					$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
 				}
 			}
-							
+
 			$return_price = round( $line_price + $taxes_total, wc_get_price_decimals() );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
