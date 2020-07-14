@@ -34,6 +34,39 @@ import PayPal from './paypal';
 import Klarna from './klarna';
 import PayFast from './payfast';
 
+export function installActivateAndConnectWcpay(
+	resolve,
+	reject,
+	createNotice,
+	installAndActivatePlugins
+) {
+	const errorMessage = __(
+		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
+		'woocommerce-admin'
+	);
+
+	const connect = () => {
+		apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
+			method: 'POST',
+		} )
+			.then( ( response ) => {
+				window.location = response.connectUrl;
+			} )
+			.catch( () => {
+				createNotice( 'error', errorMessage );
+				reject();
+			} );
+	};
+
+	installAndActivatePlugins( [ 'woocommerce-payments' ] )
+		.then( () => connect() )
+		.catch( ( error ) => {
+			createNoticesFromResponse( error );
+			reject();
+		} );
+}
+
 export function getPaymentMethods( {
 	activePlugins,
 	countryCode,
@@ -123,31 +156,12 @@ export function getPaymentMethods( {
 			),
 			before: <WCPayIcon />,
 			onClick: ( resolve, reject ) => {
-				const errorMessage = __(
-					'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
-					'woocommerce-admin'
+				return installActivateAndConnectWcpay(
+					resolve,
+					reject,
+					createNotice,
+					installAndActivatePlugins
 				);
-
-				const connect = () => {
-					apiFetch( {
-						path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
-						method: 'POST',
-					} )
-						.then( ( response ) => {
-							window.location = response.connectUrl;
-						} )
-						.catch( () => {
-							createNotice( 'error', errorMessage );
-							reject();
-						} );
-				};
-
-				installAndActivatePlugins( [ 'woocommerce-payments' ] )
-					.then( () => connect() )
-					.catch( ( error ) => {
-						createNoticesFromResponse( error );
-						reject();
-					} );
 			},
 			visible: [ 'US', 'PR' ].includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'woocommerce-payments' ],
