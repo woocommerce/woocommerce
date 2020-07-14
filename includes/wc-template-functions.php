@@ -268,7 +268,7 @@ function wc_get_loop_product_visibility( $product_id ) {
  * @return bool
  */
 function woocommerce_product_loop() {
-	return wc_get_loop_prop( 'total' ) > 0 || 'products' !== woocommerce_get_loop_display_mode();
+	return have_posts() || 'products' !== woocommerce_get_loop_display_mode();
 }
 
 /**
