@@ -515,6 +515,13 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
 		</tr>
+
+		<tr>
+			<td data-export-label="WC Database Name"><?php esc_html_e( 'Database name', 'woocommerce' ); ?></td>
+			<td class="help">&nbsp;</td>
+			<td><?php echo esc_html( $database['database_name'] ); ?></td>
+		</tr>
+
 		<tr>
 			<td data-export-label="WC Database Prefix"><?php esc_html_e( 'Database prefix', 'woocommerce' ); ?></td>
 			<td class="help">&nbsp;</td>
