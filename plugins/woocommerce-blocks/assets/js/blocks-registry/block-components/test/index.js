@@ -11,7 +11,9 @@ import {
 describe( 'blocks registry', () => {
 	const context = '@woocommerce/all-products';
 	const blockName = '@woocommerce-extension/price-level';
-	const component = () => {};
+	const component = () => {
+		return null;
+	};
 
 	describe( 'registerBlockComponent', () => {
 		const invokeTest = ( args ) => () => {
