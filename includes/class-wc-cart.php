@@ -353,9 +353,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function display_prices_including_tax() {
-		$customer_exempt = $this->get_customer() && $this->get_customer()->get_is_vat_exempt();
-
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->is_tax_displayed() && ! $customer_exempt );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->get_tax_price_display_mode() );
 	}
 
 	/*
@@ -1935,7 +1933,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @return string
 	 */
-	private function is_tax_displayed() {
+	public function get_tax_price_display_mode() {
 		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
 			return 'excl';
 		}
