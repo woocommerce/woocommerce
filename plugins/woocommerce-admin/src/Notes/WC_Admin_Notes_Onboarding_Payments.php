@@ -11,8 +11,6 @@ namespace Automattic\WooCommerce\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
-
 /**
  * WC_Admin_Notes_Onboarding_Payments.
  */
@@ -31,19 +29,8 @@ class WC_Admin_Notes_Onboarding_Payments {
 	 * Get the note.
 	 */
 	public static function get_note() {
-		// This note should only be added if the task list is still shown.
-		if ( ! Onboarding::should_show_tasks() ) {
-			return;
-		}
-
-		// Make sure payments task was skipped at least 3 days ago.
-		$three_days_in_seconds = 3 * DAY_IN_SECONDS;
-		$payments_task         = get_option( 'woocommerce_task_list_payments', array() );
-		if (
-			! isset( $payments_task['skipped'] ) ||
-			! isset( $payments_task['timestamp'] ) ||
-			( time() - $payments_task['timestamp'] ) < $three_days_in_seconds
-		) {
+		// We want to show the note after five days.
+		if ( ! self::wc_admin_active_for( 5 * DAY_IN_SECONDS ) ) {
 			return;
 		}
 
