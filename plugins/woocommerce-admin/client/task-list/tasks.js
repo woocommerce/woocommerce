@@ -110,6 +110,7 @@ export function getAllTasks( {
 			visible: productIds.length,
 			completed: productIds.length && ! remainingProductIds.length,
 			time: __( '2 minutes', 'woocommerce-admin' ),
+			isDismissable: true,
 		},
 		{
 			key: 'connect',

@@ -13,6 +13,7 @@ import { withDispatch } from '@wordpress/data';
 import { updateQueryString } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
 } from '@woocommerce/data';
@@ -184,6 +185,7 @@ class ProfileWizard extends Component {
 	}
 
 	async goToNextStep() {
+		const { dismissedTasks, updateOptions } = this.props;
 		const currentStep = this.getCurrentStep();
 		const currentStepIndex = this.getSteps().findIndex(
 			( s ) => s.key === currentStep.key
@@ -192,6 +194,12 @@ class ProfileWizard extends Component {
 		recordEvent( 'storeprofiler_step_complete', {
 			step: currentStep.key,
 		} );
+
+		if ( dismissedTasks.length ) {
+			updateOptions( {
+				woocommerce_task_list_dismissed_tasks: [],
+			} );
+		}
 
 		const nextStep = this.getSteps()[ currentStepIndex + 1 ];
 		if ( typeof nextStep === 'undefined' ) {
@@ -242,6 +250,7 @@ class ProfileWizard extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getNotes } = select( 'wc-api' );
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
@@ -255,8 +264,11 @@ export default compose(
 		};
 		const notes = getNotes( notesQuery );
 		const activePlugins = getActivePlugins();
+		const dismissedTasks =
+			getOption( 'woocommerce_task_list_dismissed_tasks' ) || [];
 
 		return {
+			dismissedTasks,
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			notes,
 			profileItems: getProfileItems(),
@@ -265,12 +277,14 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { updateNote } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			updateNote,
+			updateOptions,
 			updateProfileItems,
 		};
 	} ),

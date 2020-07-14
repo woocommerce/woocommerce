@@ -108,3 +108,29 @@
 .woocommerce-list__item-content {
 	color: $studio-gray-50;
 }
+
+.woocommerce-list__item-enter {
+	opacity: 0;
+	max-height: 0;
+	transform: translateX(50%);
+}
+
+.woocommerce-list__item-enter-active {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateX(0%);
+	transition: opacity 500ms, transform 500ms, max-height 500ms;
+}
+
+.woocommerce-list__item-exit {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateX(0%);
+}
+
+.woocommerce-list__item-exit-active {
+	opacity: 0;
+	max-height: 0;
+	transform: translateX(50%);
+	transition: opacity 500ms, transform 500ms, max-height 500ms;
+}

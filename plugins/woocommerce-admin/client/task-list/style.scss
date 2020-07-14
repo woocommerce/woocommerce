@@ -40,8 +40,11 @@
 		}
 	}
 
-	.woocommerce-task-estimated-time {
-		color: $medium-gray-text;
+	.woocommerce-task__estimated-time {
+		color: $core-grey-dark-300;
+		font-weight: 400;
+		font-size: 12px;
+		display: block;
 	}
 
 	.woocommerce-card.is-narrow {
