@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.3.0
 Tested up to: 5.4.1
 Requires PHP: 5.6.20
-Stable tag: 1.3.0-beta.1
+Stable tag: 1.3.0
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/main/license.txt
 
@@ -71,7 +71,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 1.3.0-beta.1 2020-06-15 =
+= 1.3.0 2020-07-08 =
 - Enhancement: Add Jetpack stats to performance indicatorts / homepage #4291
 - Enhancement: New "Store Management" quick links card on WooCommerce home screen. #4350
 - Enhancement: Inbox notifications layout updates #4218
@@ -85,6 +85,9 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Migrate user store to wp.data #4505
 - Dev: Add options data store to wp.data #4144
 - Dev: Runtime feature config override #4523
+- Dev: Check that the possibly_add_note function exists before calling it #4680
+- Dev: Remove unnecessary rest API init action. #4691
+- Dev: Don't include sourcemaps or unminified JS for "core" builds. #4642
 - Fix: misaligned 'required' text on selects #4307
 - Fix: exception when opening dashboard after selecting extensions to purchase #4357
 - Fix: REST API collections schema #4377
@@ -101,6 +104,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Check for enabled methods before payment task completion #4530
 - Fix: Solved a problem with the method onChoose in the last onboarding step. #4583
 - Fix: Only mark purchase task as complete when products exist #4574
+- Fix: Remove unnecessary rest_api_init action that caused incompatibility issues with other plugins. #4691
+- Fix: Fix WCPay sometimes not appearing on the task list #4647
 - Tweak: make revenue report total sales column optional #4397
 - Tweak: Adjustments to WooCommerce Payments setup task #4373
 - Tweak: Handling of plugin installs in OBW #4411
@@ -111,6 +116,9 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Use single dash for country/state dropdown options #4553
 - Tweak: Use label tag for toggleable shipping zones #4554
 - Tweak: Tweak - Make it easier to add submenu items to the Marketing menu #4561
+- Tweak: Remove duplicate/redundant inbox note after first order received. #4659
+- Tweak: Fix the embed page CSS so the top content sits better #4622
+
 
 = 1.2.4 2020-06-11 =
 - Tweak: reduce asset filename length and remove tilde characters. #4535
