@@ -35,6 +35,7 @@ export const previewCart = {
 			permalink: 'https://example.org',
 			low_stock_remaining: 2,
 			backorders_allowed: false,
+			show_backorder_badge: false,
 			sold_individually: false,
 			images: [
 				{
@@ -103,6 +104,7 @@ export const previewCart = {
 			sku: 'woo-cap',
 			permalink: 'https://example.org',
 			backorders_allowed: false,
+			show_backorder_badge: false,
 			sold_individually: false,
 			images: [
 				{

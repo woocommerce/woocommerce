@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import './style.scss';
+import ProductBadge from '../product-badge';
 
 /**
  * ProductSaleBadge
@@ -25,7 +25,7 @@ const ProductSaleBadge = ( { currency, saleAmount } ) => {
 		return null;
 	}
 	return (
-		<div className="wc-block-components-sale-badge">
+		<ProductBadge className="wc-block-components-sale-badge">
 			{ __experimentalCreateInterpolateElement(
 				/* translators: <price/> will be replaced by the discount amount */
 				__( 'Save <price/>', 'woo-gutenberg-products-block' ),
@@ -38,7 +38,7 @@ const ProductSaleBadge = ( { currency, saleAmount } ) => {
 					),
 				}
 			) }
-		</div>
+		</ProductBadge>
 	);
 };
 

@@ -9,7 +9,7 @@ import classNames from 'classnames';
  * Returns a formatted element containing variation details.
  */
 const ProductVariationData = ( { className, variation = [] } ) => {
-	if ( ! variation ) {
+	if ( ! variation || variation.length === 0 ) {
 		return null;
 	}
 
