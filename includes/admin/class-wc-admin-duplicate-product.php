@@ -129,11 +129,24 @@ class WC_Admin_Duplicate_Product {
 	 */
 	public function product_duplicate( $product ) {
 		/**
-		 * Filter to allow us to unset/remove data we don't want to copy to the duplicate.
+		 * Filter to allow us to exclude meta keys from product duplication..
 		 *
+		 * @param array $exclude_meta The keys to exclude from the duplicate.
+		 * @param array $existing_meta_keys The meta keys that the product already has.
 		 * @since 2.6
 		 */
-		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
+		$meta_to_exclude = array_filter(
+			apply_filters(
+				'woocommerce_duplicate_product_exclude_meta',
+				array(),
+				array_map(
+					function ( $datum ) {
+						return $datum->key;
+					},
+					$product->get_meta_data()
+				)
+			)
+		);
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
