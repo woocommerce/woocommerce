@@ -39,6 +39,8 @@ class WC_Unit_Tests_Bootstrap {
 		$this->tests_dir  = dirname( __FILE__ );
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
+		$this->register_autoloader_for_testing_tools();
+
 		$this->initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
@@ -70,6 +72,29 @@ class WC_Unit_Tests_Bootstrap {
 
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
+	}
+
+	/**
+	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
+	 */
+	protected static function register_autoloader_for_testing_tools() {
+		return spl_autoload_register(
+			function ( $class ) {
+				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
+				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$len      = strlen( $prefix );
+				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+					// no, move to the next registered autoloader.
+					return;
+				}
+				$relative_class = substr( $class, $len );
+				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				if ( ! file_exists( $file ) ) {
+					throw new \Exception( 'Autoloader for unit tests: file not found: ' . $file );
+				}
+				require $file;
+			}
+		);
 	}
 
 	/**
