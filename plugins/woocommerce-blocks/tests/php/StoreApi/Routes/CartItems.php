@@ -229,6 +229,7 @@ class CartItems extends TestCase {
 		$this->assertArrayHasKey( 'variation', $data );
 		$this->assertArrayHasKey( 'low_stock_remaining', $data );
 		$this->assertArrayHasKey( 'backorders_allowed', $data );
+		$this->assertArrayHasKey( 'show_backorder_badge', $data );
 		$this->assertArrayHasKey( 'short_description', $data );
 	}
 

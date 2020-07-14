@@ -9,6 +9,7 @@ import { getCurrency } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
 import {
+	ProductBackorderBadge,
 	ProductImage,
 	ProductLowStockBadge,
 	ProductMetadata,
@@ -45,6 +46,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		short_description: shortDescription = '',
 		description: fullDescription = '',
 		low_stock_remaining: lowStockRemaining = null,
+		show_backorder_badge: showBackorderBadge = false,
 		quantity_limit: quantityLimit = 99,
 		permalink = '',
 		images = [],
@@ -111,7 +113,16 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 					name={ name }
 					disabled={ isPendingDelete }
 				/>
-				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
+				{ showBackorderBadge ? (
+					<ProductBackorderBadge />
+				) : (
+					lowStockRemaining && (
+						<ProductLowStockBadge
+							lowStockRemaining={ lowStockRemaining }
+						/>
+					)
+				) }
+				{ showBackorderBadge && <ProductBackorderBadge /> }
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }

@@ -45,80 +45,86 @@ class CartItemSchema extends ProductSchema {
 	 */
 	public function get_properties() {
 		return [
-			'key'                 => [
+			'key'                  => [
 				'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'id'                  => [
+			'id'                   => [
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'quantity'            => [
+			'quantity'             => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'quantity_limit'      => [
+			'quantity_limit'       => [
 				'description' => __( 'The maximum quantity than can be added to the cart at once.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'name'                => [
+			'name'                 => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'short_description'   => [
+			'short_description'    => [
 				'description' => __( 'Product short description in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'description'         => [
+			'description'          => [
 				'description' => __( 'Product full description in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'sku'                 => [
+			'sku'                  => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'low_stock_remaining' => [
+			'low_stock_remaining'  => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'integer', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'backorders_allowed'  => [
+			'backorders_allowed'   => [
 				'description' => __( 'True if backorders are allowed past stock availability.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'boolean' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'sold_individually'   => [
+			'show_backorder_badge' => [
+				'description' => __( 'True if the product is on backorder.', 'woo-gutenberg-products-block' ),
+				'type'        => [ 'boolean' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'sold_individually'    => [
 				'description' => __( 'If true, only one item of this product is allowed for purchase in a single order.', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'permalink'           => [
+			'permalink'            => [
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'images'              => [
+			'images'               => [
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -128,7 +134,7 @@ class CartItemSchema extends ProductSchema {
 					'properties' => $this->image_attachment_schema->get_properties(),
 				],
 			],
-			'variation'           => [
+			'variation'            => [
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -151,7 +157,7 @@ class CartItemSchema extends ProductSchema {
 					],
 				],
 			],
-			'prices'              => [
+			'prices'               => [
 				'description' => __( 'Price data for the product in the current line item, including or excluding taxes based on the "display prices during cart and checkout" setting. Provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -232,7 +238,7 @@ class CartItemSchema extends ProductSchema {
 					]
 				),
 			],
-			'totals'              => [
+			'totals'               => [
 				'description' => __( 'Item total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -280,22 +286,23 @@ class CartItemSchema extends ProductSchema {
 		$product = $cart_item['data'];
 
 		return [
-			'key'                 => $cart_item['key'],
-			'id'                  => $product->get_id(),
-			'quantity'            => wc_stock_amount( $cart_item['quantity'] ),
-			'quantity_limit'      => $this->get_product_quantity_limit( $product ),
-			'name'                => $this->prepare_html_response( $product->get_title() ),
-			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
-			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
-			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
-			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
-			'backorders_allowed'  => (bool) $product->backorders_allowed(),
-			'sold_individually'   => $product->is_sold_individually(),
-			'permalink'           => $product->get_permalink(),
-			'images'              => $this->get_images( $product ),
-			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
-			'prices'              => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
-			'totals'              => (object) array_merge(
+			'key'                  => $cart_item['key'],
+			'id'                   => $product->get_id(),
+			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
+			'quantity_limit'       => $this->get_product_quantity_limit( $product ),
+			'name'                 => $this->prepare_html_response( $product->get_title() ),
+			'short_description'    => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
+			'description'          => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
+			'sku'                  => $this->prepare_html_response( $product->get_sku() ),
+			'low_stock_remaining'  => $this->get_low_stock_remaining( $product ),
+			'backorders_allowed'   => (bool) $product->backorders_allowed(),
+			'show_backorder_badge' => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
+			'sold_individually'    => $product->is_sold_individually(),
+			'permalink'            => $product->get_permalink(),
+			'images'               => $this->get_images( $product ),
+			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
+			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
+			'totals'               => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),

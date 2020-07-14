@@ -143,6 +143,10 @@
  * @property {boolean}             backorders_allowed  True if backorders are
  *                                                     allowed past stock
  *                                                     availability.
+ * @property {boolean}             show_backorder_badge  Whether a notification
+ *                                                     should be shown about the
+ *                                                     product being available on
+ *                                                     backorder.
  * @property {boolean}             sold_individually   If true, only one item of
  *                                                     this product is allowed
  *                                                     for purchase in a single

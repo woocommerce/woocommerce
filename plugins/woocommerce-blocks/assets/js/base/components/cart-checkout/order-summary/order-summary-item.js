@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getCurrency } from '@woocommerce/base-utils';
 import Label from '@woocommerce/base-components/label';
 import {
+	ProductBackorderBadge,
 	ProductImage,
 	ProductLowStockBadge,
 	ProductMetadata,
@@ -18,6 +19,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	const {
 		images,
 		low_stock_remaining: lowStockRemaining = null,
+		show_backorder_badge: showBackorderBadge = false,
 		name,
 		permalink,
 		prices,
@@ -60,7 +62,15 @@ const OrderSummaryItem = ( { cartItem } ) => {
 						value={ linePrice }
 					/>
 				</div>
-				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
+				{ showBackorderBadge ? (
+					<ProductBackorderBadge />
+				) : (
+					lowStockRemaining && (
+						<ProductLowStockBadge
+							lowStockRemaining={ lowStockRemaining }
+						/>
+					)
+				) }
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }
