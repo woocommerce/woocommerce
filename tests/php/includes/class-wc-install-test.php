@@ -1,9 +1,4 @@
 <?php
-/**
- * Class WCInstallTest file.
- *
- * @package WooCommerce|Tests|WCInstallTest.
- */
 
 /**
  * Class WC_Install_Test.
