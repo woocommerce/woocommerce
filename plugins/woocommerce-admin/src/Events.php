@@ -36,6 +36,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Learn_More_About_Product_
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Online_Clothing_Store;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_First_Product;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Customize_Store_With_Blocks;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Facebook_Marketing_Expert;
 
 /**
  * WC_Admin_Events Class.
@@ -103,6 +104,7 @@ class Events {
 		WC_Admin_Notes_Choose_Niche::possibly_add_note();
 		WC_Admin_Notes_Real_Time_Order_Alerts::possibly_add_note();
 		WC_Admin_Notes_Customize_Store_With_Blocks::possibly_add_note();
+		WC_Admin_Notes_Facebook_Marketing_Expert::possibly_add_note();
 
 		if ( Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
 			DataSourcePoller::read_specs_from_data_sources();
