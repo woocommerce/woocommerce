@@ -259,32 +259,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				<h2 style="text-align:center">' . __( 'Shop by Category', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:shortcode -->
-				[product_categories limit="3" columns="3" orderby="menu_order"]
+				[product_categories number="0" parent="0"]
 				<!-- /wp:shortcode -->
 				<!-- wp:heading {"align":"center"} -->
 				<h2 style="text-align:center">' . __( 'New In', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
-				<!-- wp:woocommerce/product-new {"columns":4} -->
-				<div class="wp-block-woocommerce-product-new">[products limit="4" columns="4" orderby="date" order="DESC"]</div>
-				<!-- /wp:woocommerce/product-new -->
+				<!-- wp:woocommerce/product-new {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
 				<h2 style="text-align:center">' . __( 'Fan Favorites', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
-				<!-- wp:woocommerce/product-top-rated {"columns":4} -->
-				<div class="wp-block-woocommerce-product-top-rated">[products limit="4" columns="4" orderby="rating"]</div>
-				<!-- /wp:woocommerce/product-top-rated -->
+				<!-- wp:woocommerce/product-top-rated {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
 				<h2 style="text-align:center">' . __( 'On Sale', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
-				<!-- wp:woocommerce/product-on-sale {"columns":4} -->
-				<div class="wp-block-woocommerce-product-on-sale">[products limit="4" columns="4" orderby="date" order="DESC" on_sale="1"]</div>
-				<!-- /wp:woocommerce/product-on-sale -->
+				<!-- wp:woocommerce/product-on-sale {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
 				<h2 style="text-align:center">' . __( 'Best Sellers', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
-				<!-- wp:woocommerce/product-best-sellers {"columns":4} -->
-				<div class="wp-block-woocommerce-product-best-sellers">[products limit="4" columns="4" best_selling="1"]</div>
-				<!-- /wp:woocommerce/product-best-sellers -->
+				<!-- wp:woocommerce/product-best-sellers {"columns":4} /-->
 			';
 
 			/**
