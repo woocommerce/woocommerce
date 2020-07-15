@@ -5,12 +5,10 @@
  * @package WooCommerce|Tests|WCInstallTest.
  */
 
-namespace Automattic\WooCommerce;
-
 /**
- * Class WC_Tests_WC_Helper.
+ * Class WC_Install_Test.
  */
-class WCInstallTest extends \WC_Unit_Test_Case {
+class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can detect missing table and adds/remove a notice.
