@@ -228,8 +228,27 @@ class TaskDashboard extends Component {
 	}
 
 	getCurrentTask() {
-		const { task } = this.props.query;
-		const currentTask = this.getTasks().find( ( s ) => s.key === task );
+		const {
+			query,
+			profileItems,
+			payments,
+			activePlugins,
+			installedPlugins,
+			createNotice,
+			isJetpackConnected,
+		} = this.props;
+		const allTasks = getAllTasks( {
+			profileItems,
+			options: payments,
+			query,
+			activePlugins,
+			installedPlugins,
+			createNotice,
+			isJetpackConnected,
+		} );
+		const { task } = query;
+		
+		const currentTask = allTasks.find( ( s ) => s.key === task );
 
 		if ( ! currentTask ) {
 			return null;
@@ -488,6 +507,7 @@ export default compose(
 			completedTaskKeys,
 			activePlugins,
 			installedPlugins,
+			payments,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

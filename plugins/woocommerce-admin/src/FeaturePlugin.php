@@ -20,6 +20,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Draw_Attention;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Coupon_Page_Moved;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Home_Screen_Feedback;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Set_Up_Additional_Payment_Types;
 
 /**
  * Feature plugin main class.
@@ -192,6 +193,7 @@ class FeaturePlugin {
 		new WC_Admin_Notes_Install_JP_And_WCS_Plugins();
 		new WC_Admin_Notes_Draw_Attention();
 		new WC_Admin_Notes_Home_Screen_Feedback();
+		new WC_Admin_Notes_Set_Up_Additional_Payment_Types();
 
 		// Initialize RemoteInboxNotificationsEngine.
 		RemoteInboxNotificationsEngine::init();
