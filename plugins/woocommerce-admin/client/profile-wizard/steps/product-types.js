@@ -27,8 +27,9 @@ class ProductTypes extends Component {
 		const profileItems = get( props, 'profileItems', {} );
 
 		const { productTypes = {} } = getSetting( 'onboarding', {} );
-		const defaultProductTypes = Object.keys( productTypes )
-			.filter( key => !! productTypes[ key ].default );
+		const defaultProductTypes = Object.keys( productTypes ).filter(
+			( key ) => !! productTypes[ key ].default
+		);
 
 		this.state = {
 			error: null,
@@ -137,19 +138,19 @@ class ProductTypes extends Component {
 											.more_url ? (
 												<Link
 													href={
-														productTypes[ slug ]
-															.more_url
-													}
+													productTypes[ slug ]
+														.more_url
+												}
 													target="_blank"
 													type="external"
 													onClick={ () =>
-														this.onLearnMore( slug )
-													}
-												>
+													this.onLearnMore( slug )
+												}
+											>
 													{ __(
-														'Learn more',
-														'woocommerce-admin'
-													) }
+													'Learn more',
+													'woocommerce-admin'
+												) }
 												</Link>
 										) : (
 											''
@@ -175,13 +176,15 @@ class ProductTypes extends Component {
 						) }
 					</div>
 
-					<Button
-						isPrimary
-						onClick={ this.onContinue }
-						disabled={ ! selected.length }
-					>
-						{ __( 'Continue', 'woocommerce-admin' ) }
-					</Button>
+					<div className="woocommerce-profile-wizard__card-actions">
+						<Button
+							isPrimary
+							onClick={ this.onContinue }
+							disabled={ ! selected.length }
+						>
+							{ __( 'Continue', 'woocommerce-admin' ) }
+						</Button>
+					</div>
 				</Card>
 			</Fragment>
 		);
@@ -190,7 +193,9 @@ class ProductTypes extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems, getOnboardingError } = select(
+			ONBOARDING_STORE_NAME
+		);
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),

@@ -217,13 +217,18 @@ class StoreDetails extends Component {
 									/>
 								</div>
 
-								<Button
-									isPrimary
-									onClick={ handleSubmit }
-									disabled={ ! isValidForm }
-								>
-									{ __( 'Continue', 'woocommerce-admin' ) }
-								</Button>
+								<div className="woocommerce-profile-wizard__card-actions">
+									<Button
+										isPrimary
+										onClick={ handleSubmit }
+										disabled={ ! isValidForm }
+									>
+										{ __(
+											'Continue',
+											'woocommerce-admin'
+										) }
+									</Button>
+								</div>
 							</Fragment>
 						) }
 					</Form>
