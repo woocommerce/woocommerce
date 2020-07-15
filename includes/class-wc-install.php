@@ -7,7 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internals\WCCom\WCConnectionHelper;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1376,7 +1376,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_community_support_url', 'https://wordpress.org/support/plugin/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'Visit community forums', 'woocommerce' ) . '">' . esc_html__( 'Community support', 'woocommerce' ) . '</a>',
 		);
 
-		if ( WCConnectionHelper::is_wccom_connected() ) {
+		if ( WCConnectionHelper::is_connected() ) {
 			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
 		}
 
