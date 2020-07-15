@@ -1116,7 +1116,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		// Initial exponential backoff
-		$backoff = ( 2 ** $failures ) * 100;
+		$backoff = ( 2 ** $this->get_failure_count() ) * 100;
 		$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $this->get_failure_count() );
 
 		// Requeue the webhook
