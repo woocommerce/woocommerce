@@ -181,7 +181,7 @@ final class Stripe extends AbstractPaymentMethodType {
 	/**
 	 * Return the inline cc option.
 	 *
-	 * @return string A pixel value for the height (defaults to '64').
+	 * @return boolean True if the inline CC form option is enabled.
 	 */
 	private function get_inline_cc_form() {
 		return isset( $this->settings['inline_cc_form'] ) && 'yes' === $this->settings['inline_cc_form'];

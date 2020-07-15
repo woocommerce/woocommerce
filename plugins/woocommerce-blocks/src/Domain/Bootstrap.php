@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Stripe;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -226,6 +227,13 @@ class Bootstrap {
 			function( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new BankTransfer( $asset_api );
+			}
+		);
+		$this->container->register(
+			CashOnDelivery::class,
+			function( Container $container ) {
+				$asset_api = $container->get( AssetApi::class );
+				return new CashOnDelivery( $asset_api );
 			}
 		);
 	}

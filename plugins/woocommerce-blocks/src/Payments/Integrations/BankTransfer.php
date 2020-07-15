@@ -3,7 +3,7 @@
  * Bank Transfer (BACS) (core) gateway implementation.
  *
  * @package WooCommerce/Blocks
- * @since 2.10.0
+ * @since $VID:$
  */
 
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 /**
  * Bank Transfer (BACS) payment method integration
  *
- * @since 2.10.0
+ * @since $VID:$
  */
 final class BankTransfer extends AbstractPaymentMethodType {
 	/**
@@ -52,7 +52,7 @@ final class BankTransfer extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'];
+		return filter_var( $this->settings['enabled'], FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**

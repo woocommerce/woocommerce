@@ -293,13 +293,18 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		paymentData.hasSavedToken,
 	] );
 
-	// set initial active payment method if it's undefined.
+	// Set active (selected) payment method as needed.
 	useEffect( () => {
 		const paymentMethodKeys = Object.keys( paymentData.paymentMethods );
+		if ( ! paymentMethodsInitialized || ! paymentMethodKeys.length ) {
+			return;
+		}
+
+		// If there's no active payment method, or the active payment method has
+		// been removed (e.g. COD vs shipping methods), set one as active.
 		if (
-			paymentMethodsInitialized &&
-			! activePaymentMethod &&
-			paymentMethodKeys.length > 0
+			! activePaymentMethod ||
+			! paymentMethodKeys.includes( activePaymentMethod )
 		) {
 			setActivePaymentMethod(
 				Object.keys( paymentData.paymentMethods )[ 0 ]
