@@ -5,18 +5,13 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import {
-	withDispatch,
-	withSelect,
-	__experimentalResolveSelect,
-} from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { filter } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
 import { Card, H } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
 	pluginNames,
 	ONBOARDING_STORE_NAME,
@@ -110,7 +105,7 @@ class Benefits extends Component {
 				woocommerce_setup_jetpack_opted_in: true,
 			} ),
 		] )
-			.then( () => this.connectJetpack() )
+			.then( goToNextStep )
 			.catch( ( pluginError, profileError ) => {
 				if ( pluginError ) {
 					createNoticesFromResponse( pluginError );
@@ -126,33 +121,6 @@ class Benefits extends Component {
 				}
 				goToNextStep();
 			} );
-	}
-
-	connectJetpack() {
-		const {
-			getJetpackConnectUrl,
-			getPluginsError,
-			goToNextStep,
-			isJetpackConnected,
-		} = this.props;
-		if ( isJetpackConnected ) {
-			goToNextStep();
-			return;
-		}
-
-		getJetpackConnectUrl( {
-			redirect_url: getAdminLink(
-				'admin.php?page=wc-admin&reset_profiler=0'
-			),
-		} ).then( ( url ) => {
-			const error = getPluginsError( 'getJetpackConnectUrl' );
-			if ( error ) {
-				createNoticesFromResponse( error );
-				goToNextStep();
-				return;
-			}
-			window.location = url;
-		} );
 	}
 
 	renderBenefit( benefit ) {
@@ -305,24 +273,16 @@ export default compose(
 			isOnboardingRequesting,
 		} = select( ONBOARDING_STORE_NAME );
 
-		const {
-			getActivePlugins,
-			getPluginsError,
-			isJetpackConnected,
-			isPluginsRequesting,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, isPluginsRequesting } = select(
+			PLUGINS_STORE_NAME
+		);
 
 		return {
 			activePlugins: getActivePlugins(),
-			getJetpackConnectUrl: __experimentalResolveSelect(
-				PLUGINS_STORE_NAME
-			).getJetpackConnectUrl,
-			getPluginsError,
 			isProfileItemsError: Boolean(
 				getOnboardingError( 'updateProfileItems' )
 			),
 			profileItems: getProfileItems(),
-			isJetpackConnected: isJetpackConnected(),
 			isRequesting: isOnboardingRequesting( 'updateProfileItems' ),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||

@@ -37,7 +37,7 @@ import {
 	TextControl,
 } from '@woocommerce/components';
 import { recordEvent } from 'lib/tracks';
-import { getCurrencyRegion } from 'dashboard/utils';
+import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
 import { CurrencyContext } from 'lib/currency-context';
 import { createNoticesFromResponse } from 'lib/notices';
 
@@ -46,7 +46,11 @@ const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 class BusinessDetails extends Component {
 	constructor( props ) {
 		super();
+		const settings = get( props, 'settings', {} );
 		const profileItems = get( props, 'profileItems', {} );
+		const industrySlugs = get( profileItems, 'industry', [] ).map(
+			( industry ) => industry.slug
+		);
 		const businessExtensions = get(
 			profileItems,
 			'business_extensions',
@@ -81,7 +85,10 @@ class BusinessDetails extends Component {
 			'kliken-marketing-for-google',
 		];
 
-		this.bundleInstall = false;
+		this.bundleInstall =
+			getCountryCode( settings.woocommerce_default_country ) === 'US' &&
+			( industrySlugs.includes( 'fashion-apparel-accessories' ) ||
+				industrySlugs.includes( 'health-beauty' ) );
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
 		this.getNumberRangeString = this.getNumberRangeString.bind( this );
@@ -150,13 +157,6 @@ class BusinessDetails extends Component {
 
 		const promises = [
 			updateProfileItems( updates ).catch( () => {
-				createNotice(
-					'error',
-					__(
-						'There was a problem updating your business details.',
-						'woocommerce-admin'
-					)
-				);
 				throw new Error();
 			} ),
 		];
@@ -174,9 +174,19 @@ class BusinessDetails extends Component {
 			);
 		}
 
-		Promise.all( promises ).then( () => {
-			goToNextStep();
-		} );
+		Promise.all( promises )
+			.then( () => {
+				goToNextStep();
+			} )
+			.catch( () => {
+				createNotice(
+					'error',
+					__(
+						'There was a problem updating your business details.',
+						'woocommerce-admin'
+					)
+				);
+			} );
 	}
 
 	validate( values ) {
@@ -471,6 +481,10 @@ class BusinessDetails extends Component {
 				<div className="woocommerce-business-extensions__popover-wrapper">
 					<Button
 						isTertiary
+						label={ __(
+							'Learn more about recommended free business features',
+							'woocommerce-admin'
+						) }
 						onClick={ () => {
 							recordEvent(
 								'storeprofiler_store_business_details_popover'
@@ -478,11 +492,17 @@ class BusinessDetails extends Component {
 							this.setState( { isPopoverVisible: true } );
 						} }
 					>
-						<i className="material-icons-outlined">info</i>
+						<i
+							className="material-icons-outlined"
+							aria-hidden="true"
+						>
+							info
+						</i>
 					</Button>
 					{ isPopoverVisible && (
 						<Popover
 							className="woocommerce-business-extensions__popover"
+							focusOnMount="container"
 							position="top center"
 							onClose={ () =>
 								this.setState( { isPopoverVisible: false } )
@@ -490,7 +510,10 @@ class BusinessDetails extends Component {
 						>
 							<div className="woocommerce-business-extensions__benefits">
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -499,7 +522,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -508,7 +534,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -517,7 +546,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -526,7 +558,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -535,7 +570,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -544,7 +582,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
@@ -553,7 +594,10 @@ class BusinessDetails extends Component {
 									) }
 								</div>
 								<div className="woocommerce-business-extensions__benefit">
-									<i className="material-icons-outlined">
+									<i
+										className="material-icons-outlined"
+										aria-hidden="true"
+									>
 										check
 									</i>
 									{ __(
