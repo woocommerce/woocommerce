@@ -49,7 +49,6 @@ class List extends Component {
 						className: itemClasses,
 						content,
 						href,
-						key,
 						listItemTag,
 						onClick,
 						target,
@@ -81,11 +80,11 @@ class List extends Component {
 
 					return (
 						<CSSTransition
-							key={ key }
+							key={ i }
 							timeout={ 500 }
 							classNames="woocommerce-list__item"
 						>
-							<li className={ itemClassName } key={ i }>
+							<li className={ itemClassName }>
 								<InnerTag { ...innerTagProps }>
 									{ before && (
 										<div className="woocommerce-list__item-before">
