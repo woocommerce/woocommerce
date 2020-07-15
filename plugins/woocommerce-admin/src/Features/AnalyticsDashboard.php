@@ -46,6 +46,10 @@ class AnalyticsDashboard {
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+
+		if ( Loader::is_feature_enabled( 'homescreen' ) ) {
+			add_filter( 'woocommerce_admin_plugins_whitelist', array( $this, 'get_homescreen_allowed_plugins' ) );
+		}
 	}
 
 	/**
@@ -136,5 +140,20 @@ class AnalyticsDashboard {
 		// Move menu item to top of array.
 		unset( $submenu['woocommerce'][ $wc_admin_key ] );
 		array_unshift( $submenu['woocommerce'], $menu );
+	}
+
+	/**
+	 * Gets an array of plugins that can be installed & activated via the home screen.
+	 *
+	 * @param array $plugins Array of plugin slugs to be allowed.
+	 *
+	 * @return array
+	 */
+	public static function get_homescreen_allowed_plugins( $plugins ) {
+		$homescreen_plugins = array(
+			'jetpack' => 'jetpack/jetpack.php',
+		);
+
+		return array_merge( $plugins, $homescreen_plugins );
 	}
 }
