@@ -65,8 +65,6 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'add_with_auto_arguments' should throw an exception if an invalid class name is passed.
-	 *
-	 * @throws \Exception Invalid class name passed.
 	 */
 	public function test_add_with_auto_arguments_throws_on_non_class_passed() {
 		$this->expectException( \Exception::class );
@@ -77,8 +75,6 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a private constructor.
-	 *
-	 * @throws \Exception The passed class has a private constructor.
 	 */
 	public function test_add_with_auto_arguments_throws_on_private_constructor() {
 		$this->expectException( \Exception::class );
@@ -89,8 +85,6 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a constructor argument without type hint.
-	 *
-	 * @throws \Exception The passed class has a constructor argument without type hint.
 	 */
 	public function test_add_with_auto_arguments_throws_on_constructor_argument_without_type_hint() {
 		$this->expectException( \Exception::class );
@@ -101,8 +95,6 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a constructor argument with a scalar type hint.
-	 *
-	 * @throws \Exception The passed class has a constructor argument with a scalar type hint.
 	 */
 	public function test_add_with_auto_arguments_throws_on_constructor_argument_with_scalar_type_hint() {
 		$this->expectException( \Exception::class );

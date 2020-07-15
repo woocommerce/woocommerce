@@ -32,8 +32,6 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'add' should throw an exception when trying to register a class not in the WooCommerce root namespace.
-	 *
-	 * @throws \Exception Attempt to register a class not in the WooCommerce root namespace.
 	 */
 	public function test_add_throws_when_trying_to_register_class_in_forbidden_namespace() {
 		$external_class = \League\Container\Container::class;
@@ -57,8 +55,6 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'replace' should throw an exception when trying to replace a class that has not been previously registered.
-	 *
-	 * @throws \Exception Attempt to replace a class that has not been previously registered.
 	 */
 	public function test_replace_throws_if_class_has_not_been_registered() {
 		$this->expectException( \Exception::class );
