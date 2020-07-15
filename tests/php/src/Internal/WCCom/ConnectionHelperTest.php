@@ -1,18 +1,11 @@
 <?php
-/**
- * Tests for ConnectionHelper for WCCom
- *
- * @package WooCommerce|Tests|Internal|WCCom.
- */
 
-namespace Automattic\WooCommerce\Tests\Internal;
+namespace Automattic\WooCommerce\Tests\Internal\WCCom;
 
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 
 /**
  * Class ConnectionHelperTest.
- *
- * @package Automattic\WooCommerce\Tests\Internal.
  */
 class ConnectionHelperTest extends \WC_Unit_Test_Case {
 
