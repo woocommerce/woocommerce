@@ -3,11 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Button } from '@wordpress/components';
+import { Button, CheckboxControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
+import { isEmail } from '@wordpress/url';
 
 /**
  * WooCommerce dependencies
@@ -17,7 +18,7 @@ import { getQuery } from '@woocommerce/navigation';
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
-class PayPal extends Component {
+export class PayPal extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -28,6 +29,7 @@ class PayPal extends Component {
 		};
 
 		this.updateSettings = this.updateSettings.bind( this );
+		this.validate = this.validate.bind( this );
 	}
 
 	componentDidMount() {
@@ -71,6 +73,16 @@ class PayPal extends Component {
 		}
 	}
 
+	isWooCommerceServicesConnected() {
+		const { activePlugins, isJetpackConnected, wcsTosAccepted } = this.props;
+
+		return (
+			isJetpackConnected &&
+			wcsTosAccepted &&
+			activePlugins.includes( 'woocommerce-services' )
+		);
+	}
+
 	async fetchOAuthConnectURL() {
 		const { activePlugins } = this.props;
 
@@ -91,6 +103,7 @@ class PayPal extends Component {
 			if ( ! result || ! result.connectUrl ) {
 				this.setState( {
 					autoConnectFailed: true,
+					isPending: false,
 				} );
 				return;
 			}
@@ -106,15 +119,6 @@ class PayPal extends Component {
 		}
 	}
 
-	renderConnectButton() {
-		const { connectURL } = this.state;
-		return (
-			<Button isPrimary href={ connectURL }>
-				{ __( 'Connect', 'woocommerce-admin' ) }
-			</Button>
-		);
-	}
-
 	async updateSettings( values ) {
 		const {
 			createNotice,
@@ -123,13 +127,23 @@ class PayPal extends Component {
 			markConfigured,
 		} = this.props;
 
+		const optionValues = {
+			...options.woocommerce_ppec_paypal_settings,
+			enabled: 'yes',
+		};
+
+		if ( values.create_account ) {
+			// Tell WCS to proxy payment requests.
+			// See: https://github.com/Automattic/woocommerce-services/blob/29dfe0ba6fd3075afe08f917a6ff33c321502d9c/classes/class-wc-connect-paypal-ec.php#L53.
+			optionValues.reroute_requests = 'yes';
+			optionValues.email = values.account_email;
+		} else {
+			optionValues.api_username = values.api_username;
+			optionValues.api_password = values.api_password;
+		}
+
 		const update = await updateOptions( {
-			woocommerce_ppec_paypal_settings: {
-				...options.woocommerce_ppec_paypal_settings,
-				api_username: values.api_username,
-				api_password: values.api_password,
-				enabled: 'yes',
-			},
+			woocommerce_ppec_paypal_settings: optionValues,
 		} );
 
 		if ( update.success ) {
@@ -153,21 +167,34 @@ class PayPal extends Component {
 		return {
 			api_username: '',
 			api_password: '',
+			create_account: this.isWooCommerceServicesConnected(),
+			account_email: '',
 		};
 	}
 
 	validate( values ) {
 		const errors = {};
 
-		if ( ! values.api_username ) {
+		if ( ! values.create_account && ! values.api_username ) {
 			errors.api_username = __(
 				'Please enter your API username',
 				'woocommerce-admin'
 			);
 		}
-		if ( ! values.api_password ) {
+		if ( ! values.create_account && ! values.api_password ) {
 			errors.api_password = __(
 				'Please enter your API password',
+				'woocommerce-admin'
+			);
+		}
+
+		if (
+			this.isWooCommerceServicesConnected() &&
+			values.create_account &&
+			! isEmail( values.account_email )
+		) {
+			errors.account_email = __(
+				'Please enter a valid email address',
 				'woocommerce-admin'
 			);
 		}
@@ -175,60 +202,131 @@ class PayPal extends Component {
 		return errors;
 	}
 
-	renderManualConfig() {
+	renderAutomaticConfig() {
 		const { isOptionsUpdating } = this.props;
-		const link = (
-			<Link
-				href="https://docs.woocommerce.com/document/paypal-express-checkout/#section-8"
-				target="_blank"
-				type="external"
-			/>
-		);
-		const help = interpolateComponents( {
-			mixedString: __(
-				'Your API details can be obtained from your {{link}}PayPal account{{/link}}',
-				'woocommerce-admin'
-			),
-			components: {
-				link,
-			},
-		} );
+		const { autoConnectFailed, connectURL, isPending } = this.state;
+
+		const canAutoCreate = this.isWooCommerceServicesConnected();
+		const initialValues = this.getInitialConfigValues();
 
 		return (
 			<Form
-				initialValues={ this.getInitialConfigValues() }
+				initialValues={ initialValues }
 				onSubmitCallback={ this.updateSettings }
 				validate={ this.validate }
 			>
-				{ ( { getInputProps, handleSubmit } ) => {
+				{ ( { getInputProps, handleSubmit, values } ) => {
 					return (
 						<Fragment>
-							<TextControl
-								label={ __(
-									'API Username',
-									'woocommerce-admin'
-								) }
-								required
-								{ ...getInputProps( 'api_username' ) }
-							/>
-							<TextControl
-								label={ __(
-									'API Password',
-									'woocommerce-admin'
-								) }
-								required
-								{ ...getInputProps( 'api_password' ) }
-							/>
+							{ canAutoCreate && (
+								<div className="woocommerce-task-payments__paypal-auto-create-account">
+									<CheckboxControl
+										label={ __(
+											'Create a PayPal account for me',
+											'woocommerce-admin'
+										) }
+										{ ...getInputProps( 'create_account' ) }
+									/>
+									{ values.create_account && (
+										<TextControl
+											label={ __(
+												'Email address',
+												'woocommerce-admin'
+											) }
+											type="email"
+											{ ...getInputProps( 'account_email' ) }
+										/>
+									) }
+								</div>
+							) }
 
-							<Button
-								onClick={ handleSubmit }
-								isPrimary
-								isBusy={ isOptionsUpdating }
-							>
-								{ __( 'Proceed', 'woocommerce-admin' ) }
-							</Button>
+							{ ! isPending &&
+								( autoConnectFailed || ! connectURL ) &&
+								( ! canAutoCreate || ! values.create_account ) && (
+									<Fragment>
+										<TextControl
+											label={ __(
+												'API Username',
+												'woocommerce-admin'
+											) }
+											required
+											{ ...getInputProps(
+												'api_username'
+											) }
+										/>
+										<TextControl
+											label={ __(
+												'API Password',
+												'woocommerce-admin'
+											) }
+											required
+											{ ...getInputProps(
+												'api_password'
+											) }
+										/>
 
-							<p>{ help }</p>
+										<Button
+											onClick={ handleSubmit }
+											isPrimary
+											isBusy={ isOptionsUpdating }
+										>
+											{ __(
+												'Proceed',
+												'woocommerce-admin'
+											) }
+										</Button>
+
+										<p>
+											{ interpolateComponents( {
+												mixedString: __(
+													'Your API details can be obtained from your {{link}}PayPal account{{/link}}',
+													'woocommerce-admin'
+												),
+												components: {
+													link: (
+														<Link
+															href="https://docs.woocommerce.com/document/paypal-express-checkout/#section-8"
+															target="_blank"
+															type="external"
+														/>
+													),
+												},
+											} ) }
+										</p>
+									</Fragment>
+								) }
+
+							{ canAutoCreate && values.create_account && (
+								<Button
+									onClick={ handleSubmit }
+									isPrimary
+									isBusy={ isOptionsUpdating }
+								>
+									{ __(
+										'Create account',
+										'woocommerce-admin'
+									) }
+								</Button>
+							) }
+
+							{ ! autoConnectFailed &&
+								connectURL &&
+								( ! canAutoCreate || ! values.create_account ) && (
+									<Fragment>
+										<Button isPrimary href={ connectURL }>
+											{ __(
+												'Connect',
+												'woocommerce-admin'
+											) }
+										</Button>
+										<p>
+											{ __(
+												'You will be redirected to the Paypal website to create the connection.',
+												'woocommerce-admin'
+											) }
+										</p>
+									</Fragment>
+								) }
 						</Fragment>
 					);
 				} }
@@ -237,34 +335,14 @@ class PayPal extends Component {
 	}
 
 	getConnectStep() {
-		const { autoConnectFailed, connectURL, isPending } = this.state;
-		const connectStep = {
+		return {
 			key: 'connect',
 			label: __( 'Connect your PayPal account', 'woocommerce-admin' ),
-		};
-
-		if ( isPending ) {
-			return connectStep;
-		}
-
-		if ( ! autoConnectFailed && connectURL ) {
-			return {
-				...connectStep,
-				description: __(
-					'A Paypal account is required to process payments. You will be redirected to the Paypal website to create the connection.',
-					'woocommerce-admin'
-				),
-				content: this.renderConnectButton(),
-			};
-		}
-
-		return {
-			...connectStep,
 			description: __(
-				'Connect your store to your PayPal account. Don’t have a PayPal account? Create one.',
+				'A Paypal account is required to process payments. Connect your store to your PayPal account.',
 				'woocommerce-admin'
 			),
-			content: this.renderManualConfig(),
+			content: this.renderAutomaticConfig(),
 		};
 	}
 
@@ -290,14 +368,19 @@ PayPal.defaultProps = {
 export default compose(
 	withSelect( ( select ) => {
 		const { getOption, isOptionsUpdating } = select( OPTIONS_STORE_NAME );
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
-		const options = getOption( 'woocommerce_ppec_paypal_settings' );
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
+		const paypalOptions = getOption( 'woocommerce_ppec_paypal_settings' );
+		const wcsOptions = getOption( 'wc_connect_options' );
 		const activePlugins = getActivePlugins();
 
 		return {
 			activePlugins,
-			options,
+			isJetpackConnected: isJetpackConnected(),
 			isOptionsUpdating: isOptionsUpdating(),
+			options: paypalOptions,
+			wcsTosAccepted: wcsOptions && wcsOptions.tos_accepted,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
