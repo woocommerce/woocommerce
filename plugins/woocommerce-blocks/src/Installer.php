@@ -25,7 +25,6 @@ class Installer {
 	 */
 	public function install() {
 		$this->maybe_create_tables();
-		$this->maybe_create_cronjobs();
 	}
 
 	/**
@@ -119,14 +118,5 @@ class Installer {
 				echo '</p></div>';
 			}
 		);
-	}
-
-	/**
-	 * Maybe create cron events.
-	 */
-	protected function maybe_create_cronjobs() {
-		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
-			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
-		}
 	}
 }
