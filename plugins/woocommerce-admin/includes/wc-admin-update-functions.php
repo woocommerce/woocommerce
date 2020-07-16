@@ -117,3 +117,10 @@ function wc_admin_update_140_change_deactivate_plugin_note_type() {
 
 	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", WC_Admin_Notes_Deactivate_Plugin::NOTE_NAME ) );
 }
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_140_db_version() {
+	Installer::update_db_version( '1.4.0' );
+}
