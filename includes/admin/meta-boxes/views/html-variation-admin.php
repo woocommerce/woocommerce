@@ -6,7 +6,7 @@
  * @var int $variation_id
  * @var WP_POST $variation
  * @var WC_Product_Variation $variation_object
- * @var array $variation_data array of variation data @deprecated.
+ * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
 defined( 'ABSPATH' ) || exit;
