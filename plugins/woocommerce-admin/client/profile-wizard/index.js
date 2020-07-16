@@ -12,12 +12,16 @@ import { withDispatch, __experimentalResolveSelect } from '@wordpress/data';
  */
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
+	getHistory,
+	getNewPath,
+	updateQueryString,
+} from '@woocommerce/navigation';
+import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
 } from '@woocommerce/data';
-import { getHistory, getNewPath, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -249,7 +253,7 @@ class ProfileWizard extends Component {
 						createNoticesFromResponse( error );
 						return;
 					}
-					redirectUrl = jetpackConnectUrl
+					redirectUrl = jetpackConnectUrl;
 				} )
 			);
 		}
@@ -261,6 +265,24 @@ class ProfileWizard extends Component {
 			}
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		} );
+	}
+
+	skipProfiler() {
+		const { createNotice, updateProfileItems } = this.props;
+		updateProfileItems( { skipped: true } )
+			.then( () => {
+				recordEvent( 'storeprofiler_store_details_skip' );
+				getHistory().push( getNewPath( {}, '/', {} ) );
+			} )
+			.catch( () => {
+				createNotice(
+					'error',
+					__(
+						'There was a problem skipping the setup wizard.',
+						'woocommerce-admin'
+					)
+				);
+			} );
 	}
 
 	render() {

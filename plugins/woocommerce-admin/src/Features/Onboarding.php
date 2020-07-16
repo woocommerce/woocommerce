@@ -242,7 +242,7 @@ class Onboarding {
 	}
 
 	/**
-	 * Returns true if the profiler should be displayed (not completed).
+	 * Returns true if the profiler should be displayed (not completed and not skipped).
 	 *
 	 * @return bool
 	 */
@@ -250,10 +250,11 @@ class Onboarding {
 		$onboarding_data = get_option( self::PROFILE_DATA_OPTION, array() );
 
 		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
+		$is_skipped   = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
 
 		// @todo When merging to WooCommerce Core, we should set the `completed` flag to true during the upgrade progress.
 		// https://github.com/woocommerce/woocommerce-admin/pull/2300#discussion_r287237498.
-		return ! $is_completed;
+		return ! $is_completed && ! $is_skipped;
 	}
 
 	/**
@@ -933,9 +934,7 @@ class Onboarding {
 			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
 
 			$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
-			$onboarding_data  = get_option( self::PROFILE_DATA_OPTION, array() );
-			$is_completed     = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
-			$is_enabled       = ! $is_completed;
+			$is_enabled       = self::should_show_profiler();
 
 			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
@@ -1067,6 +1066,7 @@ class Onboarding {
 			wp_json_encode(
 				array(
 					'completed' => $new_value,
+					'skipped'   => $new_value,
 				)
 			)
 		);

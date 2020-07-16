@@ -40,6 +40,9 @@ const Homescreen = lazy( () =>
 const MarketingOverview = lazy( () =>
 	import( /* webpackChunkName: "marketing-overview" */ 'marketing/overview' )
 );
+const ProfileWizard = lazy( () =>
+	import( /* webpackChunkName: "profile-wizard" */ 'profile-wizard' )
+);
 import getReports from 'analytics/report/get-reports';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
@@ -169,13 +172,21 @@ export const getPages = () => {
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[
-					'/marketing',
-					__( 'Marketing', 'woocommerce-admin' ),
-				],
+				[ '/marketing', __( 'Marketing', 'woocommerce-admin' ) ],
 				__( 'Overview', 'woocommerce-admin' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce-marketing',
+		} );
+	}
+
+	if ( window.wcAdminFeatures.onboarding ) {
+		pages.push( {
+			container: ProfileWizard,
+			path: '/profiler',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				[ '/profiler', __( 'Profiler', 'woocommerce-admin' ) ],
+			],
 		} );
 	}
 
@@ -243,10 +254,9 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
-		const defaultPath =
-			window.wcAdminFeatures.homescreen
-				? 'homescreen'
-				: 'dashboard';
+		const defaultPath = window.wcAdminFeatures.homescreen
+			? 'homescreen'
+			: 'dashboard';
 		const path = query.path || defaultPath;
 		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
 
