@@ -202,3 +202,53 @@ function wc_get_webhook_rest_api_versions() {
 		'wp_api_v3',
 	);
 }
+
+/**
+ * Add retries on woo webhook fails (from woocommerce_webhook_deliver action)
+ * see \WC_Webhook::deliver() for the arguments.
+ *
+ * @param array $http_args HTTP Request arguments (e.g. method, timeout, redirection, etc.)
+ * @param WP_Error|HTTP_Response $response
+ * @param float $duration The length of time for the request to complete
+ * @param int $arg The CPT id
+ * @param int $webhook_id
+ */
+function wc_requeue_failed_webhook_delivery(
+	$http_args = null,
+	$response = null,
+	$duration = null,
+	$arg = null,
+	$webhook_id = null
+) {
+	// If we reached the limit of failures we won't reschedule. (Why doesn't status update, bug?)
+	$webhook = new WC_Webhook( $webhook_id );
+	if ( ! $webhook->get_retry_enabled() ) {
+		return;
+	}
+
+	$response_code = is_wp_error( $response )
+	? $response->get_error_code()
+	: wp_remote_retrieve_response_code( $response );
+
+	// Success is 2xx, 301 and 302 (from class-wc-webhook.php)
+	if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+		return;
+	}
+
+	// Determine exponential backoff (2^n * 100)
+	$failures = $webhook->get_failure_count();
+	$backoff = ( 2 ** $failures ) * 100;
+	$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $failures );
+
+	// Requeue the webhook
+	$queue_args = array(
+		'webhook_id' => $webhook_id,
+		'arg'        => $arg,
+	);
+	WC()->queue()->schedule_single( time() + $backoff,
+		'woocommerce_deliver_webhook_async',
+		$queue_args,
+		'woocommerce-webhooks'
+	);
+}
+add_action( 'woocommerce_webhook_delivery', 'wc_requeue_failed_webhook_delivery', 10, 5 );
