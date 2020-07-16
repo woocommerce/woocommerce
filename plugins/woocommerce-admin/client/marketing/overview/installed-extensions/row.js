@@ -119,7 +119,7 @@ class InstalledExtensionRow extends Component {
 	}
 
 	render() {
-		const { name, description, status, icon } = this.props;
+		const { name, description, status, slug } = this.props;
 		let actions = null;
 
 		switch ( status ) {
@@ -136,7 +136,7 @@ class InstalledExtensionRow extends Component {
 
 		return (
 			<div className="woocommerce-marketing-installed-extensions-card__item">
-				<ProductIcon src={ icon } />
+				<ProductIcon product={ slug } />
 				<div className="woocommerce-marketing-installed-extensions-card__item-text-and-actions">
 					<div className="woocommerce-marketing-installed-extensions-card__item-text">
 						<h4>{ name }</h4>

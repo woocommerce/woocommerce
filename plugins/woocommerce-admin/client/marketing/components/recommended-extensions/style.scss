@@ -48,9 +48,10 @@
 
 	h4 {
 		color: $core-grey-dark-800;
-		margin: -2px 0 5px;
+		margin: -2px 0 ($gap-smallest - 1);
 		font-size: 16px;
 		line-height: 1.3;
+		transition: color 0.2s ease;
 	}
 
 	p {
@@ -60,7 +61,7 @@
 
 	&:hover {
 		h4 {
-			color: $core-blue-dark-900;
+			color: $theme-color;
 		}
 		p {
 			color: $core-grey-dark-900;
@@ -71,7 +72,7 @@
 		padding-left: 46px;
 	}
 
-	.woocommere-admin-marketing-product-icon {
+	.woocommerce-admin-marketing-product-icon {
 		position: absolute;
 		top: 12px;
 		left: 12px;

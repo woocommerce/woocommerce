@@ -53,6 +53,7 @@ const RecommendedExtensions = ( {
 						{ extensions.map( ( extension ) => (
 							<RecommendedExtensionsItem
 								key={ extension.product }
+								category={ category }
 								{ ...extension }
 							/>
 						) ) }

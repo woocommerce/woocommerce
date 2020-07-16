@@ -1,8 +1,15 @@
-.woocommere-admin-marketing-product-icon {
+.woocommerce-admin-marketing-product-icon {
+	position: relative;
+	overflow: hidden;
 	width: 36px;
 	height: 36px;
-	border-radius: 4px;
+	border-radius: 8px;
 	// for loading state
 	background: $core-grey-light-300;
 	color: $core-grey-light-300;
+
+	svg {
+		width: 36px;
+		height: 36px;
+	}
 }

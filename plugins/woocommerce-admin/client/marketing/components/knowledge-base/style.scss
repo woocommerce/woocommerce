@@ -93,11 +93,12 @@
 			font-weight: 600;
 			white-space: normal;
 			color: $core-grey-dark-800;
+			transition: color 0.2s ease;
 		}
 
 		&:hover {
 			h3 {
-				color: $core-blue-dark-900;
+				color: $theme-color;
 			}
 		}
 
