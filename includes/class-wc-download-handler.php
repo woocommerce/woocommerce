@@ -191,10 +191,12 @@ class WC_Download_Handler {
 	/**
 	 * Count download.
 	 *
-	 * @deprecated unknown
+	 * @deprecated 4.4.0
 	 * @param array $download_data Download data.
 	 */
-	public static function count_download( $download_data ) {}
+	public static function count_download( $download_data ) {
+		wc_deprecated_function( 'WC_Download_Handler::count_download', '4.4.0', '' );
+	}
 
 	/**
 	 * Download a file - hook into init function.

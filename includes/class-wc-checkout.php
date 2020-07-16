@@ -454,8 +454,8 @@ class WC_Checkout {
 			 */
 			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
 			$product                    = $values['data'];
-			$item->legacy_values        = $values; // @deprecated For legacy actions.
-			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
+			$item->legacy_values        = $values; // @deprecated 4.4.0 For legacy actions.
+			$item->legacy_cart_item_key = $cart_item_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
@@ -502,8 +502,8 @@ class WC_Checkout {
 	public function create_order_fee_lines( &$order, $cart ) {
 		foreach ( $cart->get_fees() as $fee_key => $fee ) {
 			$item                 = new WC_Order_Item_Fee();
-			$item->legacy_fee     = $fee; // @deprecated For legacy actions.
-			$item->legacy_fee_key = $fee_key; // @deprecated For legacy actions.
+			$item->legacy_fee     = $fee; // @deprecated 4.4.0 For legacy actions.
+			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
 					'name'      => $fee->name,
@@ -541,7 +541,7 @@ class WC_Checkout {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
 				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
 				$item                     = new WC_Order_Item_Shipping();
-				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
+				$item->legacy_package_key = $package_key; // @deprecated 4.4.0 For legacy actions.
 				$item->set_props(
 					array(
 						'method_title' => $shipping_rate->label,
