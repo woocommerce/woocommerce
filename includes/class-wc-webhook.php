@@ -308,6 +308,31 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
+	 * Make retry enabled determination.
+	 *
+	 * @since 4.4.0
+	 * @param int $arg Resource ID
+	 * @param WP_Error|HTTP_Response $response
+	 * @return bool
+	 */
+	public function is_retryable( $arg, $response ) {
+		$webhook_retry_enabled = $this->get_retry_enabled();
+
+		// If we reached the limit of failures we won't reschedule. (Why doesn't status update, bug?)
+		$failed = ( $this->get_failure_count() > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) );
+
+		$response_code = is_wp_error( $response )
+			? $response->get_error_code()
+			: wp_remote_retrieve_response_code( $response );
+
+		// Success is 2xx, 301 and 302 (from class-wc-webhook.php)
+		$response_failed = ( intval( $response_code ) < 200 || intval( $response_code ) >= 303 );
+
+		$is_retryable = $webhook_retry_enabled && ! $failed && ! $response_failed;
+		return apply_filters( 'woocommerce_webhook_retry_enabled', $is_retryable, $this, $arg, $response );
+	}
+
+	/**
 	 * Deliver the webhook payload using wp_safe_remote_request().
 	 *
 	 * @since 2.2.0
@@ -813,8 +838,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool
 	 */
 	public function get_retry_enabled( $context = 'view' ) {
-		$retry_enabled = $this->get_prop( 'retry_enabled', $context );
-		return apply_filters( 'woocommerce_webhook_retry_enabled', $retry_enabled, $this );
+		return $this->get_prop( 'retry_enabled', $context );
 	}
 
 	/*

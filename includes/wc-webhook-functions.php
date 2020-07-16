@@ -220,25 +220,14 @@ function wc_requeue_failed_webhook_delivery(
 	$arg = null,
 	$webhook_id = null
 ) {
-	// If we reached the limit of failures we won't reschedule. (Why doesn't status update, bug?)
 	$webhook = new WC_Webhook( $webhook_id );
-	if ( ! $webhook->get_retry_enabled() ) {
-		return;
-	}
-
-	$response_code = is_wp_error( $response )
-	? $response->get_error_code()
-	: wp_remote_retrieve_response_code( $response );
-
-	// Success is 2xx, 301 and 302 (from class-wc-webhook.php)
-	if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+	if ( ! $webhook->is_retryable( $arg, $response ) ) {
 		return;
 	}
 
 	// Determine exponential backoff (2^n * 100)
-	$failures = $webhook->get_failure_count();
-	$backoff = ( 2 ** $failures ) * 100;
-	$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $failures );
+	$backoff = ( 2 ** $webhook->get_failure_count() ) * 100;
+	$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $webhook->get_failure_count() );
 
 	// Requeue the webhook
 	$queue_args = array(
