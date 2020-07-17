@@ -20,7 +20,7 @@ return array(
 	),
 	'BA' => array(
 		'currency_code'  => 'BAM',
-		'currency_pos'   => 'right',
+		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
 		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
