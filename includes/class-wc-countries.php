@@ -1240,15 +1240,6 @@ class WC_Countries {
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
-					'LI' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
 					'LK' => array(
 						'state' => array(
 							'required' => false,
