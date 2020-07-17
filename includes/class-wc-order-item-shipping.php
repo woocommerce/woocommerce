@@ -276,12 +276,10 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Offset get: for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated 4.4.0
 	 * @param string $offset Key.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		wc_deprecated_function( 'WC_Order_Item_Shipping::offsetGet', '4.4.0', '' );
 		if ( 'cost' === $offset ) {
 			$offset = 'total';
 		}
