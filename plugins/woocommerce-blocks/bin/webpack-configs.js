@@ -29,8 +29,27 @@ const dashIconReplacementModule = path.resolve(
 	'../assets/js/module_replacements/dashicon.js'
 );
 
+const getProgressBarPluginConfig = ( name, fileSuffix ) => {
+	const isLegacy = fileSuffix && fileSuffix === 'legacy';
+	const progressBarPrefix = isLegacy ? 'Legacy ' : '';
+	return {
+		format:
+			chalk.blue( `Building ${ progressBarPrefix }${ name }` ) +
+			' [:bar] ' +
+			chalk.green( ':percent' ) +
+			' :msg (:elapsed seconds)',
+		summary: false,
+		customSummary: ( time ) => {
+			console.log(
+				chalk.green.bold(
+					`${ progressBarPrefix }${ name } assets build completed (${ time })`
+				)
+			);
+		},
+	};
+};
+
 const getCoreConfig = ( options = {} ) => {
-	const isLegacy = options.fileSuffix && options.fileSuffix === 'legacy';
 	return {
 		entry: getEntryConfig( 'core', options.exclude || [] ),
 		output: {
@@ -65,22 +84,9 @@ const getCoreConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			new ProgressBarPlugin( {
-				format:
-					chalk.blue( 'Building Core' ) +
-					' [:bar] ' +
-					chalk.green( ':percent' ) +
-					' :msg (:elapsed seconds)',
-				summary: false,
-				customSummary: ( time ) => {
-					const prefix = isLegacy ? 'Legacy' : '';
-					console.log(
-						chalk.green.bold(
-							`${ prefix } Core assets build completed (${ time })`
-						)
-					);
-				},
-			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Core', options.fileSuffix )
+			),
 			new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
 			new CreateFileWebpack( {
 				path: './',
@@ -97,7 +103,6 @@ const getCoreConfig = ( options = {} ) => {
 const getMainConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
-	const isLegacy = fileSuffix === 'legacy';
 	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
 	const resolve = alias
 		? {
@@ -255,22 +260,9 @@ const getMainConfig = ( options = {} ) => {
 				],
 				`build/vendors${ fileSuffix }.js`
 			),
-			new ProgressBarPlugin( {
-				format:
-					chalk.blue( 'Building Main' ) +
-					' [:bar] ' +
-					chalk.green( ':percent' ) +
-					' :msg (:elapsed seconds)',
-				summary: false,
-				customSummary: ( time ) => {
-					const prefix = isLegacy ? 'Legacy' : '';
-					console.log(
-						chalk.green.bold(
-							`${ prefix } Main assets build completed (${ time })`
-						)
-					);
-				},
-			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Main', options.fileSuffix )
+			),
 			new DependencyExtractionWebpackPlugin( {
 				injectPolyfill: true,
 				requestToExternal,
@@ -288,7 +280,6 @@ const getMainConfig = ( options = {} ) => {
 const getFrontConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
-	const isLegacy = fileSuffix === 'legacy';
 	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
 	const resolve = alias
 		? {
@@ -364,22 +355,9 @@ const getFrontConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			new ProgressBarPlugin( {
-				format:
-					chalk.blue( 'Building Frontend' ) +
-					' [:bar] ' +
-					chalk.green( ':percent' ) +
-					' :msg (:elapsed seconds)',
-				summary: false,
-				customSummary: ( time ) => {
-					const prefix = isLegacy ? 'Legacy' : '';
-					console.log(
-						chalk.green.bold(
-							`${ prefix } Frontend assets build completed (${ time })`
-						)
-					);
-				},
-			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Frontend', options.fileSuffix )
+			),
 			new DependencyExtractionWebpackPlugin( {
 				injectPolyfill: true,
 				requestToExternal,
@@ -396,7 +374,6 @@ const getFrontConfig = ( options = {} ) => {
 
 const getPaymentsConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const isLegacy = options.fileSuffix && options.fileSuffix === 'legacy';
 	const resolve = alias
 		? {
 				alias,
@@ -503,22 +480,12 @@ const getPaymentsConfig = ( options = {} ) => {
 			new MiniCssExtractPlugin( {
 				filename: `[name].css`,
 			} ),
-			new ProgressBarPlugin( {
-				format:
-					chalk.blue( 'Building Payment Method Extensions' ) +
-					' [:bar] ' +
-					chalk.green( ':percent' ) +
-					' :msg (:elapsed seconds)',
-				summary: false,
-				customSummary: ( time ) => {
-					const prefix = isLegacy ? 'Legacy' : '';
-					console.log(
-						chalk.green.bold(
-							`${ prefix } Payment Method Extension assets build completed (${ time })`
-						)
-					);
-				},
-			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig(
+					'Payment Method Extensions',
+					options.fileSuffix
+				)
+			),
 			new DependencyExtractionWebpackPlugin( {
 				injectPolyfill: true,
 				requestToExternal,
