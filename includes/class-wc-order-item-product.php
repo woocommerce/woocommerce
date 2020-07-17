@@ -425,12 +425,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * OffsetGet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated 4.4.0
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		wc_deprecated_function( 'WC_Order_Item_Shipping::offsetGet', '4.4.0', '' );
 		if ( 'line_subtotal' === $offset ) {
 			$offset = 'subtotal';
 		} elseif ( 'line_subtotal_tax' === $offset ) {
@@ -455,7 +453,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
-		wc_deprecated_function( 'WC_Order_Item_Shipping::offsetSet', '4.4.0', '' );
+		wc_deprecated_function( 'WC_Order_Item_Product::offsetSet', '4.4.0', '' );
 		if ( 'line_subtotal' === $offset ) {
 			$offset = 'subtotal';
 		} elseif ( 'line_subtotal_tax' === $offset ) {

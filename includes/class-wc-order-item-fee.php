@@ -290,12 +290,10 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * OffsetGet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated 4.4.0
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		wc_deprecated_function( 'WC_Order_Item_Fee::offsetGet', '4.4.0', '' );
 		if ( 'line_total' === $offset ) {
 			$offset = 'total';
 		} elseif ( 'line_tax' === $offset ) {
