@@ -837,6 +837,7 @@ return array(
 		'XS' => __( 'Xaisomboun', 'woocommerce' ),
 	),
 	'LB' => array(),
+	'LI' => array(),
 	'LR' => array( // Liberia provinces.
 		'BM' => __( 'Bomi', 'woocommerce' ),
 		'BN' => __( 'Bong', 'woocommerce' ),
