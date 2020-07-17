@@ -13,13 +13,13 @@ import {
 	megaphone,
 	box,
 	brush,
+	home,
 	shipping,
 	percent,
 	payment,
 	pencil,
 	lifesaver,
 	external,
-	chevronRight,
 } from '@wordpress/icons';
 import { partial } from 'lodash';
 
@@ -91,13 +91,15 @@ function getItems( props ) {
 			type: 'external',
 			href: 'https://woocommerce.com/my-account/create-a-ticket/',
 			icon: lifesaver,
+			after: <Icon icon={ external } />,
 			listItemTag: 'support',
 		},
 		{
 			title: __( 'View my store', 'woocommerce-admin' ),
 			type: 'external',
 			href: props.getSetting( 'siteUrl' ),
-			icon: external,
+			icon: home,
+			after: <Icon icon={ external } />,
 			listItemTag: 'view-store',
 		},
 	];
@@ -157,9 +159,13 @@ function getLinkTypeAndHref( item ) {
 function getListItems( props ) {
 	return getItems( props ).map( ( item ) => {
 		return {
-			title: <Text as="div" variant="button">{ item.title }</Text>,
+			title: (
+				<Text as="div" variant="button">
+					{ item.title }
+				</Text>
+			),
 			before: <Icon icon={ item.icon } />,
-			after: <Icon icon={ chevronRight } />,
+			after: item.after,
 			...getLinkTypeAndHref( item ),
 			listItemTag: item.listItemTag,
 			onClick: partial( handleOnItemClick, props ),
