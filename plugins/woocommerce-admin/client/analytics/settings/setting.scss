@@ -1,5 +1,3 @@
-
-
 .woocommerce-setting {
 	display: flex;
 	margin-bottom: $gap-large;
@@ -9,7 +7,7 @@
 }
 
 .woocommerce-setting__label {
-	@include font-size(16);
+	@include font-size( 16 );
 	margin-bottom: $gap;
 	padding-right: $gap;
 	font-weight: bold;
@@ -33,7 +31,7 @@
 		width: 100%;
 		display: block;
 		margin-bottom: $gap-small;
-		color: $core-grey-dark-500;
+		color: $gray-700;
 	}
 
 	.woocommerce-filters-filter label {
@@ -62,5 +60,5 @@
 
 .woocommerce-setting__help {
 	font-style: italic;
-	color: $core-grey-dark-300;
+	color: $gray-700;
 }

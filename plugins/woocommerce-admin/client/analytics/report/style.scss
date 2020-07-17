@@ -1,4 +1,3 @@
-
 .woocommerce-analytics__table-placeholder {
 	.woocommerce-card__body {
 		padding: 0;
@@ -18,7 +17,7 @@
 // exportable card based on the Gutenberg component that houses wc-admin styles.
 .woocommerce-analytics__card {
 	border-radius: 0;
-	border: 1px solid $core-grey-light-700;
+	border: 1px solid $gray-400;
 	box-shadow: none;
 	margin-bottom: $gap-large;
 
@@ -34,8 +33,8 @@
 	}
 
 	> .woocommerce-card__header {
-		padding: ($gap - 3) $gap;
-		border-bottom: 1px solid $core-grey-light-700;
+		padding: ( $gap - 3 ) $gap;
+		border-bottom: 1px solid $gray-400;
 		border-radius: 0;
 
 		> .woocommerce-card__title-wrapper > .woocommerce-card__title {

@@ -42,7 +42,7 @@
 	}
 
 	> button svg {
-		fill: $core-grey-dark-500;
+		fill: $gray-700;
 	}
 }
 
@@ -68,12 +68,12 @@
 }
 
 .woocommerce-dashboard-section__add-more-btn-title {
-	color: $core-grey-dark-300;
+	color: $gray-700;
 	padding-top: 8px;
 }
 
 .woocommerce-dashboard-section-controls {
-	border-top: $border-width solid $core-grey-light-500;
+	border-top: $border-width solid $gray-100;
 	padding-top: $gap-smaller;
 
 	.dashicon {
@@ -99,7 +99,6 @@
 		}
 	}
 }
-
 
 .woocommerce-dashboard-card {
 	.components-card__header.is-size-large,

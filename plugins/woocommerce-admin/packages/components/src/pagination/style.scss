@@ -1,5 +1,3 @@
-
-
 .woocommerce-pagination {
 	display: flex;
 	flex-direction: row;
@@ -36,7 +34,7 @@
 	}
 
 	.components-button:not(:disabled):not([aria-disabled='true']):hover {
-		color: $core-grey-dark-300;
+		color: $gray-700;
 	}
 
 	button:first-child {

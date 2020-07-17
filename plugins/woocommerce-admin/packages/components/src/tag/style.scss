@@ -1,5 +1,3 @@
-
-
 .woocommerce-tag {
 	display: inline-flex;
 	margin: 1px 4px 1px 0;
@@ -10,7 +8,7 @@
 	.woocommerce-tag__remove {
 		display: inline-block;
 		line-height: 24px;
-		background: $core-grey-light-500;
+		background: $gray-100;
 		transition: all 0.2s cubic-bezier(0.4, 1, 0.4, 1);
 	}
 
@@ -18,7 +16,7 @@
 		align-self: center;
 		padding: 0 $gap-smaller;
 		border-radius: 12px;
-		color: $core-grey-dark-500;
+		color: $gray-700;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -33,13 +31,13 @@
 		cursor: pointer;
 		padding: 0 2px;
 		border-radius: 0 12px 12px 0;
-		color: $core-grey-dark-500;
+		color: $gray-700;
 		line-height: 10px;
 		text-indent: 0;
 		height: 24px;
 
 		&:hover {
-			color: $core-grey-dark-700;
+			color: $gray-900;
 		}
 	}
 }

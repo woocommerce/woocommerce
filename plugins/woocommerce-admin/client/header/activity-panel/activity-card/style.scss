@@ -1,11 +1,9 @@
-
-
 .woocommerce-activity-card {
 	position: relative;
 	padding: $fallback-gutter;
 	padding: $gutter;
 	background: $studio-white;
-	border-bottom: 1px solid $core-grey-light-400;
+	border-bottom: 1px solid $gray-200;
 	color: $gray-text;
 	@include font-size( 13 );
 
@@ -25,10 +23,10 @@
 
 .woocommerce-activity-card__unread {
 	position: absolute;
-	top: calc(#{ $fallback-gutter } - 6px);
-	top: calc(#{ $gutter } - 6px);
-	right: calc(#{ $fallback-gutter } - 6px);
-	right: calc(#{ $gutter } - 6px);
+	top: calc(#{$fallback-gutter} - 6px);
+	top: calc(#{$gutter} - 6px);
+	right: calc(#{$fallback-gutter} - 6px);
+	right: calc(#{$gutter} - 6px);
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
@@ -37,7 +35,7 @@
 
 .woocommerce-activity-card__icon {
 	grid-area: icon;
-	fill: $core-grey-light-600;
+	fill: $gray-200;
 }
 
 .woocommerce-activity-card__header {
@@ -51,7 +49,7 @@
 		order: 2;
 
 		.woocommerce-empty-activity-card & {
-			color: $dark-gray-primary;
+			color: $gray-900;
 			@include font-size( 16 );
 			font-style: normal;
 			line-height: 24px;
@@ -60,7 +58,7 @@
 	}
 
 	.woocommerce-activity-card__date {
-		color: $core-grey-dark-300;
+		color: $gray-700;
 		text-transform: uppercase;
 		@include font-size( 11 );
 		margin-bottom: $gap-small;
@@ -107,7 +105,7 @@
 		margin-bottom: 0;
 	}
 	.woocommerce-empty-activity-card & {
-		color: $medium-gray-text;
+		color: $gray-700;
 		font-style: normal;
 		font-weight: normal;
 		@include font-size( 14 );
@@ -224,7 +222,7 @@
 	padding: $fallback-gutter;
 	padding: $gutter;
 
-	@media screen and (prefers-reduced-motion: no-preference) {
+	@media screen and ( prefers-reduced-motion: no-preference ) {
 		transition: opacity 0.3s, height 0s, padding 0s;
 	}
 
@@ -240,7 +238,7 @@
 		height: 0;
 		opacity: 0;
 		padding: 0;
-		@media screen and (prefers-reduced-motion: no-preference) {
+		@media screen and ( prefers-reduced-motion: no-preference ) {
 			transition: opacity 0.3s, height 0s 0.3s, padding 0s 0.3s;
 		}
 	}
@@ -288,7 +286,8 @@
 			margin-top: $gap-smallest;
 		}
 
-		.woocommerce-review-activity-card__image-overlay__product .woocommerce-gravatar {
+		.woocommerce-review-activity-card__image-overlay__product
+		.woocommerce-gravatar {
 			margin-left: 0;
 			width: 18px;
 			height: 18px;
@@ -306,7 +305,7 @@
 	width: 60px;
 
 	&.is-placeholder::before {
-		background-color: $core-grey-dark-500;
+		background-color: $gray-700;
 		border-radius: 50%;
 		content: '';
 		position: absolute;
@@ -319,7 +318,7 @@
 }
 
 .woocommerce-stock-activity-card {
-	@media screen and (prefers-reduced-motion: no-preference) {
+	@media screen and ( prefers-reduced-motion: no-preference ) {
 		transition: opacity 0.3s;
 	}
 
@@ -328,8 +327,8 @@
 	}
 
 	.woocommerce-stock-activity-card__stock-quantity {
-		background: $core-grey-light-300;
-		color: $core-grey-dark-500;
+		background: $gray-100;
+		color: $gray-700;
 		padding: 3px $gap-smaller;
 		border-radius: 3px;
 	}
@@ -366,13 +365,13 @@
 	}
 
 	.woocommerce-activity-card__subtitle {
-		color: $core-grey-dark-500;
+		color: $gray-700;
 		@include font-size( 12 );
 	}
 }
 
 .woocommerce-empty-activity-card {
-	background: $core-grey-light-200;
+	background: $gray-100;
 	margin: 20px;
 	border-bottom: unset;
 }

@@ -10,14 +10,14 @@
 			}
 			.woocommerce-list__item:not(.is-complete) {
 				.woocommerce-task__icon {
-					border: 1px solid $core-grey-light-500;
+					border: 1px solid $gray-100;
 					background: $white;
 				}
 			}
 
 			.woocommerce-list__item.is-complete {
 				.woocommerce-list__item-title {
-					color: $medium-gray-text;
+					color: $gray-700;
 				}
 			}
 
@@ -41,7 +41,7 @@
 	}
 
 	.woocommerce-task__estimated-time {
-		color: $core-grey-dark-300;
+		color: $gray-700;
 		font-weight: 400;
 		font-size: 12px;
 		display: block;
@@ -336,7 +336,7 @@
 		}
 	}
 
-	@include breakpoint('<600px') {
+	@include breakpoint( '<600px' ) {
 		.woocommerce-card__body {
 			flex-direction: column;
 		}
@@ -403,8 +403,7 @@
 }
 
 .woocommerce-task-dashboard__container {
-	.woocommerce-task-payments
-	.woocommerce-task-payments__actions {
+	.woocommerce-task-payments .woocommerce-task-payments__actions {
 		text-align: center;
 	}
 
@@ -470,7 +469,7 @@
 	}
 
 	.woocommerce-task-card__prompt-pointer {
-		border-bottom: 10px solid $core-grey-dark-700; /* Snackbar color */
+		border-bottom: 10px solid $gray-900; /* Snackbar color */
 		border-left: 10px solid transparent;
 		border-right: 10px solid transparent;
 		position: relative;
@@ -496,7 +495,7 @@
 
 	&:hover {
 		.woocommerce-task-card__prompt-pointer {
-			border-bottom-color: $core-grey-dark-900; /* Snackbar hover */
+			border-bottom-color: $gray-900; /* Snackbar hover */
 		}
 	}
 }
@@ -565,35 +564,36 @@
 
 	// Firefox
 	& {
-		background-color: $light-gray-300;
+		background-color: $gray-100;
 	}
 
 	&::-moz-progress-bar {
-		background-color: $dark-gray-500;
+		background-color: $gray-700;
 		border-top-left-radius: 2px;
 		border-top-right-radius: 2px;
 	}
 
 	// Chrome
 	&::-webkit-progress-bar {
-		background-color: $light-gray-300;
+		background-color: $gray-100;
 		border-top-left-radius: 2px;
 		border-top-right-radius: 2px;
 	}
 
 	&::-webkit-progress-value {
-		background-color: $dark-gray-500;
+		background-color: $gray-700;
 		border-top-left-radius: 2px;
 	}
 }
 
-.woocommerce-task-dashboard__container .woocommerce-task-card__progress-bar.completed {
+.woocommerce-task-dashboard__container
+.woocommerce-task-card__progress-bar.completed {
 	&::-webkit-progress-value {
 		border-top-right-radius: 2px;
 	}
 }
 
 .woocommerce-task__caption {
-	color: $dark-gray-300;
+	color: $gray-700;
 	margin-top: $gap;
 }

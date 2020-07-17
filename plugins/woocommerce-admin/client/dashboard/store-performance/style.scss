@@ -1,5 +1,3 @@
-
-
 .woocommerce-dashboard__store-performance {
 	margin-bottom: $gap-large;
 
@@ -8,7 +6,7 @@
 	}
 
 	.woocommerce-summary {
-		background-color: $core-grey-light-100;
+		background-color: $gray-100;
 		margin: 0;
 
 		@include breakpoint( '<782px' ) {
@@ -19,7 +17,7 @@
 			&:not(.is-placeholder) {
 				.woocommerce-summary__item-container:first-child {
 					.woocommerce-summary__item {
-						border-top: 1px solid $core-grey-light-700;
+						border-top: 1px solid $gray-400;
 					}
 				}
 			}
@@ -30,11 +28,11 @@
 		background-color: $studio-white;
 
 		&:hover {
-			background-color: $core-grey-light-200;
+			background-color: $gray-100;
 		}
 
 		&:active {
-			background-color: $core-grey-light-300;
+			background-color: $gray-100;
 		}
 	}
 }

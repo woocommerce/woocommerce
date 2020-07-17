@@ -1,5 +1,4 @@
 .woocommerce-marketing-knowledgebase-card {
-
 	.woocommerce-marketing-slider {
 		margin: 0 0 14px;
 	}
@@ -80,7 +79,7 @@
 		&-text {
 			margin: 10px 0 0;
 
-			@include breakpoint('>960px') {
+			@include breakpoint( '>960px' ) {
 				margin: 0;
 			}
 		}
@@ -92,13 +91,13 @@
 			line-height: 24px;
 			font-weight: 600;
 			white-space: normal;
-			color: $core-grey-dark-800;
+			color: $gray-900;
 			transition: color 0.2s ease;
 		}
 
 		&:hover {
 			h3 {
-				color: $theme-color;
+				color: var(--wp-admin-theme-color);
 			}
 		}
 
@@ -108,7 +107,7 @@
 			align-items: center;
 			font-size: 12px;
 			line-height: 17px;
-			color: $core-grey-dark-500;
+			color: $gray-700;
 			margin: 0;
 			padding: 0;
 			height: 17px;

@@ -1,5 +1,3 @@
-
-
 .woocommerce-stepper {
 	$step-icon-size: 24px;
 
@@ -60,7 +58,7 @@
 			min-width: 24px;
 			width: 24px;
 			border-radius: 50%;
-			background: $blue-medium-focus;
+			background: var(--wp-admin-theme-color);
 		}
 
 		.woocommerce-spinner__circle {
@@ -70,7 +68,7 @@
 		&.is-active,
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
-				background: $blue-medium-focus;
+				background: var(--wp-admin-theme-color);
 				color: $studio-white;
 			}
 
@@ -149,8 +147,8 @@
 			content: '';
 			position: absolute;
 			left: $step-icon-size / 2 + $gap-smaller;
-			top: $step-icon-size + ($gap-smaller * 2);
-			height: calc(100% - #{$step-icon-size} - #{ $gap-smaller * 2 });
+			top: $step-icon-size + ( $gap-smaller * 2 );
+			height: calc(100% - #{$step-icon-size} - #{$gap-smaller * 2});
 			border-left: 1px solid $studio-gray-5;
 		}
 

@@ -1,5 +1,3 @@
-
-
 .woocommerce-filters-filter__content {
 	&.is-mobile {
 		.components-popover__header-title {
@@ -7,11 +5,11 @@
 			font-weight: 100;
 			text-transform: uppercase;
 			text-align: center;
-			color: $core-grey-dark-500;
+			color: $gray-700;
 		}
 
 		.woocommerce-filters-filter__content-list-item:last-child {
-			border-bottom: 1px solid $core-grey-light-700;
+			border-bottom: 1px solid $gray-400;
 		}
 	}
 }
@@ -24,7 +22,7 @@
 
 .woocommerce-filters-filter__content-list-item {
 	border: 1px solid transparent;
-	border-bottom: 1px solid $core-grey-light-700;
+	border-bottom: 1px solid $gray-400;
 	margin: 0;
 
 	&:last-child {
@@ -58,20 +56,20 @@
 		display: flex;
 		width: 100%;
 		padding: 1em 1em 1em 3em;
-		background-color: $core-grey-light-100;
+		background-color: $gray-100;
 		text-align: left;
 
 		&.components-button {
-			color: $core-grey-dark-500;
+			color: $gray-700;
 		}
 
 		&:hover {
-			background-color: $core-grey-light-200;
-			color: $core-grey-dark-500;
+			background-color: $gray-200;
+			color: $gray-700;
 		}
 
 		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
-			background-color: $core-grey-light-100;
+			background-color: $gray-100;
 		}
 
 		svg {

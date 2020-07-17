@@ -1,5 +1,3 @@
-
-
 .woocommerce-table {
 	.woocommerce-card__body {
 		padding: 0;
@@ -20,12 +18,12 @@
 	$header-row-height: #{$gap-smaller * 2} + #{$row-text-height} + 1px;
 	&.is-empty {
 		align-items: center;
-		background: $core-grey-light-100;
-		color: $core-grey-dark-500;
+		background: $gray-100;
+		color: $gray-700;
 		display: flex;
 		// Default to 5 rows for browsers not supporting custom properties (IE11)
-		height: calc(#{$header-row-height} + (#{$row-height}) * 5);
-		height: calc(#{$header-row-height} + (#{$row-height}) * var(--number-of-rows));
+		height: calc(#{$header-row-height} + ( #{$row-height} ) * 5);
+		height: calc(#{$header-row-height} + ( #{$row-height} ) * var(--number-of-rows));
 		justify-content: center;
 		padding: $gap;
 		text-align: center;
@@ -106,7 +104,7 @@
 
 	tr:hover,
 	tr:focus-within {
-		background-color: $core-grey-light-200;
+		background-color: $gray-200;
 		td,
 		th {
 			background: transparent;
@@ -118,7 +116,7 @@
 .woocommerce-table__item,
 .woocommerce-table__empty-item {
 	padding: $gap $gap-large;
-	border-bottom: 1px solid $core-grey-light-500;
+	border-bottom: 1px solid $gray-100;
 }
 
 .woocommerce-table__header,
@@ -163,7 +161,7 @@
 	}
 
 	&.is-sorted {
-		background-color: $core-grey-light-100;
+		background-color: $gray-100;
 	}
 
 	&.is-checkbox-column {
@@ -180,7 +178,7 @@
 .woocommerce-table__empty-item {
 	text-align: center;
 	@include font-size( 18 );
-	color: $core-grey-dark-300;
+	color: $gray-700;
 	font-weight: bold;
 
 	@include breakpoint( '<782px' ) {
@@ -195,12 +193,12 @@ th.woocommerce-table__item {
 .woocommerce-table__header {
 	padding: $gap-smaller $gap-large;
 	background-color: #f8f9fa;
-	border-bottom: 1px solid $core-grey-light-700;
+	border-bottom: 1px solid $gray-400;
 	font-weight: bold;
 	white-space: nowrap;
 
 	& + .woocommerce-table__header {
-		border-left: 1px solid $core-grey-light-700;
+		border-left: 1px solid $gray-400;
 	}
 
 	&.is-left-aligned.is-sortable {

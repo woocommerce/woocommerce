@@ -15,7 +15,7 @@
 			border-right-width: 0;
 
 			& + .text-control-with-affixes__suffix {
-				border-left: 1px solid $core-grey-light-500;
+				border-left: 1px solid $gray-100;
 			}
 		}
 	}
@@ -37,7 +37,7 @@
 	background: $studio-white;
 	border-width: 1px;
 	border-style: solid;
-	border-color: $core-form-grey;
+	border-color: $gray-700;
 	color: $gray-text;
 	padding: 7px 14px;
 	white-space: nowrap;
@@ -63,7 +63,7 @@
 	& + input[type='text'],
 	& + input[type='number'] {
 		&:disabled {
-			border-left-color: $core-grey-light-500;
+			border-left-color: $gray-100;
 		}
 	}
 }

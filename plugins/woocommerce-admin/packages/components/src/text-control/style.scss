@@ -1,5 +1,3 @@
-
-
 .muriel-input-text {
 	background: $studio-white;
 	border: 1px solid $studio-gray-20;
@@ -24,7 +22,22 @@
 		}
 	}
 
-	.components-text-control__input {
+	// @wordpress/components styles for text control target all types, so we must also do that
+	// to increase specificity and override the styles.
+	.components-text-control__input,
+	.components-text-control__input[type='text'],
+	.components-text-control__input[type='tel'],
+	.components-text-control__input[type='time'],
+	.components-text-control__input[type='url'],
+	.components-text-control__input[type='week'],
+	.components-text-control__input[type='password'],
+	.components-text-control__input[type='color'],
+	.components-text-control__input[type='date'],
+	.components-text-control__input[type='datetime'],
+	.components-text-control__input[type='datetime-local'],
+	.components-text-control__input[type='email'],
+	.components-text-control__input[type='month'],
+	.components-text-control__input[type='number'] {
 		border: 0;
 		box-shadow: none;
 		font-size: 16px;
@@ -39,7 +52,7 @@
 	}
 
 	&.active {
-		box-shadow: 0 0 0 2px $blue-medium-focus;
+		box-shadow: 0 0 0 2px var(--wp-admin-theme-color);
 		border-color: transparent;
 
 		input {

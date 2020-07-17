@@ -1,8 +1,6 @@
-
-
 .woocommerce-layout__activity-panel-header {
 	height: 50px;
-	background: $core-grey-light-500;
+	background: $gray-200;
 	padding: 16px;
 	display: flex;
 	justify-content: space-between;
@@ -24,23 +22,23 @@
 	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled='true']):hover {
 		box-shadow: none;
 		border-radius: 10px;
-		background: $core-grey-light-700;
+		background: $gray-400;
 	}
 }
 
 .woocommerce-layout__inbox-title {
-	color: $dark-gray-primary;
+	color: $gray-900;
 	display: flex;
 	align-items: center;
 }
 
 .woocommerce-layout__inbox-subtitle {
-	color: $medium-gray-text;
+	color: $gray-700;
 }
 
 .woocommerce-layout__inbox-badge {
 	margin-left: $gap-small / 2;
-	background-color: $medium-gray-text;
+	background-color: $gray-700;
 	border-radius: 13px;
 	padding: 0 $gap-small / 2;
 	color: $white;

@@ -1,3 +1,5 @@
+@import 'node_modules/@automattic/color-studio/dist/color-variables.scss';
+
 // Import Gutenberg variables
 @import 'node_modules/@wordpress/base-styles/colors';
 @import 'node_modules/@wordpress/base-styles/variables';
@@ -5,6 +7,11 @@
 @import 'node_modules/@wordpress/base-styles/breakpoints';
 @import 'node_modules/@wordpress/base-styles/animations';
 @import 'node_modules/@wordpress/base-styles/z-index';
+
+@include wordpress-admin-schemes;
+
+// TODO - remove this after the conflict with main is dealt with
+$core-grey-dark-800: $gray-900;
 
 $fallback-gutter: 24px;
 $fallback-gutter-large: 40px;
@@ -31,24 +38,6 @@ $spacing: 16px;
 // Gutenberg variable overrides.
 $white: $studio-white;
 $black: $studio-black;
-$light-gray-100: $core-grey-light-100;
-$light-gray-200: $core-grey-light-200;
-$light-gray-300: $core-grey-light-300;
-$light-gray-400: $core-grey-light-400;
-$light-gray-500: $core-grey-light-500;
-$light-gray-600: $core-grey-light-600;
-$light-gray-700: $core-grey-light-700;
-$light-gray-800: $core-grey-light-800;
-$light-gray-900: $core-grey-light-900;
-$dark-gray-100: $core-grey-dark-100;
-$dark-gray-200: $core-grey-dark-200;
-$dark-gray-300: $core-grey-dark-300; // This & below have 4.5+ contrast against white
-$dark-gray-400: $core-grey-dark-400;
-$dark-gray-500: $core-grey-dark-500;
-$dark-gray-600: $core-grey-dark-600;
-$dark-gray-700: $core-grey-dark-700;
-$dark-gray-800: $core-grey-dark-800;
-$dark-gray-900: $core-grey-dark-900;
 $alert-red: $error-red;
 $alert-yellow: $notice-yellow;
 $alert-green: $valid-green;
@@ -62,9 +51,9 @@ $wp-admin-background: #f1f1f1;
 $wp-admin-sidebar: #24292d;
 
 // Muriel
-$muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
-	0 1px 3px 0 rgba(0, 0, 0, 0.12);
-$muriel-box-shadow-6dp: 0 3px 5px rgba(0, 0, 0, 0.2), 0 1px 18px rgba(0, 0, 0, 0.12),
-	0 6px 10px rgba(0, 0, 0, 0.14);
-$muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
-	0 3px 14px 2px rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+	0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-6dp: 0 3px 5px rgba(0, 0, 0, 0.2),
+	0 1px 18px rgba(0, 0, 0, 0.12), 0 6px 10px rgba(0, 0, 0, 0.14);
+$muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+	0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);

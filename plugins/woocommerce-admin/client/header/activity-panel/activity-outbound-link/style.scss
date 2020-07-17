@@ -1,12 +1,10 @@
-
-
 .woocommerce-layout__activity-panel-outbound-link {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	height: 50px;
-	background: $core-grey-light-200;
-	border-bottom: 1px solid $core-grey-light-400;
+	background: $gray-200;
+	border-bottom: 1px solid $gray-100;
 	padding: $gap $fallback-gutter;
 	padding: $gap $gutter;
 	font-size: 13px;
@@ -24,12 +22,13 @@
 	}
 
 	&:active {
-		background: $core-grey-light-100;
+		background: $gray-100;
 	}
 
 	&:focus {
-		background: $core-grey-light-200;
-		box-shadow: inset 0 0 0 1px $box-shadow-blue, inset 0 0 0 2px $studio-white;
+		background: $gray-200;
+		box-shadow: inset 0 0 0 1px $box-shadow-blue,
+			inset 0 0 0 2px $studio-white;
 	}
 
 	&:hover,

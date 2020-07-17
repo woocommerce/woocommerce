@@ -1,10 +1,8 @@
-
-
 // Rem output with px fallback
-@mixin font-size($sizeValue: 16, $lineHeight: false ) {
+@mixin font-size( $sizeValue: 16, $lineHeight: false ) {
 	font-size: $sizeValue + px;
-	font-size: ($sizeValue / 16) + rem;
-	@if ($lineHeight) {
+	font-size: ( $sizeValue / 16 ) + rem;
+	@if ( $lineHeight ) {
 		line-height: $lineHeight;
 	}
 }
@@ -24,14 +22,14 @@
 // Adds animation to placeholder section
 @mixin placeholder( $lighten-percentage: 30% ) {
 	animation: loading-fade 1.6s ease-in-out infinite;
-	background-color: $core-grey-light-500;
+	background-color: $gray-100;
 	color: transparent;
 
 	&::after {
 		content: '\00a0';
 	}
 
-	@media screen and (prefers-reduced-motion: reduce) {
+	@media screen and ( prefers-reduced-motion: reduce ) {
 		animation: none;
 	}
 }
@@ -40,7 +38,7 @@
 @mixin animate-transform( $duration: 0.2s ) {
 	transition: transform ease $duration;
 
-	@media screen and (prefers-reduced-motion: reduce) {
+	@media screen and ( prefers-reduced-motion: reduce ) {
 		transition: none;
 	}
 }
@@ -106,22 +104,22 @@
 
 @mixin button-style__hover {
 	background-color: $studio-white;
-	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $light-gray-500, inset 0 0 0 2px $studio-white,
-		0 1px 1px rgba($dark-gray-900, 0.2);
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px $studio-white,
+		0 1px 1px rgba($gray-900, 0.2);
 }
 
 @mixin button-style__active() {
 	outline: none;
 	background-color: $studio-white;
-	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $light-gray-700, inset 0 0 0 2px $studio-white;
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px $studio-white;
 }
 
 @mixin button-style__focus-active() {
 	background-color: $studio-white;
-	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $dark-gray-300, inset 0 0 0 2px $studio-white;
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-700, inset 0 0 0 2px $studio-white;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
@@ -129,17 +127,19 @@
 }
 
 /* stylelint-disable block-closing-brace-newline-after */
-@mixin reduce-motion($property: '') {
+@mixin reduce-motion( $property: '' ) {
 	@if $property == 'transition' {
-		@media (prefers-reduced-motion: reduce) {
+		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 		}
-	} @else if $property == 'animation' {
-		@media (prefers-reduced-motion: reduce) {
+	}
+	@else if $property == 'animation' {
+		@media ( prefers-reduced-motion: reduce ) {
 			animation-duration: 1ms;
 		}
-	} @else {
-		@media (prefers-reduced-motion: reduce) {
+	}
+	@else {
+		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 			animation-duration: 1ms;
 		}
@@ -155,7 +155,7 @@
 
 // Gutenberg Switch.
 @mixin switch-style__focus-active() {
-	box-shadow: 0 0 0 2px $studio-white, 0 0 0 3px $dark-gray-300;
+	box-shadow: 0 0 0 2px $studio-white, 0 0 0 3px $gray-700;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
@@ -168,8 +168,8 @@
 		&:nth-child(#{$i}) {
 			grid-column-start: #{($i - 1) % $wrap-after + 1};
 			grid-column-end: #{($i - 1) % $wrap-after + 2};
-			grid-row-start: #{floor(($i - 1) / $wrap-after) + 1};
-			grid-row-end: #{floor(($i - 1) / $wrap-after) + 2};
+			grid-row-start: #{floor(( $i - 1 ) / $wrap-after) + 1};
+			grid-row-end: #{floor(( $i - 1 ) / $wrap-after) + 2};
 		}
 	}
 }
@@ -198,7 +198,7 @@
 }
 
 // Create a string-repeat function
-@function str-repeat($character, $n) {
+@function str-repeat( $character, $n ) {
 	@if $n == 0 {
 		@return '';
 	}

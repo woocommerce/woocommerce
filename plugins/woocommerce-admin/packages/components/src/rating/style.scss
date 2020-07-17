@@ -1,5 +1,3 @@
-
-
 .woocommerce-rating {
 	position: relative;
 	vertical-align: middle;
@@ -8,7 +6,7 @@
 	white-space: nowrap;
 
 	.gridicon {
-		fill: $core-grey-light-600;
+		fill: $gray-200;
 	}
 
 	.woocommerce-rating__star-outline {
@@ -19,7 +17,7 @@
 		overflow: hidden;
 
 		.gridicon {
-			fill: $core-grey-dark-500;
+			fill: $gray-700;
 		}
 	}
 }

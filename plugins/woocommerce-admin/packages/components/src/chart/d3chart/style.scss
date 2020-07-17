@@ -1,4 +1,3 @@
-
 /**
  * Internal Dependencies
  */
@@ -19,7 +18,7 @@
 	.d3-chart__empty-message {
 		align-items: center;
 		bottom: 0;
-		color: $core-grey-dark-300;
+		color: $gray-700;
 		display: flex;
 		@include font-size( 18 );
 		font-weight: bold;
@@ -41,7 +40,7 @@
 	}
 
 	.d3-chart__tooltip {
-		border: 1px solid $core-grey-light-700;
+		border: 1px solid $gray-400;
 		position: absolute;
 		display: flex;
 		min-width: 324px;
@@ -49,7 +48,8 @@
 		background-color: $studio-white;
 		text-align: left;
 		padding: 17px;
-		box-shadow: 0 3px 20px 0 rgba(18, 24, 30, 0.1), 0 1px 3px 0 rgba(18, 24, 30, 0.1);
+		box-shadow: 0 3px 20px 0 rgba(18, 24, 30, 0.1),
+			0 1px 3px 0 rgba(18, 24, 30, 0.1);
 		flex-direction: column;
 		flex-wrap: nowrap;
 		justify-content: flex-start;
@@ -68,7 +68,7 @@
 			width: 100%;
 			text-transform: uppercase;
 			font-size: 11px;
-			color: $core-grey-dark-300;
+			color: $gray-700;
 			margin-top: 0;
 		}
 
@@ -120,14 +120,14 @@
 	.grid {
 		.tick {
 			line {
-				stroke: $core-grey-light-500;
+				stroke: $gray-100;
 				stroke-width: 1;
 				shape-rendering: crispEdges;
 			}
 
 			&:first-child {
 				line {
-					stroke: $core-grey-dark-500;
+					stroke: $gray-700;
 				}
 			}
 		}
@@ -143,7 +143,7 @@
 		text-anchor: start;
 		&.tick {
 			&text {
-				fill: $core-grey-dark-500;
+				fill: $gray-700;
 			}
 		}
 	}

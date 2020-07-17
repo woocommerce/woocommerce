@@ -1,5 +1,3 @@
-
-
 .woocommerce_devdocs {
 	@include breakpoint( '>1280px' ) {
 		&.is-list {
@@ -27,13 +25,13 @@
 
 	.woocommerce-devdocs__example {
 		padding: $gap;
-		box-shadow: inset 0 2px 1px rgba($core-grey-dark-800, 0.075);
+		box-shadow: inset 0 2px 1px rgba($gray-900, 0.075);
 
 		// Grid background
-		background-image: linear-gradient(rgba($core-grey-dark-800, 0.05) 1px, transparent 1px),
-			linear-gradient(90deg, rgba($core-grey-dark-800, 0.05) 1px, transparent 1px),
-			linear-gradient(rgba($core-grey-dark-800, 0.025) 1px, transparent 1px),
-			linear-gradient(90deg, rgba($core-grey-dark-800, 0.025) 1px, transparent 1px);
+		background-image: linear-gradient(rgba($gray-900, 0.05) 1px, transparent 1px),
+			linear-gradient(90deg, rgba($gray-900, 0.05) 1px, transparent 1px),
+			linear-gradient(rgba($gray-900, 0.025) 1px, transparent 1px),
+			linear-gradient(90deg, rgba($gray-900, 0.025) 1px, transparent 1px);
 		background-size: 32px 32px, 32px 32px, 8px 8px, 8px 8px;
 		background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
 
@@ -65,7 +63,7 @@
 
 			th,
 			td {
-				border-bottom: 1px solid $core-grey-light-700;
+				border-bottom: 1px solid $gray-400;
 				text-align: left;
 			}
 

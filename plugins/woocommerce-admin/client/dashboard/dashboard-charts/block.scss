@@ -1,5 +1,3 @@
-
-
 .woocommerce-dashboard__chart-block-wrapper {
 	cursor: pointer;
 	&:hover {
@@ -38,7 +36,7 @@
 			.woocommerce-legend__item > button {
 				cursor: default;
 				&:hover {
-					background: $core-grey-light-100;
+					background: $gray-100;
 				}
 				.woocommerce-legend__item-container {
 					cursor: default;
@@ -49,16 +47,16 @@
 			}
 
 			&:hover {
-				background: $core-grey-light-100;
+				background: $gray-100;
 				.woocommerce-legend__item > button {
-					background: $core-grey-light-100;
+					background: $gray-100;
 				}
 			}
 		}
 	}
 
 	&:hover {
-		background: $core-grey-light-100;
+		background: $gray-100;
 	}
 
 	.screen-reader-text:focus {

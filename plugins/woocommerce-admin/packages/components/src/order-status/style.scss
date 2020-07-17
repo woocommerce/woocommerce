@@ -1,5 +1,3 @@
-
-
 .woocommerce-order-status {
 	display: flex;
 	align-items: center;
@@ -10,10 +8,10 @@
 	width: 16px;
 	height: 16px;
 	display: block;
-	background: $core-grey-light-700;
+	background: $gray-400;
 	margin-right: $gap-smallest * 2;
 	border-radius: 50%;
-	border: 3px solid $core-grey-light-500;
+	border: 3px solid $gray-100;
 
 	&.is-processing {
 		background: $valid-green;

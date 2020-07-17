@@ -1,11 +1,9 @@
-
 .woocommerce-chart {
 	margin-top: -$gap;
 	margin-bottom: $gap-large;
 	background: $studio-white;
-	border: 1px solid $core-grey-light-700;
+	border: 1px solid $gray-400;
 	border-top: 0;
-
 	@include breakpoint( '<782px' ) {
 		margin-left: -16px;
 		margin-right: -16px;
@@ -17,7 +15,7 @@
 
 	.woocommerce-chart__header {
 		min-height: 50px;
-		border-bottom: 1px solid $core-grey-light-700;
+		border-bottom: 1px solid $gray-400;
 		display: flex;
 		flex-flow: row wrap;
 		justify-content: space-between;
@@ -66,7 +64,7 @@
 
 .woocommerce-chart__interval-select {
 	align-items: start;
-	border-right: 1px solid $core-grey-light-700;
+	border-right: 1px solid $gray-400;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -104,12 +102,12 @@
 	background: transparent !important;
 
 	&.components-button {
-		color: $core-grey-light-700;
+		color: $gray-400;
 		display: inline-flex;
 		padding: 8px;
 
 		&.woocommerce-chart__type-button-selected {
-			color: $core-grey-dark-500;
+			color: $gray-700;
 		}
 	}
 }

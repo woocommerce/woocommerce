@@ -1,33 +1,10 @@
-
-
 @import 'node_modules/@automattic/color-studio/dist/color-variables.scss';
+@import 'node_modules/@wordpress/base-styles/colors';
 
 $transparent: rgba(255, 255, 255, 0);
 
-// Greys
-$core-grey-light-100: #f8f9f9;
-$core-grey-light-200: #f3f4f5;
-$core-grey-light-300: #edeff0;
-$core-grey-light-400: #e8eaeb;
-$core-grey-light-500: #e2e4e7;
-$core-grey-light-600: #d7dade;
-$core-grey-light-700: #ccd0d4;
-$core-grey-light-800: #b5bcc2;
-$core-grey-light-900: #a2aab2;
-$core-grey-dark-100: #86909b;
-$core-grey-dark-150: #8d96a0;
-$core-grey-dark-200: #78848f;
-$core-grey-dark-300: #6c7781; // This & below have 4.5+ contrast against white
-$core-grey-dark-400: #606a73;
-$core-grey-dark-500: #555d66;
-$core-grey-dark-600: #40464d;
-$core-grey-dark-700: #32373c;
-$core-grey-dark-800: #23282d;
-$core-grey-dark-900: #191e23;
-$core-form-grey: #7e8993; // WP 5.3 form input border
-
-$gray-text: $core-grey-dark-500;
-$gray-text-hover: $core-grey-dark-800;
+$gray-text: $gray-700;
+$gray-text-hover: $gray-900;
 
 // Gutenberg
 $button-hover: #fafafa;
@@ -52,9 +29,3 @@ $button-border: darken($button, 20%);
 
 // Blues
 $core-blue-dark-900: #0071a1;
-
-// Inbox Messages
-$light-gray-secondary: #ccc;
-$light-gray-tertiary: #e7e8e9;
-$dark-gray-primary: #1e1e1e;
-$medium-gray-text: #757575;

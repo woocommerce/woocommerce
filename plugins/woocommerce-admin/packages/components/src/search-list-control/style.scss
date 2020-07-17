@@ -9,7 +9,7 @@
 	padding: $gap 0 0;
 	// 76px is the height of 1 row of tags.
 	min-height: 76px;
-	border-top: 1px solid $core-grey-light-500;
+	border-top: 1px solid $gray-100;
 
 	.woocommerce-search-list__selected-header {
 		margin-bottom: $gap-smaller;
@@ -27,7 +27,7 @@
 .woocommerce-search-list__search {
 	margin: $gap 0;
 	padding: $gap 0 0;
-	border-top: 1px solid $core-grey-light-500;
+	border-top: 1px solid $gray-100;
 
 	.components-base-control__field {
 		margin-bottom: $gap;
@@ -39,8 +39,8 @@
 	max-height: 17em;
 	overflow-x: hidden;
 	overflow-y: auto;
-	border-top: 1px solid $core-grey-light-500;
-	border-bottom: 1px solid $core-grey-light-500;
+	border-top: 1px solid $gray-100;
+	border-bottom: 1px solid $gray-100;
 
 	&.is-loading {
 		padding: $gap-small 0;
@@ -78,7 +78,7 @@
 	}
 
 	& > [role='menu'] {
-		border: 1px solid $core-grey-light-500;
+		border: 1px solid $gray-100;
 		border-bottom: none;
 	}
 
@@ -89,11 +89,11 @@
 		padding: $gap-small $gap;
 		background: $studio-white;
 		// !important to keep the border around on hover
-		border-bottom: 1px solid $core-grey-light-500 !important;
-		color: $core-grey-dark-500;
+		border-bottom: 1px solid $gray-100 !important;
+		color: $gray-700;
 
 		@include hover-state {
-			background: $core-grey-light-100;
+			background: $gray-100;
 		}
 
 		&:last-child {
@@ -122,7 +122,7 @@
 		}
 
 		&:not(.depth-0) + .depth-0 {
-			border-top: 1px solid $core-grey-light-500;
+			border-top: 1px solid $gray-100;
 		}
 
 		// Anything deeper than 5 levels will use this fallback depth
@@ -148,7 +148,7 @@
 
 		.woocommerce-search-list__item-prefix {
 			display: none;
-			color: $core-grey-dark-300;
+			color: $gray-700;
 		}
 
 		&.is-searching,
@@ -170,18 +170,18 @@
 
 		&.is-searching {
 			.woocommerce-search-list__item-name {
-				color: $core-grey-dark-900;
+				color: $gray-900;
 			}
 		}
 
 		.woocommerce-search-list__item-count {
 			flex: 0 1 auto;
 			padding: $gap-smallest/2 $gap-smaller;
-			border: 1px solid $core-grey-light-500;
+			border: 1px solid $gray-100;
 			border-radius: 12px;
 			font-size: 0.8em;
 			line-height: 1.4;
-			color: $core-grey-dark-300;
+			color: $gray-700;
 			background: $studio-white;
 			white-space: nowrap;
 		}

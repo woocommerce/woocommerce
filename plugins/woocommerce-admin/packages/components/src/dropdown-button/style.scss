@@ -1,10 +1,8 @@
-
-
 .woocommerce-page .woocommerce-dropdown-button {
 	background-color: $studio-white;
 	position: relative;
-	border: 1px solid $core-grey-light-500;
-	color: $core-grey-dark-500;
+	border: 1px solid $gray-100;
+	color: $gray-700;
 	border-radius: 4px;
 	padding: 0 40px 0 0;
 	width: 100%;
@@ -12,7 +10,9 @@
 
 	&::after {
 		content: '';
-		background: transparent url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E) no-repeat right 0 top 55%;
+		background: transparent
+			url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E)
+			no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
 		width: 32px;
@@ -29,7 +29,7 @@
 	&:hover,
 	&:active,
 	&.is-open {
-		background-color: $core-grey-light-100;
+		background-color: $gray-100;
 	}
 
 	&.is-multi-line .woocommerce-dropdown-button__labels {
@@ -37,7 +37,7 @@
 	}
 
 	&:not(:focus):not(.is-open) {
-		border-color: $core-form-grey;
+		border-color: $gray-700;
 	}
 }
 

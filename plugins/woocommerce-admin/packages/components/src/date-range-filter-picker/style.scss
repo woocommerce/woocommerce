@@ -1,5 +1,3 @@
-
-
 .woocommerce-filters-date__content {
 	&.is-mobile {
 		.components-popover__header {
@@ -20,7 +18,7 @@
 
 .woocommerce-filters-date__tabs {
 	height: calc(100% - 42px);
-	border-top: 1px solid $core-grey-light-700;
+	border-top: 1px solid $gray-400;
 
 	.components-tab-panel__tabs {
 		display: flex;
@@ -47,7 +45,7 @@
 	font-weight: 100;
 	text-transform: uppercase;
 	text-align: center;
-	color: $core-grey-dark-300;
+	color: $gray-700;
 	width: 100%;
 	margin: 0;
 	padding: 1em;
@@ -63,7 +61,7 @@
 	background-color: $studio-white;
 
 	&.is-custom {
-		border-top: 1px solid $core-grey-light-700;
+		border-top: 1px solid $gray-400;
 	}
 }
 
