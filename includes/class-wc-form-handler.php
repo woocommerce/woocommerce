@@ -769,7 +769,7 @@ class WC_Form_Handler {
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
 		if ( 'variable' === $add_to_cart_handler || 'variation' === $add_to_cart_handler ) {
-			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
+			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id, $adding_to_cart );
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
@@ -865,16 +865,20 @@ class WC_Form_Handler {
 	 * @since 2.4.6 Split from add_to_cart_action.
 	 * @throws Exception If add to cart fails.
 	 * @param int $product_id Product ID to add to the cart.
+	 * @param obj WC_Product $product Product object to add to cart.
 	 * @return bool success or not
 	 */
-	private static function add_to_cart_handler_variable( $product_id ) {
+	private static function add_to_cart_handler_variable( $product_id, $adding_to_cart = false ) {
 		try {
 			$variation_id         = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$quantity             = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$missing_attributes   = array();
 			$variations           = array();
 			$variation_attributes = array();
-			$adding_to_cart       = wc_get_product( $product_id );
+
+			if ( ! $adding_to_cart instanceof WC_Product ) {
+				$adding_to_cart = wc_get_product( $product_id );
+			}
 
 			if ( ! $adding_to_cart ) {
 				return false;
