@@ -773,7 +773,7 @@ class WC_Form_Handler {
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
-			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url ); // Custom handler.
+			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url, $adding_to_cart ); // Custom handler.
 		} else {
 			$was_added_to_cart = self::add_to_cart_handler_simple( $product_id );
 		}
