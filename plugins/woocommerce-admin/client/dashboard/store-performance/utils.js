@@ -12,6 +12,7 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getFilterQuery } from 'wc-api/reports/utils';
 
 function getReportUrl( href, persistedQuery, primaryItem ) {
 	if ( ! href ) {
@@ -73,7 +74,7 @@ export const getIndicatorValues = ( {
 	};
 };
 
-export const getIndicatorData = ( select, indicators, query ) => {
+export const getIndicatorData = ( select, indicators, query, filters ) => {
 	const {
 		getReportItems,
 		getReportItemsError,
@@ -88,7 +89,9 @@ export const getIndicatorData = ( select, indicators, query ) => {
 	const statKeys = indicators
 		.map( ( indicator ) => indicator.stat )
 		.join( ',' );
+	const filterQuery = getFilterQuery( { filters, query } );
 	const primaryQuery = {
+		...filterQuery,
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp(
 			endPrimary,
@@ -98,6 +101,7 @@ export const getIndicatorData = ( select, indicators, query ) => {
 	};
 
 	const secondaryQuery = {
+		...filterQuery,
 		after: appendTimestamp( datesFromQuery.secondary.after, 'start' ),
 		before: appendTimestamp(
 			endSecondary,

@@ -27,11 +27,13 @@ import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import './style.scss';
 
-const renderLeaderboardToggles = ( { allLeaderboards, hiddenBlocks, onToggleHiddenBlock } ) => {
+const renderLeaderboardToggles = ( {
+	allLeaderboards,
+	hiddenBlocks,
+	onToggleHiddenBlock,
+} ) => {
 	return allLeaderboards.map( ( leaderboard ) => {
-		const checked = ! hiddenBlocks.includes(
-			leaderboard.id
-		);
+		const checked = ! hiddenBlocks.includes( leaderboard.id );
 		return (
 			<MenuItem
 				checked={ checked }
@@ -40,13 +42,10 @@ const renderLeaderboardToggles = ( { allLeaderboards, hiddenBlocks, onToggleHidd
 				key={ leaderboard.id }
 				onInvoke={ () => {
 					onToggleHiddenBlock( leaderboard.id )();
-					recordEvent(
-						'dash_leaderboards_toggle',
-						{
-							status: checked ? 'off' : 'on',
-							key: leaderboard.id,
-						}
-					);
+					recordEvent( 'dash_leaderboards_toggle', {
+						status: checked ? 'off' : 'on',
+						key: leaderboard.id,
+					} );
 				} }
 			>
 				{ leaderboard.label }
@@ -55,7 +54,13 @@ const renderLeaderboardToggles = ( { allLeaderboards, hiddenBlocks, onToggleHidd
 	} );
 };
 
-const renderLeaderboards = ( { allLeaderboards, hiddenBlocks, query, rowsPerTable } ) => {
+const renderLeaderboards = ( {
+	allLeaderboards,
+	hiddenBlocks,
+	query,
+	rowsPerTable,
+	filters,
+} ) => {
 	return allLeaderboards.map( ( leaderboard ) => {
 		if ( hiddenBlocks.includes( leaderboard.id ) ) {
 			return undefined;
@@ -69,6 +74,7 @@ const renderLeaderboards = ( { allLeaderboards, hiddenBlocks, query, rowsPerTabl
 				query={ query }
 				title={ leaderboard.label }
 				totalRows={ rowsPerTable }
+				filters={ filters }
 			/>
 		);
 	} );
@@ -89,9 +95,12 @@ const Leaderboards = ( props ) => {
 		query,
 		title,
 		titleInput,
+		filters,
 	} = props;
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
-	const [ rowsPerTable, setRowsPerTableState ] = useState( parseInt( userPrefs.dashboard_leaderboard_rows || 5, 10 ) );
+	const [ rowsPerTable, setRowsPerTableState ] = useState(
+		parseInt( userPrefs.dashboard_leaderboard_rows || 5, 10 )
+	);
 
 	const setRowsPerTable = ( rows ) => {
 		setRowsPerTableState( parseInt( rows, 10 ) );
@@ -101,7 +110,7 @@ const Leaderboards = ( props ) => {
 		updateUserPreferences( userDataFields );
 	};
 
-	const renderMenu = () =>  (
+	const renderMenu = () => (
 		<EllipsisMenu
 			label={ __(
 				'Choose which leaderboards to display and other settings',
@@ -112,21 +121,19 @@ const Leaderboards = ( props ) => {
 					<MenuTitle>
 						{ __( 'Leaderboards', 'woocommerce-admin' ) }
 					</MenuTitle>
-					{ renderLeaderboardToggles( { allLeaderboards, hiddenBlocks, onToggleHiddenBlock } ) }
+					{ renderLeaderboardToggles( {
+						allLeaderboards,
+						hiddenBlocks,
+						onToggleHiddenBlock,
+					} ) }
 					<SelectControl
 						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ __(
-							'Rows Per Table',
-							'woocommerce-admin'
-						) }
+						label={ __( 'Rows Per Table', 'woocommerce-admin' ) }
 						value={ rowsPerTable }
-						options={ Array.from(
-							{ length: 20 },
-							( v, key ) => ( {
-								v: key + 1,
-								label: key + 1,
-							} )
-						) }
+						options={ Array.from( { length: 20 }, ( v, key ) => ( {
+							v: key + 1,
+							label: key + 1,
+						} ) ) }
 						onChange={ setRowsPerTable }
 					/>
 					{ window.wcAdminFeatures[
@@ -152,18 +159,22 @@ const Leaderboards = ( props ) => {
 		<Fragment>
 			<div className="woocommerce-dashboard__dashboard-leaderboards">
 				<SectionHeader
-					title={
-						title || __( 'Leaderboards', 'woocommerce-admin' )
-					}
+					title={ title || __( 'Leaderboards', 'woocommerce-admin' ) }
 					menu={ renderMenu() }
 				/>
 				<div className="woocommerce-dashboard__columns">
-					{ renderLeaderboards( { allLeaderboards, hiddenBlocks, query, rowsPerTable } ) }
+					{ renderLeaderboards( {
+						allLeaderboards,
+						hiddenBlocks,
+						query,
+						rowsPerTable,
+						filters,
+					} ) }
 				</div>
 			</div>
 		</Fragment>
 	);
-}
+};
 
 Leaderboards.propTypes = {
 	query: PropTypes.object.isRequired,
@@ -171,11 +182,9 @@ Leaderboards.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getItems,
-			getItemsError,
-			isGetItemsRequesting,
-		} = select( 'wc-api' );
+		const { getItems, getItemsError, isGetItemsRequesting } = select(
+			'wc-api'
+		);
 		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', {
 			leaderboards: [],
 		} );

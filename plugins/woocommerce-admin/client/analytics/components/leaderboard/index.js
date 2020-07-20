@@ -20,6 +20,7 @@ import { getLeaderboard } from 'wc-api/items/utils';
 import ReportError from 'analytics/components/report-error';
 import sanitizeHTML from 'lib/sanitize-html';
 import withSelect from 'wc-api/with-select';
+import { getFilterQuery } from 'wc-api/reports/utils';
 import './style.scss';
 
 export class Leaderboard extends Component {
@@ -140,10 +141,11 @@ Leaderboard.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { id, query, totalRows } = props;
+		const { id, query, totalRows, filters } = props;
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		const filterQuery = getFilterQuery( { filters, query } );
 
 		const leaderboardQuery = {
 			id,
@@ -152,6 +154,7 @@ export default compose(
 			query,
 			select,
 			defaultDateRange,
+			filterQuery,
 		};
 		const leaderboardData = getLeaderboard( leaderboardQuery );
 

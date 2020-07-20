@@ -18,6 +18,7 @@ import {
 	OPTIONS_STORE_NAME,
 	useUserPreferences,
 } from '@woocommerce/data';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -34,6 +35,10 @@ import {
 	isoDateFormat,
 } from 'lib/date';
 import ReportFilters from 'analytics/components/report-filters';
+import {
+	CurrencyContext,
+	getFilteredCurrencyInstance,
+} from 'lib/currency-context';
 
 const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
@@ -292,6 +297,7 @@ const CustomizableDashboard = ( {
 										visibleSectionKeys.length - 1
 									]
 								}
+								filters={ filters }
 							/>
 						);
 					}
@@ -303,14 +309,16 @@ const CustomizableDashboard = ( {
 	};
 
 	return (
-		<Fragment>
+		<CurrencyContext.Provider
+			value={ getFilteredCurrencyInstance( getQuery() ) }
+		>
 			{ isTaskListEnabled && (
 				<Suspense fallback={ <Spinner /> }>
 					<TaskList query={ query } inline={ isDashboardShown } />
 				</Suspense>
 			) }
 			{ isDashboardShown && renderDashboardReports() }
-		</Fragment>
+		</CurrencyContext.Provider>
 	);
 };
 
