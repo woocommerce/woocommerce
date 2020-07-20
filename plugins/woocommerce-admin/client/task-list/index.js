@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, cloneElement, Fragment } from '@wordpress/element';
-import { isEqual } from 'lodash';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
 import {
@@ -16,6 +15,7 @@ import {
 } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { Icon, check, chevronRight } from '@wordpress/icons';
+import { xor } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -47,34 +47,18 @@ class TaskDashboard extends Component {
 	}
 
 	componentDidMount() {
-		const { incompleteTasks, updateOptions } = this.props;
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
 
 		this.recordTaskView();
 		this.recordTaskListView();
-
-		if ( ! incompleteTasks.length ) {
-			updateOptions( {
-				woocommerce_task_list_complete: 'yes',
-			} );
-		}
-
+		this.possiblyCompleteTaskList();
 		this.possiblyTrackCompletedTasks();
 	}
 
 	componentDidUpdate( prevProps ) {
-		const {
-			completedTaskKeys,
-			incompleteTasks,
-			query,
-			updateOptions,
-		} = this.props;
-		const {
-			completedTaskKeys: prevCompletedTaskKeys,
-			incompleteTasks: prevIncompleteTasks,
-			query: prevQuery,
-		} = prevProps;
+		const { query } = this.props;
+		const { query: prevQuery } = prevProps;
 		const { task: prevTask } = prevQuery;
 		const { task } = query;
 
@@ -83,25 +67,40 @@ class TaskDashboard extends Component {
 			this.recordTaskView();
 		}
 
-		if ( ! incompleteTasks.length && prevIncompleteTasks.length ) {
+		this.possiblyCompleteTaskList();
+		this.possiblyTrackCompletedTasks();
+	}
+
+	possiblyCompleteTaskList() {
+		const { isTaskListComplete, updateOptions } = this.props;
+
+		if ( ! this.getIncompleteTasks().length && ! isTaskListComplete ) {
 			updateOptions( {
 				woocommerce_task_list_complete: 'yes',
 			} );
 		}
+	}
 
-		if ( ! isEqual( prevCompletedTaskKeys, completedTaskKeys ) ) {
-			this.possiblyTrackCompletedTasks();
-		}
+	getCompletedTaskKeys() {
+		return this.getVisibleTasks()
+			.filter( ( task ) => task.completed )
+			.map( ( task ) => task.key );
+	}
+
+	getIncompleteTasks() {
+		return this.getAllTasks().filter(
+			( task ) => task.visible && ! task.completed
+		);
 	}
 
 	possiblyTrackCompletedTasks() {
 		const {
-			completedTaskKeys,
 			trackedCompletedTasks,
 			updateOptions,
 		} = this.props;
+		const completedTaskKeys = this.getCompletedTaskKeys();
 
-		if ( ! isEqual( trackedCompletedTasks, completedTaskKeys ) ) {
+		if ( xor( trackedCompletedTasks, completedTaskKeys ).length !== 0 ) {
 			updateOptions( {
 				woocommerce_task_list_tracked_completed_tasks: completedTaskKeys,
 			} );
@@ -144,9 +143,8 @@ class TaskDashboard extends Component {
 		document.body.classList.remove( 'woocommerce-task-dashboard__body' );
 	}
 
-	getTasks() {
+	getAllTasks() {
 		const {
-			dismissedTasks,
 			profileItems,
 			query,
 			taskListPayments,
@@ -167,7 +165,13 @@ class TaskDashboard extends Component {
 			installAndActivatePlugins,
 			createNotice,
 			isJetpackConnected,
-		} ).filter(
+		} );
+	}
+
+	getVisibleTasks() {
+		const { dismissedTasks } = this.props;
+
+		return this.getAllTasks().filter(
 			( task ) => task.visible && ! dismissedTasks.includes( task.key )
 		);
 	}
@@ -199,7 +203,7 @@ class TaskDashboard extends Component {
 		}
 
 		const { profileItems } = this.props;
-		const tasks = this.getTasks();
+		const tasks = this.getVisibleTasks();
 
 		recordEvent( 'tasklist_view', {
 			number_tasks: tasks.length,
@@ -228,27 +232,11 @@ class TaskDashboard extends Component {
 	}
 
 	getCurrentTask() {
-		const {
-			query,
-			profileItems,
-			payments,
-			activePlugins,
-			installedPlugins,
-			createNotice,
-			isJetpackConnected,
-		} = this.props;
-		const allTasks = getAllTasks( {
-			profileItems,
-			options: payments,
-			query,
-			activePlugins,
-			installedPlugins,
-			createNotice,
-			isJetpackConnected,
-		} );
+		const { query } = this.props;
+
 		const { task } = query;
-		
-		const currentTask = allTasks.find( ( s ) => s.key === task );
+
+		const currentTask = this.getAllTasks().find( ( s ) => s.key === task );
 
 		if ( ! currentTask ) {
 			return null;
@@ -354,7 +342,7 @@ class TaskDashboard extends Component {
 		const { query } = this.props;
 		const { isCartModalOpen, isWelcomeModalOpen } = this.state;
 		const currentTask = this.getCurrentTask();
-		const listTasks = this.getTasks().map( ( task ) => {
+		const listTasks = this.getVisibleTasks().map( ( task ) => {
 			task.className = classNames(
 				task.completed ? 'is-complete' : null,
 				task.className
@@ -401,12 +389,10 @@ class TaskDashboard extends Component {
 
 			return task;
 		} );
-		const numCompleteTasks = listTasks.filter( ( task ) => task.completed )
-			.length;
 		const progressBarClass = classNames(
 			'woocommerce-task-card__progress-bar',
 			{
-				completed: listTasks.length === numCompleteTasks,
+				completed: listTasks.length === this.getCompletedTaskKeys().length,
 			}
 		);
 
@@ -426,7 +412,7 @@ class TaskDashboard extends Component {
 								<progress
 									className={ progressBarClass }
 									max={ listTasks.length }
-									value={ numCompleteTasks }
+									value={ this.getCompletedTaskKeys().length }
 								/>
 								<CardHeader size="medium">
 									<Text variant="title.small">
@@ -457,7 +443,7 @@ class TaskDashboard extends Component {
 }
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		const { getOption } = select( OPTIONS_STORE_NAME );
 		const {
@@ -467,6 +453,9 @@ export default compose(
 		} = select( PLUGINS_STORE_NAME );
 		const profileItems = getProfileItems();
 
+		const isTaskListComplete =
+			getOption( 'woocommerce_task_list_complete' ) ||
+			false;
 		const modalDismissed =
 			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ||
 			false;
@@ -479,35 +468,18 @@ export default compose(
 
 		const activePlugins = getActivePlugins();
 		const installedPlugins = getInstalledPlugins();
-		const { createNotice } = props;
-		const tasks = getAllTasks( {
-			profileItems,
-			options: payments,
-			query: props.query,
-			activePlugins,
-			installedPlugins,
-			createNotice,
-			isJetpackConnected: isJetpackConnected(),
-		} );
-		const completedTaskKeys = tasks
-			.filter( ( task ) => task.completed )
-			.map( ( task ) => task.key );
-		const incompleteTasks = tasks.filter(
-			( task ) => task.visible && ! task.completed
-		);
 
 		return {
+			activePlugins,
 			dismissedTasks,
+			isJetpackConnected: isJetpackConnected(),
+			installedPlugins,
+			isTaskListComplete,
 			modalDismissed,
+			payments,
 			profileItems,
 			taskListPayments,
-			isJetpackConnected: isJetpackConnected(),
-			incompleteTasks,
 			trackedCompletedTasks,
-			completedTaskKeys,
-			activePlugins,
-			installedPlugins,
-			payments,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
@@ -517,8 +489,8 @@ export default compose(
 
 		return {
 			createNotice,
-			updateOptions,
 			installAndActivatePlugins,
+			updateOptions,
 		};
 	} )
 )( TaskDashboard );
