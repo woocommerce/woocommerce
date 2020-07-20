@@ -8,8 +8,9 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
  */
 
 /**
- * Returns the CSS value of the specified property in the document element.
+ * Returns the value of a specific CSS property for the element matched by the provided selector.
  *
+ * @param {string} selector     CSS selector that matches the element to query.
  * @param {string} property     Name of the property to retrieve the style
  *                              value from.
  * @param {string} defaultValue Fallback value if the value for the property
@@ -17,15 +18,21 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
  *
  * @return {string} The style value of that property in the document element.
  */
-const getDocumentStyle = ( property, defaultValue ) => {
-	let documentStyle = {};
+const getComputedStyle = ( selector, property, defaultValue ) => {
+	let elementStyle = {};
+
 	if (
-		typeof window === 'object' &&
+		typeof document === 'object' &&
+		typeof document.querySelector === 'function' &&
 		typeof window.getComputedStyle === 'function'
 	) {
-		documentStyle = window.getComputedStyle( document.documentElement );
+		const element = document.querySelector( selector );
+		if ( element ) {
+			elementStyle = window.getComputedStyle( element );
+		}
 	}
-	return documentStyle[ property ] || defaultValue;
+
+	return elementStyle[ property ] || defaultValue;
 };
 
 /**
@@ -36,7 +43,11 @@ const elementOptions = {
 		base: {
 			iconColor: '#666EE8',
 			color: '#31325F',
-			fontSize: getDocumentStyle( 'fontSize', '16px' ),
+			fontSize: getComputedStyle(
+				'.wc-block-checkout',
+				'fontSize',
+				'16px'
+			),
 			lineHeight: 1.375, // With a font-size of 16px, line-height will be 22px.
 			'::placeholder': {
 				color: '#fff',
