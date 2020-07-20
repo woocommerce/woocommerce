@@ -821,9 +821,6 @@ class WC_Countries {
 						),
 					),
 					'BA' => array(
-						'country' => array(
-							'label' => __('Country'),
-						),
 						'postcode' => array(
 							'priority' => 65,
 						),
