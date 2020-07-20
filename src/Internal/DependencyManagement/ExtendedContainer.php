@@ -40,11 +40,11 @@ class ExtendedContainer extends \League\Container\Container {
 	 * @param bool|null $shared Whether the resolution should be performed only once and cached.
 	 *
 	 * @return DefinitionInterface The generated definition for the container.
-	 * @throws \Exception Invalid parameters.
+	 * @throws ContainerException Invalid parameters.
 	 */
 	public function add( string $class_name, $concrete = null, bool $shared = null ) : DefinitionInterface {
 		if ( ! $this->class_is_in_root_namespace( $class_name ) && ! in_array( $class_name, $this->registration_whitelist, true ) ) {
-			throw new \Exception( "Can't use the container to register '$class_name', only objects in the " . Container::WOOCOMMERCE_ROOT_NAMESPACE . ' namespace are allowed for registration.' );
+			throw new ContainerException( "Can't use the container to register '$class_name', only objects in the " . Container::WOOCOMMERCE_ROOT_NAMESPACE . ' namespace are allowed for registration.' );
 		}
 
 		return parent::add( $class_name, $concrete, $shared );
@@ -68,11 +68,11 @@ class ExtendedContainer extends \League\Container\Container {
 	 * @param mixed  $concrete The new concrete (same as "add").
 	 *
 	 * @return DefinitionInterface The modified definition.
-	 * @throws \Exception Invalid parameters.
+	 * @throws ContainerException Invalid parameters.
 	 */
 	public function replace( string $class_name, $concrete ) {
 		if ( ! $this->has( $class_name ) ) {
-			throw new \Exception( "ExtendedContainer::replace: The container doesn't have '$class_name' registered, please use 'add' instead of 'replace'." );
+			throw new ContainerException( "ExtendedContainer::replace: The container doesn't have '$class_name' registered, please use 'add' instead of 'replace'." );
 		}
 
 		return $this->extend( $class_name )->setConcrete( $concrete );
@@ -96,11 +96,11 @@ class ExtendedContainer extends \League\Container\Container {
 	 * @param bool   $new True to generate a new instance even if the class was registered as shared.
 	 *
 	 * @return object An instance of the requested class.
-	 * @throws \Exception Attempt to get an instance of a non-namespaced class.
+	 * @throws ContainerException Attempt to get an instance of a non-namespaced class.
 	 */
 	public function get( $id, bool $new = false ) {
 		if ( false === strpos( $id, '\\' ) ) {
-			throw new \Exception( "Attempt to get an instance of the non-namespaced class '$id' from the container, did you forget to add a namespace import?" );
+			throw new ContainerException( "Attempt to get an instance of the non-namespaced class '$id' from the container, did you forget to add a namespace import?" );
 		}
 
 		return parent::get( $id, $new );

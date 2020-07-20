@@ -34,7 +34,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
-	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
+	 * @throws ContainerException Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
 	protected function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		$definition = new Definition( $class_name, $concrete );
@@ -50,7 +50,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 				} else {
 					$argument_class = $argument->getClass();
 					if ( is_null( $argument_class ) ) {
-						throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
+						throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
 					}
 
 					$definition->addArgument( $argument_class->name );
@@ -73,7 +73,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 * @param mixed  $concrete   The concrete to check.
 	 *
 	 * @return \ReflectionMethod|null A ReflectionMethod representing the class constructor, if $concrete is null or a class name; null otherwise.
-	 * @throws \Exception Class has a private constructor, or can't reflect class, or the concrete is invalid.
+	 * @throws ContainerException Class has a private constructor, or can't reflect class, or the concrete is invalid.
 	 */
 	private function verify_class_and_concrete( string $class_name, $concrete ) {
 		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
@@ -82,14 +82,14 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 				$reflector   = new \ReflectionClass( $class );
 				$constructor = $reflector->getConstructor();
 				if ( isset( $constructor ) && ! $constructor->isPublic() ) {
-					throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '$class' isn't public, instances can't be created." );
+					throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '$class' isn't public, instances can't be created." );
 				}
 				return $constructor;
 			} catch ( \ReflectionException $ex ) {
-				throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
+				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
 			}
 		} elseif ( ! is_object( $concrete ) && ! is_callable( $concrete ) && ! function_exists( $concrete ) ) {
-			throw new \Exception( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
+			throw new ContainerException( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
 		}
 
 		return null;
@@ -106,7 +106,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
-	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
+	 * @throws ContainerException Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
 	protected function share_with_auto_arguments( string $class_name, $concrete = null ) : DefinitionInterface {
 		return $this->add_with_auto_arguments( $class_name, $concrete, true );

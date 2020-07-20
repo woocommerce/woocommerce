@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 
+use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
@@ -36,7 +37,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	public function test_add_throws_when_trying_to_register_class_in_forbidden_namespace() {
 		$external_class = \League\Container\Container::class;
 
-		$this->expectException( \Exception::class );
+		$this->expectException( ContainerException::class );
 		$this->expectExceptionMessage( "Can't use the container to register '" . $external_class . "', only objects in the Automattic\WooCommerce namespace are allowed for registration." );
 
 		$this->sut->add( $external_class );
@@ -57,7 +58,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	 * @testdox 'replace' should throw an exception when trying to replace a class that has not been previously registered.
 	 */
 	public function test_replace_throws_if_class_has_not_been_registered() {
-		$this->expectException( \Exception::class );
+		$this->expectException( ContainerException::class );
 		$this->expectExceptionMessage( "ExtendedContainer::replace: The container doesn't have '" . DependencyClass::class . "' registered, please use 'add' instead of 'replace'." );
 
 		$this->sut->replace( DependencyClass::class, null );
