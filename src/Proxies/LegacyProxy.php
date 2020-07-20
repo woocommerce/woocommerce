@@ -24,6 +24,12 @@ class LegacyProxy {
 	 * Gets an instance of a given legacy class.
 	 * This must not be used to get instances of classes in the `src` directory.
 	 *
+	 * If a given class needs a special procedure to get an instance of it,
+	 * please add a private get_instance_of_(lowercased_class_name) and it will be
+	 * automatically invoked. See also how objects of classes having a static `instance`
+	 * method are retrieved, similar approaches can be used as needed to make use
+	 * of existing factory methods such as e.g. 'load'.
+	 *
 	 * @param string $class_name The name of the class to get an instance for.
 	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
 	 *
@@ -35,23 +41,19 @@ class LegacyProxy {
 			throw new \Exception( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use constructor injection or the instance of \\Psr\\Container\\ContainerInterface for that.' );
 		}
 
-		try {
-			// If a class has a dedicated method to obtain a instance, use it.
-			$method = 'get_instance_of_' . strtolower( $class_name );
-			if ( method_exists( __CLASS__, $method ) ) {
-				return $this->$method( ...$args );
-			}
-
-			// If the class is a singleton, use the "instance" method.
-			if ( method_exists( $class_name, 'instance' ) ) {
-				return $class_name::instance();
-			}
-
-			// Fallback to simply creating a new instance of the class.
-			return new $class_name( ...$args );
-		} catch ( \Exception $e ) {
-			throw new \Exception( __CLASS__ . '::' . __FUNCTION__ . ": error when getting a new instance of $class_name: {$e->getMessage()}" );
+		// If a class has a dedicated method to obtain a instance, use it.
+		$method = 'get_instance_of_' . strtolower( $class_name );
+		if ( method_exists( __CLASS__, $method ) ) {
+			return $this->$method( ...$args );
 		}
+
+		// If the class is a singleton, use the "instance" method.
+		if ( method_exists( $class_name, 'instance' ) ) {
+			return $class_name::instance( $args );
+		}
+
+		// Fallback to simply creating a new instance of the class.
+		return new $class_name( ...$args );
 	}
 
 	/**

@@ -909,6 +909,9 @@ final class WooCommerce {
 	 * Call a user function. This should be used to execute any non-idempotent function, especially
 	 * those in the `includes` directory or provided by WordPress.
 	 *
+	 * This method can be useful for unit tests, since functions called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_function_mocks.
+	 *
 	 * @param string $function_name The function to execute.
 	 * @param mixed  ...$parameters The parameters to pass to the function.
 	 *
@@ -923,6 +926,9 @@ final class WooCommerce {
 	/**
 	 * Call a static method in a class. This should be used to execute any non-idempotent method in classes
 	 * from the `includes` directory.
+	 *
+	 * This method can be useful for unit tests, since methods called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_static_mocks.
 	 *
 	 * @param string $class_name The name of the class containing the method.
 	 * @param string $method_name The name of the method.
@@ -939,6 +945,9 @@ final class WooCommerce {
 	/**
 	 * Gets an instance of a given legacy class.
 	 * This must not be used to get instances of classes in the `src` directory.
+	 *
+	 * This method can be useful for unit tests, since objects obtained using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_class_mocks.
 	 *
 	 * @param string $class_name The name of the class to get an instance for.
 	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.

@@ -20,6 +20,12 @@ class ExtendedContainer extends \League\Container\Container {
 	 * Whitelist of classes that we can register using the container
 	 * despite not belonging to the WooCommerce root namespace.
 	 *
+	 * In general we allow only the registration of classes in the
+	 * WooCommerce root namespace to prevent registering 3rd party code
+	 * (which doesn't really belong to this container) or old classes
+	 * (which may be eventually deprecated, also the LegacyProxy
+	 * should be used for those).
+	 *
 	 * @var string[]
 	 */
 	private $registration_whitelist = array(
@@ -30,7 +36,7 @@ class ExtendedContainer extends \League\Container\Container {
 	 * Register a class in the container.
 	 *
 	 * @param string    $class_name Class name.
-	 * @param mixed     $concrete How to resolve the class with `get`: a factory callback, a concrete instance, onother class name, or null to just create an instance of the class.
+	 * @param mixed     $concrete How to resolve the class with `get`: a factory callback, a concrete instance, another class name, or null to just create an instance of the class.
 	 * @param bool|null $shared Whether the resolution should be performed only once and cached.
 	 *
 	 * @return DefinitionInterface The generated definition for the container.
