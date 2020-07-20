@@ -1399,21 +1399,27 @@ class WC_Order extends WC_Abstract_Order {
 				$product        = $item->get_product();
 				if ( $product && $item_downloads ) {
 					foreach ( $item_downloads as $file ) {
-						$downloads[] = array(
-							'download_url'        => $file['download_url'],
-							'download_id'         => $file['id'],
-							'product_id'          => $product->get_id(),
-							'product_name'        => $product->get_name(),
-							'product_url'         => $product->is_visible() ? $product->get_permalink() : '', // Since 3.3.0.
-							'download_name'       => $file['name'],
-							'order_id'            => $this->get_id(),
-							'order_key'           => $this->get_order_key(),
-							'downloads_remaining' => $file['downloads_remaining'],
-							'access_expires'      => $file['access_expires'],
-							'file'                => array(
-								'name' => $file['name'],
-								'file' => $file['file'],
+						$downloads[] = apply_filters(
+							'woocommerce_order_downloadable_item',
+							array(
+								'download_url'        => $file['download_url'],
+								'download_id'         => $file['id'],
+								'product_id'          => $product->get_id(),
+								'product_name'        => $product->get_name(),
+								'product_url'         => $product->is_visible() ? $product->get_permalink() : '', // Since 3.3.0.
+								'download_name'       => $file['name'],
+								'order_id'            => $this->get_id(),
+								'order_key'           => $this->get_order_key(),
+								'downloads_remaining' => $file['downloads_remaining'],
+								'access_expires'      => $file['access_expires'],
+								'file'                => array(
+									'name' => $file['name'],
+									'file' => $file['file'],
+								),
 							),
+							$this,
+							$item,
+							$product
 						);
 					}
 				}
