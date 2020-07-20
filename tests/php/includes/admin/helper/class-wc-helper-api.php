@@ -1,9 +1,4 @@
 <?php
-/**
- * Class WC_Helper_API unit tests.
- *
- * @package WooCommerce\Tests\Importer
- */
 
 /**
  * Test class for WC_Helper_API.
@@ -22,8 +17,6 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that the url method returns the correct WooCommerce.com path.
-	 *
-	 * @return void
 	 */
 	public function test_api_url() {
 		$url = WC_Helper_API::url( '/test-path' );
@@ -32,8 +25,6 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 	/**
 	 * Test a GET request through the WC_Helper_API.
-	 *
-	 * @return void
 	 */
 	public function test_get_request() {
 		$request = WC_Helper_API::get(
@@ -45,8 +36,6 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 	/**
 	 * Test a POST request through the WC_Helper_API.
-	 *
-	 * @return void
 	 */
 	public function test_post_request() {
 		$request = WC_Helper_API::post(
@@ -58,8 +47,6 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 	/**
 	 * Test a PUT request through the WC_Helper_API.
-	 *
-	 * @return void
 	 */
 	public function test_put_request() {
 		$request = WC_Helper_API::put(
