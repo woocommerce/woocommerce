@@ -52,7 +52,7 @@ final class BankTransfer extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return filter_var( $this->settings['enabled'], FILTER_VALIDATE_BOOLEAN );
+		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**
@@ -75,8 +75,8 @@ final class BankTransfer extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return [
-			'title'       => isset( $this->settings['title'] ) ? $this->settings['title'] : '',
-			'description' => isset( $this->settings['description'] ) ? $this->settings['description'] : '',
+			'title'       => $this->get_setting( 'title' ),
+			'description' => $this->get_setting( 'description' ),
 		];
 	}
 }

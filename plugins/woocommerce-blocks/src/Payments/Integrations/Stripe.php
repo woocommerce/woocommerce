@@ -31,13 +31,6 @@ final class Stripe extends AbstractPaymentMethodType {
 	protected $name = 'stripe';
 
 	/**
-	 * Stripe settings from the WP options table
-	 *
-	 * @var array
-	 */
-	private $settings;
-
-	/**
 	 * An instance of the Asset Api
 	 *
 	 * @var Api

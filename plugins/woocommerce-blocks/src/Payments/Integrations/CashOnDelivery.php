@@ -52,7 +52,7 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return filter_var( $this->settings['enabled'], FILTER_VALIDATE_BOOLEAN );
+		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**
@@ -61,7 +61,7 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	 * @return boolean True if store allows COD payment for orders containing only virtual products.
 	 */
 	private function get_enable_for_virtual() {
-		return filter_var( $this->settings['enable_for_virtual'], FILTER_VALIDATE_BOOLEAN );
+		return filter_var( $this->get_setting( 'enable_for_virtual', false ), FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**
@@ -70,7 +70,7 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	 * @return array Array of shipping methods (string ids) that allow COD. (If empty, all support COD.)
 	 */
 	private function get_enable_for_methods() {
-		return $this->settings['enable_for_methods'];
+		return $this->get_setting( 'enable_for_methods', [] );
 	}
 
 
@@ -94,8 +94,8 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return [
-			'title'                    => isset( $this->settings['title'] ) ? $this->settings['title'] : '',
-			'description'              => isset( $this->settings['description'] ) ? $this->settings['description'] : '',
+			'title'                    => $this->get_setting( 'title' ),
+			'description'              => $this->get_setting( 'description' ),
 			'enableForVirtual'         => $this->get_enable_for_virtual(),
 			'enableForShippingMethods' => $this->get_enable_for_methods(),
 		];
