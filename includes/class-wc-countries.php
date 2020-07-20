@@ -827,7 +827,7 @@ class WC_Countries {
 						'state'    => array(
 							'label'    => __( 'Canton', 'woocommerce' ),
 							'required' => false,
-							'hidden' => true,
+							'hidden'   => true,
 						),
 					),
 					'BD' => array(
