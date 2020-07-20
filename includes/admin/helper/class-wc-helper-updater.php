@@ -192,16 +192,24 @@ class WC_Helper_Updater {
 		$locales = array_unique( $locales );
 
 		// Scan local plugins which may or may not have a subscription.
-		$plugins = WC_Helper::get_local_woo_plugins();
-		$active  = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
+		$plugins                 = WC_Helper::get_local_woo_plugins();
+		$active_woo_plugins      = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
 
-		$to_send = compact( 'plugins', 'active' );
+		/*
+		* Use only plugins that are subscribed to the automatic translations updates.
+		*/
+		$active_for_translations = array_filter(
+			$active_woo_plugins,
+			function( $plugin ) use ( $plugins ) {
+				return apply_filters( 'woocommerce_translations_updates_for_' . $plugins[ $plugin ]['slug'], false );
+			}
+		);
 
 		if ( wp_doing_cron() ) {
 			$timeout = 30;
 		} else {
 			// Three seconds, plus one extra second for every 10 plugins.
-			$timeout = 3 + (int) ( count( $plugins ) / 10 );
+			$timeout = 3 + (int) ( count( $active_for_translations ) / 10 );
 		}
 
 		$request_body = array(
@@ -209,13 +217,13 @@ class WC_Helper_Updater {
 			'plugins' => array(),
 		);
 
-		foreach ( $active as $active_plugin ) {
+		foreach ( $active_for_translations as $active_plugin ) {
 			$plugin = $plugins[ $active_plugin ];
 			$request_body['plugins'][ $plugin['slug'] ] = array( 'version' => $plugin['Version'] );
 		}
 
 		$raw_response = wp_remote_post(
-			'https://translate.wordpress.com/api/translations/wccom-api/translations_updates',
+			'https://translate.wordpress.com/api/translations_updates/woocommerce',
 			array(
 				'body'        => json_encode( $request_body ),
 				'headers'     => array( 'Content-Type: application/json' ),
@@ -223,6 +231,7 @@ class WC_Helper_Updater {
 			)
 		);
 
+		// Something wrong happened on the translate server side.
 		$response_code = wp_remote_retrieve_response_code( $raw_response );
 		if ( 200 !== $response_code ) {
 			return array();
@@ -240,21 +249,26 @@ class WC_Helper_Updater {
 			return array();
 		}
 
-		foreach ( $response['data'] as $plugin_name => $plugin_data ) {
-			foreach ( $plugin_data as $data ) {
-				$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin_name ][ $set['wp_locale'] ]['PO-Revision-Date'] );
-				$new_translation_revision_time       = new DateTime( $set['last_modified'] );
-				// Skip if translation set is not newer than what is installed already.
-				if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
-					continue;
+		$translations = array();
+
+		foreach ( $response['data'] as $plugin_name => $language_packs ) {
+			foreach ( $language_packs as $language_pack ) {
+				// Maybe we have this language pack already installed so lets check revision date.
+				if ( array_key_exists( $plugin_name, $installed_translations ) ) {
+					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin_name ][ $language_pack['wp_locale'] ]['PO-Revision-Date'] );
+					$new_translation_revision_time       = new DateTime( $language_pack['last_modified'] );
+					// Skip if translation language pack is not newer than what is installed already.
+					if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
+						continue;
+					}
 				}
 				$translations[] = array(
 					'type'       => 'plugin',
 					'slug'       => $plugin_name,
-					'language'   => $data['wp_locale'],
-					'version'    => $data['version'],
-					'updated'    => $data['last_modified'],
-					'package'    => $data['package'],
+					'language'   => $language_pack['wp_locale'],
+					'version'    => $language_pack['version'],
+					'updated'    => $language_pack['last_modified'],
+					'package'    => $language_pack['package'],
 					'autoupdate' => true,
 				);
 			}
