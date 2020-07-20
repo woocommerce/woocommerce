@@ -91,7 +91,10 @@ class Autoloader {
 				foreach ( self::$autoloaded_namespaces as $namespace => $directory ) {
 					$len = strlen( $namespace );
 					if ( substr( $class, 0, $len ) === $namespace ) {
-						require $directory . str_replace( '\\', '/', substr( $class, $len ) ) . '.php';
+						$filename = $directory . str_replace( '\\', '/', substr( $class, $len ) ) . '.php';
+						if ( file_exists( $filename ) ) {
+							require $filename;
+						}
 						return;
 					}
 				}

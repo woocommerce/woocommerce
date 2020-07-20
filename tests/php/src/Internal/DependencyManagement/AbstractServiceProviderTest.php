@@ -64,9 +64,23 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if an invalid class name is passed.
+	 * Runs before all the tests of the class.
 	 */
-	public function test_add_with_auto_arguments_throws_on_non_class_passed() {
+	public static function setUpBeforeClass() {
+		/**
+		 * Return a new instance of DependencyClass.
+		 *
+		 * @return DependencyClass The new instance.
+		 */
+		function get_new_dependency_class() {
+			return new DependencyClass();
+		};
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if an invalid class name is passed as class name.
+	 */
+	public function test_add_with_auto_arguments_throws_on_non_class_passed_as_class_name() {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class 'foobar': Class foobar does not exist" );
 
@@ -74,13 +88,38 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is neither an existing class name, an existing function, an object, or a callback.
+	 *
+	 * @testWith ["foobar"]
+	 *           [1234]
+	 *
+	 * @param mixed $concrete The concrete to use to register the class.
+	 */
+	public function test_add_with_auto_arguments_throws_on_non_class_passed_as_concrete( $concrete ) {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
+
+		$this->sut->add_with_auto_arguments( get_class( $this ), $concrete );
+	}
+
+	/**
 	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a private constructor.
 	 */
-	public function test_add_with_auto_arguments_throws_on_private_constructor() {
+	public function test_add_with_auto_arguments_throws_on_class_private_constructor() {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '" . ClassWithPrivateConstructor::class . "' isn't public, instances can't be created." );
 
 		$this->sut->add_with_auto_arguments( ClassWithPrivateConstructor::class );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is a class with a private constructor.
+	 */
+	public function test_add_with_auto_arguments_throws_on_concrete_private_constructor() {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '" . ClassWithPrivateConstructor::class . "' isn't public, instances can't be created." );
+
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithPrivateConstructor::class );
 	}
 
 	/**
@@ -104,7 +143,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should properly register the supplied class.
+	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when no concrete is passed.
 	 *
 	 * @testWith [true, 1]
 	 *           [false, 2]
@@ -112,7 +151,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 * @param bool $shared Whether to register the test class as shared or not.
 	 * @param int  $expected_constructions_count Expected number of times that the test class will have been instantiated.
 	 */
-	public function test_add_with_auto_arguments_works_as_expected( bool $shared, int $expected_constructions_count ) {
+	public function test_add_with_auto_arguments_works_as_expected_with_no_concrete( bool $shared, int $expected_constructions_count ) {
 		ClassWithDependencies::$instances_count = 0;
 
 		$this->container->share( DependencyClass::class );
@@ -130,4 +169,55 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 		// Constructor arguments are filled as expected.
 		$this->assertSame( $this->container->get( DependencyClass::class ), $resolved->dependency_class );
 	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete representing a class name is passed.
+	 */
+	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_class_name() {
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, DependencyClass::class );
+
+		$resolved = $this->container->get( ClassWithDependencies::class );
+
+		$this->assertInstanceOf( DependencyClass::class, $resolved );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete that is an object is passed.
+	 */
+	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_object() {
+		$object = new DependencyClass();
+
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, $object );
+
+		$resolved = $this->container->get( ClassWithDependencies::class );
+
+		$this->assertSame( $object, $resolved );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete that is a closure is passed.
+	 */
+	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_a_closure() {
+		$callable = function() {
+			return new DependencyClass();
+		};
+
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, $callable );
+
+		$resolved = $this->container->get( ClassWithDependencies::class );
+
+		$this->assertInstanceOf( DependencyClass::class, $resolved );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete that is a function name is passed.
+	 */
+	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_a_function_name() {
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, __NAMESPACE__ . '\get_new_dependency_class' );
+
+		$resolved = $this->container->get( ClassWithDependencies::class );
+
+		$this->assertInstanceOf( DependencyClass::class, $resolved );
+	}
 }
+

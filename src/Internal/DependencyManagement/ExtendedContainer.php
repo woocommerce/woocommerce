@@ -29,19 +29,19 @@ class ExtendedContainer extends \League\Container\Container {
 	/**
 	 * Register a class in the container.
 	 *
-	 * @param string    $id Class name.
+	 * @param string    $class_name Class name.
 	 * @param mixed     $concrete How to resolve the class with `get`: a factory callback, a concrete instance, onother class name, or null to just create an instance of the class.
 	 * @param bool|null $shared Whether the resolution should be performed only once and cached.
 	 *
 	 * @return DefinitionInterface The generated definition for the container.
 	 * @throws \Exception Invalid parameters.
 	 */
-	public function add( string $id, $concrete = null, bool $shared = null ) : DefinitionInterface {
-		if ( ! $this->class_is_in_root_namespace( $id ) && ! in_array( $id, $this->registration_whitelist, true ) ) {
-			throw new \Exception( "Can't use the container to register '$id', only objects in the " . Container::WOOCOMMERCE_ROOT_NAMESPACE . ' namespace are allowed for registration.' );
+	public function add( string $class_name, $concrete = null, bool $shared = null ) : DefinitionInterface {
+		if ( ! $this->class_is_in_root_namespace( $class_name ) && ! in_array( $class_name, $this->registration_whitelist, true ) ) {
+			throw new \Exception( "Can't use the container to register '$class_name', only objects in the " . Container::WOOCOMMERCE_ROOT_NAMESPACE . ' namespace are allowed for registration.' );
 		}
 
-		return parent::add( $id, $concrete, $shared );
+		return parent::add( $class_name, $concrete, $shared );
 	}
 
 	/**

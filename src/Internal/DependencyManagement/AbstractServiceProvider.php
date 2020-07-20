@@ -37,21 +37,11 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 * @throws \Exception Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
 	 */
 	protected function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
-		try {
-			$reflector = new \ReflectionClass( $class_name );
-		} catch ( \ReflectionException $ex ) {
-			throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class_name': {$ex->getMessage()}" );
-		}
-
 		$definition = new Definition( $class_name, $concrete );
 
-		$constructor = $reflector->getConstructor();
+		$constructor = $this->verify_class_and_concrete( $class_name, $concrete );
 
 		if ( ! is_null( $constructor ) ) {
-			if ( ! $constructor->isPublic() ) {
-				throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '$class_name' isn't public, instances can't be created." );
-			}
-
 			$constructor_arguments = $constructor->getParameters();
 			foreach ( $constructor_arguments as $argument ) {
 				if ( $argument->isDefaultValueAvailable() ) {
@@ -73,6 +63,36 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 		$this->getContainer()->add( $definition->getAlias(), $definition, $shared );
 
 		return $definition;
+	}
+
+	/**
+	 * Check if a combination of class name and concrete is valid for registration.
+	 * Also return the class constructor if the concrete is either a class name or null (then use the supplied class name).
+	 *
+	 * @param string $class_name The class name to check.
+	 * @param mixed  $concrete   The concrete to check.
+	 *
+	 * @return \ReflectionMethod|null A ReflectionMethod representing the class constructor, if $concrete is null or a class name; null otherwise.
+	 * @throws \Exception Class has a private constructor, or can't reflect class, or the concrete is invalid.
+	 */
+	private function verify_class_and_concrete( string $class_name, $concrete ) {
+		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
+			try {
+				$class       = $concrete ?? $class_name;
+				$reflector   = new \ReflectionClass( $class );
+				$constructor = $reflector->getConstructor();
+				if ( isset( $constructor ) && ! $constructor->isPublic() ) {
+					throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '$class' isn't public, instances can't be created." );
+				}
+				return $constructor;
+			} catch ( \ReflectionException $ex ) {
+				throw new \Exception( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
+			}
+		} elseif ( ! is_object( $concrete ) && ! is_callable( $concrete ) && ! function_exists( $concrete ) ) {
+			throw new \Exception( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
+		}
+
+		return null;
 	}
 
 	/**
