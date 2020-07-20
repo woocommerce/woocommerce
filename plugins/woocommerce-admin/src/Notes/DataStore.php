@@ -73,7 +73,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		if ( 0 !== $note_id || '0' !== $note_id ) {
 			$note_row = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT name, type, locale, title, content, content_data, status, source, date_created, date_reminder, is_snoozable, layout, image FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
+					"SELECT * FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
 					$note->get_id()
 				)
 			);
@@ -124,7 +124,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			 */
 			do_action( 'woocommerce_note_loaded', $note );
 		} else {
-			throw new \Exception( __( 'Invalid data store for admin note.', 'woocommerce-admin' ) );
+			throw new \Exception( __( 'Invalid admin note', 'woocommerce-admin' ) );
 		}
 	}
 
@@ -342,7 +342,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		$query = $wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT note_id, title, content, layout, image FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
+			"SELECT * FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
 			$offset,
 			$args['per_page']
 		);

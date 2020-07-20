@@ -77,6 +77,7 @@ class WC_Admin_Note extends \WC_Data {
 			$this->set_id( $data );
 		} elseif ( is_object( $data ) && ! empty( $data->note_id ) ) {
 			$this->set_id( $data->note_id );
+			unset( $data->icon ); // Icons are deprecated.
 			$this->set_props( (array) $data );
 			$this->set_object_read( true );
 		} else {

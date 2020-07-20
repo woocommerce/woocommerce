@@ -59,6 +59,9 @@ class WC_Admin_Notes_WooCommerce_Payments {
 
 			$note_id = array_pop( $note_ids );
 			$note    = WC_Admin_Notes::get_note( $note_id );
+			if ( false === $note ) {
+				return;
+			}
 
 			// If the WooCommerce Payments plugin was installed after the note was created, make sure it's marked as actioned.
 			if ( self::is_installed() && WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {

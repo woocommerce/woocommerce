@@ -40,23 +40,27 @@ class WC_Admin_Notes {
 		$raw_notes  = $data_store->get_notes( $args );
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
-			$note                               = new WC_Admin_Note( $raw_note );
-			$note_id                            = $note->get_id();
-			$notes[ $note_id ]                  = $note->get_data();
-			$notes[ $note_id ]['name']          = $note->get_name( $context );
-			$notes[ $note_id ]['type']          = $note->get_type( $context );
-			$notes[ $note_id ]['locale']        = $note->get_locale( $context );
-			$notes[ $note_id ]['title']         = $note->get_title( $context );
-			$notes[ $note_id ]['content']       = $note->get_content( $context );
-			$notes[ $note_id ]['content_data']  = $note->get_content_data( $context );
-			$notes[ $note_id ]['status']        = $note->get_status( $context );
-			$notes[ $note_id ]['source']        = $note->get_source( $context );
-			$notes[ $note_id ]['date_created']  = $note->get_date_created( $context );
-			$notes[ $note_id ]['date_reminder'] = $note->get_date_reminder( $context );
-			$notes[ $note_id ]['actions']       = $note->get_actions( $context );
-			$notes[ $note_id ]['layout']        = $note->get_layout( $context );
-			$notes[ $note_id ]['image']         = $note->get_image( $context );
-			$notes[ $note_id ]['is_deleted']    = $note->get_is_deleted( $context );
+			try {
+				$note                               = new WC_Admin_Note( $raw_note );
+				$note_id                            = $note->get_id();
+				$notes[ $note_id ]                  = $note->get_data();
+				$notes[ $note_id ]['name']          = $note->get_name( $context );
+				$notes[ $note_id ]['type']          = $note->get_type( $context );
+				$notes[ $note_id ]['locale']        = $note->get_locale( $context );
+				$notes[ $note_id ]['title']         = $note->get_title( $context );
+				$notes[ $note_id ]['content']       = $note->get_content( $context );
+				$notes[ $note_id ]['content_data']  = $note->get_content_data( $context );
+				$notes[ $note_id ]['status']        = $note->get_status( $context );
+				$notes[ $note_id ]['source']        = $note->get_source( $context );
+				$notes[ $note_id ]['date_created']  = $note->get_date_created( $context );
+				$notes[ $note_id ]['date_reminder'] = $note->get_date_reminder( $context );
+				$notes[ $note_id ]['actions']       = $note->get_actions( $context );
+				$notes[ $note_id ]['layout']        = $note->get_layout( $context );
+				$notes[ $note_id ]['image']         = $note->get_image( $context );
+				$notes[ $note_id ]['is_deleted']    = $note->get_is_deleted( $context );
+			} catch ( \Exception $e ) {
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, array( $note_id ) );
+			}
 		}
 		return $notes;
 	}
@@ -72,9 +76,11 @@ class WC_Admin_Notes {
 			try {
 				return new WC_Admin_Note( $note_id );
 			} catch ( \Exception $e ) {
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, array( $note_id ) );
 				return false;
 			}
 		}
+
 		return false;
 	}
 
@@ -107,8 +113,10 @@ class WC_Admin_Notes {
 		foreach ( $names as $name ) {
 			$note_ids = $data_store->get_notes_with_name( $name );
 			foreach ( (array) $note_ids as $note_id ) {
-				$note = new WC_Admin_Note( $note_id );
-				$note->delete();
+				$note = self::get_note( $note_id );
+				if ( $note ) {
+					$note->delete();
+				}
 			}
 		}
 	}
@@ -177,9 +185,11 @@ class WC_Admin_Notes {
 
 		$notes = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
-			$note = new WC_Admin_Note( $raw_note );
-			self::delete_note( $note );
-			array_push( $notes, $note );
+			$note = self::get_note( $raw_note->note_id );
+			if ( $note ) {
+				self::delete_note( $note );
+				array_push( $notes, $note );
+			}
 		}
 		return $notes;
 	}
@@ -197,7 +207,11 @@ class WC_Admin_Notes {
 		$now        = new \DateTime();
 
 		foreach ( $raw_notes as $raw_note ) {
-			$note          = new WC_Admin_Note( $raw_note );
+			$note = self::get_note( $raw_note->note_id );
+			if ( false === $note ) {
+				continue;
+			}
+
 			$date_reminder = $note->get_date_reminder( 'edit' );
 
 			if ( $date_reminder < $now ) {
@@ -243,8 +257,10 @@ class WC_Admin_Notes {
 		);
 
 		foreach ( $notes as $note ) {
-			$note = new WC_Admin_Note( $note->note_id );
-			$note->delete();
+			$note = self::get_note( $note->note_id );
+			if ( $note ) {
+				$note->delete();
+			}
 		}
 	}
 
@@ -261,9 +277,11 @@ class WC_Admin_Notes {
 		);
 
 		foreach ( $notes as $note ) {
-			$note = new WC_Admin_Note( $note->note_id );
-			$note->set_is_deleted( 1 );
-			$note->save();
+			$note = self::get_note( $note->note_id );
+			if ( $note ) {
+				$note->set_is_deleted( 1 );
+				$note->save();
+			}
 		}
 	}
 }

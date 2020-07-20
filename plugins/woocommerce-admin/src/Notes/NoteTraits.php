@@ -99,9 +99,11 @@ trait NoteTraits {
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
 		foreach ( $note_ids as $note_id ) {
-			$note = new WC_Admin_Note( $note_id );
+			$note = WC_Admin_Notes::get_note( $note_id );
 
-			$data_store->delete( $note );
+			if ( $note ) {
+				$data_store->delete( $note );
+			}
 		}
 	}
 }
