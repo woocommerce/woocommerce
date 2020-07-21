@@ -294,8 +294,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_total( $context = 'view' ) {
 		$total = apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'total' ) );
-		return 'view' === $c
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). Weontext ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
+		return 'view' === $context ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
 	}
 
 	/**
