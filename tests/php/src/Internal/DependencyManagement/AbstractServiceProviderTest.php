@@ -69,12 +69,13 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass() {
 		/**
-		 * Return a new instance of DependencyClass.
+		 * Return a new instance of ClassWithDependencies.
 		 *
-		 * @return DependencyClass The new instance.
+		 * @param DependencyClass $dependency The dependency to inject.
+		 * @return ClassWithDependencies The new instance.
 		 */
-		function get_new_dependency_class() {
-			return new DependencyClass();
+		function get_new_dependency_class( DependencyClass $dependency ) {
+			return new ClassWithDependencies( $dependency );
 		};
 	}
 
@@ -86,21 +87,6 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class 'foobar': Class foobar does not exist" );
 
 		$this->sut->add_with_auto_arguments( 'foobar' );
-	}
-
-	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is neither an existing class name, an existing function, an object, or a callback.
-	 *
-	 * @testWith ["foobar"]
-	 *           [1234]
-	 *
-	 * @param mixed $concrete The concrete to use to register the class.
-	 */
-	public function test_add_with_auto_arguments_throws_on_non_class_passed_as_concrete( $concrete ) {
-		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
-
-		$this->sut->add_with_auto_arguments( get_class( $this ), $concrete );
 	}
 
 	/**
@@ -199,26 +185,29 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete that is a closure is passed.
 	 */
 	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_a_closure() {
-		$callable = function() {
-			return new DependencyClass();
+		$this->container->share( DependencyClass::class );
+		$callable = function( DependencyClass $dependency ) {
+			return new ClassWithDependencies( $dependency );
 		};
 
 		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, $callable );
 
 		$resolved = $this->container->get( ClassWithDependencies::class );
 
-		$this->assertInstanceOf( DependencyClass::class, $resolved );
+		$this->assertInstanceOf( ClassWithDependencies::class, $resolved );
 	}
 
 	/**
 	 * @testdox 'add_with_auto_arguments' should properly register the supplied class when a concrete that is a function name is passed.
 	 */
 	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_a_function_name() {
+		$this->container->share( DependencyClass::class );
+
 		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, __NAMESPACE__ . '\get_new_dependency_class' );
 
 		$resolved = $this->container->get( ClassWithDependencies::class );
 
-		$this->assertInstanceOf( DependencyClass::class, $resolved );
+		$this->assertInstanceOf( ClassWithDependencies::class, $resolved );
 	}
 }
 

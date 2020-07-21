@@ -39,11 +39,11 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	protected function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		$definition = new Definition( $class_name, $concrete );
 
-		$constructor = $this->verify_class_and_concrete( $class_name, $concrete );
+		$function = $this->reflect_class_or_callable( $class_name, $concrete );
 
-		if ( ! is_null( $constructor ) ) {
-			$constructor_arguments = $constructor->getParameters();
-			foreach ( $constructor_arguments as $argument ) {
+		if ( ! is_null( $function ) ) {
+			$arguments = $function->getParameters();
+			foreach ( $arguments as $argument ) {
 				if ( $argument->isDefaultValueAvailable() ) {
 					$default_value = $argument->getDefaultValue();
 					$definition->addArgument( new RawArgument( $default_value ) );
@@ -72,10 +72,10 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 * @param string $class_name The class name to check.
 	 * @param mixed  $concrete   The concrete to check.
 	 *
-	 * @return \ReflectionMethod|null A ReflectionMethod representing the class constructor, if $concrete is null or a class name; null otherwise.
-	 * @throws ContainerException Class has a private constructor, or can't reflect class, or the concrete is invalid.
+	 * @return \ReflectionFunctionAbstract|null A reflection instance for the $class_name constructor or $concrete constructor or callable; null otherwise.
+	 * @throws ContainerException Class has a private constructor, can't reflect class, or the concrete is invalid.
 	 */
-	private function verify_class_and_concrete( string $class_name, $concrete ) {
+	private function reflect_class_or_callable( string $class_name, $concrete ) {
 		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
 			try {
 				$class       = $concrete ?? $class_name;
@@ -88,8 +88,12 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 			} catch ( \ReflectionException $ex ) {
 				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
 			}
-		} elseif ( ! is_object( $concrete ) && ! is_callable( $concrete ) ) {
-			throw new ContainerException( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
+		} elseif ( is_callable( $concrete ) ) {
+			try {
+				return new \ReflectionFunction( $concrete );
+			} catch ( \ReflectionException $ex ) {
+				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting callable: {$ex->getMessage()}" );
+			}
 		}
 
 		return null;
