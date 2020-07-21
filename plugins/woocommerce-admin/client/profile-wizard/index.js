@@ -293,6 +293,9 @@ class ProfileWizard extends Component {
 			query,
 			step,
 			goToNextStep: this.goToNextStep,
+			skipProfiler: () => {
+				this.skipProfiler();
+			},
 		} );
 		const steps = this.getSteps().map( ( _step ) =>
 			pick( _step, [ 'key', 'label', 'isComplete' ] )

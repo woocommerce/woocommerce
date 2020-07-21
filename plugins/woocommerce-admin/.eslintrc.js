@@ -2,6 +2,7 @@ module.exports = {
 	extends: [
 		'plugin:@wordpress/eslint-plugin/recommended',
 		'prettier',
+		'prettier/react',
 		'plugin:testing-library/recommended',
 		'plugin:testing-library/react',
 		'plugin:jest-dom/recommended',
