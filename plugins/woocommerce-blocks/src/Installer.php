@@ -43,7 +43,7 @@ class Installer {
 		$schema_version    = 260;
 		$db_schema_version = (int) get_option( 'wc_blocks_db_schema_version', 0 );
 
-		if ( $db_schema_version > $schema_version ) {
+		if ( $db_schema_version >= $schema_version && 0 !== $db_schema_version ) {
 			return;
 		}
 
