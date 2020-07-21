@@ -12,10 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const settings = getSetting( 'cod_data', {} );
-const defaultLabel = __(
-	'Cash on delivery',
-	'woo-gutenberg-products-block'
-);
+const defaultLabel = __( 'Cash on delivery', 'woo-gutenberg-products-block' );
 const label = decodeEntities( settings.title ) || defaultLabel;
 
 /**
@@ -57,16 +54,16 @@ const canMakePayment = ( { cartNeedsShipping, selectedShippingMethods } ) => {
 		return true;
 	}
 
-	// Look for an not-supported shipping method in the user's selected
-	// shipping methods. If one is found, then COD is not allowed.
-	const selectedNotSupported = Object.values( selectedShippingMethods ).some(
-		( shippingMethodId ) => {
-			return ! settings.enableForShippingMethods.includes(
-				shippingMethodId
-			);
-		}
-	);
-	return ! selectedNotSupported;
+	// Look for a supported shipping method in the user's selected
+	// shipping methods. If one is found, then COD is allowed.
+	const selectedMethods = Object.values( selectedShippingMethods );
+	// supported shipping methods might be global (eg. "Any flat rate"), hence
+	// this is doing a `String.prototype.includes` match vs a `Array.prototype.includes` match.
+	return settings.enableForShippingMethods.some( ( shippingMethodId ) => {
+		return selectedMethods.some( ( selectedMethod ) => {
+			return selectedMethod.includes( shippingMethodId );
+		} );
+	} );
 };
 
 /**
@@ -82,4 +79,6 @@ const cashOnDeliveryPaymentMethod = {
 	ariaLabel: label,
 };
 
-registerPaymentMethod( ( Config ) => new Config( cashOnDeliveryPaymentMethod ) );
+registerPaymentMethod(
+	( Config ) => new Config( cashOnDeliveryPaymentMethod )
+);
