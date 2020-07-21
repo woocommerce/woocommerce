@@ -3,12 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, bill } from '@woocommerce/icons';
+import { CURRENCY } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import sharedConfig from '../shared-config';
+import attributes from './attributes';
 import edit from './edit';
 
 const blockConfig = {
@@ -18,10 +19,11 @@ const blockConfig = {
 		'woo-gutenberg-products-block'
 	),
 	icon: {
-		src: <Icon srcElement={ bill } />,
+		src: <b style={ { color: '$96588a' } }>{ CURRENCY.symbol }</b>,
 		foreground: '#96588a',
 	},
 	edit,
+	attributes,
 };
 
 registerBlockType( 'woocommerce/product-price', {
