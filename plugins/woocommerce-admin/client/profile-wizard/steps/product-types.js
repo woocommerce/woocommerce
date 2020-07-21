@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, CheckboxControl } from '@wordpress/components';
+import { Button, CheckboxControl, Tooltip } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -13,13 +13,42 @@ import { withDispatch, withSelect } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { H, Card, Link } from '@woocommerce/components';
+import { H, Card, Link, Pill } from '@woocommerce/components';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { recordEvent } from 'lib/tracks';
+import './product-types.scss';
+
+function getLabel( description, yearlyPrice ) {
+	if ( ! yearlyPrice ) {
+		return description;
+	}
+
+	const monthlyPrice = ( yearlyPrice / 12.0 ).toFixed( 2 );
+	const priceDescription = sprintf(
+		__( '$%f per month, billed annually', 'woocommerce-admin' ),
+		monthlyPrice
+	);
+
+	return (
+		<Fragment>
+			<span className="woocommerce-product-wizard__product-types__label">
+				{ description }
+			</span>
+			<Tooltip
+				text={ __(
+					"This product type requires a paid extension. We'll add this to a cart so that you can purchase and install it later.",
+					'woocommerce-admin'
+				) }
+			>
+				<Pill>{ priceDescription }</Pill>
+			</Tooltip>
+		</Fragment>
+	);
+}
 
 class ProductTypes extends Component {
 	constructor( props ) {
@@ -113,7 +142,7 @@ class ProductTypes extends Component {
 		const { error, selected } = this.state;
 
 		return (
-			<Fragment>
+			<div className="woocommerce-profile-wizard__product-types">
 				<H className="woocommerce-profile-wizard__header-title">
 					{ __(
 						'What type of products will be listed?',
@@ -125,6 +154,11 @@ class ProductTypes extends Component {
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( productTypes ).map( ( slug ) => {
+							const label = getLabel(
+								productTypes[ slug ].label,
+								productTypes[ slug ].yearly_price
+							);
+							const moreUrl = productTypes[ slug ].more_url;
 							const helpText =
 								productTypes[ slug ].description &&
 								interpolateComponents( {
@@ -134,13 +168,9 @@ class ProductTypes extends Component {
 											? ' {{moreLink/}}'
 											: '' ),
 									components: {
-										moreLink: productTypes[ slug ]
-											.more_url ? (
+										moreLink: moreUrl ? (
 											<Link
-												href={
-													productTypes[ slug ]
-														.more_url
-												}
+												href={ moreUrl }
 												target="_blank"
 												type="external"
 												onClick={ () =>
@@ -161,7 +191,7 @@ class ProductTypes extends Component {
 							return (
 								<CheckboxControl
 									key={ slug }
-									label={ productTypes[ slug ].label }
+									label={ label }
 									help={ helpText }
 									onChange={ () => this.onChange( slug ) }
 									checked={ selected.includes( slug ) }
@@ -186,7 +216,7 @@ class ProductTypes extends Component {
 						</Button>
 					</div>
 				</Card>
-			</Fragment>
+			</div>
 		);
 	}
 }

@@ -21,6 +21,7 @@
 	{ "component": "List" },
 	{ "component": "OrderStatus" },
 	{ "component": "Pagination" },
+	{ "component": "Pill" },
 	{ "component": "ProductImage" },
 	{ "component": "Rating" },
 	{ "component": "ScrollTo" },

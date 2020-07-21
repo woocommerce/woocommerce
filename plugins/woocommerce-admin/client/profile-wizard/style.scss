@@ -275,7 +275,7 @@
 			margin-top: 0;
 			margin-bottom: 0;
 			position: relative;
-			padding: $gap-small $gap;
+			padding: $gap-large $gap;
 			min-height: 56px;
 
 			.components-base-control {
@@ -288,11 +288,7 @@
 
 			label.components-checkbox-control__label {
 				color: $studio-gray-80;
-				margin-top: $gap-smallest;
-			}
-
-			label.components-checkbox-control__label {
-				margin-left: $gap-large - $gap-smallest;
+				margin-left: $gap-small;
 			}
 
 			.components-base-control__help {

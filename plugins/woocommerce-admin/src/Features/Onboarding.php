@@ -339,13 +339,10 @@ class Onboarding {
 		$product_types = self::append_product_data(
 			array(
 				'physical'        => array(
-					'label'       => __( 'Physical products', 'woocommerce-admin' ),
-					'description' => __( 'Products you ship to customers.', 'woocommerce-admin' ),
-					'default'     => true,
+					'label' => __( 'Physical products', 'woocommerce-admin' ),
 				),
 				'downloads'       => array(
-					'label'       => __( 'Downloads', 'woocommerce-admin' ),
-					'description' => __( 'Virtual products that customers download.', 'woocommerce-admin' ),
+					'label' => __( 'Downloads', 'woocommerce-admin' ),
 				),
 				'subscriptions'   => array(
 					'label'   => __( 'Subscriptions', 'woocommerce-admin' ),
@@ -545,11 +542,13 @@ class Onboarding {
 		// Loop over product types and append data.
 		foreach ( $product_types as $key => $product_type ) {
 			if ( isset( $product_type['product'] ) && isset( $products[ $product_type['product'] ] ) ) {
-				/* translators: Amount of product per year (e.g. Bookings - $240.00 per year) */
-				$product_types[ $key ]['label']      .= sprintf( __( ' — %s per year', 'woocommerce-admin' ), html_entity_decode( $products[ $product_type['product'] ]->price ) );
-				$product_types[ $key ]['description'] = $products[ $product_type['product'] ]->excerpt;
-				$product_types[ $key ]['more_url']    = $products[ $product_type['product'] ]->link;
-				$product_types[ $key ]['slug']        = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
+				$price        = html_entity_decode( $products[ $product_type['product'] ]->price );
+				$yearly_price = (float) str_replace( '$', '', $price );
+
+				$product_types[ $key ]['yearly_price'] = $yearly_price;
+				$product_types[ $key ]['description']  = $products[ $product_type['product'] ]->excerpt;
+				$product_types[ $key ]['more_url']     = $products[ $product_type['product'] ]->link;
+				$product_types[ $key ]['slug']         = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
 			} elseif ( isset( $product_type['product'] ) ) {
 				/* translators: site currency symbol (used to show that the product costs money) */
 				$product_types[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce-admin' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
