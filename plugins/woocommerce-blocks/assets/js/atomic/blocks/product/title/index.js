@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Icon, heading } from '@woocommerce/icons';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -18,7 +19,7 @@ const blockConfig = {
 		'woo-gutenberg-products-block'
 	),
 	icon: {
-		src: 'heading',
+		src: <Icon srcElement={ heading } />,
 		foreground: '#96588a',
 	},
 	attributes,

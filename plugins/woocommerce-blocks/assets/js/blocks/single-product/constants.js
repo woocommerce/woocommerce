@@ -31,7 +31,7 @@ export const DEFAULT_INNER_BLOCKS = [
 				{},
 				[
 					[ 'woocommerce/product-sale-badge' ],
-					[ 'woocommerce/product-title', { headingLevel: 1 } ],
+					[ 'woocommerce/product-title', { headingLevel: 2 } ],
 					[ 'woocommerce/product-rating' ],
 					[ 'woocommerce/product-price' ],
 					[ 'woocommerce/product-summary' ],
