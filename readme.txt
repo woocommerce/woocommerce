@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,161 +179,13 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.3.0 - 2020-07-08 =
+= 4.3.1 - 2020-07-21 =
 
-**WooCommerce**
-* Enhancement - Show notice to update to latest PHP if version is < 7.2. #26775
-* Enhancement - Add template cache clearing. #26752
-* Enhancement - Add 47 Kenya counties. #26728
-* Enhancement - Accessibility: add aria-disabled attribute to "Update cart" button on checkout page. #26726
-* Enhancement - Update "Subtotal" translation string in wc-template-functions.php. #26706
-* Enhancement - Add a new Features settings section, enabling woocommerce_homescreen_enabled for all new stores. #26625
-* Enhancement - Add warning in status report if a base database table is missing. #26455
-* Enhancement - Updated stock handling to prevent race conditions when orders come in at the same time. #26395
-* Tweak - Allow checkout even if reserved table is not present. #26705
-* Tweak - Add note to Products Importer description that TXT files are also supported. #26670
-* Tweak - Allow set different notice types with WC_Admin_Notices. #26410
-* Tweak - Fix redundant setting of object cache when attribute taxonomies are not being used. #26518
-* Fix - Encode HTML entities for product attribute name and values. #26754
-* Fix - Fix an issue with attribute value escaping in product CSV exports. #26739
-* Fix - Fix comment_type value for reviews created with WordPress 5.5. #26729
-* Fix - Close unbalanced <p> tag in auth "Grant Access" form template file. #26725
-* Fix - Remove check for the existing term when parsing category via CSV & instead catch an existing term error when adding a new category to the database. #26720
-* Fix - Domain update script now replaces woocommerce-admin domain also in Blocks package. #26690
-* Fix - Correct grammar mistake in the help tip of the Connected to WooCommerce.com field of the System Status Report. #26666
-* Fix - Allow float value timezone offsets to display the correct float values. #26637
-* Fix - Add asterisk to star rating if 'Star ratings should be required, not optional' checkbox is enabled. #26596
-* Fix - Use calculations similar to cart for orders as well (fixed regression). #26583
-* Fix - Fixed data-id of notices in checkout. #26386
-* Fix - Fixed password visible toggle in the checkout page. #26292
-* Fix - Product description display fix when multiple products shortcodes are present on a page. #26250
-* Fix - Using the add-to-cart parameter with a product variant id will now have the variation attributes populated correctly. #26237
-* Fix - Better template caching support for multi-server environments. #23971
-* Fix - Fix updating the wc_reserve_stock stock_quantity value after making changes to the cart in between checkouts. #26807
-* Fix - Put back the remove element for multiselects on selectWoo. #26849
-* Dev - Adjusted the WC tested up to check to only apply to major versions. #26685
-* Dev - Make shipping calculations more flexible by providing actions. #26542
-* Dev - Trigger check_variations with custom values. #26525
-* Dev - Add verify_base_db method to check if all base tables are present. #26454
-* Dev - Added action before the "Add payment method" save button and a filter to validate manually added fields when adding payment method. #26445
-* Dev - `wc_get_shipping_method_count() has a new argument (`$enabled_only`) which allows restricting the non-legacy shipping methods to the enabled ones. #25753
-* Dev - Added pre query filters for WP dashboard WooCommerce status widget. #25321
-* Dev - Removed type hints from src folder. #26963
+**WooCommerce Admin 1.3.1**
+* Fix - PHP Fatal errors when columns are missing from the Notes table. #4831
 
-**REST API 1.0.10**
-* Enhancement - Add API tool to clear template cache. woocommerce/woocommerce-rest-api#212
-* Enhancement - Add API tool to verify base DB tables. woocommerce/woocommerce-rest-api#188
-
-**WooCommerce Admin 1.3.0**
-* Enhancement - Add Jetpack stats to performance indicatorts / homepage #4291
-* Enhancement - New "Store Management" quick links card on WooCommerce home screen. #4350
-* Enhancement - Inbox notifications layout updates #4218
-* Enhancement - New Home Screen #4303
-* Enhancement - Use WordPress Core colors for styling accents. #4558
-* Tweak - make revenue report total sales column optional #4397
-* Tweak - Adjustments to WooCommerce Payments setup task #4373
-* Tweak - Handling of plugin installs in OBW #4411
-* Tweak - Update design of Setup Checklist #4434
-* Tweak - Add scrollable styling to left side of Table, and keep updated #4179
-* Tweak - Add custom autocompleter support to Search component #4518
-* Tweak - reduce asset filename length. #4535
-* Tweak - Use single dash for country/state dropdown options #4553
-* Tweak - Use label tag for toggleable shipping zones #4554
-* Tweak - Make it easier to add submenu items to the Marketing menu #4561
-* Tweak - Tag remove button style so it is properly centered. #4651
-* Tweak - Tweak the embed page CSS so the top content sits better. #4622
-* Tweak - Update summary number placeholder styles. #4682
-* Fix - misaligned 'required' text on selects #4307
-* Fix - exception when opening dashboard after selecting extensions to purchase #4357
-* Fix - REST API collections schema #4377
-* Fix - Monetary Advanced Filters in Customers Report with correct currency object prop. #4356
-* Fix - In App purchase "back link" #4301
-* Fix - Search results selectable by clicking on item text or icon #4474
-* Fix - Filters' static query parameters #4458
-* Fix - The WCPay method not appearing as recommended sometimes #4345
-* Fix - Removed URLSearchParams method #4501
-* Fix - REST API collections schema. #4484
-* Fix - null issue in wpNavMenuClassChange #4513 🎉 gradosevic 
-* Fix - RTL stylesheet loading for split code chunks. #4542
-* Fix - Don't show store location step in tax and shipping tasks if the address has already been provided #4507
-* Fix - Check for enabled methods before payment task completion #4530
-* Fix - Solved a problem with the method onChoose in the last onboarding step. #4583
-* Fix - Only mark purchase task as complete when products exist #4574
-* Fix - WCPay sometimes not appearing on the task list. #4647
-* Fix - Fix inbox spacing. #4632
-* Fix - Don't include sourcemaps or unminified JS for "core" builds. #4642
-* Fix - Add a bottom border to the Install Jetpack CTA. #4589
-* Fix - Style cleanup from components update. #4606
-* Fix - Check that the possibly_add_note function exists before calling it. #4680
-* Fix - Remove unnecessary rest_api_init action that caused incompatibility issues with other plugins. #4691
-* Fix - Fix dashboard task list menu placement. #4664
-* Fix - Added styles to the unread notes counter in the inbox panel. #4690
-* Fix - Fix spacing between stats overview and store management cards. #4681
-* Fix - Added default value to the note icon. #4745
-* Fix - Unnecessary REST API usage leading to potential overflow of Jetpack option sizes. #4755
-* Dev - Add jest-dom eslint plugin. #4327
-* Dev - Migrate onboarding data store to wp.data #4433
-* Dev - Remove use of `IconButton` in favor of `Button` #4415
-* Dev - Fix error handling for plugins on server error #4462
-* Dev - update @wordpress/components and @wordpress/base*styles #4427
-* Dev - Migrate user store to wp.data #4505
-* Dev - Add options data store to wp.data #4144
-* Dev - Runtime feature config override #4523
-* Dev - Add deprecation notice for install_plugin() #4713
-* Dev - Only load non-minified js files when SCRIPT_DEBUG is on, and env is development or plugin. #4747
-
-**WooCommerce Admin 1.2.4**
-* Tweak - reduce asset filename length and remove tilde characters. #4535
-* Fix - RTL stylesheet loading for split code chunks. #4542
-
-**WooCommerce Blocks 2.7.1**
-* Fix - Use IE11 friendly code for Dashicon component replacement. #2708
-* Fix - Fix PHP warnings produced by StoreAPI endpoints when variations have no prices. #2722
-* Fix - Fix missing scoped variable in closure and missing schema definitions. #2724
-* Fix - Fix undefined index notice for query_type on the product collection data endpoint. #2723
-
-**WooCommerce Blocks 2.7.0**
-* Enhancement - Filter block font sizes have been adjusted to be in line with other blocks. #2594
-* Enhancement - The All Products block and the other product grid blocks now share more styles and the markup is more similar (see release post or docs to learn how to undo this change). #2428 [DN]
-* Enhancement - The Cart and Checkout blocks now use the heading styles provided by the theme. #2597
-* Enhancement - The Cart block titles have been merged into one. #2615
-* Enhancement - The item count badges of the Checkout block have been updated so it looks better in light & dark backgrounds. #2619
-* Enhancement - Checkout step progress indicator design has been updated to match the theme headings style. #2649
-* Performance - Reduce bundlesize of blocks using @wordpress/components directly. #2664
-* Fix - Fix bug in Checkout block preventing a retry of credit card payment when first credit card used fails and a new one is tried. #2655
-* Fix - Avoid some theme style properties leaking into the Cart and Checkout select controls. #2647
-* Fix - Fixes to the product grid blocks in Twenty Twenty: discounted prices are no longer underlined and the On Sale badge is correctly positioned in the All Products block. #2573
-* Fix - Improved alignment of credit card validation error messages. #2662
-* Fix - Show the 'No shipping methods' placeholder in the editor with the _Checkout_ block if there are shipping methods but all of them are disabled. #2543
-
-**WooCommerce Blocks 2.6.1**
-* Fix - Updated the wc_reserved_stock table for compatibility with versions of MySql < 5.6.5. #2590
-
-**WooCommerce Blocks 2.6.0**
-* Enhancement - Add dropdown display style to Filter Products by Attribute block. #1255
-* Enhancement - Add option to display a Filter button to Filter Products by Attribute block. #1332
-* Enhancement - Add support for image for product categories block #1739
-* Enhancement - An error notice will be shown in All Product if the customer is trying to add a product above stock or sold individually. #2278
-* Performance - Improvements to REST API performance #2248
-* Performance - Avoid loading Assets API during REST requests #2286
-* Fix - Add placeholder to the on-sale products block when no results are found. #1519
-* Fix - Added correct ellipsis character in Product Search block #1672
-* Fix - If product is changed for featured product block, update the link in the button. #1894
-* Fix - Import from `@woocommerce/settings` in `@woocommerce/block-settings` #2330
-* Dev - Accessibility of the All Products block and filter blocks has been improved. #1656
-* Dev - All Products Block: Update sorting labels to match frontend options #2462
-* Dev - Change PropType validation for Icon component #1737
-* Dev - Changed default rows and columns for product grid blocks to 3x3. #1613
-* Dev - Check for instance of WP_Block in render_callback #2258
-* Dev - Devs: `ENABLE_REVIEW_RATING` setting was renamed to `REVIEW_RATINGS_ENABLED` and now it also verifies reviews are enabled, to better match WooCommerce API. #1374
-* Dev - Fix price filtering when stored prices do not match displayed prices (determined by tax settings). #1612
-* Dev - HTML editing is no longer supported in several blocks. #1395
-* Dev - Implement __experimentalCreateInterpolateElement for translations. #1736
-* Dev - Load WooCommerce Core translations for 'Sale!' and some other strings if translations are unavailable for WooCommerce Blocks. #1694
-* Dev - Prevent data hydration on REST requests #2176
-* Dev - Show relationship between terms in the active filters block. #1630
-* Dev - Table creation validation for install routine #2287
-* Dev - Update the icons used in the blocks. #1644
+**WooCommerce Blocks 2.7.2**
+* Enhancement: Move Draft order logic behind feature flag. #2874
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
