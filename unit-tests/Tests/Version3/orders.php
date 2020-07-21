@@ -61,6 +61,33 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting all orders sorted by modified date.
+	 */
+	public function test_get_items_ordered_by_modified() {
+		wp_set_current_user( $this->user );
+
+		$order1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+
+		$order1->set_status( 'completed' );
+		$order1->save();
+		sleep( 1 );
+		$order2->set_status( 'completed' );
+		$order2->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_query_params( array( 'orderby' => 'modified', 'order' => 'asc' ) );
+		$response = $this->server->dispatch( $request );
+		$orders   = $response->get_data();
+		$this->assertEquals( $order1->get_id(), $orders[0]['id'] );
+
+		$request->set_query_params( array( 'orderby' => 'modified', 'order' => 'desc' ) );
+		$response = $this->server->dispatch( $request );
+		$orders   = $response->get_data();
+		$this->assertEquals( $order2->get_id(), $orders[0]['id'] );
+	}
+
+	/**
 	 * Tests to make sure orders cannot be viewed without valid permissions.
 	 *
 	 * @since 3.5.0
