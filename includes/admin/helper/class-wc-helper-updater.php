@@ -237,11 +237,6 @@ class WC_Helper_Updater {
 			return array();
 		}
 
-		// General error.
-		if ( is_wp_error( $raw_response ) ) {
-			return array();
-		}
-
 		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
 
 		// API error, api returned but something was wrong.
