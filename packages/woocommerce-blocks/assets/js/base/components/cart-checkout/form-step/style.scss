@@ -1,0 +1,87 @@
+.wc-block-checkout-form {
+	counter-reset: checkout-step;
+}
+
+.wc-block-checkout-form fieldset.wc-block-checkout-step {
+	position: relative;
+	border: none;
+	padding: 0 0 0 $gap-larger;
+	background: none;
+	margin: 0;
+
+	.is-large & {
+		padding-right: $gap-large;
+	}
+}
+
+.wc-block-checkout-step__container {
+	position: relative;
+}
+
+.wc-block-checkout-step__content {
+	padding-bottom: $gap-larger;
+}
+
+.wc-block-checkout-form fieldset.wc-block-checkout-step:disabled {
+	opacity: 0.6;
+}
+
+.wc-block-checkout-step__heading {
+	display: flex;
+	justify-content: space-between;
+	align-content: center;
+	flex-wrap: wrap;
+	margin-bottom: $gap-smaller;
+	position: relative;
+}
+
+.wc-block-checkout-step__title {
+	line-height: 1.5;
+	margin: 0 $gap-small 0 0;
+}
+
+.wc-block-checkout-step__heading-content {
+	@include font-size(smaller);
+	color: $gray-80;
+	position: absolute;
+	right: 0;
+
+	a {
+		font-weight: bold;
+		color: $gray-80;
+	}
+}
+
+.wc-block-checkout-step__description {
+	@include font-size(small);
+	line-height: 1.25;
+	color: $gray-60;
+	margin-bottom: $gap;
+}
+
+.wc-block-checkout-step__title::before {
+	@include reset-box();
+	background: transparent;
+	counter-increment: checkout-step;
+	content: "\00a0" counter(checkout-step) ".";
+	content: "\00a0" counter(checkout-step) "." / "";
+	position: absolute;
+	width: $gap-larger;
+	left: -$gap-larger/2;
+	top: 0;
+	text-align: center;
+	transform: translateX(-50%);
+}
+
+.wc-block-checkout-step__container::after {
+	content: "";
+	height: calc(100% - #{$gap-smaller});
+	border-left: 1px solid;
+	position: absolute;
+	left: -$gap-larger/2;
+	top: 0;
+}
+
+.wc-block-checkout-step:last-child .wc-block-checkout-step__container::after {
+	content: none;
+}

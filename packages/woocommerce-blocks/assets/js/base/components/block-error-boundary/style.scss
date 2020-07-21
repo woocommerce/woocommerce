@@ -1,0 +1,36 @@
+.wc-block-error {
+	display: flex;
+	background-color: #f3f3f4;
+	border-left: 4px solid #6d6d6d;
+	padding: $gap-larger $gap;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.wc-block-error__header {
+	@include font-size(larger);
+	font-weight: bold;
+	margin: 0;
+}
+
+.wc-block-error__image {
+	max-width: 25%;
+}
+.wc-block-error__text {
+	margin: 0;
+}
+.wc-block-error__message {
+	margin: 1em 0 0 0;
+	font-style: italic;
+}
+
+@include breakpoint( ">480px" ) {
+	.wc-block-error {
+		flex-direction: row;
+	}
+
+	.wc-block-error__image + .wc-block-error__content {
+		margin-left: $gap-large;
+	}
+}

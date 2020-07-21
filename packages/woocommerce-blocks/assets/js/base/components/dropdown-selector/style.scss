@@ -1,0 +1,181 @@
+.wc-block-dropdown-selector {
+	max-width: 300px;
+	position: relative;
+	width: 100%;
+}
+
+.wc-block-dropdown-selector__input-wrapper {
+	align-items: center;
+	border: 1px solid #9f9f9f;
+	border-radius: 4px;
+	cursor: text;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 2px;
+
+	.is-disabled & {
+		background-color: $core-grey-light-500;
+	}
+}
+
+.wc-block-dropdown-selector__placeholder {
+	@include font-size(small);
+	height: 1.8em;
+	margin: 0 $gap-smallest;
+	white-space: nowrap;
+}
+
+.wc-block-dropdown-selector__input {
+	@include font-size(small);
+	height: 1.8em;
+	min-width: 0;
+
+	.is-single & {
+		margin: 0 4px;
+		padding: 0;
+		width: 100%;
+
+		&:hover,
+		&:focus,
+		&:active {
+			outline: 0;
+		}
+
+		&:not(:first-child):focus {
+			margin-bottom: 1.5px;
+			margin-top: 1.5px;
+		}
+
+		&:not(:first-child):not(:focus) {
+			@include visually-hidden();
+			// Fixes an issue in Firefox that `flex: wrap` in the container was making
+			// this element to still occupy one line.
+			position: absolute;
+		}
+	}
+
+	.is-multiple & {
+		flex: 1;
+		min-width: 0;
+		margin: 1.5px;
+	}
+}
+
+// Visually hide the input
+.is-single .wc-block-dropdown-selector__input:first-child,
+.is-multiple .wc-block-dropdown-selector__input {
+	background: transparent;
+	border: 0;
+
+	&:hover,
+	&:focus,
+	&:active {
+		outline: 0;
+	}
+}
+
+.wc-block-dropdown-selector {
+	// Reset <button> styles
+	.wc-block-dropdown-selector__selected-chip,
+	.wc-block-dropdown-selector__selected-value__label,
+	.wc-block-dropdown-selector__selected-value__remove {
+		background-color: transparent;
+		border: 0;
+		color: inherit;
+		font-size: inherit;
+		font-weight: inherit;
+		text-transform: initial;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: transparent;
+			text-decoration: none;
+		}
+	}
+
+	.wc-block-dropdown-selector__selected-value {
+		align-items: center;
+		color: $core-grey-dark-600;
+		display: inline-flex;
+		height: 1.8em;
+		padding: 1.5px 1.5px 1.5px 4px;
+		width: 100%;
+	}
+
+	.wc-block-dropdown-selector__selected-chip {
+		align-items: center;
+		background-color: $core-grey-light-600;
+		border: 1px solid #9f9f9f;
+		border-radius: 4px;
+		color: $core-grey-dark-600;
+		display: inline-flex;
+		height: 1.8em;
+		margin: 1.5px;
+		padding: 0 0 0 4px;
+		white-space: nowrap;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: $core-grey-light-400;
+			border: 1px solid #9f9f9f;
+			color: $core-grey-dark-600;
+		}
+	}
+
+	.wc-block-dropdown-selector__selected-value__label,
+	.wc-block-dropdown-selector__selected-chip__label {
+		@include font-size(small);
+		flex-grow: 1;
+		padding: 0;
+		text-align: left;
+	}
+
+	.wc-block-dropdown-selector__selected-value__remove,
+	.wc-block-dropdown-selector__selected-chip__remove {
+		background-color: transparent;
+		border: 0;
+		display: inline-block;
+		line-height: 1;
+		padding: 0 0.3em;
+	}
+}
+
+.wc-block-dropdown-selector__list {
+	background-color: #fff;
+	margin: -1px 0 0;
+	padding: 0;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 100%;
+	max-height: 300px;
+	overflow-y: auto;
+	z-index: 1;
+
+	&:not(:empty) {
+		border: 1px solid #9f9f9f;
+	}
+}
+
+.wc-block-dropdown-selector__list-item {
+	@include font-size(small);
+	color: $core-grey-dark-600;
+	cursor: default;
+	list-style: none;
+	margin: 0;
+	padding: 0 $gap-smallest;
+
+	&.is-selected {
+		background-color: $core-grey-light-600;
+	}
+
+	&:hover,
+	&:focus,
+	&.is-highlighted,
+	&:active {
+		background-color: #00669e;
+		color: #fff;
+	}
+}

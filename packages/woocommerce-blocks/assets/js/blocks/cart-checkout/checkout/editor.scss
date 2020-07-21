@@ -1,0 +1,24 @@
+.editor-styles-wrapper {
+	.wp-block h4.wc-block-checkout-step__title {
+		@include font-size(regular);
+		line-height: 24px;
+		margin: 0 $gap-small 0 0;
+	}
+}
+.wc-block-checkout__controls-text {
+	color: #999;
+	font-style: italic;
+}
+
+.components-base-control--nested {
+	padding-left: 52px;
+	margin-top: -12px;
+}
+
+.wc-block-checkout__page-notice {
+	margin: 0;
+}
+
+.components-panel__body-title .components-button {
+	opacity: 1;
+}
