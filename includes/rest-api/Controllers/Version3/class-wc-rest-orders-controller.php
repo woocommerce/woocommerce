@@ -280,4 +280,52 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		return $params;
 	}
+
+	/**
+	 * Expands an order item to get its data.
+	 *
+	 * @param WC_Order_item $item Order item data.
+	 * @return array
+	 */
+	protected function get_order_item_data( $item ) {
+		$data = parent::get_order_item_data( $item );
+
+		$product = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : false;
+
+		$data['meta_data'] = array_map(
+			array( $this, 'get_order_item_meta_data' ),
+			$data['meta_data'],
+			array_fill( 0, count( $data['meta_data'] ), $product )
+		);
+
+		return $data;
+	}
+
+	/**
+	 * Convert a {@link WC_Meta_Data} to an array with the expected API response keys and values.
+	 *
+	 * @param WC_Meta_Data $meta The metadata taken from the {@link WC_Order_Item::$meta_data} array.
+	 * @param WC_Product   $product The product that the metadata belongs to.
+	 * @return array
+	 */
+	private function get_order_item_meta_data( $meta, $product ) {
+		$attribute_key = str_replace( 'attribute_', '', $meta->key );
+		$display_key = wc_attribute_label( $attribute_key, $product );
+
+		$display_value = wp_kses_post( $meta->value );
+		if ( taxonomy_exists( $attribute_key ) ) {
+			$term = get_term_by( 'slug', $meta->value, $attribute_key );
+			if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
+				$display_value = $term->name;
+			}
+		}
+
+		return array(
+			'id' => $meta->id,
+			'key' => $meta->key,
+			'value' => $meta->value,
+			'display_key' => $display_key,
+			'display_value' => $display_value,
+		);
+	}
 }
