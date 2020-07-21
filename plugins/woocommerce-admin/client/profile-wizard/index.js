@@ -288,6 +288,7 @@ class ProfileWizard extends Component {
 	render() {
 		const { query } = this.props;
 		const step = this.getCurrentStep();
+		const stepKey = step.key;
 
 		const container = createElement( step.container, {
 			query,
@@ -300,13 +301,12 @@ class ProfileWizard extends Component {
 		const steps = this.getSteps().map( ( _step ) =>
 			pick( _step, [ 'key', 'label', 'isComplete' ] )
 		);
+		const classNames = `woocommerce-profile-wizard__container ${ stepKey }`;
 
 		return (
 			<Fragment>
-				<ProfileWizardHeader currentStep={ step.key } steps={ steps } />
-				<div className="woocommerce-profile-wizard__container">
-					{ container }
-				</div>
+				<ProfileWizardHeader currentStep={ stepKey } steps={ steps } />
+				<div className={ classNames }>{ container }</div>
 			</Fragment>
 		);
 	}

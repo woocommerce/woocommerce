@@ -85,6 +85,10 @@
 			margin-right: auto;
 		}
 
+		&.benefits {
+			text-align: center;
+		}
+
 		@include breakpoint( '<782px' ) {
 			padding-left: $gap;
 			padding-right: $gap;
