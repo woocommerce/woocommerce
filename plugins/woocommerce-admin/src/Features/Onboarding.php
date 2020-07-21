@@ -455,7 +455,7 @@ class Onboarding {
 	 */
 	public static function get_theme_data( $theme ) {
 		return array(
-			'slug'                    => sanitize_title( $theme->stylesheet ),
+			'slug'                    => sanitize_text_field( $theme->stylesheet ),
 			'title'                   => $theme->get( 'Name' ),
 			'price'                   => '0.00',
 			'is_installed'            => true,
