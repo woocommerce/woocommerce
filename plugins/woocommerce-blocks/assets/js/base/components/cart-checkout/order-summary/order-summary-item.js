@@ -65,7 +65,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 				{ showBackorderBadge ? (
 					<ProductBackorderBadge />
 				) : (
-					lowStockRemaining && (
+					!! lowStockRemaining && (
 						<ProductLowStockBadge
 							lowStockRemaining={ lowStockRemaining }
 						/>

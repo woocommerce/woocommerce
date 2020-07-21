@@ -116,7 +116,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				{ showBackorderBadge ? (
 					<ProductBackorderBadge />
 				) : (
-					lowStockRemaining && (
+					!! lowStockRemaining && (
 						<ProductLowStockBadge
 							lowStockRemaining={ lowStockRemaining }
 						/>
