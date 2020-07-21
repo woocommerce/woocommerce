@@ -50,13 +50,15 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_instance_of' uses the 'instance' static method in classes that implement it.
+	 * @testdox 'get_instance_of' uses the 'instance' static method in classes that implement it, passing the supplied arguments.
 	 */
 	public function test_get_instance_of_class_with_instance_method_gets_an_instance_of_the_appropriate_class() {
-		$instance1 = $this->sut->get_instance_of( \WooCommerce::class );
-		$instance2 = $this->sut->get_instance_of( \WooCommerce::class );
-		$this->assertSame( \WooCommerce::instance(), $instance1 );
-		$this->assertSame( $instance1, $instance2 );
+		// ClassWithSingleton is in the root namespace and thus can't be autoloaded.
+		require_once dirname( __DIR__ ) . '/Internal/DependencyManagement/ExampleClasses/ClassWithSingleton.php';
+
+		$instance = $this->sut->get_instance_of( \ClassWithSingleton::class, 'foo', 'bar' );
+		$this->assertSame( \ClassWithSingleton::$instance, $instance );
+		$this->assertEquals( array( 'foo', 'bar' ), \ClassWithSingleton::$instance_args );
 	}
 
 	/**

@@ -49,7 +49,7 @@ class LegacyProxy {
 
 		// If the class is a singleton, use the "instance" method.
 		if ( method_exists( $class_name, 'instance' ) ) {
-			return $class_name::instance( $args );
+			return $class_name::instance( ...$args );
 		}
 
 		// Fallback to simply creating a new instance of the class.

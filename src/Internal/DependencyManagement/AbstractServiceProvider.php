@@ -88,7 +88,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 			} catch ( \ReflectionException $ex ) {
 				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
 			}
-		} elseif ( ! is_object( $concrete ) && ! is_callable( $concrete ) && ! function_exists( $concrete ) ) {
+		} elseif ( ! is_object( $concrete ) && ! is_callable( $concrete ) ) {
 			throw new ContainerException( 'AbstractServiceProvider::add_with_auto_arguments: concrete must be a valid class name, function name, object, or callable.' );
 		}
 
