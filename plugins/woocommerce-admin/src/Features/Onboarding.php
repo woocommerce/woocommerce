@@ -582,13 +582,9 @@ class Onboarding {
 			'profile'    => $profile,
 		);
 
-		// Only fetch if the onboarding wizard is incomplete.
-		if ( self::should_show_profiler() ) {
-			$settings['onboarding']['activeTheme'] = get_option( 'stylesheet' );
-		}
-
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
+			$settings['onboarding']['activeTheme']              = get_option( 'stylesheet' );
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
 			$current_user                                       = wp_get_current_user();
