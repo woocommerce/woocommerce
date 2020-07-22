@@ -400,7 +400,7 @@ class Theme extends Component {
 					/>
 				) }
 				{ activeThemeSupportsWooCommerce && (
-					<p>
+					<p className="woocommerce-profile-wizard__themes-skip-this-step">
 						<Button
 							isLink
 							className="woocommerce-profile-wizard__skip"
