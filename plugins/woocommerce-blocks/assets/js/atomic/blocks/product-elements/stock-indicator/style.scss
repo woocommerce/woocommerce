@@ -1,0 +1,17 @@
+.wc-block-components-product-stock-indicator {
+	margin-top: 0;
+	margin-bottom: em($gap-small);
+	display: block;
+	@include font-size(small);
+
+	&--in-stock {
+		color: $valid-green;
+	}
+	&--out-of-stock {
+		color: $error-red;
+	}
+	&--low-stock,
+	&--available-on-backorder {
+		color: $notice-yellow;
+	}
+}

@@ -53,6 +53,7 @@ class Assets {
 		$asset_api->register_script( 'wc-vendors', $asset_api->get_block_asset_build_path( 'vendors' ), [], false );
 		$asset_api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
 		$asset_api->register_script( 'wc-shared-context', 'build/wc-shared-context.js', [], false );
+		$asset_api->register_script( 'wc-shared-hocs', 'build/wc-shared-hocs.js', [], false );
 
 		// Inline data.
 		wp_add_inline_script(

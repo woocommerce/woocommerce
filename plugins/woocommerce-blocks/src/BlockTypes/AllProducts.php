@@ -32,6 +32,7 @@ class AllProducts extends AbstractDynamicBlock {
 				'editor_style'    => 'wc-block-editor',
 				'style'           => 'wc-block-style',
 				'script'          => 'wc-' . $this->block_name . '-frontend',
+				'supports'        => [],
 			)
 		);
 	}

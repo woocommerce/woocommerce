@@ -87,7 +87,11 @@ const getCoreConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Core', options.fileSuffix )
 			),
-			new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
+			new DependencyExtractionWebpackPlugin( {
+				injectPolyfill: true,
+				requestToExternal,
+				requestToHandle,
+			} ),
 			new CreateFileWebpack( {
 				path: './',
 				// file name

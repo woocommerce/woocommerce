@@ -3,7 +3,6 @@
  */
 import PropTypes from 'prop-types';
 import { createContext, useContext } from '@wordpress/element';
-import classnames from 'classnames';
 
 /**
  * This context is a configuration object used for connecting
@@ -24,24 +23,15 @@ export const useInnerBlockLayoutContext = () =>
 export const InnerBlockLayoutContextProvider = ( {
 	parentName = '',
 	parentClassName = '',
-	isLoading = false,
 	children,
 } ) => {
 	const contextValue = {
 		parentName,
 		parentClassName,
-		isLoading,
 	};
-
 	return (
 		<InnerBlockLayoutContext.Provider value={ contextValue }>
-			<div
-				className={ classnames( 'wc-block-layout', {
-					'wc-block-layout--is-loading': isLoading,
-				} ) }
-			>
-				{ children }
-			</div>
+			{ children }
 		</InnerBlockLayoutContext.Provider>
 	);
 };

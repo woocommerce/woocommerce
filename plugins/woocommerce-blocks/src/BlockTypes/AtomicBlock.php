@@ -33,6 +33,7 @@ class AtomicBlock extends AbstractBlock {
 			$this->namespace . '/' . $this->block_name,
 			array(
 				'render_callback' => array( $this, 'render' ),
+				'supports'        => [],
 			)
 		);
 	}

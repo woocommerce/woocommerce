@@ -36,6 +36,7 @@ class Cart extends AbstractBlock {
 				'editor_style'    => 'wc-block-editor',
 				'style'           => [ 'wc-block-style', 'wc-block-vendors-style' ],
 				'script'          => 'wc-' . $this->block_name . '-block-frontend',
+				'supports'        => [],
 			)
 		);
 	}

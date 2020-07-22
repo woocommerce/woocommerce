@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from 'react-dom';
+import { render, Suspense } from '@wordpress/element';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
@@ -34,7 +34,11 @@ export const renderFrontend = ( {
 
 			render(
 				<BlockErrorBoundary { ...errorBoundaryProps }>
-					<Block { ...props } attributes={ attributes } />
+					<Suspense
+						fallback={ <div className="wc-block-placeholder" /> }
+					>
+						<Block { ...props } attributes={ attributes } />
+					</Suspense>
 				</BlockErrorBoundary>,
 				el
 			);
