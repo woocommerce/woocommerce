@@ -178,7 +178,7 @@ class OnboardingTasks {
 		switch ( $task ) {
 			case 'products':
 				$products = wp_count_posts( 'product' );
-				return (int) $products->publish > 0 || (int) $products->draft > 0;
+				return (int) $products->publish > 0;
 			case 'homepage':
 				$homepage_id = get_option( 'woocommerce_onboarding_homepage_post_id', false );
 				if ( ! $homepage_id ) {
