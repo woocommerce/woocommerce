@@ -29,7 +29,7 @@ _Outcome_: **You are equipped to ship a release!**
 -   Ensure all issues/PRs intended for this release are merged, closed and linked to release.
 -   All PRs should have changelog entry, or `skip-changelog` tag.
 -   Check with the team to confirm any outstanding or in progress work.
--   Review recent [dependency updates](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pulls?q=is%3Apr+is%3Aclosed+author%3Aapp%2Frenovate) to be included in this release, and ensure they have been adequately tested. 
+-   Review recent [dependency updates](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pulls?q=is%3Apr+is%3Aclosed+author%3Aapp%2Frenovate) to be included in this release, and ensure they have been adequately tested.
 
 Note: changelog should be formatted like this in PR description. Note the preceding `>` - this is required by changelog script.
 
@@ -129,23 +129,17 @@ Note - the PR is not merged here either - read on :)
 
 ### Release!
 
-#### Tag release on GitHub
+#### Tag release on GitHub (and optionally deploy to WPORG)
 
 -   Prepare tagged release on github `$ npm run deploy`.
     -   Note: the script automatically updates version numbers (commits on your behalf).
+    -   **ALERT**: This script will ask you if this release will be deployed to WordPress.org. If you answer yes, then a GitHub release is created and this will trigger a GitHub workflow we have setup to deploy the contents of the release tag to GitHub. If you answer no, then a tag only is created and nothing will be deployed to GitHub. Note: Pre-releases GitHub releases ARE deployed to WordPress.org but the deploy script will not update the stable version in readme.txt (so pre-releases are only available in the svn tags).
+
+**If GitHub release was created:**
+
 -   Edit release, add changelog info to Github release notes.
--   Check release repo tag is correct - checkout, smoke test/confidence check.
-
-_Outcomes_: **Version numbers updated in source code & developers can test tagged release.**
-
-#### Release to WPORG
-
--   Run `$ npm run release`. This script clones a copy of the source code to your home folder, and outputs an `svn` command to push release up to WPORG.
--   Push release to WPORG using `svn`.
-    -   Run generated svn command to commit to WPORG svn repo.
-        -   The command should look like this: `cd /Users/{YOU}/blocks-deployment/woo-gutenberg-products-block-svn && svn ci -m "Release 2.5.11, see readme.txt for changelog."`
-    -   Commit should complete successfully with a message like `Committed revision 2231217.`.
--   Confirm that the WPORG release is updated and correct:
+-   Check GitHub actions tab and verify wp.org deploy workflow was successful.
+-   After wp.org deploy GitHub workflow completes, confirm that the WPORG release is updated and correct:
     -   Changelog, `Version` & `Last updated` on [WPORG plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/).
     -   Confirm svn tag is correct, e.g. [2.5.11](https://plugins.svn.wordpress.org/woo-gutenberg-products-block/tags/2.5.11/).
     -   Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated.
@@ -153,6 +147,10 @@ _Outcomes_: **Version numbers updated in source code & developers can test tagge
     -   Test updating plugin from previous version.
 
 _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to date**.
+
+**If GitHub tag only was created:**
+
+- Checkout the tag and smoke test to verify everything works as expected.
 
 ### After release
 
