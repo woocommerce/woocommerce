@@ -122,7 +122,6 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 						/>
 					)
 				) }
-				{ showBackorderBadge && <ProductBackorderBadge /> }
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }

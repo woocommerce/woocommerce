@@ -3,7 +3,7 @@
  * Bank Transfer (BACS) (core) gateway implementation.
  *
  * @package WooCommerce/Blocks
- * @since $VID:$
+ * @since 3.0.0
  */
 
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 /**
  * Bank Transfer (BACS) payment method integration
  *
- * @since $VID:$
+ * @since 3.0.0
  */
 final class BankTransfer extends AbstractPaymentMethodType {
 	/**

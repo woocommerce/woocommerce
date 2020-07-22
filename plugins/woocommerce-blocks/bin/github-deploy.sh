@@ -1,8 +1,6 @@
 #!/bin/sh
 
 RELEASER_PATH=$(pwd)
-PLUGIN_SLUG="woocommerce-gutenberg-products-block"
-GITHUB_ORG="woocommerce"
 IS_PRE_RELEASE=false
 
 # Functions
@@ -77,8 +75,39 @@ if is_substring "-" "${VERSION}"; then
 	output 2 "Detected pre-release version!"
 fi
 
+
+echo
+output 3 "Will this release get published to WordPress.org (if no, then only a tag will be created)? [y/N]:"
+read -r DO_WP_DEPLOY
+echo
+
+if [ ! -d "build" ]; then
+	output 3 "Build directory not found. Aborting."
+	exit 1
+fi
+
+# Safety check, if a patch release is detected ask for verification.
+VERSION_PIECES=${VERSION//[^.]}
+if [[ "${#VERSION_PIECES}" -ge "2" && "$(echo "${DO_WP_DEPLOY:-n}" | tr "[:upper:]" "[:lower:]")" = "y" ]]; then
+	output 1 "The version you entered (${VERSION}) looks like a patch version. Since this version will be deployed to WordPress.org, it will become the latest available version. Are you sure you want that (no will abort)?: [y/N]"
+	read -r ABORT
+	if [ "$(echo "${ABORT:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
+		output 1 "Release cancelled!"
+		exit 1
+	fi
+else
+	printf "Ready to proceed? [y/N]: "
+	read -r PROCEED
+	echo
+fi
+
+if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
+  output 1 "Release cancelled!"
+  exit 1
+fi
+
 # Version changes
-output 2 "Updating version numbers in files..."
+output 2 "Updating version numbers in files (note pre-releases will not have the readme.txt stable tag updated)..."
 source $RELEASER_PATH/bin/version-changes.sh
 
 output 2 "Committing version change..."
@@ -87,21 +116,14 @@ echo
 git commit -am "Bumping version strings to new version." --no-verify
 git push origin $CURRENTBRANCH
 
-if [ ! -d "build" ]; then
-	output 3 "Build directory not found. Aborting."
-	exit 1
-fi
-
-printf "Ready to proceed? [y/N]: "
-read -r PROCEED
+# Tag existing version for reference
+output 2 "Creating tag for current non-built branch on GitHub..."
 echo
+DEVTAG="v${VERSION}-dev"
+git tag $DEVTAG
+git push origin $DEVTAG
 
-if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
-  output 1 "Release cancelled!"
-  exit 1
-fi
-
-output 2 "Starting release to GitHub..."
+output 2 "Prepping release for GitHub..."
 echo
 
 # Create a release branch.
@@ -122,10 +144,12 @@ git commit -m "Adding /vendor directory to release" --no-verify
 git push origin $BRANCH
 
 # Create the new release.
-if [ $IS_PRE_RELEASE = true ]; then
-	hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH --prerelease "v${VERSION}"
-else
-	hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH "v${VERSION}"
+if [ "$(echo "${DO_WP_DEPLOY:-n}" | tr "[:upper:]" "[:lower:]")" = "y" ]; then
+	if [ $IS_PRE_RELEASE = true ]; then
+		hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH --prerelease "v${VERSION}"
+	else
+		hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH "v${VERSION}"
+	fi
 fi
 
 git checkout $CURRENTBRANCH

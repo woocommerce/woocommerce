@@ -13,7 +13,6 @@ cache:
 branches:
     only:
         - main
-        - /release\/.*/
 
 # Make sure NodeGit gets the correct C libs.
 addons:
