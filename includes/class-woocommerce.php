@@ -445,6 +445,7 @@ final class WooCommerce {
 		/**
 		 * REST API.
 		 */
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
