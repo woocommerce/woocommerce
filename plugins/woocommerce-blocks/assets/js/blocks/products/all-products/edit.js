@@ -208,7 +208,7 @@ class Editor extends Component {
 						parentName="woocommerce/all-products"
 						parentClassName="wc-block-grid"
 					>
-						<div className="wc-block-grid has-1-columns">
+						<div className="wc-block-grid wc-block-layout has-1-columns">
 							<ul className="wc-block-grid__products">
 								<li className="wc-block-grid__product">
 									<ProductDataContextProvider

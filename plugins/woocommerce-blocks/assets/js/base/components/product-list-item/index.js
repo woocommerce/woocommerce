@@ -15,10 +15,13 @@ const ProductListItem = ( { product, attributes, instanceId } ) => {
 	const { layoutConfig } = attributes;
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const isLoading = Object.keys( product ).length === 0;
-	const classes = classnames( `${ parentClassName }__product`, {
-		'is-loading': isLoading,
-		'wc-block-layout--is-loading': isLoading, // This can be removed when switching to inner block rendering.
-	} );
+	const classes = classnames(
+		`${ parentClassName }__product`,
+		'wc-block-layout',
+		{
+			'is-loading': isLoading,
+		}
+	);
 
 	return (
 		<li className={ classes } aria-hidden={ isLoading }>

@@ -7,3 +7,7 @@
 		color: $white;
 	}
 }
+.block-editor-block-toolbar__slot {
+	// prevents text toolbar items shrinking to avoid other buttons overlapping.
+	flex-shrink: 0;
+}

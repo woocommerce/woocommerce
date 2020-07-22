@@ -1,15 +1,15 @@
 /**
  * Internal dependencies
  */
-import './product/title';
-import './product/price';
-import './product/image';
-import './product/rating';
-import './product/button';
-import './product/summary';
-import './product/sale-badge';
-import './product/sku';
-import './product/category-list';
-import './product/tag-list';
-import './product/stock-indicator';
-import './product/add-to-cart';
+import './product-elements/title';
+import './product-elements/price';
+import './product-elements/image';
+import './product-elements/rating';
+import './product-elements/button';
+import './product-elements/summary';
+import './product-elements/sale-badge';
+import './product-elements/sku';
+import './product-elements/category-list';
+import './product-elements/tag-list';
+import './product-elements/stock-indicator';
+import './product-elements/add-to-cart';

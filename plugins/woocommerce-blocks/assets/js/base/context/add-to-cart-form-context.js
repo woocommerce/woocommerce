@@ -57,9 +57,10 @@ export const useAddToCartFormContext = () => {
  */
 export const AddToCartFormContextProvider = ( {
 	children,
-	product,
+	product: productProp,
 	showFormElements,
 } ) => {
+	const product = productProp || {};
 	const productId = product.id || 0;
 	const [ variationId, setVariationId ] = useState( 0 );
 	const [ variationData, setVariationData ] = useState( {} );

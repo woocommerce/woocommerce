@@ -57,6 +57,7 @@ abstract class AbstractBlock {
 				'editor_script' => 'wc-' . $this->block_name,
 				'editor_style'  => 'wc-block-editor',
 				'style'         => 'wc-block-style',
+				'supports'      => [],
 			)
 		);
 	}

@@ -25,7 +25,10 @@ export const renderInnerBlocks = ( {
 	const blockMap = getBlockMap( parentBlockName );
 
 	return Array.from( children ).map( ( el, index ) => {
-		const componentProps = el.dataset;
+		const componentProps = {
+			...el.dataset,
+			key: `${ parentBlockName }_${ depth }_${ index }`,
+		};
 
 		const componentChildren =
 			el.children && el.children.length
@@ -54,7 +57,7 @@ export const renderInnerBlocks = ( {
 
 		return (
 			<Suspense
-				key={ `${ parentBlockName }_${ depth }_${ index }` }
+				key={ `${ parentBlockName }_${ depth }_${ index }_suspense` }
 				fallback={ <div className="wc-block-placeholder" /> }
 			>
 				<LayoutComponent { ...componentProps }>

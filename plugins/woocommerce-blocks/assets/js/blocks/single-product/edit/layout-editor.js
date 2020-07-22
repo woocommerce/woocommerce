@@ -26,7 +26,7 @@ import {
  * Component to handle edit mode of the "Single Product Block".
  */
 const LayoutEditor = ( { isLoading, product, clientId } ) => {
-	const baseClassName = 'wc-block-single-product';
+	const baseClassName = 'wc-block-single-product wc-block-layout';
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
 	const resetInnerBlocks = useCallback( () => {
@@ -41,9 +41,11 @@ const LayoutEditor = ( { isLoading, product, clientId } ) => {
 		<InnerBlockLayoutContextProvider
 			parentName={ BLOCK_NAME }
 			parentClassName={ baseClassName }
-			isLoading={ isLoading }
 		>
-			<ProductDataContextProvider product={ product }>
+			<ProductDataContextProvider
+				product={ product }
+				isLoading={ isLoading }
+			>
 				<InspectorControls>
 					<PanelBody
 						title={ __( 'Layout', 'woo-gutenberg-products-block' ) }

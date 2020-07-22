@@ -3,7 +3,10 @@
  */
 import { StoreNoticesProvider } from '@woocommerce/base-context';
 import { getValidBlockAttributes } from '@woocommerce/base-utils';
-import { renderParentBlock } from '@woocommerce/atomic-utils';
+import {
+	renderParentBlock,
+	renderStandaloneBlocks,
+} from '@woocommerce/atomic-utils';
 
 /**
  * Internal dependencies
@@ -37,3 +40,5 @@ renderParentBlock( {
 	selector: '.wp-block-woocommerce-single-product',
 	getProps,
 } );
+
+renderStandaloneBlocks();

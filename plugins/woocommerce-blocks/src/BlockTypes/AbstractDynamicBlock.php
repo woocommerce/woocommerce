@@ -40,6 +40,7 @@ abstract class AbstractDynamicBlock {
 				'editor_style'    => 'wc-block-editor',
 				'style'           => 'wc-block-style',
 				'attributes'      => $this->get_attributes(),
+				'supports'        => [],
 			)
 		);
 	}
