@@ -205,6 +205,11 @@ class WC_Helper_Updater {
 			}
 		);
 
+		// Nothing to check for, exit.
+		if ( empty( $active_for_translations ) ) {
+			return array();
+		}
+
 		if ( wp_doing_cron() ) {
 			$timeout = 30;
 		} else {
