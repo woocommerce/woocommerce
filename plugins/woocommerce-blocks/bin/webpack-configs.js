@@ -3,7 +3,7 @@
  * External dependencies
  */
 const path = require( 'path' );
-const MergeExtractFilesPlugin = require( './merge-extract-files-webpack-plugin' );
+const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
@@ -135,31 +135,6 @@ const getMainConfig = ( options = {} ) => {
 						chunks: 'all',
 						enforce: true,
 					},
-					editor: {
-						// Capture all `editor` stylesheets and the components stylesheets.
-						test: ( module = {} ) =>
-							module.constructor.name === 'CssModule' &&
-							( findModuleMatch( module, /editor\.scss$/ ) ||
-								findModuleMatch(
-									module,
-									/[\\/]assets[\\/]components[\\/]/
-								) ),
-						name: 'editor',
-						chunks: 'all',
-						priority: 10,
-					},
-					'vendors-style': {
-						test: /\/node_modules\/.*?style\.s?css$/,
-						name: 'vendors-style',
-						chunks: 'all',
-						priority: 7,
-					},
-					style: {
-						test: /style\.scss$/,
-						name: 'style',
-						chunks: 'all',
-						priority: 5,
-					},
 				},
 			},
 		},
@@ -186,80 +161,14 @@ const getMainConfig = ( options = {} ) => {
 					},
 				},
 				{
-					test: /\/node_modules\/.*?style\.s?css$/,
-					use: [
-						MiniCssExtractPlugin.loader,
-						{ loader: 'css-loader', options: { importLoaders: 1 } },
-						'postcss-loader',
-						{
-							loader: 'sass-loader',
-							query: {
-								includePaths: [ 'node_modules' ],
-								data: [
-									'colors',
-									'breakpoints',
-									'variables',
-									'mixins',
-									'animations',
-									'z-index',
-								]
-									.map(
-										( imported ) =>
-											`@import "~@wordpress/base-styles/${ imported }";`
-									)
-									.join( ' ' ),
-							},
-						},
-					],
-				},
-				{
-					test: /\.s?css$/,
-					exclude: /node_modules/,
-					use: [
-						MiniCssExtractPlugin.loader,
-						{ loader: 'css-loader', options: { importLoaders: 1 } },
-						'postcss-loader',
-						{
-							loader: 'sass-loader',
-							query: {
-								includePaths: [
-									'assets/css/abstracts',
-									'node_modules',
-								],
-								data: [
-									'_colors',
-									'_variables',
-									'_breakpoints',
-									'_mixins',
-								]
-									.map(
-										( imported ) =>
-											`@import "${ imported }";`
-									)
-									.join( ' ' ),
-							},
-						},
-					],
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
 				},
 			],
 		},
 		plugins: [
-			new WebpackRTLPlugin( {
-				filename: `[name]${ fileSuffix }-rtl.css`,
-				minify: {
-					safe: true,
-				},
-			} ),
-			new MiniCssExtractPlugin( {
-				filename: `[name]${ fileSuffix }.css`,
-			} ),
-			new MergeExtractFilesPlugin(
-				[
-					`build/editor${ fileSuffix }.js`,
-					`build/style${ fileSuffix }.js`,
-				],
-				`build/vendors${ fileSuffix }.js`
-			),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Main', options.fileSuffix )
 			),
@@ -440,46 +349,14 @@ const getPaymentsConfig = ( options = {} ) => {
 					},
 				},
 				{
-					test: /\.s?css$/,
-					exclude: /node_modules/,
-					use: [
-						MiniCssExtractPlugin.loader,
-						{ loader: 'css-loader', options: { importLoaders: 1 } },
-						'postcss-loader',
-						{
-							loader: 'sass-loader',
-							query: {
-								includePaths: [
-									'assets/css/abstracts',
-									'node_modules',
-								],
-								data: [
-									'_colors',
-									'_variables',
-									'_breakpoints',
-									'_mixins',
-								]
-									.map(
-										( imported ) =>
-											`@import "${ imported }";`
-									)
-									.join( ' ' ),
-							},
-						},
-					],
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
 				},
 			],
 		},
 		plugins: [
-			new WebpackRTLPlugin( {
-				filename: `[name]-rtl.css`,
-				minify: {
-					safe: true,
-				},
-			} ),
-			new MiniCssExtractPlugin( {
-				filename: `[name].css`,
-			} ),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig(
 					'Payment Method Extensions',
@@ -500,9 +377,146 @@ const getPaymentsConfig = ( options = {} ) => {
 	};
 };
 
+const getStylingConfig = ( options = {} ) => {
+	let { fileSuffix } = options;
+	const { alias, resolvePlugins = [] } = options;
+	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: getEntryConfig( 'styling', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			filename: `[name]-style${ fileSuffix }.js`,
+			library: [ 'wc', 'blocks', '[name]' ],
+			libraryTarget: 'this',
+			// This fixes an issue with multiple webpack projects using chunking
+			// overwriting each other's chunk loader function.
+			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			jsonpFunction: 'webpackWcBlocksJsonp',
+		},
+		optimization: {
+			splitChunks: {
+				minSize: 0,
+				cacheGroups: {
+					editor: {
+						// Capture all `editor` stylesheets and the components stylesheets.
+						test: ( module = {} ) =>
+							module.constructor.name === 'CssModule' &&
+							( findModuleMatch( module, /editor\.scss$/ ) ||
+								findModuleMatch(
+									module,
+									/[\\/]assets[\\/]js[\\/]components[\\/]/
+								) ),
+						name: 'editor',
+						chunks: 'all',
+						priority: 10,
+					},
+					'vendors-style': {
+						test: /\/node_modules\/.*?style\.s?css$/,
+						name: 'vendors-style',
+						chunks: 'all',
+						priority: 7,
+					},
+					style: {
+						// Capture all stylesheets with name `style` or
+						// name that starts with underscore (abstracts).
+						test: /(style|_.*)\.scss$/,
+						name: 'style',
+						chunks: 'all',
+						priority: 5,
+					},
+				},
+			},
+		},
+		module: {
+			rules: [
+				{
+					test: /\/node_modules\/.*?style\.s?css$/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'postcss-loader',
+						{
+							loader: 'sass-loader',
+							query: {
+								includePaths: [ 'node_modules' ],
+								data: [
+									'colors',
+									'breakpoints',
+									'variables',
+									'mixins',
+									'animations',
+									'z-index',
+								]
+									.map(
+										( imported ) =>
+											`@import "~@wordpress/base-styles/${ imported }";`
+									)
+									.join( ' ' ),
+							},
+						},
+					],
+				},
+				{
+					test: /\.s?css$/,
+					exclude: /node_modules/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'postcss-loader',
+						{
+							loader: 'sass-loader',
+							query: {
+								includePaths: [ 'assets/css/abstracts' ],
+								data: [
+									'_colors',
+									'_variables',
+									'_breakpoints',
+									'_mixins',
+								]
+									.map(
+										( imported ) =>
+											`@import "${ imported }";`
+									)
+									.join( ' ' ),
+							},
+						},
+					],
+				},
+			],
+		},
+		plugins: [
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Styles', options.fileSuffix )
+			),
+			new WebpackRTLPlugin( {
+				filename: `[name]${ fileSuffix }-rtl.css`,
+				minify: {
+					safe: true,
+				},
+			} ),
+			new MiniCssExtractPlugin( {
+				filename: `[name]${ fileSuffix }.css`,
+			} ),
+			// Remove JS files generated by MiniCssExtractPlugin.
+			new RemoveFilesPlugin( `./build/*style${ fileSuffix }.js` ),
+		],
+		resolve,
+	};
+};
+
 module.exports = {
 	getCoreConfig,
 	getFrontConfig,
 	getMainConfig,
 	getPaymentsConfig,
+	getStylingConfig,
 };
