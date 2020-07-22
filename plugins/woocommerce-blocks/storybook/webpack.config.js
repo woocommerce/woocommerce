@@ -8,7 +8,10 @@ const path = require( 'path' );
  * Internal dependencies
  */
 const { getAlias } = require( '../bin/webpack-helpers.js' );
-const { getMainConfig } = require( '../bin/webpack-configs.js' );
+const {
+	getMainConfig,
+	getStylingConfig,
+} = require( '../bin/webpack-configs.js' );
 const tsConfig = require( '../tsconfig.json' );
 
 const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
@@ -25,6 +28,7 @@ const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
 
 module.exports = ( { config: storybookConfig } ) => {
 	const wooBlocksConfig = getMainConfig( { alias: getAlias() } );
+	const wooStylingConfig = getStylingConfig();
 	storybookConfig.resolve.alias = {
 		...storybookConfig.resolve.alias,
 		...aliases,
@@ -35,7 +39,8 @@ module.exports = ( { config: storybookConfig } ) => {
 			loaders: [ require.resolve( '@storybook/source-loader' ) ],
 			enforce: 'pre',
 		},
-		...wooBlocksConfig.module.rules
+		...wooBlocksConfig.module.rules,
+		...wooStylingConfig.module.rules
 	);
 
 	storybookConfig.plugins.push(

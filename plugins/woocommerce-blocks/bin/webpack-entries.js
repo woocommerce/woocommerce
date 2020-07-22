@@ -2,8 +2,101 @@
  * External dependencies
  */
 const { omit } = require( 'lodash' );
+const glob = require( 'glob' );
 
-const stable = {
+// List of blocks that should be used as webpack entry points. They are expected
+// to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
+// path should be defined in the `customDir` property. The scripts below will
+// take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
+// block directory.
+// If a block is experimental, it should be marked with the `isExperimental`
+// property.
+const blocks = {
+	'handpicked-products': {},
+	'product-best-sellers': {},
+	'product-category': {},
+	'product-categories': {},
+	'product-new': {},
+	'product-on-sale': {},
+	'product-top-rated': {},
+	'products-by-attribute': {},
+	'featured-product': {},
+	'all-reviews': {
+		customDir: 'reviews/all-reviews',
+	},
+	'reviews-by-product': {
+		customDir: 'reviews/reviews-by-product',
+	},
+	'reviews-by-category': {
+		customDir: 'reviews/reviews-by-category',
+	},
+	'product-search': {},
+	'product-tag': {},
+	'featured-category': {},
+	'all-products': {
+		customDir: 'products/all-products',
+	},
+	'price-filter': {},
+	'attribute-filter': {},
+	'active-filters': {},
+	cart: {
+		customDir: 'cart-checkout/cart',
+	},
+	checkout: {
+		customDir: 'cart-checkout/checkout',
+	},
+	'single-product': {
+		isExperimental: true,
+	},
+};
+
+// Returns the entries for each block given a relative path (ie: `index.js`,
+// `**/*.scss`...).
+// It also filters out elements with undefined props and experimental blocks.
+const getBlockEntries = ( relativePath ) => {
+	const experimental =
+		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
+
+	return Object.fromEntries(
+		Object.entries( blocks )
+			.filter(
+				( [ , config ] ) =>
+					! config.isExperimental ||
+					config.isExperimental === experimental
+			)
+			.map( ( [ blockCode, config ] ) => {
+				const filePaths = glob.sync(
+					`./assets/js/blocks/${ config.customDir || blockCode }/` +
+						relativePath
+				);
+				if ( filePaths.length > 0 ) {
+					return [ blockCode, filePaths ];
+				}
+				return null;
+			} )
+			.filter( Boolean )
+	);
+};
+
+const entries = {
+	styling: {
+		// @wordpress/components styles
+		'custom-select-control-style':
+			'./node_modules/wordpress-components/src/custom-select-control/style.scss',
+		'spinner-style':
+			'./node_modules/wordpress-components/src/spinner/style.scss',
+		'snackbar-notice-style':
+			'./node_modules/wordpress-components/src/snackbar/style.scss',
+
+		'general-style': glob.sync( './assets/**/*.scss', {
+			ignore: [
+				// Block styles are added below.
+				'./assets/js/blocks/*/*.scss',
+			],
+		} ),
+
+		...getBlockEntries( '**/*.scss' ),
+	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
 		wcSettings: './assets/js/settings/shared/index.js',
@@ -15,59 +108,12 @@ const stable = {
 		// Shared blocks code
 		blocks: './assets/js/index.js',
 
-		// @wordpress/components styles
-		'custom-select-control-style':
-			'./node_modules/wordpress-components/src/custom-select-control/style.scss',
-		'spinner-style':
-			'./node_modules/wordpress-components/src/spinner/style.scss',
-		'snackbar-notice-style':
-			'./node_modules/wordpress-components/src/snackbar/style.scss',
-
-		// Styles for grid blocks. WP <=5.2 doesn't have the All Products block,
-		// so this file would not be included if not explicitly declared here.
-		// This file is excluded from the default build so CSS styles are included
-		// in the other the components are imported.
-		'product-list-style':
-			'./assets/js/base/components/product-list/style.scss',
-
 		// Blocks
-		'handpicked-products':
-			'./assets/js/blocks/handpicked-products/index.js',
-		'product-best-sellers':
-			'./assets/js/blocks/product-best-sellers/index.js',
-		'product-category': './assets/js/blocks/product-category/index.js',
-		'product-categories': './assets/js/blocks/product-categories/index.js',
-		'product-new': './assets/js/blocks/product-new/index.js',
-		'product-on-sale': './assets/js/blocks/product-on-sale/index.js',
-		'product-top-rated': './assets/js/blocks/product-top-rated/index.js',
-		'products-by-attribute':
-			'./assets/js/blocks/products-by-attribute/index.js',
-		'featured-product': './assets/js/blocks/featured-product/index.js',
-		'all-reviews': './assets/js/blocks/reviews/all-reviews/index.js',
-		'reviews-by-product':
-			'./assets/js/blocks/reviews/reviews-by-product/index.js',
-		'reviews-by-category':
-			'./assets/js/blocks/reviews/reviews-by-category/index.js',
-		'product-search': './assets/js/blocks/product-search/index.js',
-		'product-tag': './assets/js/blocks/product-tag/index.js',
-		'featured-category': './assets/js/blocks/featured-category/index.js',
-		'all-products': './assets/js/blocks/products/all-products/index.js',
-		'price-filter': './assets/js/blocks/price-filter/index.js',
-		'attribute-filter': './assets/js/blocks/attribute-filter/index.js',
-		'active-filters': './assets/js/blocks/active-filters/index.js',
-		'block-error-boundary':
-			'./assets/js/base/components/block-error-boundary/style.scss',
-		cart: './assets/js/blocks/cart-checkout/cart/index.js',
-		checkout: './assets/js/blocks/cart-checkout/checkout/index.js',
+		...getBlockEntries( 'index.js' ),
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.js',
-		'all-products': './assets/js/blocks/products/all-products/frontend.js',
-		'price-filter': './assets/js/blocks/price-filter/frontend.js',
-		'attribute-filter': './assets/js/blocks/attribute-filter/frontend.js',
-		'active-filters': './assets/js/blocks/active-filters/frontend.js',
-		cart: './assets/js/blocks/cart-checkout/cart/frontend.js',
-		checkout: './assets/js/blocks/cart-checkout/checkout/frontend.js',
+		...getBlockEntries( 'frontend.js' ),
 	},
 	payments: {
 		'wc-payment-method-stripe':
@@ -83,24 +129,8 @@ const stable = {
 	},
 };
 
-const experimental = {
-	core: {},
-	main: {
-		'single-product': './assets/js/blocks/single-product/index.js',
-	},
-	frontend: {
-		'single-product': './assets/js/blocks/single-product/frontend.js',
-	},
-	payments: {},
-};
-
 const getEntryConfig = ( type = 'main', exclude = [] ) => {
-	return omit(
-		parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3
-			? stable[ type ]
-			: { ...stable[ type ], ...experimental[ type ] },
-		exclude
-	);
+	return omit( entries[ type ], exclude );
 };
 
 module.exports = {
