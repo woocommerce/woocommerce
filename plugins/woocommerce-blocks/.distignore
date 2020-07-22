@@ -24,7 +24,7 @@ babel.config.js
 blocks.ini
 composer.json
 composer.lock
-docker-composer.yml
+docker-compose.yml
 globals.d.ts
 package.json
 package-lock.json

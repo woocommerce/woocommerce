@@ -107,7 +107,7 @@ _Outcome_: **Release branch has `readme.txt` is updated with release details.**
 -   Ensure you are on the tip of the release branch, e.g. `git pull origin release/2.5`
 -   Update dependencies – `$ npm ci`.
 -   Run a production build - `$ npm run build`.
--   Run package script to get a zip to test `$ npm run package-plugin`.
+-   Run package script to get a zip to test `$ npm run package-plugin:deploy`.
 -   Smoke test built release zip:
     -   At least one other person should test the built zip - ask a teammate to help out.
     -   Test in a clean environment, e.g. Jurassic.Ninja site.
