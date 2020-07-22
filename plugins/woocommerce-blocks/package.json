@@ -173,7 +173,7 @@
 		"react-number-format": "4.4.1",
 		"reakit": "1.0.2",
 		"trim-html": "0.1.9",
-		"use-debounce": "3.4.0",
+		"use-debounce": "3.4.3",
 		"wordpress-components": "npm:@wordpress/components@8.5.0",
 		"wordpress-compose": "npm:@wordpress/compose@3.13.1",
 		"wordpress-element": "npm:@wordpress/element@2.11.0"
