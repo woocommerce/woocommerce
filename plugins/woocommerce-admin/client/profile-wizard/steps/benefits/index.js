@@ -7,11 +7,12 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { filter } from 'lodash';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
  */
-import { Card, H } from '@woocommerce/components';
+import { Card, H, Link } from '@woocommerce/components';
 import {
 	pluginNames,
 	ONBOARDING_STORE_NAME,
@@ -212,6 +213,13 @@ class Benefits extends Component {
 		);
 		const isInstallAction =
 			isInstallingActivating || ! pluginsRemaining.length;
+		const isAcceptingTos = ! this.isWcsActive;
+		const pluralizedPlugins = _n(
+			'plugin',
+			'plugins',
+			this.pluginsToInstall.length,
+			'woocommerce-admin'
+		);
 
 		return (
 			<Card className="woocommerce-profile-wizard__benefits-card">
@@ -246,19 +254,34 @@ class Benefits extends Component {
 				</div>
 
 				<p className="woocommerce-profile-wizard__benefits-install-notice">
-					{ sprintf(
-						__(
-							'%s %s will be installed & activated for free.',
-							'woocommerce-admin'
-						),
-						pluginNamesString,
-						_n(
-							'plugin',
-							'plugins',
-							this.pluginsToInstall.length,
-							'woocommerce-admin'
-						)
-					) }
+					{ isAcceptingTos
+						? interpolateComponents( {
+								mixedString: sprintf(
+									__(
+										'%s %s will be installed & activated for free, and you agree to our {{link}}Terms of Service{{/link}}.',
+										'woocommerce-admin'
+									),
+									pluginNamesString,
+									pluralizedPlugins
+								),
+								components: {
+									link: (
+										<Link
+											href="https://wordpress.com/tos/"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+						  } )
+						: sprintf(
+								__(
+									'%s %s will be installed & activated for free.',
+									'woocommerce-admin'
+								),
+								pluginNamesString,
+								pluralizedPlugins
+						  ) }
 				</p>
 			</Card>
 		);
