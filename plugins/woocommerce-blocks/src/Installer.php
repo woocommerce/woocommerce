@@ -89,13 +89,13 @@ class Installer {
 	protected function maybe_create_table( $table_name, $create_sql ) {
 		global $wpdb;
 
-		if ( in_array( $table_name, $wpdb->get_col( 'SHOW TABLES', 0 ), true ) ) {
+		if ( in_array( $table_name, $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ), 0 ), true ) ) {
 			return true;
 		}
 
 		$wpdb->query( $create_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-		return in_array( $table_name, $wpdb->get_col( 'SHOW TABLES', 0 ), true );
+		return in_array( $table_name, $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ), 0 ), true );
 	}
 
 	/**
