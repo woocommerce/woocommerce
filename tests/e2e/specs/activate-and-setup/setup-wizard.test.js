@@ -51,6 +51,9 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 describe( 'Store owner can go through setup Task List', () => {
 	it( 'can setup shipping', async () => {
+		await page.evaluate( () => {
+			document.querySelector( '.woocommerce-list__item-title' ).scrollIntoView();
+		} );
 		// Query for all tasks on the list
 		const taskListItems = await page.$$( '.woocommerce-list__item-title' );
 		expect( taskListItems ).toHaveLength( 6 );
