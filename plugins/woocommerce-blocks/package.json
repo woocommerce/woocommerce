@@ -174,7 +174,7 @@
 		"html-react-parser": "0.13.0",
 		"jest-environment-jsdom-sixteen": "1.0.3",
 		"react-number-format": "4.4.1",
-		"reakit": "1.0.2",
+		"reakit": "1.1.2",
 		"trim-html": "0.1.9",
 		"use-debounce": "3.4.3",
 		"wordpress-components": "npm:@wordpress/components@8.5.0",
