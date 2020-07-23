@@ -4,7 +4,7 @@ services:
 
   db:
     container_name: "${APP_NAME}_db"
-    image: mariadb:10.4
+    image: mariadb:${DC_MARIADB_VERSION}
     restart: on-failure
     environment:
       MYSQL_DATABASE: testdb
@@ -14,12 +14,15 @@ services:
     volumes:
       - db:/var/lib/mysql
 
+  php:
+    container_name: "${APP_NAME}_php"
+    image: php:${DC_PHP_VERSION}
+
   wordpress-www:
     container_name: "${APP_NAME}_wordpress-www"
     depends_on:
       - db
-    build:
-      context: ./docker/wordpress
+    image: wordpress:${WORDPRESS_VERSION}
     ports:
       - ${WORDPRESS_PORT}:80
     restart: on-failure
@@ -41,7 +44,6 @@ services:
     build:
         context: ./docker/wp-cli
     restart: on-failure
-#    user: xfs
     environment:
         WORDPRESS_PORT: ${WORDPRESS_PORT}
         WORDPRESS_HOST: wordpress-www:80

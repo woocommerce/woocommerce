@@ -41,8 +41,8 @@
     "access": "public"
   },
   "scripts": {
-    "docker:up": "./bin/docker-compose.js up",
-    "docker:down": "./bin/docker-compose.js down",
+    "docker:up": "./bin/docker-compose.sh up",
+    "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it woocommerce_wordpress-www /bin/bash",
     "install-wp-tests": "./bin/install-wp-tests.sh",
