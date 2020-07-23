@@ -14,6 +14,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class ThemeUpgraderSkin extends \Theme_Upgrader_Skin {
 	/**
+	 * Avoid undefined property error from \Theme_Upgrader::check_parent_theme_filter().
+	 *
+	 * @var array
+	 */
+	public $api;
+
+	/**
 	 * Hide the skin header display.
 	 */
 	public function header() {}
@@ -27,8 +34,9 @@ class ThemeUpgraderSkin extends \Theme_Upgrader_Skin {
 	 * Hide the skin feedback display.
 	 *
 	 * @param string $string String to display.
+	 * @param mixed  ...$args Optional text replacements.
 	 */
-	public function feedback( $string ) {}
+	public function feedback( $string, ...$args ) {}
 
 	/**
 	 * Hide the skin after display.
