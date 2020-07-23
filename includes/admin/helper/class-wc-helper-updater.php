@@ -175,7 +175,7 @@ class WC_Helper_Updater {
 	 * @return array Update data {product_id => data}
 	 */
 	public static function get_translations_update_data() {
-		$payload = array();
+			$payload = array();
 
 		$installed_translations = wp_get_installed_translations( 'plugins' );
 
@@ -254,7 +254,7 @@ class WC_Helper_Updater {
 		foreach ( $response['data'] as $plugin_name => $language_packs ) {
 			foreach ( $language_packs as $language_pack ) {
 				// Maybe we have this language pack already installed so lets check revision date.
-				if ( array_key_exists( $plugin_name, $installed_translations ) ) {
+				if ( array_key_exists( $plugin_name, $installed_translations ) && array_key_exists( $language_pack['wp_locale'], $installed_translations[ $plugin_name ] ) ) {
 					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin_name ][ $language_pack['wp_locale'] ]['PO-Revision-Date'] );
 					$new_translation_revision_time       = new DateTime( $language_pack['last_modified'] );
 					// Skip if translation language pack is not newer than what is installed already.
