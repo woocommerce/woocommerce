@@ -485,7 +485,7 @@ class WC_Form_Handler {
 				return;
 			}
 
-			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay, false );
 
 			ob_start();
 

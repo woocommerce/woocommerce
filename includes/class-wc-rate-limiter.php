@@ -69,11 +69,12 @@ class WC_Rate_Limiter {
 	 *
 	 * @param string $action_id Identifier of the action.
 	 * @param int    $delay Delay in seconds.
+	 * @param bool   $autoload Autoload option, default is true.
 	 * @return bool True if the option setting was successful, false otherwise.
 	 */
-	public static function set_rate_limit( $action_id, $delay ) {
+	public static function set_rate_limit( $action_id, $delay, $autoload = true ) {
 		$option_name         = self::storage_id( $action_id );
 		$next_try_allowed_at = time() + $delay;
-		return update_option( $option_name, $next_try_allowed_at );
+		return update_option( $option_name, $next_try_allowed_at, $autoload );
 	}
 }
