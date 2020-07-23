@@ -61,8 +61,8 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
-		"@babel/cli": "7.10.4",
-		"@babel/core": "7.10.4",
+		"@babel/cli": "7.10.5",
+		"@babel/core": "7.10.5",
 		"@babel/plugin-proposal-class-properties": "7.10.4",
 		"@babel/polyfill": "7.10.4",
 		"@babel/preset-env": "7.10.4",
