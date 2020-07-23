@@ -440,6 +440,17 @@ class PageController {
 				$options['icon'],
 				$options['position']
 			);
+
+			if ( method_exists( '\Automattic\WooCommerce\Navigation\Menu', 'add_category' ) ) {
+				\Automattic\WooCommerce\Navigation\Menu::add_category(
+					array(
+						'id'         => $options['id'],
+						'title'      => $options['title'],
+						'capability' => $options['capability'],
+						'url'        => $options['path'],
+					)
+				);
+			}
 		} else {
 			$parent_path = $this->get_path_from_id( $options['parent'] );
 			// @todo check for null path.
@@ -451,6 +462,18 @@ class PageController {
 				$options['path'],
 				array( __CLASS__, 'page_wrapper' )
 			);
+
+			if ( method_exists( '\Automattic\WooCommerce\Navigation\Menu', 'add_item' ) ) {
+				\Automattic\WooCommerce\Navigation\Menu::add_item(
+					array(
+						'id'         => $options['id'],
+						'parent'     => $options['parent'],
+						'title'      => $options['title'],
+						'capability' => $options['capability'],
+						'url'        => $options['path'],
+					)
+				);
+			}
 		}
 
 		$this->connect_page( $options );
