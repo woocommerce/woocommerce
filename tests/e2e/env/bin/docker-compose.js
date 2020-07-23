@@ -30,14 +30,6 @@ const appPath = getAppPath();
 const envVars = {};
 
 if ( appPath ) {
-    // Look for a Docker compose file in the dependent app's path.
-	const appDockerComposefile = path.resolve( appPath, 'docker-compose.yaml' );
-
-    // Specify the app's Docker compose file in our command.
-	if ( fs.existsSync( appDockerComposefile ) ) {
-		dockerArgs.unshift( '-f', appDockerComposefile );
-    }
-
     if ( 'up' === command ) {
         // Look for an initialization script in the dependent app.
         const appInitFile = path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
@@ -54,6 +46,10 @@ if ( appPath ) {
 
     // Provide an "app name" to use in Docker container names.
     envVars.APP_NAME = path.basename( appPath );
+}
+
+if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
+	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + envVars.APP_NAME;
 }
 
 // Ensure that the first Docker compose file loaded is from our local env.

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-if [[ "$1" != '' ]];
+if [[ $1 ]];
 then
 #
 # Set environment variables for Docker
@@ -28,7 +28,7 @@ then
 		export DC_MARIADB_VERSION=${MVER/mariadb-/}
 	fi
 
-	if [[ "$1" == 'up']];
+	if [[ $1 == 'up' ]];
 	then
 		echo WordPress $WORDPRESS_VERSION
 		echo PHP $DC_PHP_VERSION
