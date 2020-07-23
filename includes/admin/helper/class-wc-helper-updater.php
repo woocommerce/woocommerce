@@ -175,7 +175,7 @@ class WC_Helper_Updater {
 	 * @return array Update data {product_id => data}
 	 */
 	public static function get_translations_update_data() {
-			$payload = array();
+		$payload = array();
 
 		$installed_translations = wp_get_installed_translations( 'plugins' );
 
