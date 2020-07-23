@@ -141,7 +141,7 @@
 		"promptly": "3.0.3",
 		"puppeteer": "2.1.1",
 		"react-test-renderer": "16.13.0",
-		"request-promise": "4.2.5",
+		"request-promise": "4.2.6",
 		"rimraf": "3.0.2",
 		"sass-loader": "7.3.1",
 		"source-map-explorer": "2.4.2",
