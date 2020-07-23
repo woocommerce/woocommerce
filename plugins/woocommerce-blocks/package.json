@@ -101,7 +101,7 @@
 		"@wordpress/jest-console": "3.6.0",
 		"@wordpress/jest-preset-default": "5.3.1",
 		"@wordpress/scripts": "6.2.0",
-		"autoprefixer": "9.8.4",
+		"autoprefixer": "9.8.5",
 		"axios": "0.19.2",
 		"babel-core": "7.0.0-bridge.0",
 		"babel-eslint": "10.1.0",
