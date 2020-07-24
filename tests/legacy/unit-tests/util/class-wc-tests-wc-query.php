@@ -376,4 +376,56 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$url = 'http://example.com/shop/page/2/?add-to-cart=1';
 		$this->assertEquals( 'http://example.com/shop/page/2/', WC()->query->remove_add_to_cart_pagination( $url ) );
 	}
+
+	/**
+	 * Tests that the rating order by clause works correctly with different rating counts.
+	 */
+	public function test_catalog_order_by_rating() {
+		$worst_product = WC_Helper_Product::create_simple_product();
+		$worst_product->set_average_rating( 1 );
+		$worst_product->set_rating_counts( array( 1 => 5 ) );
+		$worst_product->save();
+		$no_reviews = WC_Helper_Product::create_simple_product();
+		$no_reviews->set_average_rating( 0 );
+		$no_reviews->set_rating_counts( array() );
+		$no_reviews->save();
+		$two_positive = WC_Helper_Product::create_simple_product();
+		$two_positive->set_average_rating( 5 );
+		$two_positive->set_rating_counts( array( 5 => 2 ) );
+		$two_positive->save();
+		$one_positive = WC_Helper_Product::create_simple_product();
+		$one_positive->set_average_rating( 5 );
+		$one_positive->set_rating_counts( array( 5 => 1 ) );
+		$one_positive->save();
+		$top_product = WC_Helper_Product::create_simple_product();
+		$top_product->set_average_rating( 5 );
+		$top_product->set_rating_counts( array( 5 => 3 ) );
+		$top_product->save();
+
+		$query = new WP_Query(
+			array_merge(
+				array(
+					'fields'      => 'ids',
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'orderby'     => 'rating',
+					'order'       => 'DESC',
+				),
+				WC()->query->get_catalog_ordering_args( 'rating' )
+			)
+		);
+
+		$this->assertEquals(
+			array(
+				$top_product->get_id(),
+				$two_positive->get_id(),
+				$one_positive->get_id(),
+				$worst_product->get_id(),
+				$no_reviews->get_id(),
+			),
+			wp_parse_id_list( $query->posts )
+		);
+
+		WC()->query->remove_ordering_args();
+	}
 }

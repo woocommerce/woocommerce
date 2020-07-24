@@ -3,6 +3,7 @@
 set -ex
 
 PACKAGE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ && pwd )"
+WP_CLI_BIN_DIR="${PACKAGE_DIR}/bin"
 
 download() {
     if [ `which curl` ]; then

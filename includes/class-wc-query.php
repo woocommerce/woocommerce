@@ -598,7 +598,7 @@ class WC_Query {
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['orderby'] = ' wc_product_meta_lookup.average_rating DESC, wc_product_meta_lookup.product_id DESC ';
+		$args['orderby'] = ' wc_product_meta_lookup.average_rating DESC, wc_product_meta_lookup.rating_count DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 
