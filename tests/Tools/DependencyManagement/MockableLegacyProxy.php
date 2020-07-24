@@ -86,7 +86,16 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 			}
 		}
 
-		$this->mocked_statics = array_merge_recursive( $this->mocked_statics, $mocks );
+		// TODO: replace the following with just "$this->mocked_statics = array_merge_recursive( $this->mocked_statics, $mocks )" once the minimum PHP version is bumped to 7.1 or newer (see https://bugs.php.net/bug.php?id=76505).
+
+		$class_names = array_keys( $mocks );
+		foreach ( $class_names as $class_name ) {
+			if ( array_key_exists( $class_name, $this->mocked_statics ) ) {
+				$this->mocked_statics[ $class_name ] = array_merge( $this->mocked_statics[ $class_name ], $mocks[ $class_name ] );
+			} else {
+				$this->mocked_statics[ $class_name ] = $mocks[ $class_name ];
+			}
+		}
 	}
 
 	/**
