@@ -5,6 +5,7 @@ const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const getAppPath = require( '../utils/app-root' );
+const getTestConfig = require( '../utils/test-config' );
 
 const dockerArgs = [];
 let command = '';
@@ -48,8 +49,27 @@ if ( appPath ) {
     envVars.APP_NAME = path.basename( appPath );
 }
 
+// Load test configuration file into an object.
+const localTestConfigFile = path.resolve( appPath, 'tests/e2e/config/default.json' );
+const testConfigFile = path.resolve( __dirname, '../config/default.json' );
+// Copy local test configuration file if it exists.
+if ( fs.existsSync( localTestConfigFile ) ) {
+	fs.copyFileSync(
+		localTestConfigFile,
+		testConfigFile
+	);
+}
+const testConfig = getTestConfig();
+
+// Set some environment variables
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
 	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + envVars.APP_NAME;
+}
+if ( ! global.process.env.WORDPRESS_PORT ) {
+	global.process.env.WORDPRESS_PORT = testConfig.port;
+}
+if ( ! global.process.env.WORDPRESS_URL ) {
+	global.process.env.WORDPRESS_URL = testConfig.url;
 }
 
 // Ensure that the first Docker compose file loaded is from our local env.
