@@ -155,7 +155,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Create a new user in a given role and set it as the current user.
 	 *
 	 * @param string $role The role for the user to be created.
-	 * @returns int The id of the user created.
+	 * @return int The id of the user created.
 	 */
 	public function login_as_role( $role ) {
 		$user_id = $this->factory->user->create( array( 'role' => $role ) );
@@ -166,7 +166,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Create a new administrator user and set it as the current user.
 	 *
-	 * @returns int The id of the user created.
+	 * @return int The id of the user created.
 	 */
 	public function login_as_administrator() {
 		$this->login_as_role( 'administrator' );
