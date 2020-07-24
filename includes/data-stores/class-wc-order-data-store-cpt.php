@@ -746,6 +746,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @since 3.1.0
 	 * @param array $query_vars query vars from a WC_Order_Query.
+	 *
+	 * @throws \Exception When status arg exists with a status that is not
+	 *                    registered as a custom post status.
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
@@ -782,20 +785,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
 			}
 
-			// verify post_status is actually registered
-			$post_stati = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : [ $query_vars['post_status'] ];
-			foreach( $post_stati as $post_status )  {
-				$post_status_exists = get_post_stati( [ 'name' => $post_status ] );
+			// verify post_status is actually registered.
+			$post_stati = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] );
+			foreach ( $post_stati as $post_status ) {
+				$post_status_exists = get_post_stati( array( 'name' => $post_status ) );
 				if ( empty( $post_status_exists ) ) {
-					/* translators: 1: Status name */
 					$message = sprintf(
+						/* translators: 1: Status name */
 						__(
 							'The provided order query contains an order status that is not registered as a custom post status (status provided is %1$s). It is possible there is something removing any expected registered custom post status before the query is made.',
 							'woocommerce'
 						),
 						$post_status
 					);
-					// bail
+					// bail.
 					throw new \Exception( $message );
 				}
 			}
@@ -871,7 +874,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
-		$orders = [];
+		$orders = array();
 		try {
 			$args = $this->get_wp_query_args( $query_vars );
 
