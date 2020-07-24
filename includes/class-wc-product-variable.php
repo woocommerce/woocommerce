@@ -285,6 +285,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_available_variations() {
+		// Allow 3rd parties to pre-load this data.
+		$available_variations = apply_filters( 'woocommerce_pre_get_available_variations', null, $this, $this->data_store );
+
+		if ( null !== $available_variations ) {
+			return $available_variations;
+		}
 
 		$variation_ids        = $this->get_children();
 		$available_variations = array();

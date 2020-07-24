@@ -278,14 +278,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				);
 			}
 
-			// If the prices are not stored for this hash, generate them and add to the transient.
-			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
-				$prices_array = array(
-					'price'         => array(),
-					'regular_price' => array(),
-					'sale_price'    => array(),
-				);
+			// Allow 3rd parties to skip a full calculation of this data in favor of, for example, a background task.
+			$skip_price_data = apply_filters( 'woocommerce_variation_skip_price_data', false, $product );
 
+			$prices_array = array(
+				'price'         => array(),
+				'regular_price' => array(),
+				'sale_price'    => array(),
+			);
+
+			// If the prices are not stored for this hash, generate them and add to the transient.
+			if ( empty( $transient_cached_prices_array[ $price_hash ] ) && ! $skip_price_data ) {
 				$variation_ids = $product->get_visible_children();
 
 				if ( is_callable( '_prime_post_caches' ) ) {
@@ -373,6 +376,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				}
 
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
+
+			} elseif ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
+				$transient_cached_prices_array[ $price_hash ] = $prices_array;
 			}
 
 			/**
