@@ -6,6 +6,8 @@
  *
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed
+ *
+ * @package WooCommerce/Admin/Views
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -86,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="line_tax" width="1%">
 				<div class="view">
 					<?php
-					echo wp_kses_post( ( '' !== $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) ) : '&ndash;' );
+					echo wp_kses_post( ( '' !== $tax_item_total ) ? wc_price( $tax_item_total, array( 'currency' => $order->get_currency() ) ) : '&ndash;' );
 					$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
 					if ( $refunded ) {
 						echo wp_kses_post( '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>' );
