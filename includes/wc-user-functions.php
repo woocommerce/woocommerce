@@ -39,6 +39,9 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
 	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
+		$autogenerate_username = ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) || $args['generate_username'] );
+		$autogenerate_password = ( 'yes' === get_option( 'woocommerce_registration_generate_password', 'yes' ) || $args['generate_password'] );
+
 		if ( empty( $email ) || ! is_email( $email ) ) {
 			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
 		}
@@ -47,7 +50,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return new WP_Error( 'registration-error-email-exists', apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $email ) );
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) && empty( $username ) ) {
+		if ( $autogenerate_username && empty( $username ) ) {
 			$username = wc_create_new_customer_username( $email, $args );
 		}
 
@@ -63,7 +66,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		// Handle password creation.
 		$password_generated = false;
-		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
+		if ( $autogenerate_password && empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
 		}
@@ -897,7 +900,7 @@ function wc_update_user_last_active( $user_id ) {
 	if ( ! $user_id ) {
 		return;
 	}
-	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', time() ) ) );
+	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( gmdate( 'Y-m-d', time() ) ) );
 }
 
 /**
