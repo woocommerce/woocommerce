@@ -23,16 +23,4 @@
 			}
 		}
 	}
-
-	.woocommerce-summary__item {
-		background-color: $studio-white;
-
-		&:hover {
-			background-color: $gray-100;
-		}
-
-		&:active {
-			background-color: $gray-100;
-		}
-	}
 }

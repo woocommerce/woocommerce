@@ -56,7 +56,6 @@ export class ReportSummary extends Component {
 	render() {
 		const {
 			charts,
-			isRequesting,
 			query,
 			selectedChart,
 			summaryData,
@@ -64,13 +63,13 @@ export class ReportSummary extends Component {
 			report,
 			defaultDateRange,
 		} = this.props;
-		const { isError, isRequesting: isSummaryDataRequesting } = summaryData;
+		const { isError, isRequesting } = summaryData;
 
 		if ( isError ) {
 			return <ReportError isError />;
 		}
 
-		if ( isRequesting || isSummaryDataRequesting ) {
+		if ( isRequesting ) {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
@@ -144,10 +143,6 @@ ReportSummary.propTypes = {
 	 */
 	query: PropTypes.object.isRequired,
 	/**
-	 * Whether there is an API call running.
-	 */
-	isRequesting: PropTypes.bool,
-	/**
 	 * Properties of the selected chart.
 	 */
 	selectedChart: PropTypes.shape( {
@@ -189,7 +184,6 @@ ReportSummary.defaultProps = {
 			secondary: {},
 		},
 		isError: false,
-		isRequesting: false,
 	},
 };
 
@@ -200,17 +194,12 @@ export default compose(
 		const {
 			charts,
 			endpoint,
-			isRequesting,
 			limitProperties,
 			query,
 			filters,
 			advancedFilters,
 		} = props;
 		const limitBy = limitProperties || [ endpoint ];
-
-		if ( isRequesting ) {
-			return {};
-		}
 
 		const hasLimitByParam = limitBy.some(
 			( item ) => query[ item ] && query[ item ].length
