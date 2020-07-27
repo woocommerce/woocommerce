@@ -163,13 +163,11 @@ class WC_Order_Item_Meta {
 	 * Return an array of formatted item meta in format e.g.
 	 * Handles @deprecated args.
 	 *
-	 * @deprecated 4.4.0
 	 * @param string $hideprefix Hide prefix.
 	 *
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {
-		wc_deprecated_function( 'WC_Order_Item_Product::get_formatted_legacy', '4.4.0', '' );
 		if ( ! is_ajax() ) {
 			wc_deprecated_argument( 'WC_Order_Item_Meta::get_formatted', '2.4', 'Item Meta Data is being called with legacy arguments' );
 		}
