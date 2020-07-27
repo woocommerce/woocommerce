@@ -895,7 +895,7 @@ class WC_Admin_Post_Types {
 	 * @deprecated 3.3.0 and moved to post-data class.
 	 */
 	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
-		wc_deprecated_function( 'WC_Admin_Post_Types::process_product_file_download_paths', '3.3', 'WC_Post_Data::process_product_file_download_paths' );
+		wc_deprecated_function( 'WC_Admin_Post_Types::process_product_file_download_paths', '3.3', '' );
 		WC_Post_Data::process_product_file_download_paths( $product_id, $variation_id, $downloadable_files );
 	}
 
