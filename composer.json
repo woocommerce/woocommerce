@@ -50,7 +50,10 @@
     "psr-4": {
       "Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
       "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
-    }
+    },
+    "classmap": [
+      "tests/legacy/unit-tests/api/unit-tests/Helpers"
+    ]
   },
   "scripts": {
     "post-install-cmd": [
