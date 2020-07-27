@@ -149,6 +149,10 @@ class WC_Install {
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
 		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
+		),
 	);
 
 	/**

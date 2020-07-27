@@ -2110,3 +2110,35 @@ function wc_update_400_reset_action_scheduler_migration_status() {
 function wc_update_400_db_version() {
 	WC_Install::update_db_version( '4.0.0' );
 }
+
+/**
+ * Update DB version to 4.5.0.
+ */
+function wc_update_450_db_version() {
+	WC_Install::update_db_version( '4.5.0' );
+}
+
+/**
+ * Sanitize all coupons code.
+ */
+function wc_update_450_sanitize_coupons_code() {
+	global $wpdb;
+
+	$coupons = $wpdb->get_results( "SELECT ID, post_title FROM {$wpdb->posts} WHERE post_type = 'shop_coupon';" );
+
+	if ( $coupons ) {
+		foreach ( $coupons as $data ) {
+			$code = trim( wp_filter_kses( $data->post_title ) );
+
+			if ( ! empty( $code ) ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->posts} SET post_title = %s WHERE ID = %d",
+						$code,
+						$data->ID
+					)
+				);
+			}
+		}
+	}
+}
