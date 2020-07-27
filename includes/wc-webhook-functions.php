@@ -42,7 +42,7 @@ function wc_webhook_execute_queue() {
 		}
 	}
 }
-register_shutdown_function( 'wc_webhook_execute_queue' );
+add_action( 'shutdown', 'wc_webhook_execute_queue' );
 
 /**
  * Process webhook delivery.
