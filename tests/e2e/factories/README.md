@@ -5,7 +5,7 @@ A simple interface for generating models of different types.
 ## Installation
 
 ``bash
-npm install @woocommerce/model-factories --save
+npm install @woocommerce/model-factories --save-dev
 ``
 
 ## Usage
