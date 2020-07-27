@@ -216,7 +216,14 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Paid By Customer', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+					<?php
+					$total_paid_by_customer = $order->get_total();
+					if ( $order->get_total_refunded() ) {
+						$total_paid_by_customer -= $order->get_total_refunded();
+					}
+
+					echo wc_price( $total_paid_by_customer, array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				</td>
 			</tr>
 		</table>
