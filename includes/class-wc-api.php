@@ -30,7 +30,7 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Get the version of the REST API package being ran.
+	 * Get the version of the REST API package being ran. Since API package was merged into core, this now follows WC version.
 	 *
 	 * @since 3.7.0
 	 * @return string|null
