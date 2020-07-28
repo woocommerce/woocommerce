@@ -5,6 +5,7 @@ const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const getAppPath = require( '../utils/app-root' );
+const { JEST_PUPPETEER_CONFIG } = process.env;
 
 program
 	.usage( '<file ...> [options]' )
@@ -23,16 +24,18 @@ if ( appPath ) {
 	);
 }
 
-const testEnvVars = {
+let testEnvVars = {
 	NODE_ENV: 'test-e2e',
-	JEST_PUPPETEER_CONFIG: path.resolve(
-		__dirname,
-		'../config/jest-puppeteer.config.js'
-	),
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 	node_config_dev: program.dev ? 'yes' : 'no',
 	jest_test_timeout: program.dev ? 120000 : 30000,
 };
+if ( ! JEST_PUPPETEER_CONFIG ) {
+	testEnvVars.JEST_PUPPETEER_CONFIG = path.resolve(
+		__dirname,
+		'../config/jest-puppeteer.config.js'
+	);
+}
 
 let jestCommand = 'jest';
 const jestArgs = [
