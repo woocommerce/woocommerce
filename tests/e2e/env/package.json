@@ -21,6 +21,8 @@
   "main": "index.js",
   "module": "build-module/index.js",
   "dependencies": {
+    "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
+    "@jest/test-sequencer": "^25.5.4",
     "@wordpress/e2e-test-utils": "^4.6.0",
     "@wordpress/jest-preset-default": "^5.4.0",
     "app-root-path": "^3.0.0",
