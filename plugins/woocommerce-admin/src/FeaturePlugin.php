@@ -261,7 +261,9 @@ class FeaturePlugin {
 	 * @return bool
 	 */
 	protected function check_build() {
-		return file_exists( plugin_dir_path( __DIR__ ) . '/dist/app/index.js' );
+		$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+		$suffix       = Loader::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+		return file_exists( plugin_dir_path( __DIR__ ) . "/dist/app/index{$suffix}.js" );
 	}
 
 	/**
