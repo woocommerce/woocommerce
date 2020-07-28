@@ -108,7 +108,7 @@ class WC_Admin_Pointers {
 						'content'  => '<h3>' . esc_html__( 'Virtual products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Check the "Virtual" box if this is a non-physical item, for example a service, which does not need shipping.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'bottom',
+							'edge'  => 'left',
 							'align' => 'middle',
 						),
 					),
@@ -124,7 +124,7 @@ class WC_Admin_Pointers {
 						'content'  => '<h3>' . esc_html__( 'Downloadable products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'If purchasing this product gives a customer access to a downloadable file, e.g. software, check this box.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'bottom',
+							'edge'  => 'left',
 							'align' => 'middle',
 						),
 					),
