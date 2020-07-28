@@ -267,6 +267,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Query parameters are now passed correctly when using the batch product variation endpoints. woocommerce/woocommerce-rest-api#191
 
 **WooCommerce Admin 1.4.0**
+* Enhancement - Move the WooCommerce > Coupons dashboard menu item to Marketing > Coupons. #4786
 * Fix - Installation of child theme zip files from the store setup wizard. #4852
 * Fix - Center the skip link on the theme selection step. #4847
 * Fix - Removed item "profiler" from the menu. #4851
