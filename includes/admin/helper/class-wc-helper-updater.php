@@ -191,7 +191,7 @@ class WC_Helper_Updater {
 		$locales = apply_filters( 'plugins_update_check_locales', $locales );
 		$locales = array_unique( $locales );
 
-		// No locales, means that the respone will be empty.
+		// No locales, the respone will be empty, we can return now.
 		if ( empty( $locales ) ) {
 			return array();
 		}
