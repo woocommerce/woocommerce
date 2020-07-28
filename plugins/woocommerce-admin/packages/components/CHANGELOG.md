@@ -14,6 +14,7 @@
 - Add `<List />` and `<Link />` components to Storybook.
 - Add `<Pill />` component.
 - Add `key` prop to `<List />` component items.
+- Remove unused `ref` from `<DateRangeFilterPicker />`.
 
 ## Breaking Changes
 - Removed `SplitButton` because its not being used.

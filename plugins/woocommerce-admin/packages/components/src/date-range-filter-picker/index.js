@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, createRef } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
@@ -21,8 +21,6 @@ class DateRangeFilterPicker extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = this.getResetState();
-
-		this.dropdownRef = createRef();
 
 		this.update = this.update.bind( this );
 		this.onSelect = this.onSelect.bind( this );
@@ -130,7 +128,6 @@ class DateRangeFilterPicker extends Component {
 					{ __( 'Date Range', 'woocommerce-admin' ) }:
 				</span>
 				<Dropdown
-					ref={ this.dropdownRef }
 					contentClassName="woocommerce-filters-date__content"
 					position="bottom"
 					expandOnMobile
