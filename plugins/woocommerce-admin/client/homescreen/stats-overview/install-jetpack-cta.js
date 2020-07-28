@@ -6,18 +6,18 @@ import { compose } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-	withDispatch,
-	withSelect,
-	__experimentalResolveSelect,
-} from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
+import {
+	__experimentalResolveSelect,
+	PLUGINS_STORE_NAME,
+	useUserPreferences,
+} from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { PLUGINS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
 
 /**
  * Internal dependencies

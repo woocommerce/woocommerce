@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, createElement, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { identity, pick } from 'lodash';
-import { withDispatch, __experimentalResolveSelect } from '@wordpress/data';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -17,6 +17,7 @@ import {
 	updateQueryString,
 } from '@woocommerce/navigation';
 import {
+	__experimentalResolveSelect,
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
