@@ -33,6 +33,9 @@ export function H( props ) {
 /**
  * The section wrapper, used to indicate a sub-section (and change the header level context).
  *
+ * @param root0
+ * @param root0.component
+ * @param root0.children
  * @return {Object} -
  */
 export function Section( { component, children, ...props } ) {

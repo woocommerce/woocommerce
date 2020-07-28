@@ -188,7 +188,7 @@ class Stripe extends Component {
 		const { isOptionsUpdating } = this.props;
 		const stripeHelp = interpolateComponents( {
 			mixedString: __(
-				'Your API details can be obtained from your {{docsLink}}Stripe account{{/docsLink}}.  Don’t have a Stripe account? {{registerLink}}Create one.{{/registerLink}}',
+				'Your API details can be obtained from your {{docsLink}}Stripe account{{/docsLink}}. Don’t have a Stripe account? {{registerLink}}Create one.{{/registerLink}}',
 				'woocommerce-admin'
 			),
 			components: {

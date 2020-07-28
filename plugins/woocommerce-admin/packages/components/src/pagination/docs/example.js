@@ -1,12 +1,8 @@
 /**
- * Internal dependencies
- */
-import { Pagination } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { withState } from '@wordpress/compose';
+import { Pagination } from '@woocommerce/components';
 
 export default withState( {
 	page: 2,

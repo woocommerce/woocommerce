@@ -20,7 +20,6 @@ export function getUrlParams( locationSearch ) {
 	return {};
 }
 
-
 /**
  * Get the current screen name.
  *

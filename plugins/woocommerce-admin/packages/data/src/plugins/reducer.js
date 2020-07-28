@@ -1,7 +1,6 @@
 /**
- * External Dependencies
+ * External dependencies
  */
-
 import { concat } from 'lodash';
 
 /**

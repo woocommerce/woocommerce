@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { ProductImage } from '@woocommerce/components';
 

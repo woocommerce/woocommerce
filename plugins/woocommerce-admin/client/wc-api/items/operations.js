@@ -61,7 +61,10 @@ function read( resourceNames, fetch = apiFetch ) {
 				totalCount = items.length;
 			} else {
 				items = await response.json();
-				totalCount = parseInt( response.headers.get( 'x-wp-total' ), 10 );
+				totalCount = parseInt(
+					response.headers.get( 'x-wp-total' ),
+					10
+				);
 			}
 
 			const ids = items.map( ( item ) => item.id );
@@ -92,7 +95,9 @@ function update( resourceNames, data, fetch = apiFetch ) {
 	} );
 
 	return filteredNames.map( async ( resourceName ) => {
-		const { id, parent_id: parentId, type, ...itemData } = data[ resourceName ];
+		const { id, parent_id: parentId, type, ...itemData } = data[
+			resourceName
+		];
 		let url = NAMESPACE;
 
 		switch ( type ) {

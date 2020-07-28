@@ -12,13 +12,8 @@ import { debounce } from 'lodash';
  */
 import './style.scss';
 
-const Slider = ( {
-	children,
-	animationKey,
-	animate,
-} ) => {
-
-	const [ height, updateHeight ] = useState(null);
+const Slider = ( { children, animationKey, animate } ) => {
+	const [ height, updateHeight ] = useState( null );
 
 	const container = useRef();
 
@@ -37,7 +32,9 @@ const Slider = ( {
 	const timeout = 320;
 
 	const updateSliderHeight = () => {
-		const slide = container.current.querySelector( '.woocommerce-marketing-slider__slide' );
+		const slide = container.current.querySelector(
+			'.woocommerce-marketing-slider__slide'
+		);
 		updateHeight( slide.clientHeight );
 	};
 
@@ -46,9 +43,9 @@ const Slider = ( {
 	useEffect( () => {
 		// Update the slider height on Resize
 		window.addEventListener( 'resize', debouncedUpdateSliderHeight );
-  		return () => {
-    		window.removeEventListener( 'resize', debouncedUpdateSliderHeight );
-  		}
+		return () => {
+			window.removeEventListener( 'resize', debouncedUpdateSliderHeight );
+		};
 	}, [] );
 
 	/**
@@ -60,9 +57,7 @@ const Slider = ( {
 	};
 
 	return (
-		<div className={ containerClasses }
-			ref={ container }
-			style={ style }>
+		<div className={ containerClasses } ref={ container } style={ style }>
 			<TransitionGroup>
 				<CSSTransition
 					timeout={ timeout }
@@ -70,12 +65,14 @@ const Slider = ( {
 					key={ animationKey }
 					onEnter={ onEnter }
 				>
-					<div className="woocommerce-marketing-slider__slide">{ children }</div>
+					<div className="woocommerce-marketing-slider__slide">
+						{ children }
+					</div>
 				</CSSTransition>
 			</TransitionGroup>
 		</div>
 	);
-}
+};
 
 Slider.propTypes = {
 	/**

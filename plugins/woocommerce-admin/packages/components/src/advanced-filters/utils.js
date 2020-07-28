@@ -5,6 +5,7 @@ import { isArray, isNumber, isString } from 'lodash';
 
 /**
  * @typedef {Object} ReactNode
+ * @property
  */
 
 /**

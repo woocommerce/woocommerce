@@ -17,7 +17,7 @@ import { Card } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import './style.scss'
+import './style.scss';
 import RecommendedExtensionsItem from './item';
 import { STORE_KEY } from '../../data/constants';
 
@@ -28,12 +28,13 @@ const RecommendedExtensions = ( {
 	description,
 	category,
 } ) => {
-
 	if ( extensions.length === 0 && ! isLoading ) {
 		return null;
 	}
 
-	const categoryClass = ( category ) ? `woocommerce-marketing-recommended-extensions-card__category-${category}` : '';
+	const categoryClass = category
+		? `woocommerce-marketing-recommended-extensions-card__category-${ category }`
+		: '';
 
 	return (
 		<Card
@@ -41,15 +42,19 @@ const RecommendedExtensions = ( {
 			description={ description }
 			className={ classnames(
 				'woocommerce-marketing-recommended-extensions-card',
-				categoryClass,
+				categoryClass
 			) }
 		>
 			<Fragment>
-				{ isLoading ? <Spinner /> : (
-					<div className={ classnames(
-						'woocommerce-marketing-recommended-extensions-card__items',
-						`woocommerce-marketing-recommended-extensions-card__items--count-${extensions.length}`,
-					) }>
+				{ isLoading ? (
+					<Spinner />
+				) : (
+					<div
+						className={ classnames(
+							'woocommerce-marketing-recommended-extensions-card__items',
+							`woocommerce-marketing-recommended-extensions-card__items--count-${ extensions.length }`
+						) }
+					>
 						{ extensions.map( ( extension ) => (
 							<RecommendedExtensionsItem
 								key={ extension.product }
@@ -61,8 +66,8 @@ const RecommendedExtensions = ( {
 				) }
 			</Fragment>
 		</Card>
-	)
-}
+	);
+};
 
 RecommendedExtensions.propTypes = {
 	/**
@@ -89,10 +94,13 @@ RecommendedExtensions.propTypes = {
 
 RecommendedExtensions.defaultProps = {
 	title: __( 'Recommended extensions', 'woocommerce-admin' ),
-	description: __( 'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.', 'woocommerce-admin' ),
+	description: __(
+		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
+		'woocommerce-admin'
+	),
 };
 
-export { RecommendedExtensions }
+export { RecommendedExtensions };
 
 export default compose(
 	withSelect( ( select, props ) => {
@@ -100,7 +108,9 @@ export default compose(
 
 		return {
 			extensions: getRecommendedPlugins( props.category ),
-			isLoading: isResolving( 'getRecommendedPlugins', [ props.category ] ),
+			isLoading: isResolving( 'getRecommendedPlugins', [
+				props.category,
+			] ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

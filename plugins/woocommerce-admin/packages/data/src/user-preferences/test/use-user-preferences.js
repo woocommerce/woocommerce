@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-
-/**
- * WordPress dependencies
- */
 import { registerStore } from '@wordpress/data';
 
 /**

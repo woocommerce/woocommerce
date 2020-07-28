@@ -130,7 +130,9 @@ export default compose(
 	withSelect( ( select ) => {
 		const { getOnboardingError } = select( ONBOARDING_STORE_NAME );
 
-		const isProfileItemsError = Boolean( getOnboardingError( 'updateProfileItems' ) );
+		const isProfileItemsError = Boolean(
+			getOnboardingError( 'updateProfileItems' )
+		);
 
 		return { isProfileItemsError };
 	} ),

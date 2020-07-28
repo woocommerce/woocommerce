@@ -43,10 +43,12 @@ function read( resourceNames, fetch = apiFetch ) {
 			const response = await fetch( fetchArgs );
 			const report = await response.json();
 			const totalResults = parseInt(
-				response.headers.get( 'x-wp-total' ), 10
+				response.headers.get( 'x-wp-total' ),
+				10
 			);
 			const totalPages = parseInt(
-				response.headers.get( 'x-wp-totalpages' ), 10
+				response.headers.get( 'x-wp-totalpages' ),
+				10
 			);
 
 			return {

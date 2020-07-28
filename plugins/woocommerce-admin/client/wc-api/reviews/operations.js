@@ -37,7 +37,10 @@ function readReviewQueries( resourceNames, fetch ) {
 			} );
 
 			const reviews = await response.json();
-			const totalCount = parseInt( response.headers.get( 'x-wp-total' ), 10 );
+			const totalCount = parseInt(
+				response.headers.get( 'x-wp-total' ),
+				10
+			);
 			const ids = reviews.map( ( review ) => review.id );
 			const reviewResources = reviews.reduce( ( resources, review ) => {
 				resources[ getResourceName( 'review', review.id ) ] = {

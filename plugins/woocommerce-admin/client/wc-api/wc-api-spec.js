@@ -60,7 +60,9 @@ function createWcApiSpec() {
 				];
 			},
 			undoRemoveAll( resourceNames, data ) {
-				return [ ...notes.operations.undoRemoveAll( resourceNames, data ) ];
+				return [
+					...notes.operations.undoRemoveAll( resourceNames, data ),
+				];
 			},
 		},
 	};

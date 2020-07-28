@@ -32,7 +32,9 @@ export const REPORTS_FILTER = 'woocommerce_admin_reports_list';
  * because it no longer exists under the path `/analytics/:report`. Use `props.path`/
  * instead to determine if the Customers Report is being rendered.
  *
+ * @param params.params
  * @param {Object} params -url parameters
+ * @param params.path
  * @return {string} - report parameter
  */
 const getReportParam = ( { params, path } ) => {

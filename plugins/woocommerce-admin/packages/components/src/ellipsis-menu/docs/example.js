@@ -1,14 +1,10 @@
 /**
- * Internal dependencies
- */
-import { EllipsisMenu, MenuItem, MenuTitle } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { withState } from '@wordpress/compose';
 import { Fragment } from '@wordpress/element';
 import { Icon } from '@wordpress/components';
+import { EllipsisMenu, MenuItem, MenuTitle } from '@woocommerce/components';
 
 export default withState( {
 	showCustomers: true,

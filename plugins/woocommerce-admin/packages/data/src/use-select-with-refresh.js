@@ -1,5 +1,3 @@
-
-
 /**
  * External dependencies
  */
@@ -8,22 +6,16 @@ import { useSelect } from '@wordpress/data';
 
 const useInterval = ( callback, interval ) => {
 	const savedCallback = useRef();
-	useEffect(
-		() => {
-			savedCallback.current = callback;
-		},
-		[ callback ]
-	);
-	useEffect(
-		() => {
-			const handler = ( ...args ) => savedCallback.current( ...args );
-			if ( interval !== null ) {
-				const id = setInterval( handler, interval );
-				return () => clearInterval( id );
-			}
-		},
-		[ interval ]
-	);
+	useEffect( () => {
+		savedCallback.current = callback;
+	}, [ callback ] );
+	useEffect( () => {
+		const handler = ( ...args ) => savedCallback.current( ...args );
+		if ( interval !== null ) {
+			const id = setInterval( handler, interval );
+			return () => clearInterval( id );
+		}
+	}, [ interval ] );
 };
 
 export const useSelectWithRefresh = (

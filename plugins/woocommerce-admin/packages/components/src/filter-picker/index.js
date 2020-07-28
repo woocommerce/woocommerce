@@ -9,10 +9,6 @@ import { Component } from '@wordpress/element';
 import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 import { Icon, chevronLeft } from '@wordpress/icons';
-
-/**
- * WooCommerce dependencies
- */
 import {
 	flattenFilters,
 	getPersistedQuery,

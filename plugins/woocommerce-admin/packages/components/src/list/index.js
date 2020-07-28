@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 /**
- * WooCommerce dependencies
+ * Internal dependencies
  */
 import Link from '../link';
 

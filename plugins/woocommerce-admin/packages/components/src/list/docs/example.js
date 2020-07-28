@@ -1,6 +1,6 @@
 /* eslint-disable no-alert */
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { List } from '@woocommerce/components';
 

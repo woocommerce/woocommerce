@@ -1,11 +1,7 @@
 /**
- * Internal dependencies
- */
-import { SearchListControl } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
+import { SearchListControl } from '@woocommerce/components';
 import { withState } from '@wordpress/compose';
 
 export default withState( {

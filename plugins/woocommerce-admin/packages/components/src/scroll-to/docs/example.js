@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { ScrollTo } from '@woocommerce/components';
 

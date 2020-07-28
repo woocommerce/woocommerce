@@ -20,7 +20,7 @@ const ANIMATION_FRAME_PERIOD = 16;
 export default function useFilters( hookName ) {
 	const hookNames = isArray( hookName ) ? hookName : [ hookName ];
 
-	return function( OriginalComponent ) {
+	return function ( OriginalComponent ) {
 		return class FilteredComponent extends Component {
 			constructor( props ) {
 				super( props );

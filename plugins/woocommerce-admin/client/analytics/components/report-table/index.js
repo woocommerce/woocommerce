@@ -114,7 +114,7 @@ const ReportTable = ( props ) => {
 
 			recordEvent( 'analytics_table_header_toggle', eventProps );
 		}
-	}
+	};
 
 	const onPageChange = ( newPage, source ) => {
 		scrollPointRef.current.scrollIntoView();
@@ -140,12 +140,12 @@ const ReportTable = ( props ) => {
 				} );
 			}
 		}
-	}
+	};
 
 	const trackTableSearch = () => {
 		// @todo: decide if this should only fire for new tokens (not any/all changes).
 		recordEvent( 'analytics_table_filter', { report: endpoint } );
-	}
+	};
 
 	const onSort = ( key, direction ) => {
 		onQueryChange( 'sort' )( key, direction );
@@ -157,7 +157,7 @@ const ReportTable = ( props ) => {
 		};
 
 		recordEvent( 'analytics_table_sort', eventProps );
-	}
+	};
 
 	const filterShownHeaders = ( headers, hiddenKeys ) => {
 		// If no user preferences, set visibilty based on column default.
@@ -173,13 +173,10 @@ const ReportTable = ( props ) => {
 			...header,
 			visible: header.required || ! hiddenKeys.includes( header.key ),
 		} ) );
-	}
+	};
 
 	const onClickDownload = () => {
-		const {
-			initiateReportExport,
-			title,
-		} = props;
+		const { initiateReportExport, title } = props;
 		const params = Object.assign( {}, query );
 		const { data, totalResults } = items;
 		let downloadType = 'browser';
@@ -208,7 +205,7 @@ const ReportTable = ( props ) => {
 			rows: totalResults,
 			downloadType,
 		} );
-	}
+	};
 
 	const onCompare = () => {
 		const { compareParam } = props;
@@ -219,13 +216,15 @@ const ReportTable = ( props ) => {
 				selectedRows.join( ',' )
 			);
 		}
-	}
+	};
 
 	const onSearchChange = ( values ) => {
 		const { baseSearchQuery, compareParam } = props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
-		const searchTerms = values.map( ( v ) => v.label.replace( ',', '%2C' ) );
+		const searchTerms = values.map( ( v ) =>
+			v.label.replace( ',', '%2C' )
+		);
 		if ( searchTerms.length ) {
 			updateQueryString( {
 				filter: undefined,
@@ -241,12 +240,12 @@ const ReportTable = ( props ) => {
 		}
 
 		trackTableSearch();
-	}
+	};
 
 	const selectAllRows = ( checked ) => {
 		const { ids } = props;
 		setSelectedRows( checked ? ids : [] );
-	}
+	};
 
 	const selectRow = ( i, checked ) => {
 		const { ids } = props;
@@ -259,7 +258,7 @@ const ReportTable = ( props ) => {
 				...selectedRows.slice( index + 1 ),
 			] );
 		}
-	}
+	};
 
 	const getCheckbox = ( i ) => {
 		const { ids = [] } = props;
@@ -273,7 +272,7 @@ const ReportTable = ( props ) => {
 			),
 			value: false,
 		};
-	}
+	};
 
 	const getAllCheckbox = () => {
 		const { ids = [] } = props;
@@ -292,7 +291,7 @@ const ReportTable = ( props ) => {
 			),
 			required: true,
 		};
-	}
+	};
 
 	const isLoading =
 		isRequesting || tableData.isRequesting || primaryData.isRequesting;
@@ -382,10 +381,7 @@ const ReportTable = ( props ) => {
 							onChange={ onSearchChange }
 							placeholder={
 								labels.placeholder ||
-								__(
-									'Search by item name',
-									'woocommerce-admin'
-								)
+								__( 'Search by item name', 'woocommerce-admin' )
 							}
 							selected={ searchedLabels }
 							showClearButton={ true }
@@ -416,7 +412,8 @@ const ReportTable = ( props ) => {
 				onPageChange={ onPageChange }
 				rows={ rows }
 				rowsPerPage={
-					parseInt( reportQuery.per_page, 10 ) || QUERY_DEFAULTS.pageSize
+					parseInt( reportQuery.per_page, 10 ) ||
+					QUERY_DEFAULTS.pageSize
 				}
 				summary={ summary }
 				totalRows={ totalResults }
@@ -604,9 +601,7 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { initiateReportExport } = dispatch(
-			'wc-api'
-		);
+		const { initiateReportExport } = dispatch( 'wc-api' );
 
 		return {
 			initiateReportExport,

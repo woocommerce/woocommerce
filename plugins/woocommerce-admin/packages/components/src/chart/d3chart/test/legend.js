@@ -28,11 +28,8 @@ describe( 'Legend', () => {
 		const legend = mount(
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
-
-		/* eslint-disable jest-dom/prefer-enabled-disabled */
 		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeFalsy();
 		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
-		/* eslint-enable jest-dom/prefer-enabled-disabled */
 	} );
 
 	test( 'should disable the last active button', () => {
@@ -41,10 +38,7 @@ describe( 'Legend', () => {
 		const legend = mount(
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
-
-		/* eslint-disable jest-dom/prefer-enabled-disabled */
 		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeTruthy();
 		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
-		/* eslint-enable jest-dom/prefer-enabled-disabled */
 	} );
 } );

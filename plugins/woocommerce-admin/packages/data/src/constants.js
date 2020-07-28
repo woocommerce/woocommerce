@@ -1,5 +1,3 @@
-
-
 export const JETPACK_NAMESPACE = '/jetpack/v4';
 export const NAMESPACE = '/wc-analytics';
 export const WC_ADMIN_NAMESPACE = '/wc-admin';

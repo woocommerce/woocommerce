@@ -36,36 +36,24 @@ describe( 'Timeline', () => {
 			3
 		);
 		expect(
-			timeline
-				.find( '.woocommerce-timeline-group ul' )
-				.at( 0 )
-				.children().length
+			timeline.find( '.woocommerce-timeline-group ul' ).at( 0 ).children()
+				.length
 		).toBe( 1 );
 		expect(
-			timeline
-				.find( '.woocommerce-timeline-group ul' )
-				.at( 1 )
-				.children().length
+			timeline.find( '.woocommerce-timeline-group ul' ).at( 1 ).children()
+				.length
 		).toBe( 2 );
 		expect(
-			timeline
-				.find( '.woocommerce-timeline-group ul' )
-				.at( 2 )
-				.children().length
+			timeline.find( '.woocommerce-timeline-group ul' ).at( 2 ).children()
+				.length
 		).toBe( 1 );
 
 		// Ensure dates are correctly rendered.
 		expect(
-			timeline
-				.find( '.woocommerce-timeline-group__title' )
-				.first()
-				.text()
+			timeline.find( '.woocommerce-timeline-group__title' ).first().text()
 		).toBe( 'January 22, 2020' );
 		expect(
-			timeline
-				.find( '.woocommerce-timeline-group__title' )
-				.last()
-				.text()
+			timeline.find( '.woocommerce-timeline-group__title' ).last().text()
 		).toBe( 'January 17, 2020' );
 
 		// Ensure the correct number of items is rendered.

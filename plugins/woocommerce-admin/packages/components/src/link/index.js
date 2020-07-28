@@ -4,10 +4,6 @@
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { partial } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { getHistory } from '@woocommerce/navigation';
 
 /**

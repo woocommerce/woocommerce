@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { mapValues, pick } from 'lodash';
-
-/**
- * WordPress dependencies
- */
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**

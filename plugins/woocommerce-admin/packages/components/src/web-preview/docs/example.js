@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { WebPreview } from '@woocommerce/components';
 

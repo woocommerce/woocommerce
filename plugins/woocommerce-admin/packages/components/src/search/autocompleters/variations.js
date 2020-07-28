@@ -4,10 +4,6 @@
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Fragment } from '@wordpress/element';
-
-/**
- * WooCommerce dependencies
- */
 import { getQuery } from '@woocommerce/navigation';
 
 /**
@@ -18,6 +14,7 @@ import ProductImage from '../../product-image';
 
 /**
  * @typedef {Object} Completer
+ * @property
  */
 
 /**

@@ -18,7 +18,7 @@ import { Card, Pagination, EmptyContent } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import './style.scss'
+import './style.scss';
 import { Slider } from '../../components';
 import { STORE_KEY } from '../../data/constants';
 
@@ -29,36 +29,46 @@ const KnowledgeBase = ( {
 	description,
 	category,
 } ) => {
-
-	const [ page, updatePage ] = useState(1);
-	const [ animate, updateAnimate ] = useState(null);
+	const [ page, updatePage ] = useState( 1 );
+	const [ animate, updateAnimate ] = useState( null );
 
 	const onPaginationPageChange = ( newPage ) => {
 		let newAnimate;
 		if ( newPage > page ) {
 			newAnimate = 'left';
-			recordEvent( 'marketing_knowledge_carousel', { direction: 'forward', page: newPage } );
+			recordEvent( 'marketing_knowledge_carousel', {
+				direction: 'forward',
+				page: newPage,
+			} );
 		} else {
 			newAnimate = 'right';
-			recordEvent( 'marketing_knowledge_carousel', { direction: 'back', page: newPage } );
+			recordEvent( 'marketing_knowledge_carousel', {
+				direction: 'back',
+				page: newPage,
+			} );
 		}
-		updatePage(newPage);
-		updateAnimate(newAnimate);
-	}
+		updatePage( newPage );
+		updateAnimate( newAnimate );
+	};
 
 	const onPostClick = ( post ) => {
 		recordEvent( 'marketing_knowledge_article', { title: post.title } );
-	}
+	};
 
 	/**
 	 * Get the 2 posts we need for the current page
 	 */
 	const getCurrentSlide = () => {
-
-		const currentPosts = posts.slice( ( page - 1 ) * 2, ( page - 1 ) * 2 + 2 );
-		const pageClass = classNames( 'woocommerce-marketing-knowledgebase-card__page', {
-			'page-with-single-post': currentPosts.length === 1,
-		} );
+		const currentPosts = posts.slice(
+			( page - 1 ) * 2,
+			( page - 1 ) * 2 + 2
+		);
+		const pageClass = classNames(
+			'woocommerce-marketing-knowledgebase-card__page',
+			{
+				'page-with-single-post': currentPosts.length === 1,
+			}
+		);
 
 		const displayPosts = currentPosts.map( ( post, index ) => {
 			return (
@@ -66,14 +76,16 @@ const KnowledgeBase = ( {
 					className="woocommerce-marketing-knowledgebase-card__post"
 					href={ post.link }
 					key={ index }
-					onClick={ () => { onPostClick( post ) } }
+					onClick={ () => {
+						onPostClick( post );
+					} }
 					target="_blank"
 					rel="noopener noreferrer"
 				>
 					{ post.image && (
-					<div className="woocommerce-marketing-knowledgebase-card__post-img">
-						<img src={ post.image } alt="" />
-					</div>
+						<div className="woocommerce-marketing-knowledgebase-card__post-img">
+							<img src={ post.image } alt="" />
+						</div>
 					) }
 					<div className="woocommerce-marketing-knowledgebase-card__post-text">
 						<h3>{ post.title }</h3>
@@ -81,7 +93,10 @@ const KnowledgeBase = ( {
 							By { post.author_name }
 							{ post.author_avatar && (
 								<img
-									src={ post.author_avatar.replace( 's=96', 's=32' ) }
+									src={ post.author_avatar.replace(
+										's=96',
+										's=32'
+									) }
 									className="woocommerce-gravatar"
 									alt=""
 									width="16"
@@ -91,15 +106,11 @@ const KnowledgeBase = ( {
 						</p>
 					</div>
 				</a>
-			)
+			);
 		} );
 
-		return (
-			<div className={ pageClass }>
-				{ displayPosts }
-			</div>
-		);
-	}
+		return <div className={ pageClass }>{ displayPosts }</div>;
+	};
 
 	const renderEmpty = () => {
 		const emptyTitle = __(
@@ -132,7 +143,7 @@ const KnowledgeBase = ( {
 					showPageArrowsLabel={ false }
 				/>
 			</div>
-		)
+		);
 	};
 
 	const renderCardBody = () => {
@@ -142,7 +153,9 @@ const KnowledgeBase = ( {
 		return posts.length === 0 ? renderEmpty() : renderPosts();
 	};
 
-	const categoryClass = ( category ) ? `woocommerce-marketing-knowledgebase-card__category-${category}` : '';
+	const categoryClass = category
+		? `woocommerce-marketing-knowledgebase-card__category-${ category }`
+		: '';
 
 	return (
 		<Card
@@ -150,13 +163,13 @@ const KnowledgeBase = ( {
 			description={ description }
 			className={ classNames(
 				'woocommerce-marketing-knowledgebase-card',
-				categoryClass,
+				categoryClass
 			) }
 		>
 			{ renderCardBody() }
 		</Card>
-	)
-}
+	);
+};
 
 KnowledgeBase.propTypes = {
 	/**
@@ -183,10 +196,13 @@ KnowledgeBase.propTypes = {
 
 KnowledgeBase.defaultProps = {
 	title: __( 'WooCommerce knowledge base', 'woocommerce-admin' ),
-	description: __( 'Learn the ins and outs of successful marketing from the experts at WooCommerce.', 'woocommerce-admin' ),
+	description: __(
+		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
+		'woocommerce-admin'
+	),
 };
 
-export { KnowledgeBase }
+export { KnowledgeBase };
 
 export default compose(
 	withSelect( ( select, props ) => {

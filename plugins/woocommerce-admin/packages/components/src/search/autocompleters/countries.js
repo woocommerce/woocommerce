@@ -13,6 +13,7 @@ import Flag from '../../flag';
 
 /**
  * @typedef {Object} Completer
+ * @property
  */
 
 // Cache countries to avoid repeated requests.

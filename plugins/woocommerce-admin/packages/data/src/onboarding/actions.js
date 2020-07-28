@@ -1,11 +1,10 @@
 /**
- * External Dependencies
+ * External dependencies
  */
-
 import { apiFetch } from '@wordpress/data-controls';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';

@@ -31,9 +31,7 @@ describe( 'StatsOverview tracking', () => {
 			updateUserPreferences: () => {},
 			hiddenStats: null,
 		} );
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		const ellipsisBtn = screen.getByRole( 'button', {
 			name: 'Choose which values to display',
@@ -58,9 +56,7 @@ describe( 'StatsOverview tracking', () => {
 			updateUserPreferences: () => {},
 			hiddenStats: null,
 		} );
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		const monthBtn = screen.getByRole( 'tab', {
 			name: 'Month to date',
@@ -84,9 +80,7 @@ describe( 'StatsOverview toggle and persist stat preference', () => {
 			hiddenStats: null,
 		} );
 
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		const ellipsisBtn = screen.getByRole( 'button', {
 			name: 'Choose which values to display',
@@ -117,9 +111,7 @@ describe( 'StatsOverview rendering correct elements', () => {
 			updateUserPreferences: () => {},
 			hiddenStats: null,
 		} );
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		const viewDetailedStatsLink = screen.getByText( 'View detailed stats' );
 		expect( viewDetailedStatsLink ).toBeDefined();
@@ -135,9 +127,7 @@ describe( 'StatsOverview period selection', () => {
 			updateUserPreferences: () => {},
 			hiddenStats: null,
 		} );
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		const todayBtn = screen.getByRole( 'tab', { name: 'Today' } );
 		expect( todayBtn.classList ).toContain( 'is-active' );
@@ -148,9 +138,7 @@ describe( 'StatsOverview period selection', () => {
 			updateUserPreferences: () => {},
 			hiddenStats: null,
 		} );
-		render(
-			<StatsOverview />
-		);
+		render( <StatsOverview /> );
 
 		fireEvent.click( screen.getByRole( 'tab', { name: 'Month to date' } ) );
 

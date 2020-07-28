@@ -134,25 +134,24 @@ export class ActivityPanel extends Component {
 
 		// Don't show the inbox on the Home screen.
 		const { location } = this.props.getHistory();
-		const showInbox = isEmbedded || ! window.wcAdminFeatures.homescreen || location.pathname !== '/';
+		const showInbox =
+			isEmbedded ||
+			! window.wcAdminFeatures.homescreen ||
+			location.pathname !== '/';
 		const isPerformingSetupTask =
 			query.task &&
 			! query.path &&
 			( requestingTaskListOptions === true ||
-				(
-					taskListHidden === false &&
-					taskListComplete === false
-				)
-			);
+				( taskListHidden === false && taskListComplete === false ) );
 
 		return [
 			! isPerformingSetupTask && showInbox
 				? {
-					name: 'inbox',
-					title: __( 'Inbox', 'woocommerce-admin' ),
-					icon: <i className="material-icons-outlined">inbox</i>,
-					unread: hasUnreadNotes,
-				}
+						name: 'inbox',
+						title: __( 'Inbox', 'woocommerce-admin' ),
+						icon: <i className="material-icons-outlined">inbox</i>,
+						unread: hasUnreadNotes,
+				  }
 				: null,
 			! isPerformingSetupTask && {
 				name: 'orders',
@@ -185,11 +184,7 @@ export class ActivityPanel extends Component {
 			isPerformingSetupTask && {
 				name: 'help',
 				title: __( 'Help', 'woocommerce-admin' ),
-				icon: (
-					<i className="material-icons-outlined">
-						support
-					</i>
-				),
+				icon: <i className="material-icons-outlined">support</i>,
 			},
 		].filter( Boolean );
 	}
@@ -377,15 +372,15 @@ export default compose(
 		let requestingTaskListOptions, taskListComplete, taskListHidden;
 
 		if ( isOnboardingEnabled() ) {
-			taskListComplete = getOption( 'woocommerce_task_list_complete' ) === 'yes';
-			taskListHidden = getOption( 'woocommerce_task_list_hidden' ) === 'yes';
+			taskListComplete =
+				getOption( 'woocommerce_task_list_complete' ) === 'yes';
+			taskListHidden =
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes';
 			requestingTaskListOptions =
 				isResolving( 'getOption', [
 					'woocommerce_task_list_complete',
 				] ) ||
-				isResolving( 'getOption', [
-					'woocommerce_task_list_hidden',
-				] );
+				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
 		}
 
 		return {

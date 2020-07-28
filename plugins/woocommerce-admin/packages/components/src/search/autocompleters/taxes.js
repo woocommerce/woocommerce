@@ -13,6 +13,7 @@ import { computeSuggestionMatch, getTaxCode } from './utils';
 
 /**
  * @typedef {Object} Completer
+ * @property
  */
 
 /**

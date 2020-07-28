@@ -69,7 +69,7 @@ const Settings = ( { createNotice, query } ) => {
 				createNotice(
 					'error',
 					__(
-						'There was an error saving your settings.  Please try again.',
+						'There was an error saving your settings. Please try again.',
 						'woocommerce-admin'
 					)
 				);

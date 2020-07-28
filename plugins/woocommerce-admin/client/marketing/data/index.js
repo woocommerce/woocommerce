@@ -39,12 +39,18 @@ registerStore( STORE_KEY, {
 			case 'SET_ACTIVATING_PLUGIN':
 				return {
 					...state,
-					activatingPlugins: [ ...state.activatingPlugins, action.pluginSlug ],
+					activatingPlugins: [
+						...state.activatingPlugins,
+						action.pluginSlug,
+					],
 				};
 			case 'REMOVE_ACTIVATING_PLUGIN':
 				return {
 					...state,
-					activatingPlugins: without( state.activatingPlugins, action.pluginSlug ),
+					activatingPlugins: without(
+						state.activatingPlugins,
+						action.pluginSlug
+					),
 				};
 			case 'SET_RECOMMENDED_PLUGINS':
 				return {
@@ -66,5 +72,4 @@ registerStore( STORE_KEY, {
 
 		return state;
 	},
-
 } );

@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { SummaryList, SummaryNumber } from '@woocommerce/components';
 

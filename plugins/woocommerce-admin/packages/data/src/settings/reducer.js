@@ -1,4 +1,3 @@
-
 /**
  * External dependencies
  */
@@ -10,8 +9,11 @@ import { union } from 'lodash';
 import TYPES from './action-types';
 import { getResourceName } from '../utils';
 
-const updateGroupDataInNewState = ( newState, { group, groupIds, data, time, error } ) => {
-	groupIds.forEach( id => {
+const updateGroupDataInNewState = (
+	newState,
+	{ group, groupIds, data, time, error }
+) => {
+	groupIds.forEach( ( id ) => {
 		newState[ getResourceName( group, id ) ] = {
 			data: data[ id ],
 			lastReceived: time,
@@ -21,7 +23,10 @@ const updateGroupDataInNewState = ( newState, { group, groupIds, data, time, err
 	return newState;
 };
 
-const receiveSettings = ( state = {}, { type, group, data, error, time, isRequesting } ) => {
+const receiveSettings = (
+	state = {},
+	{ type, group, data, error, time, isRequesting }
+) => {
 	const newState = {};
 	switch ( type ) {
 		case TYPES.SET_IS_REQUESTING:

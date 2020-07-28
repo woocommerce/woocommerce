@@ -98,6 +98,7 @@ export function getDefaultOptionValue( config, options ) {
 
 /**
  * @typedef {Object} activeFilters
+ * @property
  */
 
 /**

@@ -94,10 +94,7 @@ class TaskDashboard extends Component {
 	}
 
 	possiblyTrackCompletedTasks() {
-		const {
-			trackedCompletedTasks,
-			updateOptions,
-		} = this.props;
+		const { trackedCompletedTasks, updateOptions } = this.props;
 		const completedTaskKeys = this.getCompletedTaskKeys();
 
 		if ( xor( trackedCompletedTasks, completedTaskKeys ).length !== 0 ) {
@@ -392,7 +389,8 @@ class TaskDashboard extends Component {
 		const progressBarClass = classNames(
 			'woocommerce-task-card__progress-bar',
 			{
-				completed: listTasks.length === this.getCompletedTaskKeys().length,
+				completed:
+					listTasks.length === this.getCompletedTaskKeys().length,
 			}
 		);
 
@@ -454,8 +452,7 @@ export default compose(
 		const profileItems = getProfileItems();
 
 		const isTaskListComplete =
-			getOption( 'woocommerce_task_list_complete' ) ||
-			false;
+			getOption( 'woocommerce_task_list_complete' ) || false;
 		const modalDismissed =
 			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ||
 			false;

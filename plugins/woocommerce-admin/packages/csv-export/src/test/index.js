@@ -61,7 +61,14 @@ describe( 'generateCSVFileName', () => {
 
 describe( 'downloadCSVFile', () => {
 	it( "should download a CSV file name to users' browser", () => {
-		global.Blob = ( content, options ) => ( { content, options } );
+		global.Blob = class Blob {
+			constructor( content, options ) {
+				return {
+					content,
+					options,
+				};
+			}
+		};
 		const fileName = 'test.csv';
 		downloadCSVFile( fileName, mockCSVData );
 

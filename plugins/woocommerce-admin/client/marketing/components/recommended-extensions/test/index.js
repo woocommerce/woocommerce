@@ -20,20 +20,20 @@ jest.mock( 'lib/tracks' );
 
 const mockExtensions = [
 	{
-		'title': 'AutomateWoo',
-		'description': 'Does things.',
-		'url': 'https://woocommerce.com/products/automatewoo/',
-		'icon': 'icons/automatewoo.svg',
-		'product': 'automatewoo',
-		'plugin': 'automatewoo/automatewoo.php',
+		title: 'AutomateWoo',
+		description: 'Does things.',
+		url: 'https://woocommerce.com/products/automatewoo/',
+		icon: 'icons/automatewoo.svg',
+		product: 'automatewoo',
+		plugin: 'automatewoo/automatewoo.php',
 	},
 	{
-		'title': 'Mailchimp for WooCommerce',
-		'description': 'Does things.',
-		'url': 'https://woocommerce.com/products/mailchimp-for-woocommerce/',
-		'icon': 'icons/mailchimp.svg',
-		'product': 'mailchimp-for-woocommerce',
-		'plugin': 'mailchimp-for-woocommerce/mailchimp-woocommerce.php',
+		title: 'Mailchimp for WooCommerce',
+		description: 'Does things.',
+		url: 'https://woocommerce.com/products/mailchimp-for-woocommerce/',
+		icon: 'icons/mailchimp.svg',
+		product: 'mailchimp-for-woocommerce',
+		plugin: 'mailchimp-for-woocommerce/mailchimp-woocommerce.php',
 	},
 ];
 
@@ -57,15 +57,21 @@ describe( 'Recommendations and not loading', () => {
 
 	it( 'should display default title and description', () => {
 		const cardWrapper = recommendedExtensionsWrapper.find( Card );
-		expect( cardWrapper.prop( 'title' ) ).toBe( 'Recommended extensions'  );
-		expect( cardWrapper.prop( 'description' ) ).toBe( 'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.' );
+		expect( cardWrapper.prop( 'title' ) ).toBe( 'Recommended extensions' );
+		expect( cardWrapper.prop( 'description' ) ).toBe(
+			'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.'
+		);
 	} );
 
 	it( 'should display correct number of recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find( 'div.woocommerce-marketing-recommended-extensions-card__items' );
+		const itemsContainer = recommendedExtensionsWrapper.find(
+			'div.woocommerce-marketing-recommended-extensions-card__items'
+		);
 		expect( itemsContainer.length ).toBe( 1 );
 
-		const items = recommendedExtensionsWrapper.find( RecommendedExtensionsItem );
+		const items = recommendedExtensionsWrapper.find(
+			RecommendedExtensionsItem
+		);
 		expect( items.length ).toBe( 2 );
 	} );
 } );
@@ -89,7 +95,9 @@ describe( 'Recommendations and loading', () => {
 	} );
 
 	it( 'should not display recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find( 'div.woocommerce-marketing-recommended-extensions-card__items' );
+		const itemsContainer = recommendedExtensionsWrapper.find(
+			'div.woocommerce-marketing-recommended-extensions-card__items'
+		);
 		expect( itemsContainer.length ).toBe( 0 );
 	} );
 } );
@@ -113,7 +121,9 @@ describe( 'No Recommendations and not loading', () => {
 	} );
 
 	it( 'should not display recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find( 'div.woocommerce-marketing-recommended-extensions-card__items' );
+		const itemsContainer = recommendedExtensionsWrapper.find(
+			'div.woocommerce-marketing-recommended-extensions-card__items'
+		);
 		expect( itemsContainer.length ).toBe( 0 );
 	} );
 } );
@@ -139,7 +149,9 @@ describe( 'Click Recommendations', () => {
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_recommended_extension',
-			{ name: 'AutomateWoo' },
+			{
+				name: 'AutomateWoo',
+			}
 		);
 	} );
 } );
@@ -166,8 +178,9 @@ describe( 'Custom title and description ', () => {
 	it( 'should override defaults', () => {
 		const cardWrapper = recommendedExtensionsWrapper.find( Card );
 
-		expect( cardWrapper.prop( 'title' ) ).toBe( 'Custom Title'  );
-		expect( cardWrapper.prop( 'description' ) ).toBe( 'Custom Description' );
+		expect( cardWrapper.prop( 'title' ) ).toBe( 'Custom Title' );
+		expect( cardWrapper.prop( 'description' ) ).toBe(
+			'Custom Description'
+		);
 	} );
-
 } );

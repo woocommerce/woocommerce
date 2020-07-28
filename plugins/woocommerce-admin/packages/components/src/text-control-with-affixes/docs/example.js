@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { TextControlWithAffixes } from '@woocommerce/components';
 

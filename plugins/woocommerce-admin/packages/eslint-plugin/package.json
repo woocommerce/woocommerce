@@ -1,0 +1,38 @@
+{
+	"name": "@woocommerce/eslint-plugin",
+	"version": "1.0.0-beta.0",
+	"description": "ESLint plugin for WooCommerce development.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"eslint",
+		"plugin"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/eslint-plugin/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce-admin.git",
+		"directory": "packages/eslint-plugin"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+	},
+	"files": [
+		"configs",
+		"rules",
+		"index.js"
+	],
+	"main": "index.js",
+	"dependencies": {
+		"@wordpress/eslint-plugin": "^7.1.0",
+		"eslint": "^7",
+		"eslint-plugin-react-hooks": "^4.0.4",
+		"eslint-plugin-testing-library": "^3.3.1",
+		"requireindex":"^1.2.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

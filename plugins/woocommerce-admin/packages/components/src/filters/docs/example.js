@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import {
 	AdvancedFilters,
@@ -13,10 +13,6 @@ import {
 	getCurrentDates,
 	isoDateFormat,
 } from '@woocommerce/date';
-
-/**
- * External dependencies
- */
 import { partialRight } from 'lodash';
 
 const ORDER_STATUSES = {

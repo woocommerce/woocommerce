@@ -4,9 +4,7 @@
 import './style.scss';
 
 const TaskListPlaceholder = ( props ) => {
-	const {
-		numTasks = 5,
-	} = props;
+	const { numTasks = 5 } = props;
 	return (
 		<div className="woocommerce-task-dashboard__container">
 			<div
@@ -23,7 +21,10 @@ const TaskListPlaceholder = ( props ) => {
 				<div className="woocommerce-card__body">
 					<div className="woocommerce-list">
 						{ Array.from( new Array( numTasks ) ).map( ( v, i ) => (
-							<div key={ i } className="woocommerce-list__item has-action">
+							<div
+								key={ i }
+								className="woocommerce-list__item has-action"
+							>
 								<div className="woocommerce-list__item-inner">
 									<div className="woocommerce-list__item-before">
 										<span className="is-placeholder" />

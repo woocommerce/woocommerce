@@ -9,11 +9,6 @@ import { parse } from 'qs';
 export const isoDateFormat = 'YYYY-MM-DD';
 
 /**
- * @typedef {Object} Moment - An instance of moment
- * @typedef {Object} DateParams
- */
-
-/**
  * DateValue Object
  *
  * @typedef  {Object} DateValue - Describes the date range supplied by the date picker.
@@ -26,7 +21,7 @@ export const isoDateFormat = 'YYYY-MM-DD';
 /**
  * DateParams Object
  *
- * @typedef {Object} dateParams - date parameters derived from query parameters.
+ * @typedef {Object} DateParams - date parameters derived from query parameters.
  * @property {string} period - period value, ie `last_week`
  * @property {string} compare - compare valuer, ie previous_year
  * @param {moment.Moment|null} after - If the period supplied is "custom", this is the after date
@@ -141,9 +136,7 @@ export function getRangeLabel( after, before ) {
  * @return {DateValue} -  DateValue data about the selected period
  */
 export function getLastPeriod( period, compare ) {
-	const primaryStart = moment()
-		.startOf( period )
-		.subtract( 1, period );
+	const primaryStart = moment().startOf( period ).subtract( 1, period );
 	const primaryEnd = primaryStart.clone().endOf( period );
 	let secondaryStart;
 	let secondaryEnd;
@@ -151,9 +144,7 @@ export function getLastPeriod( period, compare ) {
 	if ( compare === 'previous_period' ) {
 		if ( period === 'year' ) {
 			// Subtract two entire periods for years to take into account leap year
-			secondaryStart = moment()
-				.startOf( period )
-				.subtract( 2, period );
+			secondaryStart = moment().startOf( period ).subtract( 2, period );
 			secondaryEnd = secondaryStart.clone().endOf( period );
 		} else {
 			// Otherwise, use days in primary period to figure out how far to go back
@@ -453,7 +444,8 @@ export function getIntervalForQuery( query ) {
 /**
  * Returns the current chart type to use.
  *
- * @param  {Object} query Current query
+ * @param {Object} query Current query
+ * @param query.chartType
  * @return {string} Current chart type.
  */
 export function getChartTypeForQuery( { chartType } ) {
@@ -544,6 +536,10 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
  * of moment style js formats.
  *
  * @param {Object} config Locale config object, from store settings.
+ * @param config.userLocale
+ * @param config.weekdaysShort
+ * @param config.userLocale
+ * @param config.weekdaysShort
  */
 export function loadLocaleData( { userLocale, weekdaysShort } ) {
 	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.

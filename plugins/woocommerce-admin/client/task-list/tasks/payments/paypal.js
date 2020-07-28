@@ -74,7 +74,11 @@ export class PayPal extends Component {
 	}
 
 	isWooCommerceServicesConnected() {
-		const { activePlugins, isJetpackConnected, wcsTosAccepted } = this.props;
+		const {
+			activePlugins,
+			isJetpackConnected,
+			wcsTosAccepted,
+		} = this.props;
 
 		return (
 			isJetpackConnected &&
@@ -234,7 +238,9 @@ export class PayPal extends Component {
 												'woocommerce-admin'
 											) }
 											type="email"
-											{ ...getInputProps( 'account_email' ) }
+											{ ...getInputProps(
+												'account_email'
+											) }
 										/>
 									) }
 								</div>
@@ -242,7 +248,8 @@ export class PayPal extends Component {
 
 							{ ! isPending &&
 								( autoConnectFailed || ! connectURL ) &&
-								( ! canAutoCreate || ! values.create_account ) && (
+								( ! canAutoCreate ||
+									! values.create_account ) && (
 									<Fragment>
 										<TextControl
 											label={ __(
@@ -311,7 +318,8 @@ export class PayPal extends Component {
 
 							{ ! autoConnectFailed &&
 								connectURL &&
-								( ! canAutoCreate || ! values.create_account ) && (
+								( ! canAutoCreate ||
+									! values.create_account ) && (
 									<Fragment>
 										<Button isPrimary href={ connectURL }>
 											{ __(

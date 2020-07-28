@@ -11,6 +11,12 @@ import crypto from 'crypto';
 /**
  * Display a users Gravatar.
  *
+ * @param root0
+ * @param root0.alt
+ * @param root0.title
+ * @param root0.size
+ * @param root0.user
+ * @param root0.className
  * @return {Object} -
  */
 const Gravatar = ( { alt, title, size, user, className } ) => {
@@ -32,10 +38,7 @@ const Gravatar = ( { alt, title, size, user, className } ) => {
 	const getAvatarURLFromEmail = ( email ) => {
 		return (
 			'https://www.gravatar.com/avatar/' +
-			crypto
-				.createHash( 'md5' )
-				.update( email )
-				.digest( 'hex' )
+			crypto.createHash( 'md5' ).update( email ).digest( 'hex' )
 		);
 	};
 

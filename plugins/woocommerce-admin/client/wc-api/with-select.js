@@ -76,7 +76,7 @@ const withSelect = ( mapSelectToProps ) =>
 							onCompletes.push( onComplete );
 						}
 						if ( onUnmount ) {
-							this.onUnmounts[ key ] = onUnmount
+							this.onUnmounts[ key ] = onUnmount;
 						}
 						storeSelectors[ key ] = selectors;
 					} else {

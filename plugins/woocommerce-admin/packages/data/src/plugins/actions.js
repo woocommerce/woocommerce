@@ -1,10 +1,10 @@
 /**
- * External Dependencies
+ * External dependencies
  */
 import { apiFetch, dispatch } from '@wordpress/data-controls';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
 import { pluginNames, STORE_NAME } from './constants';
 import TYPES from './action-types';
@@ -114,7 +114,11 @@ export function* activatePlugins( plugins ) {
 export function* installAndActivatePlugins( plugins ) {
 	try {
 		yield dispatch( STORE_NAME, 'installPlugins', plugins );
-		const activations = yield dispatch( STORE_NAME, 'activatePlugins', plugins );
+		const activations = yield dispatch(
+			STORE_NAME,
+			'activatePlugins',
+			plugins
+		);
 		return activations;
 	} catch ( error ) {
 		throw error;
@@ -124,15 +128,17 @@ export function* installAndActivatePlugins( plugins ) {
 export function formatErrors( response ) {
 	if ( response.errors ) {
 		// Replace the slug with a plugin name if a constant exists.
-		Object.keys( response.errors ).forEach( plugin => {
-			response.errors[ plugin ] = response.errors[ plugin ].map( pluginError => {
-				return pluginNames[ plugin ]
-					? pluginError.replace(
-						`\`${ plugin }\``,
-						pluginNames[ plugin ]
-					)
-					: pluginError;
-			} );
+		Object.keys( response.errors ).forEach( ( plugin ) => {
+			response.errors[ plugin ] = response.errors[ plugin ].map(
+				( pluginError ) => {
+					return pluginNames[ plugin ]
+						? pluginError.replace(
+								`\`${ plugin }\``,
+								pluginNames[ plugin ]
+						  )
+						: pluginError;
+				}
+			);
 		} );
 	}
 

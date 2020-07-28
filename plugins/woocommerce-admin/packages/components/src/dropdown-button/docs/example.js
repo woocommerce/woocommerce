@@ -1,12 +1,8 @@
 /**
- * Internal dependencies
- */
-import { DropdownButton } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { Dropdown } from '@wordpress/components';
+import { DropdownButton } from '@woocommerce/components';
 
 export default () => (
 	<Dropdown

@@ -8,6 +8,9 @@ import PropTypes from 'prop-types';
  * with the purpose of replacing a table with no rows.
  * It mimics the same height a table would have according to the `numberOfRows` prop.
  *
+ * @param root0
+ * @param root0.children
+ * @param root0.numberOfRows
  * @return {Object} -
  */
 const EmptyTable = ( { children, numberOfRows } ) => {

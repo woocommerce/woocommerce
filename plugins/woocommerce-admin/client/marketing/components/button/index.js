@@ -13,7 +13,10 @@ export default ( props ) => {
 	return (
 		<Button
 			{ ...props }
-			className={ classnames( props.className, 'woocommerce-admin-marketing-button' ) }
+			className={ classnames(
+				props.className,
+				'woocommere-admin-marketing-button'
+			) }
 		/>
 	);
-}
+};

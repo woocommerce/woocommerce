@@ -174,6 +174,7 @@ class StoreDetails extends Component {
 		const { showUsageModal } = this.state;
 		const { skipProfiler } = this.props;
 
+		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
 			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
 			'woocommerce-admin'
@@ -183,6 +184,7 @@ class StoreDetails extends Component {
 			'Your store address will help us configure currency\n options and shipping rules automatically.\n This information will not be publicly visible and can\n easily be changed later.',
 			'woocommerce-admin'
 		);
+		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
 		return (
 			<Fragment>

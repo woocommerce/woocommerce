@@ -1,5 +1,5 @@
 /**
- * WordPress dependencies
+ * External dependencies
  */
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
@@ -11,10 +11,12 @@ import { STORE_NAME } from './constants';
 
 /**
  * Higher-order component used to hydrate current user data.
- * 
+ *
  * @param {Object} currentUser Current user object in the same format as the WP REST API returns.
  */
-export const withCurrentUserHydration = ( currentUser ) => OriginalComponent => {
+export const withCurrentUserHydration = ( currentUser ) => (
+	OriginalComponent
+) => {
 	return ( props ) => {
 		const userRef = useRef( currentUser );
 

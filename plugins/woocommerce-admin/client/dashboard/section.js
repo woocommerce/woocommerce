@@ -46,10 +46,7 @@ export default class Section extends Component {
 	}
 
 	render() {
-		const {
-			component: SectionComponent,
-			...props
-		} = this.props;
+		const { component: SectionComponent, ...props } = this.props;
 		const { titleInput } = this.state;
 
 		return (

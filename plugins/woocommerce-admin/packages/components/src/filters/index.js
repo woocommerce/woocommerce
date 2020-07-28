@@ -5,10 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { updateQueryString } from '@woocommerce/navigation';
 import { getDateParamsFromQuery, getCurrentDates } from '@woocommerce/date';
 import CurrencyFactory from '@woocommerce/currency';

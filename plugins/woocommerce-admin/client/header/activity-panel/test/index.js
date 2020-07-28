@@ -10,12 +10,7 @@ import { ActivityPanel } from '../';
 
 describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
-		render(
-			<ActivityPanel
-				isEmbedded
-				query={ {} }
-			/>
-		);
+		render( <ActivityPanel isEmbedded query={ {} } /> );
 
 		expect( screen.getByText( 'Inbox' ) ).toBeDefined();
 	} );
@@ -36,16 +31,12 @@ describe( 'Activity Panel', () => {
 	} );
 
 	it( 'should not render inbox tab on home screen', () => {
-		render(
-			<ActivityPanel
-				query={ {} }
-			/>
-		);
+		render( <ActivityPanel query={ {} } /> );
 
 		expect( screen.queryByText( 'Inbox' ) ).toBeNull();
 	} );
 
-	it ( 'should render help tab before options load', async () => {
+	it( 'should render help tab before options load', async () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions
@@ -62,7 +53,7 @@ describe( 'Activity Panel', () => {
 		expect( screen.getByText( 'Help' ) ).toBeDefined();
 	} );
 
-	it ( 'should render help tab when on single task', async () => {
+	it( 'should render help tab when on single task', async () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
@@ -81,7 +72,7 @@ describe( 'Activity Panel', () => {
 		expect( screen.getByText( 'Help' ) ).toBeDefined();
 	} );
 
-	it ( 'should not render help tab when not on main route', () => {
+	it( 'should not render help tab when not on main route', () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
@@ -98,7 +89,7 @@ describe( 'Activity Panel', () => {
 		expect( screen.queryByText( 'Help' ) ).toBeNull();
 	} );
 
-	it ( 'should not render help tab when TaskList is hidden', () => {
+	it( 'should not render help tab when TaskList is hidden', () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
@@ -114,7 +105,7 @@ describe( 'Activity Panel', () => {
 		expect( screen.queryByText( 'Help' ) ).toBeNull();
 	} );
 
-	it ( 'should not render help tab when TaskList is complete', () => {
+	it( 'should not render help tab when TaskList is complete', () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }

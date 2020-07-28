@@ -1,8 +1,8 @@
 /**
- * External Dependencies
+ * External dependencies
  */
-// Turn on react-dates classes/styles, see https://github.com/airbnb/react-dates#initialize
 import 'react-dates/initialize';
+// The above: Turn on react-dates classes/styles, see https://github.com/airbnb/react-dates#initialize
 
 export { default as AdvancedFilters } from './advanced-filters';
 export { default as AnimationSlider } from './animation-slider';

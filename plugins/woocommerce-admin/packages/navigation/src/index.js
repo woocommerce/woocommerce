@@ -10,18 +10,14 @@ import { applyFilters } from '@wordpress/hooks';
  * Internal dependencies
  */
 import { getHistory } from './history';
+import * as navUtils from './index';
+// For the above, import the module into itself. Functions consumed from this import can be mocked in tests.
 
 // Expose history so all uses get the same history object.
 export { getHistory };
 
 // Export all filter utilities
 export * from './filters';
-
-/**
- * Internal dependencies
- */
-// Import the module into itself. Functions consumed from this import can be mocked in tests.
-import * as navUtils from './index';
 
 /**
  * Get the current path from history.

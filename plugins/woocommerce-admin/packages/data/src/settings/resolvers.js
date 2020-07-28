@@ -1,9 +1,6 @@
-
-
 /**
- * External Dependencies
+ * External dependencies
  */
-
 import { apiFetch, dispatch } from '@wordpress/data-controls';
 
 /**

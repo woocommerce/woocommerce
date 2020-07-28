@@ -1,12 +1,8 @@
 /**
- * External Dependencies
- */
-import { batchFetch } from './controls';
-
-/**
  * Internal dependencies
  */
 import { receiveOptions, setRequestingError } from './actions';
+import { batchFetch } from './controls';
 
 /**
  * Request an option value.

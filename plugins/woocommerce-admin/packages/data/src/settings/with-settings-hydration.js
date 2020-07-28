@@ -1,4 +1,3 @@
-
 /**
  * External dependencies
  */
@@ -10,8 +9,10 @@ import { useSelect } from '@wordpress/data';
  */
 import { STORE_NAME } from './constants';
 
-export const withSettingsHydration = ( group, settings ) => OriginalComponent => {
-	return props => {
+export const withSettingsHydration = ( group, settings ) => (
+	OriginalComponent
+) => {
+	return ( props ) => {
 		const settingsRef = useRef( settings );
 
 		useSelect( ( select, registry ) => {

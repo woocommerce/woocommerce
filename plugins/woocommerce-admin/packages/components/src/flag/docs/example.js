@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { Flag, H, Section } from '@woocommerce/components';
 

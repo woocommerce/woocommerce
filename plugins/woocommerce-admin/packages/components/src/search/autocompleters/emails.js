@@ -11,6 +11,7 @@ import { computeSuggestionMatch } from './utils';
 
 /**
  * @typedef {Object} Completer
+ * @property
  */
 
 /**

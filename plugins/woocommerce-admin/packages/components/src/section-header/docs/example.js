@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { SectionHeader } from '@woocommerce/components';
 

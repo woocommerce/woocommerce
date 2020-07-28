@@ -11,13 +11,6 @@ const { options: babelDefaultConfig } = babel.loadPartialConfig( {
 	configFile: '@wordpress/babel-preset-default',
 } );
 const plugins = babelDefaultConfig.plugins;
-if ( ! process.env.SKIP_JSX_PRAGMA_TRANSFORM ) {
-	plugins.push( [ '@wordpress/babel-plugin-import-jsx-pragma', {
-		scopeVariable: 'createElement',
-		source: '@wordpress/element',
-		isDefault: false,
-	} ] );
-}
 
 const overrideOptions = ( target, targetName, options ) => {
 	if ( get( target, [ 'file', 'request' ] ) === targetName ) {

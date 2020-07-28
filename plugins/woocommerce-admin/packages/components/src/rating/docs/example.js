@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { ReviewRating, ProductRating, Rating } from '@woocommerce/components';
 

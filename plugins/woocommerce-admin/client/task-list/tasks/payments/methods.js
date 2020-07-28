@@ -223,14 +223,11 @@ export function getPaymentMethods( {
 			container: <PayPal />,
 			isConfigured:
 				options.woocommerce_ppec_paypal_settings &&
-				( (
-						options.woocommerce_ppec_paypal_settings.reroute_requests &&
-						options.woocommerce_ppec_paypal_settings.email
-				) ||
-				(
-						options.woocommerce_ppec_paypal_settings.api_username &&
-						options.woocommerce_ppec_paypal_settings.api_password
-				) ),
+				( ( options.woocommerce_ppec_paypal_settings.reroute_requests &&
+					options.woocommerce_ppec_paypal_settings.email ) ||
+					( options.woocommerce_ppec_paypal_settings.api_username &&
+						options.woocommerce_ppec_paypal_settings
+							.api_password ) ),
 			isEnabled:
 				options.woocommerce_ppec_paypal_settings &&
 				options.woocommerce_ppec_paypal_settings.enabled === 'yes',

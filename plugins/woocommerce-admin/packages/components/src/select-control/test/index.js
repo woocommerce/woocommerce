@@ -27,7 +27,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -46,7 +46,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -71,7 +71,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -90,7 +90,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '    ' + query + ' ' );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -109,7 +109,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -125,7 +125,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -148,7 +148,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -171,7 +171,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -201,7 +201,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -211,7 +211,7 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( 'test' );
 		selectControl.update();
 
-		setTimeout( function() {
+		setTimeout( function () {
 			expect(
 				selectControl.find( Button ).filter( '.' + optionClassname )
 					.length
@@ -222,19 +222,19 @@ describe( 'SelectControl', () => {
 	it( "doesn't show options with an empty search", () => {
 		const optionsEmptyValue = [
 			{ key: '1', label: 'lorem 1', value: { id: '' } },
-        ];
+		];
 		const optionControlClassname = 'woocommerce-select-control__listbox';
 		const selectControl = mount(
-			<SelectControl
-				options={ optionsEmptyValue }
-			/>
+			<SelectControl options={ optionsEmptyValue } />
 		);
 
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		setTimeout( function() {
-			expect( selectControl.find( '.' + optionControlClassname ).length ).toBe( 0 );
+		setTimeout( function () {
+			expect(
+				selectControl.find( '.' + optionControlClassname ).length
+			).toBe( 0 );
 		}, 0 );
 	} );
 } );

@@ -55,9 +55,11 @@ export class ReportChart extends Component {
 
 	getItemChartData() {
 		const { primaryData, selectedChart } = this.props;
-		const chartData = primaryData.data.intervals.map( function( interval ) {
+		const chartData = primaryData.data.intervals.map( function (
+			interval
+		) {
 			const intervalData = {};
-			interval.subtotals.segments.forEach( function( segment ) {
+			interval.subtotals.segments.forEach( function ( segment ) {
 				if ( segment.segment_label ) {
 					const label = intervalData[ segment.segment_label ]
 						? segment.segment_label +
@@ -93,7 +95,7 @@ export class ReportChart extends Component {
 			defaultDateRange
 		);
 
-		const chartData = primaryData.data.intervals.map( function(
+		const chartData = primaryData.data.intervals.map( function (
 			interval,
 			index
 		) {

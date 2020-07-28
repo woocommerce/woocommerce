@@ -1,12 +1,8 @@
 /**
- * Internal dependencies
- */
-import { H, Search, Section } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { withState } from '@wordpress/compose';
+import { H, Search, Section } from '@woocommerce/components';
 
 export default withState( {
 	selected: [],

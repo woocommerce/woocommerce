@@ -1,5 +1,5 @@
 /**
- * External Dependencies
+ * External dependencies
  */
 
 import { __ } from '@wordpress/i18n';
@@ -7,7 +7,7 @@ import { apiFetch, select } from '@wordpress/data-controls';
 import { concat } from 'lodash';
 
 /**
- * Internal Dependencies
+ * Internal dependencies
  */
 import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';

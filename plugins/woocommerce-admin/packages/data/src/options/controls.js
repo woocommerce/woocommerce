@@ -24,9 +24,9 @@ export const controls = {
 	BATCH_FETCH( { optionName } ) {
 		optionNames.push( optionName );
 
-		return new Promise( resolve => {
-			setTimeout( function()  {
-				const names = optionNames.join(',');
+		return new Promise( ( resolve ) => {
+			setTimeout( function () {
+				const names = optionNames.join( ',' );
 				if ( fetches[ names ] ) {
 					return fetches[ names ].then( ( result ) => {
 						resolve( result[ optionName ] );
@@ -35,15 +35,14 @@ export const controls = {
 
 				const url = WC_ADMIN_NAMESPACE + '/options?options=' + names;
 				fetches[ names ] = apiFetch( { path: url } );
-				fetches[names].then( ( result ) => resolve( result ) )
+				fetches[ names ].then( ( result ) => resolve( result ) );
 
 				// Clear option names after all resolved;
 				setTimeout( () => {
 					optionNames = [];
 					// Delete the fetch after to allow wp data to handle cache invalidation.
 					delete fetches[ names ];
-				}, 1 )
-
+				}, 1 );
 			}, 1 );
 		} );
 	},

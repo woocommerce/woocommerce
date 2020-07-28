@@ -375,7 +375,7 @@ export function getReportChartData( options ) {
 			return { ...response, isError: true };
 		}
 
-		forEach( pagedData, function( _data ) {
+		forEach( pagedData, function ( _data ) {
 			intervals = intervals.concat( _data.data.intervals );
 		} );
 	}

@@ -5,6 +5,9 @@ const numberFormatter = require( 'locutus/php/strings/number_format' );
  *
  * @see http://locutus.io/php/strings/number_format/
  * @param {Object} numberConfig number formatting configuration object.
+ * @param numberConfig.precision
+ * @param numberConfig.decimalSeparator
+ * @param numberConfig.thousandSeparator
  * @param {number|string} number number to format
  * @return {?string} A formatted string.
  */

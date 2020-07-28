@@ -15,7 +15,6 @@ export default {
 };
 
 export const Default = () => {
-
 	const [ statePage, setPage ] = useState( 2 );
 	const [ statePerPage, setPerPage ] = useState( 50 );
 

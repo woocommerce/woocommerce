@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { STORE_NAME } from './constants';
 import { useCallback } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { STORE_NAME } from './constants';
 
 export const useSettings = ( group, settingsKeys = [] ) => {
 	const {

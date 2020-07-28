@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { sprintf } from '@wordpress/i18n';
-
-/**
- * WooCommerce dependencies
- */
 import { numberFormat } from '@woocommerce/number';
 
 const CurrencyFactory = ( currencySetting ) => {

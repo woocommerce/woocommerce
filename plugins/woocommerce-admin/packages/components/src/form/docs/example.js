@@ -1,9 +1,4 @@
 /**
- * Internal dependencies
- */
-import { Form } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import {
@@ -13,6 +8,7 @@ import {
 	SelectControl,
 	TextControl,
 } from '@wordpress/components';
+import { Form } from '@woocommerce/components';
 
 const validate = ( values ) => {
 	const errors = {};

@@ -83,10 +83,7 @@ class StoreAlerts extends Component {
 		// TODO: should "next X" be the start, or exactly 1X from the current date?
 		const snoozeOptions = [
 			{
-				value: moment()
-					.add( 4, 'hours' )
-					.unix()
-					.toString(),
+				value: moment().add( 4, 'hours' ).unix().toString(),
 				label: __( 'Later Today', 'woocommerce-admin' ),
 			},
 			{

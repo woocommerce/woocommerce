@@ -15,6 +15,7 @@ import ProductImage from '../../product-image';
 
 /**
  * @typedef {Object} Completer
+ * @property
  */
 /**
  * A products completer.

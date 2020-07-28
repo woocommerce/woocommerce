@@ -10,12 +10,7 @@ export function getTaxCode( tax ) {
 		tax.name || __( 'TAX', 'woocommerce-admin' ),
 		tax.priority,
 	]
-		.map( ( item ) =>
-			item
-				.toString()
-				.toUpperCase()
-				.trim()
-		)
+		.map( ( item ) => item.toString().toUpperCase().trim() )
 		.filter( Boolean )
 		.join( '-' );
 }

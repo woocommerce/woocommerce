@@ -26,7 +26,9 @@ const DropdownButton = ( props ) => {
 			{ ...otherProps }
 		>
 			<div className="woocommerce-dropdown-button__labels">
-				{ labels.map( ( label, i ) => <span key={ i }>{ decodeEntities( label ) }</span> ) }
+				{ labels.map( ( label, i ) => (
+					<span key={ i }>{ decodeEntities( label ) }</span>
+				) ) }
 			</div>
 		</Button>
 	);

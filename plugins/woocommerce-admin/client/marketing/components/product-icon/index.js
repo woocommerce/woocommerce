@@ -15,7 +15,6 @@ import * as icons from './icons';
 
 class ProductIcon extends Component {
 	render() {
-
 		const product = camelCase( this.props.product );
 		let iconComponent = icons.blank;
 
@@ -24,10 +23,13 @@ class ProductIcon extends Component {
 		}
 
 		return (
-			<div className={ classnames( this.props.className, 'woocommerce-admin-marketing-product-icon' ) }>
-				<Icon
-					icon={ iconComponent }
-				/>
+			<div
+				className={ classnames(
+					this.props.className,
+					'woocommerce-admin-marketing-product-icon'
+				) }
+			>
+				<Icon icon={ iconComponent } />
 			</div>
 		);
 	}

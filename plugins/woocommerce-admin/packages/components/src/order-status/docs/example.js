@@ -1,12 +1,8 @@
 /**
- * Internal dependencies
- */
-import { OrderStatus } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { OrderStatus } from '@woocommerce/components';
 
 const orderStatusMap = {
 	processing: __( 'Processing Order' ),

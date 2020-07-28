@@ -28,7 +28,8 @@ class Docs extends Component {
 
 	getReadme() {
 		const { filePath } = this.props;
-		const readme = require( `../../packages/components/src/${ filePath }/README.md` ).default;
+		const readme = require( `../../packages/components/src/${ filePath }/README.md` )
+			.default;
 
 		if ( ! readme ) {
 			return;
