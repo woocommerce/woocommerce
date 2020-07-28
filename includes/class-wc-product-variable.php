@@ -299,18 +299,20 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = wc_get_product( $variation_id );
 
+			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
+			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+				continue;
+			}
+
 			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
 			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
 				continue;
 			}
 
-			if ( ! $render_variations ) {
-				$available_variations[] = $variation;
-				continue;
-			}
-
-			if ( $this->variation_is_available( $variation ) ) {
+			if ( $render_variations ) {
 				$available_variations[] = $return_array_of_data ? $this->get_available_variation( $variation ) : $variation;
+			} else {
+				$available_variations[] = $variation;
 			}
 		}
 
@@ -620,7 +622,7 @@ class WC_Product_Variable extends WC_Product {
 			}
 		);
 
-		$variations = $this->get_available_variations( false );
+		$variations = $this->get_available_variations( true, false );
 		foreach ( $variations as $variation ) {
 			if ( $this->variation_matches_filters( $variation, $attributes_with_terms ) ) {
 				return true;
