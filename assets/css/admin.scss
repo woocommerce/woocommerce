@@ -1412,6 +1412,10 @@ ul.wc_coupon_list_block {
 		.refunded-total {
 			color: $red;
 		}
+
+		.label-highlight {
+			font-weight: bold;
+		}
 	}
 
 	.refund-actions {
