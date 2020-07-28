@@ -2067,7 +2067,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
 		WC()->cart->empty_cart();
-		$tax_rate    = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '10.0000',
@@ -2112,7 +2112,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$product    = WC_Helper_Product::create_variation_product();
 		$variations = $product->get_available_variations();
-		$variation  = array_pop( $variations );
+		$variation  = current(
+			array_filter(
+				$variations,
+				function( $variation ) {
+					return 'DUMMY SKU VARIABLE HUGE RED 2' === $variation['sku'];
+				}
+			)
+		);
 
 		// Add variation with add_to_cart_action.
 		$_REQUEST['add-to-cart'] = $variation['variation_id'];
@@ -2137,7 +2144,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			$variation['variation_id'],
 			array(
 				'attribute_pa_size'   => 'huge',
-				'attribute_pa_colour'  => 'red',
+				'attribute_pa_colour' => 'red',
 				'attribute_pa_number' => '2',
 			)
 		);
@@ -2166,7 +2173,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_pop( $variations );
 
 		// Attempt adding variation with add_to_cart_action, specifying a different colour.
-		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
 		$_REQUEST['attribute_pa_colour'] = 'green';
 		WC_Form_Handler::add_to_cart_action( false );
 		$notices = WC()->session->get( 'wc_notices', array() );
@@ -2197,7 +2204,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_shift( $variations );
 
 		// Attempt adding variation with add_to_cart_action, specifying attributes not defined in the variation.
-		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
 		$_REQUEST['attribute_pa_colour'] = 'red';
 		$_REQUEST['attribute_pa_number'] = '1';
 		WC_Form_Handler::add_to_cart_action( false );
@@ -2231,7 +2238,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_shift( $variations );
 
 		// Attempt adding variation with add_to_cart_action, without specifying attribute_pa_colour.
-		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
 		$_REQUEST['attribute_pa_number'] = '0';
 		WC_Form_Handler::add_to_cart_action( false );
 		$notices = WC()->session->get( 'wc_notices', array() );

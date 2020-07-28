@@ -283,10 +283,11 @@ class WC_Product_Variable extends WC_Product {
 	 * Get an array of available variations for the current product.
 	 *
 	 * @param bool $render_variations Prepares a data array for each variant for output in the add to cart form. Pass `false` to only return the available variations as objects.
-	 * @return array
+	 * @param bool $return_array_of_data If true, return an array of data for the variation; if false, return a WC_Product_Variation object.
+	 *
+	 * @return array|WC_Product_Variation
 	 */
-	public function get_available_variations( $render_variations = true ) {
-
+	public function get_available_variations( $render_variations = true, $return_array_of_data = true ) {
 		$variation_ids        = $this->get_children();
 		$available_variations = array();
 
@@ -309,7 +310,7 @@ class WC_Product_Variable extends WC_Product {
 			}
 
 			if ( $render_variations ) {
-				$available_variations[] = $this->get_available_variation( $variation );
+				$available_variations[] = $return_array_of_data ? $this->get_available_variation( $variation ) : $variation;
 			} else {
 				$available_variations[] = $variation;
 			}
@@ -320,6 +321,27 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		return $available_variations;
+	}
+
+	/**
+	 * Check if a given variation is currently available.
+	 *
+	 * @param WC_Product_Variation $variation Variation to check.
+	 *
+	 * @return bool True if the variation is available, false otherwise.
+	 */
+	private function variation_is_available( WC_Product_Variation $variation ) {
+		// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
+		if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			return false;
+		}
+
+		// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+		if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -570,6 +592,95 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function has_options() {
 		return true;
+	}
+
+	/**
+	 * Returns whether or not the product is visible in the catalog (doesn't trigger filters).
+	 *
+	 * @return bool
+	 */
+	protected function is_visible_core() {
+		if ( ! $this->parent_is_visible_core() ) {
+			return false;
+		}
+
+		$query_filters = $this->get_layered_nav_chosen_attributes();
+		if ( empty( $query_filters ) ) {
+			return true;
+		}
+
+		/**
+		 * If there are attribute filters in the request, a variable product will be visible
+		 * if at least one of the available variations matches the filters.
+		 */
+
+		$attributes_with_terms = array();
+		array_walk(
+			$query_filters,
+			function( $value, $key ) use ( &$attributes_with_terms ) {
+				$attributes_with_terms[ $key ] = $value['terms'];
+			}
+		);
+
+		$variations = $this->get_available_variations( true, false );
+		foreach ( $variations as $variation ) {
+			if ( $this->variation_matches_filters( $variation, $attributes_with_terms ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if a given variation matches the active attribute filters.
+	 *
+	 * @param WC_Product_Variation $variation The variation to check.
+	 * @param array                $query_filters The active filters as an array of attribute_name => [term1, term2...].
+	 *
+	 * @return bool True if the variation matches the active attribute filters.
+	 */
+	private function variation_matches_filters( WC_Product_Variation $variation, array $query_filters ) {
+		// Get the variation attributes as an array of attribute_name => attribute_value.
+		// The array_filter will filter out attributes having a value of '', these correspond
+		// to "Any..." variations that don't participate in filtering.
+		$variation_attributes = array_filter( $variation->get_variation_attributes( false ) );
+
+		$variation_attribute_names_in_filters = array_intersect( array_keys( $query_filters ), array_keys( $variation_attributes ) );
+		if ( empty( $variation_attribute_names_in_filters ) ) {
+			// The variation doesn't have any attribute that participates in filtering so we consider it a match.
+			return true;
+		}
+
+		foreach ( $variation_attribute_names_in_filters as $attribute_name ) {
+			if ( ! in_array( $variation_attributes[ $attribute_name ], $query_filters[ $attribute_name ], true ) ) {
+				// Multiple filters interact with AND logic, so as soon as one of them
+				// doesn't match then the variation doesn't match.
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * What does is_visible_core in the parent class say?
+	 * This method exists to ease unit testing.
+	 *
+	 * @return bool
+	 */
+	protected function parent_is_visible_core() {
+		return parent::is_visible_core();
+	}
+
+	/**
+	 * Get an array of attributes and terms selected with the layered nav widget.
+	 * This method exists to ease unit testing.
+	 *
+	 * @return array
+	 */
+	protected function get_layered_nav_chosen_attributes() {
+		return WC()->query::get_layered_nav_chosen_attributes();
 	}
 
 	/*
