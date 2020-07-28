@@ -43,9 +43,10 @@ class WC_Admin_Pointers {
 	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
-		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore
+		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
+
 		// These pointers will chain - they will not be shown at once.
 		$pointers = array(
 			'pointers' => array(
