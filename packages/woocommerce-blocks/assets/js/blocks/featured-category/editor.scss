@@ -1,0 +1,13 @@
+.wc-block-featured-category {
+	.components-resizable-box__handle {
+		z-index: 10;
+	}
+
+	.components-placeholder__label svg {
+		fill: currentColor;
+		margin-right: 1ch;
+	}
+}
+.wc-block-featured-category__selection {
+	width: 100%;
+}

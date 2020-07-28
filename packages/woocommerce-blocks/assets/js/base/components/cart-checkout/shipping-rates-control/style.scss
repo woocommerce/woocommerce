@@ -1,0 +1,35 @@
+.wc-block-components-shipping-rates-control__package {
+	.wc-block-components-shipping-rates-control__package-title {
+		margin: 0;
+	}
+}
+
+.wc-block-components-shipping-rates-control__package-items {
+	@include font-size(small);
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-components-shipping-rates-control__package-item {
+	@include wrap-break-word();
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
+	content: ", ";
+	white-space: pre;
+}
+
+.components-notice.wc-block-components-shipping-rates-control__no-results-notice {
+	margin-bottom: 0;
+}
+
+.wc-block-components-shipping-rates-control {
+	.wc-blocks-components-panel__content {
+		padding-bottom: 0;
+	}
+}

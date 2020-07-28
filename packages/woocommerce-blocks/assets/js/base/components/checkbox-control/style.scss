@@ -1,0 +1,41 @@
+.wc-block-components-checkbox {
+	@include reset-typography();
+	display: block;
+	position: relative;
+
+	.wc-block-components-checkbox__input[type="checkbox"] {
+		appearance: none;
+		border: 1px solid currentColor;
+		height: 1rem;
+		margin: 0;
+		min-height: 16px;
+		min-width: 16px;
+		overflow: hidden;
+		position: static;
+		vertical-align: middle;
+		width: 1rem;
+
+		&:checked {
+			background: currentColor;
+			border-color: currentColor;
+
+			&::before {
+				color: #fff;
+				content: "\2713";
+				display: block;
+				height: calc(1rem - 2px);
+				min-height: 14px;
+				min-width: 14px;
+				margin: 0;
+				line-height: 100%;
+				text-align: center;
+				width: calc(1rem - 2px);
+			}
+		}
+	}
+
+	.wc-block-components-checkbox__input[type="checkbox"] + .wc-block-components-checkbox__label {
+		padding-left: $gap-smaller;
+		vertical-align: middle;
+	}
+}
