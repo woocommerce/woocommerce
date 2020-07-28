@@ -91,4 +91,43 @@ class WC_Tests_Product_Variation extends WC_Unit_Test_Case {
 		$variable_product = WC_Helper_Product::create_variation_product();
 		new WC_Product_Variation( $variable_product->get_id() );
 	}
+
+	/**
+	 * @testdox Test that get_variation_attributes returns the appropriate values.
+	 *
+	 * @param bool   $with_prefix Parameter for get_variation_attributes.
+	 * @param string $expected_prefix Expected prefix on the returned attribute names.
+	 *
+	 * @testWith [true, "attribute_"]
+	 *           [false, ""]
+	 */
+	public function test_get_variation_attributes( $with_prefix, $expected_prefix ) {
+		$product = WC_Helper_Product::create_variation_product();
+		$sut     = wc_get_product( $product->get_children()[2] );
+
+		$expected = array(
+			$expected_prefix . 'pa_size'   => 'huge',
+			$expected_prefix . 'pa_colour' => 'red',
+			$expected_prefix . 'pa_number' => '0',
+		);
+
+		$actual = $sut->get_variation_attributes( $with_prefix );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox Test that the delete method removes the attribute terms for the variation.
+	 */
+	public function test_delete_removes_attribute_terms() {
+		$product = WC_Helper_Product::create_variation_product();
+		$sut     = wc_get_product( $product->get_children()[2] );
+		$id      = $sut->get_id();
+
+		$sut->delete( true );
+
+		$attribute_names           = wc_get_attribute_taxonomy_names();
+		$variation_attribute_terms = wp_get_post_terms( $id, $attribute_names );
+
+		$this->assertEmpty( $variation_attribute_terms );
+	}
 }
