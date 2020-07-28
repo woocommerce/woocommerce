@@ -55,5 +55,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Reset.
 		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
 		$product->delete( true );
+		WC()->cart->get_customer()->set_shipping_country( 'GB' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 }
