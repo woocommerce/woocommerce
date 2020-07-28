@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="PSR2-PHP7">
+    <description>PSR2 ruleset ignoring only grouped use statements.</description>
+     <rule ref="PSR2">
+         <exclude name="PSR2.Namespaces.UseDeclaration"/>
+     </rule>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*.js</exclude-pattern>
+    <exclude-pattern>*.css</exclude-pattern>
+</ruleset>
