@@ -191,6 +191,11 @@ class WC_Helper_Updater {
 		$locales = apply_filters( 'plugins_update_check_locales', $locales );
 		$locales = array_unique( $locales );
 
+		// No locales, means that the respone will be empty.
+		if ( empty( $locales ) ) {
+			return array();
+		}
+
 		// Scan local plugins which may or may not have a subscription.
 		$plugins                 = WC_Helper::get_local_woo_plugins();
 		$active_woo_plugins      = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
