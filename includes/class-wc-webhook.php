@@ -50,6 +50,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		'user_id'          => 0,
 		'api_version'      => 3,
 		'pending_delivery' => false,
+		'retry_enabled'    => false,
 	);
 
 	/**
@@ -349,6 +350,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$duration = round( microtime( true ) - $start_time, 5 );
 
 		$this->log_delivery( $delivery_id, $http_args, $response, $duration );
+		$this->retry( $arg );
 
 		do_action( 'woocommerce_webhook_delivery', $http_args, $response, $duration, $arg, $this->get_id() );
 	}
@@ -803,6 +805,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		return $this->get_prop( 'pending_delivery', $context );
 	}
 
+	/**
+	 * Get retry_enabled value.
+	 *
+	 * @since  4.4.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return bool
+	 */
+	public function get_retry_enabled( $context = 'view' ) {
+		return $this->get_prop( 'retry_enabled', $context );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -940,6 +954,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$this->set_prop( 'failure_count', intval( $failure_count ) );
 	}
 
+	/**
+	 * Set retry_enabled.
+	 *
+	 * @since 4.4.0
+	 * @param bool $retry_enabled Set true if retry is enabled.
+	 */
+	public function set_retry_enabled( $retry_enabled ) {
+		$this->set_prop( 'retry_enabled', (bool) $retry_enabled );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Non-CRUD Getters
@@ -1067,5 +1091,43 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$statuses = wc_get_webhook_statuses();
 
 		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+	}
+
+	/**
+	 * Reschedule delivery.
+	 *
+	 * @since 4.4.0
+	 * @return void
+	 */
+	public function retry( $arg ) {
+		$retry_disabled = ! apply_filter( 'woocommerce_webhook_retry_enabled', $this->get_retry_enabled(), $this->get_id() );
+		$webhook_failed = $this->get_failure_count() > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 );
+		if ( $retry_disabled || $webhook_failed ) {
+			return;
+		}
+
+		$response_code = is_wp_error( $response )
+			? $response->get_error_code()
+			: wp_remote_retrieve_response_code( $response );
+
+		// Success is 2xx, 301 and 302
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+			return;
+		}
+
+		// Initial exponential backoff
+		$backoff = ( 2 ** $failures ) * 100;
+		$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $this->get_failure_count() );
+
+		// Requeue the webhook
+		$queue_args = array(
+			'webhook_id' => $this->get_id(),
+			'arg'        => $arg,
+		);
+		WC()->queue()->schedule_single( time() + $backoff,
+			'woocommerce_deliver_webhook_async',
+			$queue_args,
+			'woocommerce-webhooks'
+		);
 	}
 }
