@@ -1,14 +1,14 @@
 <?php
 /**
- * Unit tests for the WC_Form_Cart_Test class.
+ * Unit tests for the WC_Cart_Test class.
  *
  * @package WooCommerce\Tests\Cart.
  */
 
 /**
- * Class WC_Form_Cart_Test
+ * Class WC_Cart_Test
  */
-class WC_Form_Cart_Test extends \WC_Unit_Test_Case {
+class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * tearDown.
