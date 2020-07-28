@@ -213,18 +213,22 @@ if ( wc_tax_enabled() ) {
 
 		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
-				<td class="label"><?php esc_html_e( 'Paid By Customer', 'woocommerce' ); ?>:</td>
+				<td class="<?php echo $order->get_total_refunded() ? 'label' : 'label label-highlight'; ?>"><?php esc_html_e( 'Paid', 'woocommerce' ); ?>: <br /></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php
-					$total_paid_by_customer = $order->get_total();
-					if ( $order->get_total_refunded() ) {
-						$total_paid_by_customer -= $order->get_total_refunded();
-					}
-
-					echo wc_price( $total_paid_by_customer, array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
+					<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="description">
+					<?php
+						/* translators: 1: payment date. 2: payment method */
+						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
+					?>
+					</span>
+				</td>
+				<td colspan="2"></td>
 			</tr>
 		</table>
 
@@ -243,7 +247,7 @@ if ( wc_tax_enabled() ) {
 			<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
 			<tr>
-				<td class="label"><?php esc_html_e( 'Net Total', 'woocommerce' ); ?>:</td>
+				<td class="label label-highlight"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total">
 				<?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
