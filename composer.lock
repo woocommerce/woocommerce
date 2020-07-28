@@ -558,12 +558,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "8c1818854b0188ae636d2a4d065865196e26e002"
+                "reference": "d56ac35bbb62bda2c981443932e7f90b0f6dbe99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/8c1818854b0188ae636d2a4d065865196e26e002",
-                "reference": "8c1818854b0188ae636d2a4d065865196e26e002",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/d56ac35bbb62bda2c981443932e7f90b0f6dbe99",
+                "reference": "d56ac35bbb62bda2c981443932e7f90b0f6dbe99",
                 "shasum": ""
             },
             "require": {
