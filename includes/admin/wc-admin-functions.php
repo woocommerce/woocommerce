@@ -474,3 +474,21 @@ function wc_render_invalid_variation_notice( $product_object ) {
 		<?php
 	}
 }
+
+/**
+ * Get current admin page or WooCommerce settings page.
+ *
+ * @internal
+ * @since 4.4.0
+ * @return string
+ */
+function wc_get_current_admin_page() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	$uri = str_replace( '/wp-admin', '', $uri );
+
+	if ( ! $uri ) {
+		return admin_url( 'admin.php?page=wc-settings' );
+	}
+
+	return remove_query_arg( array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce' ), admin_url( $uri ) );
+}
