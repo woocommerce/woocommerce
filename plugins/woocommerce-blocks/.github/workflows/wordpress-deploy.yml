@@ -6,7 +6,13 @@ jobs:
   tag:
     name: New Release
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+        if: always()
       - name: Checkout code
         uses: actions/checkout@v2
       - name: WordPress Plugin Deploy
@@ -27,3 +33,8 @@ jobs:
           asset_path: ${{github.workspace}}/woo-gutenberg-products-block.zip
           asset_name: woo-gutenberg-products-block.zip
           asset_content_type: application/zip
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+        if: always()
