@@ -2,7 +2,7 @@
 Contributors: automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
 Requires at least: 5.3.0
-Tested up to: 5.4.1
+Tested up to: 5.4.2
 Requires PHP: 5.6.20
 Stable tag: 1.4.0
 License: GPLv3
@@ -70,6 +70,12 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.3.2 2020-07-29 =
+- Fix: bug preventing saving user preferences on WP 5.3. #4869
+
+= 1.3.1 2020-07-20 =
+- Fix: PHP Fatal errors when columns are missing from the Notes table. #4831
 
 = 1.3.0 2020-07-08 =
 - Enhancement: Add Jetpack stats to performance indicatorts / homepage #4291
