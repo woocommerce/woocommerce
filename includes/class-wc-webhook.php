@@ -318,7 +318,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param WP_Error|HTTP_Response $response HTTP Response.
 	 * @return bool
 	 */
-	public function should_retry( $arg, $response ) {
+	public function should_retry( $arg = null, $response = null ) {
 		$webhook_retry_enabled = $this->get_retry_enabled();
 
 		// If we reached the limit of failures we won't reschedule.
@@ -610,6 +610,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @since 2.2.0
 	 */
 	private function failed_delivery() {
+		if ( $this->should_retry() ) {
+			// Retry.
+			add_action( 'woocommerce_webhook_delivery', array( $this, 'retry_delivery' ), 10, 5 );
+			return;
+		}
+
+		// Reset retry count and increment failure count.
+		$this->set_retry_count( 0 );
+
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
@@ -619,9 +628,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		} else {
 			$this->set_failure_count( ++$failures );
 		}
-
-		// Retry.
-		add_action( 'woocommerce_webhook_delivery', array( $this, 'retry_delivery' ), 10, 5 );
 
 		$this->save();
 	}
