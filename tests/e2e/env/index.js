@@ -7,6 +7,7 @@ const {
 	useE2EJestConfig,
 	useE2EJestPuppeteerConfig,
 } = require( './config' );
+const { getAppRoot, getTestConfig } = require( './utils' );
 const webpackAlias = require( './webpack-alias' );
 
 module.exports = {
@@ -16,5 +17,7 @@ module.exports = {
 	jestPuppeteerConfig,
 	useE2EJestConfig,
 	useE2EJestPuppeteerConfig,
+	getAppRoot,
+	getTestConfig,
 	webpackAlias,
 };
