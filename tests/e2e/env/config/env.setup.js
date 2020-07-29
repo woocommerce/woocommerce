@@ -1,4 +1,4 @@
-const getTestConfig = require( '../utils/test-config' );
+const { getTestConfig } = require( '../utils' );
 const testConfig = getTestConfig();
 
 global.process.env = {

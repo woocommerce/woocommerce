@@ -1,8 +1,8 @@
 const path = require( 'path' );
-const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseE2Econfig,
-	// Specify the path of your project's E2E tests here.
+const jestConfig = useE2EJestConfig( {
 	roots: [ path.resolve( __dirname, '../specs' ) ],
-};
+} );
+
+module.exports = jestConfig;
