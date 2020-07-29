@@ -95,6 +95,7 @@ const entries = {
 			],
 		} ),
 
+		'reviews-style': './assets/js/blocks/reviews/editor.scss',
 		...getBlockEntries( '**/*.scss' ),
 	},
 	core: {

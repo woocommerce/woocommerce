@@ -8,7 +8,6 @@ import { Icon, review } from '@woocommerce/icons';
 /**
  * Internal dependencies
  */
-import '../editor.scss';
 import Editor from './edit';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
