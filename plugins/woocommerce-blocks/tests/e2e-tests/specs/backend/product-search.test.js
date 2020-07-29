@@ -7,7 +7,10 @@ import {
 	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
 import { clearAndFillInput } from '@woocommerce/e2e-tests/utils';
-import { visitBlockPage } from '@woocommerce/blocks-test-utils';
+import {
+	findToggleWithLabel,
+	visitBlockPage,
+} from '@woocommerce/blocks-test-utils';
 
 const block = {
 	name: 'Product Search',
@@ -29,11 +32,12 @@ describe( `${ block.name } Block`, () => {
 		await openDocumentSettingsSidebar();
 		// we focus on the block
 		await page.click( block.class );
-		await page.click( '.components-form-toggle__input' );
+		const toggle = await findToggleWithLabel( 'Show search field label' );
+		await toggle.click();
 		await expect( page ).not.toMatchElement(
 			`${ block.class } .wc-block-product-search__label`
 		);
-		await page.click( '.components-form-toggle__input' );
+		await toggle.click();
 		await expect( page ).toMatchElement(
 			`${ block.class } .wc-block-product-search__label`
 		);
