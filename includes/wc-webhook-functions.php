@@ -207,11 +207,11 @@ function wc_get_webhook_rest_api_versions() {
  * Add retries on woo webhook fails (from woocommerce_webhook_deliver action)
  * see \WC_Webhook::deliver() for the arguments.
  *
- * @param array $http_args HTTP Request arguments (e.g. method, timeout, redirection, etc.)
- * @param WP_Error|HTTP_Response $response
- * @param float $duration The length of time for the request to complete
- * @param int $arg The CPT id
- * @param int $webhook_id
+ * @param array                  $http_args HTTP Request arguments (e.g. method, timeout, redirection, etc.).
+ * @param WP_Error|HTTP_Response $response HTTP Response.
+ * @param float                  $duration The length of time for the request to complete.
+ * @param int                    $arg The CPT id.
+ * @param int                    $webhook_id The Webhook ID.
  */
 function wc_requeue_failed_webhook_delivery(
 	$http_args = null,
@@ -225,16 +225,17 @@ function wc_requeue_failed_webhook_delivery(
 		return;
 	}
 
-	// Determine exponential backoff (2^n * 100)
+	// Determine exponential backoff (2^n * 100).
 	$backoff = ( 2 ** $webhook->get_failure_count() ) * 100;
 	$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $webhook->get_failure_count() );
 
-	// Requeue the webhook
+	// Requeue the webhook.
 	$queue_args = array(
 		'webhook_id' => $webhook_id,
 		'arg'        => $arg,
 	);
-	WC()->queue()->schedule_single( time() + $backoff,
+	WC()->queue()->schedule_single(
+		time() + $backoff,
 		'woocommerce_deliver_webhook_async',
 		$queue_args,
 		'woocommerce-webhooks'
