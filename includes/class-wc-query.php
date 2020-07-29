@@ -377,6 +377,7 @@ class WC_Query {
 	 *
 	 * @since 4.4.0
 	 * @param int $count Original posts count, as supplied by the found_posts filter.
+	 * @param WP_Query $query The current WP_Query object.
 	 *
 	 * @return int Adjusted posts count.
 	 */
