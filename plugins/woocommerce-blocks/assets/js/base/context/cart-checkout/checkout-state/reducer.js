@@ -75,7 +75,7 @@ export const reducer = (
 			break;
 		case SET_IDLE:
 			newState =
-				state.state !== IDLE
+				state.status !== IDLE
 					? {
 							...state,
 							status: IDLE,

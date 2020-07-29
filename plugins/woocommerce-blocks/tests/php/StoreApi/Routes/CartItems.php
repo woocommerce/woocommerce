@@ -42,7 +42,7 @@ class CartItems extends TestCase {
 		$this->products[0]->save();
 
 		// Create a test variable product.
-		$this->products[1] = ProductHelper::create_variation_product( false );
+		$this->products[1] = ProductHelper::create_variation_product();
 		$this->products[1]->set_weight( 10 );
 		$this->products[1]->set_regular_price( 10 );
 		$this->products[1]->save();
