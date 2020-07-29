@@ -303,7 +303,7 @@ final class WooCommerce {
 	 * Load REST API.
 	 */
 	public function load_rest_api() {
-		\Automattic\WooCommerce\RestApi\Package::init();
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
 	/**

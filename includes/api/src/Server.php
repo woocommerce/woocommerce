@@ -22,7 +22,7 @@ class Server {
 	 *
 	 * @var array
 	 */
-	protected $controllers = [];
+	protected $controllers = array();
 
 	/**
 	 * Hook into WordPress ready to init the REST API as needed.
@@ -51,11 +51,11 @@ class Server {
 	protected function get_rest_namespaces() {
 		return apply_filters(
 			'woocommerce_rest_api_get_rest_namespaces',
-			[
+			array(
 				'wc/v1' => $this->get_v1_controllers(),
 				'wc/v2' => $this->get_v2_controllers(),
 				'wc/v3' => $this->get_v3_controllers(),
-			]
+			)
 		);
 	}
 
@@ -65,7 +65,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v1_controllers() {
-		return [
+		return array(
 			'coupons'                  => 'WC_REST_Coupons_V1_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_V1_Controller',
 			'customers'                => 'WC_REST_Customers_V1_Controller',
@@ -86,7 +86,7 @@ class Server {
 			'taxes'                    => 'WC_REST_Taxes_V1_Controller',
 			'webhooks'                 => 'WC_REST_Webhooks_V1_Controller',
 			'webhook-deliveries'       => 'WC_REST_Webhook_Deliveries_V1_Controller',
-		];
+		);
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v2_controllers() {
-		return [
+		return array(
 			'coupons'                  => 'WC_REST_Coupons_V2_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_V2_Controller',
 			'customers'                => 'WC_REST_Customers_V2_Controller',
@@ -127,7 +127,7 @@ class Server {
 			'system-status-tools'      => 'WC_REST_System_Status_Tools_V2_Controller',
 			'shipping-methods'         => 'WC_REST_Shipping_Methods_V2_Controller',
 			'payment-gateways'         => 'WC_REST_Payment_Gateways_V2_Controller',
-		];
+		);
 	}
 
 	/**
@@ -136,7 +136,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
-		return [
+		return array(
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
@@ -176,6 +176,15 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
-		];
+		);
+	}
+
+	/**
+	 * Return the path to the package.
+	 *
+	 * @return string
+	 */
+	public static function get_path() {
+		return dirname( __DIR__ );
 	}
 }
