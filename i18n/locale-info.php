@@ -226,6 +226,15 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
+	'UG' => array(
+		'currency_code'  => 'UGX',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
 	'US' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
