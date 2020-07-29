@@ -1,8 +1,19 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
+const getAppRoot = require( './app-root' );
+
+// Copy local test configuration file if it exists.
+const appPath = getAppRoot();
+const localTestConfigFile = path.resolve( appPath, 'tests/e2e/config/default.json' );
+const testConfigFile = path.resolve( __dirname, '../config/default.json' );
+if ( fs.existsSync( localTestConfigFile ) ) {
+	fs.copyFileSync(
+		localTestConfigFile,
+		testConfigFile
+	);
+}
 
 const getTestConfig = () => {
-	const testConfigFile = path.resolve( __dirname, '../config/default.json' );
 	const rawTestConfig = fs.readFileSync( testConfigFile );
 
 	let testConfig = JSON.parse(rawTestConfig);

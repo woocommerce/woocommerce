@@ -49,15 +49,6 @@ if ( appPath ) {
 }
 
 // Load test configuration file into an object.
-const localTestConfigFile = path.resolve( appPath, 'tests/e2e/config/default.json' );
-const testConfigFile = path.resolve( __dirname, '../config/default.json' );
-// Copy local test configuration file if it exists.
-if ( fs.existsSync( localTestConfigFile ) ) {
-	fs.copyFileSync(
-		localTestConfigFile,
-		testConfigFile
-	);
-}
 const testConfig = getTestConfig();
 
 // Set some environment variables
