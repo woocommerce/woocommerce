@@ -7,24 +7,25 @@
 }
 
 .wc-blocks-components-panel__button {
+	@include reset-box();
+	height: auto;
+	line-height: 1;
+	margin-bottom: em(6px);
+	margin-top: em(6px);
+	padding-bottom: em($gap-small - 6px);
+	padding-right: #{24px + $gap-smaller};
+	padding-top: em($gap-small - 6px);
+	position: relative;
+	text-align: left;
+	width: 100%;
+
 	&,
 	&:hover,
 	&:focus,
 	&:active {
-		@include reset-box();
 		@include reset-typography();
 		background: transparent;
 		box-shadow: none;
-		height: auto;
-		line-height: 1;
-		margin-bottom: em(6px);
-		margin-top: em(6px);
-		padding-bottom: em($gap-small - 6px);
-		padding-right: #{24px + $gap-smaller};
-		padding-top: em($gap-small - 6px);
-		position: relative;
-		text-align: left;
-		width: 100%;
 	}
 
 	> .wc-blocks-components-panel__button-icon {
