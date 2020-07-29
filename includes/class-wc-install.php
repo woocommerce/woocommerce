@@ -964,6 +964,8 @@ CREATE TABLE {$wpdb->prefix}wc_webhooks (
   api_version smallint(4) NOT NULL,
   failure_count smallint(10) NOT NULL DEFAULT '0',
   pending_delivery tinyint(1) NOT NULL DEFAULT '0',
+  retry_enabled tinyint(1) NOT NULL DEFAULT '0',
+  retry_count smallint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY  (webhook_id),
   KEY user_id (user_id)
 ) $collate;

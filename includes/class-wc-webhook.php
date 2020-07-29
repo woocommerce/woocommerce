@@ -51,6 +51,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		'api_version'      => 3,
 		'pending_delivery' => false,
 		'retry_enabled'    => false,
+		'retry_count'      => 0,
 	);
 
 	/**
@@ -308,27 +309,22 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Make retry enabled determination.
+	 * Should we attempt a retry on this webhook?
+	 *
+	 * Passing in the item id and the http response to allow hooks the option of bypassing this retry.
 	 *
 	 * @since 4.4.0
 	 * @param int                    $arg Resource ID.
 	 * @param WP_Error|HTTP_Response $response HTTP Response.
 	 * @return bool
 	 */
-	public function is_retryable( $arg, $response ) {
+	public function should_retry( $arg, $response ) {
 		$webhook_retry_enabled = $this->get_retry_enabled();
 
-		// If we reached the limit of failures we won't reschedule. (Why doesn't status update, bug?).
-		$failed = ( $this->get_failure_count() > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) );
+		// If we reached the limit of failures we won't reschedule.
+		$failed = ( $this->get_retry_count() > apply_filters( 'woocommerce_max_webhook_retry_failures', 5 ) );
 
-		$response_code = is_wp_error( $response )
-			? $response->get_error_code()
-			: wp_remote_retrieve_response_code( $response );
-
-		// Success is 2xx, 301 and 302 (from class-wc-webhook.php).
-		$response_failed = ( intval( $response_code ) < 200 || intval( $response_code ) >= 303 );
-
-		$is_retryable = $webhook_retry_enabled && ! $failed && ! $response_failed;
+		$is_retryable = $webhook_retry_enabled && ! $failed;
 		return apply_filters( 'woocommerce_webhook_retry_enabled', $is_retryable, $this, $arg, $response );
 	}
 
@@ -599,6 +595,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// Check for a success, which is a 2xx, 301 or 302 Response Code.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
+			$this->set_retry_count( 0 );
 			$this->save();
 		} else {
 			$this->failed_delivery();
@@ -623,7 +620,54 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$this->set_failure_count( ++$failures );
 		}
 
+		// Retry.
+		add_action( 'woocommerce_webhook_delivery', array( $this, 'retry_delivery' ), 10, 5 );
+
 		$this->save();
+	}
+
+	/**
+	 * Add retries on failures (called from woocommerce_webhook_deliver action -- set in failed_delivery)
+	 * see deliver() for the arguments.
+	 *
+	 * @param array                  $http_args HTTP Request arguments (e.g. method, timeout, redirection, etc.).
+	 * @param WP_Error|HTTP_Response $response HTTP Response.
+	 * @param float                  $duration The length of time for the request to complete.
+	 * @param int                    $arg The CPT id.
+	 * @param int                    $webhook_id The Webhook ID.
+	 */
+	public function retry_delivery(
+		$http_args = null,
+		$response = null,
+		$duration = null,
+		$arg = null,
+		$webhook_id = null
+	) {
+		if ( ! $this->should_retry( $arg, $response ) ) {
+			return;
+		}
+
+		// Update the retry count.
+		$retry_count = $this->get_retry_count() + 1;
+		$this->set_retry_count( $retry_count );
+		$this->save();
+
+		// Default backoff algorithm is exponential (2^n * 100).  The backoff value will be added to time() to
+		// schedule when the webhook should be retried (in seconds).
+		$backoff = ( 2 ** $retry_count ) * 100;
+		$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $retry_count );
+
+		// Requeue the webhook.
+		$queue_args = array(
+			'webhook_id' => $webhook_id,
+			'arg'        => $arg,
+		);
+		WC()->queue()->schedule_single(
+			time() + $backoff,
+			'woocommerce_deliver_webhook_async',
+			$queue_args,
+			'woocommerce-webhooks'
+		);
 	}
 
 	/**
@@ -841,6 +885,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		return $this->get_prop( 'retry_enabled', $context );
 	}
 
+	/**
+	 * Get retry_count value.
+	 *
+	 * @since  4.4.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return int
+	 */
+	public function get_retry_count( $context = 'view' ) {
+		return $this->get_prop( 'retry_count', $context );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -986,6 +1042,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	public function set_retry_enabled( $retry_enabled ) {
 		$this->set_prop( 'retry_enabled', (bool) $retry_enabled );
+	}
+
+	/**
+	 * Set retry_count.
+	 *
+	 * @since 4.4.0
+	 * @param int $retry_count Current retry count.
+	 */
+	public function set_retry_count( $retry_count ) {
+		$this->set_prop( 'retry_count', (bool) $retry_count );
 	}
 
 	/*

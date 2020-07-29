@@ -51,6 +51,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'api_version'      => $this->get_api_version_number( $webhook->get_api_version( 'edit' ) ),
 			'failure_count'    => $webhook->get_failure_count( 'edit' ),
 			'pending_delivery' => $webhook->get_pending_delivery( 'edit' ),
+			'retry_enabled'    => $webhook->get_retry_enabled( 'edit' ),
+			'retry_count'      => $webhook->get_retry_count( 'edit' ),
 		);
 
 		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data ); // WPCS: DB call ok.
@@ -77,7 +79,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$data = wp_cache_get( $webhook->get_id(), 'webhooks' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A ); // WPCS: cache ok, DB call ok.
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery, retry_enabled, retry_count FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A ); // WPCS: cache ok, DB call ok.
 
 			wp_cache_add( $webhook->get_id(), $data, 'webhooks' );
 		}
@@ -97,6 +99,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 					'api_version'      => $data['api_version'],
 					'failure_count'    => $data['failure_count'],
 					'pending_delivery' => $data['pending_delivery'],
+					'retry_enabled'    => $data['retry_enabled'],
+					'retry_count'      => $data['retry_count'],
 				)
 			);
 			$webhook->set_object_read( true );
@@ -140,6 +144,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'api_version'       => $this->get_api_version_number( $webhook->get_api_version( 'edit' ) ),
 			'failure_count'     => $webhook->get_failure_count( 'edit' ),
 			'pending_delivery'  => $webhook->get_pending_delivery( 'edit' ),
+			'retry_enabled'     => $webhook->get_retry_enabled( 'edit' ),
+			'retry_count'       => $webhook->get_retry_count( 'edit' ),
 		);
 
 		$wpdb->update(
