@@ -135,6 +135,15 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
+	'KE' => array(
+		'currency_code'  => 'KES',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
 	'MD' => array(
 		'currency_code'  => 'MDL',
 		'currency_pos'   => 'right_space',
