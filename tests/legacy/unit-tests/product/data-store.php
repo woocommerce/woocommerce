@@ -216,29 +216,38 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = new WC_Product_Variable( $product->get_id() );
 
-		$this->assertEquals( 4, count( $product->get_children() ) );
+		$this->assertEquals( 6, count( $product->get_children() ) );
 
 		$expected_prices['price'][ $children[0] ] = 8.00;
 		$expected_prices['price'][ $children[1] ] = 15.00;
 		$expected_prices['price'][ $children[2] ] = 16.00;
 		$expected_prices['price'][ $children[3] ] = 17.00;
+		$expected_prices['price'][ $children[4] ] = 18.00;
+		$expected_prices['price'][ $children[5] ] = 19.00;
 
 		$expected_prices['regular_price'][ $children[0] ] = 10.00;
 		$expected_prices['regular_price'][ $children[1] ] = 15.00;
 		$expected_prices['regular_price'][ $children[2] ] = 16.00;
 		$expected_prices['regular_price'][ $children[3] ] = 17.00;
+		$expected_prices['regular_price'][ $children[4] ] = 18.00;
+		$expected_prices['regular_price'][ $children[5] ] = 19.00;
 
 		$expected_prices['sale_price'][ $children[0] ] = 8.00;
 		$expected_prices['sale_price'][ $children[1] ] = 15.00;
 		$expected_prices['sale_price'][ $children[2] ] = 16.00;
 		$expected_prices['sale_price'][ $children[3] ] = 17.00;
+		$expected_prices['sale_price'][ $children[4] ] = 18.00;
+		$expected_prices['sale_price'][ $children[5] ] = 19.00;
 
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
 
 		$expected_attributes = array(
 			'pa_size'   => array( 'small', 'large', 'huge' ),
-			'pa_colour' => array( 'red' ),
-			'pa_number' => array( '0', '2' ),
+			'pa_colour' => array(
+				0 => 'red',
+				2 => 'blue',
+			),
+			'pa_number' => array( '0', '1', '2' ),
 		);
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 	}

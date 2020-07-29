@@ -289,7 +289,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Get sortcode label in the $locale array and use appropriate one.
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort code', 'woocommerce' );
 
-		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
+		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details, $order_id );
 
 		if ( ! empty( $bacs_accounts ) ) {
 			$account_html = '';

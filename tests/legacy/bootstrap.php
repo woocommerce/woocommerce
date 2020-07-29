@@ -6,11 +6,12 @@
  * @package WooCommerce Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-use Composer\Autoload\ClassLoader;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -35,7 +36,11 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-		$this->tests_dir = dirname( __FILE__ );
+		$this->tests_dir  = dirname( __FILE__ );
+		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+
+		$this->register_autoloader_for_testing_tools();
+
 		$this->initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
@@ -64,6 +69,32 @@ class WC_Unit_Tests_Bootstrap {
 
 		// load WC testing framework.
 		$this->includes();
+
+		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
+		$this->initialize_dependency_injection();
+	}
+
+	/**
+	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
+	 */
+	protected static function register_autoloader_for_testing_tools() {
+		return spl_autoload_register(
+			function ( $class ) {
+				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
+				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$len      = strlen( $prefix );
+				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+					// no, move to the next registered autoloader.
+					return;
+				}
+				$relative_class = substr( $class, $len );
+				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				if ( ! file_exists( $file ) ) {
+					throw new \Exception( 'Autoloader for unit tests: file not found: ' . $file );
+				}
+				require $file;
+			}
+		);
 	}
 
 	/**
@@ -72,15 +103,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
 	private function initialize_code_hacker() {
-		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
-
-		$hacking_base = $this->plugin_dir . '/tests/Tools/CodeHacking';
-		require_once $hacking_base . '/CodeHacker.php';
-		require_once $hacking_base . '/Hacks/CodeHack.php';
-		require_once $hacking_base . '/Hacks/StaticMockerHack.php';
-		require_once $hacking_base . '/Hacks/FunctionsMockerHack.php';
-		require_once $hacking_base . '/Hacks/BypassFinalsHack.php';
-
 		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
@@ -97,6 +119,35 @@ class WC_Unit_Tests_Bootstrap {
 		CodeHacker::add_hack( new BypassFinalsHack() );
 
 		CodeHacker::enable();
+	}
+
+	/**
+	 * Re-initialize the dependency injection engine.
+	 *
+	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
+	 * to replace the registered read-only container with a fully configurable one for testing.
+	 * To this end we hack a bit and use reflection to grab the underlying container that the read-only one stores
+	 * in a private property.
+	 *
+	 * Additionally, we replace the legacy/function proxies with mockable versions to easily replace anything
+	 * in tests as appropriate.
+	 *
+	 * @throws \Exception The Container class doesn't have a 'container' property.
+	 */
+	private function initialize_dependency_injection() {
+		try {
+			$inner_container_property = new \ReflectionProperty( \Automattic\WooCommerce\Container::class, 'container' );
+		} catch ( ReflectionException $ex ) {
+			throw new \Exception( "Error when trying to get the private 'container' property from the " . \Automattic\WooCommerce\Container::class . ' class using reflection during unit testing bootstrap, has the property been removed or renamed?' );
+		}
+
+		$inner_container_property->setAccessible( true );
+		$inner_container = $inner_container_property->getValue( wc_get_container() );
+
+		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
+		$inner_container->reset_all_resolved();
+
+		$GLOBALS['wc_container'] = $inner_container;
 	}
 
 	/**

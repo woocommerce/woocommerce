@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 
 /**
@@ -133,7 +134,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		throw new Exception( $message, $code );
 	}
 
-
 	/**
 	 * Copies a file, temporarily disabling the code hacker.
 	 * Use this instead of "copy" in tests for compatibility with the code hacker.
@@ -148,6 +148,102 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		self::disable_code_hacker();
 		$result = copy( $source, $dest );
 		self::reenable_code_hacker();
+
 		return $result;
+	}
+
+	/**
+	 * Create a new user in a given role and set it as the current user.
+	 *
+	 * @param string $role The role for the user to be created.
+	 * @return int The id of the user created.
+	 */
+	public function login_as_role( $role ) {
+		$user_id = $this->factory->user->create( array( 'role' => $role ) );
+		wp_set_current_user( $user_id );
+		return $user_id;
+	}
+
+	/**
+	 * Create a new administrator user and set it as the current user.
+	 *
+	 * @return int The id of the user created.
+	 */
+	public function login_as_administrator() {
+		return $this->login_as_role( 'administrator' );
+  }
+
+  /**
+	 * Get an instance of a class that has been registered in the dependency injection container.
+	 * To get an instance of a legacy class (such as the ones in the 'íncludes' directory) use
+	 * 'get_legacy_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_instance_of( string $class_name ) {
+		return wc_get_container()->get( $class_name );
+	}
+
+	/**
+	 * Get an instance of  legacy class (such as the ones in the 'íncludes' directory).
+	 * To get an instance of a class registered in the dependency injection container use 'get_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_legacy_instance_of( string $class_name ) {
+		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name );
+	}
+
+	/**
+	 * Reset all the cached resolutions in the dependency injection container, so any further "get"
+	 * for shared definitions will generate the instance again.
+	 * This may be needed when registering mocks for already resolved shared classes.
+	 */
+	public function reset_container_resolutions() {
+		wc_get_container()->reset_all_resolved();
+	}
+
+	/**
+	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
+	 */
+	public function reset_legacy_proxy_mocks() {
+		wc_get_container()->get( LegacyProxy::class )->reset();
+	}
+
+	/**
+	 * Register the function mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are function names and values are function replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_function_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks( $mocks );
+	}
+
+	/**
+	 * Register the static method mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are associative arrays, in which keys are method names and values are method replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_static_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_static_mocks( $mocks );
+	}
+
+	/**
+	 * Register the class mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are either factory callbacks (optionally with a $class_name argument) or objects.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_class_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
 	}
 }

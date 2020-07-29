@@ -1,5 +1,8 @@
 # WooCommerce Tests
 
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+
+
 ## Table of contents
 
 - [WooCommerce Unit Tests](#woocommerce-unit-tests)
@@ -10,9 +13,8 @@
   - [Code Coverage](#code-coverage)
 - [WooCommerce E2E Tests](#woocommerce-e2e-tests)
 
-## WooCommerce Unit Tests
 
-### Initial Setup
+## Initial Setup
 
 From the WooCommerce root directory (if you are using VVV you might need to `vagrant ssh` first), run the following:
 
@@ -36,7 +38,8 @@ Example:
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
 
-### Running Tests
+
+## Running Tests
 
 Change to the plugin root directory and type:
 
@@ -52,10 +55,26 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
     $ vendor/bin/phpunit --coverage-text
 
-### Writing Tests
 
-* There are two different PHPUnit directories, `tests/legacy` and `tests/php`. The `tests/legacy` directory contains all of the tests for code in the `includes` directory, and the `tests/php` directory is a PSR-4 namespaced directory for tests of code in the `src` directory.
-* Each test file should roughly correspond to an associated source file, e.g. the `formatting/functions.php` test file covers code in the `wc-formatting-functions.php` file
+## Writing Tests
+
+There are three different unit test directories:
+
+- `tests/legacy/unit-tests` contains tests for code in the `includes` directory. No new tests should be added here, ever; existing test classes shouldn't get new tests either. Fixing faulty existing tests is allowed.
+- `tests/php/includes` is where all the new tests for code in the `includes` directory should be written.
+- `tests/php/src` is where all the tests for code in the `src` directory should be written.
+
+Each test file should correspond to an associated source file and be named accordingly:
+    * For `src` code: The base namespace for tests is `Automattic\WooCommerce\Tests`. A class named `Automattic\WooCommerce\TheNamespace\TheClass` should have a test named `Automattic\WooCommerce\Tests\TheNamespace\TheClassTest`.
+    * For `includes` code:
+        * When testing classes: use the same approach as for `src` except that namespaces are not used. So a `WC_Something` class in `includes/somefolder/class-wc-something.php` should have its tests in `tests/src/internal/somefolder/class-wc-something-test.php`.
+        * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
+
+
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/master/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/master/includes/README.md#writing-unit-tests). 
+
+General guidelines for all the unit tests:
+
 * Each test method should cover a single method or function with one or more assertions
 * A single method or function can have multiple associated test methods if it's a large or complex method
 * Use the test coverage HTML report (under `tmp/coverage/index.html`) to examine which lines your tests are covering and aim for 100% coverage
@@ -66,14 +85,12 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 * Filters persist between test cases so be sure to remove them in your test method or in the `tearDown()` method.
 * Use data providers where possible. Be sure that their name is like `data_provider_function_to_test` (i.e. the data provider for `test_is_postcode` would be `data_provider_test_is_postcode`). Read more about data providers [here](https://phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers).
 
-### Automated Tests
+
+## Automated Tests
 
 Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
 
-### Code Coverage
+
+## Code Coverage
 
 Code coverage is available on [Codecov](https://codecov.io/gh/woocommerce/woocommerce/) which receives updated data after each Travis build.
-
-## WooCommerce E2E Tests
-
-See [e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them. 
