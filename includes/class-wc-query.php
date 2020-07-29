@@ -45,7 +45,7 @@ class WC_Query {
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'remove_product_query_filters' ) );
-			add_filter( 'found_posts', array( $this, 'adjust_posts_count' ) );
+			add_filter( 'found_posts', array( $this, 'adjust_posts_count' ), 10, 2 );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
@@ -379,7 +379,12 @@ class WC_Query {
 	 *
 	 * @return int Adjusted posts count.
 	 */
-	public function adjust_posts_count( $count ) {
+	public function adjust_posts_count( $count, $query ) {
+
+		if ( ! $query->get( 'wc_query' ) ) {
+			return $count;
+		}
+
 		$posts = $this->get_current_posts();
 		if ( is_null( $posts ) ) {
 			return $count;
