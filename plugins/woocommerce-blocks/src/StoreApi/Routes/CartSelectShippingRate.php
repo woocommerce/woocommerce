@@ -32,9 +32,10 @@ class CartSelectShippingRate extends AbstractCartRoute {
 	public function get_args() {
 		return [
 			[
-				'methods'  => \WP_REST_Server::CREATABLE,
-				'callback' => [ $this, 'get_response' ],
-				'args'     => [
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'get_response' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
 					'package_id' => array(
 						'description' => __( 'The ID of the package being shipped.', 'woo-gutenberg-products-block' ),
 						'type'        => 'integer',

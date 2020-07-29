@@ -32,9 +32,10 @@ class Cart extends AbstractCartRoute {
 	public function get_args() {
 		return [
 			[
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ $this, 'get_response' ],
-				'args'     => [
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_response' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
 					'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 				],
 			],

@@ -31,9 +31,10 @@ class ProductTags extends AbstractTermsRoute {
 	public function get_args() {
 		return [
 			[
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ $this, 'get_response' ],
-				'args'     => $this->get_collection_params(),
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_response' ],
+				'permission_callback' => '__return_true',
+				'args'                => $this->get_collection_params(),
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
