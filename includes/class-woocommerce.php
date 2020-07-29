@@ -655,7 +655,7 @@ final class WooCommerce {
 		/**
 		 * Legacy image sizes.
 		 *
-		 * @deprecated These sizes will be removed in 4.0.
+		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
 		 */
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
