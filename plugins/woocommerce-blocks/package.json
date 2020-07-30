@@ -120,7 +120,7 @@
 		"deep-freeze": "0.0.1",
 		"eslint": "6.8.0",
 		"eslint-config-prettier": "6.11.0",
-		"eslint-plugin-jest": "23.18.0",
+		"eslint-plugin-jest": "23.19.0",
 		"eslint-plugin-react-hooks": "4.0.0",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"fs-extra": "9.0.1",
