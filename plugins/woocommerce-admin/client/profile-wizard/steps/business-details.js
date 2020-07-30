@@ -783,12 +783,12 @@ class BusinessDetails extends Component {
 									'woocommerce-admin'
 								) }
 							</H>
-							<p>
+							<H className="woocommerce-profile-wizard__header-subtitle">
 								{ __(
 									"We'd love to know if you are just getting started or you already have a business in place.",
 									'woocommerce-admin'
 								) }
-							</p>
+							</H>
 							<Card>
 								<Fragment>
 									<SelectControl

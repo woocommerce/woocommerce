@@ -180,9 +180,9 @@ class Industry extends Component {
 						'woocommerce-admin'
 					) }
 				</H>
-				<p className="woocommerce-profile-wizard__intro-paragraph">
+				<H className="woocommerce-profile-wizard__header-subtitle">
 					{ __( 'Choose any that apply' ) }
-				</p>
+				</H>
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ filteredIndustryKeys.map( ( slug ) => {

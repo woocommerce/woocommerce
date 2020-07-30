@@ -157,7 +157,9 @@ class ProductTypes extends Component {
 						'woocommerce-admin'
 					) }
 				</H>
-				<p>{ __( 'Choose any that apply' ) }</p>
+				<H className="woocommerce-profile-wizard__header-subtitle">
+					{ __( 'Choose any that apply' ) }
+				</H>
 
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
