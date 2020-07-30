@@ -339,7 +339,8 @@ class Onboarding {
 		$product_types = self::append_product_data(
 			array(
 				'physical'        => array(
-					'label' => __( 'Physical products', 'woocommerce-admin' ),
+					'label'   => __( 'Physical products', 'woocommerce-admin' ),
+					'default' => true,
 				),
 				'downloads'       => array(
 					'label' => __( 'Downloads', 'woocommerce-admin' ),

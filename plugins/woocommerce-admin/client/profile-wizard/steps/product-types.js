@@ -32,19 +32,27 @@ function getLabel( description, yearlyPrice ) {
 		__( '$%f per month, billed annually', 'woocommerce-admin' ),
 		monthlyPrice
 	);
+	/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
+	const toolTipText = __(
+		"This product type requires a paid extension.\nWe'll add this to a cart so that\nyou can purchase and install it later.",
+		'woocommerce-admin'
+	);
+	/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
 	return (
 		<Fragment>
 			<span className="woocommerce-product-wizard__product-types__label">
 				{ description }
 			</span>
-			<Tooltip
-				text={ __(
-					"This product type requires a paid extension. We'll add this to a cart so that you can purchase and install it later.",
-					'woocommerce-admin'
-				) }
-			>
-				<Pill>{ priceDescription }</Pill>
+			<Tooltip text={ toolTipText } position="bottom center">
+				<span>
+					<Pill>
+						<span className="screen-reader-text">
+							{ toolTipText }
+						</span>
+						{ priceDescription }
+					</Pill>
+				</span>
 			</Tooltip>
 		</Fragment>
 	);
