@@ -223,8 +223,12 @@ if ( wc_tax_enabled() ) {
 				<td>
 					<span class="description">
 					<?php
+					if ( $order->get_payment_method_title() ) {
 						/* translators: 1: payment date. 2: payment method */
 						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
+					} else {
+						echo esc_html( $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ) );
+					}
 					?>
 					</span>
 				</td>
