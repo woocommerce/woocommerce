@@ -4353,14 +4353,13 @@ img.help_tip {
 
 		span {
 			display: block;
-			vertical-align: middle;
 			line-height: 24px;
+		}
 
-			span {
-				display: inline;
-				line-height: inherit;
-				vertical-align: baseline;
-			}
+		.type_box {
+			display: inline;
+			line-height: inherit;
+			vertical-align: baseline;
 		}
 
 		select {
@@ -6821,6 +6820,23 @@ table.bar_chart {
 
 		@media only screen and (max-width: 782px) {
 			min-width: 100% !important;
+		}
+	}
+}
+
+.wc-wp-version-gte-55 {
+
+	#woocommerce-product-data {
+
+		.hndle {
+			display: block;
+			line-height: 24px;
+
+			.type_box {
+				display: inline;
+				line-height: inherit;
+				vertical-align: baseline;
+			}
 		}
 	}
 }
