@@ -168,12 +168,13 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $data['id'] );
 
 		$last_line_item = array_slice( $data['line_items'], -1 )[0];
-		$first_meta_data = $last_line_item['meta_data'][0];
-		$this->assertEquals( $line_item->get_meta_data()[0]->id, $first_meta_data['id'] );
-		$this->assertEquals( 'pa_size', $first_meta_data['key'] );
-		$this->assertEquals( 'size', $first_meta_data['display_key'] );
-		$this->assertEquals( 'small', $first_meta_data['value'] );
-		$this->assertEquals( 'small', $first_meta_data['display_value'] );
+
+		$size_meta_data = $last_line_item['meta_data'][0];
+		$this->assertEquals( $line_item->get_meta_data()[0]->id, $size_meta_data['id'] );
+		$this->assertEquals( 'pa_size', $size_meta_data['key'] );
+		$this->assertEquals( 'size', $size_meta_data['display_key'] );
+		$this->assertEquals( 'small', $size_meta_data['value'] );
+		$this->assertEquals( 'small', $size_meta_data['display_value'] );
 	}
 
 	/**
