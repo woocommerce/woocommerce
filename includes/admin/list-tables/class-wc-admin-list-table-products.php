@@ -395,11 +395,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Search by SKU or ID for products.
 	 *
-	 * @deprecated Logic moved to query_filters.
+	 * @deprecated 4.4.0 Logic moved to query_filters.
 	 * @param string $where Where clause SQL.
 	 * @return string
 	 */
 	public function sku_search( $where ) {
+		wc_deprecated_function( 'WC_Admin_List_Table_Products::sku_search', '4.4.0', 'Logic moved to query_filters.' );
 		return $where;
 	}
 

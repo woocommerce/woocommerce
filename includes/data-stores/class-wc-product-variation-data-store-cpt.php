@@ -473,10 +473,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $force || array_key_exists( 'attributes', $changes ) ) {
 			global $wpdb;
+
+			$product_id             = $product->get_id();
 			$attributes             = $product->get_attributes();
 			$updated_attribute_keys = array();
 			foreach ( $attributes as $key => $value ) {
-				update_post_meta( $product->get_id(), 'attribute_' . $key, wp_slash( $value ) );
+				update_post_meta( $product_id, 'attribute_' . $key, wp_slash( $value ) );
 				$updated_attribute_keys[] = 'attribute_' . $key;
 			}
 
@@ -486,13 +488,27 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
 					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d",
 					$wpdb->esc_like( 'attribute_' ) . '%',
-					$product->get_id()
+					$product_id
 				)
 			);
 
 			foreach ( $delete_attribute_keys as $key ) {
-				delete_post_meta( $product->get_id(), $key );
+				delete_post_meta( $product_id, $key );
 			}
+
+			// Set the attributes as regular taxonomy terms too...
+			$variation_attributes = array_keys( $product->get_variation_attributes( false ) );
+			foreach ( $attributes as $name => $value ) {
+				if ( '' !== $value && in_array( $name, $variation_attributes, true ) && term_exists( $value, $name ) ) {
+					wp_set_post_terms( $product_id, array( $value ), $name );
+				} elseif ( taxonomy_exists( $name ) ) {
+					wp_delete_object_term_relationships( $product_id, $name );
+				}
+			}
+
+			// ...and remove old taxonomy terms.
+			$attributes_to_delete = array_diff( wc_get_attribute_taxonomy_names(), array_keys( $attributes ) );
+			wp_delete_object_term_relationships( $product_id, $attributes_to_delete );
 		}
 	}
 

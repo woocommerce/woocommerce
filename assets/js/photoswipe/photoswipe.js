@@ -2861,6 +2861,7 @@ var _getItemAt,
 		};		
 
 		img.src = item.src;// + '?a=' + Math.random();
+		img.alt = item.alt || '';
 
 		return img;
 	},
