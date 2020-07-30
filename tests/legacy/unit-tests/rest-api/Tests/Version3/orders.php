@@ -155,9 +155,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
 
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$line_item = new WC_Order_Item_Product();
 		$line_item->set_product( $variation );
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$order->add_item( $line_item );
 		$order->save();
 
