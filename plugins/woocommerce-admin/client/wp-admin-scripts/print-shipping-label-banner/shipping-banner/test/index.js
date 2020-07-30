@@ -186,9 +186,9 @@ describe( 'Create shipping label button', () => {
 			hide: jest.fn(),
 		} );
 
-		const createElementMock = jest.fn( ( tagName ) => {
-			return createElementMockReturn[ tagName ];
-		} );
+		const createElementMock = jest.fn(
+			( tagName ) => createElementMockReturn[ tagName ]
+		);
 		const createElement = document.createElement;
 		document.createElement = createElementMock;
 
