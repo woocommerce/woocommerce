@@ -822,7 +822,7 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
 			}
 		}
 	}

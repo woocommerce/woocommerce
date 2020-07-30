@@ -597,20 +597,20 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-07-28T00:28:40+00:00"
+            "time": "2020-07-28T15:18:55+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.0.0",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "cc00da60f21a7219e7e5ef5599996c68fee7b2be"
+                "reference": "d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/cc00da60f21a7219e7e5ef5599996c68fee7b2be",
-                "reference": "cc00da60f21a7219e7e5ef5599996c68fee7b2be",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436",
+                "reference": "d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436",
                 "shasum": ""
             },
             "require": {
@@ -644,7 +644,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-07-22T13:34:19+00:00"
+            "time": "2020-07-29T15:45:19+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",

@@ -1062,6 +1062,7 @@ ul.wc_coupon_list_block {
 
 #woocommerce-order-data {
 
+	.postbox-header,
 	.hndle,
 	.handlediv {
 		display: none;
@@ -1412,6 +1413,10 @@ ul.wc_coupon_list_block {
 		.refunded-total {
 			color: $red;
 		}
+
+		.label-highlight {
+			font-weight: bold;
+		}
 	}
 
 	.refund-actions {
@@ -1466,6 +1471,7 @@ ul.wc_coupon_list_block {
 		display: block !important;
 	}
 
+	.postbox-header,
 	.hndle,
 	.handlediv {
 		display: none;
@@ -4347,14 +4353,13 @@ img.help_tip {
 
 		span {
 			display: block;
-			vertical-align: middle;
 			line-height: 24px;
+		}
 
-			span {
-				display: inline;
-				line-height: inherit;
-				vertical-align: baseline;
-			}
+		.type_box {
+			display: inline;
+			line-height: inherit;
+			vertical-align: baseline;
 		}
 
 		select {
@@ -6815,6 +6820,23 @@ table.bar_chart {
 
 		@media only screen and (max-width: 782px) {
 			min-width: 100% !important;
+		}
+	}
+}
+
+.wc-wp-version-gte-55 {
+
+	#woocommerce-product-data {
+
+		.hndle {
+			display: block;
+			line-height: 24px;
+
+			.type_box {
+				display: inline;
+				line-height: inherit;
+				vertical-align: baseline;
+			}
 		}
 	}
 }
