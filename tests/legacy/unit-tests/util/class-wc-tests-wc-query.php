@@ -526,7 +526,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * @testdox adjust_posts should return the input unmodified if the posts do not represent products.
 	 */
 	public function test_adjust_posts_count_when_the_posts_are_not_products() {
-		list($sut, $products) = $this->setup_adjust_posts_test( true, true, 'page' );
+		list( $sut, $products ) = $this->setup_adjust_posts_test( true, true, 'page' );
 
 		$products[0]->set_stock_status( 'outofstock' );
 		$products[0]->save();
