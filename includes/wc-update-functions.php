@@ -2184,17 +2184,6 @@ function wc_update_450_db_version() {
 }
 
 /**
- * Get coupons to update in the DB.
- */
-function wc_update_450_get_coupons() {
-	global $wpdb;
-
-	$coupons = $wpdb->get_results( "SELECT ID, post_title FROM {$wpdb->posts} WHERE post_type = 'shop_coupon';", ARRAY_A );
-
-	update_option( 'woocommerce_update_350_coupons', $coupons );
-}
-
-/**
  * Sanitize all coupons code.
  *
  * @return bool True to run again, false if completed.
@@ -2202,42 +2191,40 @@ function wc_update_450_get_coupons() {
 function wc_update_450_sanitize_coupons_code() {
 	global $wpdb;
 
-	$coupons = array_filter( (array) get_option( 'woocommerce_update_350_coupons', array() ) );
+	$coupon_id      = 0;
+	$last_coupon_id = get_option( 'woocommerce_update_350_last_coupon_id', '0' );
+
+	$coupons = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10", $data['ID'] ), ARRAY_A );
 
 	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_350_coupons' );
+		delete_option( 'woocommerce_update_350_last_coupon_id' );
 		return false;
 	}
 
-	// Batch 10 coupons for each run.
-	$batch_coupons = array_slice( $coupons, 0, 10, true );
-
-	foreach ( $batch_coupons as $key => $data ) {
-		$code = trim( wp_filter_kses( $data['post_title'] ) );
+	foreach ( $coupons as $key => $data ) {
+		$coupon_id = intval( $data['ID'] );
+		$code      = trim( wp_filter_kses( $data['post_title'] ) );
 
 		if ( ! empty( $code ) ) {
 			$wpdb->query(
 				$wpdb->prepare(
 					"UPDATE {$wpdb->posts} SET post_title = %s WHERE ID = %d",
 					$code,
-					$data['ID']
+					$coupon_id
 				)
 			);
 
 			// Clean cache.
-			clean_post_cache( intval( $data['ID'] ) );
+			clean_post_cache( $coupon_id );
 			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
-
-			// Remove items from the list.
-			unset( $coupons[ $key ] );
 		}
 	}
 
-	// Start the run again if there's still any coupon.
-	if ( ! empty( $coupons ) ) {
-		return update_option( 'woocommerce_update_350_coupons', $coupons );
+	// Start the run again.
+	if ( ! $coupon_id ) {
+		return update_option( 'woocommerce_update_350_last_coupon_id', $coupon_id );
 	}
 
-	delete_option( 'woocommerce_update_350_coupons' );
+	delete_option( 'woocommerce_update_350_last_coupon_id' );
 	return false;
 }
