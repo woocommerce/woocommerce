@@ -2184,26 +2184,56 @@ function wc_update_450_db_version() {
 }
 
 /**
+ * Get coupons to update in the DB.
+ */
+function wc_update_450_get_coupons() {
+	global $wpdb;
+
+	$coupons = $wpdb->get_results( "SELECT ID, post_title FROM {$wpdb->posts} WHERE post_type = 'shop_coupon';", ARRAY_A );
+
+	update_option( 'woocommerce_update_350_coupons', $coupons );
+}
+
+/**
  * Sanitize all coupons code.
+ *
+ * @return bool True to run again, false if completed.
  */
 function wc_update_450_sanitize_coupons_code() {
 	global $wpdb;
 
-	$coupons = $wpdb->get_results( "SELECT ID, post_title FROM {$wpdb->posts} WHERE post_type = 'shop_coupon';" );
+	$coupons = array_filter( (array) get_option( 'woocommerce_update_350_coupons', array() ) );
 
-	if ( $coupons ) {
-		foreach ( $coupons as $data ) {
-			$code = trim( wp_filter_kses( $data->post_title ) );
+	if ( empty( $coupons ) ) {
+		delete_option( 'woocommerce_update_350_coupons' );
+		return false;
+	}
 
-			if ( ! empty( $code ) ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						"UPDATE {$wpdb->posts} SET post_title = %s WHERE ID = %d",
-						$code,
-						$data->ID
-					)
-				);
-			}
+	// Batch 10 coupons for each run.
+	$batch_coupons = array_slice( $coupons, 0, 10, true );
+
+	foreach ( $batch_coupons as $key => $data ) {
+		$code = trim( wp_filter_kses( $data['post_title'] ) );
+
+		if ( ! empty( $code ) ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->posts} SET post_title = %s WHERE ID = %d",
+					$code,
+					$data['ID']
+				)
+			);
+
+			// Remove items from the list.
+			unset( $coupons[ $key ] );
 		}
 	}
+
+	// Start the run again if there's still any coupon.
+	if ( ! empty( $coupons ) ) {
+		return update_option( 'woocommerce_update_350_coupons', $coupons );
+	}
+
+	delete_option( 'woocommerce_update_350_coupons' );
+	return false;
 }

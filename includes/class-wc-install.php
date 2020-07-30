@@ -154,6 +154,7 @@ class WC_Install {
 			'wc_update_440_db_version',
 		),
 		'4.5.0' => array(
+			'wc_update_450_get_coupons',
 			'wc_update_450_sanitize_coupons_code',
 			'wc_update_450_db_version',
 		),
