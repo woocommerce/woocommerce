@@ -2194,7 +2194,13 @@ function wc_update_450_sanitize_coupons_code() {
 	$coupon_id      = 0;
 	$last_coupon_id = get_option( 'woocommerce_update_350_last_coupon_id', '0' );
 
-	$coupons = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10", $data['ID'] ), ARRAY_A );
+	$coupons = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10",
+			$data['ID']
+		),
+		ARRAY_A
+	);
 
 	if ( empty( $coupons ) ) {
 		delete_option( 'woocommerce_update_350_last_coupon_id' );
@@ -2206,11 +2212,19 @@ function wc_update_450_sanitize_coupons_code() {
 		$code      = trim( wp_filter_kses( $data['post_title'] ) );
 
 		if ( ! empty( $code ) ) {
-			$wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$wpdb->posts} SET post_title = %s WHERE ID = %d",
-					$code,
-					$coupon_id
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_title' => $code,
+				),
+				array(
+					'ID' => $coupon_id,
+				),
+				array(
+					'%s',
+				),
+				array(
+					'%d',
 				)
 			);
 
