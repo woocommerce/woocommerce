@@ -2197,7 +2197,7 @@ function wc_update_450_sanitize_coupons_code() {
 	$coupons = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10",
-			$data['ID']
+			$last_coupon_id
 		),
 		ARRAY_A
 	);
@@ -2235,7 +2235,7 @@ function wc_update_450_sanitize_coupons_code() {
 	}
 
 	// Start the run again.
-	if ( ! $coupon_id ) {
+	if ( $coupon_id ) {
 		return update_option( 'woocommerce_update_350_last_coupon_id', $coupon_id );
 	}
 
