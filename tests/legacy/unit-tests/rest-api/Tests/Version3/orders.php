@@ -147,6 +147,36 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests line items have the expected meta_data properties when getting a single order.
+	 */
+	public function test_get_item_with_line_items_meta_data() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+		$first_meta_data = $last_line_item['meta_data'][0];
+		$this->assertEquals( $line_item->get_meta_data()[0]->id, $first_meta_data['id'] );
+		$this->assertEquals( 'pa_size', $first_meta_data['key'] );
+		$this->assertEquals( 'size', $first_meta_data['display_key'] );
+		$this->assertEquals( 'small', $first_meta_data['value'] );
+		$this->assertEquals( 'small', $first_meta_data['display_value'] );
+	}
+
+	/**
 	 * Tests getting an order with an invalid ID.
 	 * @since 3.5.0
 	 */
