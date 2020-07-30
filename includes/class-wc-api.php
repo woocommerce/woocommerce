@@ -60,7 +60,12 @@ class WC_API extends WC_Legacy_API {
 		if ( ! $this->is_rest_api_loaded() ) {
 			return null;
 		}
-		return \Automattic\WooCommerce\RestApi\Server::get_path();
+		if ( method_exists( \Automattic\WooCommerce\RestApi\Server::class, 'get_path' ) ) {
+			// We are loading API from included version.
+			return \Automattic\WooCommerce\RestApi\Server::get_path();
+		}
+		// We are loading API from external plugin.
+		return \Automattic\WooCommerce\RestApi\Package::get_path();
 	}
 
 	/**
