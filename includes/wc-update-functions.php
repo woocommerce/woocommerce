@@ -2224,6 +2224,10 @@ function wc_update_450_sanitize_coupons_code() {
 				)
 			);
 
+			// Clean cache.
+			clean_post_cache( intval( $data['ID'] ) );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+
 			// Remove items from the list.
 			unset( $coupons[ $key ] );
 		}
