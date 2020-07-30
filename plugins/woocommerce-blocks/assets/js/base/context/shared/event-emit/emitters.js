@@ -46,7 +46,7 @@ export const emitEvent = async ( observers, eventType, data ) => {
 /**
  * Emits events on registered observers for the provided type and passes along
  * the provided data. This event emitter will abort and return any value from
- * observers that do not return true.
+ * observers that return an object which should contain a type property.
  *
  * @param {Object} observers The registered observers to omit to.
  * @param {string} eventType The event type being emitted.
@@ -75,8 +75,7 @@ export const emitEventWithAbort = async ( observers, eventType, data ) => {
 				return emitterResponse;
 			}
 		} catch ( e ) {
-			// we don't handle thrown errors but just console.log for
-			// troubleshooting
+			// We don't handle thrown errors but just console.log for troubleshooting.
 			// eslint-disable-next-line no-console
 			console.error( e );
 			return { type: 'error' };

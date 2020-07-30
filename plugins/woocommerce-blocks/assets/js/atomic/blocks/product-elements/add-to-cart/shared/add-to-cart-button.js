@@ -4,8 +4,9 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
 import { Icon, done as doneIcon } from '@woocommerce/icons';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';
+import { useStoreAddToCart } from '@woocommerce/base-hooks';
 
 /**
  * Add to Cart Form Button Component.
@@ -14,20 +15,37 @@ const AddToCartButton = () => {
 	const {
 		showFormElements,
 		product,
-		quantityInCart,
-		formDisabled,
-		formSubmitting,
-		onSubmit,
+		isDisabled,
+		isProcessing,
+		eventRegistration,
+		hasError,
+		dispatchActions,
 	} = useAddToCartFormContext();
+	const { cartQuantity } = useStoreAddToCart( product.id || 0 );
+	const [ addedToCart, setAddedToCart ] = useState( false );
+	const isPurchasable = product.is_purchasable;
+	const hasOptions = product.has_options;
+	const addToCartButtonData = product.add_to_cart || {
+		url: '',
+		text: '',
+	};
 
-	const {
-		is_purchasable: isPurchasable = true,
-		has_options: hasOptions,
-		add_to_cart: addToCartButtonData = {
-			url: '',
-			text: '',
-		},
-	} = product;
+	// Subscribe to emitter for after processing.
+	useEffect( () => {
+		const onSuccess = () => {
+			if ( ! hasError ) {
+				setAddedToCart( true );
+			}
+			return true;
+		};
+		const unsubscribeProcessing = eventRegistration.onAddToCartAfterProcessingWithSuccess(
+			onSuccess,
+			0
+		);
+		return () => {
+			unsubscribeProcessing();
+		};
+	}, [ eventRegistration, hasError ] );
 
 	// If we are showing form elements, OR if the product has no additional form options, we can show
 	// a functional direct add to cart button, provided that the product is purchasable.
@@ -36,10 +54,11 @@ const AddToCartButton = () => {
 		return (
 			<ButtonComponent
 				className="wc-block-components-product-add-to-cart-button"
-				quantityInCart={ quantityInCart }
-				disabled={ formDisabled }
-				loading={ formSubmitting }
-				onClick={ onSubmit }
+				quantityInCart={ cartQuantity }
+				isDisabled={ isDisabled }
+				isProcessing={ isProcessing }
+				isDone={ addedToCart }
+				onClick={ () => dispatchActions.submitForm() }
 			/>
 		);
 	}
@@ -73,23 +92,19 @@ const LinkComponent = ( { className, href, text } ) => {
 const ButtonComponent = ( {
 	className,
 	quantityInCart,
-	loading,
-	disabled,
+	isProcessing,
+	isDisabled,
+	isDone,
 	onClick,
 } ) => {
-	const [ wasClicked, setWasClicked ] = useState( false );
-
 	return (
 		<Button
 			className={ className }
-			disabled={ disabled }
-			showSpinner={ loading }
-			onClick={ () => {
-				onClick();
-				setWasClicked( true );
-			} }
+			disabled={ isDisabled }
+			showSpinner={ isProcessing }
+			onClick={ onClick }
 		>
-			{ quantityInCart > 0
+			{ isDone && quantityInCart > 0
 				? sprintf(
 						// translators: %s number of products in cart.
 						_n(
@@ -101,7 +116,7 @@ const ButtonComponent = ( {
 						quantityInCart
 				  )
 				: __( 'Add to cart', 'woo-gutenberg-products-block' ) }
-			{ wasClicked && (
+			{ !! isDone && (
 				<Icon
 					srcElement={ doneIcon }
 					alt={ __( 'Done', 'woo-gutenberg-products-block' ) }

@@ -21,7 +21,7 @@
 
 	.wc-block-components-product-add-to-cart-quantity {
 		margin: 0 1em em($gap-small) 0;
-		width: 5em;
+		flex-basis: 5em;
 		padding: 0.618em;
 		background: $white;
 		border: 1px solid #ccc;
@@ -31,6 +31,8 @@
 		text-align: center;
 	}
 }
+
+.is-loading .wc-block-components-product-add-to-cart,
 .wc-block-components-product-add-to-cart--placeholder {
 	.wc-block-components-product-add-to-cart-quantity,
 	.wc-block-components-product-add-to-cart-button {
