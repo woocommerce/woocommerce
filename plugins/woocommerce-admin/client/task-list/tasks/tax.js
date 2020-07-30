@@ -245,7 +245,7 @@ class Tax extends Component {
 										install_extensions: false,
 									}
 								);
-								this.redirectToTaxSettings();
+								this.manuallyConfigureTaxRates();
 							} }
 							skipText={ __(
 								'Set up tax rates manually',
