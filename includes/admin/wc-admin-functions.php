@@ -486,11 +486,11 @@ function wc_render_invalid_variation_notice( $product_object ) {
  */
 function wc_get_current_admin_url() {
 	$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-	$uri = str_replace( '/wp-admin', '', $uri );
+	$uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
 
 	if ( ! $uri ) {
 		return '';
 	}
 
-	return remove_query_arg( array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce' ), admin_url( $uri ) );
+	return remove_query_arg( array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ), admin_url( $uri ) );
 }
