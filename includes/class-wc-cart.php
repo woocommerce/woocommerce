@@ -684,6 +684,9 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
+
+			// Possibility to change quantity - for the sake of different unit based stock.
+			$quantity = apply_filters( 'woocommerce_get_cart_item_quantities', $values['quantity'], $product, $values );
 			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
 		}
 
@@ -1061,7 +1064,11 @@ class WC_Cart extends WC_Legacy_Cart {
 				throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_name() ) );
 			}
 
-			if ( ! $product_data->has_enough_stock( $quantity ) ) {
+			// Possibility to change quantity - for the sake of different unit based stock.
+			$stock_quantity = apply_filters( 'woocommerce_add_to_cart_alter_stock_quantity', $quantity, $product_id, $cart_item_data );
+
+			// Stock based functions work with stock quantity.
+			if ( ! $product_data->has_enough_stock( $stock_quantity ) ) {
 				/* translators: 1: product name 2: quantity in stock */
 				throw new Exception( sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_name(), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ) ) );
 			}
@@ -1070,7 +1077,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $product_data->managing_stock() ) {
 				$products_qty_in_cart = $this->get_cart_item_quantities();
 
-				if ( isset( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] ) && ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
+				if ( isset( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] ) && ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $stock_quantity ) ) {
 					throw new Exception(
 						sprintf(
 							'<a href="%s" class="button wc-forward">%s</a> %s',

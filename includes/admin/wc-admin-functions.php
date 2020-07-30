@@ -208,6 +208,9 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 
 	$product               = $item->get_product();
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
+
+	// Possibility to change item quantity - for the sake of different unit based stock.
+	$item_quantity         = apply_filters( 'woocommerce_maybe_adjust_line_item_product_stock_item_quantity', $item_quantity, $item );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 
 	if ( ! $product || ! $product->managing_stock() || ! $already_reduced_stock || $item_quantity === $already_reduced_stock ) {
@@ -216,6 +219,9 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 
 	$order                  = $item->get_order();
 	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
+
+	// Possibility to change refunded item quantity - for the sake of different unit based stock.
+	$refunded_item_quantity = apply_filters( 'woocommerce_maybe_adjust_line_item_product_stock_refunded_item_quantity', $refunded_item_quantity, $item );
 	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
 
 	if ( $diff < 0 ) {
