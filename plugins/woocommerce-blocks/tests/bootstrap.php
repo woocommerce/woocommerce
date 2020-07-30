@@ -27,8 +27,8 @@ require_once $_tests_dir . '/includes/functions.php';
 function wc_dir() {
 	static $dir = '';
 	if ( $dir === '' ) {
-		if ( file_exists( WP_CONTENT_DIR . '/woocommerce/woocommerce.php' ) ) {
-			$dir = WP_CONTENT_DIR . '/woocommerce';
+		if ( file_exists( WP_CONTENT_DIR . '/plugins/woocommerce/woocommerce.php' ) ) {
+			$dir = WP_CONTENT_DIR . '/plugins/woocommerce';
 			echo "Found WooCommerce plugin in content dir." . PHP_EOL;
 		} elseif ( file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce/woocommerce.php' ) ) {
 			$dir = dirname( dirname( __DIR__ ) ) . '/woocommerce';
