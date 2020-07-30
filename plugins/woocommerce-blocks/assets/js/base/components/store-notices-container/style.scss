@@ -3,17 +3,15 @@
 	margin-bottom: 2em;
 	.wc-block-components-notices__notice {
 		margin: 0;
-		.components-notice__content {
-			display: inline-block;
-		}
+		display: flex;
+		flex-wrap: nowrap;
 		.components-notice__dismiss {
 			background: transparent none;
 			padding: 0;
-			margin: 0;
+			margin: 0 0 0 0.5em;
 			border: 0;
 			outline: 0;
 			color: #fff;
-			float: right;
 			svg {
 				fill: #fff;
 				vertical-align: text-top;

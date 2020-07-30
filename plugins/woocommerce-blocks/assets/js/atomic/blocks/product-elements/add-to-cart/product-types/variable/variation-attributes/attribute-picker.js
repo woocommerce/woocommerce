@@ -2,14 +2,15 @@
  * External dependencies
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useShallowEqual } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import AttributeSelectControl from './attribute-select-control';
 import {
-	getVariationsMatchingSelectedAttributes,
-	getSelectControlOptions,
+	getVariationMatchingSelectedAttributes,
+	getActiveSelectControlOptions,
 } from './utils';
 
 /**
@@ -17,88 +18,74 @@ import {
  *
  * @param {*} props Component props.
  */
-const AttributePicker = ( { attributes, variationAttributes } ) => {
+const AttributePicker = ( {
+	attributes,
+	variationAttributes,
+	setRequestParams,
+} ) => {
+	const currentAttributes = useShallowEqual( attributes );
+	const currentVariationAttributes = useShallowEqual( variationAttributes );
 	const [ variationId, setVariationId ] = useState( 0 );
+	const [ selectedAttributes, setSelectedAttributes ] = useState( {} );
 
-	// @todo Support default selected attributes in Variation Picker.
-	const [ selectedAttributes, setSelectedAttributes ] = useState( [] );
-
-	const attributeNames = Object.keys( attributes );
-	const hasSelectedAttributes =
-		Object.values( selectedAttributes ).filter( Boolean ).length > 0;
-	const hasSelectedAllAttributes =
-		Object.values( selectedAttributes ).filter(
-			( selected ) => selected !== ''
-		).length === attributeNames.length;
-
-	// Gets valid attribute options for the picker taking current selections into account.
+	// Get options for each attribute picker.
 	const filteredAttributeOptions = useMemo( () => {
-		const options = [];
+		return getActiveSelectControlOptions(
+			currentAttributes,
+			currentVariationAttributes,
+			selectedAttributes
+		);
+	}, [ selectedAttributes, currentAttributes, currentVariationAttributes ] );
 
-		attributeNames.forEach( ( attributeName ) => {
-			const currentAttribute = attributes[ attributeName ];
-			const attributeNamesExcludingCurrentAttribute = attributeNames.filter(
-				( name ) => name !== attributeName
-			);
-			const matchingVariationIds = hasSelectedAttributes
-				? getVariationsMatchingSelectedAttributes( {
-						selectedAttributes,
-						variationAttributes,
-						attributeNames: attributeNamesExcludingCurrentAttribute,
-				  } )
-				: null;
-			const validAttributeTerms =
-				matchingVariationIds !== null
-					? matchingVariationIds.map(
-							( varId ) =>
-								variationAttributes[ varId ][ attributeName ]
-					  )
-					: null;
-			options[ attributeName ] = getSelectControlOptions(
-				currentAttribute.terms,
-				validAttributeTerms
-			);
-		} );
-
-		return options;
-	}, [
-		attributes,
-		variationAttributes,
-		attributeNames,
-		selectedAttributes,
-		hasSelectedAttributes,
-	] );
-
-	// Select variation when selections change.
+	// Select variations when selections are change.
 	useEffect( () => {
-		if ( ! hasSelectedAllAttributes ) {
+		const hasSelectedAllAttributes =
+			Object.values( selectedAttributes ).filter(
+				( selected ) => selected !== ''
+			).length === Object.keys( currentAttributes ).length;
+
+		if ( hasSelectedAllAttributes ) {
+			setVariationId(
+				getVariationMatchingSelectedAttributes(
+					currentAttributes,
+					currentVariationAttributes,
+					selectedAttributes
+				)
+			);
+		} else if ( variationId > 0 ) {
+			// Unset variation when form is incomplete.
 			setVariationId( 0 );
-			return;
 		}
-
-		const matchingVariationIds = getVariationsMatchingSelectedAttributes( {
-			selectedAttributes,
-			variationAttributes,
-			attributeNames,
-		} );
-
-		setVariationId( matchingVariationIds[ 0 ] || 0 );
 	}, [
 		selectedAttributes,
-		variationAttributes,
-		attributeNames,
-		hasSelectedAllAttributes,
+		variationId,
+		currentAttributes,
+		currentVariationAttributes,
 	] );
 
-	// @todo Hook up Variation Picker with Cart Form.
+	// Set requests params as variation ID and data changes.
+	useEffect( () => {
+		setRequestParams( {
+			id: variationId,
+			variation: Object.keys( selectedAttributes ).map(
+				( attributeName ) => {
+					return {
+						attribute: attributeName,
+						value: selectedAttributes[ attributeName ],
+					};
+				}
+			),
+		} );
+	}, [ setRequestParams, variationId, selectedAttributes ] );
+
 	return (
 		<div className="wc-block-components-product-add-to-cart-attribute-picker">
-			{ attributeNames.map( ( attributeName ) => (
+			{ Object.keys( currentAttributes ).map( ( attributeName ) => (
 				<AttributeSelectControl
 					key={ attributeName }
 					attributeName={ attributeName }
 					options={ filteredAttributeOptions[ attributeName ] }
-					selected={ selectedAttributes[ attributeName ] }
+					value={ selectedAttributes[ attributeName ] }
 					onChange={ ( selected ) => {
 						setSelectedAttributes( {
 							...selectedAttributes,
@@ -107,7 +94,6 @@ const AttributePicker = ( { attributes, variationAttributes } ) => {
 					} }
 				/>
 			) ) }
-			<p>Matched variation ID: { variationId }</p>
 		</div>
 	);
 };

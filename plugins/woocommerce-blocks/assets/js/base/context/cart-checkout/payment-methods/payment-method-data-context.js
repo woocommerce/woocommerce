@@ -46,7 +46,7 @@ import {
 	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
-import { useValidationContext } from '../validation';
+import { useValidationContext } from '../../shared/validation';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext

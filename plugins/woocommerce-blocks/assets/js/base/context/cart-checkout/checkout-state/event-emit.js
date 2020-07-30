@@ -6,7 +6,7 @@ import {
 	reducer,
 	emitEvent,
 	emitEventWithAbort,
-} from '../event-emit';
+} from '../../shared/event-emit';
 
 const EMIT_TYPES = {
 	CHECKOUT_BEFORE_PROCESSING: 'checkout_before_processing',

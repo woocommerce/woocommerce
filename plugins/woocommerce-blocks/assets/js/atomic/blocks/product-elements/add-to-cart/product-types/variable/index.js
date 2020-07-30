@@ -23,8 +23,8 @@ const Variable = () => {
 		quantity,
 		minQuantity,
 		maxQuantity,
-		setQuantity,
-		formDisabled,
+		dispatchActions,
+		isDisabled,
 	} = useAddToCartFormContext();
 
 	if ( product.id && ! product.is_purchasable ) {
@@ -44,13 +44,16 @@ const Variable = () => {
 
 	return (
 		<>
-			<VariationAttributes product={ product } />
+			<VariationAttributes
+				product={ product }
+				dispatchers={ dispatchActions }
+			/>
 			<QuantityInput
 				value={ quantity }
 				min={ minQuantity }
 				max={ maxQuantity }
-				disabled={ formDisabled }
-				onChange={ setQuantity }
+				disabled={ isDisabled }
+				onChange={ dispatchActions.setQuantity }
 			/>
 			<AddToCartButton />
 		</>
