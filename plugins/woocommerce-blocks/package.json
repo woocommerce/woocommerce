@@ -148,7 +148,7 @@
 		"stylelint": "12.0.1",
 		"stylelint-config-wordpress": "13.1.0",
 		"typescript": "3.9.7",
-		"webpack": "4.43.0",
+		"webpack": "4.44.1",
 		"webpack-cli": "3.3.11",
 		"webpack-rtl-plugin": "2.0.0",
 		"woocommerce": "git+https://github.com/woocommerce/woocommerce.git#release/4.1",
