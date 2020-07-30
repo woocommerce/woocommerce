@@ -144,6 +144,26 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_retry_count
+	 */
+	public function test_get_retry_count() {
+		$object   = new WC_Webhook();
+		$expected = 1;
+		$object->set_retry_count( $expected );
+		$this->assertEquals( $expected, $object->get_retry_count() );
+	}
+
+	/**
+	 * Test: get_retry_enabled
+	 */
+	public function test_get_retry_enabled() {
+		$object   = new WC_Webhook();
+		$expected = true;
+		$object->set_retry_enabled( $expected );
+		$this->assertEquals( $expected, $object->get_retry_enabled() );
+	}
+
+	/**
 	 * Test: get_hooks
 	 */
 	public function test_get_hooks() {
