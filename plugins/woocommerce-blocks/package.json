@@ -124,7 +124,7 @@
 		"eslint-plugin-react-hooks": "4.0.0",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"fs-extra": "9.0.1",
-		"glob": "^7.1.6",
+		"glob": "7.1.6",
 		"glob-promise": "3.4.0",
 		"husky": "2.4.1",
 		"ignore-loader": "0.1.2",
