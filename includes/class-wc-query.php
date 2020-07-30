@@ -368,8 +368,9 @@ class WC_Query {
 	}
 
 	/**
-	 * When the request is filtering by attributes via layered nav plugin we need to adjust the total posts count
-	 * to account for variable products having stock in some variations but not in others.
+	 * When we are listing products and the request is filtering by attributes via layered nav plugin
+	 * we need to adjust the total posts count to account for variable products having stock
+	 * in some variations but not in others.
 	 * We do that by just checking if each product is visible.
 	 *
 	 * We also cache the post visibility so that it isn't checked again when displaying the posts list.
@@ -385,18 +386,22 @@ class WC_Query {
 			return $count;
 		}
 
-		$count = 0;
 		foreach ( $posts as $post ) {
-			$id      = is_object( $post ) ? $post->ID : $post;
-			$product = wc_get_product( $id );
+			if ( is_object( $post ) && 'product' !== $post->post_type ) {
+				continue;
+			}
+
+			$product_id = is_object( $post ) ? $post->ID : $post;
+			$product    = wc_get_product( $product_id );
 			if ( ! is_object( $product ) ) {
 				continue;
 			}
+
 			if ( $product->is_visible() ) {
-				wc_set_loop_product_visibility( $id, true );
-				$count++;
+				wc_set_loop_product_visibility( $product_id, true );
 			} else {
-				wc_set_loop_product_visibility( $id, false );
+				wc_set_loop_product_visibility( $product_id, false );
+				$count--;
 			}
 		}
 
