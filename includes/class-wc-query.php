@@ -44,7 +44,7 @@ class WC_Query {
 			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-			add_filter( 'the_posts', array( $this, 'remove_product_query_filters' ) );
+			add_filter( 'the_posts', array( $this, 'handle_get_posts' ) );
 			add_filter( 'found_posts', array( $this, 'adjust_posts_count' ), 10, 2 );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
@@ -353,6 +353,32 @@ class WC_Query {
 	}
 
 	/**
+	 * Handler for the 'the_posts' WP filter.
+	 *
+	 * @param array $posts Posts from WP Query.
+	 *
+	 * @return array
+	 */
+	public function handle_get_posts( $posts ) {
+		$this->adjust_total_pages();
+		$this->remove_product_query_filters( $posts );
+		return $posts;
+	}
+
+	/**
+	 * The 'adjust_posts_count' method that handles the 'found_posts' filter indirectly initializes
+	 * the loop properties with a call to 'wc_setup_loop'. This includes setting 'total_pages' to
+	 * '$GLOBALS['wp_query']->max_num_pages', which at that point has a value of zero.
+	 * Thus we need to set the real value from the 'the_posts' filter, where $GLOBALS['wp_query']->max_num_pages'
+	 * will aready have been initialized.
+	 */
+	private function adjust_total_pages() {
+		if ( 0 === wc_get_loop_prop( 'total_pages' ) ) {
+			wc_set_loop_prop( 'total_pages', $GLOBALS['wp_query']->max_num_pages );
+		}
+	}
+
+	/**
 	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
 	 * all custom filters are removed.
 	 *
@@ -376,13 +402,12 @@ class WC_Query {
 	 * We also cache the post visibility so that it isn't checked again when displaying the posts list.
 	 *
 	 * @since 4.4.0
-	 * @param int $count Original posts count, as supplied by the found_posts filter.
+	 * @param int      $count Original posts count, as supplied by the found_posts filter.
 	 * @param WP_Query $query The current WP_Query object.
 	 *
 	 * @return int Adjusted posts count.
 	 */
 	public function adjust_posts_count( $count, $query ) {
-
 		if ( ! $query->get( 'wc_query' ) ) {
 			return $count;
 		}
