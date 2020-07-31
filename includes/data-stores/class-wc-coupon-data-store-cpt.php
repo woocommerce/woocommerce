@@ -33,7 +33,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	protected $internal_meta_keys = array(
 		'discount_type',
 		'coupon_amount',
+		'active_date',
 		'expiry_date',
+		'date_active',
 		'date_expires',
 		'usage_count',
 		'individual_use',
@@ -125,6 +127,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'description'                 => $post_object->post_excerpt,
 				'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
 				'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_active'                 => metadata_exists( 'post', $coupon_id, 'date_active' ) ? get_post_meta( $coupon_id, 'date_active', true ) : get_post_meta( $coupon_id, 'active_date', true ),
 				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ), // @todo: Migrate expiry_date meta to date_expires in upgrade routine.
 				'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 				'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
@@ -244,6 +247,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'usage_limit_per_user'       => 'usage_limit_per_user',
 			'limit_usage_to_x_items'     => 'limit_usage_to_x_items',
 			'usage_count'                => 'usage_count',
+			'date_active'                => 'date_active',
 			'date_expires'               => 'date_expires',
 			'free_shipping'              => 'free_shipping',
 			'product_categories'         => 'product_categories',
@@ -274,6 +278,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					break;
 				case 'email_restrictions':
 					$value = array_filter( array_map( 'sanitize_email', $value ) );
+					break;
+				case 'date_active':
+					$value = $value ? $value->getTimestamp() : null;
 					break;
 				case 'date_expires':
 					$value = $value ? $value->getTimestamp() : null;
