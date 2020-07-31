@@ -637,6 +637,22 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Ensure coupon active date is valid or throw exception.
+	 *
+	 * @since  5.6.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_active_date( $coupon ) {
+		if ( $coupon->get_date_active() && apply_filters( 'woocommerce_coupon_validate_active_date', time() < $coupon->get_date_active()->getTimestamp(), $coupon, $this ) ) {
+			throw new Exception( __( 'This coupon is not active.', 'woocommerce' ), 115 );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Ensure coupon date is valid or throw exception.
 	 *
 	 * @since  3.2.0
@@ -938,6 +954,7 @@ class WC_Discounts {
 	 * - 112: Maximum spend limit met.
 	 * - 113: Excluded products.
 	 * - 114: Excluded categories.
+	 * - 115: not active
 	 *
 	 * @since  3.2.0
 	 * @throws Exception Error message.
@@ -950,6 +967,7 @@ class WC_Discounts {
 			$this->validate_coupon_usage_limit( $coupon );
 			$this->validate_coupon_user_usage_limit( $coupon );
 			$this->validate_coupon_expiry_date( $coupon );
+			$this->validate_coupon_active_date( $coupon );
 			$this->validate_coupon_minimum_amount( $coupon );
 			$this->validate_coupon_maximum_amount( $coupon );
 			$this->validate_coupon_product_ids( $coupon );
