@@ -393,6 +393,19 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Helper function to create and set WC_Meta_data object from std objects. Automatically ignores internal keys.
+	 *
+	 * @param array $raw_data Array of objects of raw data to set.
+	 */
+	public function set_meta_data_from_raw_data( $raw_data ) {
+		if ( null === $this->meta_data ) {
+			$this->meta_data = array();
+		}
+		$meta_data = $this->data_store->filter_raw_data( $this, $raw_data );
+		$this->set_from_raw_meta_data( $meta_data );
+	}
+
+	/**
 	 * Add meta data.
 	 *
 	 * @since 2.6.0
@@ -520,6 +533,20 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Helper method to compute meta cache key. Different from WP Meta cache key.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @return string
+	 */
+	public function get_meta_cache_key() {
+		if ( ! $this->get_id() ) {
+			wc_doing_it_wrong( 'get_meta_cache_key', 'ID needs to be set before fetching a cache key.', '4.4.0' );
+			return false;
+		}
+		return WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+	}
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * Uses it's own caches because get_metadata does not provide meta_ids.
 	 *
@@ -540,7 +567,7 @@ abstract class WC_Data {
 
 		if ( ! empty( $this->cache_group ) ) {
 			// Prefix by group allows invalidation by group until https://core.trac.wordpress.org/ticket/4476 is implemented.
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			$cache_key = $this->get_meta_cache_key();
 		}
 
 		if ( ! $force_read ) {
@@ -551,20 +578,33 @@ abstract class WC_Data {
 		}
 
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
+
 		if ( $raw_meta_data ) {
-			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = new WC_Meta_Data(
-					array(
-						'id'    => (int) $meta->meta_id,
-						'key'   => $meta->meta_key,
-						'value' => maybe_unserialize( $meta->meta_value ),
-					)
-				);
-			}
+			$this->set_from_raw_meta_data( $raw_meta_data );
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
 				wp_cache_set( $cache_key, $raw_meta_data, $this->cache_group );
 			}
+		}
+	}
+
+	/**
+	 * Helper function to create WC_Meta_data object from std objects.
+	 *
+	 * @param array $raw_meta_data Array of object of raw meta data.
+	 */
+	private function set_from_raw_meta_data( $raw_meta_data ) {
+		if ( ! is_array( $raw_meta_data ) ) {
+			return;
+		}
+		foreach ( $raw_meta_data as $meta ) {
+			$this->meta_data[] = new WC_Meta_Data(
+				array(
+					'id'    => (int) $meta->meta_id,
+					'key'   => $meta->meta_key,
+					'value' => maybe_unserialize( $meta->meta_value ),
+				)
+			);
 		}
 	}
 
