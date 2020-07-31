@@ -85,6 +85,7 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		$show_columns['description'] = __( 'Description', 'woocommerce' );
 		$show_columns['products']    = __( 'Product IDs', 'woocommerce' );
 		$show_columns['usage']       = __( 'Usage / Limit', 'woocommerce' );
+		$show_columns['active_date'] = __( 'Active date', 'woocommerce' );
 		$show_columns['expiry_date'] = __( 'Expiry date', 'woocommerce' );
 
 		return $show_columns;
@@ -170,6 +171,19 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 			esc_html( $usage_count ),
 			$usage_limit ? esc_html( $usage_limit ) : '&infin;'
 		);
+	}
+
+	/**
+	 * Render columm: active_date.
+	 */
+	protected function render_active_date_column() {
+		$active_date = $this->object->get_date_active();
+
+		if ( $active_date ) {
+			echo esc_html( $active_date->date_i18n( 'F j, Y' ) );
+		} else {
+			echo '&ndash;';
+		}
 	}
 
 	/**
