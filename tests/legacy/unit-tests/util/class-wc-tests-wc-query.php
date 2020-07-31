@@ -492,6 +492,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 *           [false, true]
 	 */
 	public function test_adjust_posts_count_with_nav_filtering_attributes( $with_nav_filtering_data, $use_objects ) {
+		global $wp_query;
+
 		list($sut, $products) = $this->setup_adjust_posts_test( $with_nav_filtering_data, $use_objects );
 
 		$products[0]->set_stock_status( 'outofstock' );
@@ -499,7 +501,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$products[1]->set_stock_status( 'outofstock' );
 		$products[1]->save();
 
-		$this->assertEquals( 32, $sut->adjust_posts_count( 34 ) );
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 32, $sut->adjust_posts_count( 34, $wp_query ) );
 		$this->assertEquals( 32, wc_get_loop_prop( 'total' ) );
 		$this->assertEquals( false, wc_get_loop_product_visibility( $products[0]->get_id() ) );
 		$this->assertEquals( false, wc_get_loop_product_visibility( $products[1]->get_id() ) );
@@ -512,6 +515,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * @testdox adjust_posts should return the input unmodified if get_current_posts returns null.
 	 */
 	public function test_adjust_posts_count_when_there_are_no_posts() {
+		global $wp_query;
+
 		$sut = $this
 			->getMockBuilder( WC_Query::class )
 			->setMethods( array( 'get_current_posts', 'get_layered_nav_chosen_attributes_inst' ) )
@@ -519,18 +524,37 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 		$sut->method( 'get_current_posts' )->willReturn( null );
 
-		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
 	}
 
 	/**
 	 * @testdox adjust_posts should return the input unmodified if the posts do not represent products.
 	 */
 	public function test_adjust_posts_count_when_the_posts_are_not_products() {
+		global $wp_query;
+
 		list( $sut, $products ) = $this->setup_adjust_posts_test( true, true, 'page' );
 
 		$products[0]->set_stock_status( 'outofstock' );
 		$products[0]->save();
 
-		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
+	}
+
+	/**
+	 * @testdox adjust_posts should return the input unmodified if not in the main product query.
+	 */
+	public function test_adjust_posts_count_when_not_in_the_main_product_query() {
+		global $wp_query;
+
+		list( $sut, $products ) = $this->setup_adjust_posts_test( true, true );
+
+		$products[0]->set_stock_status( 'outofstock' );
+		$products[0]->save();
+
+		$wp_query->set( 'wc_query', null );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
 	}
 }
