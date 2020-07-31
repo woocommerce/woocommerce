@@ -2175,3 +2175,10 @@ function wc_update_440_insert_attribute_terms_for_variable_products() {
 function wc_update_440_db_version() {
 	WC_Install::update_db_version( '4.4.0' );
 }
+
+/**
+ * Update DB version.
+ */
+function wc_update_450_db_version() {
+	WC_Install::update_db_version( '4.5.0' );
+}
