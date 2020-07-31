@@ -179,15 +179,15 @@ _Outcome:_ __There is a new release milestone ready for the next iteration.__
 
 #### Create pull request for updating the package in WooCommerce core.
 
-All releases (except RCs, betas etc) should be included in WooCommerce core. We do this by adding a PR on WooCommerce Core repo immediately after our release is completed.
+When a release of Woo Blocks is the last release before code freeze in the WooCommerce core cycle, we need to bump the package version included in WooCommerce core. We do this by adding a PR on WooCommerce Core repo.
 
 - Create the pull request in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/master/composer.json) for the blocks package to the version being pulled in.
-- Copy the release pull request notes for that tag (and merge any notes from previous tags if you're bumping up from non consecutive versions) into the pull request description.
+- The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/27177). Essentially you link to all the important things that have already been prepared. Note, you need to make sure you link to all the related documents for the feature plugin releases since the last package version bump in Woo Core.
 - Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should include ensuring any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
 - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
 - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 
-_Outcome:_ __The package is updated in WooCommerce core frequently and successfully merged to WooCommerce main branch as a stable release.__
+_Outcome:_ __The package is updated in WooCommerce core before code freeze in the Woo Core release process and successfully merged to WooCommerce main branch as a stable release.__
 
 #### Post release announcement on [WooCommerce Developer Blog](https://woocommerce.wordpress.com/category/blocks/)
 
