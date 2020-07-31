@@ -322,10 +322,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$webhook_retry_enabled = $this->get_retry_enabled();
 
 		// If we reached the limit of failures we won't reschedule.
-		$failed = ( $this->get_retry_count() > apply_filters( 'woocommerce_max_webhook_retry_failures', 5 ) );
+		$failed = ( $this->get_retry_count() > apply_filters( 'woocommerce_webhook_retry_count_limit', 5 ) );
 
 		$is_retryable = $webhook_retry_enabled && ! $failed;
-		return apply_filters( 'woocommerce_webhook_retry_enabled', $is_retryable, $this, $arg, $response );
+		return apply_filters( 'woocommerce_webhook_should_retry', $is_retryable, $this, $arg, $response );
 	}
 
 	/**

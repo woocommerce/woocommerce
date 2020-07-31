@@ -77,10 +77,10 @@ class WC_Webhook_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_retry_delivery() {
 		$wc_queued_webhooks = array();
-		$lambda = function( $action_id ) use ( &$wc_queued_webhooks ) {
+		$closure = function( $action_id ) use ( &$wc_queued_webhooks ) {
 			$wc_queued_webhooks[] = $action_id;
 		};
-		add_action( 'action_scheduler_stored_action', $lambda );
+		add_action( 'action_scheduler_stored_action', $closure );
 
 		$start_time = time();
 
@@ -97,6 +97,8 @@ class WC_Webhook_Test extends \WC_Unit_Test_Case {
 		$this->assertGreaterThanOrEqual( $start_time + 400, $timestamp );
 		$this->assertLessThan( $start_time + 500, $timestamp );
 		$this->assertEquals( $expected_retry_count, $object->get_retry_count() );
+
+		remove_action( 'action_scheduler_stored_action', $closure );
 	}
 
 	/**
