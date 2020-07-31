@@ -109,6 +109,23 @@ class WC_Meta_Box_Coupon_Data {
 					);
 				}
 
+				// Active date.
+				$active_date = $coupon->get_date_active( 'edit' ) ? $coupon->get_date_active( 'edit' )->date( 'Y-m-d' ) : '';
+				woocommerce_wp_text_input(
+					array(
+						'id'                => 'active_date',
+						'value'             => esc_attr( $active_date ),
+						'label'             => __( 'Coupon active date', 'woocommerce' ),
+						'placeholder'       => 'YYYY-MM-DD',
+						'description'       => __( 'The coupon will activate at 00:00:00 of this date.', 'woocommerce' ),
+						'desc_tip'          => true,
+						'class'             => 'date-picker',
+						'custom_attributes' => array(
+							'pattern' => apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ),
+						),
+					)
+				);
+
 				// Expiry date.
 				$expiry_date = $coupon->get_date_expires( 'edit' ) ? $coupon->get_date_expires( 'edit' )->date( 'Y-m-d' ) : '';
 				woocommerce_wp_text_input(
@@ -371,6 +388,7 @@ class WC_Meta_Box_Coupon_Data {
 				'code'                        => $post->post_title,
 				'discount_type'               => wc_clean( $_POST['discount_type'] ),
 				'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
+				'date_active'                 => wc_clean( $_POST['active_date'] ),
 				'date_expires'                => wc_clean( $_POST['expiry_date'] ),
 				'individual_use'              => isset( $_POST['individual_use'] ),
 				'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) : array(),
