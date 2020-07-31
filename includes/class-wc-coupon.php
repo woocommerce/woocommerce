@@ -28,6 +28,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'amount'                      => 0,
 		'date_created'                => null,
 		'date_modified'               => null,
+		'date_active'                 => null,
 		'date_expires'                => null,
 		'discount_type'               => 'fixed_cart',
 		'description'                 => '',
@@ -65,6 +66,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	const E_WC_COUPON_MAX_SPEND_LIMIT_MET            = 112;
 	const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
 	const E_WC_COUPON_EXCLUDED_CATEGORIES            = 114;
+	const E_WC_COUPON_NOT_ACTIVE                     = 115;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -200,6 +202,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_amount( $context = 'view' ) {
 		return wc_format_decimal( $this->get_prop( 'amount', $context ) );
+	}
+
+	/**
+	 * Get coupon active date.
+	 *
+	 * @since  5.6.0
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_active( $context = 'view' ) {
+		return $this->get_prop( 'date_active', $context );
 	}
 
 	/**
@@ -521,6 +534,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Set active date.
+	 *
+	 * @since  5.6.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 */
+	public function set_date_active( $date ) {
+		$this->set_date_prop( 'date_active', $date );
+	}
+
+	/**
 	 * Set expiration date.
 	 *
 	 * @since  3.0.0
@@ -760,6 +783,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 						$coupon[ $key ] = wc_string_to_bool( $value );
 					}
 					break;
+				case 'active_date':
+					$coupon['date_active'] = $value;
+					break;
 				case 'expiry_date':
 					$coupon['date_expires'] = $value;
 					break;
@@ -970,6 +996,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_REACHED:
 				$err = __( 'Coupon usage limit has been reached.', 'woocommerce' );
+				break;
+			case self::E_WC_COUPON_NOT_ACTIVE:
+				$err = __( 'This coupon is not active.', 'woocommerce' );
 				break;
 			case self::E_WC_COUPON_EXPIRED:
 				$err = __( 'This coupon has expired.', 'woocommerce' );
