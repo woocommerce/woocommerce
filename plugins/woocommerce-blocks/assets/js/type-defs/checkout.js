@@ -16,6 +16,8 @@
  *                                                           the calculating state for checkout by one.
  * @property {function(number|string)}  setOrderId           Dispatches an action that stores the draft
  *                                                           order ID and key to state.
+ * @property {function(string)}         setOrderNotes        Dispatches an action that sets the order
+ *                                                           notes.
  */
 
 /**

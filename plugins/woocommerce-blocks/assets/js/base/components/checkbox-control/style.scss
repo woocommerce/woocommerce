@@ -1,19 +1,21 @@
 .wc-block-components-checkbox {
 	@include reset-typography();
-	display: block;
+	align-items: center;
+	display: flex;
+	height: 1em;
 	position: relative;
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
 		appearance: none;
 		border: 1px solid currentColor;
-		height: 1rem;
+		height: 1em;
 		margin: 0;
 		min-height: 16px;
 		min-width: 16px;
 		overflow: hidden;
 		position: static;
 		vertical-align: middle;
-		width: 1rem;
+		width: 1em;
 
 		&:checked {
 			background: currentColor;

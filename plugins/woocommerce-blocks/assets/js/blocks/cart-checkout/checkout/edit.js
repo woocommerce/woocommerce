@@ -41,6 +41,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 		showPhoneField,
 		requireCompanyField,
 		requirePhoneField,
+		showOrderNotes,
 		showPolicyLinks,
 		showReturnToCart,
 		cartPageId,
@@ -147,6 +148,28 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 						className="components-base-control--nested"
 					/>
 				) }
+			</PanelBody>
+			<PanelBody
+				title={ __( 'Order notes', 'woo-gutenberg-products-block' ) }
+			>
+				<p className="wc-block-checkout__controls-text">
+					{ __(
+						'Reduce the number of fields to checkout.',
+						'woo-gutenberg-products-block'
+					) }
+				</p>
+				<ToggleControl
+					label={ __(
+						'Allow customers to optionally add order notes',
+						'woo-gutenberg-products-block'
+					) }
+					checked={ showOrderNotes }
+					onChange={ () =>
+						setAttributes( {
+							showOrderNotes: ! showOrderNotes,
+						} )
+					}
+				/>
 			</PanelBody>
 			<PanelBody
 				title={ __(

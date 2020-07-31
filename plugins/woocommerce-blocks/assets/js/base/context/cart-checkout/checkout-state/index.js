@@ -43,6 +43,7 @@ const CheckoutContext = createContext( {
 	hasError: false,
 	redirectUrl: '',
 	orderId: 0,
+	orderNotes: '',
 	customerId: 0,
 	onSubmit: () => void null,
 	onCheckoutAfterProcessingWithSuccess: ( callback ) => void callback,
@@ -56,6 +57,7 @@ const CheckoutContext = createContext( {
 		incrementCalculating: () => void null,
 		decrementCalculating: () => void null,
 		setOrderId: ( id ) => void id,
+		setOrderNotes: ( orderNotes ) => void orderNotes,
 	},
 	hasOrder: false,
 	isCart: false,
@@ -137,6 +139,8 @@ export const CheckoutStateProvider = ( {
 				void dispatch( actions.decrementCalculating() ),
 			setOrderId: ( orderId ) =>
 				void dispatch( actions.setOrderId( orderId ) ),
+			setOrderNotes: ( orderNotes ) =>
+				void dispatch( actions.setOrderNotes( orderNotes ) ),
 			setAfterProcessing: ( response ) => {
 				// capture general error message if this is an error response.
 				if (
@@ -330,6 +334,7 @@ export const CheckoutStateProvider = ( {
 		orderId: checkoutState.orderId,
 		hasOrder: !! checkoutState.orderId,
 		customerId: checkoutState.customerId,
+		orderNotes: checkoutState.orderNotes,
 	};
 	return (
 		<CheckoutContext.Provider value={ checkoutData }>

@@ -24,6 +24,10 @@ const blockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	showOrderNotes: {
+		type: 'boolean',
+		default: true,
+	},
 	showPolicyLinks: {
 		type: 'boolean',
 		default: true,
