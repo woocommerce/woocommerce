@@ -17,6 +17,7 @@ const {
 	INCREMENT_CALCULATING,
 	DECREMENT_CALCULATING,
 	SET_ORDER_ID,
+	SET_ORDER_NOTES,
 } = TYPES;
 
 /**
@@ -63,5 +64,9 @@ export const actions = {
 	setOrderId: ( orderId ) => ( {
 		type: SET_ORDER_ID,
 		orderId,
+	} ),
+	setOrderNotes: ( orderNotes ) => ( {
+		type: SET_ORDER_NOTES,
+		orderNotes,
 	} ),
 };

@@ -26,6 +26,7 @@ export const DEFAULT_STATE = {
 	hasError: false,
 	calculatingCount: 0,
 	orderId: checkoutData.order_id,
+	orderNotes: '',
 	customerId: checkoutData.customer_id,
 	processingResponse: null,
 };
@@ -42,6 +43,7 @@ export const TYPES = {
 	SET_HAS_ERROR: 'set_checkout_has_error',
 	SET_NO_ERROR: 'set_checkout_no_error',
 	SET_ORDER_ID: 'set_checkout_order_id',
+	SET_ORDER_NOTES: 'set_checkout_order_notes',
 	INCREMENT_CALCULATING: 'increment_calculating',
 	DECREMENT_CALCULATING: 'decrement_calculating',
 };

@@ -2,9 +2,8 @@
 	top: -96px;
 }
 
-.wc-block-checkout__add-note,
-.wc-block-checkout__keep-updated {
-	margin-top: $gap;
+.wc-block-checkout__use-address-for-billing {
+	margin-top: em($gap-large);
 }
 
 .wc-block-checkout__shipping-option {
@@ -208,6 +207,11 @@
 					width: 100%;
 					margin-left: 0;
 					margin-right: 0;
+				}
+
+				&:nth-last-of-type(2),
+				&:last-of-type {
+					margin-bottom: 0;
 				}
 			}
 

@@ -243,6 +243,8 @@
  *                                                                     context data.
  * @property {number}                       orderId                    This is the ID for the draft
  *                                                                     order if one exists.
+ * @property {number}                       orderNotes                 Order notes introduced by the
+ *                                                                     user in the checkout form.
  * @property {boolean}                      hasOrder                   True when the checkout has a
  *                                                                     draft order from the API.
  * @property {boolean}                      isCart                     When true, means the provider
