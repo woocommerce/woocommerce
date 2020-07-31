@@ -659,9 +659,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$this->save();
 
 		// Default backoff algorithm is exponential (2^n * 100).  The backoff value will be added to time() to
-		// schedule when the webhook should be retried (in seconds).
-		$backoff = ( 2 ** $retry_count ) * 100;
-		$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', $backoff, $retry_count );
+		// schedule when the webhook should be retried (in seconds).  Grabbing the filter return first and using that
+		// unless it is not a number then defaulting to above algorithm.
+		$backoff = apply_filters( 'woocommerce_webhook_retry_backoff', null, $retry_count );
+		$backoff = is_numeric( $backoff ) ? intval( $backoff ) : ( 2 ** $retry_count ) * 100;
 
 		// Requeue the webhook.
 		$queue_args = array(
@@ -1057,7 +1058,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param int $retry_count Current retry count.
 	 */
 	public function set_retry_count( $retry_count ) {
-		$this->set_prop( 'retry_count', (bool) $retry_count );
+		$this->set_prop( 'retry_count', intval( $retry_count ) );
 	}
 
 	/*
