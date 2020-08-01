@@ -155,10 +155,16 @@ function wc_reduce_stock_levels( $order_id ) {
 	}
 
 	$changes = array();
+	$order_item_keys_to_ignore = apply_filters( 'woocommerce_reduce_stock_levels_ignore_order_item_keys', array() );
 
 	// Loop over all items.
-	foreach ( $order->get_items() as $item ) {
+	foreach ( $order->get_items() as $item_key => $item ) {
 		if ( ! $item->is_type( 'line_item' ) ) {
+			continue;
+		}
+
+		// Ignore order item keys if ignores set
+		if ( in_array( $item_key, $order_item_keys_to_ignore ) ) {
 			continue;
 		}
 
@@ -254,10 +260,16 @@ function wc_increase_stock_levels( $order_id ) {
 	}
 
 	$changes = array();
+	$order_item_keys_to_ignore = apply_filters( 'woocommerce_increase_stock_levels_ignore_order_item_keys', array() );
 
 	// Loop over all items.
-	foreach ( $order->get_items() as $item ) {
+	foreach ( $order->get_items() as $item_key => $item ) {
 		if ( ! $item->is_type( 'line_item' ) ) {
+			continue;
+		}
+
+		// Ignore order item keys if ignores set
+		if ( in_array( $item_key, $order_item_keys_to_ignore ) ) {
 			continue;
 		}
 

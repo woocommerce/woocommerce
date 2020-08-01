@@ -80,8 +80,14 @@ final class ReserveStock {
 				}
 			);
 			$rows  = array();
+			$order_item_keys_to_ignore = apply_filters( 'woocommerce_reserve_stock_for_order_ignore_order_item_keys', array() );
 
-			foreach ( $items as $item ) {
+			foreach ( $items as $item_key => $item ) {
+				// Ignore order item keys if ignores set
+				if ( in_array( $item_key, $order_item_keys_to_ignore ) ) {
+					continue;
+				}
+
 				$product = $item->get_product();
 
 				if ( ! $product->is_in_stock() ) {
