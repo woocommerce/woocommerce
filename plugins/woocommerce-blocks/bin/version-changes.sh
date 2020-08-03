@@ -17,3 +17,6 @@ perl -i -pe 's/"version":*.+/"version": "'${VERSION}'",/' package.json
 
 # Update version in src/Package.php
 perl -i -pe "s/version \= '*.+';/version = '${VERSION}';/" src/Package.php
+
+# Add version to composer.json
+perl -i -pe 's/"type":*.+/"type":"wordpress-plugin",\n\t"version": "'${VERSION}'",/' composer.json
