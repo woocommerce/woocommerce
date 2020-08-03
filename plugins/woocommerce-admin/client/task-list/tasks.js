@@ -8,7 +8,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * WooCommerce dependencies
  */
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	getHistory,
 	getNewPath,
@@ -188,12 +188,6 @@ export function getAllTasks( {
 				recordEvent( 'tasklist_click', {
 					task_name: 'payments',
 				} );
-				if ( paymentsCompleted || paymentsSkipped ) {
-					window.location = getAdminLink(
-						'admin.php?page=wc-settings&tab=checkout'
-					);
-					return;
-				}
 				updateQueryString( { task: 'payments' } );
 			},
 			visible: ! woocommercePaymentsInstalled,
