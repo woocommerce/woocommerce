@@ -180,6 +180,7 @@ const AddressForm = ( {
 							field.required ? field.label : field.optionalLabel
 						}
 						value={ values[ field.key ] }
+						autoCapitalize={ field.autocapitalize }
 						autoComplete={ field.autocomplete }
 						onChange={ ( newValue ) =>
 							onChange( {
