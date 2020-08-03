@@ -2,6 +2,10 @@
 @import '@wordpress/components/src/visually-hidden/style';
 
 #woocommerce-admin-print-label {
+	.postbox-header {
+		display: none;
+	}
+
 	min-height: 100px;
 
 	.hndle,
