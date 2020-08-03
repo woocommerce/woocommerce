@@ -39,8 +39,10 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
 	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
-		$autogenerate_username = ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) || $args['generate_username'] );
-		$autogenerate_password = ( 'yes' === get_option( 'woocommerce_registration_generate_password', 'yes' ) || $args['generate_password'] );
+		$autogenerate_username = 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' );
+		$autogenerate_password = 'yes' === get_option( 'woocommerce_registration_generate_password', 'yes' );
+		$autogenerate_username = array_key_exists( 'generate_username', $args ) ? $args['generate_username'] : $autogenerate_username;
+		$autogenerate_password = array_key_exists( 'generate_password', $args ) ? $args['generate_password'] : $autogenerate_password;
 
 		if ( empty( $email ) || ! is_email( $email ) ) {
 			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
