@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Proxies;
  *
  * This class should be used instead of directly accessing the WordPress functions, to ease unit testing.
  *
- * @package Automattic\WooCommerce\Tools\Proxies
+ * @package Automattic\WooCommerce\Proxies
  */
 class ActionsProxy {
 
