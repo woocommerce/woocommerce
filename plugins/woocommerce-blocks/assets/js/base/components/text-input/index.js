@@ -24,6 +24,7 @@ const TextInput = forwardRef(
 			screenReaderLabel,
 			disabled,
 			help,
+			autoCapitalize = 'off',
 			autoComplete = 'off',
 			value = '',
 			onChange,
@@ -50,6 +51,7 @@ const TextInput = forwardRef(
 					id={ id }
 					value={ value }
 					ref={ ref }
+					autoCapitalize={ autoCapitalize }
 					autoComplete={ autoComplete }
 					onChange={ ( event ) => {
 						onChange( event.target.value );
@@ -101,6 +103,7 @@ TextInput.propTypes = {
 	screenReaderLabel: PropTypes.string,
 	disabled: PropTypes.bool,
 	help: PropTypes.string,
+	autoCapitalize: PropTypes.string,
 	autoComplete: PropTypes.string,
 	required: PropTypes.bool,
 };
