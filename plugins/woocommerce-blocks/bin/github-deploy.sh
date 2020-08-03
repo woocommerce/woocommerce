@@ -107,8 +107,10 @@ if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
 fi
 
 # Version changes
-output 2 "Updating version numbers in files (note pre-releases will not have the readme.txt stable tag updated)..."
+output 2 "Updating version numbers in files and regenerating php autoload classmap (note pre-releases will not have the readme.txt stable tag updated)..."
 source $RELEASER_PATH/bin/version-changes.sh
+
+composer dump-autoload
 
 output 2 "Committing version change..."
 echo
