@@ -40,6 +40,10 @@ class ReviewsPanel extends Component {
 		this.mountTime = new Date().getTime();
 	}
 
+	recordReviewEvent( eventName ) {
+		recordEvent( `activity_panel_reviews_${ eventName }`, {} );
+	}
+
 	renderReview( review, props ) {
 		const { lastRead } = props;
 		const product =
@@ -64,11 +68,16 @@ class ReviewsPanel extends Component {
 			),
 			components: {
 				productLink: (
-					<Link href={ product.permalink } type="external" />
+					<Link
+						href={ product.permalink }
+						onClick={ () => this.recordReviewEvent( 'product' ) }
+						type="external"
+					/>
 				),
 				authorLink: (
 					<Link
 						href={ 'mailto:' + review.reviewer_email }
+						onClick={ () => this.recordReviewEvent( 'customer' ) }
 						type="external"
 					/>
 				),
@@ -158,6 +167,7 @@ class ReviewsPanel extends Component {
 		let buttonTarget = '';
 		let buttonText = '';
 		let content = '';
+		let eventName = 'learn_more';
 
 		if ( lastApprovedReviewTime ) {
 			const now = new Date();
@@ -198,6 +208,7 @@ class ReviewsPanel extends Component {
 						) }
 					</p>
 				);
+				eventName = 'view_reviews';
 			}
 		} else {
 			buttonUrl =
@@ -232,6 +243,7 @@ class ReviewsPanel extends Component {
 						href={ buttonUrl }
 						target={ buttonTarget }
 						isSecondary
+						onClick={ () => this.recordReviewEvent( eventName ) }
 					>
 						{ buttonText }
 					</Button>

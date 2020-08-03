@@ -20,6 +20,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import { ActivityCard } from '../../activity-card';
+import { recordEvent } from 'lib/tracks';
 
 class ProductStockCard extends Component {
 	constructor( props ) {
@@ -37,6 +38,10 @@ class ProductStockCard extends Component {
 		this.onSubmit = this.onSubmit.bind( this );
 	}
 
+	recordStockEvent( eventName, eventProps = {} ) {
+		recordEvent( `activity_panel_stock_${ eventName }`, eventProps );
+	}
+
 	beginEdit() {
 		const { product } = this.props;
 
@@ -51,6 +56,7 @@ class ProductStockCard extends Component {
 				}
 			}
 		);
+		this.recordStockEvent( 'update_stock' );
 	}
 
 	cancelEdit() {
@@ -60,6 +66,7 @@ class ProductStockCard extends Component {
 			editing: false,
 			quantity: product.stock_quantity,
 		} );
+		this.recordStockEvent( 'cancel' );
 	}
 
 	handleKeyDown( event ) {
@@ -79,6 +86,9 @@ class ProductStockCard extends Component {
 		this.setState( { editing: false, edited: true } );
 
 		updateProductStock( product, quantity );
+		this.recordStockEvent( 'save', {
+			quantity,
+		} );
 	}
 
 	getActions() {
@@ -158,6 +168,7 @@ class ProductStockCard extends Component {
 					'post.php?action=edit&post=' +
 					( product.parent_id || product.id )
 				}
+				onClick={ () => this.recordStockEvent( 'product_name' ) }
 				type="wp-admin"
 			>
 				{ product.name }
