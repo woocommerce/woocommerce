@@ -356,28 +356,26 @@ class BusinessDetails extends Component {
 				</p>
 			);
 		}
-
+		const accountRequiredText = this.bundleInstall
+			? __(
+					'User accounts are required to use these features.',
+					'woocommerce-admin'
+			  )
+			: '';
 		return (
 			<Fragment>
 				<p>
 					{ sprintf(
 						_n(
-							'The following plugin will be installed for free: %s',
-							'The following plugins will be installed for free: %s',
+							'The following plugin will be installed for free: %s. %s',
+							'The following plugins will be installed for free: %s. %s',
 							extensions.length,
 							'woocommerce-admin'
 						),
-						extensionsList
+						extensionsList,
+						accountRequiredText
 					) }
 				</p>
-				{ this.bundleInstall && (
-					<p>
-						{ __(
-							'An account is required to use these features.',
-							'woocommerce-admin'
-						) }
-					</p>
-				) }
 			</Fragment>
 		);
 	}
