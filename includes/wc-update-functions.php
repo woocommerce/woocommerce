@@ -2192,7 +2192,7 @@ function wc_update_450_sanitize_coupons_code() {
 	global $wpdb;
 
 	$coupon_id      = 0;
-	$last_coupon_id = get_option( 'woocommerce_update_350_last_coupon_id', '0' );
+	$last_coupon_id = get_option( 'woocommerce_update_450_last_coupon_id', '0' );
 
 	$coupons = $wpdb->get_results(
 		$wpdb->prepare(
@@ -2203,7 +2203,7 @@ function wc_update_450_sanitize_coupons_code() {
 	);
 
 	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_350_last_coupon_id' );
+		delete_option( 'woocommerce_update_450_last_coupon_id' );
 		return false;
 	}
 
@@ -2236,9 +2236,9 @@ function wc_update_450_sanitize_coupons_code() {
 
 	// Start the run again.
 	if ( $coupon_id ) {
-		return update_option( 'woocommerce_update_350_last_coupon_id', $coupon_id );
+		return update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id );
 	}
 
-	delete_option( 'woocommerce_update_350_last_coupon_id' );
+	delete_option( 'woocommerce_update_450_last_coupon_id' );
 	return false;
 }
