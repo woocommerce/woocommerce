@@ -50,13 +50,80 @@ export function getProductIdsForCart(
 	includeInstalledItems = false,
 	installedPlugins
 ) {
+	const productList = getProductList(
+		profileItems,
+		includeInstalledItems,
+		installedPlugins
+	);
+	const productIds = productList.map(
+		( product ) => product.id || product.product
+	);
+	return productIds;
+}
+
+/**
+ * Gets the labeled/categorized product names and types for items based on the product types and theme selected in the onboarding profiler.
+ *
+ * @param {Object} profileItems Onboarding profile.
+ * @param {Array} installedPlugins Installed plugins.
+ * @return {Array} Objects with labeled/categorized product names and types.
+ */
+export function getCategorizedOnboardingProducts(
+	profileItems,
+	installedPlugins
+) {
+	const productList = {};
+	productList.products = getProductList(
+		profileItems,
+		true,
+		installedPlugins
+	);
+	productList.remainingProducts = getProductList(
+		profileItems,
+		false,
+		installedPlugins
+	);
+
+	const uniqueItemsList = [
+		...new Set( [
+			...productList.products,
+			...productList.remainingProducts,
+		] ),
+	];
+
+	productList.uniqueItemsList = uniqueItemsList.map( ( product ) => {
+		let cleanedProduct;
+		if ( product.label ) {
+			cleanedProduct = { type: 'extension', name: product.label };
+		} else {
+			cleanedProduct = { type: 'theme', name: product.title };
+		}
+		return cleanedProduct;
+	} );
+
+	return productList;
+}
+
+/**
+ * Gets a product list for items based on the product types and theme selected in the onboarding profiler.
+ *
+ * @param {Object} profileItems Onboarding profile.
+ * @param {boolean} includeInstalledItems Include installed items in returned product list.
+ * @param {Array} installedPlugins Installed plugins.
+ * @return {Array} Products.
+ */
+export function getProductList(
+	profileItems,
+	includeInstalledItems = false,
+	installedPlugins
+) {
 	const onboarding = getSetting( 'onboarding', {} );
-	const productIds = [];
+	const productList = [];
 
 	// The population of onboarding.productTypes only happens if the task list should be shown
 	// so bail early if it isn't present.
 	if ( ! onboarding.productTypes ) {
-		return productIds;
+		return productList;
 	}
 
 	const productTypes = profileItems.product_types || [];
@@ -70,7 +137,7 @@ export function getProductIdsForCart(
 					onboarding.productTypes[ productType ].slug
 				) )
 		) {
-			productIds.push( onboarding.productTypes[ productType ].product );
+			productList.push( onboarding.productTypes[ productType ] );
 		}
 	} );
 
@@ -84,10 +151,10 @@ export function getProductIdsForCart(
 		getPriceValue( theme.price ) > 0 &&
 		( includeInstalledItems || ! theme.is_installed )
 	) {
-		productIds.push( theme.id );
+		productList.push( theme );
 	}
 
-	return productIds;
+	return productList;
 }
 
 /**
