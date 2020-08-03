@@ -45,6 +45,7 @@ export function recordTaskViewEvent(
 }
 
 export function getAllTasks( {
+	countryCode,
 	profileItems,
 	taskListPayments,
 	query,
@@ -166,7 +167,9 @@ export function getAllTasks( {
 				} );
 			},
 			visible:
-				window.wcAdminFeatures.wcpay && woocommercePaymentsInstalled,
+				window.wcAdminFeatures.wcpay &&
+				woocommercePaymentsInstalled &&
+				countryCode === 'US',
 			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{

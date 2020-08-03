@@ -26,6 +26,7 @@ import {
 	PLUGINS_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 
 /**
@@ -34,6 +35,7 @@ import {
 import './style.scss';
 import CartModal from 'dashboard/components/cart-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
+import { getCountryCode } from 'dashboard/utils';
 import { recordEvent } from 'lib/tracks';
 import withSelect from 'wc-api/with-select';
 
@@ -142,6 +144,7 @@ class TaskDashboard extends Component {
 
 	getAllTasks() {
 		const {
+			countryCode,
 			profileItems,
 			query,
 			taskListPayments,
@@ -153,6 +156,7 @@ class TaskDashboard extends Component {
 		} = this.props;
 
 		return getAllTasks( {
+			countryCode,
 			profileItems,
 			taskListPayments,
 			query,
@@ -444,6 +448,7 @@ export default compose(
 	withSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const {
 			getActivePlugins,
 			getInstalledPlugins,
@@ -463,11 +468,17 @@ export default compose(
 		const dismissedTasks =
 			getOption( 'woocommerce_task_list_dismissed_tasks' ) || [];
 
+		const { general: generalSettings = {} } = getSettings( 'general' );
+		const countryCode = getCountryCode(
+			generalSettings.woocommerce_default_country
+		);
+
 		const activePlugins = getActivePlugins();
 		const installedPlugins = getInstalledPlugins();
 
 		return {
 			activePlugins,
+			countryCode,
 			dismissedTasks,
 			isJetpackConnected: isJetpackConnected(),
 			installedPlugins,
