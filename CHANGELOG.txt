@@ -9,6 +9,7 @@
 * Enhancement - Improvements for the Hungarian address format. #26697
 * Enhancement - Dropdown arrow width was made smaller. #26202
 * Enhancement - Add a "No change" option to the "Stock status" selector in quick edit, preselect it when the product being edited is a variable product. #26174
+* Enhancement - Don't request language packs for empty locales list. #27148
 * Localization - Added 14 Namibia regions. #26894
 * Localization - Change default Greek states names to English. #26719
 * Localization - Improved Puerto Rico addresses and improve address formatting. #26698
@@ -24,6 +25,7 @@
 * Tweak - Remove HTML tags from plain text email template for Customer new account. #26613
 * Tweak - Conditionally change the text in My account to reflect if shipping is disabled. #26325
 * Tweak - Show CSV file name in result message when product import is complete. #25240
+* Tweak - Improve order details UI to highlight "Paid" and "Net Payment" sections. #27142
 * Fix - Remove the dot after the generated password in new account emails. #27073
 * Fix - Delayed the execution of all webhooks until after the request has completed. #27067
 * Fix - [Importer/Exporter] Fixed the value display of "Published" for children of draft variable products. #27046
@@ -51,10 +53,13 @@
 * Fix - Fixed user capability required to view the order count indicator. #26338
 * Fix - The filtering widget now works as expected with variable products, displaying those products for which visible variations are available. #26260
 * Fix - Added a z-index to the remove button (x) to set the z-order of the element. #26202
-* Fix - don' change the stock status of variations when bulk editing a variable product and leaving the "Stock status" selector as "No change". #26174
+* Fix - Don't change the stock status of variations when bulk editing a variable product and leaving the "Stock status" selector as "No change". #26174
+* Fix - Remove new WP 5.5 meta box arrows from "Order data" and "Order items" meta boxes. #27173
+* Fix - After clicking to update WooCommerce, the user will stay in the same page instead of being redirected to the "Settings" page. #27172
+* Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
+* Fix - Removed the JETPACK_AUTOLOAD_DEV define. #27185
 * Dev - Update WooCommerce Admin version to v1.4.0-beta.2. #27144
 * Dev - Upgraded to the 2.x Jetpack Autoloader. #27123
-* Dev - Update WooCommerce blocks version to 3.0.0. #27099
 * Dev - Update jest-preset-default version to ^6.2.0. #27090
 * Dev - Added a second $existing_meta_keys parameter to the woocommerce_duplicate_product_exclude_meta filter. #27038
 * Dev - Remove leftover note for translators in customer-completed-order.php. #26989
@@ -78,6 +83,8 @@
 * Dev - Deprecated WC_Legacy_Cart::tax_display_cart in favor of WC_Cart:: get_tax_price_display_mode(). #26400
 * Dev - Add an optional $render_variations argument to in WC_Product_Variable::get_available_variation() in order to allow plugins to avoid performance bottlenecks. #26303
 * Dev - Ensure wc_load_cart loads its own dependencies. #26219
+* Dev - Clean up deprecated documentation. #27054
+* Dev - Update WooCommerce Blocks version to 3.1.0. #27177
 
 **REST API 1.0.11**
 * Enhancement - Introduced X-WP-Total header for product attributes GET endpoint listing the number of entries in the response. woocommerce/woocommerce-rest-api#171
@@ -108,6 +115,11 @@
 * Performance - Scripts only relevant to the frontend side of blocks are no longer loaded in the editor. #2788
 * Performance - Lazy Loading Atomic Components. #2777
 * Pefactor - Remove dashicon classes. #2848
+
+**WooCommerce Blocks 3.1.0**
+* Fix - Missing permissions_callback arg in StoreApi route definitions. #2926
+* Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
+* Dev - Add query filter when searching for a table. #2886
 
 = 4.3.1 - 2020-07-21 =
 
