@@ -174,7 +174,6 @@ const ReviewsByCategoryEditor = ( {
 			{ getInspectorControls() }
 			<EditorContainerBlock
 				attributes={ attributes }
-				className="wc-block-reviews-by-category"
 				icon={
 					<Icon
 						srcElement={ review }
