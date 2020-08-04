@@ -1,0 +1,36 @@
+.wc-block-components-error {
+	display: flex;
+	background-color: #f3f3f4;
+	border-left: 4px solid #6d6d6d;
+	padding: $gap-larger $gap;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.wc-block-components-error__header {
+	@include font-size(larger);
+	font-weight: bold;
+	margin: 0;
+}
+
+.wc-block-components-error__image {
+	max-width: 25%;
+}
+.wc-block-components-error__text {
+	margin: 0;
+}
+.wc-block-components-error__message {
+	margin: 1em 0 0 0;
+	font-style: italic;
+}
+
+@include breakpoint( ">480px" ) {
+	.wc-block-components-error {
+		flex-direction: row;
+	}
+
+	.wc-block-components-error__image + .wc-block-components-error__content {
+		margin-left: $gap-large;
+	}
+}

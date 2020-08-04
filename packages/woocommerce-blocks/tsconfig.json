@@ -1,0 +1,45 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"lib": [ "dom", "esnext" ],
+		"allowJs": true,
+		"checkJs": true,
+		"noEmit": true,
+		"traceResolution": true,
+		"strictNullChecks": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"jsx": "preserve",
+		"allowSyntheticDefaultImports": true,
+		"paths": {
+			"@woocommerce/atomic-blocks": [ "assets/js/base/atomic/blocks" ],
+			"@woocommerce/atomic-blocks/*": [
+				"assets/js/base/atomic/blocks/*"
+			],
+			"@woocommerce/atomic-utils": [ "assets/js/atomic/utils" ],
+			"@woocommerce/base-components/*": [ "assets/js/base/components/*" ],
+			"@woocommerce/base-context": [ "assets/js/base/context" ],
+			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
+			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
+			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
+			"@woocommerce/block-components/*": [ "assets/js/components/*" ],
+			"@woocommerce/block-data": [ "assets/js/data" ],
+			"@woocommerce/block-hocs": [ "assets/js/hocs" ],
+			"@woocommerce/blocks-registry": [ "assets/js/blocks-registry" ],
+			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
+			"@woocommerce/e2e-tests": [
+				"node_modules/woocommerce/tests/e2e-tests"
+			],
+			"@woocommerce/icons": [ "assets/js/icons" ],
+			"@woocommerce/resource-previews": [ "assets/js/previews" ],
+			"@woocommerce/settings": [ "assets/js/settings/shared" ],
+			"@woocommerce/shared-context": [ "assets/js/shared/context" ],
+			"@woocommerce/type-defs/*": [ "assets/js/type-defs/*" ]
+		}
+	},
+	"include": [ "./assets/js/**/*.js", "./globals.d.ts" ]
+}
