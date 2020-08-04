@@ -441,12 +441,13 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	/**
 	 * Setup for a test for adjust_posts.
 	 *
-	 * @param bool $with_nav_filtering_data Should WC_Query::get_layered_nav_chosen_attributes return filtering data?.
-	 * @param bool $use_objects If true, get_current_posts will return objects with an ID property; if false, it will returns the ids.
+	 * @param bool   $with_nav_filtering_data Should WC_Query::get_layered_nav_chosen_attributes return filtering data?.
+	 * @param bool   $use_objects If true, get_current_posts will return objects with an ID property; if false, it will returns the ids.
+	 * @param string $post_type The value of the 'post_type' property for the objects generated when $use_objects is true.
 	 *
 	 * @return array An array where the first element is the instance of WC_Query, and the second is an array of sample products created.
 	 */
-	private function setup_adjust_posts_test( $with_nav_filtering_data, $use_objects ) {
+	private function setup_adjust_posts_test( $with_nav_filtering_data, $use_objects, $post_type = 'product' ) {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		if ( $with_nav_filtering_data ) {
@@ -460,7 +461,10 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		for ( $i = 0; $i < 5; $i++ ) {
 			$product = WC_Helper_Product::create_simple_product();
 			array_push( $products, $product );
-			$post = $use_objects ? (object) array( 'ID' => $product->get_id() ) : $product->get_id();
+			$post = $use_objects ? (object) array(
+				'ID'        => $product->get_id(),
+				'post_type' => $post_type,
+			) : $product->get_id();
 			array_push( $posts, $post );
 		}
 
@@ -488,6 +492,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 *           [false, true]
 	 */
 	public function test_adjust_posts_count_with_nav_filtering_attributes( $with_nav_filtering_data, $use_objects ) {
+		global $wp_query;
+
 		list($sut, $products) = $this->setup_adjust_posts_test( $with_nav_filtering_data, $use_objects );
 
 		$products[0]->set_stock_status( 'outofstock' );
@@ -495,8 +501,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$products[1]->set_stock_status( 'outofstock' );
 		$products[1]->save();
 
-		$this->assertEquals( 3, $sut->adjust_posts_count( 34 ) );
-		$this->assertEquals( 3, wc_get_loop_prop( 'total' ) );
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 32, $sut->adjust_posts_count( 34, $wp_query ) );
+		$this->assertEquals( 32, wc_get_loop_prop( 'total' ) );
 		$this->assertEquals( false, wc_get_loop_product_visibility( $products[0]->get_id() ) );
 		$this->assertEquals( false, wc_get_loop_product_visibility( $products[1]->get_id() ) );
 		foreach ( array_slice( $products, 2 ) as $product ) {
@@ -508,6 +515,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * @testdox adjust_posts should return the input unmodified if get_current_posts returns null.
 	 */
 	public function test_adjust_posts_count_when_there_are_no_posts() {
+		global $wp_query;
+
 		$sut = $this
 			->getMockBuilder( WC_Query::class )
 			->setMethods( array( 'get_current_posts', 'get_layered_nav_chosen_attributes_inst' ) )
@@ -515,6 +524,37 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 		$sut->method( 'get_current_posts' )->willReturn( null );
 
-		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
+	}
+
+	/**
+	 * @testdox adjust_posts should return the input unmodified if the posts do not represent products.
+	 */
+	public function test_adjust_posts_count_when_the_posts_are_not_products() {
+		global $wp_query;
+
+		list( $sut, $products ) = $this->setup_adjust_posts_test( true, true, 'page' );
+
+		$products[0]->set_stock_status( 'outofstock' );
+		$products[0]->save();
+
+		$wp_query->set( 'wc_query', 'product_query' );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
+	}
+
+	/**
+	 * @testdox adjust_posts should return the input unmodified if not in the main product query.
+	 */
+	public function test_adjust_posts_count_when_not_in_the_main_product_query() {
+		global $wp_query;
+
+		list( $sut, $products ) = $this->setup_adjust_posts_test( true, true );
+
+		$products[0]->set_stock_status( 'outofstock' );
+		$products[0]->save();
+
+		$wp_query->set( 'wc_query', null );
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34, $wp_query ) );
 	}
 }

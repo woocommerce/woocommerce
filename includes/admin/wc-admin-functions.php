@@ -474,3 +474,23 @@ function wc_render_invalid_variation_notice( $product_object ) {
 		<?php
 	}
 }
+
+/**
+ * Get current admin page URL.
+ *
+ * Returns an empty string if it cannot generate a URL.
+ *
+ * @internal
+ * @since 4.4.0
+ * @return string
+ */
+function wc_get_current_admin_url() {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	$uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
+
+	if ( ! $uri ) {
+		return '';
+	}
+
+	return remove_query_arg( array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ), admin_url( $uri ) );
+}
