@@ -25,7 +25,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * Setup before tests
 	 */
 	public function setUp() {
-		// set listening for exceptions.
+		// Set listening for exceptions.
 		add_action(
 			'woocommerce_caught_exception',
 			function( $exception_object ) {
@@ -36,7 +36,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Teardown after tests
+	 * Teardown after tests.
 	 */
 	public function tearDown() {
 		remove_all_actions( 'woocommerce_caught_exception' );
@@ -1573,13 +1573,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * post status
 	 */
 	public function test_wc_get_order_non_registered_status_param() {
-		// temporarily hide error logging we don't care about (and keeps from polluting stdout).
+		// Temporarily hide error logging we don't care about (and keeps from polluting stdout).
 		$original_logging_destination = ini_get( 'error_log' );
 		ini_set( 'error_log', '/dev/null' );
 		$orders = wc_get_orders( array( 'status' => 'i-do-not-exist' ) );
 		$this->assertEmpty( $orders );
 		$this->assertContains( 'provided order query contains an order status that is not registered', $this->caught_exception->getMessage() );
-		// restore original logging destination.
-		ini_set( 'error_log', $this->original_logging_destination );
+		// Restore original logging destination.
+		ini_set( 'error_log', $original_logging_destination );
 	}
 }

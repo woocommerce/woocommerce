@@ -785,20 +785,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
 			}
 
-			// verify post_status is actually registered.
+			// Verify post_status is actually registered.
 			$post_stati = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] );
 			foreach ( $post_stati as $post_status ) {
 				$post_status_exists = get_post_stati( array( 'name' => $post_status ) );
 				if ( empty( $post_status_exists ) ) {
 					$message = sprintf(
-						/* translators: 1: Status name */
+						/* translators: %s: status name */
 						__(
-							'The provided order query contains an order status that is not registered as a custom post status (status provided is %1$s). It is possible there is something removing any expected registered custom post status before the query is made.',
+							'The provided order query contains an order status that is not registered as a custom post status (status provided is %s). It is possible there is something removing any expected registered custom post status before the query is made.',
 							'woocommerce'
 						),
 						$post_status
 					);
-					// bail.
+					// Bail.
 					throw new \Exception( $message );
 				}
 			}
