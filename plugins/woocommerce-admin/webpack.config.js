@@ -104,39 +104,14 @@ const webpackConfig = {
 				},
 			},
 			{
-				test: /\.jsx?$/,
+				test: /\.js?$/,
 				exclude: /node_modules/,
 				use: {
-					loader: 'babel-loader?cacheDirectory',
+					loader: 'babel-loader',
 					options: {
 						presets: [ '@wordpress/babel-preset-default' ],
 					},
 				},
-			},
-			{
-				test: /\.js?$/,
-				use: {
-					loader: 'babel-loader',
-					options: {
-						presets: [
-							[
-								'@babel/preset-env',
-								{ loose: true, modules: 'commonjs' },
-							],
-						],
-						plugins: [ 'transform-es2015-template-literals' ],
-					},
-				},
-				include: new RegExp(
-					'/node_modules/(' +
-						'|acorn-jsx' +
-						'|d3-array' +
-						'|debug' +
-						'|marked' +
-						'|regexpu-core' +
-						'|unicode-match-property-ecmascript' +
-						'|unicode-match-property-value-ecmascript)/'
-				),
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
@@ -182,8 +157,6 @@ const webpackConfig = {
 				__dirname,
 				'node_modules/@wordpress/components/src'
 			),
-			// @todo - remove once https://github.com/WordPress/gutenberg/pull/16196 is released.
-			'react-spring': 'react-spring/web.cjs',
 			'@woocommerce/wc-admin-settings': path.resolve(
 				__dirname,
 				'client/settings/index.js'
