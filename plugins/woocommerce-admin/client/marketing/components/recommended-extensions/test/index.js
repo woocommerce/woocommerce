@@ -138,6 +138,8 @@ describe( 'Click Recommendations', () => {
 				description={ 'Does things.' }
 				icon={ 'icons/automatewoo.svg' }
 				url={ 'https://woocommerce.com/products/automatewoo/' }
+				product={ 'automatewoo' }
+				category={ 'marketing' }
 			/>
 		);
 	} );
