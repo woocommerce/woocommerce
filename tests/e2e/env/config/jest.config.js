@@ -1,5 +1,25 @@
+/**
+ * External Dependencies
+ */
 const { jestConfig } = require( '@automattic/puppeteer-utils' );
+const path = require( 'path' );
+const fs = require( 'fs' );
 
+/**
+ * Internal Dependencies
+ */
+const { getAppRoot } = require( '../utils' );
+
+let setupFilesAfterEnv = [
+	path.resolve( __dirname, '../build/setup/jest.setup.js' ),
+	'expect-puppeteer',
+];
+
+const appPath = getAppRoot();
+const localJestSetupFile = path.resolve( appPath, 'tests/e2e/config/jest.setup.js' );
+if (fs.existsSync( localJestSetupFile ) ) {
+	setupFilesAfterEnv.push( localJestSetupFile );
+}
 module.exports = {
 	...jestConfig,
 	moduleNameMapper: {
@@ -10,10 +30,7 @@ module.exports = {
 	setupFiles: [ '<rootDir>/config/env.setup.js' ],
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
-	setupFilesAfterEnv: [
-		'<rootDir>/build/setup/jest.setup.js',
-		'expect-puppeteer',
-	],
+	setupFilesAfterEnv,
 
 	// Sort test path alphabetically. This is needed so that `activate-and-setup` tests run first
 	testSequencer: '<rootDir>/config/jest-custom-sequencer.js',
