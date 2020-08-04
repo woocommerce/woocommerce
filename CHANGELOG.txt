@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 4.3.1 - 2020-07-21 =
+
+**WooCommerce Admin 1.3.1**
+* Fix - PHP Fatal errors when columns are missing from the Notes table. #4831
+
+**WooCommerce Blocks 2.7.2**
+* Enhancement - Move Draft order logic behind feature flag. #2874
+
 = 4.3.0 - 2020-07-08 =
 
 **WooCommerce**
