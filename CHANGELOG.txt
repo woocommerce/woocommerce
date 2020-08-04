@@ -58,7 +58,7 @@
 * Fix - After clicking to update WooCommerce, the user will stay in the same page instead of being redirected to the "Settings" page. #27172
 * Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
 * Fix - Removed the JETPACK_AUTOLOAD_DEV define. #27185
-* Dev - Update WooCommerce Admin version to v1.4.0-beta.2. #27144
+* Dev - Update WooCommerce Admin version to v1.4.0-beta.3. #27214
 * Dev - Upgraded to the 2.x Jetpack Autoloader. #27123
 * Dev - Update jest-preset-default version to ^6.2.0. #27090
 * Dev - Added a second $existing_meta_keys parameter to the woocommerce_duplicate_product_exclude_meta filter. #27038
@@ -100,7 +100,16 @@
 * Fix - Center the skip link on the theme selection step. #4847
 * Fix - Removed item "profiler" from the menu. #4851
 * Fix - PHP notices when hosts block certain WP scripts. #4856
+* Fix - Remove new WP 5.5 meta box arrows in the shipping banner. #4914
+* Fix - Allow revisiting of the payments task. #4918
+* Fix - Use of Jetpack autoloader. #4920
+* Fix - Only show WCPay task in US based stores. #4899
+* Fix - Polyfill core-data saveUser() on WP 5.3.x. #4869
+* Fix - Product types step bugs in onboarding wizard. #4900
+* Fix - Center all descriptive text on onboarding wizard steps. #4902
+* Fix - Change account required text on biz step in onboarding wizard. #4909
 * Dev - Add the experimental resolver to WCA data package. #4862
+* Dev - Fix linter errors. #4904
 
 **WooCommerce Blocks 3.0.0**
 * Build - Updated the automattic/jetpack-autoloader package to the 2.0 branch. #2847
