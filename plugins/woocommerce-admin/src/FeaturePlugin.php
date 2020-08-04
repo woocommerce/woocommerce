@@ -138,10 +138,6 @@ class FeaturePlugin {
 			return;
 		}
 
-		if ( ! $this->check_build() ) {
-			add_action( 'admin_notices', array( $this, 'render_build_notice' ) );
-		}
-
 		$this->includes();
 		$this->hooks();
 	}
@@ -256,17 +252,6 @@ class FeaturePlugin {
 	}
 
 	/**
-	 * Returns true if build file exists.
-	 *
-	 * @return bool
-	 */
-	protected function check_build() {
-		$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-		$suffix       = Loader::should_use_minified_js_file( $script_debug ) ? '.min' : '';
-		return file_exists( plugin_dir_path( __DIR__ ) . "/dist/app/index{$suffix}.js" );
-	}
-
-	/**
 	 * Deactivates this plugin.
 	 */
 	public function deactivate_self() {
@@ -280,19 +265,6 @@ class FeaturePlugin {
 	public function render_dependencies_notice() {
 		$message = $this->get_dependency_errors();
 		printf( '<div class="error"><p>%s</p></div>', implode( ' ', $message ) ); /* phpcs:ignore xss ok. */
-	}
-
-	/**
-	 * Notify users that the plugin needs to be built.
-	 */
-	public function render_build_notice() {
-		$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'woocommerce-admin' );
-		$message_two = sprintf(
-			/* translators: 1: URL of GitHub Repository build page */
-			__( 'Or you can download a pre-built version of the plugin by visiting <a href="%1$s">the releases page in the repository</a>.', 'woocommerce-admin' ),
-			'https://github.com/woocommerce/woocommerce-admin/releases'
-		);
-		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* phpcs:ignore xss ok. */
 	}
 
 	/**

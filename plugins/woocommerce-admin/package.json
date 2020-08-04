@@ -18,7 +18,7 @@
 		"license.txt"
 	],
 	"scripts": {
-		"prebuild": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
+		"prebuild": "npm run -s install-if-deps-outdated",
 		"build": "npm run build:feature-config && npm run build:packages && cross-env NODE_ENV=production webpack",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"postbuild": "npm run -s i18n:pot && npm run -s i18n:build",
@@ -52,7 +52,7 @@
 		"publish-packages:check": "npm run build:packages && lerna updated",
 		"publish-packages:dev": "npm run build:packages && lerna publish from-package --npm-tag next",
 		"publish-packages:prod": "npm run build:packages && lerna publish from-package",
-		"prestart": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
+		"prestart": "npm run -s install-if-deps-outdated",
 		"start": "cross-env WC_ADMIN_PHASE=development npm run build:packages && cross-env WC_ADMIN_PHASE=development npm run build:feature-config && concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"node ./bin/packages/watch.js\"",
 		"pretest": "npm run -s install-if-no-packages",
 		"test": "wp-scripts test-unit-js --config tests/js/jest.config.json",
@@ -65,7 +65,8 @@
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
 		"storybook": "start-storybook  -c ./storybook -p 6007 --ci",
 		"build-storybook": "build-storybook  -c ./storybook",
-		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'"
+		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
+		"bump-version": "npm run -s install-if-deps-outdated && php ./bin/update-version.php"
 	},
 	"changelog": {
 		"labelPrefix": "[Type]",

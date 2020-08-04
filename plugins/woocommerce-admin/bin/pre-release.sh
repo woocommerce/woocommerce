@@ -76,9 +76,9 @@ npm --no-git-tag-version version $release || { error "ERROR: Invalid version num
 
 success "Version bumped successfully"
 
-status "Run prestart scripts to propagate version numbers and update dependencies."
+status "Run scripts to propagate version numbers and update dependencies."
 
-npm run prestart
+npm run bump-version
 
 status "Run docs script to make sure docs are updated."
 
