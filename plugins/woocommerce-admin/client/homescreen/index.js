@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 import { identity } from 'lodash';
 
 /**
@@ -17,7 +18,6 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import withSelect from 'wc-api/with-select';
 import { isOnboardingEnabled } from 'dashboard/utils';
 
 import Layout from './layout';

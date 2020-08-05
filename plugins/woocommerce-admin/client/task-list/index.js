@@ -10,10 +10,9 @@ import {
 	Card,
 	CardBody,
 	CardHeader,
-	Modal,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { Icon, check, chevronRight } from '@wordpress/icons';
 import { xor } from 'lodash';
 
@@ -37,14 +36,12 @@ import CartModal from 'dashboard/components/cart-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
 import { getCountryCode } from 'dashboard/utils';
 import { recordEvent } from 'lib/tracks';
-import withSelect from 'wc-api/with-select';
 
 class TaskDashboard extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
 			isCartModalOpen: false,
-			isWelcomeModalOpen: ! props.modalDismissed,
 		};
 	}
 
@@ -234,9 +231,7 @@ class TaskDashboard extends Component {
 
 	getCurrentTask() {
 		const { query } = this.props;
-
 		const { task } = query;
-
 		const currentTask = this.getAllTasks().find( ( s ) => s.key === task );
 
 		if ( ! currentTask ) {
@@ -277,71 +272,9 @@ class TaskDashboard extends Component {
 		this.setState( { isCartModalOpen: ! isCartModalOpen } );
 	}
 
-	closeWelcomeModal() {
-		// Prevent firing this event before the modal is seen.
-		if (
-			document.body.classList.contains( 'woocommerce-admin-is-loading' )
-		) {
-			return;
-		}
-
-		this.setState( { isWelcomeModalOpen: false } );
-		this.props.updateOptions( {
-			woocommerce_task_list_welcome_modal_dismissed: true,
-		} );
-	}
-
-	renderWelcomeModal() {
-		return (
-			<Modal
-				title={
-					<Fragment>
-						<span
-							role="img"
-							aria-hidden="true"
-							focusable="false"
-							className="woocommerce-task-dashboard__welcome-modal-icon"
-						>
-							🚀
-						</span>
-						{ __(
-							"Woo hoo - you're almost there!",
-							'woocommerce-admin'
-						) }
-					</Fragment>
-				}
-				onRequestClose={ () => this.closeWelcomeModal() }
-				className="woocommerce-task-dashboard__welcome-modal"
-			>
-				<div className="woocommerce-task-dashboard__welcome-modal-wrapper">
-					<div className="woocommerce-task-dashboard__welcome-modal-message">
-						<p>
-							{ __(
-								'Based on the information you provided we’ve prepared some final set up tasks for you to perform.',
-								'woocommerce-admin'
-							) }
-						</p>
-						<p>
-							{ __(
-								'Once complete your store will be ready for launch - exciting!',
-								'woocommerce-admin'
-							) }
-						</p>
-					</div>
-					<Button
-						isPrimary
-						onClick={ () => this.closeWelcomeModal() }
-					>
-						{ __( 'Continue', 'woocommerce-admin' ) }
-					</Button>
-				</div>
-			</Modal>
-		);
-	}
-
 	render() {
 		const { query } = this.props;
-		const { isCartModalOpen, isWelcomeModalOpen } = this.state;
+		const { isCartModalOpen } = this.state;
 		const currentTask = this.getCurrentTask();
 		const listTasks = this.getVisibleTasks().map( ( task ) => {
 			task.className = classNames(
@@ -429,7 +362,6 @@ class TaskDashboard extends Component {
 									<List items={ listTasks } />
 								</CardBody>
 							</Card>
-							{ isWelcomeModalOpen && this.renderWelcomeModal() }
 						</Fragment>
 					) }
 				</div>
@@ -458,12 +390,10 @@ export default compose(
 
 		const isTaskListComplete =
 			getOption( 'woocommerce_task_list_complete' ) || false;
-		const modalDismissed =
-			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ||
-			false;
 		const taskListPayments = getOption( 'woocommerce_task_list_payments' );
 		const trackedCompletedTasks =
 			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
+
 		const payments = getOption( 'woocommerce_task_list_payments' );
 		const dismissedTasks =
 			getOption( 'woocommerce_task_list_dismissed_tasks' ) || [];
@@ -483,7 +413,6 @@ export default compose(
 			isJetpackConnected: isJetpackConnected(),
 			installedPlugins,
 			isTaskListComplete,
-			modalDismissed,
 			payments,
 			profileItems,
 			taskListPayments,
