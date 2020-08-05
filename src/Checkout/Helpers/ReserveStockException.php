@@ -1,8 +1,6 @@
 <?php
 /**
  * Exceptions for stock reservation.
- *
- * @package WooCommerce
  */
 
 namespace Automattic\WooCommerce\Checkout\Helpers;

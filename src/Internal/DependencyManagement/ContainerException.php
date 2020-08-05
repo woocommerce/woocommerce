@@ -1,8 +1,6 @@
 <?php
 /**
  * ExtendedContainer class file.
- *
- * @package WooCommerce\Internal\DependencyManagement
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;

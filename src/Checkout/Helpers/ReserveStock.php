@@ -1,8 +1,6 @@
 <?php
 /**
  * Handle product stock reservation during checkout.
- *
- * @package WooCommerce
  */
 
 namespace Automattic\WooCommerce\Checkout\Helpers;

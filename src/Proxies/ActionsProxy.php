@@ -1,8 +1,6 @@
 <?php
 /**
  * ActionsProxy class file.
- *
- * @package WooCommerce\Tools\Proxies
  */
 
 namespace Automattic\WooCommerce\Proxies;

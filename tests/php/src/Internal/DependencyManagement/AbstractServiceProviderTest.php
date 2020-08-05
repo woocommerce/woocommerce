@@ -1,8 +1,6 @@
 <?php
 /**
  * AbstractServiceProviderTests class file.
- *
- * @package WooCommerce\Tests\Internal\DependencyManagement
  */
 
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;

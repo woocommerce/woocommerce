@@ -1,8 +1,6 @@
 <?php
 /**
  * ClassThatDependsOnLegacyCodeTest class file
- *
- * @package WooCommerce\Tests\Proxies
  */
 
 namespace Automattic\WooCommerce\Tests\Proxies;
