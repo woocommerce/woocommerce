@@ -42,7 +42,7 @@ class List extends Component {
 				className={ listClassName }
 				role="menu"
 			>
-				{ items.map( ( item ) => {
+				{ items.map( ( item, index ) => {
 					const {
 						after,
 						before,
@@ -81,7 +81,7 @@ class List extends Component {
 
 					return (
 						<CSSTransition
-							key={ key }
+							key={ key || index }
 							timeout={ 500 }
 							classNames="woocommerce-list__item"
 						>
