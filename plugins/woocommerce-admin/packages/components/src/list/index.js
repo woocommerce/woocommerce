@@ -42,13 +42,14 @@ class List extends Component {
 				className={ listClassName }
 				role="menu"
 			>
-				{ items.map( ( item, i ) => {
+				{ items.map( ( item ) => {
 					const {
 						after,
 						before,
 						className: itemClasses,
 						content,
 						href,
+						key,
 						listItemTag,
 						onClick,
 						target,
@@ -80,7 +81,7 @@ class List extends Component {
 
 					return (
 						<CSSTransition
-							key={ i }
+							key={ key }
 							timeout={ 500 }
 							classNames="woocommerce-list__item"
 						>
