@@ -13,7 +13,7 @@ import './style.scss';
 
 const ProductPrice = ( { className, currency, regularValue, value } ) => {
 	const isDiscounted =
-		Number.isFinite( regularValue ) && regularValue !== value;
+		Number.isFinite( regularValue ) && regularValue > value;
 
 	if ( isDiscounted ) {
 		return (
