@@ -111,6 +111,10 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * the environment fields returned in the response.
 	 */
 	public function test_get_system_status_info_environment_filtered_by_field() {
+		if ( ! version_compare( get_bloginfo( 'version' ), '5.3', '>=' ) ) {
+			$this->markTestSkipped( 'Skipping because nested property support was introduced in 5.3.' );
+			return;
+		}
 		$expected_data = array(
 			'environment' => array(
 				'version' => WC()->version
