@@ -116,7 +116,7 @@ const completeOnboardingWizard = async () => {
 	expect( productTypesCheckboxes ).toHaveLength( 8 );
 
 	// Select Physical and Downloadable products
-	for ( let i = 0; i < 2; i++ ) {
+	for ( let i = 1; i < 2; i++ ) {
 		await productTypesCheckboxes[i].click();
 	}
 
