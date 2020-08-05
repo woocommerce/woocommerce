@@ -180,7 +180,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		window.location.href
 	) }`;
 
-	if ( ! customerId && ! CHECKOUT_ALLOWS_GUEST ) {
+	if ( ! isEditor && ! customerId && ! CHECKOUT_ALLOWS_GUEST ) {
 		return (
 			<>
 				{ __(
