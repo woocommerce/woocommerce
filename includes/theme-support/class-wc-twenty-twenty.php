@@ -3,7 +3,7 @@
  * Twenty Twenty support.
  *
  * @since   3.8.1
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 use Automattic\Jetpack\Constants;

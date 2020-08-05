@@ -2,7 +2,7 @@
 /**
  * WC_Report_Most_Stocked.
  *
- * @package WooCommerce/Admin/Reports
+ * @package WooCommerce\Admin\Reports
  */
 
 defined( 'ABSPATH' ) || exit;

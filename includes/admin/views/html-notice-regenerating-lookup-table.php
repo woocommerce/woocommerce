@@ -2,7 +2,7 @@
 /**
  * Admin View: Notice - Regenerating product lookup table.
  *
- * @package WooCommerce/admin
+ * @package WooCommerce\admin
  */
 
 use Automattic\Jetpack\Constants;

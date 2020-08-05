@@ -5,7 +5,7 @@
  * The WooCommerce order factory creating the right order objects.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;

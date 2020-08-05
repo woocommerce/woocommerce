@@ -2,7 +2,7 @@
 /**
  * Post Types Admin
  *
- * @package  WooCommerce/admin
+ * @package  WooCommerce\admin
  * @version  3.3.0
  */
 
