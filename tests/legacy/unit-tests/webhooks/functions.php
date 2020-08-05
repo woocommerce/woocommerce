@@ -221,6 +221,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * will only deliver the payload once per webhook.
 	 */
 	public function test_woocommerce_webhook_is_delivered_only_once() {
+		global $wc_queued_webhooks;
+		$this->assertNull( $wc_queued_webhooks );
+
 		$webhook1 = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
 		$webhook2 = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
 		wc_load_webhooks( 'active' );
@@ -231,34 +234,23 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $this->delivery_counter[ $webhook2->get_id() . $customer1->get_id() ] );
 		$this->assertEquals( 1, $this->delivery_counter[ $webhook1->get_id() . $customer2->get_id() ] );
 		$this->assertEquals( 1, $this->delivery_counter[ $webhook2->get_id() . $customer2->get_id() ] );
+
+		$this->assertCount( 4, $wc_queued_webhooks );
+		$this->assertEquals( $webhook2->get_id(), $wc_queued_webhooks[0]['webhook']->get_id() );
+		$this->assertEquals( $customer1->get_id(), $wc_queued_webhooks[0]['arg'] );
+		$this->assertEquals( $webhook1->get_id(), $wc_queued_webhooks[1]['webhook']->get_id() );
+		$this->assertEquals( $customer1->get_id(), $wc_queued_webhooks[1]['arg'] );
+		$this->assertEquals( $webhook2->get_id(), $wc_queued_webhooks[2]['webhook']->get_id() );
+		$this->assertEquals( $customer2->get_id(), $wc_queued_webhooks[2]['arg'] );
+		$this->assertEquals( $webhook1->get_id(), $wc_queued_webhooks[3]['webhook']->get_id() );
+		$this->assertEquals( $customer2->get_id(), $wc_queued_webhooks[3]['arg'] );
+		$wc_queued_webhooks = null;
+
 		$webhook1->delete( true );
 		$webhook2->delete( true );
 		$customer1->delete( true );
 		$customer2->delete( true );
 		remove_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
-	}
-
-	/**
-	 * Verify that a webhook is queued when intended to be delivered synchronously. This allows us to then execute them
-	 * all in a `register_shutdown_function` after the request has processed. Since async jobs are handled in
-	 * this way, we can be more confident that it is consistent.
-	 */
-	public function test_woocommerce_webhook_synchronous_is_queued() {
-		add_filter( 'woocommerce_webhook_deliver_async', '__return_false' );
-		$webhook = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
-		wc_load_webhooks( 'active' );
-		add_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
-		$customer = WC_Helper_Customer::create_customer( 'test1', 'pw1', 'user1@example.com' );
-
-		global $wc_queued_sync_webhooks;
-		$this->assertCount( 1, $wc_queued_sync_webhooks );
-		$this->assertEquals( $webhook->get_id(), $wc_queued_sync_webhooks[0]['webhook']->get_id() );
-		$this->assertEquals( $customer->get_id(), $wc_queued_sync_webhooks[0]['arg'] );
-
-		$wc_queued_sync_webhooks = null;
-		remove_filter( 'woocommerce_webhook_deliver_async', '__return_false' );
-		$webhook->delete( true );
-		$customer->delete( true );
 	}
 
 	/**

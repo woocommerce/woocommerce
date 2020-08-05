@@ -1,16 +1,9 @@
 <?php
-/**
- * Class WCInstallTest file.
- *
- * @package WooCommerce|Tests|WCInstallTest.
- */
-
-namespace Automattic\WooCommerce;
 
 /**
- * Class WC_Tests_WC_Helper.
+ * Class WC_Install_Test.
  */
-class WCInstallTest extends \WC_Unit_Test_Case {
+class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can detect missing table and adds/remove a notice.
@@ -87,6 +80,21 @@ class WCInstallTest extends \WC_Unit_Test_Case {
 		// Ideally, no missing table because verify base tables created the table as well.
 		$this->assertNotContains( $original_table_name, $missing_tables );
 		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+	}
+
+	/**
+	 * Test that premium support link is shown only when wccom is connected.
+	 */
+	public function test_plugin_row_meta() {
+		// Simulate connection break.
+		delete_option( 'woocommerce_helper_data' );
+		$plugin_row_data = \WC_Install::plugin_row_meta( array(), WC_PLUGIN_BASENAME );
+
+		$this->assertNotContains( 'premium_support', array_keys( $plugin_row_data ) );
+
+		update_option( 'woocommerce_helper_data', array( 'auth' => 'random token' ) );
+		$plugin_row_data = \WC_Install::plugin_row_meta( array(), WC_PLUGIN_BASENAME );
+		$this->assertContains( 'premium_support', array_keys( $plugin_row_data ) );
 	}
 
 }

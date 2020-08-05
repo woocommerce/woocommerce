@@ -268,7 +268,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'publish' => 1,
 		);
 
-		$status = $product->get_status( 'edit' );
+		// Fix display for variations when parent product is a draft.
+		if ( 'variation' === $product->get_type() ) {
+			$parent = $product->get_parent_data();
+			$status = 'draft' === $parent['status'] ? $parent['status'] : $product->get_status( 'edit' );
+		} else {
+			$status = $product->get_status( 'edit' );
+		}
 
 		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : -1;
 	}

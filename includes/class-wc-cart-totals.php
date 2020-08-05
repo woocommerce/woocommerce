@@ -341,7 +341,8 @@ final class WC_Cart_Totals {
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-			$shipping_line->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $shipping_line->taxes ) );
+			$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
+			$shipping_line->total_tax = array_sum( $shipping_line->taxes );
 
 			$this->shipping[ $key ] = $shipping_line;
 		}
@@ -858,7 +859,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + wc_round_tax_total( array_sum( $this->get_merged_taxes( true ) ), 0 ), 0 ) );
+		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.

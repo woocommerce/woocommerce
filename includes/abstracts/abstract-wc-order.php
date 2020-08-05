@@ -462,7 +462,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->is_compound      = $tax->is_compound();
 			$tax_totals[ $code ]->label            = $tax->get_label();
 			$tax_totals[ $code ]->amount          += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
+			$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount, array( 'currency' => $this->get_currency() ) );
 		}
 
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
@@ -672,7 +672,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_total_tax( $value ) {
 		// We round here because this is a total entry, as opposed to line items in other setters.
-		$this->set_prop( 'total_tax', wc_format_decimal( wc_round_tax_total( $value ) ) );
+		$this->set_prop( 'total_tax', wc_format_decimal( round( $value, wc_get_price_decimals() ) ) );
 	}
 
 	/**

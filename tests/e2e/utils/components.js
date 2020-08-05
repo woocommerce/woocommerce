@@ -90,10 +90,10 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( industryCheckboxes ).toHaveLength( 8 );
+	expect( industryCheckboxes ).toHaveLength( 10 );
 
 	// Select all industries including "Other"
-	for ( let i = 0; i < 8; i++ ) {
+	for ( let i = 0; i < 10; i++ ) {
 		await industryCheckboxes[i].click();
 	}
 
@@ -115,10 +115,10 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( productTypesCheckboxes ).toHaveLength( 6 );
+	expect( productTypesCheckboxes ).toHaveLength( 8 );
 
 	// Select Physical and Downloadable products
-	for ( let i = 0; i < 2; i++ ) {
+	for ( let i = 1; i < 2; i++ ) {
 		await productTypesCheckboxes[i].click();
 	}
 
@@ -141,22 +141,17 @@ const completeOnboardingWizard = async () => {
 
 	// Fill the number of products you plan to sell
 	await selectControls[0].click();
-	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.numberofproducts' ) } );
 
 	// Fill currently selling elsewhere
 	await selectControls[1].click();
-	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Query for the plugin upload toggles
-	const pluginToggles = await page.$$( '.components-form-toggle__input' );
-	expect( pluginToggles ).toHaveLength( 3 );
-
-	// Disable Market on Facebook, Mailchimp and Google Shopping download
-	for ( let i = 0; i < 3; i++ ) {
-		await pluginToggles[i].click();
-	}
+	// Disable business extension downloads
+	const pluginToggle = await page.$( '.woocommerce-business-extensions .components-checkbox-control__input-container' );
+	pluginToggle.click();
 
 	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );

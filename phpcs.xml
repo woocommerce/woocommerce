@@ -25,7 +25,7 @@
 	<arg name="parallel" value="8" />
 
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="5.0" />
+	<config name="minimum_supported_wp_version" value="5.2" />
 	<config name="testVersion" value="7.0-" />
 
 	<!-- Rules -->
@@ -43,8 +43,19 @@
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
-		<exclude-pattern>tests/*</exclude-pattern>
-		<exclude-pattern>src/*</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php/src/</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Classes.ClassFileName">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/php/src/</include-pattern>
+	</rule>
+
+	<rule ref="Squiz.Classes.ValidClassName">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/php/src/</include-pattern>
 	</rule>
 
 	<rule ref="Generic.Commenting">
@@ -60,5 +71,17 @@
 		<exclude-pattern>src/</exclude-pattern>
 		<exclude-pattern>tests/php</exclude-pattern>
 		<exclude-pattern>tests/Tools/</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+		<exclude-pattern>tests/php/</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>tests/php/</exclude-pattern>
+	</rule>
+	
+	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+		<exclude-pattern>src/</exclude-pattern>
 	</rule>
 </ruleset>

@@ -824,7 +824,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				0  => 'private',
 				1  => 'publish',
 			);
-			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : -1;
+			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : 'draft';
+
+			// Fix draft status of variations.
+			if ( isset( $data['type'] ) && 'variation' === $data['type'] && -1 === $data['published'] ) {
+				$data['status'] = 'publish';
+			}
 
 			unset( $data['published'] );
 		}

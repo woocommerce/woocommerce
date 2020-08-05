@@ -22,7 +22,7 @@
   "module": "build-module/index.js",
   "dependencies": {
     "@wordpress/e2e-test-utils": "^4.6.0",
-    "@wordpress/jest-preset-default": "^5.4.0",
+    "@wordpress/jest-preset-default": "^6.2.0",
     "app-root-path": "^3.0.0",
     "jest": "^25.1.0",
     "jest-puppeteer": "^4.4.0",
