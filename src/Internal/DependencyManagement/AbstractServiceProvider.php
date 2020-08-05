@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
 use League\Container\Argument\RawArgument;
 use League\Container\Definition\DefinitionInterface;
-use League\Container\Definition\Definition;
 
 /**
  * Base class for the service providers used to register classes in the container.
@@ -50,7 +49,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 				} else {
 					$argument_class = $argument->getClass();
 					if ( is_null( $argument_class ) ) {
-						throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: constructor argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
+						throw new ContainerException( "Argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
 					}
 
 					$definition->addArgument( $argument_class->name );
@@ -59,7 +58,6 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 		}
 
 		// Register the definition only after being sure that no exception will be thrown.
-
 		$this->getContainer()->add( $definition->getAlias(), $definition, $shared );
 
 		return $definition;
@@ -78,21 +76,20 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	private function reflect_class_or_callable( string $class_name, $concrete ) {
 		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
 			try {
-				$class       = $concrete ?? $class_name;
-				$reflector   = new \ReflectionClass( $class );
-				$constructor = $reflector->getConstructor();
-				if ( isset( $constructor ) && ! $constructor->isPublic() ) {
-					throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '$class' isn't public, instances can't be created." );
+				$class  = $concrete ?? $class_name;
+				$method = new \ReflectionMethod( $class, Definition::INJECTION_METHOD );
+				if ( isset( $method ) && ! $method->isPublic() ) {
+					throw new ContainerException( "Method '" . Definition::INJECTION_METHOD . "' of class '$class' isn't public, instances can't be created." );
 				}
-				return $constructor;
+				return $method;
 			} catch ( \ReflectionException $ex ) {
-				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class '$class': {$ex->getMessage()}" );
+				return null;
 			}
 		} elseif ( is_callable( $concrete ) ) {
 			try {
 				return new \ReflectionFunction( $concrete );
 			} catch ( \ReflectionException $ex ) {
-				throw new ContainerException( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting callable: {$ex->getMessage()}" );
+				throw new ContainerException( "Error when reflecting callable: {$ex->getMessage()}" );
 			}
 		}
 

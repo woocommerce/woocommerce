@@ -15,10 +15,10 @@ class ClassWithScalarConstructorArgument {
 	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidTypeHint
 
 	/**
-	 * Class constructor.
+	 * Sets class dependencies.
 	 *
 	 * @param mixed $scalar_argument_without_default_value Anything, really.
 	 */
-	public function __construct( int $scalar_argument_without_default_value ) {
+	public function set_internal_dependencies( int $scalar_argument_without_default_value ) {
 	}
 }

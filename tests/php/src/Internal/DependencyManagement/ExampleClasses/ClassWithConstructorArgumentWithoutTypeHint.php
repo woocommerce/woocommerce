@@ -13,10 +13,10 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClas
 class ClassWithConstructorArgumentWithoutTypeHint {
 
 	/**
-	 * Class constructor.
+	 * Sets class dependencies.
 	 *
 	 * @param mixed $argument_without_type_hint Anything, really.
 	 */
-	public function __construct( $argument_without_type_hint ) {
+	public function set_internal_dependencies( $argument_without_type_hint ) {
 	}
 }

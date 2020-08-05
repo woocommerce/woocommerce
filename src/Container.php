@@ -30,11 +30,6 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 final class Container implements \Psr\Container\ContainerInterface {
 
 	/**
-	 * The root namespace of all WooCommerce classes in the `src` directory.
-	 */
-	const WOOCOMMERCE_ROOT_NAMESPACE = 'Automattic\\WooCommerce';
-
-	/**
 	 * The list of service provider classes to register.
 	 *
 	 * @var string[]
