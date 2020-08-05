@@ -13,8 +13,8 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClas
 class ClassWithPrivateConstructor {
 
 	/**
-	 * Class constructor.
+	 * Sets class dependencies.
 	 */
-	private function __construct() {
+	private function set_internal_dependencies() {
 	}
 }

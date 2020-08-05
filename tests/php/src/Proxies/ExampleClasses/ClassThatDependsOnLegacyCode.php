@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Proxies\ExampleClasses;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * An example class that uses the legacy proxy both from an constructor injected proxy and from the helper methods in the WooCommerce class.
+ * An example class that uses the legacy proxy both from a dependency injected proxy and from the helper methods in the WooCommerce class.
  */
 class ClassThatDependsOnLegacyCode {
 	/**
@@ -21,11 +21,11 @@ class ClassThatDependsOnLegacyCode {
 	private $legacy_proxy;
 
 	/**
-	 * Class constructor.
+	 * Sets class dependencies.
 	 *
 	 * @param LegacyProxy $legacy_proxy The instance of LegacyProxy to use.
 	 */
-	public function __construct( LegacyProxy $legacy_proxy ) {
+	public function set_internal_dependencies( LegacyProxy $legacy_proxy ) {
 		$this->legacy_proxy = $legacy_proxy;
 	}
 
