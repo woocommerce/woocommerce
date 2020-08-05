@@ -12,7 +12,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$variations = $product->get_available_variations();
 
-		$this->assertIsArray( $variations[0] );
+		$this->assertTrue( is_array( $variations[0] ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
 	}
 
@@ -24,7 +24,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$variations = $product->get_available_variations( 'array' );
 
-		$this->assertIsArray( $variations[0] );
+		$this->assertTrue( is_array( $variations[0] ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
 	}
 
