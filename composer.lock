@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60cbbbb4da7f102b79301f59930fb136",
+    "content-hash": "427fc6abd9c6a2bc8e568c70f2760b3d",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -466,16 +466,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.7.2",
+            "version": "v2.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "22a19698c5d0bf0029f10d39928d6fa54fc50ffd"
+                "reference": "cb03f2c257f21b9f7d6c50c1ae4eba1c01a5c68f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/22a19698c5d0bf0029f10d39928d6fa54fc50ffd",
-                "reference": "22a19698c5d0bf0029f10d39928d6fa54fc50ffd",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/cb03f2c257f21b9f7d6c50c1ae4eba1c01a5c68f",
+                "reference": "cb03f2c257f21b9f7d6c50c1ae4eba1c01a5c68f",
                 "shasum": ""
             },
             "require": {
@@ -509,7 +509,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-07-16T18:04:50+00:00"
+            "time": "2020-08-05T16:34:00+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -2521,20 +2521,6 @@
                 "polyfill",
                 "portable"
             ],
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-07-14T12:35:20+00:00"
         },
         {
@@ -2940,6 +2926,5 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    },
-    "plugin-api-version": "1.1.0"
+    }
 }
