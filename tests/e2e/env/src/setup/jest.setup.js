@@ -184,7 +184,6 @@ beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
-	await setupBrowser();
 } );
 
 afterEach( async () => {

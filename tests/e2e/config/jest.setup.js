@@ -1,7 +1,9 @@
 const {
 	switchUserToAdmin,
 	visitAdminPage,
-	switchUserToTest
+	switchUserToTest,
+	clearLocalStorage,
+	setBrowserViewport
 } = require( "@wordpress/e2e-test-utils" );
 
 /**
@@ -69,4 +71,6 @@ beforeAll( async () => {
 	await trashExistingPosts();
 	await trashExistingProducts();
 	await switchUserToTest();
+	await clearLocalStorage();
+	await setBrowserViewport( 'large' );
 } );
