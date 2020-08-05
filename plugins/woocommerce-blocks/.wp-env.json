@@ -9,5 +9,8 @@
 	],
 	"mappings": {
 		".htaccess": "./bin/.htaccess"
+	},
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true
 	}
 }
