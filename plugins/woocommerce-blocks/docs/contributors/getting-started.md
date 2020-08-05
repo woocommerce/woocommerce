@@ -12,6 +12,23 @@ To do so from the command line, ensure you have [`git`](https://git-scm.com) ins
 $ git clone https://github.com/woocommerce/woocommerce-gutenberg-products-block.git
 ```
 
+## Configuring your WordPress site
+
+When developing this plugin, you'll must add the following to the `wp-config.php` file attached to the WordPress instance you are using to test the plugin against:
+
+```php
+define( 'JETPACK_AUTOLOAD_DEV', true );
+```
+
+The above constant definition ensures that classes in the cloned plugin are always overriding what's included with WooCommerce core via the Woo Blocks package.
+
+It's also _recommended_ you add the following constant definitions to your `wp-config.php` file as well to make sure you are catching any PHP notices and/or errors introduced:
+
+```php
+define( 'WP_DEBUG', true );
+define( 'SCRIPT_DEBUG', true );
+```
+
 ## Installing dependencies
 
 To install dependencies, you will need the following tools installed on your machine:
