@@ -12,7 +12,10 @@ import {
 	useShippingDataContext,
 } from '@woocommerce/base-context';
 import { useStoreCart, useShallowEqual } from '@woocommerce/base-hooks';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import {
+	CURRENT_USER_IS_ADMIN,
+	PAYMENT_GATEWAY_SORT_ORDER,
+} from '@woocommerce/block-settings';
 
 /**
  * If there was an error registering a payment method, alert the admin.
@@ -44,18 +47,23 @@ const handleRegistrationError = ( error ) => {
  *                                                               state.
  * @param  {Object}                     registeredPaymentMethods Registered payment methods to
  *                                                               process.
+ * @param  {Array}                      paymentMethodsSortOrder  Array of payment method names to
+ *                                                               sort by. This should match keys of
+ *                                                               registeredPaymentMethods.
  *
  * @return {boolean} Whether the payment methods have been initialized or not. True when all payment
  *                   methods have been initialized.
  */
 const usePaymentMethodRegistration = (
 	dispatcher,
-	registeredPaymentMethods
+	registeredPaymentMethods,
+	paymentMethodsSortOrder
 ) => {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { isEditor } = useEditorContext();
 	const { selectedRates, shippingAddress } = useShippingDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
+	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
 	const { cartTotals, cartNeedsShipping } = useStoreCart();
 	const canPayArgument = useRef( {
 		cartTotals,
@@ -86,8 +94,13 @@ const usePaymentMethodRegistration = (
 				[ paymentMethod.name ]: paymentMethod,
 			};
 		};
-		for ( const paymentMethodName in registeredPaymentMethods ) {
+
+		for ( let i = 0; i < paymentMethodsOrder.length; i++ ) {
+			const paymentMethodName = paymentMethodsOrder[ i ];
 			const paymentMethod = registeredPaymentMethods[ paymentMethodName ];
+			if ( ! paymentMethod ) {
+				continue;
+			}
 
 			// In editor, shortcut so all payment methods show as available.
 			if ( isEditor ) {
@@ -119,7 +132,12 @@ const usePaymentMethodRegistration = (
 		// Example: Stripe CC, Stripe Payment Request.
 		// That's why we track "is initialised" state here.
 		setIsInitialized( true );
-	}, [ dispatcher, isEditor, registeredPaymentMethods ] );
+	}, [
+		dispatcher,
+		isEditor,
+		registeredPaymentMethods,
+		paymentMethodsOrder,
+	] );
 
 	// Determine which payment methods are available initially and whenever
 	// shipping methods change.
@@ -131,7 +149,41 @@ const usePaymentMethodRegistration = (
 	return isInitialized;
 };
 
-export const usePaymentMethods = ( dispatcher ) =>
-	usePaymentMethodRegistration( dispatcher, getPaymentMethods() );
-export const useExpressPaymentMethods = ( dispatcher ) =>
-	usePaymentMethodRegistration( dispatcher, getExpressPaymentMethods() );
+/**
+ * Custom hook for setting up payment methods (standard, non-express).
+ *
+ * @param  {function(Object):undefined} dispatcher
+ *
+ * @return {boolean} True when standard payment methods have been initialized.
+ */
+export const usePaymentMethods = ( dispatcher ) => {
+	const standardMethods = getPaymentMethods();
+	// Ensure all methods are present in order.
+	// Some payment methods may not be present in PAYMENT_GATEWAY_SORT_ORDER if they
+	// depend on state, e.g. COD can depend on shipping method.
+	const displayOrder = new Set( [
+		...PAYMENT_GATEWAY_SORT_ORDER,
+		...Object.keys( standardMethods ),
+	] );
+	return usePaymentMethodRegistration(
+		dispatcher,
+		standardMethods,
+		Array.from( displayOrder )
+	);
+};
+
+/**
+ * Custom hook for setting up express payment methods.
+ *
+ * @param  {function(Object):undefined} dispatcher
+ *
+ * @return {boolean} True when express payment methods have been initialized.
+ */
+export const useExpressPaymentMethods = ( dispatcher ) => {
+	const expressMethods = getExpressPaymentMethods();
+	return usePaymentMethodRegistration(
+		dispatcher,
+		expressMethods,
+		Object.keys( expressMethods )
+	);
+};
