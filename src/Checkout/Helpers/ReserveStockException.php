@@ -2,7 +2,7 @@
 /**
  * Exceptions for stock reservation.
  *
- * @package Automattic/WooCommerce
+ * @package WooCommerce
  */
 
 namespace Automattic\WooCommerce\Checkout\Helpers;

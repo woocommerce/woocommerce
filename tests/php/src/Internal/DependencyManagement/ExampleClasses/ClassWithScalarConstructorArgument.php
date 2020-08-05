@@ -2,7 +2,7 @@
 /**
  * ClassWithConstructorArgumentWithoutTypeHint class file.
  *
- * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
+ * @package WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
 
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;

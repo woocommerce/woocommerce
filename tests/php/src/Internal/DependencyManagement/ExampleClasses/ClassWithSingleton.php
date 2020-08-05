@@ -2,7 +2,7 @@
 /**
  * ClassWithSingleton class file.
  *
- * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
+ * @package WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
 
 // This class is in the root namespace on purpose, since it simulates being a legacy class in the 'includes' directory.

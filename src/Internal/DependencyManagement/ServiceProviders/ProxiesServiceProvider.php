@@ -2,7 +2,7 @@
 /**
  * Proxies class file.
  *
- * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
+ * @package WooCommerce\Internal\DependencyManagement\ServiceProviders
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;

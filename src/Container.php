@@ -2,7 +2,7 @@
 /**
  * Container class file.
  *
- * @package Automattic\WooCommerce
+ * @package WooCommerce
  */
 
 namespace Automattic\WooCommerce;
