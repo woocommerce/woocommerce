@@ -199,12 +199,18 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 				),
 				'value'       => array(
 					'description' => __( 'Setting value.', 'woocommerce-rest-api' ),
-					'type'        => 'mixed',
+					'type'        => array( 'string', 'array', 'null' ),
+					'items'       => array(
+						'type' => array( 'string', 'null' ),
+					),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'default'     => array(
 					'description' => __( 'Default value for the setting.', 'woocommerce-rest-api' ),
-					'type'        => 'mixed',
+					'type'        => array( 'string', 'array', 'null' ),
+					'items'       => array(
+						'type' => array( 'string', 'null' ),
+					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

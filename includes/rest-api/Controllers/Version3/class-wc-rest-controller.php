@@ -78,6 +78,35 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Compatibility functions for WP 5.5, since custom types are not supported anymore.
+	 * See @link https://core.trac.wordpress.org/changeset/48306
+	 *
+	 * @param string $method Optional. HTTP method of the request.
+	 *
+	 * @return array Endpoint arguments.
+	 */
+	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+
+		$endpoint_args = parent::get_endpoint_args_for_item_schema( $method );
+
+		if ( false === strpos( WP_REST_Server::EDITABLE, $method ) ) {
+			return $endpoint_args;
+		}
+
+		foreach ( $endpoint_args as $field_id => $params ) {
+			/**
+			 * Custom types are not supported as of WP 5.5, this translates type => 'date-time' to type => 'string' with format date-time.
+			 */
+			if ( 'date-time' === $params['type'] ) {
+				$endpoint_args[ $field_id ]['type']   = 'string';
+				$endpoint_args[ $field_id ]['format'] = 'date-time';
+			}
+		}
+
+		return $endpoint_args;
+	}
+
+	/**
 	 * Get normalized rest base.
 	 *
 	 * @return string

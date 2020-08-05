@@ -736,7 +736,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce-rest-api' ),
-								'type'        => 'mixed',
+								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
