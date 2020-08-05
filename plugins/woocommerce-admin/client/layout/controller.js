@@ -44,6 +44,7 @@ const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ 'profile-wizard' )
 );
 import getReports from 'analytics/report/get-reports';
+import { isWCAdmin } from 'dashboard/utils';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
@@ -252,9 +253,7 @@ export class Controller extends Component {
  * @param {Array} excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
-	const isWCAdmin = /admin.php\?page=wc-admin/.test( item.href );
-
-	if ( isWCAdmin ) {
+	if ( isWCAdmin( item.href ) ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
 		const defaultPath = window.wcAdminFeatures.homescreen

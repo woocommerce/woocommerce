@@ -22,8 +22,8 @@ import ActivityPanel from './activity-panel';
 import { recordEvent } from 'lib/tracks';
 
 class Header extends Component {
-	constructor() {
-		super();
+	constructor( props ) {
+		super( props );
 		this.state = {
 			isScrolled: false,
 		};

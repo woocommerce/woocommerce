@@ -182,3 +182,13 @@ export function isOnboardingEnabled() {
 
 	return getSetting( 'onboardingEnabled', false );
 }
+
+/**
+ * Determines if a URL is a WC admin url.
+ *
+ * @param {*} url - the url to test
+ * @return {boolean} true if the url is a wc-admin URL
+ */
+export function isWCAdmin( url ) {
+	return /admin.php\?page=wc-admin/.test( url );
+}
