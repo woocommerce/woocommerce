@@ -161,8 +161,12 @@
 								class_name = 'method_enabled';
 							}
 
+							var shipping_method_title_or_link = shipping_method.title;
+							if ( shipping_method.has_settings ) {
+								shipping_method_title_or_link = '<a href="' + window.location.href + '&instance_id=' + shipping_method_title_or_link + '">' + shipping_method.title + '</a>';
+							}
 							$method_list.append(
-								'<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method.title + '</li>'
+								'<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method_title_or_link + '</li>'
 							);
 						} );
 					} else {
