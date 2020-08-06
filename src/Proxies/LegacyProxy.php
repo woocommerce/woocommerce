@@ -7,7 +7,9 @@
 
 namespace Automattic\WooCommerce\Proxies;
 
+use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
 use \Psr\Container\ContainerInterface as Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Proxy class to access legacy WooCommerce functionality.
@@ -38,7 +40,10 @@ class LegacyProxy {
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
 		if ( false !== strpos( $class_name, '\\' ) ) {
-			throw new \Exception( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use method injection or the instance of \\Psr\\Container\\ContainerInterface for that.' );
+			throw new \Exception(
+				'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' .
+				Definition::INJECTION_METHOD . ' method injection or the instance of ' . ContainerInterface::class . ' for that.'
+			);
 		}
 
 		// If a class has a dedicated method to obtain a instance, use it.

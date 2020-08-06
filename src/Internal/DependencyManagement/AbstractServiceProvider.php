@@ -16,14 +16,14 @@ use League\Container\Definition\DefinitionInterface;
  * See the documentation of the original class this one is based on (https://container.thephpleague.com/3.x/service-providers)
  * for basic usage details. What this class adds is:
  *
- * - The `add_with_auto_arguments` method that allows to register classes without having to specify the constructor arguments.
+ * - The `add_with_auto_arguments` method that allows to register classes without having to specify the injection method arguments.
  * - The `share_with_auto_arguments` method, sibling of the above.
  * - Convenience `add` and `share` methods that are just proxies for the same methods in `$this->getContainer()`.
  */
 abstract class AbstractServiceProvider extends \League\Container\ServiceProvider\AbstractServiceProvider {
 
 	/**
-	 * Register a class in the container and use reflection to guess the constructor arguments.
+	 * Register a class in the container and use reflection to guess the injection method arguments.
 	 *
 	 * WARNING: this method uses reflection, so please have performance in mind when using it.
 	 *
@@ -33,7 +33,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
-	 * @throws ContainerException Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
+	 * @throws ContainerException Error when reflecting the class, or class injection method is not public, or an argument has no valid type hint.
 	 */
 	protected function add_with_auto_arguments( string $class_name, $concrete = null, bool $shared = false ) : DefinitionInterface {
 		$definition = new Definition( $class_name, $concrete );
@@ -65,13 +65,13 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 
 	/**
 	 * Check if a combination of class name and concrete is valid for registration.
-	 * Also return the class constructor if the concrete is either a class name or null (then use the supplied class name).
+	 * Also return the class injection method if the concrete is either a class name or null (then use the supplied class name).
 	 *
 	 * @param string $class_name The class name to check.
 	 * @param mixed  $concrete   The concrete to check.
 	 *
-	 * @return \ReflectionFunctionAbstract|null A reflection instance for the $class_name constructor or $concrete constructor or callable; null otherwise.
-	 * @throws ContainerException Class has a private constructor, can't reflect class, or the concrete is invalid.
+	 * @return \ReflectionFunctionAbstract|null A reflection instance for the $class_name injection method or $concrete injection method or callable; null otherwise.
+	 * @throws ContainerException Class has a private injection method, can't reflect class, or the concrete is invalid.
 	 */
 	private function reflect_class_or_callable( string $class_name, $concrete ) {
 		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
@@ -97,7 +97,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	}
 
 	/**
-	 * Register a class in the container and use reflection to guess the constructor arguments.
+	 * Register a class in the container and use reflection to guess the injection method arguments.
 	 * The class is registered as shared, so `get` on the container always returns the same instance.
 	 *
 	 * WARNING: this method uses reflection, so please have performance in mind when using it.
@@ -107,7 +107,7 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 	 *
 	 * @return DefinitionInterface The generated container definition.
 	 *
-	 * @throws ContainerException Error when reflecting the class, or class constructor is not public, or an argument has no valid type hint.
+	 * @throws ContainerException Error when reflecting the class, or class injection method is not public, or an argument has no valid type hint.
 	 */
 	protected function share_with_auto_arguments( string $class_name, $concrete = null ) : DefinitionInterface {
 		return $this->add_with_auto_arguments( $class_name, $concrete, true );
