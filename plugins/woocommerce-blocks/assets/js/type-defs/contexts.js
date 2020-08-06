@@ -264,20 +264,24 @@
 /**
  * @typedef {Object} AddToCartFormContext
  *
- * @property {boolean}                        showFormElements   True if showing a full add to cart form.
- * @property {Object}                         product            The product object to add to the cart.
- * @property {number}                         quantity           Stores the quantity being added to the cart.
- * @property {number}                         minQuantity        Min quantity that can be added to the cart.
- * @property {number}                         maxQuantity        Max quantity than can be added to the cart.
- * @property {Object}                         requestParams      List of params to send to the API.
- * @property {boolean}                        isIdle             True when the form state has changed and has no activity.
- * @property {boolean}                        isDisabled         True when the form cannot be submitted.
- * @property {boolean}                        isProcessing       True when the form has been submitted and is being processed.
- * @property {boolean}                        isBeforeProcessing True during any observers executing logic before form processing (eg. validation).
- * @property {boolean}                        isAfterProcessing  True when form status is AFTER_PROCESSING.
- * @property {boolean}                        hasError           True when the form is in an error state. Whatever caused the error (validation/payment method) will likely have triggered a notice.
- * @property {AddToCartFormEventRegistration} eventRegistration  Event emitters that can be subscribed to.
- * @property {AddToCartFormDispatchActions}   dispatchActions    Various actions that can be dispatched for the add to cart form context data.
+ * @property {Object}                         product              The product object to add to the cart.
+ * @property {string}                         productType          The name of the product type.
+ * @property {boolean}                        productIsPurchasable True if the product can be purchased.
+ * @property {boolean}                        productHasOptions    True if the product has additonal options and thus needs a cart form.
+ * @property {boolean}                        supportsFormElements True if the product type supports form elements.
+ * @property {boolean}                        showFormElements     True if showing a full add to cart form (enabled and supported).
+ * @property {number}                         quantity             Stores the quantity being added to the cart.
+ * @property {number}                         minQuantity          Min quantity that can be added to the cart.
+ * @property {number}                         maxQuantity          Max quantity than can be added to the cart.
+ * @property {Object}                         requestParams        List of params to send to the API.
+ * @property {boolean}                        isIdle               True when the form state has changed and has no activity.
+ * @property {boolean}                        isDisabled           True when the form cannot be submitted.
+ * @property {boolean}                        isProcessing         True when the form has been submitted and is being processed.
+ * @property {boolean}                        isBeforeProcessing   True during any observers executing logic before form processing (eg. validation).
+ * @property {boolean}                        isAfterProcessing    True when form status is AFTER_PROCESSING.
+ * @property {boolean}                        hasError             True when the form is in an error state. Whatever caused the error (validation/payment method) will likely have triggered a notice.
+ * @property {AddToCartFormEventRegistration} eventRegistration    Event emitters that can be subscribed to.
+ * @property {AddToCartFormDispatchActions}   dispatchActions      Various actions that can be dispatched for the add to cart form context data.
  */
 
 /**
