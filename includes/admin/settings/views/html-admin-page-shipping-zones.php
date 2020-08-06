@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
 					if ( ! empty( $methods ) ) {
-						foreach ( $methods as $method ) {
+						foreach ( $methods as $instance_id => $method ) {
 							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 
 							$shipping_method_link_or_title = esc_html( $method->get_title() );
