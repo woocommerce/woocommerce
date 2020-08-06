@@ -1,6 +1,6 @@
 <?php
 /**
- * ClassWithPrivateConstructor class file.
+ * ClassWithPrivateInjectionMethod class file.
  *
  * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
@@ -8,9 +8,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
- * An example of a class with a private constructor.
+ * An example of a class with a private injection method.
  */
-class ClassWithPrivateConstructor {
+class ClassWithPrivateInjectionMethod {
 
 	/**
 	 * Sets class dependencies.

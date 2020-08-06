@@ -1,6 +1,6 @@
 <?php
 /**
- * ClassWithConstructorArgumentWithoutTypeHint class file.
+ * ClassWithScalarInjectionMethodArgument class file.
  *
  * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
@@ -8,9 +8,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
- * An example class that has a constructor argument with a scalar type but without a default value.
+ * An example class that has an injector method argument with a scalar type but without a default value.
  */
-class ClassWithScalarConstructorArgument {
+class ClassWithScalarInjectionMethodArgument {
 
 	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidTypeHint
 

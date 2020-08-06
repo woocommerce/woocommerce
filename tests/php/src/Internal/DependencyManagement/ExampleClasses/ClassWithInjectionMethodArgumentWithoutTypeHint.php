@@ -1,6 +1,6 @@
 <?php
 /**
- * ClassWithConstructorArgumentWithoutTypeHint class file.
+ * ClassWithInjectionMethodArgumentWithoutTypeHint class file.
  *
  * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
@@ -8,9 +8,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
 
 /**
- * An example class that has a constructor argument without type hint.
+ * An example class that has a injector method argument without type hint.
  */
-class ClassWithConstructorArgumentWithoutTypeHint {
+class ClassWithInjectionMethodArgumentWithoutTypeHint {
 
 	/**
 	 * Sets class dependencies.
