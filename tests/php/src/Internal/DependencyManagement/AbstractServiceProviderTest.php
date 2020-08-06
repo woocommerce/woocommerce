@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithInjectionMethodArgumentWithoutTypeHint;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithNonFinalInjectionMethod;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithPrivateInjectionMethod;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithScalarInjectionMethodArgument;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
@@ -95,9 +96,19 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_throws_on_class_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't public, instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
 
 		$this->sut->add_with_auto_arguments( ClassWithPrivateInjectionMethod::class );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a non-final injection method.
+	 */
+	public function test_add_with_auto_arguments_throws_on_class_non_final_method_injection() {
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithNonFinalInjectionMethod::class . "' isn't 'final', instances can't be created." );
+
+		$this->sut->add_with_auto_arguments( ClassWithNonFinalInjectionMethod::class );
 	}
 
 	/**
@@ -105,9 +116,19 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_throws_on_concrete_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't public, instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
 
 		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithPrivateInjectionMethod::class );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is a class with a non-final injection method.
+	 */
+	public function test_add_with_auto_arguments_throws_on_concrete_non_final_method_injection() {
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithNonFinalInjectionMethod::class . "' isn't 'final', instances can't be created." );
+
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithNonFinalInjectionMethod::class );
 	}
 
 	/**

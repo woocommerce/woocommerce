@@ -78,9 +78,21 @@ abstract class AbstractServiceProvider extends \League\Container\ServiceProvider
 			try {
 				$class  = $concrete ?? $class_name;
 				$method = new \ReflectionMethod( $class, Definition::INJECTION_METHOD );
-				if ( isset( $method ) && ! $method->isPublic() ) {
-					throw new ContainerException( "Method '" . Definition::INJECTION_METHOD . "' of class '$class' isn't public, instances can't be created." );
+				if ( ! isset( $method ) ) {
+					return null;
 				}
+
+				$missing_modifiers = array();
+				if ( ! $method->isFinal() ) {
+					$missing_modifiers[] = 'final';
+				}
+				if ( ! $method->isPublic() ) {
+					$missing_modifiers[] = 'public';
+				}
+				if ( ! empty( $missing_modifiers ) ) {
+					throw new ContainerException( "Method '" . Definition::INJECTION_METHOD . "' of class '$class' isn't '" . implode( ' ', $missing_modifiers ) . "', instances can't be created." );
+				}
+
 				return $method;
 			} catch ( \ReflectionException $ex ) {
 				return null;
