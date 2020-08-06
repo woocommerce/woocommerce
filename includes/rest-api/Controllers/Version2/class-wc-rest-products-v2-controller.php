@@ -83,7 +83,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -112,7 +112,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'args'                => array(
 						'force' => array(
 							'default'     => false,
-							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce-rest-api' ),
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 							'type'        => 'boolean',
 						),
 					),
@@ -423,8 +423,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'date_modified'     => wc_rest_prepare_date_response( current_time( 'mysql' ), false ),
 				'date_modified_gmt' => wc_rest_prepare_date_response( time() ),
 				'src'               => wc_placeholder_img_src(),
-				'name'              => __( 'Placeholder', 'woocommerce-rest-api' ),
-				'alt'               => __( 'Placeholder', 'woocommerce-rest-api' ),
+				'name'              => __( 'Placeholder', 'woocommerce' ),
+				'alt'               => __( 'Placeholder', 'woocommerce' ),
 				'position'          => 0,
 			);
 		}
@@ -730,7 +730,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( 'variation' === $product->get_type() ) {
 			return new WP_Error(
 				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce-rest-api' ),
+				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -1120,7 +1120,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
 					/* translators: %s: attachment id */
-					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce-rest-api' ), $attachment_id ), 400 );
+					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
 				$gallery_positions[ $attachment_id ] = absint( isset( $image['position'] ) ? $image['position'] : $index );
@@ -1351,7 +1351,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error(
 				"woocommerce_rest_{$this->post_type}_invalid_id",
-				__( 'Invalid ID.', 'woocommerce-rest-api' ),
+				__( 'Invalid ID.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -1361,7 +1361,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( 'variation' === $object->get_type() ) {
 			return new WP_Error(
 				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce-rest-api' ),
+				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -1384,7 +1384,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error(
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */
-				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce-rest-api' ), $this->post_type ),
+				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
 				array(
 					'status' => rest_authorization_required_code(),
 				)
@@ -1422,7 +1422,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				return new WP_Error(
 					'woocommerce_rest_trash_not_supported',
 					/* translators: %s: post type */
-					sprintf( __( 'The %s does not support trashing.', 'woocommerce-rest-api' ), $this->post_type ),
+					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
 					array(
 						'status' => 501,
 					)
@@ -1435,7 +1435,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					return new WP_Error(
 						'woocommerce_rest_already_trashed',
 						/* translators: %s: post type */
-						sprintf( __( 'The %s has already been deleted.', 'woocommerce-rest-api' ), $this->post_type ),
+						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
 						array(
 							'status' => 410,
 						)
@@ -1451,7 +1451,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error(
 				'woocommerce_rest_cannot_delete',
 				/* translators: %s: post type */
-				sprintf( __( 'The %s cannot be deleted.', 'woocommerce-rest-api' ), $this->post_type ),
+				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
 				array(
 					'status' => 500,
 				)
@@ -1489,185 +1489,185 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id'                    => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'                  => array(
-					'description' => __( 'Product name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'slug'                  => array(
-					'description' => __( 'Product slug.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product slug.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'permalink'             => array(
-					'description' => __( 'Product URL.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created'          => array(
-					'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce-rest-api' ),
+					'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt'      => array(
-					'description' => __( 'The date the product was created, as GMT.', 'woocommerce-rest-api' ),
+					'description' => __( 'The date the product was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified'         => array(
-					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce-rest-api' ),
+					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified_gmt'     => array(
-					'description' => __( 'The date the product was last modified, as GMT.', 'woocommerce-rest-api' ),
+					'description' => __( 'The date the product was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'type'                  => array(
-					'description' => __( 'Product type.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product type.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'simple',
 					'enum'        => array_keys( wc_get_product_types() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status'                => array(
-					'description' => __( 'Product status (post status).', 'woocommerce-rest-api' ),
+					'description' => __( 'Product status (post status).', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'publish',
 					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'featured'              => array(
-					'description' => __( 'Featured product.', 'woocommerce-rest-api' ),
+					'description' => __( 'Featured product.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'catalog_visibility'    => array(
-					'description' => __( 'Catalog visibility.', 'woocommerce-rest-api' ),
+					'description' => __( 'Catalog visibility.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'visible',
 					'enum'        => array( 'visible', 'catalog', 'search', 'hidden' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'description'           => array(
-					'description' => __( 'Product description.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'short_description'     => array(
-					'description' => __( 'Product short description.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product short description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sku'                   => array(
-					'description' => __( 'Unique identifier.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'price'                 => array(
-					'description' => __( 'Current product price.', 'woocommerce-rest-api' ),
+					'description' => __( 'Current product price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'regular_price'         => array(
-					'description' => __( 'Product regular price.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product regular price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sale_price'            => array(
-					'description' => __( 'Product sale price.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product sale price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from'     => array(
-					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce-rest-api' ),
+					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from_gmt' => array(
-					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce-rest-api' ),
+					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to'       => array(
-					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce-rest-api' ),
+					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to_gmt'   => array(
-					'description' => __( 'End date of sale price, as GMT.', 'woocommerce-rest-api' ),
+					'description' => __( 'End date of sale price, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'price_html'            => array(
-					'description' => __( 'Price formatted in HTML.', 'woocommerce-rest-api' ),
+					'description' => __( 'Price formatted in HTML.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'on_sale'               => array(
-					'description' => __( 'Shows if the product is on sale.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if the product is on sale.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'purchasable'           => array(
-					'description' => __( 'Shows if the product can be bought.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if the product can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_sales'           => array(
-					'description' => __( 'Amount of sales.', 'woocommerce-rest-api' ),
+					'description' => __( 'Amount of sales.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'virtual'               => array(
-					'description' => __( 'If the product is virtual.', 'woocommerce-rest-api' ),
+					'description' => __( 'If the product is virtual.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'downloadable'          => array(
-					'description' => __( 'If the product is downloadable.', 'woocommerce-rest-api' ),
+					'description' => __( 'If the product is downloadable.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'downloads'             => array(
-					'description' => __( 'List of downloadable files.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of downloadable files.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
-								'description' => __( 'File ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'File ID.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
-								'description' => __( 'File name.', 'woocommerce-rest-api' ),
+								'description' => __( 'File name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'file' => array(
-								'description' => __( 'File URL.', 'woocommerce-rest-api' ),
+								'description' => __( 'File URL.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1675,156 +1675,156 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'download_limit'        => array(
-					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce-rest-api' ),
+					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry'       => array(
-					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce-rest-api' ),
+					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'external_url'          => array(
-					'description' => __( 'Product external URL. Only for external products.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'button_text'           => array(
-					'description' => __( 'Product external button text. Only for external products.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product external button text. Only for external products.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_status'            => array(
-					'description' => __( 'Tax status.', 'woocommerce-rest-api' ),
+					'description' => __( 'Tax status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'taxable',
 					'enum'        => array( 'taxable', 'shipping', 'none' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_class'             => array(
-					'description' => __( 'Tax class.', 'woocommerce-rest-api' ),
+					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'manage_stock'          => array(
-					'description' => __( 'Stock management at product level.', 'woocommerce-rest-api' ),
+					'description' => __( 'Stock management at product level.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_quantity'        => array(
-					'description' => __( 'Stock quantity.', 'woocommerce-rest-api' ),
+					'description' => __( 'Stock quantity.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'in_stock'              => array(
-					'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce-rest-api' ),
+					'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(
-					'description' => __( 'If managing stock, this controls if backorders are allowed.', 'woocommerce-rest-api' ),
+					'description' => __( 'If managing stock, this controls if backorders are allowed.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'no',
 					'enum'        => array( 'no', 'notify', 'yes' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders_allowed'    => array(
-					'description' => __( 'Shows if backorders are allowed.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if backorders are allowed.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'backordered'           => array(
-					'description' => __( 'Shows if the product is on backordered.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if the product is on backordered.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'sold_individually'     => array(
-					'description' => __( 'Allow one item to be bought in a single order.', 'woocommerce-rest-api' ),
+					'description' => __( 'Allow one item to be bought in a single order.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce-rest-api' ), $weight_unit ),
+					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'dimensions'            => array(
-					'description' => __( 'Product dimensions.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product dimensions.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'shipping_required'     => array(
-					'description' => __( 'Shows if the product need to be shipped.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if the product need to be shipped.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_taxable'      => array(
-					'description' => __( 'Shows whether or not the product shipping is taxable.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows whether or not the product shipping is taxable.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_class'        => array(
-					'description' => __( 'Shipping class slug.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shipping class slug.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'shipping_class_id'     => array(
-					'description' => __( 'Shipping class ID.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shipping class ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'reviews_allowed'       => array(
-					'description' => __( 'Allow reviews.', 'woocommerce-rest-api' ),
+					'description' => __( 'Allow reviews.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'average_rating'        => array(
-					'description' => __( 'Reviews average rating.', 'woocommerce-rest-api' ),
+					'description' => __( 'Reviews average rating.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'rating_count'          => array(
-					'description' => __( 'Amount of reviews that the product have.', 'woocommerce-rest-api' ),
+					'description' => __( 'Amount of reviews that the product have.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'related_ids'           => array(
-					'description' => __( 'List of related products IDs.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of related products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type' => 'integer',
@@ -1833,7 +1833,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'upsell_ids'            => array(
-					'description' => __( 'List of up-sell products IDs.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type' => 'integer',
@@ -1841,7 +1841,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'cross_sell_ids'        => array(
-					'description' => __( 'List of cross-sell products IDs.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of cross-sell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type' => 'integer',
@@ -1849,35 +1849,35 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id'             => array(
-					'description' => __( 'Product parent ID.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product parent ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'purchase_note'         => array(
-					'description' => __( 'Optional note to send the customer after purchase.', 'woocommerce-rest-api' ),
+					'description' => __( 'Optional note to send the customer after purchase.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'categories'            => array(
-					'description' => __( 'List of categories.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of categories.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
-								'description' => __( 'Category ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Category ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
-								'description' => __( 'Category name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Category name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'slug' => array(
-								'description' => __( 'Category slug.', 'woocommerce-rest-api' ),
+								'description' => __( 'Category slug.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1886,25 +1886,25 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'tags'                  => array(
-					'description' => __( 'List of tags.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of tags.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
-								'description' => __( 'Tag ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Tag ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
-								'description' => __( 'Tag name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Tag name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'slug' => array(
-								'description' => __( 'Tag slug.', 'woocommerce-rest-api' ),
+								'description' => __( 'Tag slug.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1913,59 +1913,59 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'images'                => array(
-					'description' => __( 'List of images.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of images.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'                => array(
-								'description' => __( 'Image ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Image ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'date_created'      => array(
-								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce-rest-api' ),
+								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_created_gmt'  => array(
-								'description' => __( 'The date the image was created, as GMT.', 'woocommerce-rest-api' ),
+								'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified'     => array(
-								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce-rest-api' ),
+								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified_gmt' => array(
-								'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce-rest-api' ),
+								'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'src'               => array(
-								'description' => __( 'Image URL.', 'woocommerce-rest-api' ),
+								'description' => __( 'Image URL.', 'woocommerce' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name'              => array(
-								'description' => __( 'Image name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Image name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'alt'               => array(
-								'description' => __( 'Image alternative text.', 'woocommerce-rest-api' ),
+								'description' => __( 'Image alternative text.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'position'          => array(
-								'description' => __( 'Image position. 0 means that the image is featured.', 'woocommerce-rest-api' ),
+								'description' => __( 'Image position. 0 means that the image is featured.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1973,41 +1973,41 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'attributes'            => array(
-					'description' => __( 'List of attributes.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of attributes.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'        => array(
-								'description' => __( 'Attribute ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name'      => array(
-								'description' => __( 'Attribute name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'position'  => array(
-								'description' => __( 'Attribute position.', 'woocommerce-rest-api' ),
+								'description' => __( 'Attribute position.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'visible'   => array(
-								'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce-rest-api' ),
+								'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
 								'type'        => 'boolean',
 								'default'     => false,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation' => array(
-								'description' => __( 'Define if the attribute can be used as variation.', 'woocommerce-rest-api' ),
+								'description' => __( 'Define if the attribute can be used as variation.', 'woocommerce' ),
 								'type'        => 'boolean',
 								'default'     => false,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'options'   => array(
-								'description' => __( 'List of available term names of the attribute.', 'woocommerce-rest-api' ),
+								'description' => __( 'List of available term names of the attribute.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'items'       => array(
@@ -2018,24 +2018,24 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'default_attributes'    => array(
-					'description' => __( 'Defaults variation attributes.', 'woocommerce-rest-api' ),
+					'description' => __( 'Defaults variation attributes.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'     => array(
-								'description' => __( 'Attribute ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'name'   => array(
-								'description' => __( 'Attribute name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'option' => array(
-								'description' => __( 'Selected attribute term name.', 'woocommerce-rest-api' ),
+								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -2043,7 +2043,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 				),
 				'variations'            => array(
-					'description' => __( 'List of variations IDs.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of variations IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -2052,7 +2052,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'grouped_products'      => array(
-					'description' => __( 'List of grouped products ID.', 'woocommerce-rest-api' ),
+					'description' => __( 'List of grouped products ID.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type' => 'integer',
@@ -2060,30 +2060,30 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'menu_order'            => array(
-					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce-rest-api' ),
+					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'meta_data'             => array(
-					'description' => __( 'Meta data.', 'woocommerce-rest-api' ),
+					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'    => array(
-								'description' => __( 'Meta ID.', 'woocommerce-rest-api' ),
+								'description' => __( 'Meta ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'key'   => array(
-								'description' => __( 'Meta key.', 'woocommerce-rest-api' ),
+								'description' => __( 'Meta key.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'value' => array(
-								'description' => __( 'Meta value.', 'woocommerce-rest-api' ),
+								'description' => __( 'Meta value.', 'woocommerce' ),
 								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -2107,63 +2107,63 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'menu_order' ) );
 
 		$params['slug']           = array(
-			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['status']         = array(
 			'default'           => 'any',
-			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_merge( array( 'any', 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['type']           = array(
-			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_keys( wc_get_product_types() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['sku']            = array(
-			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['featured']       = array(
-			'description'       => __( 'Limit result set to featured products.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['category']       = array(
-			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['tag']            = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['shipping_class'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute']      = array(
-			'description'       => __( 'Limit result set to products with a specific attribute. Use the taxonomy name/attribute slug.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products with a specific attribute. Use the taxonomy name/attribute slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute_term'] = array(
-			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -2171,7 +2171,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		if ( wc_tax_enabled() ) {
 			$params['tax_class'] = array(
-				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce-rest-api' ),
+				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce' ),
 				'type'              => 'string',
 				'enum'              => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
 				'sanitize_callback' => 'sanitize_text_field',
@@ -2180,25 +2180,25 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		$params['in_stock']  = array(
-			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['on_sale']   = array(
-			'description'       => __( 'Limit result set to products on sale.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['min_price'] = array(
-			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['max_price'] = array(
-			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',

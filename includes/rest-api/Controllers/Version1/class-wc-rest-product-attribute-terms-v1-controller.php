@@ -44,7 +44,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 		array(
 			'args' => array(
 				'attribute_id' => array(
-					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -61,7 +61,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'name' => array(
 						'type'        => 'string',
-						'description' => __( 'Name for the resource.', 'woocommerce-rest-api' ),
+						'description' => __( 'Name for the resource.', 'woocommerce' ),
 						'required'    => true,
 					),
 				) ),
@@ -72,11 +72,11 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 				'attribute_id' => array(
-					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -102,7 +102,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 					'force' => array(
 						'default'     => false,
 						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
+						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),
 			),
@@ -112,7 +112,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
 			'args' => array(
 				'attribute_id' => array(
-					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -193,13 +193,13 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 			'type'                 => 'object',
 			'properties'           => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Term name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Term name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -207,7 +207,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 					),
 				),
 				'slug' => array(
-					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce-rest-api' ),
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -215,7 +215,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 					),
 				),
 				'description' => array(
-					'description' => __( 'HTML description of the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -223,12 +223,12 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 					),
 				),
 				'menu_order' => array(
-					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'count' => array(
-					'description' => __( 'Number of published products for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

@@ -42,7 +42,7 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 			$this->namespace, '/' . $this->rest_base . '/batch', array(
 				'args'   => array(
 					'product_id' => array(
-						'description' => __( 'Unique identifier for the variable product.', 'woocommerce-rest-api' ),
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -65,7 +65,7 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -150,43 +150,43 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 			'type'       => 'object',
 			'properties' => array(
 				'id'               => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'review'           => array(
-					'description' => __( 'The content of the review.', 'woocommerce-rest-api' ),
+					'description' => __( 'The content of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created'     => array(
-					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce-rest-api' ),
+					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created_gmt' => array(
-					'description' => __( 'The date the review was created, as GMT.', 'woocommerce-rest-api' ),
+					'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'rating'           => array(
-					'description' => __( 'Review rating (0 to 5).', 'woocommerce-rest-api' ),
+					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'name'             => array(
-					'description' => __( 'Reviewer name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Reviewer name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'email'            => array(
-					'description' => __( 'Reviewer email.', 'woocommerce-rest-api' ),
+					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'verified'         => array(
-					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
