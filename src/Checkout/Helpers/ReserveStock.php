@@ -101,8 +101,18 @@ final class ReserveStock {
 					continue;
 				}
 
-				$managed_by_id          = $product->get_stock_managed_by_id();
-				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item->get_quantity() : $item->get_quantity();
+				$managed_by_id = $product->get_stock_managed_by_id();
+
+				/**
+				 * Filter order item quantity.
+				 *
+				 * @param int|float             $quantity Quantity.
+				 * @param WC_Order              $order    Order data.
+				 * @param WC_Order_Item_Product $item Order item data.
+				 */
+				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
+
+				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
 			}
 
 			if ( ! empty( $rows ) ) {
