@@ -91,6 +91,10 @@ $border-radius: 5px;
 .wc-block-card-elements {
 	display: flex;
 	width: 100%;
+
+	.wc-block-components-validation-error {
+		position: static;
+	}
 }
 
 .wc-block-gateway-container {
