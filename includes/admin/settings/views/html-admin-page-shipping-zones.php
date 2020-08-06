@@ -39,6 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					if ( ! empty( $methods ) ) {
 						foreach ( $methods as $method ) {
 							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+
 							$shipping_method_link_or_title = esc_html( $method->get_title() );
 							if ( $method->has_settings() ) {
 								$shipping_method_link_or_title = '<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . $instance_id . '">' . $shipping_method_link_or_title . '</a>';
