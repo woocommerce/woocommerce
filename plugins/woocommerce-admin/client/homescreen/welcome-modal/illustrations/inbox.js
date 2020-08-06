@@ -13,7 +13,7 @@ export const InboxIllustration = () => {
 		>
 			<defs />
 			<g clipPath="url(#clip0)">
-				<path fill="#3858E9" d="M0 0h517v160H0z" />
+				<path className="fill-theme-color" d="M0 0h517v160H0z" />
 				<path
 					fill="#fff"
 					fillOpacity=".65"
@@ -21,7 +21,7 @@ export const InboxIllustration = () => {
 				/>
 				<path fill="#F6F7F7" d="M113 33h267v185H113z" />
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M248.466 73.79h-114.69V47.88h114.69V73.79zm-114.015-.673h113.341V48.554H134.451v24.563z"
 				/>
 				<path
@@ -29,26 +29,26 @@ export const InboxIllustration = () => {
 					d="M155.702 56.63h-12.818v12.786h12.818V56.63z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M154.016 67.733h-13.493V54.274h13.493v13.46zm-12.819-.673h12.144V54.947h-12.144V67.06z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M225.267 56.966h-50v.673h50v-.673z"
 					opacity=".7"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M235.311 61.677h-60.044v.673h60.044v-.673z"
 					opacity=".5"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M225.267 66.387h-50v.673h50v-.673z"
 					opacity=".2"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M248.466 147.142h-114.69v-25.909h114.69v25.909zm-114.015-.673h113.341v-24.563H134.451v24.563z"
 				/>
 				<path
@@ -56,26 +56,26 @@ export const InboxIllustration = () => {
 					d="M155.702 129.981h-12.818v12.786h12.818v-12.786z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M154.016 141.085h-13.493v-13.459h13.493v13.459zm-12.819-.673h12.144v-12.113h-12.144v12.113z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M235.311 130.318h-60.044v.673h60.044v-.673z"
 					opacity=".7"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M225.267 135.028h-50v.673h50v-.673z"
 					opacity=".5"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M215.267 139.739h-40v.673h40v-.673z"
 					opacity=".2"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M289.62 110.465H174.93V84.557h114.69v25.908zm-114.016-.672h113.341V85.23H175.604v24.563z"
 				/>
 				<path
@@ -83,31 +83,31 @@ export const InboxIllustration = () => {
 					d="M267.694 106.092h12.818V93.305h-12.818v12.787z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M282.873 104.409H269.38V90.95h13.493v13.459zm-12.818-.673h12.144V91.623h-12.144v12.113z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M248.129 93.642h-60.044v.673h60.044v-.673z"
 					opacity=".7"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M238.085 98.353h-50v.672h50v-.672z"
 					opacity=".5"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M243.085 103.063h-55v.673h55v-.673z"
 					opacity=".2"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M266.035 66.154a5.363 5.363 0 005.369-5.356 5.363 5.363 0 00-5.369-5.356c-2.966 0-5.37 2.398-5.37 5.356 0 2.958 2.404 5.356 5.37 5.356zM273.793 140.515c2.966 0 5.37-2.398 5.37-5.356 0-2.958-2.404-5.356-5.37-5.356a5.363 5.363 0 00-5.369 5.356 5.363 5.363 0 005.369 5.356zM153.706 102.83a5.363 5.363 0 005.37-5.356c0-2.959-2.404-5.357-5.37-5.357s-5.37 2.398-5.37 5.357a5.363 5.363 0 005.37 5.356z"
 					opacity=".5"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M401.276 172h-70.552a8.79 8.79 0 01-6.169-2.517 8.532 8.532 0 01-2.555-6.078V131.56a3.368 3.368 0 011.078-2.471l37.386-34.915A8.113 8.113 0 01366 92c2.06 0 4.041.778 5.536 2.174l35.645 33.289a8.882 8.882 0 012.084 2.944 8.78 8.78 0 01.735 3.515v29.483c0 2.28-.919 4.466-2.555 6.078a8.79 8.79 0 01-6.169 2.517z"
 				/>
 				<path
@@ -115,13 +115,13 @@ export const InboxIllustration = () => {
 					d="M393.267 106h-54.534c-2.614 0-4.733 2.053-4.733 4.585v52.83c0 2.532 2.119 4.585 4.733 4.585h54.534c2.614 0 4.733-2.053 4.733-4.585v-52.83c0-2.532-2.119-4.585-4.733-4.585z"
 				/>
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M366 150.493l-41.579-20.323a1.667 1.667 0 00-1.631.091 1.695 1.695 0 00-.579.619 1.725 1.725 0 00-.211.826v34.967a5.345 5.345 0 001.543 3.767 5.261 5.261 0 003.725 1.56h77.464a5.261 5.261 0 003.725-1.56 5.345 5.345 0 001.543-3.767v-34.368c0-.352-.088-.699-.257-1.008a2.069 2.069 0 00-1.688-1.071 2.035 2.035 0 00-1.009.205L366 150.493zM390 118h-48v2h48v-2zM390 124h-48v2h48v-2z"
 				/>
-				<path fill="#3858E9" d="M384 130h-42v2h42v-2z" />
+				<path className="fill-theme-color" d="M384 130h-42v2h42v-2z" />
 				<path fill="#fff" d="M335 112a7 7 0 100-14 7 7 0 000 14z" />
 				<path
-					fill="#3858E9"
+					className="fill-theme-color"
 					d="M336 98a8.003 8.003 0 00-7.391 4.939 7.992 7.992 0 00-.455 4.622 7.993 7.993 0 006.285 6.285A8 8 0 00344 106a8.022 8.022 0 00-8-8zm-1.642 12.265l-4.1-4.1 1.15-1.15 2.954 2.954 6.234-6.234 1.15 1.15-7.388 7.38z"
 				/>
 			</g>

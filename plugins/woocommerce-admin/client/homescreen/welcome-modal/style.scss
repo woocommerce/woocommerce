@@ -62,4 +62,8 @@
 			outline: 1px solid transparent;
 		}
 	}
+
+	.fill-theme-color {
+		fill: var(--wp-admin-theme-color);
+	}
 }
