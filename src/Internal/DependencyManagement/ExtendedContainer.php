@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
-use Automattic\WooCommerce\Utilities\StringUtility;
+use Automattic\WooCommerce\Utilities\StringUtil;
 use League\Container\Container as BaseContainer;
 use League\Container\Definition\DefinitionInterface;
 
@@ -149,6 +149,6 @@ class ExtendedContainer extends BaseContainer {
 	 * @return bool True if the class is allowed to be registered, false otherwise.
 	 */
 	protected function is_class_allowed( string $class_name ): bool {
-		return StringUtility::starts_with( $class_name, $this->woocommerce_namespace, false ) || in_array( $class_name, $this->registration_whitelist, true );
+		return StringUtil::starts( $class_name, $this->woocommerce_namespace, false ) || in_array( $class_name, $this->registration_whitelist, true );
 	}
 }

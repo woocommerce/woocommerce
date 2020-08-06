@@ -1,6 +1,6 @@
 <?php
 /**
- * A class of utilities for dealing with namespaces.
+ * A class of utilities for dealing with strings.
  *
  * @package Automattic\WooCommerce\Utilities
  */
@@ -8,9 +8,9 @@
 namespace Automattic\WooCommerce\Utilities;
 
 /**
- * A class of utilities for dealing with namespaces.
+ * A class of utilities for dealing with strings.
  */
-final class StringUtility {
+final class StringUtil {
 
 	/**
 	 * Checks to see whether or not a string starts with another.
@@ -21,7 +21,7 @@ final class StringUtility {
 	 *
 	 * @return bool True if the $string starts with $starts_with, false otherwise.
 	 */
-	public static function starts_with( string $string, string $starts_with, bool $case_sensitive = true ): bool {
+	public static function starts( string $string, string $starts_with, bool $case_sensitive = true ): bool {
 		$len = strlen( $starts_with );
 		if ( $len > strlen( $string ) ) {
 			return false;
@@ -45,7 +45,7 @@ final class StringUtility {
 	 *
 	 * @return bool True if the $string ends with $ends_with, false otherwise.
 	 */
-	public static function ends_with( string $string, string $ends_with, bool $case_sensitive = true ): bool {
+	public static function ends( string $string, string $ends_with, bool $case_sensitive = true ): bool {
 		$len = strlen( $ends_with );
 		if ( $len > strlen( $string ) ) {
 			return false;
