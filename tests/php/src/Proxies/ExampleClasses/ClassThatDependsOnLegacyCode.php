@@ -25,7 +25,7 @@ class ClassThatDependsOnLegacyCode {
 	 *
 	 * @param LegacyProxy $legacy_proxy The instance of LegacyProxy to use.
 	 */
-	public function set_internal_dependencies( LegacyProxy $legacy_proxy ) {
+	public function container_init( LegacyProxy $legacy_proxy ) {
 		$this->legacy_proxy = $legacy_proxy;
 	}
 

@@ -17,6 +17,6 @@ class ClassWithInjectionMethodArgumentWithoutTypeHint {
 	 *
 	 * @param mixed $argument_without_type_hint Anything, really.
 	 */
-	public function set_internal_dependencies( $argument_without_type_hint ) {
+	public function container_init( $argument_without_type_hint ) {
 	}
 }

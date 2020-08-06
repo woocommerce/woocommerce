@@ -44,7 +44,7 @@ class ClassWithDependencies {
 	 * @param DependencyClass $dependency_class A class we depend on.
 	 * @param int             $some_number Some number we need for some reason.
 	 */
-	public function set_internal_dependencies( DependencyClass $dependency_class, int $some_number = self::SOME_NUMBER ) {
+	public function container_init( DependencyClass $dependency_class, int $some_number = self::SOME_NUMBER ) {
 		self::$instances_count++;
 		$this->dependency_class = $dependency_class;
 		$this->some_number      = self::SOME_NUMBER;

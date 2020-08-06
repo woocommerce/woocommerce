@@ -17,7 +17,7 @@ class Definition extends BaseDefinition {
 	/**
 	 * The standard method that we use for dependency injection.
 	 */
-	const INJECTION_METHOD = 'set_internal_dependencies';
+	const INJECTION_METHOD = 'container_init';
 
 	/**
 	 * Resolve a class using method injection instead of constructor injection.

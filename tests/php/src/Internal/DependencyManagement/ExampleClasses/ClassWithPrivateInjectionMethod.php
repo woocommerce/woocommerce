@@ -15,6 +15,6 @@ class ClassWithPrivateInjectionMethod {
 	/**
 	 * Sets class dependencies.
 	 */
-	private function set_internal_dependencies() {
+	private function container_init() {
 	}
 }
