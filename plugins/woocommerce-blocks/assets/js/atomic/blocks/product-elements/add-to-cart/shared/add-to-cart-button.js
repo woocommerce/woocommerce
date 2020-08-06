@@ -14,7 +14,10 @@ import { useStoreAddToCart } from '@woocommerce/base-hooks';
 const AddToCartButton = () => {
 	const {
 		showFormElements,
+		productIsPurchasable,
+		productHasOptions,
 		product,
+		productType,
 		isDisabled,
 		isProcessing,
 		eventRegistration,
@@ -23,8 +26,6 @@ const AddToCartButton = () => {
 	} = useAddToCartFormContext();
 	const { cartQuantity } = useStoreAddToCart( product.id || 0 );
 	const [ addedToCart, setAddedToCart ] = useState( false );
-	const isPurchasable = product.is_purchasable;
-	const hasOptions = product.has_options;
 	const addToCartButtonData = product.add_to_cart || {
 		url: '',
 		text: '',
@@ -47,23 +48,30 @@ const AddToCartButton = () => {
 		};
 	}, [ eventRegistration, hasError ] );
 
-	// If we are showing form elements, OR if the product has no additional form options, we can show
-	// a functional direct add to cart button, provided that the product is purchasable.
-	// No link is required to the full form under these circumstances.
-	if ( ( showFormElements || ! hasOptions ) && isPurchasable ) {
-		return (
-			<ButtonComponent
-				className="wc-block-components-product-add-to-cart-button"
-				quantityInCart={ cartQuantity }
-				isDisabled={ isDisabled }
-				isProcessing={ isProcessing }
-				isDone={ addedToCart }
-				onClick={ () => dispatchActions.submitForm() }
-			/>
-		);
-	}
+	/**
+	 * We can show a real button if we are:
+	 *
+	 *  	a) Showing a full add to cart form.
+	 * 		b) The product doesn't have options and can therefore be added directly to the cart.
+	 * 		c) The product is purchasable.
+	 *
+	 * Otherwise we show a link instead.
+	 */
+	const showButton =
+		( showFormElements ||
+			( ! productHasOptions && productType === 'simple' ) ) &&
+		productIsPurchasable;
 
-	return (
+	return showButton ? (
+		<ButtonComponent
+			className="wc-block-components-product-add-to-cart-button"
+			quantityInCart={ cartQuantity }
+			isDisabled={ isDisabled }
+			isProcessing={ isProcessing }
+			isDone={ addedToCart }
+			onClick={ () => dispatchActions.submitForm() }
+		/>
+	) : (
 		<LinkComponent
 			className="wc-block-components-product-add-to-cart-button"
 			href={ addToCartButtonData.url }

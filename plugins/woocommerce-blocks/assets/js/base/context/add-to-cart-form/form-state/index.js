@@ -5,12 +5,19 @@ import {
 	createContext,
 	useContext,
 	useReducer,
-	useRef,
 	useMemo,
 	useEffect,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
+import {
+	useStoreNotices,
+	useEmitResponse,
+	useShallowEqual,
+} from '@woocommerce/base-hooks';
+import {
+	productIsPurchasable,
+	productSupportsAddToCartForm,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -34,8 +41,12 @@ import { useValidationContext } from '../../shared/validation';
  */
 
 const AddToCartFormContext = createContext( {
-	showFormElements: false,
 	product: {},
+	productType: 'simple',
+	productIsPurchasable: true,
+	productHasOptions: false,
+	supportsFormElements: true,
+	showFormElements: false,
 	quantity: 0,
 	minQuantity: 1,
 	maxQuantity: 99,
@@ -89,7 +100,7 @@ export const AddToCartFormStateContextProvider = ( {
 		DEFAULT_STATE
 	);
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
-	const currentObservers = useRef( observers );
+	const currentObservers = useShallowEqual( observers );
 	const { addErrorNotice, removeNotices } = useStoreNotices();
 	const { setValidationErrors } = useValidationContext();
 	const {
@@ -97,11 +108,6 @@ export const AddToCartFormStateContextProvider = ( {
 		isErrorResponse,
 		isFailResponse,
 	} = useEmitResponse();
-
-	// set observers on ref so it's always current.
-	useEffect( () => {
-		currentObservers.current = observers;
-	}, [ observers ] );
 
 	/**
 	 * @type {AddToCartFormEventRegistration}
@@ -165,7 +171,7 @@ export const AddToCartFormStateContextProvider = ( {
 		if ( status === STATUS.BEFORE_PROCESSING ) {
 			removeNotices( 'error' );
 			emitEvent(
-				currentObservers.current,
+				currentObservers,
 				EMIT_TYPES.ADD_TO_CART_BEFORE_PROCESSING,
 				{}
 			).then( ( response ) => {
@@ -194,6 +200,7 @@ export const AddToCartFormStateContextProvider = ( {
 		addErrorNotice,
 		removeNotices,
 		dispatch,
+		currentObservers,
 	] );
 
 	/**
@@ -217,7 +224,7 @@ export const AddToCartFormStateContextProvider = ( {
 			if ( addToCartFormState.hasError ) {
 				// allow things to customize the error with a fallback if nothing customizes it.
 				emitEventWithAbort(
-					currentObservers.current,
+					currentObservers,
 					EMIT_TYPES.ADD_TO_CART_AFTER_PROCESSING_WITH_ERROR,
 					data
 				).then( ( response ) => {
@@ -244,7 +251,7 @@ export const AddToCartFormStateContextProvider = ( {
 			}
 
 			emitEventWithAbort(
-				currentObservers.current,
+				currentObservers,
 				EMIT_TYPES.ADD_TO_CART_AFTER_PROCESSING_WITH_SUCCESS,
 				data
 			).then( ( response ) => {
@@ -271,14 +278,21 @@ export const AddToCartFormStateContextProvider = ( {
 		isErrorResponse,
 		isFailResponse,
 		isSuccessResponse,
+		currentObservers,
 	] );
+
+	const supportsFormElements = productSupportsAddToCartForm( product );
 
 	/**
 	 * @type {AddToCartFormContext}
 	 */
 	const contextData = {
-		showFormElements: showFormElements && productIsPurchasable( product ),
 		product,
+		productType: product.type || 'simple',
+		productIsPurchasable: productIsPurchasable( product ),
+		productHasOptions: product.has_options || false,
+		supportsFormElements,
+		showFormElements: showFormElements && supportsFormElements,
 		quantity: addToCartFormState.quantity,
 		minQuantity: 1,
 		maxQuantity: product.quantity_limit || 99,
@@ -302,15 +316,4 @@ export const AddToCartFormStateContextProvider = ( {
 			{ children }
 		</AddToCartFormContext.Provider>
 	);
-};
-
-/**
- * Check a product object to see if it can be purchased.
- *
- * @param {Object} product Product object.
- */
-const productIsPurchasable = ( product ) => {
-	const { is_purchasable: isPurchasable = false } = product;
-
-	return isPurchasable;
 };
