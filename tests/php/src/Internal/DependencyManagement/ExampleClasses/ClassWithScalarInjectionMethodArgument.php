@@ -19,6 +19,6 @@ class ClassWithScalarInjectionMethodArgument {
 	 *
 	 * @param mixed $scalar_argument_without_default_value Anything, really.
 	 */
-	public function container_init( int $scalar_argument_without_default_value ) {
+	final public function container_init( int $scalar_argument_without_default_value ) {
 	}
 }
