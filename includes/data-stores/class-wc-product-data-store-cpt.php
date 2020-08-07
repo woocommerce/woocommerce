@@ -824,6 +824,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
 		$new_type = $product->get_type();
 
+		$old_product = WC_Data_Store::load($old_type);
+
+		/**
+		 * Make the old product way more easier accessible
+		 *
+		 * @var WC_Product $old_product The old product before type change
+		 * @var WC_Product $product		The type changed Product
+		 * @var string $old_type		The old type of the product
+		 * @var string $new_type		The new changed type of the product
+		 */
+		do_action('woocommerce_before_product_type_changed', $old_product, $product, $old_type, $new_type);
+
 		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
 		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
