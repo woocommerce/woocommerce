@@ -91,13 +91,13 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 			'type'                 => 'object',
 			'properties'           => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Shipping class name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Shipping class name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -105,7 +105,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 					),
 				),
 				'slug' => array(
-					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce-rest-api' ),
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -113,7 +113,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 					),
 				),
 				'description' => array(
-					'description' => __( 'HTML description of the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -121,7 +121,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 					),
 				),
 				'count' => array(
-					'description' => __( 'Number of published products for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

@@ -59,7 +59,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -90,195 +90,195 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'environment'        => array(
-					'description' => __( 'Environment.', 'woocommerce-rest-api' ),
+					'description' => __( 'Environment.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
 						'home_url'                  => array(
-							'description' => __( 'Home URL.', 'woocommerce-rest-api' ),
+							'description' => __( 'Home URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'site_url'                  => array(
-							'description' => __( 'Site URL.', 'woocommerce-rest-api' ),
+							'description' => __( 'Site URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'version'                   => array(
-							'description' => __( 'WooCommerce version.', 'woocommerce-rest-api' ),
+							'description' => __( 'WooCommerce version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'log_directory'             => array(
-							'description' => __( 'Log directory.', 'woocommerce-rest-api' ),
+							'description' => __( 'Log directory.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'log_directory_writable'    => array(
-							'description' => __( 'Is log directory writable?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is log directory writable?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'wp_version'                => array(
-							'description' => __( 'WordPress version.', 'woocommerce-rest-api' ),
+							'description' => __( 'WordPress version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'wp_multisite'              => array(
-							'description' => __( 'Is WordPress multisite?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is WordPress multisite?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'wp_memory_limit'           => array(
-							'description' => __( 'WordPress memory limit.', 'woocommerce-rest-api' ),
+							'description' => __( 'WordPress memory limit.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'wp_debug_mode'             => array(
-							'description' => __( 'Is WordPress debug mode active?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is WordPress debug mode active?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'wp_cron'                   => array(
-							'description' => __( 'Are WordPress cron jobs enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Are WordPress cron jobs enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'language'                  => array(
-							'description' => __( 'WordPress language.', 'woocommerce-rest-api' ),
+							'description' => __( 'WordPress language.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'server_info'               => array(
-							'description' => __( 'Server info.', 'woocommerce-rest-api' ),
+							'description' => __( 'Server info.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'php_version'               => array(
-							'description' => __( 'PHP version.', 'woocommerce-rest-api' ),
+							'description' => __( 'PHP version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'php_post_max_size'         => array(
-							'description' => __( 'PHP post max size.', 'woocommerce-rest-api' ),
+							'description' => __( 'PHP post max size.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'php_max_execution_time'    => array(
-							'description' => __( 'PHP max execution time.', 'woocommerce-rest-api' ),
+							'description' => __( 'PHP max execution time.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'php_max_input_vars'        => array(
-							'description' => __( 'PHP max input vars.', 'woocommerce-rest-api' ),
+							'description' => __( 'PHP max input vars.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'curl_version'              => array(
-							'description' => __( 'cURL version.', 'woocommerce-rest-api' ),
+							'description' => __( 'cURL version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'suhosin_installed'         => array(
-							'description' => __( 'Is SUHOSIN installed?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is SUHOSIN installed?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'max_upload_size'           => array(
-							'description' => __( 'Max upload size.', 'woocommerce-rest-api' ),
+							'description' => __( 'Max upload size.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'mysql_version'             => array(
-							'description' => __( 'MySQL version.', 'woocommerce-rest-api' ),
+							'description' => __( 'MySQL version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'mysql_version_string'      => array(
-							'description' => __( 'MySQL version string.', 'woocommerce-rest-api' ),
+							'description' => __( 'MySQL version string.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'default_timezone'          => array(
-							'description' => __( 'Default timezone.', 'woocommerce-rest-api' ),
+							'description' => __( 'Default timezone.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'fsockopen_or_curl_enabled' => array(
-							'description' => __( 'Is fsockopen/cURL enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is fsockopen/cURL enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'soapclient_enabled'        => array(
-							'description' => __( 'Is SoapClient class enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is SoapClient class enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'domdocument_enabled'       => array(
-							'description' => __( 'Is DomDocument class enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is DomDocument class enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'gzip_enabled'              => array(
-							'description' => __( 'Is GZip enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is GZip enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'mbstring_enabled'          => array(
-							'description' => __( 'Is mbstring enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is mbstring enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'remote_post_successful'    => array(
-							'description' => __( 'Remote POST successful?', 'woocommerce-rest-api' ),
+							'description' => __( 'Remote POST successful?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'remote_post_response'      => array(
-							'description' => __( 'Remote POST response.', 'woocommerce-rest-api' ),
+							'description' => __( 'Remote POST response.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'remote_get_successful'     => array(
-							'description' => __( 'Remote GET successful?', 'woocommerce-rest-api' ),
+							'description' => __( 'Remote GET successful?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'remote_get_response'       => array(
-							'description' => __( 'Remote GET response.', 'woocommerce-rest-api' ),
+							'description' => __( 'Remote GET response.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -286,31 +286,31 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'database'           => array(
-					'description' => __( 'Database.', 'woocommerce-rest-api' ),
+					'description' => __( 'Database.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
 						'wc_database_version'    => array(
-							'description' => __( 'WC database version.', 'woocommerce-rest-api' ),
+							'description' => __( 'WC database version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'database_prefix'        => array(
-							'description' => __( 'Database prefix.', 'woocommerce-rest-api' ),
+							'description' => __( 'Database prefix.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'maxmind_geoip_database' => array(
-							'description' => __( 'MaxMind GeoIP database.', 'woocommerce-rest-api' ),
+							'description' => __( 'MaxMind GeoIP database.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'database_tables'        => array(
-							'description' => __( 'Database tables.', 'woocommerce-rest-api' ),
+							'description' => __( 'Database tables.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -321,7 +321,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'active_plugins'     => array(
-					'description' => __( 'Active plugins.', 'woocommerce-rest-api' ),
+					'description' => __( 'Active plugins.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -330,7 +330,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'inactive_plugins'   => array(
-					'description' => __( 'Inactive plugins.', 'woocommerce-rest-api' ),
+					'description' => __( 'Inactive plugins.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -339,7 +339,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'dropins_mu_plugins' => array(
-					'description' => __( 'Dropins & MU plugins.', 'woocommerce-rest-api' ),
+					'description' => __( 'Dropins & MU plugins.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -348,62 +348,62 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'theme'              => array(
-					'description' => __( 'Theme.', 'woocommerce-rest-api' ),
+					'description' => __( 'Theme.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
 						'name'                    => array(
-							'description' => __( 'Theme name.', 'woocommerce-rest-api' ),
+							'description' => __( 'Theme name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'version'                 => array(
-							'description' => __( 'Theme version.', 'woocommerce-rest-api' ),
+							'description' => __( 'Theme version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'version_latest'          => array(
-							'description' => __( 'Latest version of theme.', 'woocommerce-rest-api' ),
+							'description' => __( 'Latest version of theme.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'author_url'              => array(
-							'description' => __( 'Theme author URL.', 'woocommerce-rest-api' ),
+							'description' => __( 'Theme author URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'is_child_theme'          => array(
-							'description' => __( 'Is this theme a child theme?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is this theme a child theme?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'has_woocommerce_support' => array(
-							'description' => __( 'Does the theme declare WooCommerce support?', 'woocommerce-rest-api' ),
+							'description' => __( 'Does the theme declare WooCommerce support?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'has_woocommerce_file'    => array(
-							'description' => __( 'Does the theme have a woocommerce.php file?', 'woocommerce-rest-api' ),
+							'description' => __( 'Does the theme have a woocommerce.php file?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'has_outdated_templates'  => array(
-							'description' => __( 'Does this theme have outdated templates?', 'woocommerce-rest-api' ),
+							'description' => __( 'Does this theme have outdated templates?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'overrides'               => array(
-							'description' => __( 'Template overrides.', 'woocommerce-rest-api' ),
+							'description' => __( 'Template overrides.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -412,19 +412,19 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'parent_name'             => array(
-							'description' => __( 'Parent theme name.', 'woocommerce-rest-api' ),
+							'description' => __( 'Parent theme name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'parent_version'          => array(
-							'description' => __( 'Parent theme version.', 'woocommerce-rest-api' ),
+							'description' => __( 'Parent theme version.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'parent_author_url'       => array(
-							'description' => __( 'Parent theme author URL.', 'woocommerce-rest-api' ),
+							'description' => __( 'Parent theme author URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view' ),
@@ -433,67 +433,67 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'settings'           => array(
-					'description' => __( 'Settings.', 'woocommerce-rest-api' ),
+					'description' => __( 'Settings.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'              => array(
-							'description' => __( 'REST API enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'force_ssl'                => array(
-							'description' => __( 'SSL forced?', 'woocommerce-rest-api' ),
+							'description' => __( 'SSL forced?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'currency'                 => array(
-							'description' => __( 'Currency.', 'woocommerce-rest-api' ),
+							'description' => __( 'Currency.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'currency_symbol'          => array(
-							'description' => __( 'Currency symbol.', 'woocommerce-rest-api' ),
+							'description' => __( 'Currency symbol.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'currency_position'        => array(
-							'description' => __( 'Currency position.', 'woocommerce-rest-api' ),
+							'description' => __( 'Currency position.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'thousand_separator'       => array(
-							'description' => __( 'Thousand separator.', 'woocommerce-rest-api' ),
+							'description' => __( 'Thousand separator.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'decimal_separator'        => array(
-							'description' => __( 'Decimal separator.', 'woocommerce-rest-api' ),
+							'description' => __( 'Decimal separator.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'number_of_decimals'       => array(
-							'description' => __( 'Number of decimals.', 'woocommerce-rest-api' ),
+							'description' => __( 'Number of decimals.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'geolocation_enabled'      => array(
-							'description' => __( 'Geolocation enabled?', 'woocommerce-rest-api' ),
+							'description' => __( 'Geolocation enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'taxonomies'               => array(
-							'description' => __( 'Taxonomy terms for product/order statuses.', 'woocommerce-rest-api' ),
+							'description' => __( 'Taxonomy terms for product/order statuses.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -502,7 +502,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'product_visibility_terms' => array(
-							'description' => __( 'Terms in the product visibility taxonomy.', 'woocommerce-rest-api' ),
+							'description' => __( 'Terms in the product visibility taxonomy.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -513,19 +513,19 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'security'           => array(
-					'description' => __( 'Security.', 'woocommerce-rest-api' ),
+					'description' => __( 'Security.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
 						'secure_connection' => array(
-							'description' => __( 'Is the connection to your store secure?', 'woocommerce-rest-api' ),
+							'description' => __( 'Is the connection to your store secure?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'hide_errors'       => array(
-							'description' => __( 'Hide errors from visitors?', 'woocommerce-rest-api' ),
+							'description' => __( 'Hide errors from visitors?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -533,7 +533,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'pages'              => array(
-					'description' => __( 'WooCommerce pages.', 'woocommerce-rest-api' ),
+					'description' => __( 'WooCommerce pages.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -542,7 +542,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'post_type_counts'   => array(
-					'description' => __( 'Total post count.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total post count.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -657,7 +657,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
 		} elseif ( extension_loaded( 'curl' ) ) {
-			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce-rest-api' );
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
 		}
 
 		// WP memory limit.
@@ -1156,23 +1156,23 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public function get_pages() {
 		// WC pages to check against.
 		$check_pages = array(
-			_x( 'Shop base', 'Page setting', 'woocommerce-rest-api' ) => array(
+			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_shop_page_id',
 				'shortcode' => '',
 			),
-			_x( 'Cart', 'Page setting', 'woocommerce-rest-api' ) => array(
+			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 			),
-			_x( 'Checkout', 'Page setting', 'woocommerce-rest-api' ) => array(
+			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
-			_x( 'My account', 'Page setting', 'woocommerce-rest-api' ) => array(
+			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),
-			_x( 'Terms and conditions', 'Page setting', 'woocommerce-rest-api' ) => array(
+			_x( 'Terms and conditions', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_terms_page_id',
 				'shortcode' => '',
 			),

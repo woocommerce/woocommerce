@@ -66,7 +66,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -287,67 +287,67 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'total_sales' => array(
-					'description' => __( 'Gross sales in the period.', 'woocommerce-rest-api' ),
+					'description' => __( 'Gross sales in the period.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'net_sales' => array(
-					'description' => __( 'Net sales in the period.', 'woocommerce-rest-api' ),
+					'description' => __( 'Net sales in the period.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'average_sales' => array(
-					'description' => __( 'Average net daily sales.', 'woocommerce-rest-api' ),
+					'description' => __( 'Average net daily sales.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_orders' => array(
-					'description' => __( 'Total of orders placed.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total of orders placed.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_items' => array(
-					'description' => __( 'Total of items purchased.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total of items purchased.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_tax' => array(
-					'description' => __( 'Total charged for taxes.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total charged for taxes.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_shipping' => array(
-					'description' => __( 'Total charged for shipping.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total charged for shipping.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_refunds' => array(
-					'description' => __( 'Total of refunded orders.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total of refunded orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total_discount' => array(
-					'description' => __( 'Total of coupons used.', 'woocommerce-rest-api' ),
+					'description' => __( 'Total of coupons used.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'totals_grouped_by' => array(
-					'description' => __( 'Group type.', 'woocommerce-rest-api' ),
+					'description' => __( 'Group type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'totals' => array(
-					'description' => __( 'Totals.', 'woocommerce-rest-api' ),
+					'description' => __( 'Totals.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'array',
@@ -370,7 +370,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 			'period' => array(
-				'description'       => __( 'Report period.', 'woocommerce-rest-api' ),
+				'description'       => __( 'Report period.', 'woocommerce' ),
 				'type'              => 'string',
 				'enum'              => array( 'week', 'month', 'last_month', 'year' ),
 				'validate_callback' => 'rest_validate_request_arg',
@@ -378,7 +378,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			),
 			'date_min' => array(
 				/* translators: %s: date format */
-				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce-rest-api' ), 'YYYY-MM-DD' ),
+				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-DD' ),
 				'type'              => 'string',
 				'format'            => 'date',
 				'validate_callback' => 'wc_rest_validate_reports_request_arg',
@@ -386,7 +386,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			),
 			'date_max' => array(
 				/* translators: %s: date format */
-				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce-rest-api' ), 'YYYY-MM-DD' ),
+				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-DD' ),
 				'type'              => 'string',
 				'format'            => 'date',
 				'validate_callback' => 'wc_rest_validate_reports_request_arg',

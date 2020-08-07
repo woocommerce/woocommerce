@@ -40,7 +40,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function get_object( $id ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-rest-api' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -53,7 +53,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -69,7 +69,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -85,7 +85,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -113,7 +113,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-rest-api' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -126,7 +126,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-rest-api' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -139,7 +139,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data     = $this->prepare_object_for_response( $object, $request );
@@ -187,7 +187,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$object = $this->save_object( $request, true );
@@ -234,7 +234,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$object = $this->save_object( $request, false );
@@ -417,7 +417,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$result = false;
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
@@ -434,7 +434,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -448,14 +448,14 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: post type */
-				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 501 ) );
+				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
 					/* translators: %s: post type */
-					return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 410 ) );
+					return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
 				}
 
 				$object->delete();
@@ -465,7 +465,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -511,7 +511,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
-			'description'        => __( 'Current page of the collection.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'               => 'integer',
 			'default'            => 1,
 			'sanitize_callback'  => 'absint',
@@ -519,7 +519,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'minimum'            => 1,
 		);
 		$params['per_page'] = array(
-			'description'        => __( 'Maximum number of items to be returned in result set.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'               => 'integer',
 			'default'            => 10,
 			'minimum'            => 1,
@@ -528,25 +528,25 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['search'] = array(
-			'description'        => __( 'Limit results to those matching a string.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Limit results to those matching a string.', 'woocommerce' ),
 			'type'               => 'string',
 			'sanitize_callback'  => 'sanitize_text_field',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'               => 'string',
 			'format'             => 'date-time',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'               => 'string',
 			'format'             => 'date-time',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -555,7 +555,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woocommerce-rest-api' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -564,20 +564,20 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'               => 'integer',
 			'sanitize_callback'  => 'absint',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'               => 'string',
 			'default'            => 'desc',
 			'enum'               => array( 'asc', 'desc' ),
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce-rest-api' ),
+			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'               => 'string',
 			'default'            => 'date',
 			'enum'               => array(
@@ -593,7 +593,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 
 		if ( $this->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce-rest-api' ),
+				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type'          => 'integer',
@@ -602,7 +602,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				'default'           => array(),
 			);
 			$params['parent_exclude'] = array(
-				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce-rest-api' ),
+				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type'          => 'integer',

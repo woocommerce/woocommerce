@@ -54,7 +54,7 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 			$data[] = array(
 				'slug'  => 'rated_' . $i . '_out_of_5',
 				/* translators: %s: average rating */
-				'name'  => sprintf( __( 'Rated %s out of 5', 'woocommerce-rest-api' ), $i ),
+				'name'  => sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $i ),
 				'total' => (int) get_comments( $query_data ),
 			);
 		}
@@ -107,19 +107,19 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 			'type'       => 'object',
 			'properties' => array(
 				'slug'  => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'  => array(
-					'description' => __( 'Review type name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Review type name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total' => array(
-					'description' => __( 'Amount of reviews.', 'woocommerce-rest-api' ),
+					'description' => __( 'Amount of reviews.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

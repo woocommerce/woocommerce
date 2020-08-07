@@ -100,13 +100,13 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'        => array(
-					'description' => __( 'Category name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Category name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -114,7 +114,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					),
 				),
 				'slug'        => array(
-					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce-rest-api' ),
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -122,12 +122,12 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					),
 				),
 				'parent'      => array(
-					'description' => __( 'The ID for the parent of the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'The ID for the parent of the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'description' => array(
-					'description' => __( 'HTML description of the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -135,71 +135,71 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					),
 				),
 				'display'     => array(
-					'description' => __( 'Category archive display type.', 'woocommerce-rest-api' ),
+					'description' => __( 'Category archive display type.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'default',
 					'enum'        => array( 'default', 'products', 'subcategories', 'both' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'image'       => array(
-					'description' => __( 'Image data.', 'woocommerce-rest-api' ),
+					'description' => __( 'Image data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id'                => array(
-							'description' => __( 'Image ID.', 'woocommerce-rest-api' ),
+							'description' => __( 'Image ID.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'date_created'      => array(
-							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce-rest-api' ),
+							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'date_created_gmt'  => array(
-							'description' => __( 'The date the image was created, as GMT.', 'woocommerce-rest-api' ),
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'date_modified'     => array(
-							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce-rest-api' ),
+							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'date_modified_gmt' => array(
-							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce-rest-api' ),
+							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'src'               => array(
-							'description' => __( 'Image URL.', 'woocommerce-rest-api' ),
+							'description' => __( 'Image URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'name'              => array(
-							'description' => __( 'Image name.', 'woocommerce-rest-api' ),
+							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'alt'               => array(
-							'description' => __( 'Image alternative text.', 'woocommerce-rest-api' ),
+							'description' => __( 'Image alternative text.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'menu_order'  => array(
-					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'count'       => array(
-					'description' => __( 'Number of published products for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
