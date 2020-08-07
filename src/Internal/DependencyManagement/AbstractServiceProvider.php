@@ -1,8 +1,6 @@
 <?php
 /**
  * AbstractServiceProvider class file.
- *
- * @package Automattic\WooCommerce\Internal\DependencyManagement
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;

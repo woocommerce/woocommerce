@@ -6,7 +6,7 @@
  * your own meta handling functions.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;

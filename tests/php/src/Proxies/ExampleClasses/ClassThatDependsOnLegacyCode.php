@@ -1,8 +1,6 @@
 <?php
 /**
  * ClassThatDependsOnLegacyCode class file
- *
- * @package Automattic\WooCommerce\Tests\Proxies\ExampleClasses
  */
 
 namespace Automattic\WooCommerce\Tests\Proxies\ExampleClasses;

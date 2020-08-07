@@ -1,8 +1,6 @@
 <?php
 /**
  * ExtendedContainerTests class file.
- *
- * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement
  */
 
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;

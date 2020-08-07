@@ -4,7 +4,7 @@
  *
  * @author   WooCommerce
  * @category Admin
- * @package  WooCommerce/Admin/Customize
+ * @package  WooCommerce\Admin\Customize
  * @version  3.1.0
  */
 

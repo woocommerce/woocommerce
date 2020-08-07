@@ -1,8 +1,6 @@
 <?php
 /**
  * Container class file.
- *
- * @package Automattic\WooCommerce
  */
 
 namespace Automattic\WooCommerce;

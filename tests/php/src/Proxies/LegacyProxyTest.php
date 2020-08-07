@@ -1,8 +1,6 @@
 <?php
 /**
  * LegacyProxyTests class file
- *
- * @package Automattic\WooCommerce\Tests\Proxies
  */
 
 namespace Automattic\WooCommerce\Tests\Proxies;

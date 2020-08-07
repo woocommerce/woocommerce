@@ -5,7 +5,7 @@
  * The WooCommerce cart class stores cart data and active coupons as well as handling customer sessions and some cart related urls.
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 2.1.0
  */
 
@@ -1691,7 +1691,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search( $coupon_code, $this->get_applied_coupons(), true );
+		$position    = array_search( $coupon_code, array_map( 'wc_format_coupon_code', $this->get_applied_coupons() ), true );
 
 		if ( false !== $position ) {
 			unset( $this->applied_coupons[ $position ] );
