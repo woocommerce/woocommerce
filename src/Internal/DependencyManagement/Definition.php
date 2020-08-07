@@ -1,8 +1,6 @@
 <?php
 /**
  * An extension to the Definition class to prevent constructor injection from being possible.
- *
- * @package Automattic\WooCommerce\Internal\DependencyManagement
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
