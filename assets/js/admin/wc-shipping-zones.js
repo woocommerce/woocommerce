@@ -167,7 +167,6 @@
 									+ window.location.href + '&instance_id=' + shipping_method.instance_id + '">'
 									+ shipping_method_title_or_link + '</a>';
 							}
-
 							$method_list.append(
 								'<li class="wc-shipping-zone-method ' + class_name + '">' + shipping_method_title_or_link + '</li>'
 							);
