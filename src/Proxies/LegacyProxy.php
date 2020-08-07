@@ -8,8 +8,7 @@
 namespace Automattic\WooCommerce\Proxies;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
-use \Psr\Container\ContainerInterface as Container;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use \Psr\Container\ContainerInterface;
 
 /**
  * Proxy class to access legacy WooCommerce functionality.

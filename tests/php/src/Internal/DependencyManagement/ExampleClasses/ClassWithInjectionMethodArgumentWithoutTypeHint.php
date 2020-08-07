@@ -13,10 +13,12 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClas
 class ClassWithInjectionMethodArgumentWithoutTypeHint {
 
 	/**
-	 * Sets class dependencies.
+	 * Initialize the class instance.
+	 *
+	 * @internal
 	 *
 	 * @param mixed $argument_without_type_hint Anything, really.
 	 */
-	final public function container_init( $argument_without_type_hint ) {
+	final public function init( $argument_without_type_hint ) {
 	}
 }

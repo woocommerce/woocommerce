@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * An example class that uses the legacy proxy both from a dependency injected proxy and from the helper methods in the WooCommerce class.
  */
 class ClassThatDependsOnLegacyCode {
+
 	/**
 	 * The injected LegacyProxy.
 	 *
@@ -21,11 +22,13 @@ class ClassThatDependsOnLegacyCode {
 	private $legacy_proxy;
 
 	/**
-	 * Sets class dependencies.
+	 * Initialize the class instance.
+	 *
+	 * @internal
 	 *
 	 * @param LegacyProxy $legacy_proxy The instance of LegacyProxy to use.
 	 */
-	public function container_init( LegacyProxy $legacy_proxy ) {
+	final public function init( LegacyProxy $legacy_proxy ) {
 		$this->legacy_proxy = $legacy_proxy;
 	}
 
