@@ -2,7 +2,7 @@
 /**
  * Load assets
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 3.7.0
  */
 

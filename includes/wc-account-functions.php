@@ -4,7 +4,7 @@
  *
  * Functions for account specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.6.0
  */
 

@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class       WC_Legacy_Coupon
  * @version     3.0.0
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  * @category    Class
  * @author      WooThemes
  */

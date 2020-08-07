@@ -3,7 +3,7 @@
  * WooCommerce Admin
  *
  * @class    WC_Admin
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.6.0
  */
 

@@ -2,7 +2,7 @@
 /**
  * WooCommerce Product Settings
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.4.0
  */
 

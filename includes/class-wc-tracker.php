@@ -7,7 +7,7 @@
  *
  * @class WC_Tracker
  * @since 2.3.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 use Automattic\Jetpack\Constants;

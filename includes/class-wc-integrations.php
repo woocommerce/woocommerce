@@ -5,7 +5,7 @@
  * Loads Integrations into WooCommerce.
  *
  * @version 3.9.0
- * @package WooCommerce/Classes/Integrations
+ * @package WooCommerce\Classes\Integrations
  */
 
 defined( 'ABSPATH' ) || exit;

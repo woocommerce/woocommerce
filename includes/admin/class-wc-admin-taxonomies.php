@@ -4,7 +4,7 @@
  *
  * @class    WC_Admin_Taxonomies
  * @version  2.3.10
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

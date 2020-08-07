@@ -2,7 +2,7 @@
 /**
  * Class WC_Coupon_Data_Store_CPT file.
  *
- * @package WooCommerce\DataStore
+ * @package WooCommerce\DataStores
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

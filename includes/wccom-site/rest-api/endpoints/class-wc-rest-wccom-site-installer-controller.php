@@ -4,7 +4,7 @@
  *
  * Handles requests to /installer.
  *
- * @package WooCommerce\WooCommerce_Site\Rest_Api
+ * @package WooCommerce\WCCom\API
  * @since   3.7.0
  */
 
@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API WCCOM Site Installer Controller Class.
  *
- * @package WooCommerce/WCCOM_Site/REST_API
  * @extends WC_REST_Controller
  */
 class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {

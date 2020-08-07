@@ -4,7 +4,7 @@
  *
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.4.0
  */
 

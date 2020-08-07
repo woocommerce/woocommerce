@@ -2,7 +2,7 @@
 /**
  * Installation related functions and actions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 

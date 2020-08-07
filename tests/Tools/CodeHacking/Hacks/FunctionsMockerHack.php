@@ -2,7 +2,7 @@
 /**
  * FunctionsMockerHack class file.
  *
- * @package WooCommerce/Testing
+ * @package WooCommerce\Testing
  */
 
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
