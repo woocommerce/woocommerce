@@ -7,6 +7,8 @@
  */
 import { StoreOwnerFlow } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
+import modelRegistry from './factories';
+import { SimpleProduct } from '@woocommerce/model-factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -116,7 +118,7 @@ const completeOnboardingWizard = async () => {
 	expect( productTypesCheckboxes ).toHaveLength( 8 );
 
 	// Select Physical and Downloadable products
-	for ( let i = 0; i < 2; i++ ) {
+	for ( let i = 1; i < 2; i++ ) {
 		await productTypesCheckboxes[i].click();
 	}
 
@@ -342,22 +344,11 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
-
-	// Make sure we're on the add order page
-	await expect( page.title() ).resolves.toMatch( 'Add new product' );
-
-	// Set product data
-	await expect( page ).toFill( '#title', simpleProductName );
-	await clickTab( 'General' );
-	await expect( page ).toFill( '#_regular_price', '9.99' );
-
-	await verifyAndPublish();
-
-	const simplePostId = await page.$( '#post_ID' );
-	let simplePostIdValue = ( await ( await simplePostId.getProperty( 'value' ) ).jsonValue() );
-	return simplePostIdValue;
+	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
+		name: simpleProductName,
+		regularPrice: '9.99'
+	} );
+	return product.id;
 } ;
 
 /**

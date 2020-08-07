@@ -153,6 +153,10 @@ class WC_Install {
 			'wc_update_440_insert_attribute_terms_for_variable_products',
 			'wc_update_440_db_version',
 		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
+		),
 	);
 
 	/**

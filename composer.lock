@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d7df64252352cb3445d827cf204f24b4",
+    "content-hash": "ae4abaa8d39e860cc6c379cb5f6a0c2f",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.1.0",
+            "version": "v2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "802517b3ff3010de89141d9f7c4d56aec1d21527"
+                "reference": "4502da4b2443fc1b61389cacc94c34876aca2b3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/802517b3ff3010de89141d9f7c4d56aec1d21527",
-                "reference": "802517b3ff3010de89141d9f7c4d56aec1d21527",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/4502da4b2443fc1b61389cacc94c34876aca2b3d",
+                "reference": "4502da4b2443fc1b61389cacc94c34876aca2b3d",
                 "shasum": ""
             },
             "require": {
@@ -40,7 +40,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2020-07-27T20:37:00+00:00"
+            "time": "2020-07-09T13:18:38+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -258,6 +258,12 @@
                 "league",
                 "provider",
                 "service"
+            ],
+            "funding": [
+                {
+                    "url": "https://github.com/philipobenito",
+                    "type": "github"
+                }
             ],
             "time": "2020-05-18T08:20:23+00:00"
         },
@@ -495,6 +501,20 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-03-16T08:31:04+00:00"
         },
         {
@@ -625,46 +645,6 @@
                 "woocommerce"
             ],
             "time": "2020-07-29T15:45:19+00:00"
-        },
-        {
-            "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.11",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "304bb95cb4b95f182f09d56153d5ac254d5fe60a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/304bb95cb4b95f182f09d56153d5ac254d5fe60a",
-                "reference": "304bb95cb4b95f182f09d56153d5ac254d5fe60a",
-                "shasum": ""
-            },
-            "require": {
-                "automattic/jetpack-autoloader": "^2.0.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "6.5.14",
-                "woocommerce/woocommerce-sniffs": "0.0.9"
-            },
-            "type": "wordpress-plugin",
-            "autoload": {
-                "classmap": [
-                    "src/Controllers/Version1",
-                    "src/Controllers/Version2",
-                    "src/Controllers/Version3"
-                ],
-                "psr-4": {
-                    "Automattic\\WooCommerce\\RestApi\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "description": "The WooCommerce core REST API.",
-            "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2020-07-24T13:38:16+00:00"
         }
     ],
     "packages-dev": [
@@ -787,6 +767,20 @@
             "keywords": [
                 "constructor",
                 "instantiate"
+            ],
+            "funding": [
+                {
+                    "url": "https://www.doctrine-project.org/sponsorship.html",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.patreon.com/phpdoctrine",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Finstantiator",
+                    "type": "tidelift"
+                }
             ],
             "time": "2020-05-29T17:27:14+00:00"
         },
@@ -1049,6 +1043,12 @@
                 "duplicate",
                 "object",
                 "object graph"
+            ],
+            "funding": [
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
+                    "type": "tidelift"
+                }
             ],
             "time": "2020-06-29T13:22:24+00:00"
         },
@@ -2574,6 +2574,20 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-02-14T07:34:21+00:00"
         },
         {
@@ -3041,5 +3055,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }

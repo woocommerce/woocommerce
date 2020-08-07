@@ -1691,7 +1691,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search( $coupon_code, $this->get_applied_coupons(), true );
+		$position    = array_search( $coupon_code, array_map( 'wc_format_coupon_code', $this->get_applied_coupons() ), true );
 
 		if ( false !== $position ) {
 			unset( $this->applied_coupons[ $position ] );
