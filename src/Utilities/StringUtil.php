@@ -1,8 +1,6 @@
 <?php
 /**
  * A class of utilities for dealing with strings.
- *
- * @package Automattic\WooCommerce\Utilities
  */
 
 namespace Automattic\WooCommerce\Utilities;
