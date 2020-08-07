@@ -41,6 +41,10 @@ describe( 'Activity Panels', () => {
 					key: 'payfast',
 					text: 'PayFast',
 				},
+				{
+					key: 'eway',
+					text: 'eWAY',
+				},
 			];
 
 			const noMethods = render(

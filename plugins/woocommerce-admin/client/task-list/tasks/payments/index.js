@@ -407,6 +407,7 @@ export default compose(
 			'woocommerce_cod_settings',
 			'woocommerce_bacs_settings',
 			'woocommerce_bacs_accounts',
+			'woocommerce_eway_settings',
 		];
 
 		const options = optionNames.reduce( ( result, name ) => {

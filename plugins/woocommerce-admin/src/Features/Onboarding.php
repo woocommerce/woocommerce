@@ -630,6 +630,7 @@ class Onboarding {
 		$options[] = 'woocommerce_bacs_settings';
 		$options[] = 'woocommerce_bacs_accounts';
 		$options[] = 'woocommerce_woocommerce_payments_settings';
+		$options[] = 'woocommerce_eway_settings';
 
 		return $options;
 	}
@@ -722,6 +723,7 @@ class Onboarding {
 				'woocommerce-shipstation-integration' => 'woocommerce-shipstation-integration/woocommerce-shipstation.php',
 				'woocommerce-payfast-gateway'         => 'woocommerce-payfast-gateway/gateway-payfast.php',
 				'woocommerce-payments'                => 'woocommerce-payments/woocommerce-payments.php',
+				'woocommerce-gateway-eway'            => 'woocommerce-gateway-eway/woocommerce-gateway-eway.php',
 			)
 		);
 		return array_merge( $plugins, $onboarding_plugins );

@@ -82,6 +82,7 @@ function getPaymentsItems( props ) {
 	const showPayPal = methodIsVisible( 'paypal' );
 	const showSquare = methodIsVisible( 'square' );
 	const showPayFast = methodIsVisible( 'payfast' );
+	const showEway = methodIsVisible( 'eway' );
 
 	return [
 		{
@@ -137,6 +138,11 @@ function getPaymentsItems( props ) {
 			title: __( 'PayFast Setup and Configuration', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel',
+		},
+		showEway && {
+			title: __( 'eWAY Setup and Configuration', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/eway/?utm_source=help_panel',
 		},
 		{
 			title: __( 'Direct Bank Transfer (BACS)', 'woocommerce-admin' ),

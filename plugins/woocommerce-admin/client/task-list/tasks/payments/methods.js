@@ -33,6 +33,7 @@ import WCPayIcon from './images/wcpay';
 import PayPal from './paypal';
 import Klarna from './klarna';
 import PayFast from './payfast';
+import EWay from './eway';
 
 export function installActivateAndConnectWcpay(
 	resolve,
@@ -357,6 +358,35 @@ export function getPaymentMethods( {
 				options.woocommerce_payfast_settings &&
 				options.woocommerce_payfast_settings.enabled === 'yes',
 			optionName: 'woocommerce_payfast_settings',
+		},
+		{
+			key: 'eway',
+			title: __( 'eWAY', 'woocommerce-admin' ),
+			content: (
+				<Fragment>
+					{ __(
+						'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.',
+						'woocommerce-admin'
+					) }
+				</Fragment>
+			),
+			before: (
+				<img
+					src={ wcAssetUrl + 'images/eway-logo.jpg' }
+					alt="eWAY logo"
+				/>
+			),
+			visible: [ 'AU', 'NZ' ].includes( countryCode ) && ! hasCbdIndustry,
+			plugins: [ 'woocommerce-gateway-eway' ],
+			container: <EWay />,
+			isConfigured:
+				options.woocommerce_eway_settings &&
+				options.woocommerce_eway_settings.customer_api &&
+				options.woocommerce_eway_settings.customer_password,
+			isEnabled:
+				options.woocommerce_eway_settings &&
+				options.woocommerce_eway_settings.enabled === 'yes',
+			optionName: 'woocommerce_eway_settings',
 		},
 		{
 			key: 'cod',
