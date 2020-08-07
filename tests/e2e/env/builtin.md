@@ -60,7 +60,6 @@ The built in container initialization needs to know the particulars of your test
 You can override these in `/tests/e2e/config/default.json`. The `customer` entry is not required by the sequencer but is required for the core test suite. 
 
 - The test sequencer does not use the user account email addresses.
-- The `customer` entry is not required by the sequencer but is required for the core test suite.
 
 ```
 {
