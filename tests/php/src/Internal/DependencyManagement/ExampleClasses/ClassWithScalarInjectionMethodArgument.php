@@ -15,10 +15,12 @@ class ClassWithScalarInjectionMethodArgument {
 	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidTypeHint
 
 	/**
-	 * Sets class dependencies.
+	 * Initialize the class instance.
+	 *
+	 * @internal
 	 *
 	 * @param mixed $scalar_argument_without_default_value Anything, really.
 	 */
-	final public function container_init( int $scalar_argument_without_default_value ) {
+	final public function init( int $scalar_argument_without_default_value ) {
 	}
 }

@@ -69,7 +69,7 @@ _Resolving_ a class means asking the container to provide an instance of the cla
 In principle, the container should be used to register and resolve all the classes in the `src` directory. The exception might be data-only classes that could be created the old way (using a plain `new` statement); but as a rule of thumb, the container should always be used.
 
 There are two ways to resolve registered classes, depending on from where they are resolved:
-* Classes in the `src` directory specify their dependencies as `container_init` arguments, which are automatically supplied by the container when the class is resolved (this is called _dependency injection_).
+* Classes in the `src` directory specify their dependencies as `init` arguments, which are automatically supplied by the container when the class is resolved (this is called _dependency injection_).
 * For code in the `includes` directory there's a `wc_get_container` function that will return the container, then its `get` method can be used to resolve any class.  
 
 ### Resolving classes
@@ -78,7 +78,7 @@ There are two ways to resolve registered classes, depending on from where they n
 
 #### 1. Other classes in the `src` directory
 
-When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `container_init` method with appropriate type hints, and storing these in private variables, ready to be used when needed: 
+When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed: 
 
 ```php
 use TheService1Namespace\Service1;
@@ -89,7 +89,7 @@ class TheClassWithDependencies {
 
     private $service2;
 
-    public function container_init( Service1Class $service1, Service2Class $service2 ) {
+    public function init( Service1Class $service1, Service2Class $service2 ) {
         $this->$service1 = $service1;
         $this->$service2 = $service2;
     }
@@ -110,7 +110,7 @@ use TheService1Namespace\Service1;
 class TheClassWithDependencies {
     private $container;
 
-    public function container_init( \Psr\Container\ContainerInterface $container ) {
+    public function init( \Psr\Container\ContainerInterface $container ) {
         $this->$container = $container;
     }
 
@@ -146,7 +146,7 @@ For a class to be resolvable using the container, it needs to have been previous
 
 The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
 
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `container_init` arguments in detailed above. 
+First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
 
 Example of such a class:
 
@@ -158,7 +158,7 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 class TheClass {
     private $the_dependency;
     
-    public function container_init( TheDependencyClass $dependency ) {
+    public function init( TheDependencyClass $dependency ) {
         $this->the_dependency = $dependency;
     }
             
@@ -195,7 +195,7 @@ Worth noting:
 * If you look at [the service provider documentation](https://container.thephpleague.com/3.x/service-providers/) you will see that classes are registered using `this->getContainer()->add`. WooCommerce's `AbstractServiceProvider` adds a utility `add` method itself that serves the same purpose.
 * You can use `share` instead of `add` to register single-instance classes (the class is instantiated only once and cached, so the same instance is returned every time the class is resolved). 
 
-If the class being registered has `container_init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `container_init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method. 
+If the class being registered has `init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method. 
 
 An alternative version of the service provider, which is used to register both the class and its dependency, and which takes advantage of `add_with_auto_arguments`, could be as follows:
 
@@ -259,7 +259,7 @@ Note that if the closure is defined as a function with arguments, the supplied p
 
 The container is intended for registering **only** classes in the `src` folder. There is a check in place to prevent classes outside the root `Automattic\Woocommerce` namespace from being registered.
 
-This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `container_init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests. 
+This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests. 
 
 
 ## The `Internal` namespace
@@ -306,7 +306,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class TheClass {
     private $legacy_proxy;
 
-    public function container_init( LegacyProxy $legacy_proxy ) {
+    public function init( LegacyProxy $legacy_proxy ) {
         $this->legacy_proxy = $legacy_proxy;            
     }
 

@@ -1,6 +1,8 @@
 <?php
 /**
  * ClassWithNonFinalInjectionMethod class file.
+ *
+ * @package Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses
  */
 
 namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses;
@@ -10,9 +12,13 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClas
  */
 class ClassWithNonFinalInjectionMethod {
 
+	// phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingFinal
+
 	/**
-	 * Sets class dependencies.
+	 * Initialize the class instance.
+	 *
+	 * @internal
 	 */
-	public function container_init() {
+	public function init() {
 	}
 }

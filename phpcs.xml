@@ -35,7 +35,7 @@
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
 		<properties>
-			<property name="injectionMethod" value="container_init"/>
+			<property name="injectionMethod" value="init"/>
 		</properties>
 	</rule>
 
@@ -88,7 +88,7 @@
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
-	
+
 	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
 		<exclude-pattern>src/</exclude-pattern>
 	</rule>
