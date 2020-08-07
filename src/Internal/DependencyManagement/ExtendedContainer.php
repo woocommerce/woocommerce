@@ -147,6 +147,6 @@ class ExtendedContainer extends BaseContainer {
 	 * @return bool True if the class is allowed to be registered, false otherwise.
 	 */
 	protected function is_class_allowed( string $class_name ): bool {
-		return StringUtil::starts( $class_name, $this->woocommerce_namespace, false ) || in_array( $class_name, $this->registration_whitelist, true );
+		return StringUtil::starts_with( $class_name, $this->woocommerce_namespace, false ) || in_array( $class_name, $this->registration_whitelist, true );
 	}
 }
