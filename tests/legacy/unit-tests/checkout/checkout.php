@@ -2,7 +2,7 @@
 /**
  * Checkout tests.
  *
- * @package WooCommerce|Tests|Checkout
+ * @package WooCommerce\Tests\Checkout
  */
 
 /**
