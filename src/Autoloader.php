@@ -1,8 +1,6 @@
 <?php
 /**
  * Includes the composer Autoloader used for packages and classes in the src/ directory.
- *
- * @package Automattic/WooCommerce
  */
 
 namespace Automattic\WooCommerce;

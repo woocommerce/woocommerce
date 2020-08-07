@@ -108,19 +108,19 @@ class WC_REST_Report_Products_Totals_Controller extends WC_REST_Reports_Controll
 			'type'       => 'object',
 			'properties' => array(
 				'slug'  => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-rest-api' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'  => array(
-					'description' => __( 'Product type name.', 'woocommerce-rest-api' ),
+					'description' => __( 'Product type name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total' => array(
-					'description' => __( 'Amount of products.', 'woocommerce-rest-api' ),
+					'description' => __( 'Amount of products.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

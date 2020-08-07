@@ -42,7 +42,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			$this->namespace, '/' . $this->rest_base, array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
+						'description' => __( 'Settings group ID.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -59,7 +59,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			$this->namespace, '/' . $this->rest_base . '/batch', array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
+						'description' => __( 'Settings group ID.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -77,11 +77,11 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
+						'description' => __( 'Settings group ID.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 					'id'    => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -156,13 +156,13 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_group_settings( $group_id ) {
 		if ( empty( $group_id ) ) {
-			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
 
 		if ( empty( $settings ) ) {
-			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$filtered_settings = array();
@@ -231,7 +231,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_setting( $group_id, $setting_id ) {
 		if ( empty( $setting_id ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$settings = $this->get_group_settings( $group_id );
@@ -243,13 +243,13 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		$array_key = array_keys( wp_list_pluck( $settings, 'id' ), $setting_id );
 
 		if ( empty( $array_key ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$setting = $settings[ $array_key[0] ];
 
 		if ( ! $this->is_setting_type_valid( $setting['type'] ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $setting;
@@ -373,7 +373,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -388,7 +388,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -502,7 +502,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'A unique identifier for the setting.', 'woocommerce-rest-api' ),
+					'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
@@ -511,7 +511,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'label'       => array(
-					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce-rest-api' ),
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -520,7 +520,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce-rest-api' ),
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -529,7 +529,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'value'       => array(
-					'description' => __( 'Setting value.', 'woocommerce-rest-api' ),
+					'description' => __( 'Setting value.', 'woocommerce' ),
 					'type'        => array( 'string', 'array', 'null' ),
 					'items'       => array(
 						'type' => array( 'string', 'null' ),
@@ -537,7 +537,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'default'     => array(
-					'description' => __( 'Default value for the setting.', 'woocommerce-rest-api' ),
+					'description' => __( 'Default value for the setting.', 'woocommerce' ),
 					'type'        => array( 'string', 'array', 'null' ),
 					'items'       => array(
 						'type' => array( 'string', 'null' ),
@@ -546,7 +546,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'tip'         => array(
-					'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce-rest-api' ),
+					'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -555,7 +555,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'placeholder' => array(
-					'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce-rest-api' ),
+					'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -564,7 +564,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'type'        => array(
-					'description' => __( 'Type of setting.', 'woocommerce-rest-api' ),
+					'description' => __( 'Type of setting.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -574,7 +574,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'options'     => array(
-					'description' => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce-rest-api' ),
+					'description' => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

@@ -3,7 +3,7 @@
  * My Orders - Deprecated
  *
  * @deprecated 2.6.0 this template file is no longer used. My Account shortcode uses orders.php.
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  */
 
 defined( 'ABSPATH' ) || exit;

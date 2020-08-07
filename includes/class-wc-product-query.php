@@ -4,7 +4,7 @@
  *
  * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
  *
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  * @version  3.2.0
  * @since    3.2.0
  */

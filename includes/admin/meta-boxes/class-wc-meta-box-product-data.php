@@ -4,7 +4,7 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @package  WooCommerce/Admin/Meta Boxes
+ * @package  WooCommerce\Admin\Meta Boxes
  * @version  3.0.0
  */
 
