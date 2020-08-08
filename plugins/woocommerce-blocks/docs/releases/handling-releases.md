@@ -159,6 +159,7 @@ _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to 
 -   Merge the release branch back into `main` (without the branch being up to date with `main`). This may have merge conflicts needing resolved if there are cherry-picked commits in the release branch.
 -   Restore the branch if it is deleted. Release branches are kept open for potential patch releases for that version.
 -   For _major_ & _minor_ releases, update version on `main` with dev suffix, e.g. [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
+-   Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 
 _Outcome:_ __Main branch contains all changes and metadata tweaks for the release.__
 
