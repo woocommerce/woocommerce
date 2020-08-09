@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import FeedbackPrompt from '@woocommerce/block-components/feedback-prompt';
+import { CartCheckoutFeedbackPrompt } from '@woocommerce/block-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -263,12 +263,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					/>
 				) }
 
-			<FeedbackPrompt
-				text={ __(
-					'We are currently working on improving our cart and checkout blocks, providing merchants with the tools and customization options they need.',
-					'woo-gutenberg-products-block'
-				) }
-			/>
+			<CartCheckoutFeedbackPrompt />
 		</InspectorControls>
 	);
 };

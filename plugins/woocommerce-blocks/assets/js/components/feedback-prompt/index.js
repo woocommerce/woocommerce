@@ -13,7 +13,10 @@ import './style.scss';
 /**
  * Component to render a Feedback prompt in the sidebar.
  */
-const FeedbackPrompt = ( { text } ) => {
+const FeedbackPrompt = ( {
+	text,
+	url = 'https://ideas.woocommerce.com/forums/133476-woocommerce?category_id=384565',
+} ) => {
 	return (
 		<div className="wc-block-feedback-prompt">
 			<Icon srcElement={ comment } />
@@ -22,7 +25,7 @@ const FeedbackPrompt = ( { text } ) => {
 			</h2>
 			<p className="wc-block-feedback-prompt__text">{ text }</p>
 			<a
-				href="https://ideas.woocommerce.com/forums/133476-woocommerce?category_id=384565"
+				href={ url }
 				className="wc-block-feedback-prompt__link"
 				rel="noreferrer noopener"
 				target="_blank"
@@ -39,6 +42,17 @@ const FeedbackPrompt = ( { text } ) => {
 
 FeedbackPrompt.propTypes = {
 	text: PropTypes.string,
+	url: PropTypes.string,
 };
 
 export default FeedbackPrompt;
+
+export const CartCheckoutFeedbackPrompt = () => (
+	<FeedbackPrompt
+		text={ __(
+			'We are currently working on improving our cart and checkout blocks to provide merchants with the tools and customization options they need.',
+			'woo-gutenberg-products-block'
+		) }
+		url="https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?template=--cart-checkout-feedback.md"
+	/>
+);
