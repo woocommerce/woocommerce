@@ -24,7 +24,7 @@ export default withProductSelector( {
 	icon: BLOCK_ICON,
 	label: BLOCK_TITLE,
 	description: __(
-		"Choose a product to display it's stock.",
+		"Choose a product to display its stock.",
 		'woo-gutenberg-products-block'
 	),
 } )( Edit );

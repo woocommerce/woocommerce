@@ -153,7 +153,7 @@ export default withProductSelector( {
 	icon: BLOCK_ICON,
 	label: BLOCK_TITLE,
 	description: __(
-		"Choose a product to display it's image.",
+		"Choose a product to display its image.",
 		'woo-gutenberg-products-block'
 	),
 } )( Edit );
