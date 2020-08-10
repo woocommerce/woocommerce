@@ -93,4 +93,6 @@
 	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
 		<exclude-pattern>src/</exclude-pattern>
 	</rule>
+
+	<exclude-pattern>*</exclude-pattern>
 </ruleset>
