@@ -219,12 +219,17 @@ class ProfileWizard extends Component {
 			getPluginsError,
 			isJetpackConnected,
 			notes,
+			profileItems,
 			updateNote,
 			updateProfileItems,
 		} = this.props;
 		recordEvent( 'storeprofiler_complete' );
+
+		const { plugins } = profileItems;
 		const shouldConnectJetpack =
-			activePlugins.includes( 'jetpack' ) && ! isJetpackConnected;
+			( plugins === 'installed' || plugins === 'installed-wcs' ) &&
+			activePlugins.includes( 'jetpack' ) &&
+			! isJetpackConnected;
 
 		const profilerNote = notes.find(
 			( note ) => note.name === 'wc-admin-onboarding-profiler-reminder'
