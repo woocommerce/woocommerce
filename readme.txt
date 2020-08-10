@@ -179,13 +179,17 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.3.1 - 2020-07-21 =
+= 4.3.2 - 2020-08-10 =
 
-**WooCommerce Admin 1.3.1**
-* Fix - PHP Fatal errors when columns are missing from the Notes table. #4831
+**WooCommerce**
+* Fix - Remove new WP 5.5 meta box arrows from "Order data" and "Order items" meta boxes. #27173
+* Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
 
-**WooCommerce Blocks 2.7.2**
-* Enhancement: Move Draft order logic behind feature flag. #2874
+**WooCommerce Blocks 2.7.3**
+* Fix - Fix missing permissions_callback arg in StoreApi route definitions. #2926
+
+**WooCommerce REST API 1.0.10-pl-1**
+* Enhancement - Compatibility fixes for WordPress 5.5 #232
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
