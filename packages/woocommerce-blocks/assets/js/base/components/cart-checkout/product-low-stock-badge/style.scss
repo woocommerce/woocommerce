@@ -1,0 +1,11 @@
+.wc-block-low-stock-badge {
+	@include font-size(smaller);
+	background-color: $white;
+	border-radius: 3px;
+	border: 1px solid $black;
+	display: inline-block;
+	color: $black;
+	padding: 0 1em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}

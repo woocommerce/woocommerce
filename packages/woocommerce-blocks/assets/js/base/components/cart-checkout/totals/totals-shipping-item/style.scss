@@ -1,0 +1,35 @@
+.wc-block-shipping-totals {
+	// Added extra label for specificity.
+	fieldset.wc-block-shipping-totals__fieldset {
+		background-color: transparent;
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.wc-block-shipping-totals__options {
+		.wc-block-radio-control__label,
+		.wc-block-radio-control__description,
+		.wc-block-radio-control__secondary-label,
+		.wc-block-radio-control__secondary-description {
+			flex-basis: 100%;
+			text-align: left;
+		}
+
+		.wc-block-radio-control__option {
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+
+	.wc-block-shipping-totals__change-address-button {
+		@include link-button();
+
+		&:hover,
+		&:focus,
+		&:active {
+			opacity: 0.8;
+		}
+	}
+}
