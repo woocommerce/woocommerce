@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "427fc6abd9c6a2bc8e568c70f2760b3d",
+    "content-hash": "d26bcde4bb058571783f17357510614c",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -380,6 +380,20 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-03-16T08:31:04+00:00"
         },
         {
@@ -513,16 +527,16 @@
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.10",
+            "version": "1.0.10-pl-1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "fdcb116b4f5b699b942c01b46fd863c7da8b4b7c"
+                "reference": "3da37902921fd90a010a8d2277fc56425c3b1f02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/fdcb116b4f5b699b942c01b46fd863c7da8b4b7c",
-                "reference": "fdcb116b4f5b699b942c01b46fd863c7da8b4b7c",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/3da37902921fd90a010a8d2277fc56425c3b1f02",
+                "reference": "3da37902921fd90a010a8d2277fc56425c3b1f02",
                 "shasum": ""
             },
             "require": {
@@ -549,7 +563,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2020-06-16T09:51:51+00:00"
+            "time": "2020-08-07T12:26:08+00:00"
         }
     ],
     "packages-dev": [
@@ -2459,6 +2473,20 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-02-14T07:34:21+00:00"
         },
         {
@@ -2520,6 +2548,20 @@
                 "ctype",
                 "polyfill",
                 "portable"
+            ],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
@@ -2926,5 +2968,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }
