@@ -820,6 +820,16 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'BA' => array(
+						'postcode' => array(
+							'priority' => 65,
+						),
+						'state'    => array(
+							'label'    => __( 'Canton', 'woocommerce' ),
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'BD' => array(
 						'postcode' => array(
 							'required' => false,

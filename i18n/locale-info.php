@@ -27,6 +27,15 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
+	'BA' => array(
+		'currency_code'  => 'BAM',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
 	'BD' => array(
 		'currency_code'  => 'BDT',
 		'currency_pos'   => 'left',
