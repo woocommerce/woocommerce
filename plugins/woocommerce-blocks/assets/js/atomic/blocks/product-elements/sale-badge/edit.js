@@ -18,7 +18,7 @@ export default withProductSelector( {
 	icon: BLOCK_ICON,
 	label: BLOCK_TITLE,
 	description: __(
-		"Choose a product to display it's sale-badge.",
+		"Choose a product to display its sale-badge.",
 		'woo-gutenberg-products-block'
 	),
 } )( Edit );
