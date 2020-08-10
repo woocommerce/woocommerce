@@ -4,7 +4,7 @@
  * Plugin URI: https://woocommerce.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
  * Version: 4.5.0-dev
- * Author: Automattic
+ * Author: WooCommerce and Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
