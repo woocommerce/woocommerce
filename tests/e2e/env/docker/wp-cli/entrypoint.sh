@@ -62,8 +62,7 @@ if ! [[ ${CURRENT_DOMAIN} == ${URL} ]]; then
     wp search-replace ${CURRENT_DOMAIN} ${URL}
 fi
 
-if [[ $WORDPRESS_INSTALLING ]];
-then
+if [[ $WORDPRESS_INSTALLING ]]; then
     wp post create \
         --post_type=page \
         --post_status=publish \
