@@ -171,9 +171,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function login_as_administrator() {
 		return $this->login_as_role( 'administrator' );
-  }
+	}
 
-  /**
+	/**
 	 * Get an instance of a class that has been registered in the dependency injection container.
 	 * To get an instance of a legacy class (such as the ones in the 'íncludes' directory) use
 	 * 'get_legacy_instance_of' instead.

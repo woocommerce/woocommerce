@@ -2,7 +2,7 @@
 /**
  * Product general data panel.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 defined( 'ABSPATH' ) || exit;

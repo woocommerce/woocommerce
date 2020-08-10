@@ -2,7 +2,7 @@
 /**
  * Class WC_AJAX_Test file.
  *
- * @package WooCommerce|Tests|WC_AJAX.
+ * @package WooCommerce\Tests\WC_AJAX.
  */
 
 /**

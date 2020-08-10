@@ -4,7 +4,7 @@
  *
  * Returns an array of calling codes.
  *
- * @package WooCommerce/i18n
+ * @package WooCommerce\i18n
  */
 
 defined( 'ABSPATH' ) || exit;

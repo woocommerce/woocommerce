@@ -3,7 +3,7 @@
  * The update helper for WooCommerce.com plugins.
  *
  * @class WC_Helper_Updater
- * @package WooCommerce/Admin.
+ * @package WooCommerce\Admin.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -190,6 +190,11 @@ class WC_Helper_Updater {
 		 */
 		$locales = apply_filters( 'plugins_update_check_locales', $locales );
 		$locales = array_unique( $locales );
+
+		// No locales, the respone will be empty, we can return now.
+		if ( empty( $locales ) ) {
+			return array();
+		}
 
 		// Scan local plugins which may or may not have a subscription.
 		$plugins                 = WC_Helper::get_local_woo_plugins();

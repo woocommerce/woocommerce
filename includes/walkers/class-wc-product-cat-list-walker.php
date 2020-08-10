@@ -2,7 +2,7 @@
 /**
  * WC_Product_Cat_List_Walker class
  *
- * @package WooCommerce/Classes/Walkers
+ * @package WooCommerce\Classes\Walkers
  * @version 3.4.0
  */
 

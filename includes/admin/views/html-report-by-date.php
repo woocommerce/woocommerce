@@ -2,7 +2,7 @@
 /**
  * Admin View: Report by Date (with date filters)
  *
- * @package WooCommerce/Admin/Reporting
+ * @package WooCommerce\Admin\Reporting
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

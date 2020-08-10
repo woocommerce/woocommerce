@@ -222,33 +222,35 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 
 		// Test line_subtotal.
 		$this->assertTrue( isset( $item['line_subtotal'] ) );
-		$item['line_subtotal'] = 50;
+		$item->set_subtotal( 50 );
 		$this->assertEquals( 50, $item->get_subtotal() );
 		$this->assertEquals( $item->get_subtotal(), $item['line_subtotal'] );
 
 		// Test line_subtotal_tax.
 		$this->assertTrue( isset( $item['line_subtotal_tax'] ) );
-		$item['line_subtotal_tax'] = 5;
+		$item->set_subtotal_tax( 5 );
 		$this->assertEquals( 5, $item->get_subtotal_tax() );
 		$this->assertEquals( $item->get_subtotal_tax(), $item['line_subtotal_tax'] );
 
 		// Test line_total.
 		$this->assertTrue( isset( $item['line_total'] ) );
-		$item['line_total'] = 55;
+		$item->set_total( 55 );
 		$this->assertEquals( 55, $item->get_total() );
 		$this->assertEquals( $item->get_total(), $item['line_total'] );
 
 		// Test line_tax.
 		$this->assertTrue( isset( $item['line_tax'] ) );
-		$item['line_tax'] = 5;
+		$item->set_total_tax( 5 );
 		$this->assertEquals( 5, $item->get_total_tax() );
 		$this->assertEquals( $item->get_total_tax(), $item['line_tax'] );
 
 		// Test line_tax_data.
 		$this->assertTrue( isset( $item['line_tax_data'] ) );
-		$item['line_tax_data'] = array(
-			'total'    => array( 5 ),
-			'subtotal' => array( 5 ),
+		$item->set_taxes(
+			array(
+				'total'    => array( 5 ),
+				'subtotal' => array( 5 ),
+			)
 		);
 		$this->assertEquals(
 			array(
@@ -261,26 +263,21 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 
 		// Test qty.
 		$this->assertTrue( isset( $item['qty'] ) );
-		$item['qty'] = 150;
+		$item->set_quantity( 150 );
 		$this->assertEquals( 150, $item->get_quantity() );
 		$this->assertEquals( $item->get_quantity(), $item['qty'] );
 
 		// Test item_meta_array.
 		$this->assertTrue( isset( $item['item_meta_array'] ) );
-		$item['item_meta_array'] = array(
-			0 => (object) array(
-				'key'   => 'test',
-				'value' => 'val',
-			),
-		);
+		$item->update_meta_data( 'test', 'val', 0 );
 		$this->assertInstanceOf( 'WC_Meta_Data', current( $item->get_meta_data() ) );
 		$this->assertEquals( current( $item->get_meta_data() ), $item['item_meta_array'][''] );
 		unset( $item['item_meta_array'] );
 		$this->assertEquals( array(), $item->get_meta_data() );
 
 		// Test default.
-		$this->assertFalse( isset( $item['foo'] ) );
-		$item['foo'] = 'bar';
+		$this->assertFalse( $item->meta_exists( 'foo' ) );
+		$item->add_meta_data( 'foo', 'bar' );
 		$this->assertEquals( 'bar', $item->get_meta( 'foo' ) );
 	}
 }

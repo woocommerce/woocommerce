@@ -4,7 +4,7 @@
  *
  * Functions for order specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.4.0
  */
 
@@ -822,7 +822,7 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
 			}
 		}
 	}
@@ -861,6 +861,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+	} elseif ( $order->has_status( 'cancelled' ) ) {
+		$order->get_data_store()->release_held_coupons( $order, true );
+		return;
 	} else {
 		return;
 	}

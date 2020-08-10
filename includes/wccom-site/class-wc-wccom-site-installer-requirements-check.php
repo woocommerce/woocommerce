@@ -2,7 +2,7 @@
 /**
  * WooCommerce.com Product Installation Requirements Check.
  *
- * @package WooCommerce\WooCommerce_Site
+ * @package WooCommerce\WCCom
  * @since   3.8.0
  */
 

@@ -2,7 +2,7 @@
 /**
  * WooCommerce Email Settings
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.1.0
  */
 
