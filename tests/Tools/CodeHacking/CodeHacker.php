@@ -2,7 +2,7 @@
 /**
  * CodeHacker class file.
  *
- * @package WooCommerce/Testing
+ * @package WooCommerce\Testing
  */
 
 //phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors.Discouraged

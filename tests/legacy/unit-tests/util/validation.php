@@ -115,7 +115,15 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( false, WC_Validation::is_postcode( '0123', 'SI' ) ),
 		);
 
-		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl, $si );
+		$ba = array(
+			array( true, WC_Validation::is_postcode( '71000', 'BA' ) ),
+			array( true, WC_Validation::is_postcode( '78256', 'BA' ) ),
+			array( true, WC_Validation::is_postcode( '89240', 'BA' ) ),
+			array( false, WC_Validation::is_postcode( '61000', 'BA' ) ),
+			array( false, WC_Validation::is_postcode( '7850', 'BA' ) ),
+		);
+
+		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl, $si, $ba );
 	}
 
 	/**

@@ -4,7 +4,7 @@
  *
  * The WooCommerce product variation class handles product variation data.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
@@ -110,15 +110,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
+	 * Get variation attribute values. Keys are prefixed with attribute_, as stored, unless $with_prefix is false.
 	 *
-	 * @return array of attributes and their values for this variation
+	 * @param bool $with_prefix Whether keys should be prepended with attribute_ or not, default is true.
+	 * @return array of attributes and their values for this variation.
 	 */
-	public function get_variation_attributes() {
+	public function get_variation_attributes( $with_prefix = true ) {
 		$attributes           = $this->get_attributes();
 		$variation_attributes = array();
+		$prefix               = $with_prefix ? 'attribute_' : '';
+
 		foreach ( $attributes as $key => $value ) {
-			$variation_attributes[ 'attribute_' . $key ] = $value;
+			$variation_attributes[ $prefix . $key ] = $value;
 		}
 		return $variation_attributes;
 	}
@@ -579,5 +582,23 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$valid_classes[] = 'parent';
 
 		return $valid_classes;
+	}
+
+	/**
+	 * Delete variation, set the ID to 0, and return result.
+	 *
+	 * @since  4.4.0
+	 * @param  bool $force_delete Should the variation be deleted permanently.
+	 * @return bool result
+	 */
+	public function delete( $force_delete = false ) {
+		$variation_id = $this->get_id();
+
+		if ( ! parent::delete( $force_delete ) ) {
+			return false;
+		}
+
+		wp_delete_object_term_relationships( $variation_id, wc_get_attribute_taxonomy_names() );
+		return true;
 	}
 }

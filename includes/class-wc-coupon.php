@@ -4,7 +4,7 @@
  *
  * The WooCommerce coupons class gets coupon data from storage and checks coupon validity.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 

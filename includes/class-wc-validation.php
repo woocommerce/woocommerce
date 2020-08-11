@@ -53,6 +53,9 @@ class WC_Validation {
 			case 'AT':
 				$valid = (bool) preg_match( '/^([0-9]{4})$/', $postcode );
 				break;
+			case 'BA':
+				$valid = (bool) preg_match( '/^([7-8]{1})([0-9]{4})$/', $postcode );
+				break;
 			case 'BR':
 				$valid = (bool) preg_match( '/^([0-9]{5})([-])?([0-9]{3})$/', $postcode );
 				break;

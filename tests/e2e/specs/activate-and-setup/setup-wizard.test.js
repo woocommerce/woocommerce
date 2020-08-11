@@ -60,7 +60,7 @@ describe( 'Store owner can go through setup Task List', () => {
 
 		await Promise.all( [
 			// Click on "Set up shipping" task to move to the next step
-			taskListItems[3].click(),
+			taskListItems[4].click(),
 
 			// Wait for shipping setup section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),

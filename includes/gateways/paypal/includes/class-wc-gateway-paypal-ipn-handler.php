@@ -2,7 +2,7 @@
 /**
  * Handles responses from PayPal IPN.
  *
- * @package WooCommerce/PayPal
+ * @package WooCommerce\PayPal
  * @version 3.3.0
  */
 

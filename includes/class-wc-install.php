@@ -2,7 +2,7 @@
 /**
  * Installation related functions and actions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
@@ -148,6 +148,14 @@ class WC_Install {
 			'wc_update_400_increase_size_of_column',
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
+		),
+		'4.4.0' => array(
+			'wc_update_440_insert_attribute_terms_for_variable_products',
+			'wc_update_440_db_version',
+		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
 		),
 	);
 
@@ -752,14 +760,14 @@ class WC_Install {
 				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
 				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-			); // WPCS: unprepared SQL ok.
+			);
 			if ( 0 === (int) $fk_result->fk_count ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				); // WPCS: unprepared SQL ok.
+				);
 			}
 		}
 

@@ -2,7 +2,7 @@
 /**
  * Product helpers.
  *
- * @package woocommerce/tests
+ * @package WooCommerce\Tests
  */
 
 /**
@@ -103,14 +103,19 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy variation product.
+	 * Create a dummy variation product or configure an existing product object with dummy data.
+	 *
 	 *
 	 * @since 2.3
-	 *
+	 * @param WC_Product_Variable|null $product Product object to configure, or null to create a new one.
 	 * @return WC_Product_Variable
 	 */
-	public static function create_variation_product() {
-		$product = new WC_Product_Variable();
+	public static function create_variation_product( $product = null ) {
+		$is_new_product = is_null( $product );
+		if ( $is_new_product ) {
+			$product = new WC_Product_Variable();
+		}
+
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
@@ -120,96 +125,132 @@ class WC_Helper_Product {
 
 		$attributes = array();
 
-		$attribute      = new WC_Product_Attribute();
-		$attribute_data = self::create_attribute( 'size', array( 'small', 'large', 'huge' ) );
-		$attribute->set_id( $attribute_data['attribute_id'] );
-		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
-		$attribute->set_options( $attribute_data['term_ids'] );
-		$attribute->set_position( 1 );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-		$attributes[] = $attribute;
-
-		$attribute      = new WC_Product_Attribute();
-		$attribute_data = self::create_attribute( 'colour', array( 'red', 'blue' ) );
-		$attribute->set_id( $attribute_data['attribute_id'] );
-		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
-		$attribute->set_options( $attribute_data['term_ids'] );
-		$attribute->set_position( 1 );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-		$attributes[] = $attribute;
-
-		$attribute      = new WC_Product_Attribute();
-		$attribute_data = self::create_attribute( 'number', array( '0', '1', '2' ) );
-		$attribute->set_id( $attribute_data['attribute_id'] );
-		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
-		$attribute->set_options( $attribute_data['term_ids'] );
-		$attribute->set_position( 1 );
-		$attribute->set_visible( true );
-		$attribute->set_variation( true );
-		$attributes[] = $attribute;
+		$attributes[] = self::create_product_attribute_object( 'size', array( 'small', 'large', 'huge' ) );
+		$attributes[] = self::create_product_attribute_object( 'colour', array( 'red', 'blue' ) );
+		$attributes[] = self::create_product_attribute_object( 'number', array( '0', '1', '2' ) );
 
 		$product->set_attributes( $attributes );
 		$product->save();
 
-		$variation_1 = new WC_Product_Variation();
-		$variation_1->set_props(
-			array(
-				'parent_id'     => $product->get_id(),
-				'sku'           => 'DUMMY SKU VARIABLE SMALL',
-				'regular_price' => 10,
-			)
-		);
-		$variation_1->set_attributes( array( 'pa_size' => 'small' ) );
-		$variation_1->save();
+		$variations = array();
 
-		$variation_2 = new WC_Product_Variation();
-		$variation_2->set_props(
-			array(
-				'parent_id'     => $product->get_id(),
-				'sku'           => 'DUMMY SKU VARIABLE LARGE',
-				'regular_price' => 15,
-			)
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE SMALL',
+			10,
+			array( 'pa_size' => 'small' )
 		);
-		$variation_2->set_attributes( array( 'pa_size' => 'large' ) );
-		$variation_2->save();
 
-		$variation_3 = new WC_Product_Variation();
-		$variation_3->set_props(
-			array(
-				'parent_id'     => $product->get_id(),
-				'sku'           => 'DUMMY SKU VARIABLE HUGE RED 0',
-				'regular_price' => 16,
-			)
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE LARGE',
+			15,
+			array( 'pa_size' => 'large' )
 		);
-		$variation_3->set_attributes(
+
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE RED 0',
+			16,
 			array(
 				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '0',
 			)
 		);
-		$variation_3->save();
 
-		$variation_4 = new WC_Product_Variation();
-		$variation_4->set_props(
-			array(
-				'parent_id'     => $product->get_id(),
-				'sku'           => 'DUMMY SKU VARIABLE HUGE RED 2',
-				'regular_price' => 17,
-			)
-		);
-		$variation_4->set_attributes(
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE RED 2',
+			17,
 			array(
 				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '2',
 			)
 		);
-		$variation_4->save();
 
-		return wc_get_product( $product->get_id() );
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE BLUE 2',
+			18,
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'blue',
+				'pa_number' => '2',
+			)
+		);
+
+		$variations[] = self::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE HUGE BLUE ANY NUMBER',
+			19,
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'blue',
+				'pa_number' => '',
+			)
+		);
+
+		if ( $is_new_product ) {
+			return wc_get_product( $product->get_id() );
+		}
+
+		$variation_ids = array_map(
+			function( $variation ) {
+				return $variation->get_id();
+			},
+			$variations
+		);
+		$product->set_children( $variation_ids );
+		return $product;
+	}
+
+	/**
+	 * Creates an instance of WC_Product_Variation with the supplied parameters, optionally persisting it to the database.
+	 *
+	 * @param string $parent_id Parent product id.
+	 * @param string $sku SKU for the variation.
+	 * @param int    $price Price of the variation.
+	 * @param array  $attributes Attributes that define the variation, e.g. ['pa_color'=>'red'].
+	 * @param bool   $save If true, the object will be saved to the database after being created and configured.
+	 *
+	 * @return WC_Product_Variation The created object.
+	 */
+	public static function create_product_variation_object( $parent_id, $sku, $price, $attributes, $save = true ) {
+		$variation = new WC_Product_Variation();
+		$variation->set_props(
+			array(
+				'parent_id'     => $parent_id,
+				'sku'           => $sku,
+				'regular_price' => $price,
+			)
+		);
+		$variation->set_attributes( $attributes );
+		if ( $save ) {
+			$variation->save();
+		}
+		return $variation;
+	}
+
+	/**
+	 * Creates an instance of WC_Product_Attribute with the supplied parameters.
+	 *
+	 * @param string $raw_name Attribute raw name (without 'pa_' prefix).
+	 * @param array  $terms Possible values for the attribute.
+	 *
+	 * @return WC_Product_Attribute The created attribute object.
+	 */
+	public static function create_product_attribute_object( $raw_name = 'size', $terms = array( 'small' ) ) {
+		$attribute      = new WC_Product_Attribute();
+		$attribute_data = self::create_attribute( $raw_name, $terms );
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_position( 1 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		return $attribute;
 	}
 
 	/**

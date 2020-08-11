@@ -5,7 +5,7 @@
  * The WooCommerce cart class stores cart data and active coupons as well as handling customer sessions and some cart related urls.
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 2.1.0
  */
 
@@ -1038,7 +1038,16 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				if ( $found_in_cart ) {
 					/* translators: %s: product name */
-					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() ) ) );
+					$message = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
+					/**
+					 * Filters message about more than 1 product being added to cart.
+					 *
+					 * @param string     $message Message.
+					 * @param WC_Product $product_data Product data.
+					 */
+					$message = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
+
+					throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View cart', 'woocommerce' ), $message ) );
 				}
 			}
 
@@ -1058,12 +1067,32 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Stock check - only check if we're managing stock and backorders are not allowed.
 			if ( ! $product_data->is_in_stock() ) {
 				/* translators: %s: product name */
-				throw new Exception( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_name() ) );
+				$message = sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_name() );
+				/**
+				 * Filters message about product being out of stock.
+				 *
+				 * @param string     $message Message.
+				 * @param WC_Product $product_data Product data.
+				 */
+				$message = apply_filters( 'woocommerce_cart_product_out_of_stock_message', $message, $product_data );
+				throw new Exception( $message );
 			}
 
 			if ( ! $product_data->has_enough_stock( $quantity ) ) {
+				$stock_quantity = $product_data->get_stock_quantity();
+
 				/* translators: 1: product name 2: quantity in stock */
-				throw new Exception( sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_name(), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ) ) );
+				$message = sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_name(), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ) );
+				/**
+				 * Filters message about product not having enough stock.
+				 *
+				 * @param string     $message Message.
+				 * @param WC_Product $product_data Product data.
+				 * @param int        $stock_quantity Quantity remaining.
+				 */
+				$message = apply_filters( 'woocommerce_cart_product_not_enough_stock_message', $message, $product_data, $stock_quantity );
+
+				throw new Exception( $message );
 			}
 
 			// Stock check - this time accounting for whats already in-cart.
@@ -1396,10 +1425,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! $this->get_customer()->has_calculated_shipping() ) {
-				if ( ! $this->get_customer()->get_shipping_country() || ( ! $this->get_customer()->get_shipping_state() && ! $this->get_customer()->get_shipping_postcode() ) ) {
-					return false;
-				}
+			if ( ! $this->get_customer()->get_shipping_country() || ! $this->get_customer()->get_shipping_state() || ! $this->get_customer()->get_shipping_postcode() ) {
+				return false;
 			}
 		}
 
@@ -1691,7 +1718,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search( $coupon_code, $this->get_applied_coupons(), true );
+		$position    = array_search( $coupon_code, array_map( 'wc_format_coupon_code', $this->get_applied_coupons() ), true );
 
 		if ( false !== $position ) {
 			unset( $this->applied_coupons[ $position ] );
