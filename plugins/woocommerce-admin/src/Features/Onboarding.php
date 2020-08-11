@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding_Profiler;
 use \Automattic\WooCommerce\Admin\PluginsHelper;
+use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -78,6 +79,9 @@ class Onboarding {
 		// Add actions and filters.
 		$this->add_actions();
 		$this->add_filters();
+
+		// Hook up dependant classes.
+		new OnboardingSetUpShipping();
 	}
 
 	/**
@@ -105,6 +109,15 @@ class Onboarding {
 		// Rest API hooks need to run before is_admin() checks.
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
+		add_action(
+			'update_option_' . self::PROFILE_DATA_OPTION,
+			array(
+				$this,
+				'trigger_profile_completed_action',
+			),
+			10,
+			2
+		);
 
 		if ( ! is_admin() ) {
 			return;
@@ -118,6 +131,30 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
+	}
+
+	/**
+	 * Trigger the woocommerce_onboarding_profile_completed action
+	 *
+	 * @param array $old_value Previous value.
+	 * @param array $value Current value.
+	 */
+	public function trigger_profile_completed_action( $old_value, $value ) {
+		if ( isset( $old_value['completed'] ) && $old_value['completed'] ) {
+			return;
+		}
+
+		if ( ! isset( $value['completed'] ) || ! $value['completed'] ) {
+			return;
+		}
+
+		/**
+		 * Action hook fired when the onboarding profile (or onboarding wizard,
+		 * or profiler) is completed.
+		 *
+		 * @since 1.5.0
+		 */
+		do_action( 'woocommerce_onboarding_profile_completed' );
 	}
 
 	/**
