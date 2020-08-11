@@ -78,6 +78,33 @@ export const usePaymentMethodDataContext = () => {
 };
 
 /**
+ * Gets the payment methods saved for the current user after filtering out
+ * disabled ones.
+ *
+ * @param {Object[]} availablePaymentMethods List of available payment methods.
+ * @return {Object} Object containing the payment methods saved for a specific
+ *                  user which are available.
+ */
+const getCustomerPaymentMethods = ( availablePaymentMethods = [] ) => {
+	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
+	const paymentMethodKeys = Object.keys( customerPaymentMethods );
+	if ( paymentMethodKeys.length === 0 ) {
+		return {};
+	}
+	const enabledCustomerPaymentMethods = {};
+	paymentMethodKeys.forEach( ( type ) => {
+		enabledCustomerPaymentMethods[ type ] = customerPaymentMethods[
+			type
+		].filter( ( paymentMethod ) => {
+			return Object.keys( availablePaymentMethods ).includes(
+				paymentMethod.method.gateway
+			);
+		} );
+	} );
+	return enabledCustomerPaymentMethods;
+};
+
+/**
  * PaymentMethodDataProvider is automatically included in the
  * CheckoutDataProvider.
  *
@@ -107,10 +134,6 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 	const currentObservers = useRef( observers );
 
 	const { isEditor, previewData } = useEditorContext();
-	const customerPaymentMethods =
-		isEditor && previewData?.previewSavedPaymentMethods
-			? previewData?.previewSavedPaymentMethods
-			: getSetting( 'customerPaymentMethods', {} );
 	const [ paymentData, dispatch ] = useReducer(
 		reducer,
 		DEFAULT_PAYMENT_DATA
@@ -149,6 +172,24 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		},
 		[ dispatch ]
 	);
+
+	const customerPaymentMethods = useMemo( () => {
+		if ( isEditor && previewData.previewSavedPaymentMethods ) {
+			return previewData.previewSavedPaymentMethods;
+		}
+		if (
+			! paymentMethodsInitialized ||
+			paymentData.paymentMethods.length === 0
+		) {
+			return {};
+		}
+		return getCustomerPaymentMethods( paymentData.paymentMethods );
+	}, [
+		isEditor,
+		previewData.previewSavedPaymentMethods,
+		paymentMethodsInitialized,
+		paymentData.paymentMethods,
+	] );
 
 	const setExpressPaymentError = useCallback(
 		( message ) => {

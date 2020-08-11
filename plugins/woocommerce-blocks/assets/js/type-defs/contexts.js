@@ -256,9 +256,9 @@
 /**
  * @typedef {Object} EditorDataContext
  *
- * @property {number} isEditor      Indicates whether in the editor context.
- * @property {number} currentPostId The post ID being edited.
- * @property {Object} previewData   Object containing preview data for the editor.
+ * @property {boolean} isEditor      Indicates whether in the editor context.
+ * @property {number}  currentPostId The post ID being edited.
+ * @property {Object}  previewData   Object containing preview data for the editor.
  */
 
 /**
