@@ -6,6 +6,15 @@
 	.wc-block-components-product-name {
 		color: inherit;
 	}
+	.wc-block-components-address-form {
+		.wc-block-components-text-input,
+		.wc-block-components-country-input,
+		.wc-block-components-state-input {
+			&:first-of-type {
+				margin-top: 0;
+			}
+		}
+	}
 }
 
 table.wc-block-cart-items,

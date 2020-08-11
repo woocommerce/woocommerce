@@ -10,6 +10,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import { ValidatedSelect } from '../select';
+import './style.scss';
 
 const CountryInput = ( {
 	className,
