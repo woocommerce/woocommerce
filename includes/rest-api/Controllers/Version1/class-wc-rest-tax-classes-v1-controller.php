@@ -64,6 +64,11 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 				),
 			),
 			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+			),
+			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
@@ -149,6 +154,32 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 
 		$data = array();
 		foreach ( $tax_classes as $tax_class ) {
+			$class  = $this->prepare_item_for_response( $tax_class, $request );
+			$class  = $this->prepare_response_for_collection( $class );
+			$data[] = $class;
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Get one tax class.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function get_item( $request ) {
+		if ( 'standard' === $request['slug'] ) {
+			$tax_class = array(
+				'slug' => 'standard',
+				'name' => __( 'Standard rate', 'woocommerce' ),
+			);
+		} else {
+			$tax_class = WC_Tax::get_tax_class_by( 'slug', sanitize_title( $request['slug'] ) );
+		}
+
+		$data = array();
+		if ( $tax_class ) {
 			$class  = $this->prepare_item_for_response( $tax_class, $request );
 			$class  = $this->prepare_response_for_collection( $class );
 			$data[] = $class;

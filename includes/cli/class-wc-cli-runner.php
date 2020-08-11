@@ -115,10 +115,10 @@ class WC_CLI_Runner {
 			'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
 			'instance_id'  => __( 'Instance ID.', 'woocommerce' ),
 			'id'           => __( 'The ID for the resource.', 'woocommerce' ),
+			'slug'         => __( 'The slug for the resource.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
 		$positional_args = array_keys( $supported_ids );
-
 		$parent             = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
