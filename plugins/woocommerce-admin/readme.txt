@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.3.0
 Tested up to: 5.4.2
 Requires PHP: 5.6.20
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/main/license.txt
 
@@ -70,6 +70,56 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.5.0 2020-08-07 =
+- Dev: New notification: Don't forget to test your checkout. #4805
+- Dev: Enable tax calculation before redirecting to standard tax rates page. #4878
+- Fix: Use clipRule and fillRule props. #4889, part of #4864
+- Dev: Added event recording to Orders, Stock, and Reviews panels. #4861
+- Dev: Added personalization to purchase extension task. #4849
+- Dev: Display modal with more info about the new homescreen. #4890
+- Dev: Task list - add a shortcut back to store setup. #4853
+- Dev: Update the colors of the illustrations in the welcome modal. #4945
+- Enhancement: Add eWAY to Payment Setup for AU/NZ Stores. #4947
+
+= 1.4.0 2020-07-22 =
+- Fix: Update returning customer total to include customers whose first order was within the report date range #4430
+- Fix: Fix an error in the Analytics/Orders table when there is an order deleted directly from the database #4630
+- Fix: Reselecting advanced filters in the customer list #4650
+- Fix: Reporting of deleted coupons #4671
+- Fix: Preventing refresh after answering a survey note #4711
+- Fix: Regular filters not working #4704
+- Fix: React warning in test that the key prop wasn't assigned in List #4808
+- Fix: Center continue buttons in the onboarding profile wizard #4082
+- Fix: Homepage template used in setup checklist customization task #4807
+- Fix: Errant Jetpack activation prompt in Stats Overview home screen widget #4817
+- Fix: Unable to activate theme with uppercase name #4393 🎉 @ayubadiputra 
+- Fix: Set active theme when OBW is shown via the task list #4834
+- Enhancement: Add option to dismiss tasks in Setup Checklist #4733
+- Enhancement: Show contextual help menu when working on store setup tasks. #4779
+- Enhancement: Add automatic PayPal account creation flow. #4804
+- Enhancement: Move the WooCommerce > Coupons dashboard menu item to Marketing > Coupons. #4786
+- Tweak: Add education and travel to the onboarding industry types #4694
+- Tweak: Refactor Jetpack connection flows #4655
+- Tweak: Remove the Composite products option from the onboarding wizard #4703
+- Tweak: Refactor tax task to use promise chain #4683
+- Tweak: Add bundle install UI to Business Details step #4695
+- Tweak: Include Product Bundles and Product Add-ons as OBW product options #4705
+- Tweak: Toggle the “Physical products” checkbox on by default #4702
+- Tweak: Variation Names: Allow long names to be shown #4715
+- Tweak: Limit inbox status to unactioned notes #4765
+- Tweak: Only show usage tracking modal once in OBW. #4766
+- Tweak: Add WooCommerce Payments to Setup Checklist. #4793
+- Tweak: Update connection flow for Bundle UI #4717
+- Tweak: Style improvements for Marketing hub. #4794
+- Tweak: Added skip profiler functionality #4721
+- Tweak: Reordered home screen tasks #4754
+- Tweak: Create single source of truth for task list array #4825
+- Tweak: Rework the store details onboarding screen #4771
+- Tweak: Design of Product Types step in Onboarding #4707
+- Tweak: Add copy that WCS TOS will be accepted upon install #4799
+- Dev: Customize webpack jsonpFunction to avoid potential collision with other Webpack bundles #4644 🎉 @aaemnnosttv
+- Dev: Update @wordpress/base-styles and replace deprecated variables #4759
 
 = 1.3.2 2020-07-29 =
 - Fix: bug preventing saving user preferences on WP 5.3. #4869
