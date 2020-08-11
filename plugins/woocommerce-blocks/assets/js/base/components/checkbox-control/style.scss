@@ -7,37 +7,45 @@
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
 		appearance: none;
-		border: 1px solid currentColor;
-		height: 1em;
+		border: 2px solid currentColor;
+		border-radius: 2px;
+		height: em(18px);
+		width: em(18px);
 		margin: 0;
-		min-height: 16px;
-		min-width: 16px;
+		min-height: 18px;
+		min-width: 18px;
 		overflow: hidden;
 		position: static;
 		vertical-align: middle;
-		width: 1em;
+		background-color: #fff;
 
 		&:checked {
 			background: currentColor;
 			border-color: currentColor;
+		}
 
-			&::before {
-				color: #fff;
-				content: "\2713";
-				display: block;
-				height: calc(1rem - 2px);
-				min-height: 14px;
-				min-width: 14px;
-				margin: 0;
-				line-height: 100%;
-				text-align: center;
-				width: calc(1rem - 2px);
-			}
+		&:not(:checked) + .wc-block-components-checkbox__mark {
+			display: none;
 		}
 	}
 
-	.wc-block-components-checkbox__input[type="checkbox"] + .wc-block-components-checkbox__label {
+	.wc-block-components-checkbox__mark {
+		fill: #fff;
+		position: absolute;
+		left: em(1px);
+		top: em(-2px);
+		width: em(16px);
+		height: em(16px);
+	}
+
+	.wc-block-components-checkbox__label {
 		padding-left: $gap-smaller;
 		vertical-align: middle;
+	}
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+	.wc-block-components-checkbox__mark {
+		display: none;
 	}
 }
