@@ -2,7 +2,7 @@
 /**
  * Reports Performance indicators REST API Tests
  *
- * @package WooCommerce Admin\Tests\API.
+ * @package WooCommerce\Admin\Tests\API.
  */
 
 /**

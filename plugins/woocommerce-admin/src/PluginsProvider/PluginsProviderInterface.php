@@ -2,8 +2,6 @@
 /**
  * Interface for a provider for getting access to plugin queries,
  * designed to be mockable for unit tests.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\PluginsProvider;

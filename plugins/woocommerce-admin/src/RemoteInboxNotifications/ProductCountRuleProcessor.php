@@ -2,8 +2,6 @@
 /**
  * Rule processor that performs a comparison operation against the number of
  * products.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

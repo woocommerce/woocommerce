@@ -3,8 +3,6 @@
  * REST API Reports orders stats controller
  *
  * Handles requests to the /reports/orders/stats endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
@@ -16,7 +14,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 /**
  * REST API Reports orders stats controller class.
  *
- * @package WooCommerce/API
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {

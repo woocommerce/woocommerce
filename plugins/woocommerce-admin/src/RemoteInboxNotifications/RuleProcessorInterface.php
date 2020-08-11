@@ -1,8 +1,6 @@
 <?php
 /**
  * Interface for a rule processor.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

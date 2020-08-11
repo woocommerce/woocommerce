@@ -3,8 +3,6 @@
  * REST API Reports controller extended by WC Admin plugin.
  *
  * Handles requests to the reports endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports controller class.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {

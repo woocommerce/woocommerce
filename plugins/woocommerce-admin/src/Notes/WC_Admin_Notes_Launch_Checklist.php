@@ -3,8 +3,6 @@
  * WooCommerce Admin Launch Checklist Note.
  *
  * Adds a note to cover pre-launch checklist items for store owners.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

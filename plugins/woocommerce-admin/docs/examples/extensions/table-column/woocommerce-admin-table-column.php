@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin Table Column Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

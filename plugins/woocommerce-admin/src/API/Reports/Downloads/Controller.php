@@ -3,8 +3,6 @@
  * REST API Reports downloads controller
  *
  * Handles requests to the /reports/downloads endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
@@ -17,7 +15,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 /**
  * REST API Reports downloads controller class.
  *
- * @package WooCommerce/API
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {

@@ -4,7 +4,7 @@
  *
  * Holds core functions for wc-admin.
  *
- * @package WC_Admin\Functions
+ * @package WooCommerce\Admin\Functions
  */
 
 use \Automattic\WooCommerce\Admin\Loader;

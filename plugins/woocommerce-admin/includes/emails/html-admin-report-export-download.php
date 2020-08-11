@@ -2,7 +2,7 @@
 /**
  * Admin report export download
  *
- * @package WooCommerce/Admin/Templates/Emails/HTML
+ * @package WooCommerce\Admin\Templates\Emails\HTML
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,10 +14,12 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 
 ?>
 <a href="<?php echo esc_url( $download_url ); ?>">
-	<?php echo esc_html( sprintf( __( 'Download your %s Report', 'woocommerce-admin' ), $report_name ) ); ?>
+	<?php
+		/* translators: %s: report name */
+		echo esc_html( sprintf( __( 'Download your %s Report', 'woocommerce-admin' ), $report_name ) );
+	?>
 </a>
 <?php
-
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */

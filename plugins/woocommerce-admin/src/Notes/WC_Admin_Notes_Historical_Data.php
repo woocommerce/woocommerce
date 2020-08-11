@@ -3,8 +3,6 @@
  * WooCommerce Admin: Historical Analytics Data Note.
  *
  * Adds a notes to store alerts area concerning the historial analytics data tool.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

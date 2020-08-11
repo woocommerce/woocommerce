@@ -4,8 +4,6 @@
  *
  * Adds a note to ask the client if they are considering starting an online
  * clothing store.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

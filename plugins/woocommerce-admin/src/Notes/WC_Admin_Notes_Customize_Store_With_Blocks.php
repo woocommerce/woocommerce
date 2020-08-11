@@ -4,7 +4,7 @@
  *
  * Adds a note to customize the client online store with WooCommerce blocks.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

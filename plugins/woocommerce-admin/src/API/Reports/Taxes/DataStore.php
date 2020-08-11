@@ -1,8 +1,6 @@
 <?php
 /**
  * API\Reports\Taxes\DataStore class file.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;

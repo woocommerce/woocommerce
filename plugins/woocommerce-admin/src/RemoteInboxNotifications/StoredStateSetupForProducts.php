@@ -1,8 +1,6 @@
 <?php
 /**
  * Handles stored state setup for products.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

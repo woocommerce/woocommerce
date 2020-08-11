@@ -2,7 +2,7 @@
 /**
  * Stored state rule processor tests.
  *
- * @package WooCommerce\Tests\RemoteInboxNotifications
+ * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\StoredStateRuleProcessor;

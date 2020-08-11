@@ -2,8 +2,6 @@
 /**
  * Rule processor for sending when the provided plugin is activated and
  * matches the specified version.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

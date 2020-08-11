@@ -3,8 +3,6 @@
  * WooCommerce Admin Usage Tracking Opt In Note Provider.
  *
  * Adds a Usage Tracking Opt In extension note.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

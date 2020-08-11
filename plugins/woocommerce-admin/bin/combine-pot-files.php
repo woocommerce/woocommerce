@@ -2,7 +2,7 @@
 /**
  * Command line script for merging two .pot files.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 /**

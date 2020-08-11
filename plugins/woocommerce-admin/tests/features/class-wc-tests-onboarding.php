@@ -2,7 +2,7 @@
 /**
  * Onboarding Themes Tests.
  *
- * @package WooCommerce\Tests\Onboarding-themes
+ * @package WooCommerce\Admin\Tests\OnboardingThemes
  */
 
 use \Automattic\WooCommerce\Admin\Features\Onboarding;

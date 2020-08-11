@@ -3,8 +3,6 @@
  * WooCommerce Admin (Dashboard) Giving feedback notes provider
  *
  * Adds notes to the merchant's inbox about giving feedback.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

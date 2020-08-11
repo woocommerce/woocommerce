@@ -3,8 +3,6 @@
  * REST API Reports exportable traits
  *
  * Collection of utility methods for exportable reports.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports;

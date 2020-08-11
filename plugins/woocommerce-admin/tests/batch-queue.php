@@ -2,7 +2,7 @@
 /**
  * Reports Generation Batch Queue Tests
  *
- * @package WooCommerce\Tests\Reports
+ * @package WooCommerce\Admin\Tests\Reports
  * @since 3.5.0
  */
 
@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Admin\Schedulers\OrdersScheduler;
 /**
  * Reports Generation Batch Queue Test Class
  *
- * @package WooCommerce\Tests\Reports
+ * @package WooCommerce\Admin\Tests\Reports
  * @since 3.5.0
  */
 class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {

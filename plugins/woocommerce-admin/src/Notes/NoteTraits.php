@@ -3,8 +3,6 @@
  * WC Admin Note Traits
  *
  * WC Admin Note Traits class that houses shared functionality across notes.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

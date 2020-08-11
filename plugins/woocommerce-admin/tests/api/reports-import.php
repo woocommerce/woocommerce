@@ -2,7 +2,7 @@
 /**
  * Reports Import REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 use Automattic\WooCommerce\Admin\ReportsSync;
@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 /**
  * Reports Import REST API Test Class
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	/**

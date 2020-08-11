@@ -3,8 +3,6 @@
  * REST API Reports Import Controller
  *
  * Handles requests to /reports/import
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Import;
@@ -16,7 +14,6 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 /**
  * Reports Imports controller.
  *
- * @package WooCommerce Admin/API
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {

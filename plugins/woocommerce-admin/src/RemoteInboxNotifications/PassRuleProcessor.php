@@ -2,8 +2,6 @@
 /**
  * Rule processor that passes. This is required because an empty set of rules
  * (or predicate) evaluates to false.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

@@ -5,8 +5,6 @@
  * Adds a note to the merchant's inbox prompting them to install the Jetpack
  * and WooCommerce Services plugins after it fails to install during
  * WooCommerce setup.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

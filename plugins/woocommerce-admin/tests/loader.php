@@ -2,7 +2,7 @@
 /**
  * Loader tests
  *
- * @package WooCommerce Admin\Tests\Loader
+ * @package WooCommerce\Admin\Tests\Loader
  */
 
 use \Automattic\WooCommerce\Admin\Loader;
@@ -10,7 +10,7 @@ use \Automattic\WooCommerce\Admin\Loader;
 /**
  * WC_Admin_Tests_Page_Loader Class
  *
- * @package WooCommerce Admin\Tests\Loader
+ * @package WooCommerce\Admin\Tests\Loader
  */
 class WC_Admin_Tests_Loader extends WP_UnitTestCase {
 	/**

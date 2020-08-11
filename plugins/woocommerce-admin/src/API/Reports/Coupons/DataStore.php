@@ -1,8 +1,6 @@
 <?php
 /**
  * API\Reports\Coupons\DataStore class file.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;

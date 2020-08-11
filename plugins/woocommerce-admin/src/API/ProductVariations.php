@@ -3,8 +3,6 @@
  * REST API Product Variations Controller
  *
  * Handles requests to /products/variations.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Product variations controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Product_Variations_Controller
  */
 class ProductVariations extends \WC_REST_Product_Variations_Controller {

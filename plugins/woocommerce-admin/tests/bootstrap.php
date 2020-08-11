@@ -2,7 +2,7 @@
 /**
  * WooCommerce Admin Unit Tests Bootstrap
  *
- * @package WooCommerce Admin Tests
+ * @package WooCommerce\Admin\Tests
  */
 
 /**

@@ -3,8 +3,6 @@
  * WooCommerce Admin: Choose a niche note.
  *
  * Adds a note to show the client how to choose a niche for their store.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

@@ -1,8 +1,6 @@
 <?php
 /**
  * Rule processor that negates the rules in the rule's operand.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

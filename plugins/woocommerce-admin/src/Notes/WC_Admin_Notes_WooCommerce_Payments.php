@@ -3,8 +3,6 @@
  * WooCommerce Admin WooCommerce Payments Note Provider.
  *
  * Adds a note to the merchant's inbox showing the benefits of the WooCommerce Payments.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

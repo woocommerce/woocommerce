@@ -3,8 +3,6 @@
  * WC Admin Order Refund
  *
  * WC Admin Order Refund class that adds some functionality on top of general WooCommerce WC_Order_Refund.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Overrides;

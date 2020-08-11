@@ -3,8 +3,6 @@
  * WC Admin Order Trait
  *
  * WC Admin Order Trait class that houses shared functionality across order and refund classes.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Overrides;

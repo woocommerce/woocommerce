@@ -3,8 +3,6 @@
  * REST API Reports customers stats controller
  *
  * Handles requests to the /reports/customers/stats endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
@@ -16,7 +14,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 /**
  * REST API Reports customers stats controller class.
  *
- * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {

@@ -2,7 +2,7 @@
 /**
  * Reports Orders REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 
@@ -11,7 +11,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 /**
  * Reports Orders REST API Test Class
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
@@ -83,7 +83,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
 		$this->assertEquals( $order->get_order_number(), $order_report['order_number'] );
-		$this->assertEquals( date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ), $order_report['date_created'] );
+		$this->assertEquals( gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ), $order_report['date_created'] );
 		$this->assertEquals( $expected_customer_id, $order_report['customer_id'] );
 		$this->assertEquals( 4, $order_report['num_items_sold'] );
 		$this->assertEquals( 90.0, $order_report['net_total'] ); // 25 x 4 - 10 (shipping)

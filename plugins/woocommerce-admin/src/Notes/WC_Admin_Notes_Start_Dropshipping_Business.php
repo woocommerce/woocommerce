@@ -3,8 +3,6 @@
  * WooCommerce Admin: Starting a dropshipping business.
  *
  * Adds a note to ask the client if they are considering starting a dropshipping business.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

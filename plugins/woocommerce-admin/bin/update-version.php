@@ -2,7 +2,7 @@
 /**
  * Updates PHP versions to match those in package.json before start or build.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 $package_json = file_get_contents( 'package.json' );

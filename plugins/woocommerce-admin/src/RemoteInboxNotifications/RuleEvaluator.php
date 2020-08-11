@@ -2,8 +2,6 @@
 /**
  * Evaluate the given rules as an AND operation - return false early if a
  * rule evaluates to false.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

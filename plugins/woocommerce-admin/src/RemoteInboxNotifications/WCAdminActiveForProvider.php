@@ -1,8 +1,6 @@
 <?php
 /**
  * WCAdmin active for provider.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

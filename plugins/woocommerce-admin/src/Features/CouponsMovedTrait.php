@@ -1,16 +1,12 @@
 <?php
 /**
  * A Trait to help with managing the legacy coupon menu.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Features;
 
 /**
  * CouponsMovedTrait trait.
- *
- * @package Automattic\WooCommerce\Admin\Features
  */
 trait CouponsMovedTrait {
 

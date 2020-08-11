@@ -2,7 +2,7 @@
 /**
  * Reports Taxes REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 
@@ -84,7 +84,7 @@ class WC_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			array(
 				'order_id'     => $order->get_id(),
 				'tax_rate_id'  => 1,
-				'date_created' => date( 'Y-m-d H:i:s' ),
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
 				'shipping_tax' => 2,
 				'order_tax'    => 5,
 				'total_tax'    => 7,
@@ -165,7 +165,7 @@ class WC_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			array(
 				'order_id'     => $order->get_id(),
 				'tax_rate_id'  => 1,
-				'date_created' => date( 'Y-m-d H:i:s' ),
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
 				'shipping_tax' => 2,
 				'order_tax'    => 5,
 				'total_tax'    => 7,

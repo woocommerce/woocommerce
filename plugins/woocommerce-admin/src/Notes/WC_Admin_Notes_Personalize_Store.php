@@ -3,8 +3,6 @@
  * WooCommerce Admin Personalize Your Store Note Provider.
  *
  * Adds a note to the merchant's inbox prompting them to personalize their store.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

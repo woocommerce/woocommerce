@@ -3,8 +3,6 @@
  * WooCommerce Admin Coupon Page Moved provider.
  *
  * Adds a notice when the store manager access the coupons page via the old WooCommere > Coupons menu.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;
@@ -17,8 +15,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Notes_Coupon_Page_Moved class.
- *
- * @package Automattic\WooCommerce\Admin\Notes
  */
 class WC_Admin_Notes_Coupon_Page_Moved {
 

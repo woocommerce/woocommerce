@@ -3,8 +3,6 @@
  * REST API Reports taxes stats controller
  *
  * Handles requests to the /reports/taxes/stats endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports taxes stats controller class.
  *
- * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {

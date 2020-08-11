@@ -2,14 +2,14 @@
 /**
  * Plugin Version Tests
  *
- * @package WooCommerce\Tests\Reports
+ * @package WooCommerce\Admin\Tests\Reports
  * @since 3.6.4
  */
 
 /**
  * Plugin Version Tests Class
  *
- * @package WooCommerce\Tests\Reports
+ * @package WooCommerce\Admin\Tests\Reports
  * @since 3.6.4
  */
 class WC_Admin_Tests_Plugin_Version extends WP_UnitTestCase {

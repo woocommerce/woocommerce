@@ -2,7 +2,7 @@
 /**
  * Class SampleTest
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

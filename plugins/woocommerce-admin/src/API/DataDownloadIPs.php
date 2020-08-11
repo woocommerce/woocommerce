@@ -3,8 +3,6 @@
  * REST API Data Download IP Controller
  *
  * Handles requests to /data/download-ips
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Data Download IP controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
 class DataDownloadIPs extends \WC_REST_Data_Controller {

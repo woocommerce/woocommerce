@@ -2,7 +2,7 @@
 /**
  * Reports coupons tests.
  *
- * @package WooCommerce\Tests\Coupons
+ * @package WooCommerce\Admin\Tests\Coupons
  */
 
 use \Automattic\WooCommerce\Admin\ReportCSVExporter;

@@ -1,8 +1,6 @@
 <?php
 /**
  * Rule processor for sending after a specified date/time.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

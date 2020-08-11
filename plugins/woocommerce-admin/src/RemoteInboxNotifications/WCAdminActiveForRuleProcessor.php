@@ -2,8 +2,6 @@
 /**
  * Rule processor for publishing if wc-admin has been active for at least the
  * given number of seconds.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

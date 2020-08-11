@@ -2,7 +2,7 @@
 /**
  * Admin notes REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;

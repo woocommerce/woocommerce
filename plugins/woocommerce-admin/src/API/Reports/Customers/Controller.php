@@ -3,8 +3,6 @@
  * REST API Reports customers controller
  *
  * Handles requests to the /reports/customers endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
@@ -18,7 +16,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 /**
  * REST API Reports customers controller class.
  *
- * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {

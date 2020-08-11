@@ -2,7 +2,7 @@
 /**
  * Reports coupons stats tests.
  *
- * @package WooCommerce\Tests\Coupons-stats
+ * @package WooCommerce\Admin\Tests\CouponsStats
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;

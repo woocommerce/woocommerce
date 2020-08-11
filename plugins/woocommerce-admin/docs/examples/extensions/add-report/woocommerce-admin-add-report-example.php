@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin Add Report Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

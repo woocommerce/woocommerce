@@ -2,7 +2,7 @@
 /**
  * Plugins Helper Tests
  *
- * @package WooCommerce Admin\Tests\PluginHelper
+ * @package WooCommerce\Admin\Tests\PluginHelper
  */
 
 use \Automattic\WooCommerce\Admin\PluginsHelper;
@@ -10,7 +10,7 @@ use \Automattic\WooCommerce\Admin\PluginsHelper;
 /**
  * WC_Admin_Tests_Plugin_Helper Class
  *
- * @package WooCommerce Admin\Tests\PluginHelper
+ * @package WooCommerce\Admin\Tests\PluginHelper
  */
 class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 

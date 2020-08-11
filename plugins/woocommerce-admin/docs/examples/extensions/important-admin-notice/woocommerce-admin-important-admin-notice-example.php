@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin Important Notice Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

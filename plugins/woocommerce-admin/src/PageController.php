@@ -1,8 +1,6 @@
 <?php
 /**
  * PageController
- *
- * @package Woocommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin;

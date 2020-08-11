@@ -4,7 +4,7 @@
  *
  * Adds notes to the merchant's inbox concerning Facebook Marketing Expert.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

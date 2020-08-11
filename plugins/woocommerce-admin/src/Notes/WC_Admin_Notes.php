@@ -1,8 +1,6 @@
 <?php
 /**
  * Handles storage and retrieval of admin notes
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

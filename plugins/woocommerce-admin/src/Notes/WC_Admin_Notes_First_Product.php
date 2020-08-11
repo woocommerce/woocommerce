@@ -3,8 +3,6 @@
  * WooCommerce Admin: Do you need help with adding your first product?
  *
  * Adds a note to ask the client if they need help adding their first product.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

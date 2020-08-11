@@ -3,8 +3,6 @@
  * REST API Orders Controller
  *
  * Handles requests to /orders/*
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Orders controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Orders_Controller
  */
 class Orders extends \WC_REST_Orders_Controller {

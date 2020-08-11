@@ -2,7 +2,7 @@
 /**
  * Reports order stats tests.
  *
- * @package WooCommerce\Tests\Orders
+ * @package WooCommerce\Admin\Tests\Orders
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 

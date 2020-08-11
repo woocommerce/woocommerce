@@ -3,8 +3,6 @@
  * REST API Marketing Overview Controller
  *
  * Handles requests to /marketing/overview.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -17,7 +15,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Marketing Overview Controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
 class MarketingOverview extends \WC_REST_Data_Controller {

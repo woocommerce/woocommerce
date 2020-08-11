@@ -2,7 +2,7 @@
 /**
  * Publish after time rule processor tests.
  *
- * @package WooCommerce\Tests\RemoteInboxNotifications
+ * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PublishAfterTimeRuleProcessor;

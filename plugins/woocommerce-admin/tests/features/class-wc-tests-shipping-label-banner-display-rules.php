@@ -2,7 +2,7 @@
 /**
  * Shipping Label Banner Display Rules tests.
  *
- * @package WooCommerce\Tests\Shipping-label-banner-display-rules
+ * @package WooCommerce\Admin\Tests\ShippingLabelBannerDisplayRules
  */
 
 use \Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules;

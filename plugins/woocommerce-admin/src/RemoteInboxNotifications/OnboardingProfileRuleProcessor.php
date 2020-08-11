@@ -2,8 +2,6 @@
 /**
  * Rule processor that performs a comparison operation against a value in the
  * onboarding profile.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

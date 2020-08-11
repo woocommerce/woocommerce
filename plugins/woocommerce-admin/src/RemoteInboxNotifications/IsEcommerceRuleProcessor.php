@@ -3,7 +3,7 @@
  * Rule processor that passes (or fails) when the site is on the eCommerce
  * plan.
  *
- * @package WooCommerce Admin/Classes
+ * @package WooCommerce\Admin\Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin Dashboard Section Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

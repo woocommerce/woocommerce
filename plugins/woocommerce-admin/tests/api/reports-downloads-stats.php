@@ -2,7 +2,7 @@
 /**
  * Reports Downloads Stats REST API Test
  *
- * @package WooCommerce Admin\Tests\API.
+ * @package WooCommerce\Admin\Tests\API.
  */
 
 /**
@@ -81,8 +81,8 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
 				'interval' => 'day',
 			)
 		);
@@ -97,11 +97,11 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $totals, $reports['totals'] );
 
 		$today_interval = array(
-			'interval'       => date( 'Y-m-d', $time ),
-			'date_start'     => date( 'Y-m-d 00:00:00', $time ),
-			'date_start_gmt' => date( 'Y-m-d 00:00:00', $time ),
-			'date_end'       => date( 'Y-m-d 23:59:59', $time ),
-			'date_end_gmt'   => date( 'Y-m-d 23:59:59', $time ),
+			'interval'       => gmdate( 'Y-m-d', $time ),
+			'date_start'     => gmdate( 'Y-m-d 00:00:00', $time ),
+			'date_start_gmt' => gmdate( 'Y-m-d 00:00:00', $time ),
+			'date_end'       => gmdate( 'Y-m-d 23:59:59', $time ),
+			'date_end_gmt'   => gmdate( 'Y-m-d 23:59:59', $time ),
 			'subtotals'      => (object) array(
 				'download_count' => 1,
 			),
@@ -115,8 +115,8 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
 				'interval' => 'day',
 				'orderby'  => 'download_count',
 			)
@@ -271,7 +271,7 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$object->set_user_ip_address( '1.2.3.4' );
 		$object->save();
 
-		$three_days_from_now = current_time( 'timestamp', true ) - ( 3 * DAY_IN_SECONDS );
+		$three_days_from_now = time() - ( 3 * DAY_IN_SECONDS );
 
 		$object = new WC_Customer_Download_Log();
 		$object->set_permission_id( $download->get_id() );
@@ -287,8 +287,8 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $seven_days_ago ),
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d H:00:00', $seven_days_ago ),
 				'interval' => 'day',
 				'orderby'  => 'download_count',
 			)
@@ -297,17 +297,17 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 3, $reports['intervals'][0]['subtotals']->download_count );
-		$this->assertEquals( date( 'Y-m-d', $time ), $reports['intervals'][0]['interval'] );
+		$this->assertEquals( gmdate( 'Y-m-d', $time ), $reports['intervals'][0]['interval'] );
 
 		$this->assertEquals( 1, $reports['intervals'][1]['subtotals']->download_count );
-		$this->assertEquals( date( 'Y-m-d', $three_days_from_now ), $reports['intervals'][1]['interval'] );
+		$this->assertEquals( gmdate( 'Y-m-d', $three_days_from_now ), $reports['intervals'][1]['interval'] );
 
 		// Test sorting by date.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $seven_days_ago ),
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d H:00:00', $seven_days_ago ),
 				'interval' => 'day',
 				'orderby'  => 'date',
 				'order'    => 'asc',
@@ -317,10 +317,10 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 0, $reports['intervals'][0]['subtotals']->download_count );
-		$this->assertEquals( date( 'Y-m-d', $seven_days_ago ), $reports['intervals'][0]['interval'] );
+		$this->assertEquals( gmdate( 'Y-m-d', $seven_days_ago ), $reports['intervals'][0]['interval'] );
 
 		$this->assertEquals( 3, $reports['intervals'][7]['subtotals']->download_count );
-		$this->assertEquals( date( 'Y-m-d', $time ), $reports['intervals'][7]['interval'] );
+		$this->assertEquals( gmdate( 'Y-m-d', $time ), $reports['intervals'][7]['interval'] );
 	}
 
 	/**

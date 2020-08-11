@@ -2,8 +2,6 @@
 /**
  * Interface for a provider for getting the current DateTime,
  * designed to be mockable for unit tests.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\DateTimeProvider;

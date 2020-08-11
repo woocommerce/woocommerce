@@ -2,7 +2,7 @@
 /**
  * WCAdmin active for rule processor tests.
  *
- * @package WooCommerce\Tests\RemoteInboxNotification
+ * @package WooCommerce\Admin\Tests\RemoteInboxNotification
  */
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\WCAdminActiveForRuleProcessor;

@@ -2,7 +2,7 @@
 /**
  * Generates an array of feature flags, based on the config used by the client application.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 /**

@@ -3,8 +3,6 @@
  * WooCommerce Admin: WooCommerce Subscriptions.
  *
  * Adds a note to learn more about WooCommerce Subscriptions.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

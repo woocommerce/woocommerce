@@ -2,7 +2,7 @@
 /**
  * Admin notes helper for wc-admin unit tests.
  *
- * @package WooCommerce\Tests\Framework\Helpers
+ * @package WooCommerce\Admin\Tests\Framework\Helpers
  */
 
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;

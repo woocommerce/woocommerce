@@ -1,8 +1,6 @@
 <?php
 /**
  * A provider for getting access to plugin queries.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\PluginsProvider;

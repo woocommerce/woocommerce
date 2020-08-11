@@ -3,8 +3,6 @@
  * WooCommerce Admin: Learn more about Product Settings
  *
  * Adds a note about learning more about product settings.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

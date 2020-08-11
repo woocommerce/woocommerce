@@ -2,7 +2,7 @@
 /**
  * Product count rule processor tests.
  *
- * @package WooCommerce\Testes\RemoteInboxNotifications
+ * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\ProductCountRuleProcessor;

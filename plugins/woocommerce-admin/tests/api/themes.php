@@ -2,7 +2,7 @@
 /**
  * Themes REST API Test
  *
- * @package WooCommerce Admin\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 /**

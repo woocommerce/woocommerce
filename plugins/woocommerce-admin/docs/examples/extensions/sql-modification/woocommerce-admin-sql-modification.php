@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin SQL modification Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

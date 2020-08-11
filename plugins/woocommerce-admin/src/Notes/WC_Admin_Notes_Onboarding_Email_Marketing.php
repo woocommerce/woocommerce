@@ -3,8 +3,6 @@
  * WooCommerce Admin Onboarding Email Marketing Note Provider.
  *
  * Adds a note to sign up to email marketing after completing the profiler.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

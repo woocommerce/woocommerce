@@ -2,7 +2,7 @@
 /**
  * Onboarding Profile REST API Test
  *
- * @package WooCommerce Admin\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 use \Automattic\WooCommerce\Admin\API\OnboardingProfile;

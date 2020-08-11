@@ -2,7 +2,7 @@
 /**
  * Connect existing WooCommerce pages to WooCommerce Admin.
  *
- * @package Woocommerce Admin
+ * @package WooCommerce\Admin
  */
 
 use Automattic\WooCommerce\Admin\Loader;

@@ -3,8 +3,6 @@
  * REST API Onboarding Themes Controller
  *
  * Handles requests to install and activate themes.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -16,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Onboarding Themes Controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
 class OnboardingThemes extends \WC_REST_Data_Controller {

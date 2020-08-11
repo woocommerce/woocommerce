@@ -3,8 +3,6 @@
  * REST API Setting Options Controller
  *
  * Handles requests to /settings/{option}
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -16,7 +14,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 /**
  * Setting Options controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Setting_Options_Controller
  */
 class SettingOptions extends \WC_REST_Setting_Options_Controller {

@@ -1,8 +1,6 @@
 <?php
 /**
  * Traits for scheduling actions and dependencies.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Schedulers;

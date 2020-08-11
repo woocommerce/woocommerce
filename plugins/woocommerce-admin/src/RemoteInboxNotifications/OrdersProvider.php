@@ -1,8 +1,6 @@
 <?php
 /**
  * Provider for order-related queries and operations.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

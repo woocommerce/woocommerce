@@ -2,7 +2,7 @@
 /**
  * REST API Init Class Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 

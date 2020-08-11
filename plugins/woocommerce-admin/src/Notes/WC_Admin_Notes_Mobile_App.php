@@ -3,8 +3,6 @@
  * WooCommerce Admin Mobile App Note Provider.
  *
  * Adds a note to the merchant's inbox showing the benefits of the mobile app.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

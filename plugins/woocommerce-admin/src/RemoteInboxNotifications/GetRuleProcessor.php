@@ -1,8 +1,6 @@
 <?php
 /**
  * Gets the processor for the specified rule type.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

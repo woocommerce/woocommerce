@@ -3,8 +3,6 @@
  * WooCommerce Admin: Help us improve the WooCommerce Home screen
  *
  * Adds a note to ask the client to provide feedback about the home screen.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: {{extension_name}}
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 /**

@@ -3,8 +3,6 @@
  * REST API Admin Notes controller
  *
  * Handles requests to the admin notes endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -17,7 +15,6 @@ use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 /**
  * REST API Admin Notes controller class.
  *
- * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
 class Notes extends \WC_REST_CRUD_Controller {

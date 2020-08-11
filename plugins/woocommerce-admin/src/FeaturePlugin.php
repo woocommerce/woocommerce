@@ -1,8 +1,6 @@
 <?php
 /**
  * WooCommerce Admin: Feature plugin main class.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin;

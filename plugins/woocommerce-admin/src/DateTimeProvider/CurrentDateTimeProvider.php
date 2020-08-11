@@ -1,8 +1,6 @@
 <?php
 /**
  * A provider for getting the current DateTime.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\DateTimeProvider;

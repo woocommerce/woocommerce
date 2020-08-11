@@ -2,7 +2,7 @@
 /**
  * Admin report export download email (plain text)
  *
- * @package WooCommerce/Admin/Templates/Emails/HTML
+ * @package WooCommerce\Admin\Templates\Emails\HTML
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -12,7 +12,7 @@ echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %1$s: report name, %2$s: download URL */
-echo sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce-admin' ), $report_name, $download_url );
+echo wp_kses_post( sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce-admin' ), $report_name, $download_url ) );
 
 echo "\n\n----------------------------------------\n\n";
 

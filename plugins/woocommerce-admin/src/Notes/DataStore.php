@@ -1,8 +1,6 @@
 <?php
 /**
  * WC_Admin_Note_Data_Store class file.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

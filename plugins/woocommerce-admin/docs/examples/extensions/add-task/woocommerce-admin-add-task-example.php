@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Admin Add Task Example
  *
- * @package WC_Admin
+ * @package WooCommerce\Admin
  */
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;

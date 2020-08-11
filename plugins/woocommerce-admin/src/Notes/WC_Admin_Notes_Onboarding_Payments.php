@@ -3,8 +3,6 @@
  * WooCommerce Admin: Payments reminder note.
  *
  * Adds a notes to complete the payment methods.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

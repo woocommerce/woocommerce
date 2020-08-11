@@ -2,7 +2,7 @@
 /**
  * Reports Orders Stats REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 /**

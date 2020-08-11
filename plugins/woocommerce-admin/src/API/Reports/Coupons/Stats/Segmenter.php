@@ -1,8 +1,6 @@
 <?php
 /**
  * Class for adding segmenting support to coupons/stats without cluttering the data store.
- *
- * @package  WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;

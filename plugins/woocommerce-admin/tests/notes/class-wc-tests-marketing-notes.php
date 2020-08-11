@@ -2,7 +2,7 @@
 /**
  * Marketing notes tests
  *
- * @package WooCommerce\Tests\Notes
+ * @package WooCommerce\Admin\Tests\Notes
  */
 
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;

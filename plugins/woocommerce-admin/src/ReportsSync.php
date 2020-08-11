@@ -1,8 +1,6 @@
 <?php
 /**
  * Report table sync related functions and actions.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin;

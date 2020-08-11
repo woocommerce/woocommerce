@@ -3,8 +3,6 @@
  * WooCommerce Admin: Update version reminder note.
  *
  * Creates a note to nudge users to use the newer version when two are installed.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

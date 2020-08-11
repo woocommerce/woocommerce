@@ -2,7 +2,7 @@
 /**
  * Reports Coupons Stats REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  */
 
 /**
@@ -92,8 +92,8 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d 00:00:00', $time ),
+				'before'   => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'    => gmdate( 'Y-m-d 00:00:00', $time ),
 				'interval' => 'day',
 			)
 		);
@@ -110,11 +110,11 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => date( 'Y-m-d', $time ),
-					'date_start'     => date( 'Y-m-d 00:00:00', $time ),
-					'date_start_gmt' => date( 'Y-m-d 00:00:00', $time ),
-					'date_end'       => date( 'Y-m-d 23:59:59', $time ),
-					'date_end_gmt'   => date( 'Y-m-d 23:59:59', $time ),
+					'interval'       => gmdate( 'Y-m-d', $time ),
+					'date_start'     => gmdate( 'Y-m-d 00:00:00', $time ),
+					'date_start_gmt' => gmdate( 'Y-m-d 00:00:00', $time ),
+					'date_end'       => gmdate( 'Y-m-d 23:59:59', $time ),
+					'date_end_gmt'   => gmdate( 'Y-m-d 23:59:59', $time ),
 					'subtotals'      => (object) array(
 						'amount'        => 4.0,
 						'coupons_count' => 2,

@@ -4,7 +4,7 @@
  *
  * Adds a note to remind the user to test their store checkout.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

@@ -1,8 +1,6 @@
 <?php
 /**
  * REST API bootstrap.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API;

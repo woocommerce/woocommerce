@@ -1,8 +1,6 @@
 <?php
 /**
  * Rule processor for publishing based on the number of orders.
- *
- * @package WooCommerce Admin/Classes;
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

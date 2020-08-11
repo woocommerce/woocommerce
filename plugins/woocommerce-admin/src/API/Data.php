@@ -3,8 +3,6 @@
  * REST API Data Controller
  *
  * Handles requests to /data
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Data controller.
  *
- * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
 class Data extends \WC_REST_Data_Controller {

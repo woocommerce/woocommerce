@@ -2,7 +2,7 @@
 /**
  * Reports order stats tests.
  *
- * @package WooCommerce\Tests\Orders
+ * @package WooCommerce\Admin\Tests\Orders
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
@@ -2173,7 +2173,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Customer returning
 		$query_args = array(
-			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ), // I don't think this makes sense.... gmdate( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
 			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'customer' => 'returning',

@@ -1,8 +1,6 @@
 <?php
 /**
  * Compare two operands using the specified operation.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

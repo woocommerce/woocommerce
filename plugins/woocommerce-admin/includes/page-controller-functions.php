@@ -2,7 +2,7 @@
 /**
  * Convenience functions for PageController.
  *
- * @package Woocommerce Admin
+ * @package WooCommerce\Admin
  */
 
 use Automattic\WooCommerce\Admin\PageController;

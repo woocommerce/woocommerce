@@ -2,7 +2,7 @@
 /**
  * Reports Interval Test
  *
- * @package WC Admin
+ * @package WooCommerce\Admin\Tests\API
  * @since x.x.0
  */
 

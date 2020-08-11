@@ -3,7 +3,7 @@
  * Add a note to the merchant's inbox prompting them to set up additional
  * payment types if they have WooCommerce Payments activated.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

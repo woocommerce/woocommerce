@@ -3,8 +3,6 @@
  * WooCommerce Admin Draw Attention note provider
  *
  * Adds a note to the merchant's inbox
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

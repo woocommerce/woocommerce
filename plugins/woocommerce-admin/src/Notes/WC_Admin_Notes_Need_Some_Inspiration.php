@@ -3,8 +3,6 @@
  * WooCommerce Admin: Do you need some inspiration?
  *
  * Adds a note to ask the client if they need some inspiration.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

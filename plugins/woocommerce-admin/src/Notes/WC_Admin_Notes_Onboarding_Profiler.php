@@ -3,8 +3,6 @@
  * WooCommerce Admin: Profile reminder note.
  *
  * Adds a notes to complete or skip the profiler.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

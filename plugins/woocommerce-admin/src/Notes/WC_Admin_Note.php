@@ -3,8 +3,6 @@
  * WooCommerce Admin (Dashboard) Notes.
  *
  * The WooCommerce admin notes class gets admin notes data from storage and checks validity.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

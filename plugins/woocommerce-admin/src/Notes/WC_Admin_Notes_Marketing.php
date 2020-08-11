@@ -3,8 +3,6 @@
  * WooCommerce Admin Marketing Note Provider.
  *
  * Adds notes to the merchant's inbox concerning the marketing dashboard.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

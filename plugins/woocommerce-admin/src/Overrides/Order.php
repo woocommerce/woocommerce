@@ -3,8 +3,6 @@
  * WC Admin Order
  *
  * WC Admin Order class that adds some functionality on top of general WooCommerce WC_Order.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Overrides;

@@ -2,7 +2,7 @@
 /**
  * PageController tests
  *
- * @package WooCommerce Admin\Tests\PageController
+ * @package WooCommerce\Admin\Tests\PageController
  */
 
 use \Automattic\WooCommerce\Admin\PageController;
@@ -10,7 +10,7 @@ use \Automattic\WooCommerce\Admin\PageController;
 /**
  * WC_Admin_Tests_Page_Controller Class
  *
- * @package WooCommerce Admin\Tests\PageController
+ * @package WooCommerce\Admin\Tests\PageController
  */
 class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 

@@ -2,8 +2,6 @@
 /**
  * Rule processor that performs an OR operation on the rule's left and right
  * operands.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

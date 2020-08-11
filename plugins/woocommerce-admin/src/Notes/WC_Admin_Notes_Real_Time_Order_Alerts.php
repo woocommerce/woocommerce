@@ -3,8 +3,6 @@
  * WooCommerce Admin Real Time Order Alerts Note.
  *
  * Adds a note to download the mobile app to monitor store activity.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

@@ -4,7 +4,7 @@
  *
  * Adds a note to give insight about the first sale.
  *
- * @package WooCommerce Admin
+ * @package WooCommerce\Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

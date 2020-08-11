@@ -2,7 +2,7 @@
 /**
  * Reports Customers REST API Test
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 
@@ -11,7 +11,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 /**
  * Reports Customers REST API Test Class
  *
- * @package WooCommerce\Tests\API
+ * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
 class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
@@ -298,7 +298,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'search'           => 'Alice',
-				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
+				'last_order_after' => gmdate( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);
 		$response = $this->server->dispatch( $request );

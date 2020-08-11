@@ -1,8 +1,6 @@
 <?php
 /**
  * InstalledExtensions class file.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Marketing;

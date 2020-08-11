@@ -3,8 +3,6 @@
  * WooCommerce Admin: Migrate from Shopify to WooCommerce.
  *
  * Adds a note to ask the client if they want to migrate from Shopify to WooCommerce.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

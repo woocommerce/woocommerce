@@ -1,8 +1,6 @@
 <?php
 /**
  * Runs a single spec.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;

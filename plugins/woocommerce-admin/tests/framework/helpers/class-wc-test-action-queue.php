@@ -2,7 +2,7 @@
 /**
  * Action Queue Test Helper
  *
- * @package WooCommerce/Tests
+ * @package WooCommerce\Tests
  */
 
 /**

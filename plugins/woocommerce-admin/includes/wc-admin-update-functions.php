@@ -4,7 +4,7 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 use \Automattic\WooCommerce\Admin\Install as Installer;

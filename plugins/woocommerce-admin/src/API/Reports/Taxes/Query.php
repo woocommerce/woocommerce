@@ -11,8 +11,6 @@
  *         );
  * $report = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Query( $args );
  * $mydata = $report->get_data();
- *
- * @package  WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;

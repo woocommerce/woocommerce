@@ -1,8 +1,6 @@
 <?php
 /**
  * Keeps the product category lookup table in sync with live data.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin;
@@ -94,7 +92,7 @@ class CategoryLookup {
 			)
 		);
 
-		$wpdb->query( "INSERT IGNORE INTO $wpdb->wc_category_lookup (category_tree_id,category_id) VALUES ({$insert_string})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( "INSERT IGNORE INTO $wpdb->wc_category_lookup (category_tree_id,category_id) VALUES ({$insert_string})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -153,7 +151,7 @@ class CategoryLookup {
 		$id_list     = implode( ',', array_map( 'intval', array_unique( array_filter( $children ) ) ) );
 
 		foreach ( $ancestors as $ancestor ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->wc_category_lookup WHERE category_tree_id = %d AND category_id IN ({$id_list})", $ancestor ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->wc_category_lookup WHERE category_tree_id = %d AND category_id IN ({$id_list})", $ancestor ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -180,7 +178,7 @@ class CategoryLookup {
 
 		$insert_string = implode( ',', $inserts );
 
-		$wpdb->query( "INSERT IGNORE INTO $wpdb->wc_category_lookup (category_id, category_tree_id) VALUES {$insert_string}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( "INSERT IGNORE INTO $wpdb->wc_category_lookup (category_id, category_tree_id) VALUES {$insert_string}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**

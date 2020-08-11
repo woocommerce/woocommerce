@@ -3,8 +3,6 @@
  * REST API Reports stock stats controller
  *
  * Handles requests to the /reports/stock/stats endpoint.
- *
- * @package WooCommerce Admin/API
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Stock\Stats;
@@ -14,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports stock stats controller class.
  *
- * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {

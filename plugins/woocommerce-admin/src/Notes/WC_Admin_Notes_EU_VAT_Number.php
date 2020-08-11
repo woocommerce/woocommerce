@@ -3,8 +3,6 @@
  * WooCommerce Admin: EU VAT Number Note.
  *
  * Adds a note for EU store to install the EU VAT Number extension.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

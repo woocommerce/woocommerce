@@ -3,8 +3,6 @@
  * WooCommerce Admin (Dashboard) Order Milestones Note Provider.
  *
  * Adds a note to the merchant's inbox when certain order milestones are reached.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;
@@ -210,7 +208,7 @@ class WC_Admin_Notes_Order_Milestones {
 	public function get_note_content_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
-				return __( "Congratulations on getting your first order! Now is a great time to learn how to manage your orders.", 'woocommerce-admin' );
+				return __( 'Congratulations on getting your first order! Now is a great time to learn how to manage your orders.', 'woocommerce-admin' );
 			case 10:
 				return __( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' );
 			case 100:

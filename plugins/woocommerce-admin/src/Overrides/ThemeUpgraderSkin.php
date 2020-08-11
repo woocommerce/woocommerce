@@ -1,8 +1,6 @@
 <?php
 /**
  * Theme upgrader skin used in REST API response.
- *
- * @package WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\Overrides;

@@ -3,8 +3,6 @@
  * WooCommerce Admin (Dashboard) WooCommerce.com Extension Subscriptions Note Provider.
  *
  * Adds notes to the merchant's inbox concerning WooCommerce.com extension subscriptions.
- *
- * @package WooCommerce Admin
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

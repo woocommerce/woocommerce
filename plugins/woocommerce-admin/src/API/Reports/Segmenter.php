@@ -1,8 +1,6 @@
 <?php
 /**
  * Class for adding segmenting support without cluttering the data stores.
- *
- * @package  WooCommerce Admin/Classes
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports;
