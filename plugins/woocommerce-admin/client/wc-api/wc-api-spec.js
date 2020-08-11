@@ -7,7 +7,6 @@ import imports from './imports';
 import notes from './notes';
 import reportItems from './reports/items';
 import reportStats from './reports/stats';
-import reviews from './reviews';
 
 function createWcApiSpec() {
 	return {
@@ -23,7 +22,6 @@ function createWcApiSpec() {
 			...notes.selectors,
 			...reportItems.selectors,
 			...reportStats.selectors,
-			...reviews.selectors,
 		},
 		operations: {
 			read( resourceNames ) {
@@ -38,7 +36,6 @@ function createWcApiSpec() {
 					...notes.operations.read( resourceNames ),
 					...reportItems.operations.read( resourceNames ),
 					...reportStats.operations.read( resourceNames ),
-					...reviews.operations.read( resourceNames ),
 				];
 			},
 			update( resourceNames, data ) {

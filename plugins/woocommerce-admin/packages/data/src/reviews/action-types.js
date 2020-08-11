@@ -1,0 +1,6 @@
+const TYPES = {
+	UPDATE_REVIEWS: 'UPDATE_REVIEWS',
+	SET_ERROR: 'SET_ERROR',
+};
+
+export default TYPES;

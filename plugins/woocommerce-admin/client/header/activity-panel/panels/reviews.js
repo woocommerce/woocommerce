@@ -22,6 +22,7 @@ import {
 	Section,
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { REVIEWS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -324,8 +325,8 @@ ReviewsPanel.defaultProps = {
 
 export default withSelect( ( select, props ) => {
 	const { hasUnapprovedReviews } = props;
-	const { getReviews, getReviewsError, isGetReviewsRequesting } = select(
-		'wc-api'
+	const { getReviews, getReviewsError, isResolving } = select(
+		REVIEWS_STORE_NAME
 	);
 	let reviews = [];
 	let isError = false;
@@ -340,7 +341,7 @@ export default withSelect( ( select, props ) => {
 		};
 		reviews = getReviews( reviewsQuery );
 		isError = Boolean( getReviewsError( reviewsQuery ) );
-		isRequesting = isGetReviewsRequesting( reviewsQuery );
+		isRequesting = isResolving( 'getReviews', [ reviewsQuery ] );
 	} else {
 		const approvedReviewsQuery = {
 			page: 1,
@@ -360,7 +361,7 @@ export default withSelect( ( select, props ) => {
 		}
 
 		isError = Boolean( getReviewsError( approvedReviewsQuery ) );
-		isRequesting = isGetReviewsRequesting( approvedReviewsQuery );
+		isRequesting = isResolving( 'getReviews', [ approvedReviewsQuery ] );
 	}
 
 	return {

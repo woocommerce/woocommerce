@@ -1,7 +1,11 @@
 /**
  * WooCommerce dependencies
  */
-import { SETTINGS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
+import {
+	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	REVIEWS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -96,11 +100,9 @@ export function getUnreadOrders( select ) {
 }
 
 export function getUnapprovedReviews( select ) {
-	const {
-		getReviewsTotalCount,
-		getReviewsError,
-		isGetReviewsRequesting,
-	} = select( 'wc-api' );
+	const { getReviewsTotalCount, getReviewsError, isResolving } = select(
+		REVIEWS_STORE_NAME
+	);
 	const reviewsEnabled = getSetting( 'reviewsEnabled' );
 	if ( reviewsEnabled === 'yes' ) {
 		const actionableReviewsQuery = {
@@ -113,11 +115,14 @@ export function getUnapprovedReviews( select ) {
 		const totalActionableReviews = getReviewsTotalCount(
 			actionableReviewsQuery
 		);
+
 		const isActionableReviewsError = Boolean(
 			getReviewsError( actionableReviewsQuery )
 		);
-		const isActionableReviewsRequesting = isGetReviewsRequesting(
-			actionableReviewsQuery
+
+		const isActionableReviewsRequesting = isResolving(
+			'getReviewsTotalCount',
+			[ actionableReviewsQuery ]
 		);
 
 		if ( ! isActionableReviewsError && ! isActionableReviewsRequesting ) {
