@@ -25,14 +25,15 @@ class WC_Admin_Notes_Test_Checkout {
 	 */
 	const NOTE_NAME = 'wc-admin-test-checkout';
 
-	const TASK_LIST_PAYMENTS      = 'woocommerce_task_list_payments';
+	/**
+	 * Completed tasks option name.
+	 */
 	const TASK_LIST_TRACKED_TASKS = 'woocommerce_task_list_tracked_completed_tasks';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'update_option_' . self::TASK_LIST_PAYMENTS, array( $this, 'possibly_add_note' ) );
 		add_action( 'update_option_' . self::TASK_LIST_TRACKED_TASKS, array( $this, 'possibly_add_note' ) );
 	}
 
@@ -57,8 +58,8 @@ class WC_Admin_Notes_Test_Checkout {
 		}
 
 		// Make sure payments task was completed.
-		$payments_task = get_option( self::TASK_LIST_PAYMENTS, array() );
-		if ( ! isset( $payments_task['completed'] ) ) {
+		$completed_tasks = get_option( self::TASK_LIST_TRACKED_TASKS, array() );
+		if ( ! in_array( 'payments', $completed_tasks, true ) ) {
 			return;
 		}
 

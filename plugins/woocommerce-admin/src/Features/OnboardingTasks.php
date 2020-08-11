@@ -96,10 +96,19 @@ class OnboardingTasks {
 				: false;
 		}
 
+		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways = array_filter(
+			$gateways,
+			function( $gateway ) {
+				return 'yes' === $gateway->enabled;
+			}
+		);
+
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
 		$settings['onboarding']['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
+		$settings['onboarding']['hasPaymentGateway']              = ! empty( $enabled_gateways );
 		$settings['onboarding']['hasPhysicalProducts']            = count(
 			wc_get_products(
 				array(
