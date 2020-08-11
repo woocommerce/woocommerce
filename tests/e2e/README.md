@@ -21,7 +21,11 @@ Automated end-to-end tests for WooCommerce.
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
   - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
-- [Writing tests](#writing-tests)
+- [Guide for writing e2e tests](#guide-for-writing-e2e-tests) 
+  - [Tools for writing tests](#tools-for-writing-tests)
+  - [Creating test structure](#creating-test-structure)
+  - [Writing the test](#writing-the-test)
+  - [Best practices](#best-practices)
 - [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
@@ -248,7 +252,9 @@ The full command to build the site will look as follows:
 TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 npm run docker:up
 ```
 
-## Writing tests
+## Guide for writing e2e tests
+
+### Tools for writing tests
 
 We use the following tools to write e2e tests:
 
@@ -262,6 +268,71 @@ The following packages are used to write tests:
 
 - `@wordpress/e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils);
 - `@automattic/puppeteer-utils` - Utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
+
+### Creating test structure
+
+It is a good practice to start working on the test by identifying what needs to be tested on the higher and lower levels. For example, if you are writing a test to verify that merchant can create virtual product, the overview of the test will be as follows:
+
+- Merchant can create virtual product
+  - Merchant can log in
+  - Merchant can create virtual product
+  - Merchant can verify that virtual product was created   
+  
+Once you identify the structure of the test, you can move on to writing it. 
+
+### Writing the test
+
+The structure of the test serves as a skeleton for the test itself. You can turn it into a test by using `describe()` and `it()` methods of Jest:
+
+- [`describe()`](https://jestjs.io/docs/en/api#describename-fn) - creates a block that groups together several related tests;
+- [`it()`](https://jestjs.io/docs/en/api#testname-fn-timeout) - actual method that runs the test. 
+
+Based on our example, the test skeleton would look as follows:
+
+```
+describe( 'Merchant can create virtual product', () => {
+	it( 'merchant can log in', async () => {
+
+	} );
+
+	it( 'merchant can create virtual product', async () => {
+
+	} );
+
+	it( 'merchant can verify that virtual product was created', async () => {
+
+	} );
+} );
+```
+
+Next, you can start filling up each section with relevant functions (test building blocks). Note, that we have the `@woocommerce/e2e-utils` package where many reusable helper functions can be found for writing tests. For example, `flows.js` of `@woocommerce/e2e-utils` package contains `StoreOwnerFlow` object that has `login` method. As a result, in the test it can be used as `await StoreOwnerFlow.login();` so the first `it()` section of the test will become:
+
+```
+it( 'merchant can log in', async () => {
+      await StoreOwnerFlow.login();
+	} );
+```
+
+Moving to the next section where we need to actually create a product. You will find that we have a reusable function such as `createSimpleProduct()` in the `components.js` of `@woocommerce/e2e-utils` package. Note that this function should not be used for this test because the way simple product is being created in this function is by using WooCommerce REST API. Because this is not how the merchant would typically create a virtual product, we would need to test it by writing actual steps for creating a product in the test. 
+
+`createSimpleProduct()` should be used in tests where you need to test something else than creating a simple product. In other words, this function exists in order to quickly fill the site with test data required for running tests. For example, if you want to write a test that will verify that shopper can place a product to the cart on the site, you can use `createSimpleProduct()` to create a product to test the cart. 
+
+
+### Best practices
+
+- It is best to keep the tests inside `describe()` block granular as it helps to debug the test if it fails. When the test is done running, you will see the result along with the breakdown of how each of the test sections performed. If one of the tests within `describe()` block fails, it will be shown as follows:
+
+```
+FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
+  My account page
+    ✓ allows customer to login (2924ms)
+    ✓ allows customer to see orders (1083ms)
+    x allows customer to see downloads (887ms)
+    ✓ allows customer to see addresses (1161ms)
+    ✓ allows customer to see account details (1066ms)
+```
+
+In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
 
 ## Debugging tests 
 
