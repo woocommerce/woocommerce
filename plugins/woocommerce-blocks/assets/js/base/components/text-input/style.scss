@@ -1,6 +1,6 @@
 .wc-block-components-text-input {
 	position: relative;
-	margin-bottom: em($gap-large);
+	margin-top: em($gap-large);
 	white-space: nowrap;
 
 	label {
@@ -75,6 +75,6 @@
 	}
 
 	&:only-child {
-		margin-bottom: 0;
+		margin-top: 0;
 	}
 }
