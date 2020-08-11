@@ -39,8 +39,8 @@ final class ReserveStock {
 	/**
 	 * Query for any existing holds on stock for this item.
 	 *
-	 * @param \WC_Product|object $product Product to get reserved stock for.
-	 * @param integer            $exclude_order_id Optional order to exclude from the results.
+	 * @param \WC_Product $product Product to get reserved stock for.
+	 * @param integer     $exclude_order_id Optional order to exclude from the results.
 	 *
 	 * @return integer Amount of stock already reserved.
 	 */
@@ -60,8 +60,8 @@ final class ReserveStock {
 	 *
 	 * @throws ReserveStockException If stock cannot be reserved.
 	 *
-	 * @param \WC_Order|object $order Order object.
-	 * @param int              $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
+	 * @param \WC_Order $order Order object.
+	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
 	public function reserve_stock_for_order( $order, $minutes = 0 ) {
 		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
@@ -127,7 +127,7 @@ final class ReserveStock {
 	/**
 	 * Release a temporary hold on stock for an order.
 	 *
-	 * @param \WC_Order|object $order Order object.
+	 * @param \WC_Order $order Order object.
 	 */
 	public function release_stock_for_order( $order ) {
 		global $wpdb;
@@ -149,10 +149,10 @@ final class ReserveStock {
 	 *
 	 * @throws ReserveStockException If a row cannot be inserted.
 	 *
-	 * @param int              $product_id Product ID which is having stock reserved.
-	 * @param int              $stock_quantity Stock amount to reserve.
-	 * @param \WC_Order|object $order Order object which contains the product.
-	 * @param int              $minutes How long to reserve stock in minutes.
+	 * @param int       $product_id Product ID which is having stock reserved.
+	 * @param int       $stock_quantity Stock amount to reserve.
+	 * @param \WC_Order $order Order object which contains the product.
+	 * @param int       $minutes How long to reserve stock in minutes.
 	 */
 	private function reserve_stock_for_product( $product_id, $stock_quantity, $order, $minutes ) {
 		global $wpdb;
