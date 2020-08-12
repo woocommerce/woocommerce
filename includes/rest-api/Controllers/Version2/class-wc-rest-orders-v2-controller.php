@@ -197,7 +197,34 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		unset( $data['order_id'] );
 		unset( $data['type'] );
 
+		// Expand meta_data to include user-friendly values.
+		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
+		$data['meta_data'] = array_map(
+			array( $this, 'clean_formatted_order_item_meta_data' ),
+			$formatted_meta_data,
+			array_keys( $formatted_meta_data )
+		);
+
 		return $data;
+	}
+
+	/**
+	 * Sanitizes an object from the array returned by {@link WC_Order_Item::get_formatted_meta_data} and includes
+	 * the {@link WC_Meta_Data} `id` in the resulting array.
+	 *
+	 * @param Object  $meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 *        This is expected to have the properties `key`, `value`, `display_key`, and `display_value`.
+	 * @param integer $meta_data_id The id of the {@link WC_Meta_Data}.
+	 * @return array
+	 */
+	private function clean_formatted_order_item_meta_data( $meta_data, $meta_data_id ) {
+		return array(
+			'id' => $meta_data_id,
+			'key' => $meta_data->key,
+			'value' => $meta_data->value,
+			'display_key' => wc_clean( $meta_data->display_key ),
+			'display_value' => wc_clean( $meta_data->display_value ),
+		);
 	}
 
 	/**
