@@ -718,4 +718,25 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 	}
+
+	/**
+	 * Test the order line items schema.
+	 */
+	public function test_order_line_items_schema() {
+		wp_set_current_user( $this->user );
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/orders/' . $order->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+
+		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
+		$this->assertEquals( 14, count( $line_item_properties ) );
+		$this->assertArrayHasKey( 'id', $line_item_properties );
+		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
+
+		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
+		$this->assertEquals( 5, count( $meta_data_item_properties ) );
+		$this->assertEquals( [ 'id', 'key', 'value', 'display_key', 'display_value' ], array_keys( $meta_data_item_properties ) );
+	}
 }
