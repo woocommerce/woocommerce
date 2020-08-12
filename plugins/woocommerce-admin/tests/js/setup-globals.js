@@ -101,7 +101,11 @@ wooCommercePackages.forEach( ( lib ) => {
 } );
 
 const config = require( '../../config/development.json' );
-window.wcAdminFeatures = config && config.features ? config.features : {};
+
+// Check if test is jsdom or node
+if ( global.window ) {
+	window.wcAdminFeatures = config && config.features ? config.features : {};
+}
 
 setLocaleData(
 	{ '': { domain: 'woocommerce-admin', lang: 'en_US' } },
