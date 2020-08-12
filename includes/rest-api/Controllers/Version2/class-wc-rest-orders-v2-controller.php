@@ -590,8 +590,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Gets the product ID from the SKU or posted ID.
 	 *
 	 * @throws WC_REST_Exception When SKU or ID is not valid.
-	 * @param array           $posted Request data.
-	 * @param string          $action 'create' to add line item or 'update' to update it.
+	 * @param array  $posted Request data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @return int
 	 */
 	protected function get_product_id( $posted, $action = 'create' ) {
