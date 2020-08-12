@@ -10,6 +10,7 @@
 babel.config.js
 CHANGELOG.txt
 composer.*
+tsconfig.*
 contributors.html
 docker-compose.yaml
 Dockerfile
