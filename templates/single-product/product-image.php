@@ -25,13 +25,6 @@ if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
 global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
-$post_thumbnail_id = $product->get_image_id();
-if ( ! $post_thumbnail_id ) {
-	$gallery_image_ids = $product->get_gallery_image_ids();
-	if ( ! empty( $gallery_image_ids ) ) {
-		$post_thumbnail_id = array_shift( $gallery_image_ids );
-	}
-}
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
