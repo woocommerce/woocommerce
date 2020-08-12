@@ -823,12 +823,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				-1 => 'draft',
 				0  => 'private',
 				1  => 'publish',
+				2  => 'pending' //add pending status to products
 			);
 			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : 'draft';
 
-			// Fix draft status of variations.
-			if ( isset( $data['type'] ) && 'variation' === $data['type'] && -1 === $data['published'] ) {
-				$data['status'] = 'publish';
+			// Fix draft status of variations. It should be like this.
+			if ( isset( $data['type'] ) && 'variation' === $data['type'] ) {
+				if ( isset( $data['status'] ) && 'draft' == $data['status'] ) {
+					$data['status'] = "publish";                                                                                                    
+				}
 			}
 
 			unset( $data['published'] );
