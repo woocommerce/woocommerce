@@ -8,7 +8,7 @@
 /node_modules/
 /tests/
 babel.config.js
-CHANGELOG.txt
+changelog.txt
 composer.*
 tsconfig.*
 contributors.html

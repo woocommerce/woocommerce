@@ -309,7 +309,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
 * Dev - Add query filter when searching for a table. #2886
 
-[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
 == Upgrade Notice ==
 
