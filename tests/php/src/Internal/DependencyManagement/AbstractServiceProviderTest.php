@@ -7,11 +7,13 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
+use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
-use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithConstructorArgumentWithoutTypeHint;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithInjectionMethodArgumentWithoutTypeHint;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
-use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithPrivateConstructor;
-use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithScalarConstructorArgument;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithNonFinalInjectionMethod;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithPrivateInjectionMethod;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithScalarInjectionMethodArgument;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
 use League\Container\Definition\DefinitionInterface;
 
@@ -82,49 +84,69 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_throws_on_non_class_passed_as_class_name() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: error when reflecting class 'foobar': Class foobar does not exist" );
+		$this->expectExceptionMessage( "You cannot add 'foobar', only classes in the Automattic\WooCommerce\ namespace are allowed." );
 
 		$this->sut->add_with_auto_arguments( 'foobar' );
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a private constructor.
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a private injection method.
 	 */
-	public function test_add_with_auto_arguments_throws_on_class_private_constructor() {
+	public function test_add_with_auto_arguments_throws_on_class_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '" . ClassWithPrivateConstructor::class . "' isn't public, instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
 
-		$this->sut->add_with_auto_arguments( ClassWithPrivateConstructor::class );
+		$this->sut->add_with_auto_arguments( ClassWithPrivateInjectionMethod::class );
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is a class with a private constructor.
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a non-final injection method.
 	 */
-	public function test_add_with_auto_arguments_throws_on_concrete_private_constructor() {
+	public function test_add_with_auto_arguments_throws_on_class_non_final_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor of class '" . ClassWithPrivateConstructor::class . "' isn't public, instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithNonFinalInjectionMethod::class . "' isn't 'final', instances can't be created." );
 
-		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithPrivateConstructor::class );
+		$this->sut->add_with_auto_arguments( ClassWithNonFinalInjectionMethod::class );
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a constructor argument without type hint.
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is a class with a private injection method.
 	 */
-	public function test_add_with_auto_arguments_throws_on_constructor_argument_without_type_hint() {
+	public function test_add_with_auto_arguments_throws_on_concrete_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor argument 'argument_without_type_hint' of class '" . ClassWithConstructorArgumentWithoutTypeHint::class . "' doesn't have a type hint or has one that doesn't specify a class." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
 
-		$this->sut->add_with_auto_arguments( ClassWithConstructorArgumentWithoutTypeHint::class );
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithPrivateInjectionMethod::class );
 	}
 
 	/**
-	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a constructor argument with a scalar type hint.
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed concrete is a class with a non-final injection method.
 	 */
-	public function test_add_with_auto_arguments_throws_on_constructor_argument_with_scalar_type_hint() {
+	public function test_add_with_auto_arguments_throws_on_concrete_non_final_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "AbstractServiceProvider::add_with_auto_arguments: constructor argument 'scalar_argument_without_default_value' of class '" . ClassWithScalarConstructorArgument::class . "' doesn't have a type hint or has one that doesn't specify a class." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithNonFinalInjectionMethod::class . "' isn't 'final', instances can't be created." );
 
-		$this->sut->add_with_auto_arguments( ClassWithScalarConstructorArgument::class );
+		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithNonFinalInjectionMethod::class );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a method argument without type hint.
+	 */
+	public function test_add_with_auto_arguments_throws_on_method_argument_without_type_hint() {
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Argument 'argument_without_type_hint' of class '" . ClassWithInjectionMethodArgumentWithoutTypeHint::class . "' doesn't have a type hint or has one that doesn't specify a class." );
+
+		$this->sut->add_with_auto_arguments( ClassWithInjectionMethodArgumentWithoutTypeHint::class );
+	}
+
+	/**
+	 * @testdox 'add_with_auto_arguments' should throw an exception if the passed class has a method argument with a scalar type hint.
+	 */
+	public function test_add_with_auto_arguments_throws_on_method_argument_with_scalar_type_hint() {
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Argument 'scalar_argument_without_default_value' of class '" . ClassWithScalarInjectionMethodArgument::class . "' doesn't have a type hint or has one that doesn't specify a class." );
+
+		$this->sut->add_with_auto_arguments( ClassWithScalarInjectionMethodArgument::class );
 	}
 
 	/**
@@ -151,7 +173,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 		// Arguments with default values are honored.
 		$this->assertEquals( ClassWithDependencies::SOME_NUMBER, $resolved->some_number );
 
-		// Constructor arguments are filled as expected.
+		// Method arguments are filled as expected.
 		$this->assertSame( $this->container->get( DependencyClass::class ), $resolved->dependency_class );
 	}
 

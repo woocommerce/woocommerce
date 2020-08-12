@@ -21,16 +21,11 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
  * Classes in the `includes` directory should use the `wc_get_container` function to get the instance of the container when
  * they need to get an instance of a class from the `src` directory.
  *
- * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Tools\DependencyManagement
- * and those should go in the `src\Tools\DependencyManagement\ServiceProviders` folder unless there's a good reason
+ * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Internal\DependencyManagement
+ * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
  * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
  */
 final class Container implements \Psr\Container\ContainerInterface {
-
-	/**
-	 * The root namespace of all WooCommerce classes in the `src` directory.
-	 */
-	const WOOCOMMERCE_ROOT_NAMESPACE = 'Automattic\\WooCommerce';
 
 	/**
 	 * The list of service provider classes to register.
