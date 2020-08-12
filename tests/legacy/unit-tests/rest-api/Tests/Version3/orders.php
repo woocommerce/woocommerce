@@ -152,13 +152,13 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_get_item_with_line_items_meta_data() {
 		wp_set_current_user( $this->user );
 
-		$site_level_attribute_id = wc_create_attribute( array( 'name' => 'Site Level Color' ) );
+		$site_level_attribute_id = wc_create_attribute( array( 'name' => 'Site Level Type' ) );
 		$site_level_attribute_slug = wc_attribute_taxonomy_name_by_id( $site_level_attribute_id );
 
 		// Register the attribute so that wp_insert_term will be successful
 		register_taxonomy( $site_level_attribute_slug, array( 'product' ), array() );
 
-		$site_level_term_insertion_result = wp_insert_term( 'Site Level Value - Blue', $site_level_attribute_slug );
+		$site_level_term_insertion_result = wp_insert_term( 'Site Level Value - Wood', $site_level_attribute_slug );
 		$site_level_term = get_term( $site_level_term_insertion_result['term_id'] );
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
@@ -192,9 +192,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$color_meta_data = $last_line_item['meta_data'][1];
 		$this->assertEquals( $line_item->get_meta_data()[1]->id, $color_meta_data['id'] );
 		$this->assertEquals( $site_level_attribute_slug, $color_meta_data['key'] );
-		$this->assertEquals( 'Site Level Color', $color_meta_data['display_key'] );
+		$this->assertEquals( 'Site Level Type', $color_meta_data['display_key'] );
 		$this->assertEquals( $site_level_term->slug, $color_meta_data['value'] );
-		$this->assertEquals( 'Site Level Value - Blue', $color_meta_data['display_value'] );
+		$this->assertEquals( 'Site Level Value - Wood', $color_meta_data['display_value'] );
 	}
 
 	/**
