@@ -292,40 +292,32 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$product = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : false;
 
+		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
 		$data['meta_data'] = array_map(
-			array( $this, 'get_order_item_meta_data' ),
-			$data['meta_data'],
-			array_fill( 0, count( $data['meta_data'] ), $product )
+			array( $this, 'clean_formatted_meta_data' ),
+			$formatted_meta_data,
+			array_keys( $formatted_meta_data )
 		);
 
 		return $data;
 	}
 
 	/**
-	 * Convert a {@link WC_Meta_Data} to an array with the expected API response keys and values.
+	 * Sanitizes an object from the array returned by {@link WC_Order_Item::get_formatted_meta_data} and includes
+	 * the {@link WC_Meta_Data} `id` in the resulting array.
 	 *
-	 * @param WC_Meta_Data $meta The metadata taken from the {@link WC_Order_Item::$meta_data} array.
-	 * @param WC_Product   $product The product that the metadata belongs to.
+	 * @param Object  $meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 *        This is expected to have the properties `key`, `value`, `display_key`, and `display_value`.
+	 * @param integer $meta_data_id The id of the {@link WC_Meta_Data}.
 	 * @return array
 	 */
-	private function get_order_item_meta_data( $meta, $product ) {
-		$attribute_key = str_replace( 'attribute_', '', $meta->key );
-		$display_key = wc_attribute_label( $attribute_key, $product );
-
-		$display_value = wp_kses_post( $meta->value );
-		if ( taxonomy_exists( $attribute_key ) ) {
-			$term = get_term_by( 'slug', $meta->value, $attribute_key );
-			if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
-				$display_value = $term->name;
-			}
-		}
-
+	private function clean_formatted_meta_data( $meta_data, $meta_data_id ) {
 		return array(
-			'id' => $meta->id,
-			'key' => $meta->key,
-			'value' => $meta->value,
-			'display_key' => $display_key,
-			'display_value' => $display_value,
+			'id' => $meta_data_id,
+			'key' => $meta_data->key,
+			'value' => $meta_data->value,
+			'display_key' => wc_clean( $meta_data->display_key ),
+			'display_value' => wc_clean( $meta_data->display_value ),
 		);
 	}
 }
