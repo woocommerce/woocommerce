@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
-import { find, first, isEqual, noop, without } from 'lodash';
+import { find, first, isEqual, without } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -337,8 +337,8 @@ TableCard.propTypes = {
 
 TableCard.defaultProps = {
 	isLoading: false,
-	onQueryChange: noop,
-	onColumnsChange: noop,
+	onQueryChange: () => () => {},
+	onColumnsChange: () => {},
 	onSort: undefined,
 	query: {},
 	rowHeader: 0,

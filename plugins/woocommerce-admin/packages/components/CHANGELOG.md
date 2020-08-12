@@ -1,3 +1,7 @@
+# Unreleased Changes
+
+- Fixed default value for `<Table />` component `onQueryChange` prop.
+
 # 5.0.0
 
 -   Added `<Timeline />` component.
