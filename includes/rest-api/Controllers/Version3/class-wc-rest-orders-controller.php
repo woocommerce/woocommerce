@@ -244,18 +244,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 
-		$meta_data_item_properties_ref = &$schema['properties']['line_items']['items']['properties']['meta_data']['items']['properties'];
-		$meta_data_item_properties_ref['display_key'] = array(
-			'description' => __( 'Meta key for UI display.', 'woocommerce-rest-api' ),
-			'type' => 'string',
-			'context' => array( 'view', 'edit' ),
-		);
-		$meta_data_item_properties_ref['display_value'] = array(
-			'description' => __( 'Meta value for UI display.', 'woocommerce-rest-api' ),
-			'type' => 'string',
-			'context' => array( 'view', 'edit' ),
-		);
-
 		return $schema;
 	}
 
