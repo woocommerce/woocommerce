@@ -34,8 +34,7 @@ jobs:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     script:
       - composer require wp-cli/i18n-command
-      - npm run build
-      - npm run build:packages
+      - npm run build:core
       - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
