@@ -25,8 +25,8 @@ class ReserveStockTests extends TestCase {
 
 		$product = ProductHelper::create_simple_product();
 		$product->set_manage_stock( true );
-		$product->set_stock( 10 );
-		$product->save();
+		// this also saves product
+		wc_update_product_stock( $product, 10 );
 
 		$order = OrderHelper::create_order( 1, $product ); // Note this adds 4 to the order.
 		$order->set_status( 'checkout-draft' );
@@ -54,8 +54,8 @@ class ReserveStockTests extends TestCase {
 
 		$product = ProductHelper::create_simple_product();
 		$product->set_manage_stock( true );
-		$product->set_stock( 10 );
-		$product->save();
+		// this also saves product
+		wc_update_product_stock( $product, 10 );
 
 		$order = OrderHelper::create_order( 1, $product ); // Note this adds 4 to the order.
 		$order->set_status( 'checkout-draft' );

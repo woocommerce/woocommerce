@@ -8,7 +8,7 @@ RUN apt-get update && \
 CMD echo "Installing tests..."
 
 ENV WP_TESTS_DIR=/tmp/wordpress-tests-lib
-ENV WP_CORE_DIR=/usr/src/wordpress
+ENV WP_CORE_DIR=/tmp/src/wordpress
 
 COPY install-wp-tests.sh /usr/local/bin/dockerInit
 RUN chmod +x /usr/local/bin/dockerInit
