@@ -59,7 +59,12 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		// Test updating 2 fields separately.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
-		$request->set_body( wp_json_encode( array( 'industry' => 'health-beauty' ) ) );
+		$industry = array(
+			array(
+				'slug' => 'health-beauty',
+			),
+		);
+		$request->set_body( wp_json_encode( array( 'industry' => $industry ) ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -82,7 +87,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'health-beauty', $data['industry'][0] );
+		$this->assertEquals( 'health-beauty', $data['industry'][0]['slug'] );
 		$this->assertEquals( 'storefront', $data['theme'] );
 	}
 
