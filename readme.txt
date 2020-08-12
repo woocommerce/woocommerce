@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.3.1
+Stable tag: 4.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -264,11 +264,14 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Ensure wc_load_cart loads its own dependencies. #26219
 * Dev - Clean up deprecated documentation. #27054
 * Dev - Update WooCommerce Blocks version to 3.1.0. #27177
+* Dev - Added woocommerce_order_item_quantity filter to ReserveStock::reserve_stock_for_order(). #27251
+* Dev - Updated docs to make the type in docblock more specific. #27285
 
-**REST API 1.0.11**
+**REST API 1.0.13**
 * Enhancement - Introduced X-WP-Total header for product attributes GET endpoint listing the number of entries in the response. woocommerce/woocommerce-rest-api#171
 * Enhancement - Introduced X-WP-TotalPages header for product attributes GET endpoint listing the number of pages that can be fetched. woocommerce/woocommerce-rest-api#171
 * Enhancement - Introduced the modified option for orderby fetch requests in post based resources. woocommerce/woocommerce-rest-api#226
+* Enhancement - Compatibility fixes for WordPress 5.5. woocommerce/woocommerce-rest-api#232
 * Fix - Ensured Action Scheduler transients are cleared by "Clear Transients" tool. woocommerce/woocommerce-rest-api#152
 * Fix - Corrected the schema datatype for coupon expiry_date, date_expires, and date_expires_gmt fields. woocommerce/woocommerce-rest-api#176
 * Fix - Query parameters are now passed correctly when using the batch product variation endpoints. woocommerce/woocommerce-rest-api#191
