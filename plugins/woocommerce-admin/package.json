@@ -169,7 +169,7 @@
 		"@wordpress/prettier-config": "^0.3.0",
 		"@wordpress/scripts": "12.0.0",
 		"ast-types": "0.13.3",
-		"autoprefixer": "9.8.5",
+		"autoprefixer": "9.8.6",
 		"babel-core": "7.0.0-bridge.0",
 		"babel-jest": "^26.2.2",
 		"babel-loader": "8.1.0",
