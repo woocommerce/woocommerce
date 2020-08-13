@@ -93,16 +93,57 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			return $endpoint_args;
 		}
 
-		foreach ( $endpoint_args as $field_id => $params ) {
-			/**
-			 * Custom types are not supported as of WP 5.5, this translates type => 'date-time' to type => 'string' with format date-time.
-			 */
-			if ( 'date-time' === $params['type'] ) {
-				$endpoint_args[ $field_id ]['type']   = 'string';
-				$endpoint_args[ $field_id ]['format'] = 'date-time';
-			}
+		$endpoint_args = $this->adjust_wp_5_5_datatype_compatibility( $endpoint_args );
+
+		return $endpoint_args;
+	}
+
+	/**
+	 * Change datatypes `date-time` to string, and `mixed` to composite of all built in types. This is required for maintaining forward compatibility with WP 5.5 since custom post types are not supported anymore.
+	 *
+	 * See @link https://core.trac.wordpress.org/changeset/48306
+	 *
+	 * We still use the 'mixed' type, since if we convert to composite type everywhere, it won't work in 5.4 anymore because they require to define the full schema.
+	 *
+	 * @param array $endpoint_args Schema with datatypes to convert.
+
+	 * @return mixed Schema with converted datatype.
+	 */
+	protected function adjust_wp_5_5_datatype_compatibility( $endpoint_args ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+			return $endpoint_args;
 		}
 
+		foreach ( $endpoint_args as $field_id => $params ) {
+
+			if ( ! isset( $params['type'] ) ) {
+				continue;
+			}
+
+			/**
+			 * Custom types are not supported as of WP 5.5, this translates type => 'date-time' to type => 'string'.
+			 */
+			if ( 'date-time' === $params['type'] ) {
+				$params['type'] = array( 'null', 'string' );
+			}
+
+			/**
+			 * WARNING: Order of fields here is important, types of fields are ordered from most specific to least specific as perceived by core's built-in type validation methods.
+			 */
+			if ( 'mixed' === $params['type'] ) {
+				$params['type'] = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
+			}
+
+			if ( isset( $params['properties'] ) ) {
+				$params['properties'] = $this->adjust_wp_5_5_datatype_compatibility( $params['properties'] );
+			}
+
+			if ( isset( $params['items'] ) && isset( $params['items']['properties'] ) ) {
+				$params['items']['properties'] = $this->adjust_wp_5_5_datatype_compatibility( $params['items']['properties'] );
+			}
+
+			$endpoint_args[ $field_id ] = $params;
+		}
 		return $endpoint_args;
 	}
 

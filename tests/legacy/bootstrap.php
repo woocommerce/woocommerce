@@ -222,6 +222,9 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
+
+		// Traits.
+		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 	}
 
 	/**
