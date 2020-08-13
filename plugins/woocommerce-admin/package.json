@@ -197,7 +197,7 @@
 		"lint-staged": "10.2.11",
 		"merge-config": "2.0.0",
 		"moment-timezone-data-webpack-plugin": "1.2.0",
-		"node-sass": "4.13.1",
+		"node-sass": "4.14.1",
 		"node-watch": "0.6.4",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "3.0.0",
