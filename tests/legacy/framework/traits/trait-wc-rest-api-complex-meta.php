@@ -33,6 +33,10 @@ trait WC_REST_API_Complex_Meta {
 			'value' => array( 1, 2, 'string' ),
 		),
 		array(
+			'key' => 'null_meta',
+			'value' => 'null',
+		),
+		array(
 			'key' => 'object_meta',
 			'value' => array(
 				'nested_key1' => 'nested_value1',
