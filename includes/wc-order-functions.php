@@ -778,6 +778,7 @@ function wc_order_fully_refunded( $order_id ) {
 	}
 
 	// Create the refund object.
+	wc_switch_to_site_locale();
 	wc_create_refund(
 		array(
 			'amount'     => $max_refund,
@@ -786,6 +787,7 @@ function wc_order_fully_refunded( $order_id ) {
 			'line_items' => array(),
 		)
 	);
+	wc_restore_locale();
 
 	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
 }
