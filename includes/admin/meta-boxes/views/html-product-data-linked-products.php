@@ -2,7 +2,7 @@
 /**
  * Linked product options.
  *
- * @package WooCommerce/admin
+ * @package WooCommerce\Admin
  */
 
 defined( 'ABSPATH' ) || exit;

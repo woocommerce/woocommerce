@@ -4,7 +4,7 @@
  *
  * Functions for order specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.4.0
  */
 
@@ -149,13 +149,18 @@ function wc_get_order_status_name( $status ) {
 }
 
 /**
- * Generate an order key.
+ * Generate an order key with prefix.
  *
  * @since 3.5.4
+ * @param string $key Order key without a prefix. By default generates a 13 digit secret.
  * @return string The order key.
  */
-function wc_generate_order_key() {
-	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . wp_generate_password( 13, false ) );
+function wc_generate_order_key( $key = '' ) {
+	if ( '' === $key ) {
+		$key = wp_generate_password( 13, false );
+	}
+
+	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 }
 
 /**
@@ -817,7 +822,7 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
 			}
 		}
 	}
@@ -856,6 +861,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+	} elseif ( $order->has_status( 'cancelled' ) ) {
+		$order->get_data_store()->release_held_coupons( $order, true );
+		return;
 	} else {
 		return;
 	}

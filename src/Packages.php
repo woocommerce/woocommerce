@@ -1,8 +1,6 @@
 <?php
 /**
  * Loads WooCommece packages from the /packages directory. These are packages developed outside of core.
- *
- * @package Automattic/WooCommerce
  */
 
 namespace Automattic\WooCommerce;
@@ -28,7 +26,6 @@ class Packages {
 	 */
 	protected static $packages = array(
 		'woocommerce-blocks'   => '\\Automattic\\WooCommerce\\Blocks\\Package',
-		'woocommerce-rest-api' => '\\Automattic\\WooCommerce\\RestApi\\Package',
 		'woocommerce-admin'    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
 	);
 

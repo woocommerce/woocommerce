@@ -2,7 +2,7 @@
 /**
  * Class WC_Tests_Order_Functions file.
  *
- * @package WooCommerce/Tests
+ * @package WooCommerce\Tests
  */
 
 use Automattic\Jetpack\Constants;
@@ -1477,6 +1477,45 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Checks if coupons are released when switching from pending to cancelled state.
+	 *
+	 * Tests the fix for issue #26741
+	 */
+	public function test_wc_cancelled_order_releases_coupon_hold_from_pending_state() {
+		$coupon_code       = 'coupon1';
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array(
+				'usage_limit' => 1,
+				'usage_limit_per_user' => 1,
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon_code );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 1, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 1, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'cancelled' );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+	}
+
+	/**
 	 * Test if everything works as expected when coupon hold is disabled using filter.
 	 */
 	public function test_wc_update_usage_count_without_coupon_hold() {
@@ -1519,5 +1558,24 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
 
 		remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
+	}
+
+	/**
+	 * Test wc_generate_order_key().
+	 *
+	 * @since 4.3.0
+	 */
+	public function test_wc_generate_order_key() {
+		// Test custom key.
+		$key       = 'foo123bar';
+		$order_key = wc_generate_order_key( $key );
+		$expected  = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
+		$this->assertEquals( $expected, $order_key );
+
+		// Test default key.
+		$order_key = wc_generate_order_key();
+		$prefix    = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
+		$this->assertStringStartsWith( $prefix, $order_key );
+		$this->assertEquals( 13, strlen( str_replace( $prefix, '', $order_key ) ) );
 	}
 }

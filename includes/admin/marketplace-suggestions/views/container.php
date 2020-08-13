@@ -2,7 +2,7 @@
 /**
  * Marketplace suggestions container
  *
- * @package  WooCommerce/Templates
+ * @package  WooCommerce\Templates
  * @version  3.6.0
  */
 

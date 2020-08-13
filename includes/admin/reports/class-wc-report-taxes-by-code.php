@@ -2,7 +2,7 @@
 /**
  * Taxes by tax code report.
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Taxes_By_Code
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {

@@ -7,7 +7,7 @@
  * - Legacy REST API - Deprecated in 2.6.0. @see class-wc-legacy-api.php
  * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
  *
- * @package WooCommerce/API
+ * @package WooCommerce\API
  * @since   2.0.0
  */
 
@@ -30,7 +30,7 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Get the version of the REST API package being ran.
+	 * Get the version of the REST API package being ran. Since API package was merged into core, this now follows WC version.
 	 *
 	 * @since 3.7.0
 	 * @return string|null
@@ -39,6 +39,14 @@ class WC_API extends WC_Legacy_API {
 		if ( ! $this->is_rest_api_loaded() ) {
 			return null;
 		}
+		if ( method_exists( \Automattic\WooCommerce\RestApi\Server::class, 'get_path' ) ) {
+			$path = \Automattic\WooCommerce\RestApi\Server::get_path();
+			if ( 0 === strpos( $path, __DIR__ ) ) {
+				// We are loading API from included version.
+				return WC()->version;
+			}
+		}
+		// We are loading API from external plugin.
 		return \Automattic\WooCommerce\RestApi\Package::get_version();
 	}
 
@@ -52,6 +60,11 @@ class WC_API extends WC_Legacy_API {
 		if ( ! $this->is_rest_api_loaded() ) {
 			return null;
 		}
+		if ( method_exists( \Automattic\WooCommerce\RestApi\Server::class, 'get_path' ) ) {
+			// We are loading API from included version.
+			return \Automattic\WooCommerce\RestApi\Server::get_path();
+		}
+		// We are loading API from external plugin.
 		return \Automattic\WooCommerce\RestApi\Package::get_path();
 	}
 
@@ -62,7 +75,7 @@ class WC_API extends WC_Legacy_API {
 	 * @return boolean
 	 */
 	protected function is_rest_api_loaded() {
-		return class_exists( '\Automattic\WooCommerce\RestApi\Package', false );
+		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );
 	}
 
 	/**

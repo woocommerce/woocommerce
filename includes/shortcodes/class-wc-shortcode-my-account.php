@@ -4,7 +4,7 @@
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *
- * @package WooCommerce/Shortcodes/My_Account
+ * @package WooCommerce\Shortcodes\My_Account
  * @version 2.0.0
  */
 

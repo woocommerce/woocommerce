@@ -2,7 +2,7 @@
 /**
  * WC_Product_Data_Store_CPT class file.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 use Automattic\Jetpack\Constants;
@@ -1559,9 +1559,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$post_types   = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$join_query   = '';
 		$type_where   = '';
 		$status_where = '';
 		$limit_query  = '';
+
+		// When searching variations we should include the parent's meta table for use in searches.
+		if ( $include_variations ) {
+			$join_query = " LEFT JOIN {$wpdb->wc_product_meta_lookup} parent_wc_product_meta_lookup
+			 ON posts.post_type = 'product_variation' AND parent_wc_product_meta_lookup.product_id = posts.post_parent ";
+		}
 
 		/**
 		 * Hook woocommerce_search_products_post_statuses.
@@ -1602,8 +1609,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$searchand        = '';
 
 			foreach ( $search_terms as $search_term ) {
-				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) )", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+				// Variations should also search the parent's meta table for fallback fields.
+				if ( $include_variations ) {
+					$variation_query = $wpdb->prepare( ' OR ( wc_product_meta_lookup.sku = "" AND parent_wc_product_meta_lookup.sku LIKE %s ) ', $like );
+				} else {
+					$variation_query = '';
+				}
+
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) $variation_query)", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$searchand         = ' AND ';
 			}
 
@@ -1643,6 +1658,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// phpcs:disable
 			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+			 $join_query
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
 			$search_where
 			$status_where

@@ -2,7 +2,7 @@
 /**
  * Load assets
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 3.7.0
  */
 
@@ -430,6 +430,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'woocommerce_admin_system_status',
 					array(
 						'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
+						'run_tool_confirmation'   => esc_js( __( 'Are you sure you want to run this tool?', 'woocommerce' ) ),
 					)
 				);
 			}
