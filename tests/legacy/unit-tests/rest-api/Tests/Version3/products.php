@@ -490,6 +490,19 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( null, $data['date_on_sale_from'] );
+
+		$request->set_body_params( array( 'date_on_sale_from' => $date_from_sale ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( $date_from_sale, $data['date_on_sale_from'] );
+
+		// Null does not delete.
+		$request->set_body_params( array( 'date_on_sale_from' => null ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( $date_from_sale, $data['date_on_sale_from'] );
 	}
 
 	/**
