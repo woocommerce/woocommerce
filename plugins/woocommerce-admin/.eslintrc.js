@@ -5,7 +5,6 @@ module.exports = {
 		'@wordpress/i18n-translator-comments': 'warn',
 		'@wordpress/valid-sprintf': 'warn',
 		'react-hooks/rules-of-hooks': 'warn',
-		'@wordpress/i18n-text-domain': 'warn',
 		'jsdoc/check-param-names': 'warn',
 		'jsdoc/require-param': 'warn',
 		'jsdoc/require-property': 'warn',

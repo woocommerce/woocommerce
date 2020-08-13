@@ -155,19 +155,19 @@ class StockReportTable extends Component {
 				value: formatValue( currency, 'number', products ),
 			},
 			{
-				label: __( 'out of stock', outofstock, 'woocommerce-admin' ),
+				label: __( 'out of stock', 'woocommerce-admin' ),
 				value: formatValue( currency, 'number', outofstock ),
 			},
 			{
-				label: __( 'low stock', lowstock, 'woocommerce-admin' ),
-				value: formatValue( 'currency, number', lowstock ),
+				label: __( 'low stock', 'woocommerce-admin' ),
+				value: formatValue( currency, 'number', lowstock ),
 			},
 			{
-				label: __( 'on backorder', onbackorder, 'woocommerce-admin' ),
+				label: __( 'on backorder', 'woocommerce-admin' ),
 				value: formatValue( currency, 'number', onbackorder ),
 			},
 			{
-				label: __( 'in stock', instock, 'woocommerce-admin' ),
+				label: __( 'in stock', 'woocommerce-admin' ),
 				value: formatValue( currency, 'number', instock ),
 			},
 		];
