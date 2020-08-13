@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/block-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -25,7 +26,6 @@ import PageSelector from '@woocommerce/block-components/page-selector';
 import {
 	previewCart,
 	previewSavedPaymentMethods,
-	checkoutBlockPreview,
 } from '@woocommerce/resource-previews';
 
 /**
@@ -270,16 +270,19 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 
 const CheckoutEditor = ( { attributes, setAttributes } ) => {
 	const { className, isPreview } = attributes;
-
-	if ( isPreview ) {
-		return checkoutBlockPreview;
-	}
-
 	return (
 		<EditorProvider
 			previewData={ { previewCart, previewSavedPaymentMethods } }
 		>
-			<div className={ className }>
+			<div
+				className={ classnames(
+					className,
+					'wp-block-woocommerce-checkout',
+					{
+						'is-editor-preview': isPreview,
+					}
+				) }
+			>
 				<BlockSettings
 					attributes={ attributes }
 					setAttributes={ setAttributes }

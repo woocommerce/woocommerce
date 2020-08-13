@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/block-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -23,7 +24,7 @@ import {
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
 import { getAdminLink } from '@woocommerce/settings';
-import { previewCart, cartBlockPreview } from '@woocommerce/resource-previews';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -143,12 +144,12 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
  *       in the frontend.
  */
 const CartEditor = ( { className, attributes, setAttributes } ) => {
-	if ( attributes.isPreview ) {
-		return cartBlockPreview;
-	}
-
 	return (
-		<div className={ className }>
+		<div
+			className={ classnames( className, 'wp-block-woocommerce-cart', {
+				'is-editor-preview': attributes.isPreview,
+			} ) }
+		>
 			<ViewSwitcher
 				label={ __( 'Edit', 'woo-gutenberg-products-block' ) }
 				views={ [
