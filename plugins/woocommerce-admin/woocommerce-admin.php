@@ -8,7 +8,7 @@
  * Text Domain: woocommerce-admin
  * Domain Path: /languages
  * Version: 1.6.0-dev
- * Requires at least: 5.3.0
+ * Requires at least: 5.3
  * Requires PHP: 5.6.20
  *
  * WC requires at least: 3.6.0
