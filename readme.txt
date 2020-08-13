@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.3.2
+Stable tag: 4.3.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,17 +179,10 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.3.2 - 2020-08-10 =
+= 4.3.3 - 2020-08-14 =
 
-**WooCommerce**
-* Fix - Remove new WP 5.5 meta box arrows from "Order data" and "Order items" meta boxes. #27173
-* Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
-
-**WooCommerce Blocks 2.7.3**
-* Fix - Fix missing permissions_callback arg in StoreApi route definitions. #2926
-
-**WooCommerce REST API 1.0.10-pl-1**
-* Enhancement - Compatibility fixes for WordPress 5.5 #232
+**WooCommerce REST API 1.0.10-pl-2**
+* Fix - Fix regression and restore backward compatibility for date-time and mixed datatypes. #239
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
