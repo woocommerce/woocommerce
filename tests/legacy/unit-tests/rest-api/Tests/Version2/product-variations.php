@@ -7,6 +7,7 @@
  */
 
 class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
+	use WC_REST_API_Complex_Meta;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -297,6 +298,19 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 3, count( $variations ) );
+	}
+
+	/**
+	 * Test updating complex meta object.
+	 */
+	public function test_update_complex_meta_27282() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product->save();
+		$variations = $product->get_available_variations( 'objects' );
+		$first_variation_id = $variations[0]->get_id();
+		$url = '/wc/v2/products/' . $product->get_id() . '/variations/' . $first_variation_id;
+		$this->assert_update_complex_meta( $url );
 	}
 
 	/**
