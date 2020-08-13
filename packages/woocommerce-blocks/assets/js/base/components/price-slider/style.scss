@@ -1,0 +1,290 @@
+/* stylelint-disable */
+@mixin thumb {
+	background-color: transparent;
+	background-position: 0 0;
+	width: 26px;
+	height: 21px;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	vertical-align: top;
+	cursor: pointer;
+	z-index: 20;
+	pointer-events: auto;
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='52' height='42'%3E%3Cdefs%3E%3Cpath id='a' d='M23.3176 7.9423l-8.4163-6.1432C13.1953.5706 11.2618-.0997 9.2146.0121h-.1137C4.2103.347.1159 4.368.0022 9.2827-.1115 14.644 4.2102 19 9.6696 19h.1137c1.8197 0 3.6395-.6702 5.118-1.787l8.4163-6.255c.9099-.8935.9099-2.2338 0-3.0157z'/%3E%3Cpath id='b' d='M23.3176 7.9423l-8.4163-6.1432C13.1953.5706 11.2618-.0997 9.2146.0121h-.1137C4.2103.347.1159 4.368.0022 9.2827-.1115 14.644 4.2102 19 9.6696 19h.1137c1.8197 0 3.6395-.6702 5.118-1.787l8.4163-6.255c.9099-.8935.9099-2.2338 0-3.0157z'/%3E%3C/defs%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath fill='%23FFF' fill-rule='nonzero' stroke='%2395588A' d='M24.3176 8.9423l-8.4163-6.1432c-1.706-1.2285-3.6395-1.8988-5.6867-1.787h-.1137c-4.8906.335-8.985 4.356-9.0987 9.2706C.8885 15.644 5.2102 20 10.6696 20h.1137c1.8197 0 3.6395-.6702 5.118-1.787l8.4163-6.255c.9099-.8935.9099-2.2338 0-3.0157z'/%3E%3Cpath stroke='%23B8B8B8' d='M9 6v9m3-9v9'/%3E%3Cg fill-rule='nonzero' transform='translate(1 22)'%3E%3Cuse fill='%23F8F3F7' stroke='%23FFF' stroke-opacity='.75' stroke-width='3' xlink:href='%23a'/%3E%3Cuse stroke='%2395588A' xlink:href='%23a'/%3E%3C/g%3E%3Cpath stroke='%2395588A' d='M9 27v9m3-9v9'/%3E%3Cg%3E%3Cpath fill='%23FFF' fill-rule='nonzero' stroke='%2395588A' d='M27.6824 8.9423l8.4163-6.1432c1.706-1.2285 3.6395-1.8988 5.6867-1.787h.1137c4.8906.335 8.985 4.356 9.0987 9.2706C51.1115 15.644 46.7898 20 41.3304 20h-.1137c-1.8197 0-3.6395-.6702-5.118-1.787l-8.4163-6.255c-.9099-.8935-.9099-2.2338 0-3.0157z'/%3E%3Cpath stroke='%23B8B8B8' d='M43 6v9m-3-9v9'/%3E%3C/g%3E%3Cg%3E%3Cg fill-rule='nonzero' transform='matrix(-1 0 0 1 51 22)'%3E%3Cuse fill='%23F8F3F7' stroke='%23FFF' stroke-opacity='.75' stroke-width='3' xlink:href='%23b'/%3E%3Cuse stroke='%2395588A' xlink:href='%23b'/%3E%3C/g%3E%3Cpath stroke='%2395588A' d='M43 27v9m-3-9v9'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+	transition: transform .2s ease-in-out;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+
+	&:hover {
+		@include thumbFocus;
+		transform: scale(1.1);
+	}
+}
+@mixin thumbFocus {
+	background-position-y: -21px;
+	filter: drop-shadow(3px 0 0 rgba(255, 255, 255, .75)) drop-shadow(-3px 0 0 rgba(255, 255, 255, .75));
+}
+/* stylelint-enable */
+@mixin track {
+	cursor: default;
+	height: 1px; /* Required for Samsung internet based browsers */
+	outline: 0;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+@mixin reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: none;
+	background: transparent;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.wc-block-price-filter {
+	margin-bottom: $gap-large;
+
+	.wc-block-price-filter__range-input-wrapper {
+		@include reset;
+		height: 9px;
+		clear: both;
+		position: relative;
+		box-shadow: 0 0 0 1px inset rgba(0, 0, 0, 0.1);
+		background: #e1e1e1;
+		margin: 15px 0;
+
+		.wc-block-price-filter__range-input-progress {
+			height: 9px;
+			width: 100%;
+			position: absolute;
+			left: 0;
+			top: 0;
+			--track-background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+			--range-color: #a8739d;
+			/*rtl:ignore*/
+			background: var(--track-background);
+		}
+	}
+
+	.wc-block-price-filter__controls {
+		display: flex;
+
+		.wc-block-price-filter__amount {
+			margin: 0;
+			border-radius: 4px;
+			width: auto;
+			max-width: 100px;
+			min-width: 0;
+
+			&.wc-block-price-filter__amount--min {
+				margin-right: 10px;
+			}
+			&.wc-block-price-filter__amount--max {
+				margin-left: auto;
+			}
+		}
+	}
+	&.wc-block-price-filter--has-filter-button {
+		.wc-block-price-filter__controls {
+			justify-content: flex-end;
+
+			.wc-block-price-filter__amount.wc-block-price-filter__amount--max {
+				margin-left: 0;
+				margin-right: 10px;
+			}
+		}
+	}
+	.wc-block-price-filter__range-input {
+		@include reset;
+		width: 100%;
+		height: 0;
+		display: block;
+		position: relative;
+		pointer-events: none;
+		outline: none !important;
+
+		&::-webkit-slider-runnable-track {
+			@include track;
+		}
+		&::-webkit-slider-thumb {
+			@include thumb;
+			margin: -6px 0 0 0;
+		}
+		&::-webkit-slider-progress {
+			@include reset;
+		}
+
+		&::-moz-focus-outer {
+			border: 0;
+		}
+		&::-moz-range-track {
+			@include track;
+		}
+		&::-moz-range-progress {
+			@include reset;
+		}
+		&::-moz-range-thumb {
+			@include thumb;
+		}
+
+		&::-ms-thumb {
+			@include thumb;
+		}
+
+		&:focus {
+			&::-webkit-slider-thumb {
+				@include thumbFocus;
+			}
+			&::-moz-range-thumb {
+				@include thumbFocus;
+			}
+			&::-ms-thumb {
+				@include thumbFocus;
+			}
+		}
+
+		&.wc-block-price-filter__range-input--min {
+			z-index: 21;
+
+			&::-webkit-slider-thumb {
+				margin-left: -2px;
+				background-position-x: left;
+			}
+			&::-moz-range-thumb {
+				background-position-x: left;
+				transform: translate(-2px, 4px);
+			}
+			&::-ms-thumb {
+				background-position-x: left;
+			}
+		}
+
+		&.wc-block-price-filter__range-input--max {
+			z-index: 20;
+
+			&::-webkit-slider-thumb {
+				background-position-x: right;
+				margin-left: 2px;
+			}
+			&::-moz-range-thumb {
+				background-position-x: right;
+				transform: translate(2px, 4px);
+			}
+			&::-ms-thumb {
+				background-position-x: right;
+			}
+		}
+	}
+
+	&.is-loading,
+	&.is-disabled {
+		.wc-block-price-filter__range-input-wrapper,
+		.wc-block-price-filter__amount,
+		.wc-block-price-filter__button {
+			@include placeholder();
+			box-shadow: none;
+		}
+	}
+
+	&.is-disabled:not(.is-loading) {
+		.wc-block-price-filter__range-input-wrapper,
+		.wc-block-price-filter__amount,
+		.wc-block-price-filter__button {
+			animation: none;
+		}
+	}
+}
+
+.rtl {
+	.wc-block-price-filter .wc-block-price-filter__range-input-wrapper .wc-block-price-filter__range-input-progress {
+		--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+		--range-color: #a8739d;
+		background: var(--track-background);
+	}
+}
+
+@mixin ie {
+	.wc-block-price-filter {
+		.wc-block-price-filter__range-input-wrapper {
+			background: transparent;
+			box-shadow: none;
+			height: 24px;
+
+			.wc-block-price-filter__range-input-progress {
+				background: #a8739d;
+				box-shadow: 0 0 0 1px inset #95588a;
+				width: 100%;
+				top: 7px;
+			}
+		}
+		.wc-block-price-filter__range-input {
+			height: 24px;
+			pointer-events: auto;
+			position: absolute;
+			left: 0;
+			top: 0;
+
+			&::-ms-track {
+				/*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+				background: transparent;
+
+				/*leave room for the larger thumb to overflow with a transparent border */
+				border-color: transparent;
+				border-width: 7px 0;
+
+				/*remove default tick marks*/
+				color: transparent;
+			}
+			&::-ms-fill-lower {
+				background: #e1e1e1;
+				box-shadow: 0 0 0 1px inset #b8b8b8;
+			}
+			&::-ms-fill-upper {
+				background: transparent;
+			}
+			&::-ms-tooltip {
+				display: none;
+			}
+			&::-ms-thumb {
+				transform: translate(1px, 0);
+				pointer-events: auto;
+			}
+		}
+		.wc-block-price-filter__range-input--max {
+			&::-ms-fill-upper {
+				background: #e1e1e1;
+				box-shadow: 0 0 0 1px inset #b8b8b8;
+			}
+			&::-ms-fill-lower {
+				background: transparent;
+			}
+		}
+
+		&.is-loading,
+		&.is-disabled {
+			.wc-block-price-filter__range-input-wrapper {
+				@include placeholder();
+				box-shadow: none;
+			}
+		}
+
+		&.is-disabled:not(.is-loading) {
+			.wc-block-price-filter__range-input-wrapper {
+				animation: none;
+			}
+		}
+	}
+}
+
+/* IE 11 will not support multi-range slider due to poor pointer-events support on the thumb. Reverts to 2 sliders. */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+	@include ie;
+}
+@supports (-ms-ime-align:auto) {
+	@include ie;
+}

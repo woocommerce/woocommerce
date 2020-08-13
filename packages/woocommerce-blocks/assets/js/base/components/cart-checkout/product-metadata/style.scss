@@ -1,0 +1,9 @@
+.wc-block-product-metadata {
+	@include font-size(smaller);
+	color: $core-grey-dark-400;
+
+	p,
+	.wc-block-product-variation-data {
+		margin: 0.25em 0 0 0;
+	}
+}

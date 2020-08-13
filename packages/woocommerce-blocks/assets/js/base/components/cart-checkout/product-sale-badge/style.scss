@@ -1,0 +1,12 @@
+.wc-block-sale-badge {
+	@include font-size(smaller);
+	background-color: $core-grey-dark-600;
+	border-radius: 2px;
+	color: $white;
+	display: inline-block;
+	font-weight: 600;
+	letter-spacing: 0.0833em; // 1px/12px
+	padding: 0 0.66em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
