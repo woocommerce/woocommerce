@@ -121,7 +121,7 @@
 		"memize": "^1.1.0",
 		"memoize-one": "5.1.1",
 		"prismjs": "1.21.0",
-		"qs": "6.9.3",
+		"qs": "6.9.4",
 		"react-click-outside": "3.0.1",
 		"react-dates": "17.2.0",
 		"react-router-dom": "5.1.2",
