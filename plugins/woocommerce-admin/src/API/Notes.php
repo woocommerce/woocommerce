@@ -103,11 +103,11 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/undoremove',
+			'/' . $this->rest_base . '/update',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'undoremove_items' ),
+					'callback'            => array( $this, 'batch_update_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -324,15 +324,35 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Undo delete all notes.
+	 * Batch update a set of notes.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function undoremove_items( $request ) {
-		$data      = array();
-		$notes_ids = $request->get_param( 'notesIds' );
-		foreach ( (array) $notes_ids as $note_id ) {
+		wc_deprecated_function( 'undoremove_items', '4.4', '\Automattic\WooCommerce\Admin\API\Notes()->undoremove_items' );
+		return self::batch_update_items( $request );
+	}
+
+	/**
+	 * Batch update a set of notes.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function batch_update_items( $request ) {
+		$data     = array();
+		$note_ids = $request->get_param( 'noteIds' );
+
+		if ( ! isset( $note_ids ) || ! is_array( $note_ids ) ) {
+			return new \WP_Error(
+				'woocommerce_note_invalid_ids',
+				__( 'Please provide an array of IDs through the noteIds param.', 'woocommerce-admin' ),
+				array( 'status' => 422 )
+			);
+		}
+
+		foreach ( (array) $note_ids as $note_id ) {
 			$note = WC_Admin_Notes::get_note( (int) $note_id );
 			if ( $note ) {
 				WC_Admin_Notes::update_note( $note, $this->get_requested_updates( $request ) );

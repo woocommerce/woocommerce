@@ -14,6 +14,7 @@ import {
 } from '@woocommerce/navigation';
 import {
 	__experimentalResolveSelect,
+	NOTES_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
@@ -316,7 +317,7 @@ class ProfileWizard extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getNotes } = select( 'wc-api' );
+		const { getNotes } = select( NOTES_STORE_NAME );
 		const { getOption } = select( OPTIONS_STORE_NAME );
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
@@ -352,7 +353,7 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateNote } = dispatch( 'wc-api' );
+		const { updateNote } = dispatch( NOTES_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );

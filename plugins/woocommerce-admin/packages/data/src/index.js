@@ -18,4 +18,6 @@ export { withOptionsHydration } from './options/with-options-hydration';
 
 export { REVIEWS_STORE_NAME } from './reviews';
 
+export { NOTES_STORE_NAME } from './notes';
+
 export { __experimentalResolveSelect } from './registry';

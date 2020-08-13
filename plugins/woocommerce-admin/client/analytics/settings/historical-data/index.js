@@ -7,6 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import moment from 'moment';
+import { NOTES_STORE_NAME } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 import { withSpokenMessages } from '@wordpress/components';
 
@@ -204,7 +205,7 @@ class HistoricalData extends Component {
 
 export default compose( [
 	withSelect( ( select ) => {
-		const { getNotes } = select( 'wc-api' );
+		const { getNotes } = select( NOTES_STORE_NAME );
 
 		const notesQuery = {
 			page: 1,
@@ -217,7 +218,7 @@ export default compose( [
 		return { notes };
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateNote } = dispatch( 'wc-api' );
+		const { updateNote } = dispatch( NOTES_STORE_NAME );
 
 		return { updateNote };
 	} ),

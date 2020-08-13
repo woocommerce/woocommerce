@@ -2,9 +2,10 @@
  * External dependencies
  */
 import {
+	NOTES_STORE_NAME,
+	REVIEWS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	USER_STORE_NAME,
-	REVIEWS_STORE_NAME,
 } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
@@ -16,9 +17,7 @@ import { QUERY_DEFAULTS } from '../../wc-api/constants';
 import { getUnreadNotesCount } from './panels/inbox/utils';
 
 export function getUnreadNotes( select ) {
-	const { getNotes, getNotesError, isGetNotesRequesting } = select(
-		'wc-api'
-	);
+	const { getNotes, getNotesError, isResolving } = select( NOTES_STORE_NAME );
 
 	const { getCurrentUser } = select( USER_STORE_NAME );
 	const userData = getCurrentUser();
@@ -48,8 +47,8 @@ export function getUnreadNotes( select ) {
 	// depend on `getNotes` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const latestNotes = getNotes( notesQuery );
-	const isError = Boolean( getNotesError( notesQuery ) );
-	const isRequesting = isGetNotesRequesting( notesQuery );
+	const isError = Boolean( getNotesError( 'getNotes', [ notesQuery ] ) );
+	const isRequesting = isResolving( 'getNotes', [ notesQuery ] );
 
 	if ( isError || isRequesting ) {
 		return null;

@@ -12,6 +12,7 @@ import moment from 'moment';
 import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { Card } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { NOTES_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -268,7 +269,7 @@ class StoreAlerts extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getNotes, isGetNotesRequesting } = select( 'wc-api' );
+		const { getNotes, isResolving } = select( NOTES_STORE_NAME );
 		const alertsQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
@@ -279,8 +280,7 @@ export default compose(
 		// Filter out notes that may have been marked actioned or not delayed after the initial request
 		const filterNotes = ( note ) => note.status === 'unactioned';
 		const alerts = getNotes( alertsQuery ).filter( filterNotes );
-
-		const isLoading = isGetNotesRequesting( alertsQuery );
+		const isLoading = isResolving( 'getNotes', [ alertsQuery ] );
 
 		return {
 			alerts,
