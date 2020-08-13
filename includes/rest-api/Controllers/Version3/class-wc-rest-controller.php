@@ -124,7 +124,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			 * Custom types are not supported as of WP 5.5, this translates type => 'date-time' to type => 'string'.
 			 */
 			if ( 'date-time' === $params['type'] ) {
-				$params['type'] = 'string';
+				$params['type'] = array( 'null', 'string' );
 			}
 
 			/**
