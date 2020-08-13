@@ -7,10 +7,6 @@ import { cloneElement, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Button, FormToggle } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, H, Plugins } from '@woocommerce/components';
 import {
 	getHistory,
@@ -29,9 +25,9 @@ import {
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
-import { getCountryCode } from 'dashboard/utils';
-import withSelect from 'wc-api/with-select';
+import { recordEvent } from '../../../lib/tracks';
+import { getCountryCode } from '../../../dashboard/utils';
+import withSelect from '../../../wc-api/with-select';
 import { getPaymentMethods } from './methods';
 
 class Payments extends Component {

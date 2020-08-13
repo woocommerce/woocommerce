@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { lazy, Suspense } from '@wordpress/element';
+import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { Spinner } from '@woocommerce/components';
 const LazyDashboardCharts = lazy( () =>
 	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
 );

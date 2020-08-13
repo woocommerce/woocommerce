@@ -3,12 +3,12 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { dispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { API_NAMESPACE } from './constants';
-import { __ } from '@wordpress/i18n';
 
 export function receiveInstalledPlugins( plugins ) {
 	return {

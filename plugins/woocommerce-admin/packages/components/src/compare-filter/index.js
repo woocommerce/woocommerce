@@ -7,9 +7,6 @@ import { Button } from '@wordpress/components';
 import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 
-/**
- * WooCommerce dependencies
- */
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**

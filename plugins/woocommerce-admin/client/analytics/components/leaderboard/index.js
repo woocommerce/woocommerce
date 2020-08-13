@@ -5,10 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, EmptyTable, TableCard } from '@woocommerce/components';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -16,11 +12,11 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { getLeaderboard } from 'wc-api/items/utils';
-import ReportError from 'analytics/components/report-error';
-import sanitizeHTML from 'lib/sanitize-html';
-import withSelect from 'wc-api/with-select';
-import { getFilterQuery } from 'wc-api/reports/utils';
+import { getLeaderboard } from '../../../wc-api/items/utils';
+import ReportError from '../report-error';
+import sanitizeHTML from '../../../lib/sanitize-html';
+import withSelect from '../../../wc-api/with-select';
+import { getFilterQuery } from '../../../wc-api/reports/utils';
 import './style.scss';
 
 export class Leaderboard extends Component {

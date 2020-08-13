@@ -1,14 +1,6 @@
 /**
  * External dependencies
  */
-
-/**
- * Internal dependencies
- */
-
-/**
- * WooCommerce dependencies
- */
 import {
 	isoDateFormat,
 	presetValues,

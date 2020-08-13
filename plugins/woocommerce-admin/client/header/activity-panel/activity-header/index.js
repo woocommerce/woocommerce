@@ -5,12 +5,12 @@ import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __experimentalText as Text } from '@wordpress/components';
+import { EllipsisMenu } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { EllipsisMenu } from '@woocommerce/components';
 
 class ActivityHeader extends Component {
 	render() {

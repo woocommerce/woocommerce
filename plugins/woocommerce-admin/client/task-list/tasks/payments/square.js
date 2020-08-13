@@ -6,16 +6,16 @@ import { Component, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
-
-/**
- * WooCommerce dependencies
- */
 import { getQuery } from '@woocommerce/navigation';
-import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
+import { compose } from '@wordpress/compose';
 import { Stepper } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import { WC_ADMIN_NAMESPACE } from '../../../wc-api/constants';
 
 class Square extends Component {
 	constructor( props ) {

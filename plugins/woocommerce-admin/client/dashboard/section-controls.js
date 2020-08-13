@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, TextControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
 import { MenuItem } from '@woocommerce/components';
 
 class SectionControls extends Component {

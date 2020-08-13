@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { shallow } from 'enzyme';
-import { recordEvent } from 'lib/tracks';
 import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import { recordEvent } from '../../../../lib/tracks';
 import { WelcomeCard } from '../index.js';
 
 jest.mock( 'lib/tracks' );

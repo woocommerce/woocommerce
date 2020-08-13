@@ -8,10 +8,6 @@ import { Fragment, useEffect } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { Icon, chevronRight, page } from '@wordpress/icons';
 import { partial } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List, Section } from '@woocommerce/components';
 import {
@@ -19,15 +15,15 @@ import {
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { compose } from 'redux';
 
 /**
  * Internal dependencies
  */
 import ActivityHeader from '../activity-header';
-import { getCountryCode } from 'dashboard/utils';
-import { recordEvent } from 'lib/tracks';
-import { getPaymentMethods } from 'task-list/tasks/payments/methods';
-import { compose } from 'redux';
+import { getCountryCode } from '../../../dashboard/utils';
+import { recordEvent } from '../../../lib/tracks';
+import { getPaymentMethods } from '../../../task-list/tasks/payments/methods';
 
 export const SETUP_TASK_HELP_ITEMS_FILTER =
 	'woocommerce_admin_setup_task_help_items';

@@ -10,9 +10,6 @@ import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	getActiveFiltersFromQuery,
 	getDefaultOptionValue,

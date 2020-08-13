@@ -14,7 +14,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const UnminifyWebpackPlugin = require( './unminify' );
 
 /**
- * WordPress dependencies
+ * External dependencies
  */
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 
@@ -151,7 +151,6 @@ const webpackConfig = {
 	},
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [ path.join( __dirname, 'client' ), 'node_modules' ],
 		alias: {
 			'gutenberg-components': path.resolve(
 				__dirname,

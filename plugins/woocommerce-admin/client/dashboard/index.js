@@ -5,10 +5,6 @@ import { Component, Suspense, lazy } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import { identity } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
@@ -21,7 +17,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import { isOnboardingEnabled } from 'dashboard/utils';
+import { isOnboardingEnabled } from './utils';
 
 const CustomizableDashboard = lazy( () =>
 	import( /* webpackChunkName: "customizable-dashboard" */ './customizable' )

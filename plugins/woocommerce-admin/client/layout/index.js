@@ -8,10 +8,6 @@ import { Router, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity } from 'lodash';
 import { parse } from 'qs';
-
-/**
- * WooCommerce dependencies
- */
 import { useFilters, Spinner } from '@woocommerce/components';
 import { getHistory } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
@@ -26,14 +22,15 @@ import {
  */
 import './style.scss';
 import { Controller, getPages, PAGES_FILTER } from './controller';
-import Header from 'header';
+import Header from '../header';
 import Notices from './notices';
-import { recordPageView } from 'lib/tracks';
+import { recordPageView } from '../lib/tracks';
 import TransientNotices from './transient-notices';
+import { REPORTS_FILTER } from '../analytics/report';
+
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
 );
-import { REPORTS_FILTER } from 'analytics/report';
 
 export class PrimaryLayout extends Component {
 	render() {

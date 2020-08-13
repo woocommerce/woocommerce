@@ -8,10 +8,6 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, H, Link } from '@woocommerce/components';
 import {
 	pluginNames,
@@ -23,13 +19,13 @@ import {
 /**
  * Internal dependencies
  */
-import { createNoticesFromResponse } from 'lib/notices';
+import { createNoticesFromResponse } from '../../../lib/notices';
 import Logo from './logo';
 import ManagementIcon from './images/management';
 import SalesTaxIcon from './images/sales_tax';
 import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 
 class Benefits extends Component {
 	constructor( props ) {

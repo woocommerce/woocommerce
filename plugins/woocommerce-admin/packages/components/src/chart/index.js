@@ -13,9 +13,6 @@ import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
-/**
- * WooCommerce dependencies
- */
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**

@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import moment from 'moment';
 import { SelectControl } from '@wordpress/components';
+import { DatePicker } from '@woocommerce/components';
 
 /**
- * WooCommerce dependencies
+ * Internal dependencies
  */
-import { DatePicker } from '@woocommerce/components';
-import { dateValidationMessages } from 'lib/date';
+import { dateValidationMessages } from '../../../lib/date';
 
 function HistoricalDataPeriodSelector( {
 	dateFormat,

@@ -7,7 +7,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { getCategoryLabels } from 'lib/async-requests';
+import { getCategoryLabels } from '../../../lib/async-requests';
 
 const CATEGORY_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_categories_report_charts';

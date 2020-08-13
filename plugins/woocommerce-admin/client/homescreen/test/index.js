@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+
+/**
+ * Internal dependencies
+ */
 import { Layout } from '../layout';
 
 // Rendering <StatsOverview /> breaks tests.

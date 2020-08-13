@@ -7,16 +7,12 @@ import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
+import { getDefaultOptionValue } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { textContent } from './utils';
-
-/**
- * WooCommerce dependencies
- */
-import { getDefaultOptionValue } from '@woocommerce/navigation';
 
 class SelectFilter extends Component {
 	constructor( { filter, config, onFilterChange } ) {

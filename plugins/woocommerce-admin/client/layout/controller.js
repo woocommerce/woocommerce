@@ -6,10 +6,6 @@ import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-
-/**
- * WooCommerce dependencies
- */
 import {
 	getNewPath,
 	getPersistedQuery,
@@ -20,31 +16,35 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { getUrlParams } from 'utils';
+import { getUrlParams } from '../utils';
+import getReports from '../analytics/report/get-reports';
+import { isWCAdmin } from '../dashboard/utils';
 
 const AnalyticsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report" */ 'analytics/report' )
+	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
 const AnalyticsSettings = lazy( () =>
-	import( /* webpackChunkName: "analytics-settings" */ 'analytics/settings' )
+	import(
+		/* webpackChunkName: "analytics-settings" */ '../analytics/settings'
+	)
 );
 const Dashboard = lazy( () =>
-	import( /* webpackChunkName: "dashboard" */ 'dashboard' )
+	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
 const DevDocs = lazy( () =>
-	import( /* webpackChunkName: "devdocs" */ 'devdocs' )
+	import( /* webpackChunkName: "devdocs" */ '../devdocs' )
 );
 const Homescreen = lazy( () =>
-	import( /* webpackChunkName: "homescreen" */ 'homescreen' )
+	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
 const MarketingOverview = lazy( () =>
-	import( /* webpackChunkName: "marketing-overview" */ 'marketing/overview' )
+	import(
+		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
+	)
 );
 const ProfileWizard = lazy( () =>
-	import( /* webpackChunkName: "profile-wizard" */ 'profile-wizard' )
+	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
-import getReports from 'analytics/report/get-reports';
-import { isWCAdmin } from 'dashboard/utils';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 

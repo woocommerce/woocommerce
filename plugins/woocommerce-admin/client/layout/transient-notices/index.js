@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
-import withSelect from 'wc-api/with-select';
+import withSelect from '../../wc-api/with-select';
 
 class TransientNotices extends Component {
 	render() {

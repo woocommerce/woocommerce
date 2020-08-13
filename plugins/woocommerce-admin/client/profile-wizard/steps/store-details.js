@@ -16,10 +16,6 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
 import { H, Form } from '@woocommerce/components';
 import { getCurrencyData } from '@woocommerce/currency';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -27,14 +23,14 @@ import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
+import { getCountryCode, getCurrencyRegion } from '../../dashboard/utils';
 import {
 	StoreAddress,
 	validateStoreAddress,
-} from 'dashboard/components/settings/general/store-address';
+} from '../../dashboard/components/settings/general/store-address';
 import UsageModal from './usage-modal';
-import { CurrencyContext } from 'lib/currency-context';
-import { recordEvent } from 'lib/tracks';
+import { CurrencyContext } from '../../lib/currency-context';
+import { recordEvent } from '../../lib/tracks';
 
 class StoreDetails extends Component {
 	constructor( props ) {

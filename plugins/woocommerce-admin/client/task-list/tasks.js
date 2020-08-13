@@ -4,10 +4,6 @@
 
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-
-/**
- * WooCommerce dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	getHistory,
@@ -20,13 +16,13 @@ import { Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import Appearance from './tasks/appearance';
-import { getCategorizedOnboardingProducts } from 'dashboard/utils';
+import { getCategorizedOnboardingProducts } from '../dashboard/utils';
 import Products from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import { installActivateAndConnectWcpay } from './tasks/payments/methods';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../lib/tracks';
 
 export function recordTaskViewEvent(
 	taskName,

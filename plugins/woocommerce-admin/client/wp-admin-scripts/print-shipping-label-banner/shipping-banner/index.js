@@ -5,25 +5,21 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { recordEvent } from 'lib/tracks';
 import interpolateComponents from 'interpolate-components';
 import PropTypes from 'prop-types';
 import { get, isArray } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { withDispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import '../style.scss';
+import { recordEvent } from '../../../lib/tracks';
 import DismissModal from '../dismiss-modal';
-import { getSetting } from '@woocommerce/wc-admin-settings';
-import withSelect from 'wc-api/with-select';
+import withSelect from '../../../wc-api/with-select';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
-import { withDispatch } from '@wordpress/data';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );

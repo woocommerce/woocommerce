@@ -1,18 +1,18 @@
 /**
- * WooCommerce dependencies
+ * External dependencies
  */
 import {
 	SETTINGS_STORE_NAME,
 	USER_STORE_NAME,
 	REVIEWS_STORE_NAME,
 } from '@woocommerce/data';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
-import { DEFAULT_ACTIONABLE_STATUSES } from 'analytics/settings/config';
-import { getSetting } from '@woocommerce/wc-admin-settings';
-import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { DEFAULT_ACTIONABLE_STATUSES } from '../../analytics/settings/config';
+import { QUERY_DEFAULTS } from '../../wc-api/constants';
 import { getUnreadNotesCount } from './panels/inbox/utils';
 
 export function getUnreadNotes( select ) {

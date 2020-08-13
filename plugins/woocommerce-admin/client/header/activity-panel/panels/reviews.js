@@ -10,9 +10,6 @@ import interpolateComponents from 'interpolate-components';
 import { get, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	EmptyContent,
 	Gravatar,
@@ -29,10 +26,10 @@ import { REVIEWS_STORE_NAME } from '@woocommerce/data';
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
-import { QUERY_DEFAULTS } from 'wc-api/constants';
-import sanitizeHTML from 'lib/sanitize-html';
-import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
+import { QUERY_DEFAULTS } from '../../../wc-api/constants';
+import sanitizeHTML from '../../../lib/sanitize-html';
+import withSelect from '../../../wc-api/with-select';
+import { recordEvent } from '../../../lib/tracks';
 
 class ReviewsPanel extends Component {
 	constructor() {

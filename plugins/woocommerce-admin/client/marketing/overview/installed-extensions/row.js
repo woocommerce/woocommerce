@@ -4,17 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { Button, ProductIcon } from '../../components';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 
 class InstalledExtensionRow extends Component {
 	constructor( props ) {

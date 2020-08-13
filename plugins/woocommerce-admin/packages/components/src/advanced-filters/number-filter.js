@@ -8,9 +8,6 @@ import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
 
-/**
- * WooCommerce dependencies
- */
 import CurrencyFactory from '@woocommerce/currency';
 
 /**

@@ -1,5 +1,5 @@
 /**
- * WordPress dependencies
+ * External dependencies
  */
 import { SVG, Path } from '@wordpress/primitives';
 

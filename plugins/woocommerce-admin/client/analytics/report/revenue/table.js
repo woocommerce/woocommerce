@@ -6,15 +6,6 @@ import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
 import { get } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
-import {
-	appendTimestamp,
-	defaultTableDateFormat,
-	getCurrentDates,
-} from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
@@ -23,11 +14,16 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULTS } from 'wc-api/constants';
-import ReportTable from 'analytics/components/report-table';
-import withSelect from 'wc-api/with-select';
-import { getReportTableQuery } from 'wc-api/reports/utils';
-import { CurrencyContext } from 'lib/currency-context';
+import {
+	appendTimestamp,
+	defaultTableDateFormat,
+	getCurrentDates,
+} from '../../../lib/date';
+import { QUERY_DEFAULTS } from '../../../wc-api/constants';
+import ReportTable from '../../components/report-table';
+import withSelect from '../../../wc-api/with-select';
+import { getReportTableQuery } from '../../../wc-api/reports/utils';
+import { CurrencyContext } from '../../../lib/currency-context';
 
 class RevenueReportTable extends Component {
 	constructor() {

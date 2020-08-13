@@ -9,9 +9,6 @@ import { compose } from '@wordpress/compose';
 import { filter } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	Card,
 	Stepper,
@@ -25,8 +22,8 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { queueRecordEvent, recordEvent } from 'lib/tracks';
-import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
+import { queueRecordEvent, recordEvent } from '../../lib/tracks';
+import { WC_ADMIN_NAMESPACE } from '../../wc-api/constants';
 
 class Appearance extends Component {
 	constructor( props ) {

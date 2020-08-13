@@ -7,7 +7,10 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { getCustomerLabels, getProductLabels } from 'lib/async-requests';
+import {
+	getCustomerLabels,
+	getProductLabels,
+} from '../../../lib/async-requests';
 
 const DOWLOADS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_downloads_report_charts';

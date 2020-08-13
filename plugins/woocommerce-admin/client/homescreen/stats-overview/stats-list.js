@@ -5,9 +5,6 @@ import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	SummaryNumber,
 	SummaryNumberPlaceholder,
@@ -17,13 +14,13 @@ import { getPersistedQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
-import { CurrencyContext } from 'lib/currency-context';
+import withSelect from '../../wc-api/with-select';
+import { recordEvent } from '../../lib/tracks';
+import { CurrencyContext } from '../../lib/currency-context';
 import {
 	getIndicatorData,
 	getIndicatorValues,
-} from 'dashboard/store-performance/utils';
+} from '../../dashboard/store-performance/utils';
 
 export const StatsList = ( {
 	stats,

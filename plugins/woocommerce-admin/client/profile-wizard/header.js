@@ -3,16 +3,8 @@
  */
 import { Component } from '@wordpress/element';
 import { filter } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
-import { updateQueryString } from '@woocommerce/navigation';
-
-/**
- * Internal dependencies
- */
 import { Stepper } from '@woocommerce/components';
+import { updateQueryString } from '@woocommerce/navigation';
 
 export default class ProfileWizardHeader extends Component {
 	renderStepper() {

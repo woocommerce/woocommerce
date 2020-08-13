@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { EmptyContent } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 

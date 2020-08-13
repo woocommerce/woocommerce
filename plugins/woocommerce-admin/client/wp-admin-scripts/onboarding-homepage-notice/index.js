@@ -4,16 +4,12 @@
 import { dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
-
-/**
- * WooCommerce dependencies
- */
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
-import { queueRecordEvent } from 'lib/tracks';
+import { queueRecordEvent } from '../../lib/tracks';
 
 /**
  * Returns a promise and resolves when the post begins to publish.

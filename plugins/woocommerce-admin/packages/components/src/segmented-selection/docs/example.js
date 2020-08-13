@@ -1,12 +1,8 @@
 /**
- * Internal dependencies
- */
-import { SegmentedSelection } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import { withState } from '@wordpress/compose';
+import { SegmentedSelection } from '@woocommerce/components';
 
 const name = 'number';
 

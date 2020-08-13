@@ -4,13 +4,13 @@
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { find, get } from 'lodash';
+import { Card, Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import ComponentExample from './example';
 import ComponentDocs from './docs';
-import { Card, Link } from '@woocommerce/components';
 import examples from './examples.json';
 import './style.scss';
 

@@ -7,9 +7,11 @@ import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
+import { Chart } from '@woocommerce/components';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
- * WooCommerce dependencies
+ * Internal dependencies
  */
 import {
 	getAllowedIntervalsForQuery,
@@ -18,20 +20,14 @@ import {
 	getIntervalForQuery,
 	getChartTypeForQuery,
 	getPreviousDate,
-} from 'lib/date';
-import { Chart } from '@woocommerce/components';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
-import { CurrencyContext } from 'lib/currency-context';
-
-/**
- * Internal dependencies
- */
+} from '../../../lib/date';
+import { CurrencyContext } from '../../../lib/currency-context';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
-} from 'wc-api/reports/utils';
-import ReportError from 'analytics/components/report-error';
-import withSelect from 'wc-api/with-select';
+} from '../../../wc-api/reports/utils';
+import ReportError from '../report-error';
+import withSelect from '../../../wc-api/with-select';
 import { getChartMode, getSelectedFilter } from './utils';
 
 /**

@@ -4,12 +4,7 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { Date, Link } from '@woocommerce/components';
-import { defaultTableDateFormat } from 'lib/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
@@ -17,8 +12,9 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import ReportTable from 'analytics/components/report-table';
-import { CurrencyContext } from 'lib/currency-context';
+import { defaultTableDateFormat } from '../../../lib/date';
+import ReportTable from '../../components/report-table';
+import { CurrencyContext } from '../../../lib/currency-context';
 
 class CouponsReportTable extends Component {
 	constructor() {

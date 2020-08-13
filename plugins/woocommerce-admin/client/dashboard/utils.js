@@ -3,10 +3,6 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { without } from 'lodash';
-
-/**
- * Internal dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**

@@ -6,10 +6,6 @@ import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { Card } from '@woocommerce/components';
 
 /**

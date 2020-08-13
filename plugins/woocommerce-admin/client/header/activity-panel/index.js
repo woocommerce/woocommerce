@@ -12,10 +12,6 @@ import PagesIcon from 'gridicons/dist/pages';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
 import { Icon, lifesaver } from '@wordpress/icons';
-
-/**
- * WooCommerce dependencies
- */
 import { getSetting, getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section, Spinner } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -32,8 +28,10 @@ import {
 	getUnapprovedReviews,
 	getUnreadStock,
 } from './unread-indicators';
-import { isOnboardingEnabled, isWCAdmin } from 'dashboard/utils';
-import withSelect from 'wc-api/with-select';
+import { isOnboardingEnabled, isWCAdmin } from '../../dashboard/utils';
+import withSelect from '../../wc-api/with-select';
+import { Tabs } from './tabs';
+import { SetupProgress } from './setup-progress';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -51,9 +49,6 @@ const StockPanel = lazy( () =>
 const ReviewsPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-inbox" */ './panels/reviews' )
 );
-
-import { Tabs } from './tabs';
-import { SetupProgress } from './setup-progress';
 
 const manageStock = getSetting( 'manageStock', 'no' );
 const reviewsEnabled = getSetting( 'reviewsEnabled', 'no' );

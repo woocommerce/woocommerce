@@ -5,10 +5,6 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { useFilters } from '@woocommerce/components';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
 
@@ -16,13 +12,13 @@ import { getQuery, getSearchWords } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import ReportError from 'analytics/components/report-error';
-import { searchItemsByString } from 'wc-api/items/utils';
-import withSelect from 'wc-api/with-select';
+import ReportError from '../components/report-error';
+import { searchItemsByString } from '../../wc-api/items/utils';
+import withSelect from '../../wc-api/with-select';
 import {
 	CurrencyContext,
 	getFilteredCurrencyInstance,
-} from 'lib/currency-context';
+} from '../../lib/currency-context';
 import getReports from './get-reports';
 
 export const REPORTS_FILTER = 'woocommerce_admin_reports_list';

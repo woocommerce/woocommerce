@@ -6,9 +6,6 @@ import { Component } from '@wordpress/element';
 import { filter } from 'lodash';
 import PropTypes from 'prop-types';
 
-/**
- * WooCommerce dependencies
- */
 import { presetValues } from '@woocommerce/date';
 
 /**

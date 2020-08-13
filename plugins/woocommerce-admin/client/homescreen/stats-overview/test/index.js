@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { useUserPreferences } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { StatsOverview } from '../index';
 import StatsList from '../stats-list';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 
 jest.mock( 'lib/tracks' );
 // Mock the stats list so that it can be tested separately.
@@ -22,7 +23,6 @@ jest.mock( '../install-jetpack-cta', () => {
 		.mockImplementation( () => <div>mocked install jetpack cta</div> );
 } );
 
-import { useUserPreferences } from '@woocommerce/data';
 jest.mock( '@woocommerce/data' );
 
 describe( 'StatsOverview tracking', () => {

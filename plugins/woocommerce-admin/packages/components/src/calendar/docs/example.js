@@ -1,13 +1,9 @@
 /**
- * Internal dependencies
- */
-import { DateRange, DatePicker, H, Section } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
 import moment from 'moment';
 import { withState } from '@wordpress/compose';
+import { DateRange, DatePicker, H, Section } from '@woocommerce/components';
 
 const dateFormat = 'MM/DD/YYYY';
 

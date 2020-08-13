@@ -12,9 +12,6 @@ import { partial } from 'lodash';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
-/**
- * WooCommerce dependencies
- */
 import { validateDateInputForRange } from '@woocommerce/date';
 
 /**

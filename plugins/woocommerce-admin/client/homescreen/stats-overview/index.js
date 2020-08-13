@@ -13,9 +13,6 @@ import {
 } from '@wordpress/components';
 import { get, xor } from 'lodash';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	EllipsisMenu,
 	MenuItem,
@@ -32,7 +29,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import './style.scss';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../lib/tracks';
 import InstallJetpackCta from './install-jetpack-cta';
 
 const { performanceIndicators } = getSetting( 'dataEndpoints', {

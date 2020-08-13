@@ -7,10 +7,6 @@ import { escapeRegExp } from 'lodash';
 import { Fragment } from '@wordpress/element';
 import { useEffect, useMemo, useState } from 'react';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-
-/**
- * Internal dependencies
- */
 import { SelectControl, TextControl } from '@woocommerce/components';
 
 const { countries } = getSetting( 'dataEndpoints', { countries: {} } );

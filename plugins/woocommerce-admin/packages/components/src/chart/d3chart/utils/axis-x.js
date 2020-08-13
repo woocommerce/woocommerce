@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { axisBottom as d3AxisBottom } from 'd3-axis';
-import { smallBreak, wideBreak } from './breakpoints';
 import moment from 'moment';
+
+/**
+ * Internal dependencies
+ */
+import { smallBreak, wideBreak } from './breakpoints';
 
 const dayTicksThreshold = 63;
 const weekTicksThreshold = 9;

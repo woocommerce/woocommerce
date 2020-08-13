@@ -3,15 +3,6 @@
  */
 import { find, forEach, isNull, get, includes } from 'lodash';
 import moment from 'moment';
-
-/**
- * WooCommerce dependencies
- */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getIntervalForQuery,
-} from 'lib/date';
 import {
 	flattenFilters,
 	getActiveFiltersFromQuery,
@@ -21,7 +12,12 @@ import {
 /**
  * Internal dependencies
  */
-import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'wc-api/constants';
+import {
+	appendTimestamp,
+	getCurrentDates,
+	getIntervalForQuery,
+} from '../../lib/date';
+import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
 import * as reportsUtils from './utils';
 
 /**

@@ -6,10 +6,6 @@ import { Button } from '@wordpress/components';
 import { Fragment, useEffect, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
 import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
 
@@ -20,7 +16,7 @@ import './index.scss';
 import { config } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../lib/tracks';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 

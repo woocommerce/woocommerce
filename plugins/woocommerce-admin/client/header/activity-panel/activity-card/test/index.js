@@ -5,12 +5,12 @@ import { Button } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import { shallow } from 'enzyme';
 import moment from 'moment';
+import { Gravatar } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { ActivityCard } from '../';
-import { Gravatar } from '@woocommerce/components';
 
 describe( 'ActivityCard', () => {
 	test( 'should have correct title', () => {

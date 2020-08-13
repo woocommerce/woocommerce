@@ -10,14 +10,14 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { advancedFilters, charts, filters } from './config';
-import getSelectedChart from 'lib/get-selected-chart';
+import getSelectedChart from '../../../lib/get-selected-chart';
 import ProductsReportTable from './table';
-import ReportChart from 'analytics/components/report-chart';
-import ReportError from 'analytics/components/report-error';
-import ReportSummary from 'analytics/components/report-summary';
+import ReportChart from '../../components/report-chart';
+import ReportError from '../../components/report-error';
+import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table-variations';
-import withSelect from 'wc-api/with-select';
-import ReportFilters from 'analytics/components/report-filters';
+import withSelect from '../../../wc-api/with-select';
+import ReportFilters from '../../components/report-filters';
 
 class ProductsReport extends Component {
 	getChartMeta() {

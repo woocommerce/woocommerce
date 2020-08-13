@@ -9,10 +9,6 @@ import { compose } from '@wordpress/compose';
 import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
 import { Link, ProductImage } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
@@ -20,7 +16,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import { ActivityCard } from '../../activity-card';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../../lib/tracks';
 
 class ProductStockCard extends Component {
 	constructor( props ) {

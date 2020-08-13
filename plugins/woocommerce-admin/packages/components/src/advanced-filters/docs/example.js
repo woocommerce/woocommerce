@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
 import { CURRENCY } from '@woocommerce/wc-admin-settings';

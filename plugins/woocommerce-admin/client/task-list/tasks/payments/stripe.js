@@ -8,15 +8,15 @@ import apiFetch from '@wordpress/api-fetch';
 import { withDispatch, withSelect } from '@wordpress/data';
 import interpolateComponents from 'interpolate-components';
 import { Button } from '@wordpress/components';
-
-/**
- * WooCommerce dependencies
- */
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { getQuery } from '@woocommerce/navigation';
-import { WCS_NAMESPACE } from 'wc-api/constants';
 import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import { WCS_NAMESPACE } from '../../../wc-api/constants';
 
 class Stripe extends Component {
 	constructor( props ) {

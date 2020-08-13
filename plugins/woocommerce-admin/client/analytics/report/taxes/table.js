@@ -4,20 +4,16 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { getTaxCode } from './utils';
 import { formatValue } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
-import ReportTable from 'analytics/components/report-table';
-import { CurrencyContext } from 'lib/currency-context';
+import { getTaxCode } from './utils';
+import ReportTable from '../../components/report-table';
+import { CurrencyContext } from '../../../lib/currency-context';
 
 class TaxesReportTable extends Component {
 	constructor() {

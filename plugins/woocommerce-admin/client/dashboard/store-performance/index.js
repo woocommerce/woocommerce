@@ -4,18 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-
-/**
- * WooCommerce dependencies
- */
-import { getDateParamsFromQuery } from 'lib/date';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
 import {
 	EllipsisMenu,
 	MenuItem,
@@ -25,10 +16,15 @@ import {
 	SummaryListPlaceholder,
 	SummaryNumber,
 } from '@woocommerce/components';
-import withSelect from 'wc-api/with-select';
+
+/**
+ * Internal dependencies
+ */
+import { getDateParamsFromQuery } from '../../lib/date';
+import withSelect from '../../wc-api/with-select';
 import './style.scss';
-import { recordEvent } from 'lib/tracks';
-import { CurrencyContext } from 'lib/currency-context';
+import { recordEvent } from '../../lib/tracks';
+import { CurrencyContext } from '../../lib/currency-context';
 import { getIndicatorData, getIndicatorValues } from './utils';
 
 const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {

@@ -8,10 +8,6 @@ import { compose } from '@wordpress/compose';
 import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, Link, Stepper, Plugins } from '@woocommerce/components';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -20,11 +16,11 @@ import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import Connect from 'dashboard/components/connect';
-import { getCountryCode } from 'dashboard/utils';
+import Connect from '../../../dashboard/components/connect';
+import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 
 class Shipping extends Component {
 	constructor( props ) {

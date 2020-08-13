@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-
 import { registerStore, select } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 

@@ -4,10 +4,6 @@
 import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-
-/**
- * WooCommerce dependencies
- */
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
@@ -16,9 +12,9 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import ReportTable from 'analytics/components/report-table';
+import ReportTable from '../../components/report-table';
 import { isLowStock } from './utils';
-import { CurrencyContext } from 'lib/currency-context';
+import { CurrencyContext } from '../../../lib/currency-context';
 
 const stockStatuses = getSetting( 'stockStatuses', {} );
 

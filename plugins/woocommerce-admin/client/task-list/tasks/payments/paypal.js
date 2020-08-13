@@ -9,14 +9,14 @@ import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { isEmail } from '@wordpress/url';
-
-/**
- * WooCommerce dependencies
- */
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getQuery } from '@woocommerce/navigation';
-import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import { WC_ADMIN_NAMESPACE } from '../../../wc-api/constants';
 
 export class PayPal extends Component {
 	constructor( props ) {

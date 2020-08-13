@@ -11,12 +11,7 @@ import { get, noop, partial, uniq } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
-import DownloadIcon from './download-icon';
 import {
 	getIdsFromQuery,
 	getSearchWords,
@@ -33,12 +28,16 @@ import { SETTINGS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
-import { getReportChartData, getReportTableData } from 'wc-api/reports/utils';
-import { QUERY_DEFAULTS } from 'wc-api/constants';
-import withSelect from 'wc-api/with-select';
+import DownloadIcon from './download-icon';
+import ReportError from '../report-error';
+import {
+	getReportChartData,
+	getReportTableData,
+} from '../../../wc-api/reports/utils';
+import { QUERY_DEFAULTS } from '../../../wc-api/constants';
+import withSelect from '../../../wc-api/with-select';
 import { extendTableData } from './utils';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';

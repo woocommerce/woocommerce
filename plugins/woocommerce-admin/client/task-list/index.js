@@ -15,10 +15,6 @@ import {
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Icon, check, chevronRight } from '@wordpress/icons';
 import { xor } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { List, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import {
@@ -32,10 +28,10 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import CartModal from 'dashboard/components/cart-modal';
+import CartModal from '../dashboard/components/cart-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
-import { getCountryCode } from 'dashboard/utils';
-import { recordEvent } from 'lib/tracks';
+import { getCountryCode } from '../dashboard/utils';
+import { recordEvent } from '../lib/tracks';
 
 class TaskDashboard extends Component {
 	constructor( props ) {

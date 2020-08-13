@@ -1,6 +1,5 @@
 /**
  * External dependencies
- *
  */
 import { mount } from 'enzyme';
 

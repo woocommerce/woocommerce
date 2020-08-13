@@ -4,10 +4,6 @@
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
-
-/**
- * WooCommerce dependencies
- */
 import { Card } from '@woocommerce/components';
 import {
 	getHistory,
@@ -19,7 +15,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import ReportChart from 'analytics/components/report-chart';
+import ReportChart from '../../analytics/components/report-chart';
 import './block.scss';
 
 class ChartBlock extends Component {

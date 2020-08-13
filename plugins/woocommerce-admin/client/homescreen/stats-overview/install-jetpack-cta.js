@@ -8,9 +8,6 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
 
-/**
- * WooCommerce dependencies
- */
 import {
 	__experimentalResolveSelect,
 	PLUGINS_STORE_NAME,
@@ -22,8 +19,8 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
-import { createNoticesFromResponse } from 'lib/notices';
+import { recordEvent } from '../../lib/tracks';
+import { createNoticesFromResponse } from '../../lib/notices';
 
 function InstallJetpackCta( {
 	getJetpackConnectUrl,

@@ -7,18 +7,14 @@ import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import classnames from 'classnames';
 import { __, _x } from '@wordpress/i18n';
-
-/**
- * WooCommerce dependencies
- */
 import { isoDateFormat, toMoment } from '@woocommerce/date';
+import moment from 'moment';
 
 /**
  * Internal dependencies
  */
 import DatePicker from '../calendar/date-picker';
 import { textContent } from './utils';
-import moment from 'moment';
 
 const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce-admin' );
 const dateFormat = __( 'MM/DD/YYYY', 'woocommerce-admin' );

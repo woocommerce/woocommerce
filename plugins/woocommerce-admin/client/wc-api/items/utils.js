@@ -1,11 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-
-/**
- * WooCommerce dependencies
- */
-import { appendTimestamp, getCurrentDates } from 'lib/date';
+import { appendTimestamp, getCurrentDates } from '../../lib/date';
 
 /**
  * Returns leaderboard data to render a leaderboard table.

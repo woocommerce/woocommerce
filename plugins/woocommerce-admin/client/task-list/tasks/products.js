@@ -3,17 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, List } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../lib/tracks';
 
 const subTasks = [
 	{

@@ -22,17 +22,13 @@ import {
 	external,
 } from '@wordpress/icons';
 import { partial } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../lib/tracks';
 import './style.scss';
 
 function getItems( props ) {

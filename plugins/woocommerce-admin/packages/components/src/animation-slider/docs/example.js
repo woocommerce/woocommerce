@@ -1,11 +1,7 @@
 /**
- * Internal dependencies
- */
-import { AnimationSlider } from '@woocommerce/components';
-
-/**
  * External dependencies
  */
+import { AnimationSlider } from '@woocommerce/components';
 import { Component } from '@wordpress/element';
 
 export default class MyAnimationSlider extends Component {

@@ -11,8 +11,11 @@ const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 /**
  * Internal dependencies
  */
-import { getCustomerLabels, getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'wc-api/constants';
+import {
+	getCustomerLabels,
+	getRequestByIdString,
+} from '../../../lib/async-requests';
+import { NAMESPACE } from '../../../wc-api/constants';
 
 const CUSTOMERS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_customers_report_filters';

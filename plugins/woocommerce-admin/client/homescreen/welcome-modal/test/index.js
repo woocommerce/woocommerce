@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
  * Internal dependencies
  */
 import { WelcomeModal } from '../index';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../../lib/tracks';
 
 jest.mock( 'lib/tracks', () => ( { recordEvent: jest.fn() } ) );
 

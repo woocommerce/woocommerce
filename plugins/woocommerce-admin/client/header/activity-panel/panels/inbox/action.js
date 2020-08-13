@@ -6,10 +6,6 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { ADMIN_URL as adminUrl } from '@woocommerce/wc-admin-settings';
 
 class InboxNoteAction extends Component {

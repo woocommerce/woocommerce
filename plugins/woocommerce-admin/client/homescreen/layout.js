@@ -13,10 +13,6 @@ import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-
-/**
- * WooCommerce dependencies
- */
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -26,10 +22,10 @@ import QuickLinks from '../quick-links';
 import StatsOverview from './stats-overview';
 import './style.scss';
 import '../dashboard/style.scss';
-import { isOnboardingEnabled } from 'dashboard/utils';
+import { isOnboardingEnabled } from '../dashboard/utils';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../header/activity-panel/panels/inbox';
-import withWCApiSelect from 'wc-api/with-select';
+import withWCApiSelect from '../wc-api/with-select';
 import { WelcomeModal } from './welcome-modal';
 
 const TaskList = lazy( () =>

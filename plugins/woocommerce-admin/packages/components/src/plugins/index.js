@@ -7,12 +7,12 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
- * WooCommerce dependencies
+ * Internal dependencies
  */
-import { createNoticesFromResponse } from 'lib/notices';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { createNoticesFromResponse } from '../../../../client/lib/notices';
 
 export class Plugins extends Component {
 	constructor() {

@@ -1,7 +1,13 @@
+/**
+ * External dependencies
+ */
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import PagesIcon from 'gridicons/dist/pages';
 
+/**
+ * Internal dependencies
+ */
 import { Tab } from '../';
 
 const renderTab = () =>

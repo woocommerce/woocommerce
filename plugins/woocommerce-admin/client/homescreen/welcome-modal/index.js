@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
+import { recordEvent } from '../../lib/tracks';
 import { LineChartIllustration } from './illustrations/line-chart';
 import { InboxIllustration } from './illustrations/inbox';
 import { PieChartIllustration } from './illustrations/pie-chart';

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { advancedFilters, showDatePicker, filters } from './config';
 import StockReportTable from './table';
-import ReportFilters from 'analytics/components/report-filters';
+import ReportFilters from '../../components/report-filters';
 
 export default class StockReport extends Component {
 	render() {

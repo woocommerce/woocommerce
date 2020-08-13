@@ -1,18 +1,17 @@
 /**
- * External dependenices
+ * External dependencies
  */
 import { render, screen, waitFor } from '@testing-library/react';
 import user from '@testing-library/user-event';
-// @todo: Figure out conflict with Enzyme for global config.
 import '@testing-library/jest-dom/extend-expect';
 import apiFetch from '@wordpress/api-fetch';
 
-jest.mock( '@wordpress/api-fetch' );
-
 /**
- * Internal dependenices
+ * Internal dependencies
  */
 import { PayPal } from '../tasks/payments/paypal';
+
+jest.mock( '@wordpress/api-fetch' );
 
 describe( 'TaskList > Payments', () => {
 	describe( 'PayPal', () => {

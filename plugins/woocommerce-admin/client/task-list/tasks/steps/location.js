@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
-
-/**
- * WooCommerce dependencies
- */
 import { Form } from '@woocommerce/components';
 
 /**
@@ -16,7 +12,7 @@ import { Form } from '@woocommerce/components';
 import {
 	StoreAddress,
 	validateStoreAddress,
-} from 'dashboard/components/settings/general/store-address';
+} from '../../../dashboard/components/settings/general/store-address';
 
 export default class StoreLocation extends Component {
 	constructor() {

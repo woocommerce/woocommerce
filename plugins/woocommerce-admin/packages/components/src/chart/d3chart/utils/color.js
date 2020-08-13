@@ -1,12 +1,12 @@
 /**
- * Internal dependencies
- */
-import { colorScales, selectionLimit } from '../../constants';
-
-/**
  * External dependencies
  */
 import { findIndex } from 'lodash';
+
+/**
+ * Internal dependencies
+ */
+import { colorScales, selectionLimit } from '../../constants';
 
 export const getColor = ( orderedKeys, colorScheme ) => ( key ) => {
 	const len =

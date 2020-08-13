@@ -6,10 +6,6 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import { map } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
@@ -20,9 +16,9 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
  */
 import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
-import ReportTable from 'analytics/components/report-table';
-import withSelect from 'wc-api/with-select';
-import { CurrencyContext } from 'lib/currency-context';
+import ReportTable from '../../components/report-table';
+import withSelect from '../../../wc-api/with-select';
+import { CurrencyContext } from '../../../lib/currency-context';
 import './style.scss';
 
 const manageStock = getSetting( 'manageStock', 'no' );

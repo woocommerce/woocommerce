@@ -7,20 +7,16 @@ import { Button, CheckboxControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
-
-/**
- * WooCommerce Dependencies
- */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { H, Card, TextControl } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { H, Card, TextControl } from '@woocommerce/components';
-import { getCurrencyRegion } from 'dashboard/utils';
-import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
+import { getCurrencyRegion } from '../../dashboard/utils';
+import withSelect from '../../wc-api/with-select';
+import { recordEvent } from '../../lib/tracks';
 
 const onboarding = getSetting( 'onboarding', {} );
 

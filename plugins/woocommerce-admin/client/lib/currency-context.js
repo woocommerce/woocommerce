@@ -3,15 +3,7 @@
  */
 import { createContext } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
-
-/**
- * WooCommerce dependencies
- */
 import CurrencyFactory from '@woocommerce/currency';
-
-/**
- * Internal dependencies
- */
 import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 const appCurrency = CurrencyFactory( CURRENCY );

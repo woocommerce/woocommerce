@@ -13,10 +13,13 @@ import {
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { keys, get, pickBy } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
+import {
+	H,
+	Card,
+	SelectControl,
+	Form,
+	TextControl,
+} from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
@@ -29,17 +32,10 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	H,
-	Card,
-	SelectControl,
-	Form,
-	TextControl,
-} from '@woocommerce/components';
-import { recordEvent } from 'lib/tracks';
-import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
-import { CurrencyContext } from 'lib/currency-context';
-import { createNoticesFromResponse } from 'lib/notices';
+import { recordEvent } from '../../lib/tracks';
+import { getCountryCode, getCurrencyRegion } from '../../dashboard/utils';
+import { CurrencyContext } from '../../lib/currency-context';
+import { createNoticesFromResponse } from '../../lib/notices';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
