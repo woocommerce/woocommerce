@@ -431,4 +431,48 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertFalse( CustomersDataStore::get_existing_customer_id_from_order( false ) );
 		$this->assertFalse( CustomersDataStore::get_or_create_customer_from_order( false ) );
 	}
+
+	/**
+	 * Test user deletion.
+	 */
+	public function test_user_deletion() {
+		wp_set_current_user( $this->user );
+
+		// Creating a customer should show up regardless of orders.
+		$customer = WC_Helper_Customer::create_customer( 'deleteme', 'password', 'deleteme@example.com' );
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'per_page' => 1,
+			)
+		);
+		$response  = $this->server->dispatch( $request );
+		$customers = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $customers );
+		$this->assertEquals( $customer->get_id(), $customers[0]['user_id'] );
+
+		// Delete the user associated with the customer.
+		wp_delete_user( $customer->get_id() );
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Verify they are gone.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'per_page'  => 1,
+				'customers' => array( $customer->get_id() ),
+			)
+		);
+		$response  = $this->server->dispatch( $request );
+		$customers = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $customers );
+	}
 }
