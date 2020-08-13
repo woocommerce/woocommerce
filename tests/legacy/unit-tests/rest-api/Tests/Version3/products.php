@@ -468,6 +468,31 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test to update datetime property.
+	 */
+	public function test_update_date_time() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product->save();
+		$date_from_sale = '2020-01-01T01:01:01';
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+
+		$request->set_body_params( array( 'date_on_sale_from' => $date_from_sale ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( $date_from_sale, $data['date_on_sale_from'] );
+
+		// Empty string should delete.
+		$request->set_body_params( array( 'date_on_sale_from' => '' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( null, $data['date_on_sale_from'] );
+	}
+
+	/**
 	 * Test creating a single product without permission.
 	 *
 	 * @since 3.5.0
