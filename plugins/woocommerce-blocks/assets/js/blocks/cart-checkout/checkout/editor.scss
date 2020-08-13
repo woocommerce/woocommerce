@@ -22,3 +22,8 @@
 .components-panel__body-title .components-button {
 	opacity: 1;
 }
+
+.wp-block-woocommerce-checkout.is-editor-preview {
+	max-height: 1000px;
+	overflow: hidden;
+}
