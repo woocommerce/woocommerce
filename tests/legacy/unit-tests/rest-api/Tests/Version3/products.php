@@ -10,6 +10,7 @@
   * WC_Tests_API_Product class.
   */
 class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
+	use WC_REST_API_Complex_Meta;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -218,7 +219,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$product      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response     = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 		$data         = $response->get_data();
-		$date_created = date( 'Y-m-d\TH:i:s', current_time( 'timestamp' ) );
+		$date_created = gmdate( 'Y-m-d\TH:i:s', current_time( 'timestamp' ) );
 
 		$this->assertEquals( 'DUMMY SKU', $data['sku'] );
 		$this->assertEquals( 10, $data['regular_price'] );
@@ -453,6 +454,17 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products' ) );
 		$products = $response->get_data();
 		$this->assertEquals( 3, count( $products ) );
+	}
+
+	/**
+	 * Test to update complex metadata.
+	 */
+	public function test_update_complex_meta_27282() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product->save();
+		$url = '/wc/v3/products/' . $product->get_id();
+		$this->assert_update_complex_meta( $url );
 	}
 
 	/**
