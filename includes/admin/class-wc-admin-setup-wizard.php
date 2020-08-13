@@ -6,7 +6,7 @@
  *
  * @package     WooCommerce\Admin
  * @version     2.6.0
- * @deprecated  4.4.0
+ * @deprecated  4.5.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -61,19 +61,19 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Hook in tabs.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function __construct() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
 	 * Add admin menus/screens.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function admin_menus() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		add_dashboard_page( '', '', 'manage_options', 'wc-setup', '' );
 	}
 
@@ -81,11 +81,11 @@ class WC_Admin_Setup_Wizard {
 	 * The theme "extra" should only be shown if the current user can modify themes
 	 * and the store doesn't already have a WooCommerce theme.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_theme() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! wc_is_wp_default_theme_active();
 
 		return (
@@ -100,10 +100,10 @@ class WC_Admin_Setup_Wizard {
 	 * The "automated tax" extra should only be shown if the current user can
 	 * install plugins and the store is in a supported country.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function should_show_automated_tax() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return false;
 		}
@@ -122,11 +122,11 @@ class WC_Admin_Setup_Wizard {
 	 * Should we show the MailChimp install option?
 	 * True only if the user can install plugins.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_mailchimp() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return current_user_can( 'install_plugins' );
 	}
 
@@ -135,11 +135,11 @@ class WC_Admin_Setup_Wizard {
 	 * True only if the user can install plugins,
 	 * and up until the end date of the recommendation.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_facebook() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return current_user_can( 'install_plugins' );
 	}
 
@@ -147,11 +147,11 @@ class WC_Admin_Setup_Wizard {
 	 * Is the WooCommerce Admin actively included in the WooCommerce core?
 	 * Based on presence of a basic WC Admin function.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function is_wc_admin_active() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return function_exists( 'wc_admin_url' );
 	}
 
@@ -162,11 +162,11 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @see WC_Admin_Setup_Wizard::$wc_admin_plugin_minimum_wordpress_version
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$wordpress_minimum_met = version_compare( get_bloginfo( 'version' ), $this->wc_admin_plugin_minimum_wordpress_version, '>=' );
 		return current_user_can( 'install_plugins' ) && $wordpress_minimum_met && ! $this->is_wc_admin_active();
 	}
@@ -174,11 +174,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Should we show the new WooCommerce Admin onboarding experience?
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		// As of WooCommerce 4.1, all new sites should use the latest OBW from wc-admin package.
 		// This filter will allow for forcing the old wizard while we migrate e2e tests.
 		return ! apply_filters( 'woocommerce_setup_wizard_force_legacy', false );
@@ -188,11 +188,11 @@ class WC_Admin_Setup_Wizard {
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	protected function should_show_recommended_step() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return $this->should_show_theme()
 			|| $this->should_show_automated_tax()
 			|| $this->should_show_mailchimp()
@@ -205,19 +205,19 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * Hooked onto 'admin_enqueue_scripts'.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function enqueue_scripts() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
 	 * Show the setup wizard.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function setup_wizard() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
 			return;
 		}
@@ -304,11 +304,11 @@ class WC_Admin_Setup_Wizard {
 	 *                      Admin URL if it's the last step.
 	 *                      Empty string on failure.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @since 3.0.0
 	 */
 	public function get_next_step_link( $step = '' ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		if ( ! $step ) {
 			$step = $this->step;
 		}
@@ -329,10 +329,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Setup Wizard Header.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function setup_wizard_header() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		// same as default WP from wp-admin/admin-header.php.
 		$wp_version_class = 'branch-' . str_replace( array( '.', ',' ), '-', floatval( get_bloginfo( 'version' ) ) );
 
@@ -357,10 +357,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Setup Wizard Footer.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function setup_wizard_footer() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$current_step = $this->step;
 		?>
 			<?php if ( 'new_onboarding' === $current_step || 'store-setup' === $current_step ) : ?>
@@ -377,10 +377,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Output the steps.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function setup_wizard_steps() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$output_steps      = $this->steps;
 		$selected_features = array_filter( $this->wc_setup_activate_get_feature_list() );
 
@@ -422,10 +422,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Output the content for the current step.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function setup_wizard_content() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		echo '<div class="wc-setup-content">';
 		if ( ! empty( $this->steps[ $this->step ]['view'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['view'], $this );
@@ -436,10 +436,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Display's a prompt for users to try out the new improved WooCommerce onboarding experience in WooCommerce Admin.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_new_onboarding() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		?>
 			<div class="wc-setup-step__new_onboarding-wrapper">
 				<p class="wc-setup-step__new_onboarding-welcome"><?php esc_html_e( 'Welcome to', 'woocommerce' ); ?></p>
@@ -463,10 +463,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Installs WooCommerce admin and redirects to the new onboarding experience.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_new_onboarding_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -474,7 +474,7 @@ class WC_Admin_Setup_Wizard {
 	 * Location, product type, page setup, and tracking opt-in.
 	 */
 	public function wc_setup_store_setup() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$address        = WC()->countries->get_base_address();
 		$address_2      = WC()->countries->get_base_address_2();
 		$city           = WC()->countries->get_base_city();
@@ -604,10 +604,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Template for the usage tracking modal.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function tracking_modal() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		?>
 		<script type="text/template" id="tmpl-wc-modal-tracking-setup">
 			<div class="wc-backbone-modal woocommerce-tracker">
@@ -655,10 +655,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save initial store settings.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_store_setup_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -667,7 +667,7 @@ class WC_Admin_Setup_Wizard {
 	 * @see https://core.trac.wordpress.org/ticket/41358 .
 	 */
 	protected function close_http_connection() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		// Only 1 PHP process can access a session object at a time, close this so the next request isn't kept waiting.
 		// @codingStandardsIgnoreStart
 		if ( session_id() ) {
@@ -696,10 +696,10 @@ class WC_Admin_Setup_Wizard {
 	 * @see WC_Admin_Setup_Wizard::install_plugin
 	 * @see WC_Admin_Setup_Wizard::install_theme
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function run_deferred_actions() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
 			$action['func']( ...$action['args'] );
@@ -721,10 +721,10 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $plugin_id  Plugin id used for background install.
 	 * @param array  $plugin_info Plugin info array containing name and repo-slug, and optionally file if different from [repo-slug].php.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		// Make sure we don't trigger multiple simultaneous installs.
 		if ( get_option( 'woocommerce_setup_background_installing_' . $plugin_id ) ) {
 			return;
@@ -757,10 +757,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $theme_id  Theme id used for background install.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function install_theme( $theme_id ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		if ( empty( $this->deferred_actions ) ) {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
@@ -776,10 +776,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Helper method to install Jetpack.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function install_jetpack() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$this->install_plugin(
 			'jetpack',
 			array(
@@ -792,10 +792,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Helper method to install WooCommerce Services and its Jetpack dependency.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function install_woocommerce_services() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$this->install_jetpack();
 		$this->install_plugin(
 			'woocommerce-services',
@@ -809,11 +809,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Retrieve info for missing WooCommerce Services and/or Jetpack plugin.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return array
 	 */
 	protected function get_wcs_requisite_plugins() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$plugins = array();
 		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) && ! get_option( 'woocommerce_setup_background_installing_woocommerce-services' ) ) {
 			$plugins[] = array(
@@ -833,10 +833,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Plugin install info message markup with heading.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function plugin_install_info() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		?>
 		<span class="plugin-install-info">
 			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
@@ -851,11 +851,11 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $country_code Country code.
 	 * @param string $currency_code Currency code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return array
 	 */
 	protected function get_wizard_shipping_methods( $country_code, $currency_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$shipping_methods = array(
 			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -885,10 +885,10 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $currency_code Currency code.
 	 * @param string $input_prefix Input prefix.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$selected         = 'flat_rate';
 		$shipping_methods = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
@@ -945,11 +945,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Render a product weight unit dropdown.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return string
 	 */
 	protected function get_product_weight_selection() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$weight_unit = get_option( 'woocommerce_weight_unit' );
 		ob_start();
 		?>
@@ -969,11 +969,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Render a product dimension unit dropdown.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return string
 	 */
 	protected function get_product_dimension_selection() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 		ob_start();
 		?>
@@ -994,10 +994,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Shipping.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_shipping() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$country_code          = WC()->countries->get_base_country();
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
@@ -1163,10 +1163,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Save shipping options.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_shipping_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -1175,10 +1175,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_stripe_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$stripe_supported_countries = array(
 			'AU',
 			'AT',
@@ -1212,10 +1212,10 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $currency Currency code.
 	 * @return boolean
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_paypal_supported_currency( $currency ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_currencies = array(
 			'AUD',
 			'BRL',
@@ -1253,10 +1253,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_klarna_checkout_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_countries = array(
 			'SE', // Sweden.
 			'FI', // Finland.
@@ -1271,10 +1271,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_klarna_payments_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_countries = array(
 			'DK', // Denmark.
 			'DE', // Germany.
@@ -1288,10 +1288,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_square_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$square_supported_countries = array(
 			'US',
 			'CA',
@@ -1307,10 +1307,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_eway_payments_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_countries = array(
 			'AU', // Australia.
 			'NZ', // New Zealand.
@@ -1323,10 +1323,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_shipstation_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_countries = array(
 			'AU', // Australia.
 			'CA', // Canada.
@@ -1340,10 +1340,10 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param string $country_code Country code.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function is_wcs_shipping_labels_supported_country( $country_code ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$supported_countries = array(
 			'US', // United States.
 		);
@@ -1353,11 +1353,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Helper method to retrieve the current user's email address.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return string Email address
 	 */
 	protected function get_current_user_email() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$current_user = wp_get_current_user();
 		$user_email   = $current_user->user_email;
 
@@ -1367,11 +1367,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Array of all possible "in cart" gateways that can be offered.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return array
 	 */
 	protected function get_wizard_available_in_cart_payment_gateways() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
@@ -1513,11 +1513,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Simple array of "in cart" gateways to show in wizard.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return array
 	 */
 	public function get_wizard_in_cart_payment_gateways() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
 		$country  = WC()->countries->get_base_country();
 		$currency = get_woocommerce_currency();
@@ -1583,11 +1583,11 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Simple array of "manual" gateways to show in wizard.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return array
 	 */
 	public function get_wizard_manual_payment_gateways() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$gateways = array(
 			'cheque' => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
@@ -1618,10 +1618,10 @@ class WC_Admin_Setup_Wizard {
 	 * @param int   $item_id Item ID.
 	 * @param array $item_info Item info array.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function display_service_item( $item_id, $item_info ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$item_class = 'wc-wizard-service-item';
 		if ( isset( $item_info['class'] ) ) {
 			$item_class .= ' ' . $item_info['class'];
@@ -1725,11 +1725,11 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param array $service Service info array.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	public function is_featured_service( $service ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return ! empty( $service['featured'] );
 	}
 
@@ -1738,21 +1738,21 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @param array $service Service info array.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 * @return boolean
 	 */
 	public function is_not_featured_service( $service ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return ! $this->is_featured_service( $service );
 	}
 
 	/**
 	 * Payment Step.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_payment() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$featured_gateways = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_featured_service' ) );
 		$in_cart_gateways  = array_filter( $this->get_wizard_in_cart_payment_gateways(), array( $this, 'is_not_featured_service' ) );
 		$manual_gateways   = $this->get_wizard_manual_payment_gateways();
@@ -1825,14 +1825,14 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Payment Step save.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_payment_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	protected function display_recommended_item( $item_info ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$type        = $item_info['type'];
 		$title       = $item_info['title'];
 		$description = $item_info['description'];
@@ -1872,10 +1872,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Recommended step
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_recommended() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
 		<p>
@@ -1956,17 +1956,17 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Recommended step save.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_recommended_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
 	 * Go to the next step if Jetpack was connected.
 	 */
 	protected function wc_setup_activate_actions() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		if (
 			isset( $_GET['from'] ) &&
 			'wpcom' === $_GET['from'] &&
@@ -1980,7 +1980,7 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function wc_setup_activate_get_feature_list() {
 		$features = array();
@@ -2003,10 +2003,10 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function wc_setup_activate_get_feature_list_str() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$features = $this->wc_setup_activate_get_feature_list();
 		if ( $features['payment'] && $features['taxes'] && $features['labels'] ) {
 			return __( 'payment setup, automated taxes and discounted shipping labels', 'woocommerce' );
@@ -2029,10 +2029,10 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Activate step.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_activate() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$this->wc_setup_activate_actions();
 
 		$jetpack_connected = class_exists( 'Jetpack' ) && Jetpack::is_active();
@@ -2173,10 +2173,10 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function get_all_activate_errors() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		return array(
 			'default' => __( "Sorry! We tried, but we couldn't connect Jetpack just now 😭. Please go to the Plugins tab to connect Jetpack, so that you can finish setting up your store.", 'woocommerce' ),
 			'jetpack_cant_be_installed' => __( "Sorry! We tried, but we couldn't install Jetpack for you 😭. Please go to the Plugins tab to install it, and finish setting up your store.", 'woocommerce' ),
@@ -2187,10 +2187,10 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	protected function get_activate_error_message( $code = '' ) {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		$errors = $this->get_all_activate_errors();
 		return array_key_exists( $code, $errors ) ? $errors[ $code ] : $errors['default'];
 	}
@@ -2200,19 +2200,19 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * Install, activate, and launch connection flow for Jetpack.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_activate_save() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
 	 * Final step.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.5.0
 	 */
 	public function wc_setup_ready() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.4.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install', true );
 

@@ -2,7 +2,7 @@
 /**
  * Admin View: Notice - Install
  *
- * @deprecated 4.4.0
+ * @deprecated 4.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
