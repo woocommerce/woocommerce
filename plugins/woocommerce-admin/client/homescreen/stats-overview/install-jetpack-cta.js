@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
-import { useState } from 'react';
+import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
 

@@ -4,8 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
-import { Fragment } from '@wordpress/element';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from '@wordpress/element';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SelectControl, TextControl } from '@woocommerce/components';
 

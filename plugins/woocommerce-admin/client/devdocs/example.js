@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
-import React from 'react';
+import { Component, createElement } from '@wordpress/element';
 
 class Example extends Component {
 	state = {
@@ -28,7 +27,7 @@ class Example extends Component {
 		}
 
 		this.setState( {
-			example: React.createElement(
+			example: createElement(
 				exampleComponent.default || exampleComponent
 			),
 		} );
