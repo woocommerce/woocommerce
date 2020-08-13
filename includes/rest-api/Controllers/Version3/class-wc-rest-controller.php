@@ -127,7 +127,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			 * WARNING: Order of fields here is important, types of fields are ordered from most specific to least specific as perceived by core's built-in type validation methods.
 			 */
 			if ( 'mixed' === $params['type'] ) {
-				$params['type'] = array( 'object', 'string', 'number', 'boolean', 'integer', 'array', 'null' );
+				$params['type'] = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
 			}
 
 			if ( isset( $params['properties'] ) ) {
