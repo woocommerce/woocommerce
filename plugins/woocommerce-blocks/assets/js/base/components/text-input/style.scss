@@ -20,6 +20,9 @@
 		max-width: calc(100% - #{2 * $gap});
 		cursor: text;
 
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
 		}
@@ -53,6 +56,11 @@
 
 		&:focus {
 			background-color: #fff;
+		}
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			border-color: $input-border-dark;
+			color: $input-text-dark;
 		}
 	}
 

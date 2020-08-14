@@ -43,6 +43,8 @@
 	overflow: auto;
 }
 
-.theme-twentytwenty .wc-blocks-components-panel__button {
+.theme-twentytwenty .wc-blocks-components-panel__button,
+.theme-twentyseventeen .wc-blocks-components-panel__button {
 	background: transparent;
+	color: inherit;
 }

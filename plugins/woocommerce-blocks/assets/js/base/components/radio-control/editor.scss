@@ -1,6 +1,0 @@
-@import "./mixin";
-
-// We need to increase the styles specificity in the editor, to avoid wp-admin styles taking preference.
-#wpbody .edit-post-visual-editor {
-	@include radio-control-input-styles;
-}
