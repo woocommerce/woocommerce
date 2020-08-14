@@ -27,6 +27,16 @@
 		&:not(:checked) + .wc-block-components-checkbox__mark {
 			display: none;
 		}
+
+		.has-dark-controls & {
+			border-color: $controls-border-dark;
+			background-color: transparent;
+
+			&:checked {
+				background: transparent;
+				border-color: $controls-border-dark;
+			}
+		}
 	}
 
 	.wc-block-components-checkbox__mark {
@@ -44,6 +54,8 @@
 	}
 }
 
+// Hack to hide the check mark in IE11
+// See comment: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2320/#issuecomment-621936576
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
 	.wc-block-components-checkbox__mark {
 		display: none;

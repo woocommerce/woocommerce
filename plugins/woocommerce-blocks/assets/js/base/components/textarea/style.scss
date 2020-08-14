@@ -9,4 +9,14 @@
 	margin: 0;
 	padding: em($gap-small) $gap;
 	width: 100%;
+
+	.has-dark-controls & {
+		background-color: $input-background-dark;
+		border-color: $input-border-dark;
+		color: $input-text-dark;
+
+		&::placeholder {
+			color: $input-placeholder-dark;
+		}
+	}
 }

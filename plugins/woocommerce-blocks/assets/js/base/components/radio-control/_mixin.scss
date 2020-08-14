@@ -60,7 +60,7 @@
 	.wc-block-components-radio-control {
 		.wc-block-components-radio-control__input {
 			appearance: none;
-			background: #fff;
+			background: transparent;
 			border: 2px solid currentColor;
 			border-radius: 50%;
 			display: inline-block;
@@ -83,6 +83,14 @@
 				top: 50%;
 				transform: translate(-50%, -50%);
 				width: 0.625em;
+			}
+
+			.has-dark-controls & {
+				border-color: $controls-border-dark;
+
+				&:checked::before {
+					background: $input-text-dark;
+				}
 			}
 		}
 

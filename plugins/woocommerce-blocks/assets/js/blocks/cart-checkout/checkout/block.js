@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { useMemo, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -211,9 +212,12 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 			</>
 		);
 
+	const checkoutClassName = classnames( 'wc-block-checkout', {
+		'has-dark-controls': attributes.hasDarkControls,
+	} );
 	return (
 		<>
-			<SidebarLayout className="wc-block-checkout">
+			<SidebarLayout className={ checkoutClassName }>
 				<Main className="wc-block-checkout__main">
 					{ cartNeedsPayment && <ExpressCheckoutFormControl /> }
 					<CheckoutForm onSubmit={ onSubmit }>

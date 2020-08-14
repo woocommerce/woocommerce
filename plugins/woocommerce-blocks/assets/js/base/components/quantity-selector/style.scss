@@ -16,6 +16,13 @@
 	border: 1px solid $core-grey-light-600;
 	background: #fff;
 	border-radius: 4px;
+	// needed so that buttons fill the container.
+	box-sizing: content-box;
+
+	.has-dark-controls & {
+		background-color: transparent;
+		border-color: $input-border-dark;
+	}
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
@@ -41,6 +48,18 @@
 		&:disabled {
 			color: $core-grey-dark-100;
 		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
+			background: transparent;
+
+			&:focus {
+				background: transparent;
+			}
+			&:disabled {
+				color: $input-disabled-dark;
+			}
+		}
 	}
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
@@ -65,6 +84,18 @@
 			color: $core-grey-dark-100;
 			cursor: default;
 			@include reset-button;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
+
+			&:hover,
+			&:focus {
+				color: $input-text-dark;
+			}
+			&:disabled {
+				color: $input-disabled-dark;
+			}
 		}
 	}
 	.wc-block-components-quantity-selector__button--minus {
