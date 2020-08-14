@@ -2,7 +2,7 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.2
-Tested up to: 5.4
+Tested up to: 5.5
 Requires PHP: 7.0
 Stable tag: 4.3.1
 License: GPLv3
