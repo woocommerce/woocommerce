@@ -5,5 +5,11 @@
 	"schedule": [ "before 3am on wednesday" ],
 	"composer": {
 		"enabled": false
-	}
+	},
+	"packageRules": [
+		{
+			"depTypeList": [ "devDependencies" ],
+			"automerge": true
+		}
+	]
 }
