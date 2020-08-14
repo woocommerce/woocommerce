@@ -458,20 +458,31 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$data   = array(
-			'order_id'           => $order->get_id(),
-			'parent_id'          => $order->get_parent_id(),
-			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
-			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
-			'num_items_sold'     => self::get_num_items_sold( $order ),
-			'total_sales'        => $order->get_total(),
-			'tax_total'          => $order->get_total_tax(),
-			'shipping_total'     => $order->get_shipping_total(),
-			'net_total'          => self::get_net_total( $order ),
-			'status'             => self::normalize_order_status( $order->get_status() ),
-			'customer_id'        => $order->get_report_customer_id(),
-			'returning_customer' => $order->is_returning_customer(),
+		/**
+		 * Filters order stats data.
+		 *
+		 * @param array $data Data written to order stats lookup table.
+		 * @param WC_Order $order  Order object.
+		 */
+		$data = apply_filters(
+			'woocommerce_analytics_update_order_stats_data',
+			array(
+				'order_id'           => $order->get_id(),
+				'parent_id'          => $order->get_parent_id(),
+				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
+				'num_items_sold'     => self::get_num_items_sold( $order ),
+				'total_sales'        => $order->get_total(),
+				'tax_total'          => $order->get_total_tax(),
+				'shipping_total'     => $order->get_shipping_total(),
+				'net_total'          => self::get_net_total( $order ),
+				'status'             => self::normalize_order_status( $order->get_status() ),
+				'customer_id'        => $order->get_report_customer_id(),
+				'returning_customer' => $order->is_returning_customer(),
+			),
+			$order
 		);
+
 		$format = array(
 			'%d',
 			'%d',
