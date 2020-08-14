@@ -9,16 +9,11 @@ addFilter(
 	'woocommerce_admin_report_table',
 	'plugin-domain',
 	( reportTableData ) => {
-		if (
-			reportTableData.endpoint !== 'products' ||
-			! reportTableData.items ||
-			! reportTableData.items.data ||
-			! reportTableData.items.data.length
-		) {
+		if ( reportTableData.endpoint !== 'products' ) {
 			return reportTableData;
 		}
 
-		const newHeaders = [
+		reportTableData.headers = [
 			...reportTableData.headers,
 			{
 				label: 'ID',
@@ -29,6 +24,15 @@ addFilter(
 				key: 'product_rating',
 			},
 		];
+
+		if (
+			! reportTableData.items ||
+			! reportTableData.items.data ||
+			! reportTableData.items.data.length
+		) {
+			return reportTableData;
+		}
+
 		const newRows = reportTableData.rows.map( ( row, index ) => {
 			const product = reportTableData.items.data[ index ];
 			const newRow = [
@@ -54,7 +58,6 @@ addFilter(
 			return newRow;
 		} );
 
-		reportTableData.headers = newHeaders;
 		reportTableData.rows = newRows;
 
 		return reportTableData;

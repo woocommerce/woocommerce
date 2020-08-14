@@ -92,30 +92,6 @@ const ReportTable = ( props ) => {
 				: userPrefColumns;
 	}
 
-	const onColumnsChange = ( shownColumns, toggledColumn ) => {
-		const columns = getHeadersContent().map( ( header ) => header.key );
-		const hiddenColumns = columns.filter(
-			( column ) => ! shownColumns.includes( column )
-		);
-
-		if ( columnPrefsKey ) {
-			const userDataFields = {
-				[ columnPrefsKey ]: hiddenColumns,
-			};
-			updateUserPreferences( userDataFields );
-		}
-
-		if ( toggledColumn ) {
-			const eventProps = {
-				report: endpoint,
-				column: toggledColumn,
-				status: shownColumns.includes( toggledColumn ) ? 'on' : 'off',
-			};
-
-			recordEvent( 'analytics_table_header_toggle', eventProps );
-		}
-	};
-
 	const onPageChange = ( newPage, source ) => {
 		scrollPointRef.current.scrollIntoView();
 		const tableElement = scrollPointRef.current.nextSibling.querySelector(
@@ -328,6 +304,29 @@ const ReportTable = ( props ) => {
 	} );
 	let { headers, rows } = filteredTableProps;
 	const { summary } = filteredTableProps;
+
+	const onColumnsChange = ( shownColumns, toggledColumn ) => {
+		const columns = headers.map( ( header ) => header.key );
+		const hiddenColumns = columns.filter(
+			( column ) => ! shownColumns.includes( column )
+		);
+		if ( columnPrefsKey ) {
+			const userDataFields = {
+				[ columnPrefsKey ]: hiddenColumns,
+			};
+			updateUserPreferences( userDataFields );
+		}
+
+		if ( toggledColumn ) {
+			const eventProps = {
+				report: endpoint,
+				column: toggledColumn,
+				status: shownColumns.includes( toggledColumn ) ? 'on' : 'off',
+			};
+
+			recordEvent( 'analytics_table_header_toggle', eventProps );
+		}
+	};
 
 	// Add in selection for comparisons.
 	if ( compareBy ) {
