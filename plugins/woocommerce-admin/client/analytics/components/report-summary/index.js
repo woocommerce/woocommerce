@@ -12,13 +12,12 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { getDateParamsFromQuery } from '../../../lib/date';
-import { getSummaryNumbers } from '../../../wc-api/reports/utils';
 import ReportError from '../report-error';
 import withSelect from '../../../wc-api/with-select';
 import { recordEvent } from '../../../lib/tracks';

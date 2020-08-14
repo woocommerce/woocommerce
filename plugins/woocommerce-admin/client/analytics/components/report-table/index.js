@@ -23,17 +23,18 @@ import {
 	generateCSVDataFromTable,
 	generateCSVFileName,
 } from '@woocommerce/csv-export';
-import { SETTINGS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
+import {
+	getReportChartData,
+	getReportTableData,
+	SETTINGS_STORE_NAME,
+	useUserPreferences,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
-import {
-	getReportChartData,
-	getReportTableData,
-} from '../../../wc-api/reports/utils';
 import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import withSelect from '../../../wc-api/with-select';
 import { extendTableData } from './utils';

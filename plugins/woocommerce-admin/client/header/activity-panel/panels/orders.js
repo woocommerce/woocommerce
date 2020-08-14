@@ -19,7 +19,7 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, REPORTS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -337,8 +337,8 @@ export default compose(
 			isGetItemsRequesting,
 			getReportItems,
 			getReportItemsError,
-			isReportItemsRequesting,
-		} = select( 'wc-api' );
+			isResolving,
+		} = select( REPORTS_STORE_NAME );
 		const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
 		const {
 			woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
@@ -399,10 +399,10 @@ export default compose(
 			const isError = Boolean(
 				getReportItemsError( 'orders', ordersQuery )
 			);
-			const isRequesting = isReportItemsRequesting(
+			const isRequesting = isResolving( 'getReportItems', [
 				'orders',
-				ordersQuery
-			);
+				ordersQuery,
+			] );
 			let orders = [];
 
 			if ( reportOrders && reportOrders.length ) {

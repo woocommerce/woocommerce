@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { NAMESPACE } from '../constants';
 import { setError, updateReviews } from './actions';
-import { fetchWithHeaders } from './controls';
+import { fetchWithHeaders } from '../controls';
 
 export function* getReviews( query ) {
 	try {

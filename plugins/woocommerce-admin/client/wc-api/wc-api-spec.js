@@ -4,8 +4,6 @@
 import reportExport from './export';
 import items from './items';
 import imports from './imports';
-import reportItems from './reports/items';
-import reportStats from './reports/stats';
 
 function createWcApiSpec() {
 	return {
@@ -17,8 +15,6 @@ function createWcApiSpec() {
 		selectors: {
 			...imports.selectors,
 			...items.selectors,
-			...reportItems.selectors,
-			...reportStats.selectors,
 		},
 		operations: {
 			read( resourceNames ) {
@@ -30,8 +26,6 @@ function createWcApiSpec() {
 				return [
 					...imports.operations.read( resourceNames ),
 					...items.operations.read( resourceNames ),
-					...reportItems.operations.read( resourceNames ),
-					...reportStats.operations.read( resourceNames ),
 				];
 			},
 			update( resourceNames, data ) {

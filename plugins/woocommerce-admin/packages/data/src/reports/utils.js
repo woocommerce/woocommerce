@@ -4,6 +4,11 @@
 import { find, forEach, isNull, get, includes } from 'lodash';
 import moment from 'moment';
 import {
+	appendTimestamp,
+	getCurrentDates,
+	getIntervalForQuery,
+} from '@woocommerce/date';
+import {
 	flattenFilters,
 	getActiveFiltersFromQuery,
 	getUrlKey,
@@ -12,13 +17,8 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getIntervalForQuery,
-} from '../../lib/date';
-import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
 import * as reportsUtils from './utils';
+import { MAX_PER_PAGE, QUERY_DEFAULTS, STORE_NAME } from './constants';
 
 /**
  * Add filters and advanced filters values to a query object.
@@ -229,11 +229,9 @@ function getRequestQuery( options ) {
  */
 export function getSummaryNumbers( options ) {
 	const { endpoint, select } = options;
-	const {
-		getReportStats,
-		getReportStatsError,
-		isReportStatsRequesting,
-	} = select( 'wc-api' );
+	const { getReportStats, getReportStatsError, isResolving } = select(
+		STORE_NAME
+	);
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -250,7 +248,7 @@ export function getSummaryNumbers( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const primary = getReportStats( endpoint, primaryQuery );
 
-	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
+	if ( isResolving( 'getReportStats', [ endpoint, primaryQuery ] ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportStatsError( endpoint, primaryQuery ) ) {
 		return { ...response, isError: true };
@@ -269,7 +267,7 @@ export function getSummaryNumbers( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const secondary = getReportStats( endpoint, secondaryQuery );
 
-	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
+	if ( isResolving( 'getReportStats', [ endpoint, secondaryQuery ] ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportStatsError( endpoint, secondaryQuery ) ) {
 		return { ...response, isError: true };
@@ -298,11 +296,9 @@ export function getSummaryNumbers( options ) {
  */
 export function getReportChartData( options ) {
 	const { endpoint, select } = options;
-	const {
-		getReportStats,
-		getReportStatsError,
-		isReportStatsRequesting,
-	} = select( 'wc-api' );
+	const { getReportStats, getReportStatsError, isResolving } = select(
+		STORE_NAME
+	);
 
 	const response = {
 		isEmpty: false,
@@ -320,7 +316,7 @@ export function getReportChartData( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const stats = getReportStats( endpoint, requestQuery );
 
-	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {
+	if ( isResolving( 'getReportStats', [ endpoint, requestQuery ] ) ) {
 		return { ...response, isRequesting: true };
 	}
 
@@ -347,7 +343,7 @@ export function getReportChartData( options ) {
 		for ( let i = 2; i <= totalPages; i++ ) {
 			const nextQuery = { ...requestQuery, page: i };
 			const _data = getReportStats( endpoint, nextQuery );
-			if ( isReportStatsRequesting( endpoint, nextQuery ) ) {
+			if ( isResolving( 'getReportStats', [ endpoint, nextQuery ] ) ) {
 				continue;
 			}
 			if ( getReportStatsError( endpoint, nextQuery ) ) {
@@ -446,11 +442,9 @@ export function getReportTableQuery( options ) {
  */
 export function getReportTableData( options ) {
 	const { endpoint, select } = options;
-	const {
-		getReportItems,
-		getReportItemsError,
-		isReportItemsRequesting,
-	} = select( 'wc-api' );
+	const { getReportItems, getReportItemsError, isResolving } = select(
+		STORE_NAME
+	);
 
 	const tableQuery = reportsUtils.getReportTableQuery( options );
 	const response = {
@@ -468,7 +462,7 @@ export function getReportTableData( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const items = getReportItems( endpoint, tableQuery );
 
-	if ( isReportItemsRequesting( endpoint, tableQuery ) ) {
+	if ( isResolving( 'getReportItems', [ endpoint, tableQuery ] ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };

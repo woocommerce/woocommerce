@@ -8,7 +8,11 @@ import { format as formatDate } from '@wordpress/date';
 import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import { Chart } from '@woocommerce/components';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	getReportChartData,
+	getTooltipValueFormat,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -22,10 +26,6 @@ import {
 	getPreviousDate,
 } from '../../../lib/date';
 import { CurrencyContext } from '../../../lib/currency-context';
-import {
-	getReportChartData,
-	getTooltipValueFormat,
-} from '../../../wc-api/reports/utils';
 import ReportError from '../report-error';
 import withSelect from '../../../wc-api/with-select';
 import { getChartMode, getSelectedFilter } from './utils';

@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { registerStore, select } from '@wordpress/data';
+import { select, registerStore } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -29,4 +29,4 @@ if ( ! storeSelectors ) {
 	} );
 }
 
-export const REVIEWS_STORE_NAME = STORE_NAME;
+export const REPORTS_STORE_NAME = STORE_NAME;
