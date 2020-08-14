@@ -238,6 +238,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
 * Fix - Removed the JETPACK_AUTOLOAD_DEV define. #27185
 * Fix - Fixed "virtual" and "downlodable" pointers on product walkthrough. #27145
+* Fix - Updated tested up to for WordPress 5.5. #27334
 * Dev - Update WooCommerce Admin version to v1.4.0-beta.3. #27214
 * Dev - Upgraded to the 2.x Jetpack Autoloader. #27123
 * Dev - Update jest-preset-default version to ^6.2.0. #27090
