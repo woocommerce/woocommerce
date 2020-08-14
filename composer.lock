@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "864de9395eab76b18fa5bdd9ca0a306e",
+    "content-hash": "f8793eed4f210d74fcb69d1beda4eead",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -258,6 +258,12 @@
                 "league",
                 "provider",
                 "service"
+            ],
+            "funding": [
+                {
+                    "url": "https://github.com/philipobenito",
+                    "type": "github"
+                }
             ],
             "time": "2020-05-18T08:20:23+00:00"
         },
@@ -678,6 +684,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
+            "abandoned": true,
             "time": "2020-08-06T11:22:44+00:00"
         }
     ],
@@ -2512,16 +2519,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.5.5",
+            "version": "3.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6"
+                "reference": "e97627871a7eab2f70e59166072a6b767d5834e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
-                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/e97627871a7eab2f70e59166072a6b767d5834e0",
+                "reference": "e97627871a7eab2f70e59166072a6b767d5834e0",
                 "shasum": ""
             },
             "require": {
@@ -2559,7 +2566,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2020-04-17T01:09:41+00:00"
+            "time": "2020-08-10T04:50:15+00:00"
         },
         {
             "name": "symfony/finder",
@@ -2608,6 +2615,20 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-02-14T07:34:21+00:00"
         },
         {
