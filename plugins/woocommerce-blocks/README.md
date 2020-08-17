@@ -44,13 +44,13 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
 >
 > We **recommend** you always keep WordPress and WooCommerce core up to date in order to ensure your store is running with the most recent fixes and enhancements to help your store be successful.
 
-1. Make sure you have WordPress 5.2+ and WooCommerce 4.0+
+1. Make sure you have WordPress 5.3+ and WooCommerce 4.0+
 2. The plugin version is available on WordPress.org. [Download the plugin version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
 3. Activate the plugin.
 
 ## Installing the development version
 
-1. Make sure you have WordPress 5.2+ and WooCommerce 4.0+
+1. Make sure you have WordPress 5.3+ and WooCommerce 4.0+
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
 3. `npm install` to install the dependencies.
 4. `composer install` to install core dependencies.

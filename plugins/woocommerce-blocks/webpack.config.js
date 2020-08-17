@@ -72,6 +72,10 @@ const StylingConfig = {
 /**
  * Legacy Configs are for builds targeting < WP5.3 and handle backwards compatibility and disabling
  * unsupported features.
+ *
+ * Now that WordPress 5.5 is released, as of WooCommerce Blocks 3.2.0 we don't support WP <5.3,
+ * so these legacy builds are not used. Keeping the config so we can conveniently reinstate
+ * these builds as needed (hence eslint-disable).
  */
 const LegacyMainConfig = {
 	...sharedConfig,
@@ -135,13 +139,22 @@ const LegacyStylingConfig = {
 	} ),
 };
 
+/**
+ * Now that WordPress 5.5 is released, as of WooCommerce Blocks 3.2.0 we don't support WP <5.3,
+ * so the legacy builds are not used. Keeping the config so we can conveniently reinstate
+ * these builds as needed (hence eslint-disable).
+ */
+// eslint-disable-next-line no-unused-vars
+const legacyConfigs = [
+	LegacyMainConfig,
+	LegacyFrontendConfig,
+	LegacyStylingConfig,
+];
+
 module.exports = [
 	CoreConfig,
 	MainConfig,
 	FrontendConfig,
 	PaymentsConfig,
 	StylingConfig,
-	LegacyMainConfig,
-	LegacyFrontendConfig,
-	LegacyStylingConfig,
 ];

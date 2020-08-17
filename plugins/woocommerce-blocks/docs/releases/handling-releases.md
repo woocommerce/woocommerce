@@ -199,6 +199,23 @@ Use previous posts for inspiration. If the release contains new features, or API
 
 _Outcome:_ __There's a public release announcement, with clear info about what's new, roughly within a day of actual release.__
 
+#### Update user-facing documentation as needed
+
+When the plugin is released, ensure user-facing documentation is kept up to date with new blocks and compatibility information. The dev team should update documents in collaboration with support team and WooCommerce docs guild.
+
+In particular, please review and update as needed:
+
+- Are there any new blocks in this release? Ensure they have adequate user documentation.
+- Ensure any major improvements or changes are documented.
+- Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including: 
+  - [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
+  - [WooCommerce blocks main documentation page](https://docs.woocommerce.com/document/woocommerce-blocks/)
+
+Documentation should be updated as part of regular development, but this item is here as a reminder :)
+
+_Outcome:_ __All user documentation and requirements info is up to date with this release.__
+
+
 ## Appendix: Versions
 
 We have _major_, _minor_ and _patch_ releases.
