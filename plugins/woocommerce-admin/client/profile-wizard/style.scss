@@ -104,7 +104,6 @@
 		}
 
 		.components-popover__content {
-			white-space: pre;
 			font-size: 16px;
 
 			> div {
@@ -522,9 +521,15 @@
 	.woocommerce-business-extensions__benefits {
 		padding: 4px;
 		display: grid;
-		grid-template-columns: 1fr;
-		max-width: 592px;
+		grid-template-columns: 1fr 1fr;
+		max-width: 100%;
+		min-width: 580px;
 		font-size: 14px;
+
+		@include breakpoint( '<782px' ) {
+			grid-template-columns: 1fr;
+			min-width: 300px;
+		}
 
 		.woocommerce-business-extensions__benefit {
 			padding: 10px;
