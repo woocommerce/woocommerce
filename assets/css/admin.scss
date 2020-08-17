@@ -1062,6 +1062,7 @@ ul.wc_coupon_list_block {
 
 #woocommerce-order-data {
 
+	.postbox-header,
 	.hndle,
 	.handlediv {
 		display: none;
@@ -1412,6 +1413,10 @@ ul.wc_coupon_list_block {
 		.refunded-total {
 			color: $red;
 		}
+
+		.label-highlight {
+			font-weight: bold;
+		}
 	}
 
 	.refund-actions {
@@ -1466,6 +1471,7 @@ ul.wc_coupon_list_block {
 		display: block !important;
 	}
 
+	.postbox-header,
 	.hndle,
 	.handlediv {
 		display: none;
@@ -4347,14 +4353,13 @@ img.help_tip {
 
 		span {
 			display: block;
-			vertical-align: middle;
 			line-height: 24px;
+		}
 
-			span {
-				display: inline;
-				line-height: inherit;
-				vertical-align: baseline;
-			}
+		.type_box {
+			display: inline;
+			line-height: inherit;
+			vertical-align: baseline;
 		}
 
 		select {
@@ -6158,6 +6163,18 @@ table.bar_chart {
 	}
 }
 
+.post-type-product {
+
+	#wp-pointer-2 .wp-pointer-arrow {
+		left: 240px;
+	}
+
+	#wp-pointer-3 .wp-pointer-arrow,
+	#wp-pointer-4 .wp-pointer-arrow {
+		left: 46%;
+	}
+}
+
 /**
   * Small screen optimisation
   */
@@ -6683,6 +6700,7 @@ table.bar_chart {
 	.select2-selection__clear {
 		color: #999;
 		margin-top: -1px;
+		z-index: 1;
 	}
 
 	.select2-search--inline .select2-search__field {
@@ -6776,7 +6794,7 @@ table.bar_chart {
 			.select2-selection__arrow {
 				right: 1px;
 				height: 28px;
-				width: 28px;
+				width: 23px;
 				background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E") no-repeat right 5px top 55%;
 				background-size: 16px 16px;
 
@@ -6814,6 +6832,23 @@ table.bar_chart {
 
 		@media only screen and (max-width: 782px) {
 			min-width: 100% !important;
+		}
+	}
+}
+
+.wc-wp-version-gte-55 {
+
+	#woocommerce-product-data {
+
+		.hndle {
+			display: block;
+			line-height: 24px;
+
+			.type_box {
+				display: inline;
+				line-height: inherit;
+				vertical-align: baseline;
+			}
 		}
 	}
 }
@@ -7266,4 +7301,9 @@ table.bar_chart {
 			margin: 6px 0 0 15px;
 		}
 	}
+}
+
+.wc-quick-edit-warning {
+	color: darkred;
+	font-weight: bold;
 }

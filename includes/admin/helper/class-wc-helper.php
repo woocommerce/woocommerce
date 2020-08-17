@@ -3,7 +3,7 @@
  * WooCommerce Admin
  *
  * @class    WC_Helper
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  */
 
 use Automattic\Jetpack\Constants;

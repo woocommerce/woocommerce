@@ -188,7 +188,8 @@
 					'attribute': 'data-tip',
 					'fadeIn': 50,
 					'fadeOut': 50,
-					'delay': 200
+					'delay': 200,
+					'keepAlive': true
 				} );
 
 				$( '.column-wc_actions .wc-action-button' ).tipTip( {
@@ -203,7 +204,8 @@
 						'attribute': 'data-tip',
 						'fadeIn': 50,
 						'fadeOut': 50,
-						'delay': 200
+						'delay': 200,
+						'keepAlive': true
 					} ).css( 'cursor', 'help' );
 				});
 			});

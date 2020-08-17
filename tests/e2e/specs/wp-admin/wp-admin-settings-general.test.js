@@ -5,8 +5,11 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { settingsPageSaveChanges, verifyValueOfInputField } from '../../utils';
+import {
+	StoreOwnerFlow,
+	settingsPageSaveChanges,
+	verifyValueOfInputField
+} from '@woocommerce/e2e-utils';
 
 describe( 'WooCommerce General Settings', () => {
 	beforeAll( async () => {

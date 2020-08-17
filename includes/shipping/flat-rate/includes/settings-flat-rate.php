@@ -2,7 +2,7 @@
 /**
  * Settings for flat rate shipping.
  *
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  */
 
 defined( 'ABSPATH' ) || exit;

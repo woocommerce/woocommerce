@@ -2,7 +2,7 @@
 /**
  * WooCommerce Admin Settings Class
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.4.0
  */
 

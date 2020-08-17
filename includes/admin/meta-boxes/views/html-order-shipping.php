@@ -2,9 +2,14 @@
 /**
  * Shows a shipping line
  *
+ * @package WooCommerce\Admin
+ *
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed
+ *
+ * @package WooCommerce\Admin\Views
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -58,10 +63,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="line_cost" width="1%">
 		<div class="view">
 			<?php
-			echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
+			echo wp_kses_post( wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) ) );
 			$refunded = $order->get_total_refunded_for_item( $item_id, 'shipping' );
 			if ( $refunded ) {
-				echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+				echo wp_kses_post( '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>' );
 			}
 			?>
 		</div>
@@ -74,7 +79,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 
 	<?php
-	if ( ( $tax_data = $item->get_taxes() ) && wc_tax_enabled() ) {
+	$tax_data = $item->get_taxes();
+	if ( $tax_data && wc_tax_enabled() ) {
 		foreach ( $order_taxes as $tax_item ) {
 			$tax_item_id    = $tax_item->get_rate_id();
 			$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
@@ -82,10 +88,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="line_tax" width="1%">
 				<div class="view">
 					<?php
-					echo ( '' !== $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) ) : '&ndash;';
+					echo wp_kses_post( ( '' !== $tax_item_total ) ? wc_price( $tax_item_total, array( 'currency' => $order->get_currency() ) ) : '&ndash;' );
 					$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
 					if ( $refunded ) {
-						echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+						echo wp_kses_post( '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>' );
 					}
 					?>
 				</div>

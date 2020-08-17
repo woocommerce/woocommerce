@@ -314,7 +314,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	if ( $filter_template !== $template ) {
 		if ( ! file_exists( $filter_template ) ) {
 			/* translators: %s template */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $template . '</code>' ), '2.1' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $filter_template . '</code>' ), '2.1' );
 			return;
 		}
 		$template = $filter_template;
@@ -1015,7 +1015,7 @@ function wc_print_js() {
 		 * @since 2.6.0
 		 * @param string $js JavaScript code.
 		 */
-		echo apply_filters( 'woocommerce_queued_js', $js ); // WPCS: XSS ok.
+		echo apply_filters( 'woocommerce_queued_js', $js ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		unset( $wc_queued_js );
 	}
@@ -1125,11 +1125,11 @@ function flush_rewrite_rules_on_shop_page_save() {
 	}
 
 	// Check if page is edited.
-	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) { // WPCS: input var ok, CSRF ok.
+	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return;
 	}
 
-	$post_id      = intval( $_GET['post'] ); // WPCS: input var ok, CSRF ok.
+	$post_id      = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$shop_page_id = wc_get_page_id( 'shop' );
 
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ), true ) ) {
@@ -1752,10 +1752,12 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
+	// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( function_exists( 'iconv' ) && defined( 'ICONV_IMPL' ) && @strcasecmp( ICONV_IMPL, 'unknown' ) !== 0 ) {
 		$a = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $a );
 		$b = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $b );
 	}
+	// phpcs:enable WordPress.PHP.NoSilencedErrors.Discouraged
 	return strcmp( $a, $b );
 }
 
@@ -1952,10 +1954,10 @@ function wc_print_r( $expression, $return = false ) {
 		if ( function_exists( $alternative['func'] ) ) {
 			$res = $alternative['func']( ...$alternative['args'] );
 			if ( $return ) {
-				return $res;
+				return $res; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 
-			echo $res; // WPCS: XSS ok.
+			echo $res; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			return true;
 		}
 	}
@@ -2124,7 +2126,8 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed Value sanitized by wc_clean.
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ], $default ) ) ); // @codingStandardsIgnoreLine
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ], $default ) ) );
 }
 
 /**
@@ -2212,19 +2215,21 @@ add_filter( 'auto_update_plugin', 'wc_prevent_dangerous_auto_updates', 99, 2 );
 function wc_delete_expired_transients() {
 	global $wpdb;
 
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	$sql  = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 		WHERE a.option_name LIKE %s
 		AND a.option_name NOT LIKE %s
 		AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
 		AND b.option_value < %d";
-	$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) ); // WPCS: unprepared SQL ok.
+	$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
 
 	$sql   = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 		WHERE a.option_name LIKE %s
 		AND a.option_name NOT LIKE %s
 		AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
 		AND b.option_value < %d";
-	$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) ); // WPCS: unprepared SQL ok.
+	$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 	return absint( $rows + $rows2 );
 }
@@ -2393,11 +2398,13 @@ function wc_get_server_database_version() {
 		);
 	}
 
+	// phpcs:disable WordPress.DB.RestrictedFunctions, PHPCompatibility.Extensions.RemovedExtensions.mysql_DeprecatedRemoved
 	if ( $wpdb->use_mysqli ) {
-		$server_info = mysqli_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+		$server_info = mysqli_get_server_info( $wpdb->dbh );
 	} else {
-		$server_info = mysql_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+		$server_info = mysql_get_server_info( $wpdb->dbh );
 	}
+	// phpcs:enable WordPress.DB.RestrictedFunctions, PHPCompatibility.Extensions.RemovedExtensions.mysql_DeprecatedRemoved
 
 	return array(
 		'string' => $server_info,
@@ -2418,6 +2425,10 @@ function wc_load_cart() {
 		return;
 	}
 
+	// Ensure dependencies are loaded in all contexts.
+	include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+	include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+
 	WC()->initialize_session();
 	WC()->initialize_cart();
 }
@@ -2429,5 +2440,6 @@ function wc_load_cart() {
  * @return bool
  */
 function wc_is_running_from_async_action_scheduler() {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	return isset( $_REQUEST['action'] ) && 'as_async_request_queue_runner' === $_REQUEST['action'];
 }

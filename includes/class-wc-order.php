@@ -1411,8 +1411,7 @@ class WC_Order extends WC_Abstract_Order {
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			// Remove any instance IDs after ":".
-			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
+			$shipping_method_id = $shipping_method->get_method_id();
 
 			if ( ! in_array( $shipping_method_id, $hide, true ) ) {
 				$needs_address = true;
@@ -1688,7 +1687,7 @@ class WC_Order extends WC_Abstract_Order {
 			return 0;
 		}
 
-		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
+		if ( is_user_logged_in() && current_user_can( 'edit_shop_orders', $this->get_id() ) && $added_by_user ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
 			$comment_author_email = $user->user_email;
@@ -1730,6 +1729,16 @@ class WC_Order extends WC_Abstract_Order {
 				)
 			);
 		}
+
+		/**
+		 * Action hook fired after an order note is added.
+		 *
+		 * @param int      $order_note_id Order note ID.
+		 * @param WC_Order $order         Order data.
+		 *
+		 * @since 4.4.0
+		 */
+		do_action( 'woocommerce_order_note_added', $comment_id, $this );
 
 		return $comment_id;
 	}

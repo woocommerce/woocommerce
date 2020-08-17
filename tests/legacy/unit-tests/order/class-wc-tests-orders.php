@@ -2,7 +2,7 @@
 /**
  * Class WC_Tests_Order file.
  *
- * @package WooCommerce|Tests|Order
+ * @package WooCommerce\Tests\Order
  */
 
 /**

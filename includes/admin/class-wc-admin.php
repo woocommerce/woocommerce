@@ -3,7 +3,7 @@
  * WooCommerce Admin
  *
  * @class    WC_Admin
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.6.0
  */
 
@@ -329,6 +329,11 @@ class WC_Admin {
 		// Add WP 5.3+ compatibility class.
 		if ( $raw_version && version_compare( $version, '5.3', '>=' ) ) {
 			$classes .= ' wc-wp-version-gte-53';
+		}
+
+		// Add WP 5.5+ compatibility class.
+		if ( $raw_version && version_compare( $version, '5.5', '>=' ) ) {
+			$classes .= ' wc-wp-version-gte-55';
 		}
 
 		return $classes;

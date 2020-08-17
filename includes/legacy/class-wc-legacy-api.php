@@ -4,7 +4,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce/API
+ * @package  WooCommerce\API
  * @since    2.6
  */
 
@@ -274,14 +274,14 @@ class WC_Legacy_API {
 	/**
 	 * Rest API Init.
 	 *
-	 * @deprecated since 3.7.0 - REST API clases autoload.
+	 * @deprecated 3.7.0 - REST API clases autoload.
 	 */
 	public function rest_api_init() {}
 
 	/**
 	 * Include REST API classes.
 	 *
-	 * @deprecated since 3.7.0 - REST API clases autoload.
+	 * @deprecated 3.7.0 - REST API clases autoload.
 	 */
 	public function rest_api_includes() {
 		$this->rest_api_init();
@@ -289,9 +289,10 @@ class WC_Legacy_API {
 	/**
 	 * Register REST API routes.
 	 *
-	 * @deprecated since 3.7.0 - Not used.
+	 * @deprecated 3.7.0
 	 */
 	public function register_rest_routes() {
+		wc_deprecated_function( 'WC_Legacy_API::register_rest_routes', '3.7.0', '' );
 		$this->register_wp_admin_settings();
 	}
 }
