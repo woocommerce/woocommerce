@@ -13,10 +13,6 @@ import {
 	getTooltipValueFormat,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
 import {
 	getAllowedIntervalsForQuery,
 	getCurrentDates,
@@ -24,7 +20,11 @@ import {
 	getIntervalForQuery,
 	getChartTypeForQuery,
 	getPreviousDate,
-} from '../../../lib/date';
+} from '@woocommerce/date';
+
+/**
+ * Internal dependencies
+ */
 import { CurrencyContext } from '../../../lib/currency-context';
 import ReportError from '../report-error';
 import withSelect from '../../../wc-api/with-select';

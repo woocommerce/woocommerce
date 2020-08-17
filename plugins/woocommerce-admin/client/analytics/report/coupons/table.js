@@ -8,11 +8,11 @@ import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { defaultTableDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { defaultTableDateFormat } from '../../../lib/date';
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 

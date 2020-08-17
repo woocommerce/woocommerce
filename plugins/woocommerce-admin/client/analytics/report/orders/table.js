@@ -8,11 +8,11 @@ import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { defaultTableDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { defaultTableDateFormat } from '../../../lib/date';
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 import './style.scss';

@@ -4,15 +4,11 @@
 import { parse, stringify } from 'qs';
 import { DateRangeFilterPicker } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
 import {
 	getCurrentDates,
 	getDateParamsFromQuery,
 	isoDateFormat,
-} from '../../lib/date';
+} from '@woocommerce/date';
 
 const DefaultDate = ( { value, onChange } ) => {
 	const { wcAdminSettings } = useSettings( 'wc_admin', [

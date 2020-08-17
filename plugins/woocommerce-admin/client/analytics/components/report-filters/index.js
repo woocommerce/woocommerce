@@ -8,16 +8,16 @@ import { withSelect } from '@wordpress/data';
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { LOCALE } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	getCurrentDates,
+	getDateParamsFromQuery,
+	isoDateFormat,
+} from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
 import { recordEvent } from '../../../lib/tracks';
-import {
-	getCurrentDates,
-	getDateParamsFromQuery,
-	isoDateFormat,
-} from '../../../lib/date';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class ReportFilters extends Component {

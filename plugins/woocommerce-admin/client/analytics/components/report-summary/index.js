@@ -13,11 +13,11 @@ import {
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { getDateParamsFromQuery } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { getDateParamsFromQuery } from '../../../lib/date';
 import ReportError from '../report-error';
 import withSelect from '../../../wc-api/with-select';
 import { recordEvent } from '../../../lib/tracks';

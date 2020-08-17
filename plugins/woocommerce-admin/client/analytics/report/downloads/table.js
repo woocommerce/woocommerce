@@ -11,11 +11,11 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { getCurrentDates, defaultTableDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { getCurrentDates, defaultTableDateFormat } from '../../../lib/date';
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 

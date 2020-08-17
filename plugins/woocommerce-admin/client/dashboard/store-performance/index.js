@@ -16,11 +16,11 @@ import {
 	SummaryListPlaceholder,
 	SummaryNumber,
 } from '@woocommerce/components';
+import { getDateParamsFromQuery } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { getDateParamsFromQuery } from '../../lib/date';
 import withSelect from '../../wc-api/with-select';
 import './style.scss';
 import { recordEvent } from '../../lib/tracks';

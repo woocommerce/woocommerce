@@ -14,15 +14,15 @@ import {
 	REPORTS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
 import {
 	appendTimestamp,
 	defaultTableDateFormat,
 	getCurrentDates,
-} from '../../../lib/date';
+} from '@woocommerce/date';
+
+/**
+ * Internal dependencies
+ */
 import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import ReportTable from '../../components/report-table';
 import withSelect from '../../../wc-api/with-select';
