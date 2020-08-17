@@ -5,15 +5,16 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { completeOnboardingWizard } from '../../utils/components';
 import {
+	StoreOwnerFlow,
+	completeOldSetupWizard,
+	completeOnboardingWizard,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	settingsPageSaveChanges,
 	verifyCheckboxIsSet,
 	verifyValueOfInputField
-} from '../../utils';
+} from '@woocommerce/e2e-utils';
 
 describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 	beforeAll( async () => {
@@ -51,13 +52,16 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 describe( 'Store owner can go through setup Task List', () => {
 	it( 'can setup shipping', async () => {
+		await page.evaluate( () => {
+			document.querySelector( '.woocommerce-list__item-title' ).scrollIntoView();
+		} );
 		// Query for all tasks on the list
 		const taskListItems = await page.$$( '.woocommerce-list__item-title' );
 		expect( taskListItems ).toHaveLength( 6 );
 
 		await Promise.all( [
 			// Click on "Set up shipping" task to move to the next step
-			taskListItems[3].click(),
+			taskListItems[4].click(),
 
 			// Wait for shipping setup section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),

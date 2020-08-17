@@ -6,7 +6,7 @@
  * This class will be removed in future versions.
  *
  * @version  3.2.0
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  * @category Class
  * @author   Automattic
  */
@@ -326,7 +326,7 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Function to apply discounts to a product and get the discounted price (before tax is applied).
 	 *
-	 * @deprecated Calculation and coupon logic is handled in WC_Cart_Totals.
+	 * @deprecated 3.2.0 Calculation and coupon logic is handled in WC_Cart_Totals.
 	 * @param mixed $values Cart item.
 	 * @param mixed $price Price of item.
 	 * @param bool  $add_totals Legacy.
@@ -377,17 +377,18 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Coupons enabled function. Filterable.
 	 *
-	 * @deprecated 2.5.0 in favor to wc_coupons_enabled()
+	 * @deprecated 2.5.0
 	 * @return bool
 	 */
 	public function coupons_enabled() {
+		wc_deprecated_function( 'WC_Legacy_Cart::coupons_enabled', '2.5.0', 'wc_coupons_enabled' );
 		return wc_coupons_enabled();
 	}
 
 	/**
 	 * Gets the total (product) discount amount - these are applied before tax.
 	 *
-	 * @deprecated Order discounts (after tax) removed in 2.3 so multiple methods for discounts are no longer required.
+	 * @deprecated 2.3.0 Order discounts (after tax) removed in 2.3 so multiple methods for discounts are no longer required.
 	 * @return mixed formatted price or false if there are none.
 	 */
 	public function get_discounts_before_tax() {
@@ -403,7 +404,7 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Get the total of all order discounts (after tax discounts).
 	 *
-	 * @deprecated Order discounts (after tax) removed in 2.3.
+	 * @deprecated 2.3.0 Order discounts (after tax) removed in 2.3.
 	 * @return int
 	 */
 	public function get_order_discount_total() {
@@ -414,7 +415,7 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Function to apply cart discounts after tax.
 	 *
-	 * @deprecated Coupons can not be applied after tax.
+	 * @deprecated 2.3.0 Coupons can not be applied after tax.
 	 * @param $values
 	 * @param $price
 	 */
@@ -425,7 +426,7 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Function to apply product discounts after tax.
 	 *
-	 * @deprecated Coupons can not be applied after tax.
+	 * @deprecated 2.3.0 Coupons can not be applied after tax.
 	 *
 	 * @param $values
 	 * @param $price
@@ -437,7 +438,7 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Gets the order discount amount - these are applied after tax.
 	 *
-	 * @deprecated Coupons can not be applied after tax.
+	 * @deprecated 2.3.0 Coupons can not be applied after tax.
 	 */
 	public function get_discounts_after_tax() {
 		wc_deprecated_function( 'get_discounts_after_tax', '2.3' );

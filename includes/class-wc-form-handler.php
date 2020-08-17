@@ -2,7 +2,7 @@
 /**
  * Handle frontend forms.
  *
- * @package WooCommerce/Classes/
+ * @package WooCommerce\Classes\
  */
 
 defined( 'ABSPATH' ) || exit;

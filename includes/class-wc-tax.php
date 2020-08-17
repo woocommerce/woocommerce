@@ -2,7 +2,7 @@
 /**
  * Tax calculation and rate finding class.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -4,7 +4,7 @@
  *
  * Handle comments (reviews and order notes).
  *
- * @package WooCommerce/Classes/Products
+ * @package WooCommerce\Classes\Products
  * @version 2.3.0
  */
 
@@ -357,6 +357,7 @@ class WC_Comments {
 			WHERE comment_parent = 0
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
+			AND comment_type = 'review'
 				",
 				$product->get_id()
 			)

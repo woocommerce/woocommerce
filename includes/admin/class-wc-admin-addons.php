@@ -2,7 +2,7 @@
 /**
  * Addons Page
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.5.0
  */
 

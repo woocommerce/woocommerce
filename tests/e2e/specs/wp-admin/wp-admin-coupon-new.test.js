@@ -5,8 +5,11 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { clickTab, verifyPublishAndTrash } from '../../utils';
+import {
+	StoreOwnerFlow,
+	clickTab,
+	verifyPublishAndTrash
+} from '@woocommerce/e2e-utils';
 
 describe( 'Add New Coupon Page', () => {
 	beforeAll( async () => {

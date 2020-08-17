@@ -4,7 +4,7 @@
  *
  * Functions for coupon specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.0.0
  */
 

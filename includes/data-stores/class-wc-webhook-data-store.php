@@ -3,7 +3,7 @@
  * Webhook Data Store
  *
  * @version  3.3.0
- * @package  WooCommerce/Classes/Data_Store
+ * @package  WooCommerce\Classes\Data_Store
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

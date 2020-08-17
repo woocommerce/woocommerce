@@ -2,18 +2,36 @@
 /**
  * Locales information
  *
- * @package WooCommerce/i18n
+ * @package WooCommerce\i18n
  * @version 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 return array(
+	'AT' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
 	'AU' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'BA' => array(
+		'currency_code'  => 'BAM',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
@@ -49,6 +67,15 @@ return array(
 		'currency_code'  => 'CAD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'CH' => array(
+		'currency_code'  => 'CHF',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => "'",
 		'decimal_sep'    => '.',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
@@ -132,6 +159,15 @@ return array(
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
 		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'LI' => array(
+		'currency_code'  => 'CHF',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => "'",
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),

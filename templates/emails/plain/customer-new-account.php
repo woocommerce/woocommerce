@@ -11,7 +11,7 @@
  * the readme will list any important changes.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails/Plain
+ * @package WooCommerce\Templates\Emails\Plain
  * @version 3.7.0
  */
 
@@ -28,7 +28,7 @@ echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username
 
 if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated ) {
 	/* translators: %s: Auto generated password */
-	echo sprintf( esc_html__( 'Your password has been automatically generated: %s.', 'woocommerce' ), esc_html( $user_pass ) ) . "\n\n";
+	echo sprintf( esc_html__( 'Your password has been automatically generated: %s', 'woocommerce' ), esc_html( $user_pass ) ) . "\n\n";
 }
 
 echo "\n\n----------------------------------------\n\n";

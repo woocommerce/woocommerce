@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_Reset_Password
 	 * @version     3.5.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Reset_Password extends WC_Email {

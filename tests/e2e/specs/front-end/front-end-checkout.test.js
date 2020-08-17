@@ -5,9 +5,15 @@
 /**
  * Internal dependencies
  */
-import { createSimpleProduct } from '../../utils/components';
-import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
-import { setCheckbox, settingsPageSaveChanges, uiUnblocked, verifyCheckboxIsSet } from '../../utils';
+import {
+	CustomerFlow,
+	StoreOwnerFlow,
+	createSimpleProduct,
+	setCheckbox,
+	settingsPageSaveChanges,
+	uiUnblocked,
+	verifyCheckboxIsSet
+} from '@woocommerce/e2e-utils';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );

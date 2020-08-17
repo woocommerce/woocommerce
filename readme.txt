@@ -2,9 +2,9 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.2
-Tested up to: 5.4
+Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -180,6 +180,134 @@ INTERESTED IN DEVELOPMENT?
 == Changelog ==
 
 = 4.4.0 - 2020-08-18 =
+
+**WooCommerce**
+* Accessibility: Adds alt attribute to photoswipe gallery images. #26945
+* Enhancement - Remove the privacy page dropdown from the Accounts & Privacy page. #26809
+* Enhancement - Added automatic language pack updates for WooCommerce.com extensions. #26750
+* Enhancement - Improvements for the Hungarian address format. #26697
+* Enhancement - Dropdown arrow width was made smaller. #26202
+* Enhancement - Add a "No change" option to the "Stock status" selector in quick edit, preselect it when the product being edited is a variable product. #26174
+* Enhancement - Don't request language packs for empty locales list. #27148
+* Localization - Added 14 Namibia regions. #26894
+* Localization - Change default Greek states names to English. #26719
+* Localization - Improved Puerto Rico addresses and improve address formatting. #26698
+* Localization - Wrapped price and currency inside a BDI tag, in order to prevent the bidirectional algorithm to produce confusing results. #26462
+* Localization - Added Algerian provinces. #25687
+* Tweak - Added "order_total" to the wcadmin_orders_edit_status_change tracker event. #26935
+* Tweak - Fixed WooCommerce menu for users that can only manage orders on WooCommerce. #26877
+* Tweak - Limit nocache headers to googleweblight by default. #26858
+* Tweak - Preserve quantity input value when changing variations. #26805
+* Tweak - Confirm before running any tool from the WooCommerce Status settings. #26660
+* Tweak - Limit stock changes for order items to status methods for consistency. #26642
+* Tweak - Custom vendor taxonomy update messages. #26634
+* Tweak - Remove HTML tags from plain text email template for Customer new account. #26613
+* Tweak - Conditionally change the text in My account to reflect if shipping is disabled. #26325
+* Tweak - Show CSV file name in result message when product import is complete. #25240
+* Tweak - Improve order details UI to highlight "Paid" and "Net Payment" sections. #27142
+* Fix - Remove the dot after the generated password in new account emails. #27073
+* Fix - Delayed the execution of all webhooks until after the request has completed. #27067
+* Fix - [Importer/Exporter] Fixed the value display of "Published" for children of draft variable products. #27046
+* Fix - Removed the extra id parameter added to CLI commands that shouldn't have one. #27017
+* Fix - Added the missing instance_id to the REST CLI command so that shipping zone method commands will work. #27017
+* Fix - Add rating_count to order by rating clause. #26964
+* Fix - Don't show premium support forum link if the store is not connected to WooCommerce.com. #26932
+* Fix - Incorrect capability used on add order note while creating an user note. #26920
+* Fix - Preserve HTML entities from product names in the cart page. #26885
+* Fix - Display warning hen leaving settings page without saving first. #26880
+* Fix - Remove wc_round_tax_total from shipping tax because shipping prices never include tax so rounding down is not needed. #26850
+* Fix - Make the "Please log in" message displayed to users with an existing account a hyperlink. #26837
+* Fix - Typo in composer.json for makepot. #26829
+* Fix - Layout issue on the checkout page when switching countries. #26697
+* Fix - Missing closing select tag to the product exporter category select. #26680
+* Fix - Possible PHP undefined index notice before WooCommerce has been configured. #26658
+* Fix - A deferred product sync is now scheduled when a product having a parent (e.g. a variation product) is deleted, not only when it's saved. #26629
+* Fix - Stock status of variable products that handle stock at the main product level is now appropriately updated when the product is saved. #26611
+* Fix - Discounted prices are no longer underlined in Twenty Twenty. #26609
+* Fix - Email link color clash. #26591
+* Fix - Remove HTML from error message. #26589
+* Fix - Fixed Tooltip flashing. #26558
+* Fix - Correctly displays the instructional option as default in the select box for picking a Country / Region on the checkout page. #26554
+* Fix - Default option "Select a country..." will now display accurately on Country select box in Cart shipping calculator. #26541
+* Fix - Fixed user capability required to view the order count indicator. #26338
+* Fix - The filtering widget now works as expected with variable products, displaying those products for which visible variations are available. #26260
+* Fix - Added a z-index to the remove button (x) to set the z-order of the element. #26202
+* Fix - Don't change the stock status of variations when bulk editing a variable product and leaving the "Stock status" selector as "No change". #26174
+* Fix - Remove new WP 5.5 meta box arrows from "Order data" and "Order items" meta boxes. #27173
+* Fix - After clicking to update WooCommerce, the user will stay in the same page instead of being redirected to the "Settings" page. #27172
+* Fix - "Product type" dropdown missing from Product's data meta box on WP 5.5. #27170
+* Fix - Removed the JETPACK_AUTOLOAD_DEV define. #27185
+* Dev - Update WooCommerce Admin version to v1.4.0-beta.3. #27214
+* Dev - Upgraded to the 2.x Jetpack Autoloader. #27123
+* Dev - Update jest-preset-default version to ^6.2.0. #27090
+* Dev - Added a second $existing_meta_keys parameter to the woocommerce_duplicate_product_exclude_meta filter. #27038
+* Dev - Remove leftover note for translators in customer-completed-order.php. #26989
+* Dev - Allow extend BACS accounts filter with order ID. #26961
+* Dev - Add npm run build:packages to npm run build. #26906
+* Dev - Add woocommerce_order_note_added action. #26846
+* Dev - Add tests for template cache. #26840
+* Dev - Add filter to allow disabling nocache headers. #26802
+* Dev - Introduce a dependency injection framework for the code in the src directory. #26731
+* Dev - Normalized parameters of woocommerce_product_importer_parsed_data filter. #26669
+* Dev - Introduced new WC_Product_CSV_Importer::get_formatting_callback() fixing a typo in the method name. #26668
+* Dev - Allow set "date_created" while creating orders via CRUD. #26567
+* Dev - Allow set a custom as order key using wc_generate_order_key(). #26566
+* Dev - Allow set order_key while creating an order via CRUD. #26565
+* Dev - Introduced woocommerce_product_cross_sells_products_heading filter. #26545
+* Dev - Added the removed_coupon_in_checkout event that is triggered on the Checkout page after a coupon is removed using .woocommerce-remove-coupon button. #26536
+* Dev - Remove no longer used styles from TwentyTwenty. #26516
+* Dev - Fix error message in wc_get_template() function. #26515
+* Dev - Add npm publish script for @woocommerce/e2e-environment. #26432
+* Dev - Make WC_Cart::display_prices_including_tax aware of tax display changes. #26400
+* Dev - Deprecated WC_Legacy_Cart::tax_display_cart in favor of WC_Cart:: get_tax_price_display_mode(). #26400
+* Dev - Add an optional $render_variations argument to in WC_Product_Variable::get_available_variation() in order to allow plugins to avoid performance bottlenecks. #26303
+* Dev - Ensure wc_load_cart loads its own dependencies. #26219
+* Dev - Clean up deprecated documentation. #27054
+* Dev - Update WooCommerce Blocks version to 3.1.0. #27177
+
+**REST API 1.0.11**
+* Enhancement - Introduced X-WP-Total header for product attributes GET endpoint listing the number of entries in the response. woocommerce/woocommerce-rest-api#171
+* Enhancement - Introduced X-WP-TotalPages header for product attributes GET endpoint listing the number of pages that can be fetched. woocommerce/woocommerce-rest-api#171
+* Enhancement - Introduced the modified option for orderby fetch requests in post based resources. woocommerce/woocommerce-rest-api#226
+* Fix - Ensured Action Scheduler transients are cleared by "Clear Transients" tool. woocommerce/woocommerce-rest-api#152
+* Fix - Corrected the schema datatype for coupon expiry_date, date_expires, and date_expires_gmt fields. woocommerce/woocommerce-rest-api#176
+* Fix - Query parameters are now passed correctly when using the batch product variation endpoints. woocommerce/woocommerce-rest-api#191
+
+**WooCommerce Admin 1.4.0**
+* Enhancement - Move the WooCommerce > Coupons dashboard menu item to Marketing > Coupons. #4786
+* Fix - Installation of child theme zip files from the store setup wizard. #4852
+* Fix - Center the skip link on the theme selection step. #4847
+* Fix - Removed item "profiler" from the menu. #4851
+* Fix - PHP notices when hosts block certain WP scripts. #4856
+* Fix - Remove new WP 5.5 meta box arrows in the shipping banner. #4914
+* Fix - Allow revisiting of the payments task. #4918
+* Fix - Use of Jetpack autoloader. #4920
+* Fix - Only show WCPay task in US based stores. #4899
+* Fix - Polyfill core-data saveUser() on WP 5.3.x. #4869
+* Fix - Product types step bugs in onboarding wizard. #4900
+* Fix - Center all descriptive text on onboarding wizard steps. #4902
+* Fix - Change account required text on biz step in onboarding wizard. #4909
+* Dev - Add the experimental resolver to WCA data package. #4862
+* Dev - Fix linter errors. #4904
+
+**WooCommerce Blocks 3.0.0**
+* Build - Updated the automattic/jetpack-autoloader package to the 2.0 branch. #2847
+* Enhancement - Add support for the Bank Transfer (BACS) payment method in the Checkout block. #2821
+* Enhancement - Several improvements to make Credit Card input fields display more consistent across different themes and viewport sizes. #2869
+* Enhancement - Cart and Checkout blocks show a notification for products on backorder. #2833
+* Enhancement - Chip styles of the Filter Products by Attribute and Active Filters have been updated to give a more consistent experience. #2765
+* Enhancement - Add protection for rogue filters on order queries when executing cleanup draft orders logic. #2874
+* Enhancement - Extend payment gateway extension API so gateways (payment methods) can dynamically disable (hide), based on checkout or order data (such as cart items or shipping method). For example, Cash on Delivery can limit availability to specific shipping methods only. #2840 [DN]
+* Enhancement - Support Cash on Delivery core payment gateway in the Checkout block. #2831
+* Performance - Don't load shortcode Cart and Checkout scripts when using the blocks. #2842
+* Performance - Scripts only relevant to the frontend side of blocks are no longer loaded in the editor. #2788
+* Performance - Lazy Loading Atomic Components. #2777
+* Pefactor - Remove dashicon classes. #2848
+
+**WooCommerce Blocks 3.1.0**
+* Fix - Missing permissions_callback arg in StoreApi route definitions. #2926
+* Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
+* Dev - Add query filter when searching for a table. #2886
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
