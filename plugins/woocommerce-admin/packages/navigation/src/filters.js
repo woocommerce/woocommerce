@@ -37,7 +37,7 @@ export function flattenFilters( filters ) {
  *
  * @param {Object} query - query oject
  * @param {Object} config - config object
- * @return {activeFilters[]} - array of activeFilters
+ * @return {Array} - array of activeFilters
  */
 export function getActiveFiltersFromQuery( query, config ) {
 	return compact(
@@ -97,15 +97,10 @@ export function getDefaultOptionValue( config, options ) {
 }
 
 /**
- * @typedef {Object} activeFilters
- * @property
- */
-
-/**
  * Given activeFilters, create a new query object to update the url. Use previousFilters to
  * Remove unused params.
  *
- * @param {activeFilters[]} activeFilters - activeFilters shown in the UI
+ * @param {Array} activeFilters - Array of activeFilters shown in the UI
  * @param {Object} query - the current url query object
  * @param {Object} config - config object
  * @return {Object} - query object representing the new parameters

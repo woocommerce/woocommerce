@@ -5,11 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
- * @typedef {Object} Completer
- * @property
- */
-
-/**
  * Parse a string suggestion, split apart by where the first matching query is.
  * Used to display matched partial in bold.
  *

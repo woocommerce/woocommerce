@@ -19,20 +19,20 @@ import Link from '../link';
 /**
  * A component to show a value, label, and an optional change percentage. Can also act as a link to a specific report focus.
  *
- * @param root0
- * @param root0.delta
- * @param root0.href
- * @param root0.hrefType
- * @param root0.isOpen
- * @param root0.label
- * @param root0.onToggle
- * @param root0.prevLabel
- * @param root0.prevValue
- * @param root0.reverseTrend
- * @param root0.selected
- * @param root0.value
- * @param root0.onLinkClickCallback
- * @param root0.isHomescreen
+ * @param {Object} props
+ * @param {number} props.delta
+ * @param {string} props.href
+ * @param {string} props.hrefType
+ * @param {boolean} props.isOpen
+ * @param {string} props.label
+ * @param {Function} props.onToggle
+ * @param {string} props.prevLabel
+ * @param {number|string} props.prevValue
+ * @param {boolean} props.reverseTrend
+ * @param {boolean} props.selected
+ * @param {number|string} props.value
+ * @param {Function} props.onLinkClickCallback
+ * @param {boolean} props.isHomescreen
  * @return {Object} -
  */
 const SummaryNumber = ( {
@@ -208,6 +208,10 @@ SummaryNumber.propTypes = {
 	 * A function to be called after a SummaryNumber, rendered as a link, is clicked.
 	 */
 	onLinkClickCallback: PropTypes.func,
+	/**
+	 * A boolean used to show if the Summary Number is on the Homescreen.
+	 */
+	isHomescreen: PropTypes.bool,
 };
 
 SummaryNumber.defaultProps = {

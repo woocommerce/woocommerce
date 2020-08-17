@@ -83,7 +83,7 @@ export const appendTimestamp = ( date, timeOfDay ) => {
  *
  * @param {string} format - localized date string format
  * @param {string} str - date string
- * @return {Moment|null} - Moment object representing given string
+ * @return {Object|null} - Moment object representing given string
  */
 export function toMoment( format, str ) {
 	if ( moment.isMoment( str ) ) {
@@ -99,8 +99,8 @@ export function toMoment( format, str ) {
 /**
  * Given two dates, derive a string representation
  *
- * @param {Moment} after - start date
- * @param {Moment} before - end date
+ * @param {Object} after - start date
+ * @param {Object} before - end date
  * @return {string} - text value for the supplied date range
  */
 export function getRangeLabel( after, before ) {
@@ -204,8 +204,8 @@ export function getCurrentPeriod( period, compare ) {
  *
  * @param {string} period - the chosen period
  * @param {string} compare - `previous_period` or `previous_year`
- * @param {Moment} [after] - after date if custom period
- * @param {Moment} [before] - before date if custom period
+ * @param {Object} [after] - after date if custom period
+ * @param {Object} [before] - before date if custom period
  * @return {DateValue} - DateValue data about the selected period
  */
 function getDateValue( period, compare, after, before ) {
@@ -257,10 +257,10 @@ function getDateValue( period, compare, after, before ) {
  * Add default date-related parameters to a query object
  *
  * @param {Object} query - query object
- * @property {string} query.period - period value, ie `last_week`
- * @property {string} query.compare - compare value, ie `previous_year`
- * @property {string} query.after - date in iso date format, ie `2018-07-03`
- * @property {string} query.before - date in iso date format, ie `2018-07-03`
+ * @param {string} query.period - period value, ie `last_week`
+ * @param {string} query.compare - compare value, ie `previous_year`
+ * @param {string} query.after - date in iso date format, ie `2018-07-03`
+ * @param {string} query.before - date in iso date format, ie `2018-07-03`
  * @param {string} defaultDateRange - the store's default date range
  * @return {DateParams} - date parameters derived from query parameters with added defaults
  */
@@ -291,10 +291,10 @@ export const getDateParamsFromQuery = (
  * Get Date Value Objects for a primary and secondary date range
  *
  * @param {Object} query - query object
- * @property {string} query.period - period value, ie `last_week`
- * @property {string} query.compare - compare value, ie `previous_year`
- * @property {string} query.after - date in iso date format, ie `2018-07-03`
- * @property {string} query.before - date in iso date format, ie `2018-07-03`
+ * @param {string} query.period - period value, ie `last_week`
+ * @param {string} query.compare - compare value, ie `previous_year`
+ * @param {string} query.after - date in iso date format, ie `2018-07-03`
+ * @param {string} query.before - date in iso date format, ie `2018-07-03`
  * @param {string} defaultDateRange - the store's default date range
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
@@ -347,11 +347,11 @@ export const getDateDifferenceInDays = ( date, date2 ) => {
  * Get the previous date for either the previous period of year.
  *
  * @param {string} date - Base date
- * @param {string|Moment.moment} date1 - primary start
- * @param {string|Moment.moment} date2 - secondary start
+ * @param {string} date1 - primary start
+ * @param {string} date2 - secondary start
  * @param {string} compare - `previous_period`  or `previous_year`
  * @param {string} interval - interval
- * @return {Moment.moment}  - Calculated date
+ * @return {Object}  - Calculated date
  */
 export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 	const dateMoment = moment( date );
@@ -445,7 +445,7 @@ export function getIntervalForQuery( query ) {
  * Returns the current chart type to use.
  *
  * @param {Object} query Current query
- * @param query.chartType
+ * @param {string} query.chartType
  * @return {string} Current chart type.
  */
 export function getChartTypeForQuery( { chartType } ) {
@@ -536,10 +536,8 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
  * of moment style js formats.
  *
  * @param {Object} config Locale config object, from store settings.
- * @param config.userLocale
- * @param config.weekdaysShort
- * @param config.userLocale
- * @param config.weekdaysShort
+ * @param {string} config.userLocale
+ * @param {Array} config.weekdaysShort
  */
 export function loadLocaleData( { userLocale, weekdaysShort } ) {
 	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
@@ -572,8 +570,8 @@ export const dateValidationMessages = {
 
 /**
  * @typedef {Object} validatedDate
- * @property {Moment|null} validatedDate.date - A resulting Moment date object or null, if invalid
- * @property {string} validatedDate.error - An optional error message if date is invalid
+ * @property {Object|null} date - A resulting Moment date object or null, if invalid
+ * @property {string} error - An optional error message if date is invalid
  */
 
 /**
@@ -581,8 +579,8 @@ export const dateValidationMessages = {
  *
  * @param {string} type - Designate beginning or end of range, eg `before` or `after`.
  * @param {string} value - User input value
- * @param {Moment|null} [before] - If already designated, the before date parameter
- * @param {Moment|null} [after] - If already designated, the after date parameter
+ * @param {Object|null} [before] - If already designated, the before date parameter
+ * @param {Object|null} [after] - If already designated, the after date parameter
  * @param {string} format - The expected date format in a user's locale
  * @return {Object} validatedDate - validated date object
  */

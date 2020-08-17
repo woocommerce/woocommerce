@@ -9,12 +9,12 @@ import { get } from 'lodash';
 /**
  * Use the `Flag` component to display a country's flag using the operating system's emojis.
  *
- * @param root0
- * @param root0.code
- * @param root0.order
- * @param root0.className
- * @param root0.size
- * @param root0.hideFromScreenReader
+ * @param {Object} props
+ * @param {string} props.code
+ * @param {Object} props.order
+ * @param {string} props.className
+ * @param {string} props.size
+ * @param {boolean} props.hideFromScreenReader
  * @return {Object} - React component.
  */
 const Flag = ( { code, order, className, size, hideFromScreenReader } ) => {

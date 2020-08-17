@@ -24,7 +24,6 @@ export const WC_ASSET_URL = SOURCE.wcAssetUrl;
 /**
  * Retrieves a setting value from the setting state.
  *
- * @export
  * @param {string}   name                         The identifier for the setting.
  * @param {*}    [fallback=false]             The value to use as a fallback
  *                                                if the setting is not in the
@@ -56,7 +55,6 @@ export function getSetting( name, fallback = false, filter = ( val ) => val ) {
  *
  * @deprecated
  *
- * @export
  * @param {string}   name                        The setting property key for the
  *                                               setting being mutated.
  * @param {*}    value                       The value to set.

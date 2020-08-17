@@ -7,9 +7,9 @@ import PropTypes from 'prop-types';
 /**
  * Display a number with a styled border.
  *
- * @param root0
- * @param root0.count
- * @param root0.label
+ * @param {Object} props
+ * @param {number} props.count
+ * @param {string} props.label
  * @return {Object} -
  */
 const Count = ( { count, label } ) => {

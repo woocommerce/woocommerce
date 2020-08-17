@@ -8,13 +8,13 @@ import { Button, Tooltip } from '@wordpress/components';
 /**
  * A button used when comparing items, if `count` is less than 2 a hoverable tooltip is added with `helpText`.
  *
- * @param root0
- * @param root0.className
- * @param root0.count
- * @param root0.children
- * @param root0.disabled
- * @param root0.helpText
- * @param root0.onClick
+ * @param {Object} props
+ * @param {string} props.className
+ * @param {number} props.count
+ * @param {Node} props.children
+ * @param {boolean} props.disabled
+ * @param {string} props.helpText
+ * @param {Function} props.onClick
  * @return {Object} -
  */
 const CompareButton = ( {

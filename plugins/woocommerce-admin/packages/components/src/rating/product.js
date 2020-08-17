@@ -11,8 +11,8 @@ import Rating from './index';
 /**
  * Display a set of stars representing the product's average rating.
  *
- * @param root0
- * @param root0.product
+ * @param {Object} props
+ * @param {Object} props.product
  * @return {Object} -
  */
 const ProductRating = ( { product, ...props } ) => {

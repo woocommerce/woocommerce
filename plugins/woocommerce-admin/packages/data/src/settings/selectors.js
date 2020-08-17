@@ -54,7 +54,6 @@ export const isUpdateSettingsRequesting = ( state, group ) => {
 /**
  * Retrieves a setting value from the setting store.
  *
- * @export
  * @param {Object}   state                        State param added by wp.data.
  * @param {string}   group                        The settings group.
  * @param {string}   name                         The identifier for the setting.

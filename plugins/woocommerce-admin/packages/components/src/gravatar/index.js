@@ -11,12 +11,12 @@ import crypto from 'crypto';
 /**
  * Display a users Gravatar.
  *
- * @param root0
- * @param root0.alt
- * @param root0.title
- * @param root0.size
- * @param root0.user
- * @param root0.className
+ * @param {Object} props
+ * @param {string} props.alt
+ * @param {string} props.title
+ * @param {string} props.size
+ * @param {string|Object} props.user
+ * @param {string} props.className
  * @return {Object} -
  */
 const Gravatar = ( { alt, title, size, user, className } ) => {
