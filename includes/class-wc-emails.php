@@ -619,7 +619,10 @@ class WC_Emails {
 		 *
 		 * @since 4.4.0
 		 */
-		do_action( 'woocommerce_should_notify_low_stock', $product );
+		$should_notify = apply_filters( 'woocommerce_before_low_stock_notification', true, $product );
+		if ( false === $should_notify ) {
+			return;
+		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
