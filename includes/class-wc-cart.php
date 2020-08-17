@@ -1128,9 +1128,11 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( $found_in_cart ) {
 					/* translators: %s: product name */
 					$message = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
+
 					/**
 					 * Filters message about more than 1 product being added to cart.
 					 *
+					 * @since 4.5.0
 					 * @param string     $message Message.
 					 * @param WC_Product $product_data Product data.
 					 */
@@ -1157,9 +1159,11 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $product_data->is_in_stock() ) {
 				/* translators: %s: product name */
 				$message = sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_name() );
+
 				/**
 				 * Filters message about product being out of stock.
 				 *
+				 * @since 4.5.0
 				 * @param string     $message Message.
 				 * @param WC_Product $product_data Product data.
 				 */
@@ -1172,9 +1176,11 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				/* translators: 1: product name 2: quantity in stock */
 				$message = sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_name(), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ) );
+
 				/**
 				 * Filters message about product not having enough stock.
 				 *
+				 * @since 4.5.0
 				 * @param string     $message Message.
 				 * @param WC_Product $product_data Product data.
 				 * @param int        $stock_quantity Quantity remaining.
