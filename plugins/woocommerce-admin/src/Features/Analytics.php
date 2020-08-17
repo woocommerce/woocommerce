@@ -113,7 +113,7 @@ class Analytics {
 	 */
 	public function register_pages() {
 		$homepage_enabled = Loader::is_feature_enabled( 'homescreen' );
-		$report_pages = array(
+		$report_pages     = array(
 			array(
 				'id'       => 'woocommerce-analytics',
 				'title'    => __( 'Analytics', 'woocommerce-admin' ),
@@ -123,10 +123,10 @@ class Analytics {
 				'position' => 56, // After WooCommerce & Product menu items.
 			),
 			$homepage_enabled ? array(
-				'id'       => 'woocommerce-analytics-overview',
-				'title'    => __( 'Overview', 'woocommerce-admin' ),
+				'id'     => 'woocommerce-analytics-overview',
+				'title'  => __( 'Overview', 'woocommerce-admin' ),
 				'parent' => 'woocommerce-analytics',
-				'path'     => '/analytics/overview',
+				'path'   => '/analytics/overview',
 			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-revenue',
