@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3fedb486f9fb3c8ba2e6d4c7ef5efd1e",
+    "content-hash": "5b0c8903ebb5c38675bdc50029a51db8",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.0.2",
+            "version": "v2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "4502da4b2443fc1b61389cacc94c34876aca2b3d"
+                "reference": "66a5d150b3928be718d86696f85631a7f0b98a7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/4502da4b2443fc1b61389cacc94c34876aca2b3d",
-                "reference": "4502da4b2443fc1b61389cacc94c34876aca2b3d",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/66a5d150b3928be718d86696f85631a7f0b98a7b",
+                "reference": "66a5d150b3928be718d86696f85631a7f0b98a7b",
                 "shasum": ""
             },
             "require": {
@@ -40,7 +40,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2020-07-09T13:18:38+00:00"
+            "time": "2020-08-14T20:34:36+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
