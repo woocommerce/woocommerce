@@ -5,8 +5,14 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { setCheckbox, settingsPageSaveChanges, unsetCheckbox, verifyCheckboxIsSet, verifyCheckboxIsUnset } from '../../utils';
+import {
+	StoreOwnerFlow,
+	setCheckbox,
+	settingsPageSaveChanges,
+	unsetCheckbox,
+	verifyCheckboxIsSet,
+	verifyCheckboxIsUnset
+} from '@woocommerce/e2e-utils';
 
 describe( 'WooCommerce Products > Downloadable Products Settings', () => {
 	beforeAll( async () => {

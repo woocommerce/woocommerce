@@ -6,9 +6,9 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
-import modelRegistry from './factories';
+import modelRegistry from '../../utils/factories';
 import { SimpleProduct } from '@woocommerce/model-factories';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
