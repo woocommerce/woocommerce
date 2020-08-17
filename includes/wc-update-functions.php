@@ -701,6 +701,7 @@ function wc_update_230_options() {
 	// _money_spent and _order_count may be out of sync - clear them
 	delete_metadata( 'user', 0, '_money_spent', '', true );
 	delete_metadata( 'user', 0, '_order_count', '', true );
+	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
 	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
