@@ -8,7 +8,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "2.0.2",
+    "automattic/jetpack-autoloader": "2.2.0",
     "automattic/jetpack-constants": "1.4.0",
     "composer/installers": "1.7.0",
     "league/container": "3.3.1",
