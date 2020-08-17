@@ -4,7 +4,7 @@
 import { getResourceName } from '../utils';
 import TYPES from './action-types';
 
-export function setItemError( endpoint, query, error ) {
+export function setReportItemsError( endpoint, query, error ) {
 	const resourceName = getResourceName( endpoint, query );
 
 	return {
@@ -34,7 +34,7 @@ export function setReportStats( endpoint, query, stats ) {
 	};
 }
 
-export function setStatError( endpoint, query, error ) {
+export function setReportStatsError( endpoint, query, error ) {
 	const resourceName = getResourceName( endpoint, query );
 
 	return {
