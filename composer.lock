@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f8793eed4f210d74fcb69d1beda4eead",
+    "content-hash": "4926323812b77d5a63132532d33f4935",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -648,16 +648,16 @@
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.13",
+            "version": "1.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "d120f92da9ce0095fc71454e1f1f12dc04ddfaea"
+                "reference": "3d8d276a9956bdaa04cb25d26fcc6f5edf7744fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/d120f92da9ce0095fc71454e1f1f12dc04ddfaea",
-                "reference": "d120f92da9ce0095fc71454e1f1f12dc04ddfaea",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/3d8d276a9956bdaa04cb25d26fcc6f5edf7744fd",
+                "reference": "3d8d276a9956bdaa04cb25d26fcc6f5edf7744fd",
                 "shasum": ""
             },
             "require": {
@@ -685,7 +685,7 @@
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
             "abandoned": true,
-            "time": "2020-08-06T11:22:44+00:00"
+            "time": "2020-08-17T14:28:51+00:00"
         }
     ],
     "packages-dev": [
@@ -808,20 +808,6 @@
             "keywords": [
                 "constructor",
                 "instantiate"
-            ],
-            "funding": [
-                {
-                    "url": "https://www.doctrine-project.org/sponsorship.html",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://www.patreon.com/phpdoctrine",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Finstantiator",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-05-29T17:27:14+00:00"
         },
@@ -1084,12 +1070,6 @@
                 "duplicate",
                 "object",
                 "object graph"
-            ],
-            "funding": [
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-06-29T13:22:24+00:00"
         },
@@ -1816,6 +1796,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2019-09-17T06:23:10+00:00"
         },
         {
