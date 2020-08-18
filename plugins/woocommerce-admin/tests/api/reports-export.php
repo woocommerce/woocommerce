@@ -126,7 +126,6 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$status_url = $export['_links']['status'][0]['href'];
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'success', $export['status'] );
 		$this->assertEquals( 'Your report file is being generated.', $export['message'] );
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status_url );
 

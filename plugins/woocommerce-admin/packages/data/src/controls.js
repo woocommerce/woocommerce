@@ -17,9 +17,17 @@ const controls = {
 	FETCH_WITH_HEADERS( { options } ) {
 		return apiFetch( { ...options, parse: false } )
 			.then( ( response ) => {
-				return Promise.all( [ response.headers, response.json() ] );
+				return Promise.all( [
+					response.headers,
+					response.status,
+					response.json(),
+				] );
 			} )
-			.then( ( [ headers, data ] ) => ( { headers, data } ) );
+			.then( ( [ headers, status, data ] ) => ( {
+				headers,
+				status,
+				data,
+			} ) );
 	},
 };
 

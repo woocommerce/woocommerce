@@ -8,7 +8,7 @@ import { compose } from '@wordpress/compose';
 import { focus } from '@wordpress/dom';
 import { withDispatch } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
@@ -26,6 +26,7 @@ import {
 import {
 	getReportChartData,
 	getReportTableData,
+	EXPORT_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -152,7 +153,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const onClickDownload = () => {
-		const { initiateReportExport, title } = props;
+		const { createNotice, startExport, title } = props;
 		const params = Object.assign( {}, query );
 		const { data, totalResults } = items;
 		let downloadType = 'browser';
@@ -173,7 +174,34 @@ const ReportTable = ( props ) => {
 			);
 		} else {
 			downloadType = 'email';
-			initiateReportExport( endpoint, title, reportQuery );
+			startExport( endpoint, reportQuery )
+				.then( () =>
+					createNotice(
+						'success',
+						sprintf(
+							/* translators: %s = type of report */
+							__(
+								'Your %s Report will be emailed to you.',
+								'woocommerce-admin'
+							),
+							title
+						)
+					)
+				)
+				.catch( ( error ) =>
+					createNotice(
+						'error',
+						error.message ||
+							sprintf(
+								/* translators: %s = type of report */
+								__(
+									'There was a problem exporting your %s Report. Please try again.',
+									'woocommerce-admin'
+								),
+								title
+							)
+					)
+				);
 		}
 
 		recordEvent( 'analytics_table_download', {
@@ -600,10 +628,12 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { initiateReportExport } = dispatch( 'wc-api' );
+		const { startExport } = dispatch( EXPORT_STORE_NAME );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			initiateReportExport,
+			createNotice,
+			startExport,
 		};
 	} )
 )( ReportTable );
