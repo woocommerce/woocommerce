@@ -5,7 +5,10 @@
 /**
  * Internal dependencies
  */
-import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
+import {
+	CustomerFlow,
+	StoreOwnerFlow
+} from '@woocommerce/e2e-utils';
 
 describe( 'My account page', () => {
 	it( 'allows customer to login', async () => {

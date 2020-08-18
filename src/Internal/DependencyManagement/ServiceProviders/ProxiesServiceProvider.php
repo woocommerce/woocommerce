@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Proxies\ActionsProxy;
 
 /**
- * Service provider for the classes in the Automattic\WooCommerce\Tools\Proxies namespace.
+ * Service provider for the classes in the Automattic\WooCommerce\Proxies namespace.
  */
 class ProxiesServiceProvider extends AbstractServiceProvider {
 
