@@ -50,7 +50,7 @@ describe( `${ block.name } Block`, () => {
 		);
 
 		await expect( page ).toFill(
-			'textarea.wc-block-product-search__field',
+			'.wc-block-product-search__field input',
 			'I am a new placeholder'
 		);
 
@@ -59,7 +59,7 @@ describe( `${ block.name } Block`, () => {
 			'The Label'
 		);
 		await clearAndFillInput(
-			'textarea.wc-block-product-search__field',
+			'.wc-block-product-search__field input',
 			'The Placeholder'
 		);
 
