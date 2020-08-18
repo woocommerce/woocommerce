@@ -43,13 +43,6 @@ const renderBlockInContainers = ( {
 		return;
 	}
 
-	// @todo Remove Suspense compatibility fix once WP 5.2 is no longer supported.
-	// If Suspense is not available (WP 5.2), use a noop component instead.
-	const noopComponent = ( { children } ) => {
-		return <>{ children }</>;
-	};
-	const SuspenseComponent = Suspense || noopComponent;
-
 	// Use Array.forEach for IE11 compatibility.
 	Array.prototype.forEach.call( containers, ( el, i ) => {
 		const props = getProps( el, i );
@@ -62,11 +55,9 @@ const renderBlockInContainers = ( {
 
 		render(
 			<BlockErrorBoundary { ...errorBoundaryProps }>
-				<SuspenseComponent
-					fallback={ <div className="wc-block-placeholder" /> }
-				>
+				<Suspense fallback={ <div className="wc-block-placeholder" /> }>
 					<Block { ...props } attributes={ attributes } />
-				</SuspenseComponent>
+				</Suspense>
 			</BlockErrorBoundary>,
 			el
 		);
