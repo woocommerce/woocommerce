@@ -388,10 +388,6 @@ class Onboarding {
 					'label'   => __( 'Memberships', 'woocommerce-admin' ),
 					'product' => 958589,
 				),
-				'composite'       => array(
-					'label'   => __( 'Composite Products', 'woocommerce-admin' ),
-					'product' => 216836,
-				),
 				'bookings'        => array(
 					'label'   => __( 'Bookings', 'woocommerce-admin' ),
 					'product' => 390890,
