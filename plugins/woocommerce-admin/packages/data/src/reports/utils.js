@@ -18,7 +18,8 @@ import {
  * Internal dependencies
  */
 import * as reportsUtils from './utils';
-import { MAX_PER_PAGE, QUERY_DEFAULTS, STORE_NAME } from './constants';
+import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
+import { STORE_NAME } from './constants';
 
 /**
  * Add filters and advanced filters values to a query object.
