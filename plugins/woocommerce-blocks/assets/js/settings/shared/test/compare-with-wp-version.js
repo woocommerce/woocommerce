@@ -4,6 +4,7 @@
 import { compareWithWpVersion, setSetting } from '..';
 
 describe( 'compareWithWpVersion', () => {
+	let initial = true;
 	it.each`
 		version             | operator | result
 		${'5.3-beta1'}      | ${'>'}   | ${true}
@@ -18,6 +19,12 @@ describe( 'compareWithWpVersion', () => {
 			'and `5.3` is the version compared using `$operator`',
 		( { version, operator, result } ) => {
 			setSetting( 'wpVersion', version );
+			// deprecated caches messages once per session, so we only check
+			// console warn on initial call.
+			if ( initial ) {
+				expect( console ).toHaveWarned();
+			}
+			initial = false;
 			expect( compareWithWpVersion( '5.3', operator ) ).toBe( result );
 		}
 	);
