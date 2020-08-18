@@ -101,7 +101,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Enhancement: Move the WooCommerce > Coupons dashboard menu item to Marketing > Coupons. #4786
 - Tweak: Add education and travel to the onboarding industry types #4694
 - Tweak: Refactor Jetpack connection flows #4655
-- Tweak: Remove the Composite products option from the onboarding wizard #4703
 - Tweak: Refactor tax task to use promise chain #4683
 - Tweak: Add bundle install UI to Business Details step #4695
 - Tweak: Include Product Bundles and Product Add-ons as OBW product options #4705
