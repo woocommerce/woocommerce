@@ -36,9 +36,21 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 		$external_class = \League\Container\Container::class;
 
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "Can't use the container to register '" . $external_class . "', only objects in the Automattic\WooCommerce namespace are allowed for registration." );
+		$this->expectExceptionMessage( "You cannot add '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
 
 		$this->sut->add( $external_class );
+	}
+
+	/**
+	 * @testdox 'add' should throw an exception when trying to register a concrete class not in the WooCommerce root namespace.
+	 */
+	public function test_add_throws_when_trying_to_register_concrete_class_in_forbidden_namespace() {
+		$external_class = \League\Container\Container::class;
+
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "You cannot add concrete '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
+
+		$this->sut->add( DependencyClass::class, $external_class );
 	}
 
 	/**
@@ -57,9 +69,24 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_replace_throws_if_class_has_not_been_registered() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "ExtendedContainer::replace: The container doesn't have '" . DependencyClass::class . "' registered, please use 'add' instead of 'replace'." );
+		$this->expectExceptionMessage( "The container doesn't have '" . DependencyClass::class . "' registered, please use 'add' instead of 'replace'." );
 
 		$this->sut->replace( DependencyClass::class, null );
+	}
+
+	/**
+	 * @testdox 'replace'
+	 */
+	public function test_replace_throws_if_concrete_not_in_woocommerce_root_namespace() {
+		$instance = new DependencyClass();
+		$this->sut->add( DependencyClass::class, $instance, true );
+
+		$external_class = \League\Container\Container::class;
+
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "You cannot use concrete '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
+
+		$this->sut->replace( DependencyClass::class, $external_class );
 	}
 
 	/**
