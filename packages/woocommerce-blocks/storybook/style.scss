@@ -1,0 +1,32 @@
+/**
+ * External dependencies
+ */
+@import "@wordpress/components/build-style/style";
+
+// Use system font, consistent with WordPress core (wp-admin)
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+// screen-reader-text applied in WP environment
+
+/* Hide visually but not from screen readers */
+.screen-reader-text,
+.screen-reader-text span,
+.ui-helper-hidden-accessible {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	-webkit-clip-path: inset(50%);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal !important; /* many screen reader and browser combinations announce broken words as they would appear visually */
+}
+
+.button .screen-reader-text {
+	height: auto; /* Fixes a Safari+VoiceOver bug, see ticket #42006 */
+}
