@@ -332,13 +332,13 @@ export default compose(
 		const { hasActionableOrders } = props;
 		const {
 			getItems,
-			getItemsTotalCount,
 			getItemsError,
+			getItemsTotalCount,
 			isGetItemsRequesting,
-			getReportItems,
-			getReportItemsError,
-			isResolving,
-		} = select( REPORTS_STORE_NAME );
+		} = select( 'wc-api' );
+		const { getReportItems, getReportItemsError, isResolving } = select(
+			REPORTS_STORE_NAME
+		);
 		const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
 		const {
 			woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
