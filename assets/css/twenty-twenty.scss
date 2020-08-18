@@ -188,12 +188,17 @@ a.button {
 .woocommerce-info {
 	margin-bottom: 5rem;
 	margin-left: 0;
-	padding: 1.5rem 3rem;
 	background: #eee;
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+}
+
+.woocommerce-message,
+.woocommerce-error li,
+.woocommerce-info {
+	padding: 1.5rem 3rem;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -218,6 +223,10 @@ a.button {
 		&.button {
 			background: #111;
 		}
+	}
+
+	> li {
+		margin: 0;
 	}
 }
 
