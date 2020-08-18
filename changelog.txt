@@ -142,6 +142,11 @@
 * Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
 * Dev - Add query filter when searching for a table. #2886
 
+= 4.3.3 - 2020-08-14 =
+
+**WooCommerce REST API 1.0.10-pl-2**
+* Fix - Fix regression and restore backward compatibility for date-time and mixed datatypes. #239
+
 = 4.3.2 - 2020-08-10 =
 
 **WooCommerce**
