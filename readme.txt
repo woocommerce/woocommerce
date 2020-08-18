@@ -239,8 +239,8 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Removed the JETPACK_AUTOLOAD_DEV define. #27185
 * Fix - Fixed "virtual" and "downlodable" pointers on product walkthrough. #27145
 * Fix - Updated tested up to for WordPress 5.5. #27334
-* Dev - Update WooCommerce Admin version to v1.4.0-beta.3. #27214
-* Dev - Upgraded to the 2.x Jetpack Autoloader. #27123
+* Dev - Update WooCommerce Admin version to v1.4.0. #27378
+* Dev - Upgraded to v2.2 of Jetpack Autoloader. #27358
 * Dev - Update jest-preset-default version to ^6.2.0. #27090
 * Dev - Added a second $existing_meta_keys parameter to the woocommerce_duplicate_product_exclude_meta filter. #27038
 * Dev - Remove leftover note for translators in customer-completed-order.php. #26989
@@ -269,7 +269,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Added woocommerce_order_item_quantity filter to ReserveStock::reserve_stock_for_order(). #27251
 * Dev - Updated docs to make the type in docblock more specific. #27285
 
-**REST API 1.0.13**
+**REST API 1.0.15**
 * Enhancement - Introduced X-WP-Total header for product attributes GET endpoint listing the number of entries in the response. woocommerce/woocommerce-rest-api#171
 * Enhancement - Introduced X-WP-TotalPages header for product attributes GET endpoint listing the number of pages that can be fetched. woocommerce/woocommerce-rest-api#171
 * Enhancement - Introduced the modified option for orderby fetch requests in post based resources. woocommerce/woocommerce-rest-api#226
@@ -277,6 +277,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Ensured Action Scheduler transients are cleared by "Clear Transients" tool. woocommerce/woocommerce-rest-api#152
 * Fix - Corrected the schema datatype for coupon expiry_date, date_expires, and date_expires_gmt fields. woocommerce/woocommerce-rest-api#176
 * Fix - Query parameters are now passed correctly when using the batch product variation endpoints. woocommerce/woocommerce-rest-api#191
+* Fix - Fix regression and restore backward compatibility for date-time and mixed data types. woocommerce/woocommerce-rest-api#238
 
 **WooCommerce Admin 1.4.0**
 * Enhancement - Move the WooCommerce > Coupons dashboard menu item to Marketing > Coupons. #4786
@@ -291,9 +292,15 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Polyfill core-data saveUser() on WP 5.3.x. #4869
 * Fix - Product types step bugs in onboarding wizard. #4900
 * Fix - Center all descriptive text on onboarding wizard steps. #4902
+* Fix - Match the requires version to the exact WordPress version number in readme.txt. #4956
 * Fix - Change account required text on biz step in onboarding wizard. #4909
+* Fix - Fix industry args type in REST API. #4974
+* Fix - Update style on shipping banner. #4948
+* Fix - CSS Fixes for Business Features Popover ( parts 1&2 ). #4994
 * Dev - Add the experimental resolver to WCA data package. #4862
 * Dev - Fix linter errors. #4904
+* Dev - Fix usage of "package" tag in file headers. #4940
+* Dev - Update Jetpack Autoloader to match Woo Core. #4993
 
 **WooCommerce Blocks 3.0.0**
 * Build - Updated the automattic/jetpack-autoloader package to the 2.0 branch. #2847
