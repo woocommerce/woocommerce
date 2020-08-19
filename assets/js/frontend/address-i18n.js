@@ -104,7 +104,9 @@ jQuery( function( $ ) {
 
 				// Class changes.
 				field.removeClass( 'form-row-first form-row-last form-row-wide' );
-				field.addClass( fieldLocale.class.join( ' ' ) );
+				if(typeof fieldLocale.class !== 'undefined'){
+					field.addClass( fieldLocale.class.join( ' ' ) );
+				}
 			});
 
 			var fieldsets = $(
