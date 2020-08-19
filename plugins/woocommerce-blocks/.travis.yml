@@ -51,9 +51,9 @@ before_script:
           composer install --no-dev
           npm ci
           if [[ ! -z "$GUTENBERG_LATEST" ]]; then
-            JSON='{"config": { "SCRIPT_DEBUG": false } }'
+            JSON='{"config": { "SCRIPT_DEBUG": false, "JETPACK_AUTOLOAD_DEV": true } }'
           else
-            JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'", "config": { "SCRIPT_DEBUG": false } }'
+            JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'", "config": { "SCRIPT_DEBUG": false, "JETPACK_AUTOLOAD_DEV": true } }'
           fi
           echo $JSON > .wp-env.override.json
           npm run build:e2e-test
