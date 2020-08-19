@@ -37,22 +37,39 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Returns the amount of minutes to use for reserving stock stock.
+	 *
+	 * @param  integer $minutes amount of minutes to reserve stock.
+	 * @return integer $minutes filtered minutes.
+	 */
+	public function reservation_minutes( $minutes = 0 ) {
+
+		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+
+		/**
+		 * Filter can also be false to bypass stock reservation later.
+		 */
+		$minutes = apply_filters( 'woocommerce_reserve_stock_minutes', $minutes );
+
+		return $minutes;
+	}
+
+	/**
 	 * Query for any existing holds on stock for this item.
 	 *
 	 * @param \WC_Product $product Product to get reserved stock for.
-	 * @param integer     $exclude_order_id Optional order to exclude from the results.
+	 * @param integer     $exclude_customer_id Optional customer_id to exclude from the results.
 	 *
 	 * @return integer Amount of stock already reserved.
 	 */
-	public function get_reserved_stock( $product, $exclude_order_id = 0 ) {
+	public function get_reserved_stock( $product, $exclude_customer_id = 0 ) {
 		global $wpdb;
 
 		if ( ! $this->is_enabled() ) {
 			return 0;
 		}
-
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) );
+		return (int) $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_customer_id ) );
 	}
 
 	/**
@@ -64,23 +81,34 @@ final class ReserveStock {
 	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
 	public function reserve_stock_for_order( $order, $minutes = 0 ) {
-		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+		// Testing with resvering stock for customer ID instead of orders. Maintains compat with WC Blocks for now.
+		return $this->reserve_stock_for_customer( false, $minutes );
+	}
 
-		if ( ! $minutes || ! $this->is_enabled() ) {
+	/**
+	 * Put a temporary hold on stock for a customer using their ID.
+	 *
+	 * @throws ReserveStockException If stock cannot be reserved.
+
+	 * @param string $customer_id can be set on the manually, fallback to current customer session.
+	 * @param int    $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
+	 */
+	public function reserve_stock_for_customer( $customer_id = false, $minutes = 0 ) {
+		$minutes = $this->reservation_minutes( $minutes );
+
+		$customer_id = $customer_id ? $customer_id : WC()->session->get_customer_id();
+
+		if ( ! $customer_id || ! $minutes || ! $this->is_enabled() ) {
 			return;
 		}
 
 		try {
-			$items = array_filter(
-				$order->get_items(),
-				function( $item ) {
-					return $item->is_type( 'line_item' ) && $item->get_product() instanceof \WC_Product && $item->get_quantity() > 0;
-				}
-			);
-			$rows  = array();
+			$items = WC()->cart->get_cart();
+
+			$rows = array();
 
 			foreach ( $items as $item ) {
-				$product = $item->get_product();
+				$product = $item['data'];
 
 				if ( ! $product->is_in_stock() ) {
 					throw new ReserveStockException(
@@ -101,25 +129,18 @@ final class ReserveStock {
 
 				$managed_by_id = $product->get_stock_managed_by_id();
 
-				/**
-				 * Filter order item quantity.
-				 *
-				 * @param int|float             $quantity Quantity.
-				 * @param WC_Order              $order    Order data.
-				 * @param WC_Order_Item_Product $item Order item data.
-				 */
-				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
+				$item_quantity = $item['quantity'];
 
 				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
 			}
 
 			if ( ! empty( $rows ) ) {
 				foreach ( $rows as $product_id => $quantity ) {
-					$this->reserve_stock_for_product( $product_id, $quantity, $order, $minutes );
+					$this->reserve_stock_for_product( $product_id, $quantity, $customer_id, $minutes );
 				}
 			}
 		} catch ( ReserveStockException $e ) {
-			$this->release_stock_for_order( $order );
+			$this->release_stock_for_customer( $customer_id );
 			throw $e;
 		}
 	}
@@ -145,32 +166,56 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Release a temporary hold on stock for an order.
+	 *
+	 * @param string $customer_id ID of the customer.
+	 */
+	public function release_stock_for_customer( $customer_id ) {
+		global $wpdb;
+
+		if ( ! $customer_id && ! $this->is_enabled() ) {
+			return;
+		}
+
+		$wpdb->delete(
+			$wpdb->wc_reserved_stock,
+			array(
+				'customer_id' => $customer_id,
+			)
+		);
+	}
+
+	/**
 	 * Reserve stock for a product by inserting rows into the DB.
 	 *
 	 * @throws ReserveStockException If a row cannot be inserted.
 	 *
-	 * @param int       $product_id Product ID which is having stock reserved.
-	 * @param int       $stock_quantity Stock amount to reserve.
-	 * @param \WC_Order $order Order object which contains the product.
-	 * @param int       $minutes How long to reserve stock in minutes.
+	 * @param int    $product_id Product ID which is having stock reserved.
+	 * @param int    $stock_quantity Stock amount to reserve.
+	 * @param string $customer_id customer ID.
+	 * @param int    $minutes How long to reserve stock in minutes.
 	 */
-	private function reserve_stock_for_product( $product_id, $stock_quantity, $order, $minutes ) {
+	private function reserve_stock_for_product( $product_id, $stock_quantity, $customer_id, $minutes ) {
 		global $wpdb;
+
+		if ( ! $customer_id || ! $minutes ) {
+			return;
+		}
 
 		$product_data_store       = \WC_Data_Store::load( 'product' );
 		$query_for_stock          = $product_data_store->get_query_for_stock( $product_id );
-		$query_for_reserved_stock = $this->get_query_for_reserved_stock( $product_id, $order->get_id() );
+		$query_for_reserved_stock = $this->get_query_for_reserved_stock( $product_id, $customer_id );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"
-				INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
-				SELECT %d, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
+				INSERT INTO {$wpdb->wc_reserved_stock} ( `customer_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
+				SELECT %s, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
 				WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock FOR UPDATE ) >= %d
 				ON DUPLICATE KEY UPDATE `expires` = VALUES( `expires` ), `stock_quantity` = VALUES( `stock_quantity` )
 				",
-				$order->get_id(),
+				$customer_id,
 				$product_id,
 				$stock_quantity,
 				$minutes,
@@ -196,23 +241,22 @@ final class ReserveStock {
 	/**
 	 * Returns query statement for getting reserved stock of a product.
 	 *
-	 * @param int     $product_id Product ID.
-	 * @param integer $exclude_order_id Optional order to exclude from the results.
+	 * @param  int     $product_id Product ID.
+	 * @param  integer $exclude_customer_id Optional customer_id to exclude from the results.
 	 * @return string|void Query statement.
 	 */
-	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
+	private function get_query_for_reserved_stock( $product_id, $exclude_customer_id = 0 ) {
 		global $wpdb;
+
 		$query = $wpdb->prepare(
 			"
 			SELECT COALESCE( SUM( stock_table.`stock_quantity` ), 0 ) FROM $wpdb->wc_reserved_stock stock_table
-			LEFT JOIN $wpdb->posts posts ON stock_table.`order_id` = posts.ID
-			WHERE posts.post_status IN ( 'wc-checkout-draft', 'wc-pending' )
+			WHERE stock_table.`product_id` = %d
 			AND stock_table.`expires` > NOW()
-			AND stock_table.`product_id` = %d
-			AND stock_table.`order_id` != %d
+			AND stock_table.`customer_id` != %s
 			",
 			$product_id,
-			$exclude_order_id
+			$exclude_customer_id
 		);
 
 		/**
@@ -222,8 +266,8 @@ final class ReserveStock {
 		 * @since 4.5.0
 		 * @param string $query            The query for getting reserved stock of a product.
 		 * @param int    $product_id       Product ID.
-		 * @param int    $exclude_order_id Order to exclude from the results.
+		 * @param int    $exclude_customer_id customer_id to exclude from the results.
 		 */
-		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_order_id );
+		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_customer_id );
 	}
 }
