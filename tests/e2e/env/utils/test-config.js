@@ -17,9 +17,14 @@ const getTestConfig = () => {
 	const rawTestConfig = fs.readFileSync( testConfigFile );
 
 	let testConfig = JSON.parse(rawTestConfig);
-	testConfig.baseUrl = testConfig.url.substr(0, testConfig.url.length - 1);
 	let testPort = testConfig.url.match(/[0-9]+/);
-	testConfig.port = testPort[0] ? testPort[0] : '8084';
+	if ( testPort ) {
+		testConfig.baseUrl = testConfig.url.substr(0, testConfig.url.length - 1);
+		testConfig.port = testPort[0] ? testPort[0] : '8084';
+	} else {
+		testConfig.baseUrl = testConfig.url;
+		testConfig.port = '';
+	}
 	return testConfig;
 };
 
