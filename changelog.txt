@@ -148,6 +148,11 @@
 * Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
 * Dev - Add query filter when searching for a table. #2886
 
+= 4.3.3 - 2020-08-14 =
+
+**WooCommerce REST API 1.0.10-pl-2**
+* Fix - Fix regression and restore backward compatibility for date-time and mixed datatypes. #239
+
 = 4.3.2 - 2020-08-10 =
 
 **WooCommerce**
@@ -2991,7 +2996,7 @@
 * Fix - Make save button clickable in tax rate table after using autocomplete field.
 * Fix - Fix passed image_size variable in email templates.
 * Fix - Don't show purchase note to admin in emails.
-* Fix - Fix 'hide empty' setting in category widget .
+* Fix - Fix 'hide empty' setting in category widget.
 * Fix - Prevent notice in get_allowed_countries.
 * Fix - Prevent add-to-cart querystring in pagination links.
 * Tweak - Allow propagation in variation script.
@@ -3023,7 +3028,7 @@
 * Fix - Show the taxable country rather than base country in "estimated for" text during checkout.
 * Fix - Prevent select2 gaining focus on IOS7 scroll.
 * Fix - API - Fix indexes on decimal and thousand values.
-* Tweak - Clear cron jobs on uninstall .
+* Tweak - Clear cron jobs on uninstall.
 * Tweak - Don't disable place order button on checkout if a weak password is used.
 * Tweak - Added password strength meter in lost password and edit accout pages.
 * Tweak - Pass $args to woocommerce_dropdown_variation_attribute_options_html hook.
@@ -3093,10 +3098,10 @@
 
 = 2.4.11 - 2015-12-7 =
 * Fix - WordPress 4.4 support.
-* Fix - Removes Switzerland from EU VAT definition .
+* Fix - Removes Switzerland from EU VAT definition.
 * Fix - Fix auth endpoint urls.
 * Fix - To allow backslash in SKUs.
-* Fix - Sanity check for min/max quantity .
+* Fix - Sanity check for min/max quantity.
 * Fix - 4.4 - Shipping class menu display.
 * Fix - 4.4 - Admin menu icons and styling.
 * Fix - API - Variable product backorders editing.
@@ -3133,9 +3138,9 @@
 * Fix - Shipping priority for methods with colons in the name.
 * Fix - Saving of passwords with '&' inside.
 * Fix - Remove double escaping of coupon descriptions.
-* Fix - Settings API default value should not apply if value of option is 0 .
+* Fix - Settings API default value should not apply if value of option is 0.
 * Fix - Avoid potential PHP Fatals by avoiding premature script enqueues.
-* Fix - Pass mimes when checking file type .
+* Fix - Pass mimes when checking file type.
 * Fix - Reset shipping totals before calculation to prevent totals being used incorrectly.
 * Fix - API - Corrected how attributes terms saves non-latin characters.
 * Fix - API - Variations price sync.
@@ -3165,7 +3170,7 @@
 * Fix - Network activated plugins not showing up in system status report.
 * Fix - Tax fields showing on bulk/quick edit when disabled the tax system.
 * Fix - Tax status and tax class values within bulk edit.
-* Tweak - Allow bulk edit price to 0 .
+* Tweak - Allow bulk edit price to 0.
 * Tweak - Add filters to control "shipped via" text.
 * Tweak - Allow line breaks in non-variation attributes.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.

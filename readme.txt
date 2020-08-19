@@ -185,7 +185,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Add protection to run adjust methods only if product query. #27396
 * Dev - Stripped the internals of the DI Container to address plugin dependency conflicts it caused. #27395
 
-[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
 == Upgrade Notice ==
 

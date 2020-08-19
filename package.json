@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -9,11 +9,17 @@
   },
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
+  "config": {
+    "wp_org_slug": "woocommerce"
+  },
   "scripts": {
-    "build": "grunt && npm run makepot && npm run build:packages",
+    "build": "./bin/build-zip.sh",
+    "build:core": "grunt && npm run makepot",
+    "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
-    "build:zip": "./bin/build-zip.sh",
+    "build:zip": "npm run build && composer install && npm run build:dev",
+    "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
     "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",

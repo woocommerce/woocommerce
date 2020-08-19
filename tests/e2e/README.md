@@ -94,7 +94,7 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 - Run `composer install --no-dev`
 
-- Run `npm run build`
+- Run `npm run build:core`
 
 - Run the following command to build the test site using Docker: `npm run docker:up` and watch the site being built. Note that it may take a few minutes the first time you do that. The process is considered completed when the messages letting you know that WordPress was installed, WooCommerce was activated and users created will be displayed:
 
