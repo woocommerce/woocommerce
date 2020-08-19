@@ -102,9 +102,10 @@ jQuery( function( $ ) {
 					}
 				}
 
-				// Class changes.
-				field.removeClass( 'form-row-first form-row-last form-row-wide' );
+			
 				if(typeof fieldLocale.class !== 'undefined'){
+					// Class changes.
+					field.removeClass( 'form-row-first form-row-last form-row-wide' );
 					field.addClass( fieldLocale.class.join( ' ' ) );
 				}
 			});
