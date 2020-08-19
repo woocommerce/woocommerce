@@ -14,10 +14,11 @@
   },
   "scripts": {
     "build": "./bin/build-zip.sh",
-    "build:core": "grunt && npm run makepot && npm run build:packages",
+    "build:core": "grunt && npm run makepot",
+    "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
-    "build:zip": "npm run build && composer install && npm run build:core",
+    "build:zip": "npm run build && composer install && npm run build:dev",
     "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
