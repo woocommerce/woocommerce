@@ -48,17 +48,10 @@ class WC_Countries {
 	 */
 	public function get_countries() {
 		if ( empty( $this->countries ) ) {
-			$countries = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
+			$this->countries = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
 			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
-				if ( class_exists( 'Collator' ) ) {
-					$collator = new Collator( get_locale() );
-					$collator->asort( $countries, Collator::SORT_STRING );
-				} else {
-					uasort( $countries, 'wc_ascii_uasort_comparison' );
-				}
+				$this->countries = wc_asort_by_locale( $this->countries );
 			}
-
-			$this->countries = $countries;
 		}
 
 		return $this->countries;
