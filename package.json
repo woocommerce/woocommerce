@@ -18,6 +18,7 @@
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
     "build:zip": "npm run build && composer install && npm run build:core",
+    "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
     "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",
