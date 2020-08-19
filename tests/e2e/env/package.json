@@ -26,9 +26,8 @@
     "@wordpress/e2e-test-utils": "^4.6.0",
     "@wordpress/jest-preset-default": "^6.2.0",
     "app-root-path": "^3.0.0",
-    "jest": "^25.1.0",
-    "jest-puppeteer": "^4.4.0",
-    "puppeteer": "^2.1.1"
+    "jest": "^24.9.0",
+    "jest-puppeteer": "^4.4.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
