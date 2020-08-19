@@ -7,8 +7,9 @@
 
 namespace Automattic\WooCommerce;
 
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -27,52 +28,19 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
  * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
  * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
  */
-final class Container implements \Psr\Container\ContainerInterface {
-
-	/**
-	 * The list of service provider classes to register.
-	 *
-	 * @var string[]
-	 */
-	private $service_providers = array(
-		ProxiesServiceProvider::class,
-	);
-
-	/**
-	 * The underlying container.
-	 *
-	 * @var \League\Container\Container
-	 */
-	private $container;
-
-	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->container = new ExtendedContainer();
-
-		// Add ourselves as the shared instance of ContainerInterface,
-		// register everything else using service providers.
-
-		$this->container->share( \Psr\Container\ContainerInterface::class, $this );
-
-		foreach ( $this->service_providers as $service_provider_class ) {
-			$this->container->addServiceProvider( $service_provider_class );
-		}
-	}
-
+final class Container implements ContainerInterface {
 	/**
 	 * Finds an entry of the container by its identifier and returns it.
 	 *
 	 * @param string $id Identifier of the entry to look for.
 	 *
 	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
+	 * @throws ContainerExceptionInterface Error while retrieving the entry.
 	 *
 	 * @return mixed Entry.
 	 */
 	public function get( $id ) {
-		return $this->container->get( $id );
+		return null;
 	}
 
 	/**
@@ -87,6 +55,6 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 * @return bool
 	 */
 	public function has( $id ) {
-		return $this->container->has( $id );
+		return false;
 	}
 }
