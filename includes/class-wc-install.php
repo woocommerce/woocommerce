@@ -1005,12 +1005,12 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
-	`order_id` bigint(20) NOT NULL,
+	`customer_id` varchar(100) NOT NULL,
 	`product_id` bigint(20) NOT NULL,
 	`stock_quantity` double NOT NULL DEFAULT 0,
 	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY  (`order_id`, `product_id`)
+	PRIMARY KEY  (`customer_id`, `product_id`)
 ) $collate;
 		";
 
