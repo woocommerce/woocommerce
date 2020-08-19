@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @deprecated  2.6.0
  * @version     2.3.0
- * @package     WooCommerce/Classes/Shipping
+ * @package     WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 

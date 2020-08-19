@@ -4,7 +4,7 @@
  *
  * Standardises certain post data on save.
  *
- * @package WooCommerce/Classes/Data
+ * @package WooCommerce\Classes\Data
  * @version 2.2.0
  */
 

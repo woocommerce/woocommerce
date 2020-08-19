@@ -4,7 +4,7 @@
  *
  * Admin Settings API used by Integrations, Shipping Methods, and Payment Gateways.
  *
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 
 defined( 'ABSPATH' ) || exit;

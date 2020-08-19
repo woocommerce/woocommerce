@@ -1,13 +1,12 @@
 <?php
 /**
  * LegacyProxy class file.
- *
- * @package Automattic/WooCommerce/Tools/Proxies
  */
 
 namespace Automattic\WooCommerce\Proxies;
 
-use \Psr\Container\ContainerInterface as Container;
+use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
+use \Psr\Container\ContainerInterface;
 
 /**
  * Proxy class to access legacy WooCommerce functionality.
@@ -15,8 +14,6 @@ use \Psr\Container\ContainerInterface as Container;
  * This class should be used to interact with code outside the `src` directory, especially functions and classes
  * in the `includes` directory, unless a more specific proxy exists for the functionality at hand (e.g. `ActionsProxy`).
  * Idempotent functions can be executed directly.
- *
- * @package Automattic\WooCommerce\Tools\Proxies
  */
 class LegacyProxy {
 
@@ -38,7 +35,10 @@ class LegacyProxy {
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
 		if ( false !== strpos( $class_name, '\\' ) ) {
-			throw new \Exception( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use constructor injection or the instance of \\Psr\\Container\\ContainerInterface for that.' );
+			throw new \Exception(
+				'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' .
+				Definition::INJECTION_METHOD . ' method injection or the instance of ' . ContainerInterface::class . ' for that.'
+			);
 		}
 
 		// If a class has a dedicated method to obtain a instance, use it.

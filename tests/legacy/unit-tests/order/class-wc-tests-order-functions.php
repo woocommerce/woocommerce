@@ -2,7 +2,7 @@
 /**
  * Class WC_Tests_Order_Functions file.
  *
- * @package WooCommerce/Tests
+ * @package WooCommerce\Tests
  */
 
 use Automattic\Jetpack\Constants;

@@ -2,7 +2,7 @@
 /**
  * Shipping zone admin
  *
- * @package WooCommerce/Admin/Shipping
+ * @package WooCommerce\Admin\Shipping
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
