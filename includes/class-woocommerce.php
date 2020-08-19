@@ -920,7 +920,7 @@ final class WooCommerce {
 	 * @since 4.4
 	 */
 	public function call_function( $function_name, ...$parameters ) {
-		return wc_get_container()->get( LegacyProxy::class )->call_function( $function_name, ...$parameters );
+		return null;
 	}
 
 	/**
@@ -939,7 +939,7 @@ final class WooCommerce {
 	 * @since 4.4
 	 */
 	public function call_static( $class_name, $method_name, ...$parameters ) {
-		return wc_get_container()->get( LegacyProxy::class )->call_static( $class_name, $method_name, ...$parameters );
+		return null;
 	}
 
 	/**
@@ -958,6 +958,6 @@ final class WooCommerce {
 	 * @since 4.4
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
-		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name, ...$args );
+		return null;
 	}
 }
