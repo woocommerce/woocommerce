@@ -1752,8 +1752,12 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
-	$a = remove_accents( html_entity_decode( $a ) );
-	$b = remove_accents( html_entity_decode( $b ) );
+	// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
+	if ( function_exists( 'iconv' ) && defined( 'ICONV_IMPL' ) && @strcasecmp( ICONV_IMPL, 'unknown' ) !== 0 ) {
+		$a = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $a );
+		$b = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $b );
+	}
+	// phpcs:enable WordPress.PHP.NoSilencedErrors.Discouraged
 
 	return strcmp( $a, $b );
 }
