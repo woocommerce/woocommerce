@@ -344,7 +344,7 @@ function wc_reserve_stock_for_order( $order ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->reserve_stock_for_order( $order );
+		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_customer( $order->get_customer_id() );
 	}
 }
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
@@ -370,7 +370,7 @@ function wc_release_stock_for_order( $order ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_order( $order );
+		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_customer( $order->get_customer_id() );
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );

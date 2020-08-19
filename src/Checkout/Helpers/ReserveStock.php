@@ -58,11 +58,28 @@ final class ReserveStock {
 	 * Query for any existing holds on stock for this item.
 	 *
 	 * @param \WC_Product $product Product to get reserved stock for.
+	 * @param integer     $exclude_order_id Optional order to exclude from the results.
+	 *
+	 * @return integer Amount of stock already reserved.
+	 */
+	public function get_reserved_stock( $product, $exclude_order_id = 0 ) {
+
+		$order = $exclude_order_id ? wc_get_order( $exclude_order_id ) : 0;
+
+		$exclude_customer_id = $order instanceof WC_Order ? $order->get_customer_id() : 0;
+
+		return $this->get_reserved_stock_by_customer_id( $product, $exclude_customer_id );
+	}
+
+	/**
+	 * Query for any existing holds on stock for this item.
+	 *
+	 * @param \WC_Product $product Product to get reserved stock for.
 	 * @param integer     $exclude_customer_id Optional customer_id to exclude from the results.
 	 *
 	 * @return integer Amount of stock already reserved.
 	 */
-	public function get_reserved_stock( $product, $exclude_customer_id = 0 ) {
+	public function get_reserved_stock_by_customer_id( $product, $exclude_customer_id = 0 ) {
 		global $wpdb;
 
 		if ( ! $this->is_enabled() ) {
@@ -81,8 +98,10 @@ final class ReserveStock {
 	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
 	public function reserve_stock_for_order( $order, $minutes = 0 ) {
-		// Testing with resvering stock for customer ID instead of orders. Maintains compat with WC Blocks for now.
-		return $this->reserve_stock_for_customer( false, $minutes );
+		// Testing with reserving stock for customer ID instead of orders.
+		$customer_id = false; // We should get the customer ID from the order.
+
+		return $this->reserve_stock_for_customer( $customer_id, $minutes );
 	}
 
 	/**
@@ -93,7 +112,7 @@ final class ReserveStock {
 	 * @param string $customer_id can be set on the manually, fallback to current customer session.
 	 * @param int    $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
-	public function reserve_stock_for_customer( $customer_id = false, $minutes = 0 ) {
+	public function reserve_stock_for_customer( $customer_id = 0, $minutes = 0 ) {
 		$minutes = $this->reservation_minutes( $minutes );
 
 		$customer_id = $customer_id ? $customer_id : WC()->session->get_customer_id();
@@ -151,18 +170,7 @@ final class ReserveStock {
 	 * @param \WC_Order $order Order object.
 	 */
 	public function release_stock_for_order( $order ) {
-		global $wpdb;
-
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
-		$wpdb->delete(
-			$wpdb->wc_reserved_stock,
-			array(
-				'order_id' => $order->get_id(),
-			)
-		);
+		$this->release_stock_for_customer( $order->get_customer_id() );
 	}
 
 	/**
