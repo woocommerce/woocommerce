@@ -44,8 +44,6 @@ class WC_Query {
 			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-			add_filter( 'the_posts', array( $this, 'handle_get_posts' ) );
-			add_filter( 'found_posts', array( $this, 'adjust_posts_count' ), 10, 2 );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
@@ -355,11 +353,15 @@ class WC_Query {
 	/**
 	 * Handler for the 'the_posts' WP filter.
 	 *
-	 * @param array $posts Posts from WP Query.
+	 * @param array    $posts Posts from WP Query.
+	 * @param WP_Query $query Current query.
 	 *
 	 * @return array
 	 */
-	public function handle_get_posts( $posts ) {
+	public function handle_get_posts( $posts, $query ) {
+		if ( 'product_query' !== $query->get( 'wc_query' ) ) {
+			return $posts;
+		}
 		$this->adjust_total_pages();
 		$this->remove_product_query_filters( $posts );
 		return $posts;
@@ -511,7 +513,8 @@ class WC_Query {
 
 		// Additonal hooks to change WP Query.
 		add_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
-
+		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
+		add_filter( 'found_posts', array( $this, 'adjust_posts_count' ), 10, 2 );
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
 
