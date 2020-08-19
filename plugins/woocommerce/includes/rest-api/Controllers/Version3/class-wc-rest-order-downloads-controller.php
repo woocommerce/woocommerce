@@ -42,21 +42,25 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 	 * Register the routes for order downloads.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			'args' => array(
-				'order_id' => array(
-					'description' => __( 'The order ID.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				'args'   => array(
+					'order_id' => array(
+						'description' => __( 'The order ID.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -76,7 +80,7 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 	/**
 	 * Get downloadable items from an order.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array|WP_Error
 	 */
@@ -102,8 +106,8 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single download output for response.
 	 *
-	 * @param stdClass          $download Download object.
-	 * @param WP_REST_Request   $request Request object.
+	 * @param stdClass        $download Download object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $download, $request ) {
@@ -154,12 +158,12 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
-			'product' => array(
+			'product'    => array(
 				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $download->product_id ) ),
 			),
-			'order' => array(
+			'order'      => array(
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $download->order_id ) ),
-			)
+			),
 		);
 
 		return $links;
@@ -176,37 +180,37 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 			'title'      => 'order_download',
 			'type'       => 'object',
 			'properties' => array(
-				'download_url' => array(
+				'download_url'        => array(
 					'description' => __( 'Download file URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_id' => array(
+				'download_id'         => array(
 					'description' => __( 'Download ID (MD5).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'product_id' => array(
+				'product_id'          => array(
 					'description' => __( 'Downloadable product ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_name' => array(
+				'download_name'       => array(
 					'description' => __( 'Downloadable file name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_id' => array(
+				'order_id'            => array(
 					'description' => __( 'Order ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_key' => array(
+				'order_key'           => array(
 					'description' => __( 'Order key.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -218,18 +222,18 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'access_expires' => array(
+				'access_expires'      => array(
 					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'file' => array(
+				'file'                => array(
 					'description' => __( 'File details.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
-					'properties' => array(
+					'properties'  => array(
 						'name' => array(
 							'description' => __( 'File name.', 'woocommerce' ),
 							'type'        => 'string',
