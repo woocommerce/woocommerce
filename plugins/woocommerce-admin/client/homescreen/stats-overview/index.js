@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
 import {
 	TabPanel,
@@ -18,7 +19,7 @@ import {
 	MenuTitle,
 	Link,
 } from '@woocommerce/components';
-import { useUserPreferences } from '@woocommerce/data';
+import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
 
@@ -29,7 +30,7 @@ import './style.scss';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
 import { recordEvent } from '../../lib/tracks';
-import InstallJetpackCta from './install-jetpack-cta';
+import { InstallJetpackCTA } from './install-jetpack-cta';
 
 const { performanceIndicators } = getSetting( 'dataEndpoints', {
 	performanceIndicators: [],
@@ -45,6 +46,13 @@ export const StatsOverview = () => {
 		[ 'homepage_stats', 'hiddenStats' ],
 		DEFAULT_HIDDEN_STATS
 	);
+
+	const jetPackIsConnected = useSelect( ( select ) => {
+		return select( PLUGINS_STORE_NAME ).isJetpackConnected();
+	}, [] );
+
+	const homePageStats = userPrefs.homepage_stats || {};
+	const userDismissedJetpackInstall = homePageStats.installJetpackDismissed;
 
 	const toggleStat = ( stat ) => {
 		const nextHiddenStats = xor( hiddenStats, [ stat ] );
@@ -128,7 +136,10 @@ export const StatsOverview = () => {
 				>
 					{ ( tab ) => (
 						<Fragment>
-							<InstallJetpackCta />
+							{ ! jetPackIsConnected &&
+								! userDismissedJetpackInstall && (
+									<InstallJetpackCTA />
+								) }
 							<StatsList
 								query={ {
 									period: tab.name,

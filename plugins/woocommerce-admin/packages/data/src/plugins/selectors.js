@@ -19,3 +19,13 @@ export const isJetpackConnected = ( state ) => state.jetpackConnection;
 export const getJetpackConnectUrl = ( state, query ) => {
 	return state.jetpackConnectUrls[ query.redirect_url ];
 };
+
+export const getPluginInstallState = ( state, plugin ) => {
+	if ( state.active.includes( plugin ) ) {
+		return 'activated';
+	} else if ( state.installed.includes( plugin ) ) {
+		return 'installed';
+	}
+
+	return 'unavailable';
+};

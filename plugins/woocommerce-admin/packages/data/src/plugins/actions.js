@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { apiFetch, dispatch } from '@wordpress/data-controls';
+import { apiFetch, dispatch, select } from '@wordpress/data-controls';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -80,7 +81,7 @@ export function* installPlugins( plugins ) {
 		return results;
 	} catch ( error ) {
 		yield setError( 'installPlugins', error );
-		throw formatErrors( error );
+		throw new Error( formatErrors( error ) );
 	}
 }
 
@@ -107,7 +108,7 @@ export function* activatePlugins( plugins ) {
 		return results;
 	} catch ( error ) {
 		yield setError( 'activatePlugins', error );
-		throw formatErrors( error );
+		throw new Error( formatErrors( error ) );
 	}
 }
 
@@ -122,6 +123,52 @@ export function* installAndActivatePlugins( plugins ) {
 		return activations;
 	} catch ( error ) {
 		throw error;
+	}
+}
+
+export const createErrorNotice = ( errorMessage ) => {
+	return dispatch( 'core/notices', 'createNotice', errorMessage );
+};
+
+export function* connectToJetpack() {
+	const url = yield select( STORE_NAME, 'getJetpackConnectUrl', {
+		redirect_url: getAdminLink( 'admin.php?page=wc-admin' ),
+	} );
+	const error = yield select(
+		STORE_NAME,
+		'getPluginsError',
+		'getJetpackConnectUrl'
+	);
+
+	if ( error ) {
+		throw new Error( error );
+	} else {
+		return url;
+	}
+}
+
+export function* installJetpackAndConnect( errorAction ) {
+	try {
+		yield dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
+		yield dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
+
+		const url = yield dispatch( STORE_NAME, 'connectToJetpack' );
+		window.location = url;
+	} catch ( error ) {
+		yield errorAction( error.message );
+	}
+}
+
+export function* connectToJetpackWithFailureRedirect(
+	failureRedirect,
+	errorAction
+) {
+	try {
+		const url = yield dispatch( STORE_NAME, 'connectToJetpack' );
+		window.location = url;
+	} catch ( error ) {
+		yield errorAction( error.message );
+		window.location = failureRedirect;
 	}
 }
 

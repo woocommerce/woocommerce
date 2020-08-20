@@ -18,9 +18,33 @@ jest.mock( '../stats-list', () =>
 );
 // Mock the Install Jetpack CTA
 jest.mock( '../install-jetpack-cta', () => {
-	return jest
-		.fn()
-		.mockImplementation( () => <div>mocked install jetpack cta</div> );
+	return {
+		InstallJetpackCTA: jest
+			.fn()
+			.mockImplementation( () => <div>mocked install jetpack cta</div> ),
+	};
+} );
+
+jest.mock( '@woocommerce/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@woocommerce/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useUserPreferences: jest.fn(),
+	};
+} );
+
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
 } );
 
 jest.mock( '@woocommerce/data' );
