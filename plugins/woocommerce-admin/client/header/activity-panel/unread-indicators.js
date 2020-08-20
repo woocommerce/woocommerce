@@ -6,6 +6,8 @@ import {
 	REVIEWS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	USER_STORE_NAME,
+	ITEMS_STORE_NAME,
+	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
@@ -13,7 +15,6 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../analytics/settings/config';
-import { QUERY_DEFAULTS } from '../../wc-api/constants';
 import { getUnreadNotesCount } from './panels/inbox/utils';
 
 export function getUnreadNotes( select ) {
@@ -60,12 +61,9 @@ export function getUnreadNotes( select ) {
 }
 
 export function getUnreadOrders( select ) {
-	const {
-		getItems,
-		getItemsTotalCount,
-		getItemsError,
-		isGetItemsRequesting,
-	} = select( 'wc-api' );
+	const { getItems, getItemsTotalCount, getItemsError, isResolving } = select(
+		ITEMS_STORE_NAME
+	);
 	const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
 	const {
 		woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
@@ -89,7 +87,7 @@ export function getUnreadOrders( select ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalOrders = getItemsTotalCount( 'orders', ordersQuery );
 	const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
-	const isRequesting = isGetItemsRequesting( 'orders', ordersQuery );
+	const isRequesting = isResolving( 'getItems', [ 'orders', ordersQuery ] );
 
 	if ( isError || isRequesting ) {
 		return null;

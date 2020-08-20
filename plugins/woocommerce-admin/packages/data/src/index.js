@@ -21,6 +21,10 @@ export { REVIEWS_STORE_NAME } from './reviews';
 export { NOTES_STORE_NAME } from './notes';
 
 export { REPORTS_STORE_NAME } from './reports';
+
+export { ITEMS_STORE_NAME } from './items';
+export { getLeaderboard, searchItemsByString } from './items/utils';
+
 export {
 	getFilterQuery,
 	getSummaryNumbers,

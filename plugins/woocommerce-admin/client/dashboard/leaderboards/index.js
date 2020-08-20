@@ -6,14 +6,14 @@ import { Fragment, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { SelectControl } from '@wordpress/components';
-
+import { withSelect } from '@wordpress/data';
 import {
 	EllipsisMenu,
 	MenuItem,
 	MenuTitle,
 	SectionHeader,
 } from '@woocommerce/components';
-import { useUserPreferences } from '@woocommerce/data';
+import { useUserPreferences, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -21,7 +21,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import Leaderboard from '../../analytics/components/leaderboard';
-import withSelect from '../../wc-api/with-select';
 import './style.scss';
 
 const renderLeaderboardToggles = ( {
@@ -179,9 +178,7 @@ Leaderboards.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getItems, getItemsError, isGetItemsRequesting } = select(
-			'wc-api'
-		);
+		const { getItems, getItemsError } = select( ITEMS_STORE_NAME );
 		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', {
 			leaderboards: [],
 		} );
@@ -190,7 +187,6 @@ export default compose(
 			allLeaderboards,
 			getItems,
 			getItemsError,
-			isGetItemsRequesting,
 		};
 	} )
 )( Leaderboards );

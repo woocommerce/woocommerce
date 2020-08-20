@@ -3,17 +3,17 @@
  */
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
+import { searchItemsByString } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ReportError from '../components/report-error';
-import { searchItemsByString } from '../../wc-api/items/utils';
-import withSelect from '../../wc-api/with-select';
 import {
 	CurrencyContext,
 	getFilteredCurrencyInstance,

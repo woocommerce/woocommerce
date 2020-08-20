@@ -4,17 +4,18 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 import { map } from 'lodash';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
+import { ITEMS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import CategoryBreacrumbs from './breadcrumbs';
 import ReportTable from '../../components/report-table';
-import withSelect from '../../../wc-api/with-select';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class CategoriesReportTable extends Component {
@@ -226,8 +227,8 @@ export default compose(
 			return {};
 		}
 
-		const { getItems, getItemsError, isGetItemsRequesting } = select(
-			'wc-api'
+		const { getItems, getItemsError, isResolving } = select(
+			ITEMS_STORE_NAME
 		);
 		const tableQuery = {
 			per_page: -1,
@@ -237,10 +238,10 @@ export default compose(
 		const isCategoriesError = Boolean(
 			getItemsError( 'categories', tableQuery )
 		);
-		const isCategoriesRequesting = isGetItemsRequesting(
+		const isCategoriesRequesting = isResolving( 'getItems', [
 			'categories',
-			tableQuery
-		);
+			tableQuery,
+		] );
 
 		return {
 			categories,

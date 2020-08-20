@@ -4,6 +4,11 @@
 import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 
 /**
+ * Internal dependencies
+ */
+import { STORE_NAME } from './constants';
+
+/**
  * Returns leaderboard data to render a leaderboard table.
  *
  * @param  {Object} options                 arguments
@@ -24,9 +29,7 @@ export function getLeaderboard( options ) {
 		select,
 		filterQuery,
 	} = options;
-	const { getItems, getItemsError, isGetItemsRequesting } = select(
-		'wc-api'
-	);
+	const { getItems, getItemsError, isResolving } = select( STORE_NAME );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -47,7 +50,7 @@ export function getLeaderboard( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const leaderboards = getItems( endpoint, leaderboardQuery );
 
-	if ( isGetItemsRequesting( endpoint, leaderboardQuery ) ) {
+	if ( isResolving( 'getItems', [ endpoint, leaderboardQuery ] ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getItemsError( endpoint, leaderboardQuery ) ) {
 		return { ...response, isError: true };
@@ -66,9 +69,7 @@ export function getLeaderboard( options ) {
  * @return {Object}   Object containing API request information and the matching items.
  */
 export function searchItemsByString( select, endpoint, search ) {
-	const { getItems, getItemsError, isGetItemsRequesting } = select(
-		'wc-api'
-	);
+	const { getItems, getItemsError, isResolving } = select( STORE_NAME );
 
 	const items = {};
 	let isRequesting = false;
@@ -82,7 +83,7 @@ export function searchItemsByString( select, endpoint, search ) {
 		newItems.forEach( ( item, id ) => {
 			items[ id ] = item;
 		} );
-		if ( isGetItemsRequesting( endpoint, query ) ) {
+		if ( isResolving( 'getItems', [ endpoint, query ] ) ) {
 			isRequesting = true;
 		}
 		if ( getItemsError( endpoint, query ) ) {

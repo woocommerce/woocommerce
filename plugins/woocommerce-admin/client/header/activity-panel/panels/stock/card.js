@@ -9,6 +9,7 @@ import { compose } from '@wordpress/compose';
 import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
+import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { Link, ProductImage } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -75,13 +76,32 @@ class ProductStockCard extends Component {
 		this.setState( { quantity: event.target.value } );
 	}
 
-	onSubmit() {
-		const { product, updateProductStock } = this.props;
+	async onSubmit() {
+		const { product, updateProductStock, createNotice } = this.props;
 		const { quantity } = this.state;
 
 		this.setState( { editing: false, edited: true } );
 
-		updateProductStock( product, quantity );
+		const results = await updateProductStock( product, quantity );
+
+		if ( results.success ) {
+			createNotice(
+				'success',
+				sprintf(
+					__( '%s stock updated.', 'woocommerce-admin' ),
+					product.name
+				)
+			);
+		} else {
+			createNotice(
+				'error',
+				sprintf(
+					__( '%s stock could not be updated.', 'woocommerce-admin' ),
+					product.name
+				)
+			);
+		}
+
 		this.recordStockEvent( 'save', {
 			quantity,
 		} );
@@ -226,10 +246,12 @@ class ProductStockCard extends Component {
 
 export default compose(
 	withDispatch( ( dispatch ) => {
-		const { updateProductStock } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
+		const { updateProductStock } = dispatch( ITEMS_STORE_NAME );
 
 		return {
 			updateProductStock,
+			createNotice,
 		};
 	} )
 )( ProductStockCard );

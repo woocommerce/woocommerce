@@ -5,6 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
@@ -19,7 +20,12 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME, REPORTS_STORE_NAME } from '@woocommerce/data';
+import {
+	SETTINGS_STORE_NAME,
+	REPORTS_STORE_NAME,
+	ITEMS_STORE_NAME,
+	QUERY_DEFAULTS,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -28,9 +34,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
-import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../../analytics/settings/config';
-import withSelect from '../../../wc-api/with-select';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class OrdersPanel extends Component {
@@ -330,12 +334,9 @@ OrdersPanel.contextType = CurrencyContext;
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hasActionableOrders } = props;
-		const {
-			getItems,
-			getItemsError,
-			getItemsTotalCount,
-			isGetItemsRequesting,
-		} = select( 'wc-api' );
+		const { getItems, getItemsError, getItemsTotalCount } = select(
+			ITEMS_STORE_NAME
+		);
 		const { getReportItems, getReportItemsError, isResolving } = select(
 			REPORTS_STORE_NAME
 		);
@@ -363,10 +364,10 @@ export default compose(
 			const actionableOrders = Array.from(
 				getItems( 'orders', actionableOrdersQuery ).values()
 			);
-			const isRequestingActionable = isGetItemsRequesting(
+			const isRequestingActionable = isResolving( 'getItems', [
 				'orders',
-				actionableOrdersQuery
-			);
+				actionableOrdersQuery,
+			] );
 
 			if ( isRequestingActionable ) {
 				return {
@@ -434,7 +435,10 @@ export default compose(
 			allOrdersQuery
 		);
 		const isError = Boolean( getItemsError( 'orders', allOrdersQuery ) );
-		const isRequesting = isGetItemsRequesting( 'orders', allOrdersQuery );
+		const isRequesting = isResolving( 'getItems', [
+			'orders',
+			allOrdersQuery,
+		] );
 
 		return {
 			hasNonActionableOrders: totalNonActionableOrders > 0,
