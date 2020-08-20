@@ -6,7 +6,6 @@
 * Localization - Added postcode validation for Bosnia and Herzegovina. #27048
 * Localization - Added the postcode validation for Liechtenstein. #27059
 * Localization - Add i18n locale information for Liechtenstein, Switzerland and Austria. #27193
-* Fix - Added additional stock-based cart filters including woocommerce_cart_product_cannot_add_another_message, woocommerce_cart_product_out_of_stock_message and woocommerce_cart_product_not_enough_stock_message. #26439
 * Fix - Remove whitespace within a link. #26897
 * Fix - `get_review_count_for_product` return all comments count not only 'review' types #26928
 * Fix - Hidden field type is now supported by `woocommerce_form_field`. #27023
@@ -19,6 +18,7 @@
 * Fix - Fixes Japan zip code format issue (dash is now optional). #27244
 * Fix - Restore backward compatibility with WC 4.x and forward compatibility with WC 5.5. #27318
 * Fix - Switch to site locale before translating refund reason. #27323
+* Dev - Added additional stock-based cart filters including woocommerce_cart_product_cannot_add_another_message, woocommerce_cart_product_out_of_stock_message and woocommerce_cart_product_not_enough_stock_message. #26439
 * Dev - Changed text domain to `woocommerce` for REST API files. #27248
 * Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
 * Dev - Merge API Package into core. #27100
