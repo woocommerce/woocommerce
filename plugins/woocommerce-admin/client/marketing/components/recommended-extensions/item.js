@@ -2,13 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { ProductIcon } from '../../components/';
-import { recordEvent } from '../../../lib/tracks';
 import { getInAppPurchaseUrl } from '../../../lib/in-app-purchase';
 
 const RecommendedExtensionsItem = ( {

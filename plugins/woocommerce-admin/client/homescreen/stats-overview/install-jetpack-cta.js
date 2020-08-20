@@ -6,11 +6,11 @@ import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { PLUGINS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../lib/tracks';
 import { createErrorNotice } from '../../../packages/data/src/plugins/actions';
 
 const getJetpackInstallText = ( jetpackInstallState ) => {

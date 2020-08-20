@@ -24,11 +24,11 @@ import {
 import { partial } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../lib/tracks';
 import './style.scss';
 
 function getItems( props ) {

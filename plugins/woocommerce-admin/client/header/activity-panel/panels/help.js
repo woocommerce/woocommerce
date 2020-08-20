@@ -16,13 +16,13 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { compose } from 'redux';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import ActivityHeader from '../activity-header';
 import { getCountryCode } from '../../../dashboard/utils';
-import { recordEvent } from '../../../lib/tracks';
 import { getPaymentMethods } from '../../../task-list/tasks/payments/methods';
 
 export const SETUP_TASK_HELP_ITEMS_FILTER =

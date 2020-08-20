@@ -11,12 +11,12 @@ import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import '../style.scss';
-import { recordEvent } from '../../../lib/tracks';
 import DismissModal from '../dismiss-modal';
 import withSelect from '../../../wc-api/with-select';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';

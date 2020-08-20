@@ -23,6 +23,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -31,7 +32,6 @@ import './style.scss';
 import CartModal from '../dashboard/components/cart-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
-import { recordEvent } from '../lib/tracks';
 
 class TaskDashboard extends Component {
 	constructor( props ) {

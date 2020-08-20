@@ -8,11 +8,11 @@ import { Button, FormToggle } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { Flag, Form, TextControlWithAffixes } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../lib/tracks';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class ShippingRates extends Component {

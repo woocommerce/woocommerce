@@ -15,13 +15,13 @@ import {
 } from '@woocommerce/components';
 import { useUserPreferences } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import Leaderboard from '../../analytics/components/leaderboard';
 import withSelect from '../../wc-api/with-select';
-import { recordEvent } from '../../lib/tracks';
 import './style.scss';
 
 const renderLeaderboardToggles = ( {

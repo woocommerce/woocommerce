@@ -372,6 +372,14 @@ class Loader {
 		);
 
 		wp_register_script(
+			'wc-tracks',
+			self::get_url( 'tracks/index', 'js' ),
+			array(),
+			$js_file_version,
+			true
+		);
+
+		wp_register_script(
 			'wc-date',
 			self::get_url( 'date/index', 'js' ),
 			array( 'moment', 'wp-date', 'wp-i18n' ),
@@ -438,6 +446,7 @@ class Loader {
 				'wp-core-data',
 				'wc-components',
 				'wp-date',
+				'wc-tracks',
 			),
 			$js_file_version,
 			true
@@ -1305,6 +1314,7 @@ class Loader {
 				'wc-number',
 				'wc-date',
 				'wc-components',
+				'wc-tracks',
 			];
 			foreach ( $handles_for_injection as $handle ) {
 				$script = wp_scripts()->query( $handle, 'registered' );

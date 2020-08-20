@@ -30,6 +30,7 @@ import {
 	SETTINGS_STORE_NAME,
 	useUserPreferences,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -39,7 +40,6 @@ import ReportError from '../report-error';
 import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import withSelect from '../../../wc-api/with-select';
 import { extendTableData } from './utils';
-import { recordEvent } from '../../../lib/tracks';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';

@@ -9,13 +9,13 @@ import VisibilitySensor from 'react-visibility-sensor';
 import moment from 'moment';
 import classnames from 'classnames';
 import { H, Section } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import NoteAction from './action';
 import sanitizeHTML from '../../../../lib/sanitize-html';
-import { recordEvent } from '../../../../lib/tracks';
 import './style.scss';
 import { getScreenName } from '../../../../utils';
 

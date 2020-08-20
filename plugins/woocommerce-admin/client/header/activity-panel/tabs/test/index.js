@@ -3,13 +3,14 @@
  */
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
 import { Tabs } from '../';
-import { recordEvent } from '../../../../lib/tracks';
 
-jest.mock( 'lib/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 const generateTabs = () => {
 	return [ '0', '1', '2', '3' ].map( ( name ) => ( {
 		name,

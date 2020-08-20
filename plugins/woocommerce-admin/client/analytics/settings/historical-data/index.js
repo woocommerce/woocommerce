@@ -10,6 +10,7 @@ import moment from 'moment';
 import { NOTES_STORE_NAME } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 import { withSpokenMessages } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,7 +18,6 @@ import { withSpokenMessages } from '@wordpress/components';
 import { formatParams } from './utils';
 import HistoricalDataLayout from './layout';
 import { QUERY_DEFAULTS } from '../../../wc-api/constants';
-import { recordEvent } from '../../../lib/tracks';
 import withSelect from '../../../wc-api/with-select';
 
 class HistoricalData extends Component {

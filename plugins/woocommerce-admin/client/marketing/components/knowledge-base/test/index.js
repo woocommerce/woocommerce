@@ -4,15 +4,15 @@
 import { shallow, mount } from 'enzyme';
 import { Spinner } from '@wordpress/components';
 import { Card, Pagination, EmptyContent } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../../lib/tracks';
 import { KnowledgeBase } from '../index.js';
 import Slider from '../../slider';
 
-jest.mock( 'lib/tracks' );
+jest.mock( '@woocommerce/tracks' );
 
 const mockPosts = [
 	{

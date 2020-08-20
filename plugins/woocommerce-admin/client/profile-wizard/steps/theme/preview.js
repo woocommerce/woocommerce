@@ -7,11 +7,11 @@ import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';
 import { WebPreview } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../lib/tracks';
 
 const devices = [
 	{

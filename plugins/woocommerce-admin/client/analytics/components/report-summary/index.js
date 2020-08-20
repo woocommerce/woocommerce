@@ -14,13 +14,13 @@ import {
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import ReportError from '../report-error';
 import withSelect from '../../../wc-api/with-select';
-import { recordEvent } from '../../../lib/tracks';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 /**

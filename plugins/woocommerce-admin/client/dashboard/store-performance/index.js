@@ -17,13 +17,13 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import { getDateParamsFromQuery } from '@woocommerce/date';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import withSelect from '../../wc-api/with-select';
 import './style.scss';
-import { recordEvent } from '../../lib/tracks';
 import { CurrencyContext } from '../../lib/currency-context';
 import { getIndicatorData, getIndicatorValues } from './utils';
 

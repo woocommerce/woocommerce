@@ -8,6 +8,7 @@ import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -16,7 +17,6 @@ import './index.scss';
 import { config } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
-import { recordEvent } from '../../lib/tracks';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 

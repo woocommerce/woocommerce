@@ -28,11 +28,11 @@ import {
 	pluginNames,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../lib/tracks';
 import { getCountryCode, getCurrencyRegion } from '../../dashboard/utils';
 import { CurrencyContext } from '../../lib/currency-context';
 import { createNoticesFromResponse } from '../../lib/notices';

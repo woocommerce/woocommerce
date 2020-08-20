@@ -9,6 +9,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Card, Pagination, EmptyContent } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -16,7 +17,6 @@ import { Card, Pagination, EmptyContent } from '@woocommerce/components';
 import './style.scss';
 import { Slider } from '../../components';
 import { STORE_KEY } from '../../data/constants';
-import { recordEvent } from '../../../lib/tracks';
 
 const KnowledgeBase = ( {
 	posts,

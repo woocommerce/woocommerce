@@ -9,13 +9,13 @@ import PropTypes from 'prop-types';
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ActivityPanel from './activity-panel';
-import { recordEvent } from '../lib/tracks';
 
 class Header extends Component {
 	constructor( props ) {

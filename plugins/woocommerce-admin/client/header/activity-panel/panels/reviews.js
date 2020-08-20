@@ -20,6 +20,7 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { REVIEWS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -29,7 +30,6 @@ import ActivityHeader from '../activity-header';
 import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import sanitizeHTML from '../../../lib/sanitize-html';
 import withSelect from '../../../wc-api/with-select';
-import { recordEvent } from '../../../lib/tracks';
 
 class ReviewsPanel extends Component {
 	constructor() {

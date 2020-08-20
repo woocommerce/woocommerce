@@ -7,6 +7,8 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 - `@woocommerce/currency`: A class to display and work with currency values.
 - `@woocommerce/date`: A collection of utilities to display and work with date values.
 - `@woocommerce/navigation`: A collection of navigation-related functions for handling query parameter objects, serializing query parameters, updating query parameters, and triggering path changes.
+- `@woocommerce/tracks`: User event tracking utility functions for Automattic based projects.
+
 
 ## Working with existing packages
 

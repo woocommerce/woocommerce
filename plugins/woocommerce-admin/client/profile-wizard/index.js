@@ -18,6 +18,7 @@ import {
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import { QUERY_DEFAULTS } from '../wc-api/constants';
-import { recordEvent } from '../lib/tracks';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
 import withSelect from '../wc-api/with-select';

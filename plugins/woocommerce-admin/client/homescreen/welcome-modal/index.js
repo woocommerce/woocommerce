@@ -4,11 +4,11 @@
 import React, { useState, useEffect } from '@wordpress/element';
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../lib/tracks';
 import { LineChartIllustration } from './illustrations/line-chart';
 import { InboxIllustration } from './illustrations/inbox';
 import { PieChartIllustration } from './illustrations/pie-chart';

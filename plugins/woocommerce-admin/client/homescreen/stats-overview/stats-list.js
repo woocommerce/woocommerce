@@ -10,12 +10,12 @@ import {
 	SummaryNumberPlaceholder,
 } from '@woocommerce/components';
 import { getPersistedQuery } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import withSelect from '../../wc-api/with-select';
-import { recordEvent } from '../../lib/tracks';
 import { CurrencyContext } from '../../lib/currency-context';
 import {
 	getIndicatorData,

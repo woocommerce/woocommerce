@@ -22,6 +22,7 @@ import {
 import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -29,7 +30,6 @@ import { getNewPath } from '@woocommerce/navigation';
 import './style.scss';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
-import { recordEvent } from '../../lib/tracks';
 import { InstallJetpackCTA } from './install-jetpack-cta';
 
 const { performanceIndicators } = getSetting( 'dataEndpoints', {

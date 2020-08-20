@@ -21,11 +21,11 @@ import {
 	pluginNames,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../lib/tracks';
 import { getCountryCode } from '../../../dashboard/utils';
 import withSelect from '../../../wc-api/with-select';
 import { getPaymentMethods } from './methods';

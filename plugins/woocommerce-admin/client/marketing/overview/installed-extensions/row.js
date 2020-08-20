@@ -5,12 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { Button, ProductIcon } from '../../components';
-import { recordEvent } from '../../../lib/tracks';
 
 class InstalledExtensionRow extends Component {
 	constructor( props ) {

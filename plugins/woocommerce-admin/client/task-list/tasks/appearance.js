@@ -18,11 +18,11 @@ import {
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { queueRecordEvent, recordEvent } from '../../lib/tracks';
 import { WC_ADMIN_NAMESPACE } from '../../wc-api/constants';
 
 class Appearance extends Component {

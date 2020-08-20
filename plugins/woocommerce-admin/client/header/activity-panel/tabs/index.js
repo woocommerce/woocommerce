@@ -3,12 +3,12 @@
  */
 import { NavigableMenu } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { Tab } from '../tab';
-import { recordEvent } from '../../../lib/tracks';
 
 export const Tabs = ( {
 	tabs,

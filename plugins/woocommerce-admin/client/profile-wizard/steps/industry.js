@@ -10,13 +10,13 @@ import { withDispatch } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { H, Card, TextControl } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { getCurrencyRegion } from '../../dashboard/utils';
 import withSelect from '../../wc-api/with-select';
-import { recordEvent } from '../../lib/tracks';
 
 const onboarding = getSetting( 'onboarding', {} );
 

@@ -15,6 +15,7 @@ import {
 	PLUGINS_STORE_NAME,
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -25,7 +26,6 @@ import ManagementIcon from './images/management';
 import SalesTaxIcon from './images/sales_tax';
 import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
-import { recordEvent } from '../../../lib/tracks';
 
 class Benefits extends Component {
 	constructor( props ) {

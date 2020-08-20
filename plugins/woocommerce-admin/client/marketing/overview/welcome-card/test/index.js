@@ -3,14 +3,14 @@
  */
 import { shallow } from 'enzyme';
 import { Button } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../../lib/tracks';
 import { WelcomeCard } from '../index.js';
 
-jest.mock( 'lib/tracks' );
+jest.mock( '@woocommerce/tracks' );
 jest.mock( '@woocommerce/wc-admin-settings' );
 
 describe( 'WelcomeCard hide button', () => {

@@ -4,15 +4,15 @@
 import { shallow } from 'enzyme';
 import { Spinner } from '@wordpress/components';
 import { Card } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../../lib/tracks';
 import { RecommendedExtensions } from '../index.js';
 import RecommendedExtensionsItem from '../item.js';
 
-jest.mock( 'lib/tracks' );
+jest.mock( '@woocommerce/tracks' );
 
 const mockExtensions = [
 	{

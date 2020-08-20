@@ -3,15 +3,15 @@
  */
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { useUserPreferences } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { StatsOverview } from '../index';
 import StatsList from '../stats-list';
-import { recordEvent } from '../../../lib/tracks';
 
-jest.mock( 'lib/tracks' );
+jest.mock( '@woocommerce/tracks' );
 // Mock the stats list so that it can be tested separately.
 jest.mock( '../stats-list', () =>
 	jest.fn().mockImplementation( () => <div>mocked stats list</div> )

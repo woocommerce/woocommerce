@@ -9,12 +9,12 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { Card } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { recordEvent } from '../../../lib/tracks';
 import WelcomeImage from './images/welcome.svg';
 
 const WelcomeCard = ( { isHidden, updateOptions } ) => {

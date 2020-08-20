@@ -12,13 +12,13 @@ import { withDispatch } from '@wordpress/data';
 import { Card, H } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import withSelect from '../../../wc-api/with-select';
 import './style.scss';
-import { recordEvent } from '../../../lib/tracks';
 import ThemeUploader from './uploader';
 import ThemePreview from './preview';
 import { getPriceValue } from '../../../dashboard/utils';

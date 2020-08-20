@@ -11,6 +11,7 @@ import {
 	updateQueryString,
 } from '@woocommerce/navigation';
 import { Fragment } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -22,7 +23,6 @@ import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import { installActivateAndConnectWcpay } from './tasks/payments/methods';
-import { recordEvent } from '../lib/tracks';
 
 export function recordTaskViewEvent(
 	taskName,

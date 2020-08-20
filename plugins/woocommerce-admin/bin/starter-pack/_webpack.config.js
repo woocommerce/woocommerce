@@ -11,6 +11,7 @@ const requestToExternal = request => {
 		'@woocommerce/navigation': [ 'window', 'wc', 'navigation' ],
 		'@woocommerce/number': [ 'window', 'wc', 'number' ],
 		'@woocommerce/settings': [ 'window', 'wc', 'wcSettings' ],
+		'@woocommerce/tracks': [ 'window', 'wc', 'tracks' ],
 	};
 
 	if ( wcDepMap[ request ] ) {
@@ -27,6 +28,7 @@ const requestToHandle = request => {
 		'@woocommerce/navigation': 'wc-navigation',
 		'@woocommerce/number': 'wc-number',
 		'@woocommerce/settings': 'wc-settings',
+		'@woocommerce/tracks': 'wc-tracks',
 	};
 
 	if ( wcHandleMap[ request ] ) {

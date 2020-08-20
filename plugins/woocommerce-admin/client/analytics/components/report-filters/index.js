@@ -13,11 +13,11 @@ import {
 	getDateParamsFromQuery,
 	isoDateFormat,
 } from '@woocommerce/date';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../../lib/tracks';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class ReportFilters extends Component {

@@ -13,6 +13,7 @@ import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { Card } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { NOTES_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -20,7 +21,6 @@ import { NOTES_STORE_NAME } from '@woocommerce/data';
 import { QUERY_DEFAULTS } from '../../wc-api/constants';
 import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
-import { recordEvent } from '../../lib/tracks';
 
 import './style.scss';
 

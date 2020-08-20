@@ -16,6 +16,7 @@ import {
 	withPluginsHydration,
 	withOptionsHydration,
 } from '@woocommerce/data';
+import { recordPageView } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -24,7 +25,6 @@ import './style.scss';
 import { Controller, getPages, PAGES_FILTER } from './controller';
 import Header from '../header';
 import Notices from './notices';
-import { recordPageView } from '../lib/tracks';
 import TransientNotices from './transient-notices';
 import { REPORTS_FILTER } from '../analytics/report';
 
