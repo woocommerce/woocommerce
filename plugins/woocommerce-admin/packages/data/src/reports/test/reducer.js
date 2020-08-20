@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * Internal dependencies
  */
 import reducer from '../reducer';
