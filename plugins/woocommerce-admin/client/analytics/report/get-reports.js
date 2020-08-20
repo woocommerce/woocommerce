@@ -9,9 +9,9 @@ import { lazy } from '@wordpress/element';
  * Internal dependencies
  */
 import { getSetting } from '../../settings';
-import { REPORTS_FILTER } from './index';
 
 const manageStock = getSetting( 'manageStock', 'no' );
+const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 /**
  * Internal dependencies

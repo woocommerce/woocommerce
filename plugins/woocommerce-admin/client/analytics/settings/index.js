@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { Fragment, useEffect, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
+import { SectionHeader, ScrollTo } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -17,8 +17,6 @@ import './index.scss';
 import { config } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
-
-const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 
 const Settings = ( { createNotice, query } ) => {
 	const {
@@ -176,4 +174,4 @@ export default compose(
 			createNotice,
 		};
 	} )
-)( useFilters( SETTINGS_FILTER )( Settings ) );
+)( Settings );

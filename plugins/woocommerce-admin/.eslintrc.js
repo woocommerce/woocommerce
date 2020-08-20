@@ -4,7 +4,6 @@ module.exports = {
 		// temporary conversion to warnings until the below are all handled.
 		'@wordpress/i18n-translator-comments': 'warn',
 		'@wordpress/valid-sprintf': 'warn',
-		'react-hooks/rules-of-hooks': 'warn',
 		'jsdoc/check-tag-names': [
 			'error',
 			{ definedTags: [ 'jest-environment' ] },
