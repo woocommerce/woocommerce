@@ -124,7 +124,7 @@ class WC_Admin_Status {
 			self::remove_log();
 		}
 
-		include_once 'views/html-admin-page-status-logs.php';
+		include_once dirname( __FILE__ ) . 'views/html-admin-page-status-logs.php';
 	}
 
 	/**
@@ -142,7 +142,7 @@ class WC_Admin_Status {
 		$log_table_list = new WC_Admin_Log_Table_List();
 		$log_table_list->prepare_items();
 
-		include_once 'views/html-admin-page-status-logs-db.php';
+		include_once dirname( __FILE__ ) . 'views/html-admin-page-status-logs-db.php';
 	}
 
 	/**

@@ -30,7 +30,7 @@ class WC_Meta_Box_Product_Data {
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		include 'views/html-product-data-panel.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-panel.php';
 	}
 
 	/**
@@ -39,12 +39,12 @@ class WC_Meta_Box_Product_Data {
 	private static function output_tabs() {
 		global $post, $thepostid, $product_object;
 
-		include 'views/html-product-data-general.php';
-		include 'views/html-product-data-inventory.php';
-		include 'views/html-product-data-shipping.php';
-		include 'views/html-product-data-linked-products.php';
-		include 'views/html-product-data-attributes.php';
-		include 'views/html-product-data-advanced.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-general.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-inventory.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-shipping.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-linked-products.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-attributes.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-advanced.php';
 	}
 
 	/**
@@ -177,7 +177,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 
-		include 'views/html-product-data-variations.php';
+		include dirname( __FILE__ ) . 'views/html-product-data-variations.php';
 	}
 
 	/**

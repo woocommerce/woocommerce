@@ -104,22 +104,22 @@ class WC_Admin {
 		switch ( $screen->id ) {
 			case 'dashboard':
 			case 'dashboard-network':
-				include 'class-wc-admin-dashboard.php';
+				include dirname( __FILE__ ) . 'class-wc-admin-dashboard.php';
 				break;
 			case 'options-permalink':
-				include 'class-wc-admin-permalink-settings.php';
+				include dirname( __FILE__ ) . 'class-wc-admin-permalink-settings.php';
 				break;
 			case 'plugins':
-				include 'plugin-updates/class-wc-plugins-screen-updates.php';
+				include dirname( __FILE__ ) . 'plugin-updates/class-wc-plugins-screen-updates.php';
 				break;
 			case 'update-core':
-				include 'plugin-updates/class-wc-updates-screen-updates.php';
+				include dirname( __FILE__ ) . 'plugin-updates/class-wc-updates-screen-updates.php';
 				break;
 			case 'users':
 			case 'user':
 			case 'profile':
 			case 'user-edit':
-				include 'class-wc-admin-profile.php';
+				include dirname( __FILE__ ) . 'class-wc-admin-profile.php';
 				break;
 		}
 	}
@@ -223,7 +223,7 @@ class WC_Admin {
 
 			// get the preview email content.
 			ob_start();
-			include 'views/html-email-template-preview.php';
+			include dirname( __FILE__ ) . 'views/html-email-template-preview.php';
 			$message = ob_get_clean();
 
 			// create a new email.
