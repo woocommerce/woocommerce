@@ -35,6 +35,13 @@ global.jQuery = () => ( {
 	off: () => void null,
 } );
 
+global.IntersectionObserver = function() {
+	return {
+		observe: () => void null,
+		unobserve: () => void null,
+	};
+};
+
 const wordPressPackages = [
 	'blocks',
 	'components',

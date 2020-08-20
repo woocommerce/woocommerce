@@ -6,6 +6,7 @@ export * from './use-collection';
 export * from './use-collection-header';
 export * from './use-collection-data';
 export * from './use-container-queries';
+export * from './use-position-relative-to-viewport';
 export * from './use-previous';
 export * from './use-shallow-equal';
 export * from './use-store-products';

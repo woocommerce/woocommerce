@@ -36,7 +36,7 @@ import {
 	useCheckoutAddress,
 } from '@woocommerce/base-hooks';
 import {
-	ExpressCheckoutFormControl,
+	CheckoutExpressPayment,
 	PaymentMethods,
 } from '@woocommerce/base-components/payment-methods';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -219,7 +219,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		<>
 			<SidebarLayout className={ checkoutClassName }>
 				<Main className="wc-block-checkout__main">
-					{ cartNeedsPayment && <ExpressCheckoutFormControl /> }
+					{ cartNeedsPayment && <CheckoutExpressPayment /> }
 					<CheckoutForm onSubmit={ onSubmit }>
 						<FormStep
 							id="contact-fields"

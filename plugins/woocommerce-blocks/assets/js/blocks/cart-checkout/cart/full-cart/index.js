@@ -18,6 +18,7 @@ import {
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
+import { CartExpressPayment } from '@woocommerce/base-components/payment-methods';
 import {
 	useStoreCartCoupons,
 	useStoreCart,
@@ -59,6 +60,7 @@ const Cart = ( { attributes } ) => {
 		cartIsLoading,
 		cartItemsCount,
 		cartItemErrors,
+		cartNeedsPayment,
 		cartNeedsShipping,
 	} = useStoreCart();
 
@@ -141,12 +143,15 @@ const Cart = ( { attributes } ) => {
 					currency={ totalsCurrency }
 					values={ cartTotals }
 				/>
-				<CheckoutButton
-					link={ getSetting(
-						'page-' + attributes?.checkoutPageId,
-						false
-					) }
-				/>
+				<div className="wc-block-cart__payment-options">
+					{ cartNeedsPayment && <CartExpressPayment /> }
+					<CheckoutButton
+						link={ getSetting(
+							'page-' + attributes?.checkoutPageId,
+							false
+						) }
+					/>
+				</div>
 			</Sidebar>
 		</SidebarLayout>
 	);
