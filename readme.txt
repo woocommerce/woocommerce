@@ -199,7 +199,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Fixes Japan zip code format issue (dash is now optional). #27244
 * Fix - Restore backward compatibility with WC 4.x and forward compatibility with WC 5.5. #27318
 * Fix - Switch to site locale before translating refund reason. #27323
-* Dev - Added additional stock-based cart filters including woocommerce_cart_product_cannot_add_another_message, woocommerce_cart_product_out_of_stock_message and woocommerce_cart_product_not_enough_stock_messag$
+* Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
 * Dev - Changed text domain to `woocommerce` for REST API files. #27248
 * Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
 * Dev - Merge API Package into core. #27100
