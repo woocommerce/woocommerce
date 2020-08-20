@@ -793,7 +793,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					$message = sprintf(
 						/* translators: %s: status name */
 						__(
-							'The provided order query contains an order status that is not registered as a custom post status (status provided is %s). It is possible there is something removing any expected registered custom post status before the query is made.',
+							'The provided order query contains an order status that is not registered as a custom post status (status provided is %s). It is possible there is something removing an expected registered custom post status before the query is made.',
 							'woocommerce'
 						),
 						$post_status
