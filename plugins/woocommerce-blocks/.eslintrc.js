@@ -17,6 +17,7 @@ module.exports = {
 		jestPuppeteer: true,
 		fetchMock: true,
 		jQuery: 'readonly',
+		IntersectionObserver: 'readonly',
 	},
 	plugins: [ 'jest', 'woocommerce' ],
 	rules: {
