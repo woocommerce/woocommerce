@@ -232,7 +232,13 @@ export function getAllTasks( {
 
 	return applyFilters(
 		'woocommerce_admin_onboarding_task_list',
-		tasks,
+		tasks.sort( ( a, b ) => {
+			if ( a.completed === b.completed ) {
+				return 0;
+			}
+
+			return a.completed ? 1 : -1;
+		} ),
 		query
 	);
 }
