@@ -103,9 +103,9 @@ We have a detailed guide on [How To Update WooCommerce](https://docs.woocommerce
 
 = My site broke – what do I do? =
 
-Begin by diagnosing the issue using our helpful [troubleshooting guide](https://docs.woocommerce.com/documentation/get-help/troubleshooting-get-help/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing)
+Start by diagnosing the issue using our helpful [troubleshooting guide](https://docs.woocommerce.com/documentation/get-help/troubleshooting-get-help/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). 
 
-If you noticed an error after updating a theme or plugin, there might be a problem between it and WooCommerce. If the error occurred after updating WooCommerce, the conflict could be between WooCommerce and an outdated theme or plugin.
+If you noticed the error after updating a theme or plugin, there might be compatibility issues between it and WooCommerce. If the issue appeared after updating WooCommerce, there could be a conflict between WooCommerce and an outdated theme or plugin.
 
 In both instances, we recommend running a conflict test using [Health Check](https://docs.woocommerce.com/document/troubleshooting-using-health-check/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) (which allows you to disable themes and plugins without affecting your visitors) or troubleshooting the issue using a [staging site](https://docs.woocommerce.com/document/how-to-test-for-conflicts/#section-3?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
