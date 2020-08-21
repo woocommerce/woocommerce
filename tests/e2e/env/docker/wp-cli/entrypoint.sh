@@ -65,6 +65,7 @@ fi
 if [[ $WORDPRESS_INSTALLING ]];
 then
     wp post create \
+        --url=${URL} \
         --post_type=page \
         --post_status=publish \
         --post_title='Ready' \
