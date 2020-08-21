@@ -2,7 +2,7 @@
 /**
  * Testing WC_Widget functionality.
  *
- * @package WooCommerce/Tests/Widgets
+ * @package WooCommerce\Tests\Widgets
  */
 
 /**

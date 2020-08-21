@@ -4,7 +4,7 @@
  *
  * @author      WooThemes
  * @category    Core
- * @package     WooCommerce/Admin/Functions
+ * @package     WooCommerce\Admin\Functions
  * @version     2.3.0
  */
 if ( ! defined( 'ABSPATH' ) ) {

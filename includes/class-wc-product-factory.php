@@ -4,7 +4,7 @@
  *
  * The WooCommerce product factory creating the right product object.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 

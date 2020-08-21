@@ -9,7 +9,7 @@
  * - if something is being stored e.g. item total, store unrounded. This is so taxes can be recalculated later accurately.
  * - if calculating a total, round (if settings allow).
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.2.0
  */
 

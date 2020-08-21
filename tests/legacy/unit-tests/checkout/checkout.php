@@ -2,7 +2,7 @@
 /**
  * Checkout tests.
  *
- * @package WooCommerce|Tests|Checkout
+ * @package WooCommerce\Tests\Checkout
  */
 
 /**
@@ -279,7 +279,15 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$variation->set_manage_stock( true );
 		$variation->set_stock_quantity( 10 );
 		$variation->save();
-		WC()->cart->add_to_cart( $variation->get_id(), 9 );
+		WC()->cart->add_to_cart(
+			$variation->get_id(),
+			9,
+			0,
+			array(
+				'attribute_pa_colour' => 'red', // Set a value since this is an 'any' attribute.
+				'attribute_pa_number' => '2', // Set a value since this is an 'any' attribute.
+			)
+		);
 		$this->assertEquals( true, WC()->cart->check_cart_items() );
 
 		$checkout = WC_Checkout::instance();
@@ -299,7 +307,15 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$this->assertEquals( 9, wc_get_held_stock_quantity( $variation ) );
 
 		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $variation->get_stock_managed_by_id(), 2 );
+		WC()->cart->add_to_cart(
+			$variation->get_stock_managed_by_id(),
+			2,
+			0,
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
 
 		$this->assertEquals( false, WC()->cart->check_cart_items() );
 	}

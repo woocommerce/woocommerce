@@ -1,7 +1,7 @@
 /.* export-ignore
 bin export-ignore
 CODE_OF_CONDUCT.md export-ignore
-CHANGELOG.txt export-ignore
+changelog.txt export-ignore
 composer.* export-ignore
 Gruntfile.js export-ignore
 package.json export-ignore

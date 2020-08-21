@@ -10,6 +10,7 @@
  * Class WC_Tests_API_Orders
  */
 class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
+	use WC_REST_API_Complex_Meta;
 
 	/**
 	 * Array of order to track
@@ -76,12 +77,22 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
-		$request->set_query_params( array( 'orderby' => 'modified', 'order' => 'asc' ) );
+		$request->set_query_params(
+			array(
+				'orderby' => 'modified',
+				'order' => 'asc',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$orders   = $response->get_data();
 		$this->assertEquals( $order1->get_id(), $orders[0]['id'] );
 
-		$request->set_query_params( array( 'orderby' => 'modified', 'order' => 'desc' ) );
+		$request->set_query_params(
+			array(
+				'orderby' => 'modified',
+				'order' => 'desc',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$orders   = $response->get_data();
 		$this->assertEquals( $order2->get_id(), $orders[0]['id'] );
@@ -208,6 +219,20 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 						'method_title' => 'Flat rate',
 						'total'        => '10.00',
 						'instance_id'  => '1',
+						'meta_data'    => array(
+							array(
+								'key'   => 'string',
+								'value' => 'string_val',
+							),
+							array(
+								'key'   => 'integer',
+								'value' => 1,
+							),
+							array(
+								'key'   => 'array',
+								'value' => array( 1, 2 ),
+							),
+						),
 					),
 				),
 			)

@@ -2,7 +2,7 @@
 /**
  * Abstract Product importer
  *
- * @package  WooCommerce/Import
+ * @package  WooCommerce\Import
  * @version  3.1.0
  */
 

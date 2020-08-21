@@ -2,7 +2,7 @@
 /**
  * Contains tests for the COD Payment Gateway.
  *
- * @package WooCommerce/Tests/PaymentGateways
+ * @package WooCommerce\Tests\PaymentGateways
  */
 
 use Automattic\Jetpack\Constants;

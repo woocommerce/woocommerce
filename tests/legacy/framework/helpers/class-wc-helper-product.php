@@ -2,7 +2,7 @@
 /**
  * Product helpers.
  *
- * @package woocommerce/tests
+ * @package WooCommerce\Tests
  */
 
 /**

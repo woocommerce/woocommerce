@@ -2,7 +2,7 @@
 /**
  * Class for displaying plugin warning notifications and determining 3rd party plugin compatibility.
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     3.2.0
  */
 

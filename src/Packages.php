@@ -1,8 +1,6 @@
 <?php
 /**
  * Loads WooCommece packages from the /packages directory. These are packages developed outside of core.
- *
- * @package Automattic/WooCommerce
  */
 
 namespace Automattic\WooCommerce;

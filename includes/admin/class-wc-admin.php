@@ -3,7 +3,7 @@
  * WooCommerce Admin
  *
  * @class    WC_Admin
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.6.0
  */
 
@@ -35,7 +35,7 @@ class WC_Admin {
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
 
 		// Add body class for WP 5.3+ compatibility.
-		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ) );
+		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ), 9999 );
 	}
 
 	/**
@@ -318,7 +318,7 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function include_admin_body_class( $classes ) {
-		if ( false !== strpos( $classes, 'wc-wp-version-gte-53' ) ) {
+		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55' ), explode( ' ', $classes ), true ) ) {
 			return $classes;
 		}
 

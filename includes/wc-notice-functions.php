@@ -4,7 +4,7 @@
  *
  * Functions for error/message handling and display.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.1.0
  */
 

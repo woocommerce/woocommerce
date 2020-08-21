@@ -2,7 +2,7 @@
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @since   3.0.0
  * @version 3.0.0
  */

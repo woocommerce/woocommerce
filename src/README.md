@@ -1,5 +1,9 @@
 # WooCommerce `src` files
 
+## Important note
+
+The dependency injection container is disabled for now due to conflicts with plugins that use the same container package. Therefore all the content about registering and resolving classes, and interacting with legacy code, doesn't apply yet. It will be enabled at a later time.
+
 ## Table of contents
 
   * [Installing Composer](#installing-composer)
@@ -69,7 +73,7 @@ _Resolving_ a class means asking the container to provide an instance of the cla
 In principle, the container should be used to register and resolve all the classes in the `src` directory. The exception might be data-only classes that could be created the old way (using a plain `new` statement); but as a rule of thumb, the container should always be used.
 
 There are two ways to resolve registered classes, depending on from where they are resolved:
-* Classes in the `src` directory specify their dependencies as constructor arguments, which are automatically supplied by the container when the class is resolved (this is called _constructor injection_).
+* Classes in the `src` directory specify their dependencies as `init` arguments, which are automatically supplied by the container when the class is resolved (this is called _dependency injection_).
 * For code in the `includes` directory there's a `wc_get_container` function that will return the container, then its `get` method can be used to resolve any class.  
 
 ### Resolving classes
@@ -78,7 +82,7 @@ There are two ways to resolve registered classes, depending on from where they n
 
 #### 1. Other classes in the `src` directory
 
-When a class in the `src` directory depends on other one classes from the same directory, it should use constructor injection. This means specifying these dependencies as constructor arguments with appropriate type hints, and storing these in private variables, ready to be used when needed: 
+When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed: 
 
 ```php
 use TheService1Namespace\Service1;
@@ -89,7 +93,7 @@ class TheClassWithDependencies {
 
     private $service2;
 
-    public function __construct( Service1Class $service1, Service2Class $service2 ) {
+    public function init( Service1Class $service1, Service2Class $service2 ) {
         $this->$service1 = $service1;
         $this->$service2 = $service2;
     }
@@ -100,9 +104,9 @@ class TheClassWithDependencies {
 }
 ```
 
-Whenever the container is about to resolve `TheClassWithDependencies` it will also resolve `Service1Class` and `Service2Class` and pass them as constructor arguments to the requested class. If these service classes have constructor arguments too then those will also be appropriately resolved recursively.
+Whenever the container is about to resolve `TheClassWithDependencies` it will also resolve `Service1Class` and `Service2Class` and pass them as method arguments to the requested class. If these service classes have method arguments too then those will also be appropriately resolved recursively.
 
-A "lazy" approach is also possible if needed: you can specify the container itself as a constructor argument (using `\Psr\Container\ContainerInterface` as type hint), and use its `get` method to obtain the required instance at the appropriate time:
+A "lazy" approach is also possible if needed: you can specify the container itself as a method argument (using `\Psr\Container\ContainerInterface` as type hint), and use its `get` method to obtain the required instance at the appropriate time:
 
 ```php
 use TheService1Namespace\Service1;
@@ -110,7 +114,7 @@ use TheService1Namespace\Service1;
 class TheClassWithDependencies {
     private $container;
 
-    public function __construct( \Psr\Container\ContainerInterface $container ) {
+    public function init( \Psr\Container\ContainerInterface $container ) {
         $this->$container = $container;
     }
 
@@ -120,7 +124,7 @@ class TheClassWithDependencies {
 }
 ```
 
-In general, however, constructor injection is preferred and the lazy approach should be used only when really necessary.
+In general, however, method injection is strongly preferred and the lazy approach should be used only when really necessary.
 
 #### 2. Code in the `includes` directory
 
@@ -146,7 +150,7 @@ For a class to be resolvable using the container, it needs to have been previous
 
 The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
 
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as constructor arguments in detailed above. 
+First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
 
 Example of such a class:
 
@@ -158,7 +162,7 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 class TheClass {
     private $the_dependency;
     
-    public function __construct( TheDependencyClass $dependency ) {
+    public function init( TheDependencyClass $dependency ) {
         $this->the_dependency = $dependency;
     }
             
@@ -195,7 +199,7 @@ Worth noting:
 * If you look at [the service provider documentation](https://container.thephpleague.com/3.x/service-providers/) you will see that classes are registered using `this->getContainer()->add`. WooCommerce's `AbstractServiceProvider` adds a utility `add` method itself that serves the same purpose.
 * You can use `share` instead of `add` to register single-instance classes (the class is instantiated only once and cached, so the same instance is returned every time the class is resolved). 
 
-If the class being registered has constructor arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the constructor arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method. 
+If the class being registered has `init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method. 
 
 An alternative version of the service provider, which is used to register both the class and its dependency, and which takes advantage of `add_with_auto_arguments`, could be as follows:
 
@@ -259,7 +263,7 @@ Note that if the closure is defined as a function with arguments, the supplied p
 
 The container is intended for registering **only** classes in the `src` folder. There is a check in place to prevent classes outside the root `Automattic\Woocommerce` namespace from being registered.
 
-This implies that classes outside `src` can't be constructor-injected, and thus must not be used as type hints in constructor arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests. 
+This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests. 
 
 
 ## The `Internal` namespace
@@ -298,7 +302,7 @@ But how does using `LegacyProxy` help in making the code testable? The trick is 
 
 ### Using the legacy proxy
 
-`LegacyProxy` is a class that is registered in the container as any other class, so an instance can be obtained by using constructor injection:
+`LegacyProxy` is a class that is registered in the container as any other class, so an instance can be obtained by using dependency-injection:
 
 ```php
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -306,7 +310,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class TheClass {
     private $legacy_proxy;
 
-    public function __construct( LegacyProxy $legacy_proxy ) {
+    public function init( LegacyProxy $legacy_proxy ) {
         $this->legacy_proxy = $legacy_proxy;            
     }
 
@@ -316,7 +320,7 @@ class TheClass {
 }
 ``` 
 
-However, the recommended way (especially when no other dependencies need to be constructor-injected) is to use the equivalent methods in the `WooCommerce` class via the `WC()` helper, like this:
+However, the recommended way (especially when no other dependencies need to be dependency-injected) is to use the equivalent methods in the `WooCommerce` class via the `WC()` helper, like this:
 
 ```php
 class TheClass {
@@ -382,14 +386,14 @@ class ActionsProxy {
 }
 ```
 
-Note however that such a class would have to be explicitly constructor-injected (unless additional helper methods are defined in the `WooCommerce` class), and that you would need to create a pairing mock class (e.g. `MockableActionsProxy`) and replace the original registration using `wc_get_container()->replace( ActionsProxy::class, MockableActionsProxy::class )`.
+Note however that such a class would have to be explicitly dependency-injected (unless additional helper methods are defined in the `WooCommerce` class), and that you would need to create a pairing mock class (e.g. `MockableActionsProxy`) and replace the original registration using `wc_get_container()->replace( ActionsProxy::class, MockableActionsProxy::class )`.
 
 
 ## Defining new actions and filters
 
 WordPress' hooks (actions and filters) are a very powerful extensibility mechanism and it's the core tool that allows WooCommerce extensions to be developer. However it has been often (ab)used in the WooCommerce core codebase to drive internal logic, e.g. an action is triggered from within one class or function with the assumption that somewhere there's some other class or function that will handle it and continue whatever processing is supposed to happen.
 
-In order to keep the code as easy as reasonably possible to read and maintain, **hooks shouldn't be used to drive WooCommerce's internal logic and processes**. If you need the services of a given class or function, please call these directly (by using constructor injection or the legacy proxy as appropriate to get access to the desired service). **New hooks should be introduced only if they provide a valuable extension point for plugins**.
+In order to keep the code as easy as reasonably possible to read and maintain, **hooks shouldn't be used to drive WooCommerce's internal logic and processes**. If you need the services of a given class or function, please call these directly (by using dependency-injection or the legacy proxy as appropriate to get access to the desired service). **New hooks should be introduced only if they provide a valuable extension point for plugins**.
 
 As usual, there might be reasonable exceptions to this; but please keep this rule in mind whenever you consider creating a new hook.      
 
@@ -400,11 +404,11 @@ Unit tests are a fundamental tool to keep the code reliable and reasonably safe 
 
 **If you are a WooCommerce core team member or a contributor from other team at Automattic:** Please write unit tests to cover any code addition or modification that you make to the `src` directory (and ideally the same for the `includes` directory, by the way). There are always reasonable exceptions, but the rule of thumb is that all code should be covered by tests.
 
-**If you are an external contributor:** When adding or changing code on the WooCommerce codebase, and especially in the `src` directory, adding unit tests is recommended but not mandatory: no contributions will be rejected solely for lacking unit tests. However, please try to at least make the code easily testable by honoring the container and constructor injection mechanism, and by using the legacy proxy to interact with legacy code when needed. If you do so, the WooCommerce team or other contributors will be able to add the missing tests.     
+**If you are an external contributor:** When adding or changing code on the WooCommerce codebase, and especially in the `src` directory, adding unit tests is recommended but not mandatory: no contributions will be rejected solely for lacking unit tests. However, please try to at least make the code easily testable by honoring the container and dependency-injection mechanism, and by using the legacy proxy to interact with legacy code when needed. If you do so, the WooCommerce team or other contributors will be able to add the missing tests.     
 
 ### Mocking dependencies
 
-Since all the dependencies for classes in this directory are constructor-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.2/test-doubles.html):
+Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.2/test-doubles.html):
 
 ```php
 $dependency_mock = somehow_create_mock();
