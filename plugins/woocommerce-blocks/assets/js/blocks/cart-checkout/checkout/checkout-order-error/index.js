@@ -33,7 +33,7 @@ const cartItemErrorCodes = [
  * The error message is derived by the hydrated API request passed to the
  * checkout block.
  */
-const CheckoutError = () => {
+const CheckoutOrderError = () => {
 	const checkoutData = getSetting( 'checkoutData', {} );
 	const errorData = {
 		code: checkoutData.code || 'unknown',
@@ -124,4 +124,4 @@ const ErrorButton = ( { errorData } ) => {
 	);
 };
 
-export default CheckoutError;
+export default CheckoutOrderError;
