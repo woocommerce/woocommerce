@@ -86,7 +86,7 @@ class WC_Admin {
 		}
 
 		// Helper.
-		include_once $dir. 'helper/class-wc-helper.php';
+		include_once $dir . 'helper/class-wc-helper.php';
 
 		// Marketplace suggestions & related REST API.
 		include_once $dir . 'marketplace-suggestions/class-wc-marketplace-suggestions.php';
