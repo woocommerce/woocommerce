@@ -185,6 +185,10 @@ class Checkout extends AbstractBlock {
 	 * @param AssetDataRegistry $data_registry Data registry instance.
 	 */
 	protected function hydrate_from_api( AssetDataRegistry $data_registry ) {
+		// Print existing notices now, otherwise they are caught by the Cart
+		// Controller and converted to exceptions.
+		wc_print_notices();
+
 		if ( ! $data_registry->exists( 'cartData' ) ) {
 			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
 		}
