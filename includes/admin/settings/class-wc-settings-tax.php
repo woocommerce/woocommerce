@@ -82,7 +82,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$settings = array();
 
 		if ( '' === $current_section ) {
-			$settings = include dirname( __FILE__ ) . 'views/settings-tax.php';
+			$settings = __DIR__ . DIRECTORY_SEPARATOR . 'views/settings-tax.php';
 		}
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}

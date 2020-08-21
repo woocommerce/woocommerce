@@ -49,19 +49,21 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once dirname( __FILE__ ) . '/wc-admin-functions.php';
-		include_once dirname( __FILE__ ) . '/wc-meta-box-functions.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-post-types.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-menus.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-customize.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-notices.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-assets.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-api-keys.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-webhooks.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
+		$dir = __DIR__ . DIRECTORY_SEPARATOR;
+
+		include_once $dir . 'wc-admin-functions.php';
+		include_once $dir . 'wc-meta-box-functions.php';
+		include_once $dir . 'class-wc-admin-post-types.php';
+		include_once $dir . 'class-wc-admin-taxonomies.php';
+		include_once $dir . 'class-wc-admin-menus.php';
+		include_once $dir . 'class-wc-admin-customize.php';
+		include_once $dir . 'class-wc-admin-notices.php';
+		include_once $dir . 'class-wc-admin-assets.php';
+		include_once $dir . 'class-wc-admin-api-keys.php';
+		include_once $dir . 'class-wc-admin-webhooks.php';
+		include_once $dir . 'class-wc-admin-pointers.php';
+		include_once $dir . 'class-wc-admin-importers.php';
+		include_once $dir . 'class-wc-admin-exporters.php';
 
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
@@ -71,24 +73,24 @@ class WC_Admin {
 
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
+			include_once $dir . 'class-wc-admin-help.php';
 		}
 
 		// Setup/welcome.
 		if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			switch ( $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				case 'wc-setup':
-					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
+					include_once $dir . 'class-wc-admin-setup-wizard.php';
 					break;
 			}
 		}
 
 		// Helper.
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+		include_once $dir. 'helper/class-wc-helper.php';
 
 		// Marketplace suggestions & related REST API.
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once $dir . 'marketplace-suggestions/class-wc-marketplace-suggestions.php';
+		include_once $dir . 'marketplace-suggestions/class-wc-marketplace-updater.php';
 	}
 
 	/**
@@ -96,6 +98,7 @@ class WC_Admin {
 	 */
 	public function conditional_includes() {
 		$screen = get_current_screen();
+		$dir = __DIR__ . DIRECTORY_SEPARATOR;
 
 		if ( ! $screen ) {
 			return;
@@ -104,22 +107,22 @@ class WC_Admin {
 		switch ( $screen->id ) {
 			case 'dashboard':
 			case 'dashboard-network':
-				include dirname( __FILE__ ) . 'class-wc-admin-dashboard.php';
+				include $dir . 'class-wc-admin-dashboard.php';
 				break;
 			case 'options-permalink':
-				include dirname( __FILE__ ) . 'class-wc-admin-permalink-settings.php';
+				include $dir . 'class-wc-admin-permalink-settings.php';
 				break;
 			case 'plugins':
-				include dirname( __FILE__ ) . 'plugin-updates/class-wc-plugins-screen-updates.php';
+				include $dir . 'plugin-updates/class-wc-plugins-screen-updates.php';
 				break;
 			case 'update-core':
-				include dirname( __FILE__ ) . 'plugin-updates/class-wc-updates-screen-updates.php';
+				include $dir . 'plugin-updates/class-wc-updates-screen-updates.php';
 				break;
 			case 'users':
 			case 'user':
 			case 'profile':
 			case 'user-edit':
-				include dirname( __FILE__ ) . 'class-wc-admin-profile.php';
+				include $dir . 'class-wc-admin-profile.php';
 				break;
 		}
 	}
@@ -223,7 +226,7 @@ class WC_Admin {
 
 			// get the preview email content.
 			ob_start();
-			include dirname( __FILE__ ) . 'views/html-email-template-preview.php';
+			include __DIR__ . DIRECTORY_SEPARATOR . 'views/html-email-template-preview.php';
 			$message = ob_get_clean();
 
 			// create a new email.

@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . 'class-wc-integration-maxmind-database-service.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'class-wc-integration-maxmind-database-service.php';
 
 /**
  * WC Integration MaxMind Geolocation

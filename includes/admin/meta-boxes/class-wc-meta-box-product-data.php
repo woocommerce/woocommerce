@@ -30,21 +30,22 @@ class WC_Meta_Box_Product_Data {
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		include dirname( __FILE__ ) . 'views/html-product-data-panel.php';
+		include __DIR__ . DIRECTORY_SEPARATOR . 'views/html-product-data-panel.php';
 	}
 
 	/**
 	 * Show tab content/settings.
 	 */
 	private static function output_tabs() {
+		$dir = __DIR__ . DIRECTORY_SEPARATOR;
 		global $post, $thepostid, $product_object;
 
-		include dirname( __FILE__ ) . 'views/html-product-data-general.php';
-		include dirname( __FILE__ ) . 'views/html-product-data-inventory.php';
-		include dirname( __FILE__ ) . 'views/html-product-data-shipping.php';
-		include dirname( __FILE__ ) . 'views/html-product-data-linked-products.php';
-		include dirname( __FILE__ ) . 'views/html-product-data-attributes.php';
-		include dirname( __FILE__ ) . 'views/html-product-data-advanced.php';
+		include $dir . 'views/html-product-data-general.php';
+		include $dir . 'views/html-product-data-inventory.php';
+		include $dir . 'views/html-product-data-shipping.php';
+		include $dir . 'views/html-product-data-linked-products.php';
+		include $dir . 'views/html-product-data-attributes.php';
+		include $dir . 'views/html-product-data-advanced.php';
 	}
 
 	/**
@@ -177,7 +178,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 
-		include dirname( __FILE__ ) . 'views/html-product-data-variations.php';
+		include __DIR__ . DIRECTORY_SEPARATOR . 'views/html-product-data-variations.php';
 	}
 
 	/**

@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$metabox_class[] = $attribute->get_name();
 			}
 
-			include dirname( __FILE__ ) . 'html-product-attribute.php';
+			include __DIR__ . DIRECTORY_SEPARATOR . 'html-product-attribute.php';
 		}
 		?>
 	</div>
