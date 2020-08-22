@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy and deprecated functions are here to keep the WC_Abstract_Order clean.
  * This class will be removed in future versions.
  *
- * @version	 3.0.0
- * @package	 WooCommerce\Abstracts
- * @category	Abstract Class
- * @author	  WooThemes
+ * @version 3.0.0
+ * @package WooCommerce\Abstracts
+ * @category Abstract Class
+ * @author WooThemes
  */
 abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
