@@ -2,7 +2,7 @@
 /**
  * Class WC_Log_Handler_Email file
  *
- * @package WooCommerce\Log Handlers
+ * @package WooCommerce\Log_Handlers
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
