@@ -392,7 +392,7 @@ class WC_Install {
 	 * A brand new install has no version yet. Also treat empty installs as 'new'.
 	 *
 	 * @since 3.2.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_new_install() {
 		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
@@ -404,7 +404,7 @@ class WC_Install {
 	 * Is a DB update needed?
 	 *
 	 * @since 3.2.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );

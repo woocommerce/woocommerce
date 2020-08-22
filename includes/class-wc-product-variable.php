@@ -90,8 +90,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation regular price.
 	 *
-	 * @param string  $min_or_max Min or max price.
-	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string $min_or_max  Min or max price.
+	 * @param bool   $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $for_display = false ) {
@@ -104,8 +104,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation sale price.
 	 *
-	 * @param string  $min_or_max Min or max price.
-	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string $min_or_max  Min or max price.
+	 * @param bool   $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_sale_price( $min_or_max = 'min', $for_display = false ) {
@@ -118,8 +118,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation (active) price.
 	 *
-	 * @param string  $min_or_max Min or max price.
-	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string $min_or_max  Min or max price.
+	 * @param bool   $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_price( $min_or_max = 'min', $for_display = false ) {
@@ -514,7 +514,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Is a child in stock?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_is_in_stock() {
 		return $this->data_store->child_is_in_stock( $this );
@@ -524,7 +524,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Is a child on backorder?
 	 *
 	 * @since 3.3.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_is_on_backorder() {
 		return $this->data_store->child_has_stock_status( $this, 'onbackorder' );
@@ -533,7 +533,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Does a child have a weight set?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_weight() {
 		$transient_name = 'wc_child_has_weight_' . $this->get_id();
@@ -550,7 +550,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Does a child have dimensions set?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_dimensions() {
 		$transient_name = 'wc_child_has_dimensions_' . $this->get_id();
@@ -587,7 +587,7 @@ class WC_Product_Variable extends WC_Product {
 	 * selecting before adding to cart.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_options() {
 		return true;

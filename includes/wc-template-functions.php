@@ -1699,7 +1699,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 *
 	 * @param array           $args Args for the input.
 	 * @param WC_Product|null $product Product.
-	 * @param boolean         $echo Whether to return or echo|string.
+	 * @param bool            $echo Whether to return or echo|string.
 	 *
 	 * @return string
 	 */
@@ -2466,7 +2466,7 @@ if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	 *
 	 * @since 3.3.1
 	 * @param array $args Arguments.
-	 * @return boolean
+	 * @return bool
 	 */
 	function woocommerce_output_product_categories( $args = array() ) {
 		$args = wp_parse_args(

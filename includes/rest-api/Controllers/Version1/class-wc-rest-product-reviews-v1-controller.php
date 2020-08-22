@@ -287,7 +287,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Comment      $product_review Inserted object.
 		 * @param WP_REST_Request $request        Request object.
-		 * @param boolean         $creating       True when creating item, false when updating.
+		 * @param bool            $creating       True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_product_review", $product_review, $request, true );
 
@@ -338,9 +338,9 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WP_Comment         $comment      Inserted object.
+		 * @param WP_Comment      $comment   Inserted object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param bool            $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_product_review", $product_review, $request, true );
 
@@ -371,8 +371,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 *
 		 * Return false to disable trash support for the product review.
 		 *
-		 * @param boolean $supports_trash        Whether the object supports trashing.
-		 * @param WP_Post $product_review        The object being considered for trashing support.
+		 * @param bool    $supports_trash Whether the object supports trashing.
+		 * @param WP_Post $product_review The object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( 'rest_product_review_trashable', ( EMPTY_TRASH_DAYS > 0 ), $product_review );
 

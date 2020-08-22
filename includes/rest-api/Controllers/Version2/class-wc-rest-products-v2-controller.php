@@ -1375,7 +1375,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * Return false to disable trash support for the object.
 		 *
-		 * @param boolean $supports_trash Whether the object type support trashing.
+		 * @param bool    $supports_trash Whether the object type support trashing.
 		 * @param WC_Data $object         The object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );

@@ -24,7 +24,7 @@ class Autoloader {
 	 *
 	 * If the autoloader is not present, let's log the failure and display a nice admin notice.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function init() {
 		$autoloader = dirname( __DIR__ ) . '/vendor/autoload_packages.php';

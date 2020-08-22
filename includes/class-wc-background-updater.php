@@ -79,7 +79,7 @@ class WC_Background_Updater extends WC_Background_Process {
 	/**
 	 * Is the updater running?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_updating() {
 		return false === $this->is_queue_empty();

@@ -1407,7 +1407,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 2.6
 	 * @param WC_Payment_Token $token Payment token object.
-	 * @return boolean|int The new token ID or false if it failed.
+	 * @return bool|int The new token ID or false if it failed.
 	 */
 	public function add_payment_token( $token ) {
 		if ( empty( $token ) || ! ( $token instanceof WC_Payment_Token ) ) {

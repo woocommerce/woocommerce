@@ -360,7 +360,7 @@ abstract class WC_Data {
 	 *
 	 * @since 3.0.0
 	 * @param string $key Meta Key.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function meta_exists( $key = '' ) {
 		$this->maybe_read_meta_data();
@@ -624,7 +624,7 @@ abstract class WC_Data {
 	 * Set object read property.
 	 *
 	 * @since 3.0.0
-	 * @param boolean $read Should read?.
+	 * @param bool    $read Should read?.
 	 */
 	public function set_object_read( $read = true ) {
 		$this->object_read = (bool) $read;
@@ -634,7 +634,7 @@ abstract class WC_Data {
 	 * Get object read property.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function get_object_read() {
 		return (bool) $this->object_read;

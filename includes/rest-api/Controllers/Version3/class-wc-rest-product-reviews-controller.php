@@ -211,7 +211,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param P_REST_Request $request Full details about the request.
-	 * @return boolean|WP_Error
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {

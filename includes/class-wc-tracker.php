@@ -36,7 +36,7 @@ class WC_Tracker {
 	/**
 	 * Decide whether to send tracking data or not.
 	 *
-	 * @param boolean $override Should override?.
+	 * @param bool $override Should override?.
 	 */
 	public static function send_tracking_data( $override = false ) {
 		// Don't trigger this on AJAX Requests.

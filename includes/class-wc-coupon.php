@@ -404,7 +404,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.2.0
 	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function get_virtual( $context = 'view' ) {
 		return (bool) $this->get_prop( 'virtual', $context );
@@ -415,7 +415,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param float      $discounting_amount Amount the coupon is being applied to.
 	 * @param array|null $cart_item          Cart item being discounted if applicable.
-	 * @param boolean    $single             True if discounting a single qty item, false if its the line.
+	 * @param bool       $single             True if discounting a single qty item, false if its the line.
 	 * @return float Amount this coupon has discounted.
 	 */
 	public function get_discount_amount( $discounting_amount, $cart_item = null, $single = false ) {
@@ -709,7 +709,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Set coupon virtual state.
 	 *
-	 * @param boolean $virtual Whether it is virtual or not.
+	 * @param bool $virtual Whether it is virtual or not.
 	 * @since 3.2.0
 	 */
 	public function set_virtual( $virtual ) {

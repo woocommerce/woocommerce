@@ -313,7 +313,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 *
 	 * @since 3.0.0
 	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return boolean|string true, false, or parent.
+	 * @return bool|string true, false, or parent.
 	 */
 	public function get_manage_stock( $context = 'view' ) {
 		$value = $this->get_prop( 'manage_stock', $context );
@@ -528,7 +528,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Variations are mapped to specific attributes unlike products, and the return
 	 * value of ->get_attributes differs. Therefore this returns false.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_attributes() {
 		return false;

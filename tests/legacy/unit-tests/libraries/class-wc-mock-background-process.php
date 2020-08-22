@@ -38,7 +38,7 @@ class WC_Mock_Background_Process extends WC_Background_Process {
 	/**
 	 * Returns whether queue is empty or not.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_queue_empty() {
 		return parent::is_queue_empty();

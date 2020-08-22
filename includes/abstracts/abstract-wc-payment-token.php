@@ -194,7 +194,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Marks the payment as default or non-default.
 	 *
 	 * @since 2.6.0
-	 * @param boolean $is_default True or false.
+	 * @param bool $is_default True or false.
 	 */
 	public function set_default( $is_default ) {
 		$this->set_prop( 'is_default', (bool) $is_default );
@@ -210,7 +210,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Returns if the token is marked as default.
 	 *
 	 * @since 2.6.0
-	 * @return boolean True if the token is default
+	 * @return bool True if the token is default
 	 */
 	public function is_default() {
 		return (bool) $this->get_prop( 'is_default', 'view' );
@@ -220,7 +220,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Validate basic token info (token and type are required).
 	 *
 	 * @since 2.6.0
-	 * @return boolean True if the passed data is valid
+	 * @return bool True if the passed data is valid
 	 */
 	public function validate() {
 		$token = $this->get_prop( 'token', 'edit' );

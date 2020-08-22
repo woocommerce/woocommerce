@@ -35,7 +35,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Return if this attribute is a taxonomy.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_taxonomy() {
 		return 0 < $this->get_id();

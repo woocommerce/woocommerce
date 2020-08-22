@@ -49,7 +49,7 @@ class Packages {
 	 * Checks a package exists by looking for it's directory.
 	 *
 	 * @param string $package Package name.
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function package_exists( $package ) {
 		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );

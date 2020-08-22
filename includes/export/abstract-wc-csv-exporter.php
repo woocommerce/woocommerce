@@ -142,7 +142,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 * @param string $column_id ID of the column being exported.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_column_exporting( $column_id ) {
 		$column_id         = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;

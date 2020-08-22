@@ -531,7 +531,7 @@ class WC_Emails {
 	 * Is customer detail field valid?
 	 *
 	 * @param array $field Field data to check if is valid.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function customer_detail_field_is_valid( $field ) {
 		return isset( $field['label'] ) && ! empty( $field['value'] );

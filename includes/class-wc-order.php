@@ -947,7 +947,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Returns true if the order has a billing address.
 	 *
 	 * @since 3.0.4
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_billing_address() {
 		return $this->get_billing_address_1() || $this->get_billing_address_2();
@@ -957,7 +957,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Returns true if the order has a shipping address.
 	 *
 	 * @since 3.0.4
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_shipping_address() {
 		return $this->get_shipping_address_1() || $this->get_shipping_address_2();

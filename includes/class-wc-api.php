@@ -72,7 +72,7 @@ class WC_API extends WC_Legacy_API {
 	 * Return if the rest API classes were already loaded.
 	 *
 	 * @since 3.7.0
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function is_rest_api_loaded() {
 		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );

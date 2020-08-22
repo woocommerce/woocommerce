@@ -419,7 +419,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_weight( $product ) {
 		global $wpdb;
@@ -440,7 +440,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
@@ -461,7 +461,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_is_in_stock( $product ) {
 		return $this->child_has_stock_status( $product, 'instock' );
@@ -474,7 +474,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param string     $status 'instock', 'outofstock', or 'onbackorder'.
 	 *
 	 * @since 3.3.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;

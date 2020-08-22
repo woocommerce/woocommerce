@@ -216,7 +216,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param P_REST_Request $request Full details about the request.
-	 * @return boolean|WP_Error
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'batch' );
@@ -426,7 +426,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Term         $term      Inserted Term object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating term, false when updating.
+		 * @param bool            $creating  True when creating term, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, true );
 
@@ -515,7 +515,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Term         $term      Inserted Term object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating term, false when updating.
+		 * @param bool            $creating  True when creating term, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, false );
 

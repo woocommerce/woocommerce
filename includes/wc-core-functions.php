@@ -2264,7 +2264,7 @@ function wc_is_external_resource( $url ) {
  *
  * @since 3.3.0
  * @param string|array $theme Theme name or array of theme names to check.
- * @return boolean
+ * @return bool
  */
 function wc_is_active_theme( $theme ) {
 	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
@@ -2273,7 +2273,7 @@ function wc_is_active_theme( $theme ) {
 /**
  * Is the site using a default WP theme?
  *
- * @return boolean
+ * @return bool
  */
 function wc_is_wp_default_theme_active() {
 	return wc_is_active_theme(

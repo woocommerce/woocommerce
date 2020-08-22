@@ -78,7 +78,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * card_type     - string Card type (visa, mastercard, etc)
 	 *
 	 * @since 2.6.0
-	 * @return boolean True if the passed data is valid
+	 * @return bool True if the passed data is valid
 	 */
 	public function validate() {
 		if ( false === parent::validate() ) {

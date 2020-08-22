@@ -57,11 +57,11 @@ class WC_Tax {
 	/**
 	 * Calculate tax for a line.
 	 *
-	 * @param float   $price              Price to calc tax on.
-	 * @param array   $rates              Rates to apply.
-	 * @param boolean $price_includes_tax Whether the passed price has taxes included.
-	 * @param boolean $deprecated         Whether to suppress any rounding from taking place. No longer used here.
-	 * @return array                       Array of rates + prices after tax.
+	 * @param float $price              Price to calc tax on.
+	 * @param array $rates              Rates to apply.
+	 * @param bool  $price_includes_tax Whether the passed price has taxes included.
+	 * @param bool  $deprecated         Whether to suppress any rounding from taking place. No longer used here.
+	 * @return array                    Array of rates + prices after tax.
 	 */
 	public static function calc_tax( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
 		if ( $price_includes_tax ) {

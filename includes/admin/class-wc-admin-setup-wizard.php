@@ -79,7 +79,7 @@ class WC_Admin_Setup_Wizard {
 	 * The theme "extra" should only be shown if the current user can modify themes
 	 * and the store doesn't already have a WooCommerce theme.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_theme() {
 		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! wc_is_wp_default_theme_active();
@@ -115,7 +115,7 @@ class WC_Admin_Setup_Wizard {
 	 * Should we show the MailChimp install option?
 	 * True only if the user can install plugins.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_mailchimp() {
 		return current_user_can( 'install_plugins' );
@@ -126,7 +126,7 @@ class WC_Admin_Setup_Wizard {
 	 * True only if the user can install plugins,
 	 * and up until the end date of the recommendation.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_facebook() {
 		return current_user_can( 'install_plugins' );
@@ -136,7 +136,7 @@ class WC_Admin_Setup_Wizard {
 	 * Is the WooCommerce Admin actively included in the WooCommerce core?
 	 * Based on presence of a basic WC Admin function.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function is_wc_admin_active() {
 		return function_exists( 'wc_admin_url' );
@@ -149,7 +149,7 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @see WC_Admin_Setup_Wizard::$wc_admin_plugin_minimum_wordpress_version
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_wc_admin() {
 		$wordpress_minimum_met = version_compare( get_bloginfo( 'version' ), $this->wc_admin_plugin_minimum_wordpress_version, '>=' );
@@ -159,7 +159,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Should we show the new WooCommerce Admin onboarding experience?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_wc_admin_onboarding() {
 		// As of WooCommerce 4.1, all new sites should use the latest OBW from wc-admin package.
@@ -171,7 +171,7 @@ class WC_Admin_Setup_Wizard {
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function should_show_recommended_step() {
 		return $this->should_show_theme()
@@ -1375,7 +1375,7 @@ class WC_Admin_Setup_Wizard {
 	 * Is PayPal currency supported.
 	 *
 	 * @param string $currency Currency code.
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function is_paypal_supported_currency( $currency ) {
 		$supported_currencies = array(
@@ -1857,7 +1857,7 @@ class WC_Admin_Setup_Wizard {
 	 * Is it a featured service?
 	 *
 	 * @param array $service Service info array.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_featured_service( $service ) {
 		return ! empty( $service['featured'] );
@@ -1867,7 +1867,7 @@ class WC_Admin_Setup_Wizard {
 	 * Is this a non featured service?
 	 *
 	 * @param array $service Service info array.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_not_featured_service( $service ) {
 		return ! $this->is_featured_service( $service );

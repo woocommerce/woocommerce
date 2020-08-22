@@ -241,7 +241,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Comment      $note      New order note object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param bool            $creating  True when creating item, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_order_note', $note, $request, true );
 

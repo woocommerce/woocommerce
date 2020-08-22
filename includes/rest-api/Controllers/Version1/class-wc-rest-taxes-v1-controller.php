@@ -373,7 +373,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param stdClass        $tax       Data used to create the tax.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @param bool            $creating  True when creating tax, false when updating tax.
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, true );
 
@@ -429,7 +429,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param stdClass        $tax       Data used to create the tax.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @param bool            $creating  True when creating tax, false when updating tax.
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, false );
 

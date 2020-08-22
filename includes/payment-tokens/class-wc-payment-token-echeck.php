@@ -69,7 +69,7 @@ class WC_Payment_Token_ECheck extends WC_Payment_Token {
 	 * last4  - string Last 4 digits of the check
 	 *
 	 * @since 2.6.0
-	 * @return boolean True if the passed data is valid
+	 * @return bool True if the passed data is valid
 	 */
 	public function validate() {
 		if ( false === parent::validate() ) {

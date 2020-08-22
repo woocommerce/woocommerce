@@ -308,7 +308,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Location type detection.
 	 *
 	 * @param bject $location Location to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	private function location_is_continent( $location ) {
 		return 'continent' === $location->type;
@@ -318,7 +318,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Location type detection.
 	 *
 	 * @param bject $location Location to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	private function location_is_country( $location ) {
 		return 'country' === $location->type;
@@ -328,7 +328,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Location type detection.
 	 *
 	 * @param bject $location Location to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	private function location_is_state( $location ) {
 		return 'state' === $location->type;
@@ -338,7 +338,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Location type detection.
 	 *
 	 * @param bject $location Location to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	private function location_is_postcode( $location ) {
 		return 'postcode' === $location->type;
@@ -348,7 +348,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Is passed location type valid?
 	 *
 	 * @param tring $type Type to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_valid_location_type( $type ) {
 		return in_array( $type, apply_filters( 'woocommerce_valid_location_types', array( 'postcode', 'state', 'country', 'continent' ) ), true );

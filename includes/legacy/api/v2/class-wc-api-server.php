@@ -525,7 +525,7 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param string $key Header key
 	 * @param string $value Header value
-	 * @param boolean $replace Should we replace the existing header?
+	 * @param bool   $replace Should we replace the existing header?
 	 */
 	public function header( $key, $value, $replace = true ) {
 		header( sprintf( '%s: %s', $key, $value ), $replace );

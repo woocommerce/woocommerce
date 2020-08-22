@@ -178,7 +178,7 @@ class WC_Checkout {
 	 * Is registration required to checkout?
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_registration_required() {
 		return apply_filters( 'woocommerce_checkout_registration_required', 'yes' !== get_option( 'woocommerce_enable_guest_checkout' ) );
@@ -188,7 +188,7 @@ class WC_Checkout {
 	 * Is registration enabled on the checkout page?
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_registration_enabled() {
 		return apply_filters( 'woocommerce_checkout_registration_enabled', 'yes' === get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) );

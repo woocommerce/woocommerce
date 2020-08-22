@@ -145,7 +145,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	 *
 	 * @since 3.0.0
 	 * @param tring $key Key to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function allowed_group_keys( $key ) {
 		return in_array( $key, array( 'id', 'label', 'description', 'parent_id', 'sub_groups' ) );

@@ -216,7 +216,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Is this a compound tax rate?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_compound() {
 		return $this->get_compound();

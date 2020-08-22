@@ -45,7 +45,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 	 * Callback for allowed keys for each setting response.
 	 *
 	 * @param string $key Key to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array(

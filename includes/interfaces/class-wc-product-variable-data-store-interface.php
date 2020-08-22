@@ -22,7 +22,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * Does a child have a weight set?
 	 *
 	 * @param WC_Product $product Product object.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_weight( $product );
 
@@ -30,7 +30,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * Does a child have dimensions set?
 	 *
 	 * @param WC_Product $product Product object.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_dimensions( $product );
 
@@ -38,7 +38,7 @@ interface WC_Product_Variable_Data_Store_Interface {
 	 * Is a child in stock?
 	 *
 	 * @param WC_Product $product Product object.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_is_in_stock( $product );
 

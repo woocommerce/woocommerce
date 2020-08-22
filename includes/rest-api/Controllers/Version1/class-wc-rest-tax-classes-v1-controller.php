@@ -177,7 +177,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param stdClass        $tax_class Data used to create the tax class.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating tax class, false when updating tax class.
+		 * @param bool            $creating  True when creating tax class, false when updating tax class.
 		 */
 		do_action( 'woocommerce_rest_insert_tax_class', (object) $tax_class, $request, true );
 

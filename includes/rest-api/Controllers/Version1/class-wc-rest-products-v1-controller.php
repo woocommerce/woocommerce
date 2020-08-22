@@ -752,7 +752,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			 *
 			 * @param WP_Post         $post      Post data.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating item, false when updating.
+			 * @param bool            $creating  True when creating item, false when updating.
 			 */
 			do_action( 'woocommerce_rest_insert_product', $post, $request, true );
 			$request->set_param( 'context', 'edit' );
@@ -795,7 +795,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			 *
 			 * @param WP_Post         $post      Post data.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating item, false when updating.
+			 * @param bool            $creating  True when creating item, false when updating.
 			 */
 			do_action( 'woocommerce_rest_insert_product', $post, $request, false );
 			$request->set_param( 'context', 'edit' );
@@ -1646,7 +1646,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * Return false to disable trash support for the item.
 		 *
-		 * @param boolean $supports_trash Whether the item type support trashing.
+		 * @param bool    $supports_trash Whether the item type support trashing.
 		 * @param WP_Post $post           The Post object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );

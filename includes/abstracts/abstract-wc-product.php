@@ -208,7 +208,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 3.0.0
 	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function get_featured( $context = 'view' ) {
 		return $this->get_prop( 'featured', $context );
@@ -345,7 +345,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 3.0.0
 	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function get_manage_stock( $context = 'view' ) {
 		return $this->get_prop( 'manage_stock', $context );
@@ -399,7 +399,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function get_sold_individually( $context = 'view' ) {
 		return $this->get_prop( 'sold_individually', $context );
@@ -1678,7 +1678,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product has any visible attributes.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_attributes() {
 		foreach ( $this->get_attributes() as $attribute ) {
@@ -1712,7 +1712,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Does a child have a weight?
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function child_has_weight() {
 		return false;
@@ -1735,7 +1735,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * selecting before adding to cart.
 	 *
 	 * @since 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_options() {
 		return false;

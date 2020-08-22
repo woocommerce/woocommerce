@@ -140,7 +140,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 
 	/**
 	 * Calculated shipping.
-	 * @param boolean $calculated
+	 * @param bool $calculated
 	 */
 	public function calculated_shipping( $calculated = true ) {
 		wc_deprecated_function( 'WC_Customer::calculated_shipping', '3.0', 'WC_Customer::set_calculated_shipping' );

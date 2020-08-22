@@ -480,7 +480,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Check if all variation's attributes are set.
 	 *
 	 * @deprecated 3.0.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_all_attributes_set() {
 		wc_deprecated_function( 'WC_Product::has_all_attributes_set', '3.0', 'an array filter on get_variation_attributes for a quick solution.' );

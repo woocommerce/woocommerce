@@ -282,7 +282,7 @@ class WC_Regenerate_Images {
 	 * Ensure we are dealing with the correct image attachment
 	 *
 	 * @param int|WP_Post $attachment Attachment object or ID.
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_regeneratable( $attachment ) {
 		if ( 'site-icon' === get_post_meta( is_object( $attachment ) ? $attachment->ID : $attachment, '_wp_attachment_context', true ) ) {

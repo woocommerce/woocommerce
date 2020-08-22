@@ -444,7 +444,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 *
 	 * @since 3.0.0
 	 * @param tring $key Key to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array(

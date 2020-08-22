@@ -33,7 +33,7 @@ interface WC_Order_Item_Data_Store_Interface {
 	 *
 	 * @param nt   $item_id Item ID.
 	 * @param rray $item order_item_name or order_item_type.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function update_order_item( $item_id, $item );
 

@@ -206,8 +206,8 @@ class WC_Cache_Helper {
 	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
 	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
 	 *
-	 * @param string  $group   Name for the group of transients we need to invalidate.
-	 * @param boolean $refresh true to force a new version.
+	 * @param string $group   Name for the group of transients we need to invalidate.
+	 * @param bool   $refresh true to force a new version.
 	 * @return string transient version based on time(), 10 digits.
 	 */
 	public static function get_transient_version( $group, $refresh = false ) {

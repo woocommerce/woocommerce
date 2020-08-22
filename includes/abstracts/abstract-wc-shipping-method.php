@@ -165,7 +165,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_taxable() {
 		return wc_tax_enabled() && 'taxable' === $this->tax_status && ( WC()->customer && ! WC()->customer->get_is_vat_exempt() );
@@ -175,7 +175,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Whether or not this method is enabled in settings.
 	 *
 	 * @since 2.6.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_enabled() {
 		return 'yes' === $this->enabled;

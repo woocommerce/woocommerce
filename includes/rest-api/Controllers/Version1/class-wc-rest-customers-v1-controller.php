@@ -353,7 +353,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			 *
 			 * @param WP_User         $user_data Data used to create the customer.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 * @param bool            $creating  True when creating customer, false when updating customer.
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, true );
 
@@ -437,7 +437,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			 *
 			 * @param WP_User         $customer  Data used to create the customer.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 * @param bool            $creating  True when creating customer, false when updating customer.
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, false );
 

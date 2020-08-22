@@ -84,7 +84,7 @@ class WC_Product_Download implements ArrayAccess {
 	/**
 	 * Check if file is allowed.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_allowed_filetype() {
 		$file_path = $this->get_file();
@@ -108,7 +108,7 @@ class WC_Product_Download implements ArrayAccess {
 	/**
 	 * Validate file exists.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function file_exists() {
 		if ( 'relative' !== $this->get_type_of_file_path() ) {

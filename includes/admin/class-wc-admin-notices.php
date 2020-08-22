@@ -139,7 +139,7 @@ class WC_Admin_Notices {
 	 *
 	 * @param string $name Notice name.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function has_notice( $name ) {
 		return in_array( $name, self::get_notices(), true );
@@ -538,7 +538,7 @@ class WC_Admin_Notices {
 	 * Wrapper for is_plugin_active.
 	 *
 	 * @param string $plugin Plugin to check.
-	 * @return boolean
+	 * @return bool
 	 */
 	protected static function is_plugin_active( $plugin ) {
 		if ( ! function_exists( 'is_plugin_active' ) ) {

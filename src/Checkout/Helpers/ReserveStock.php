@@ -30,7 +30,7 @@ final class ReserveStock {
 	/**
 	 * Is stock reservation enabled?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function is_enabled() {
 		return $this->enabled;

@@ -202,7 +202,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			 *
 			 * @param WC_Data         $object    Inserted object.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @param bool            $creating  True when creating object, false when updating.
 			 */
 			do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, true );
 		} catch ( WC_Data_Exception $e ) {
@@ -249,7 +249,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			 *
 			 * @param WC_Data         $object    Inserted object.
 			 * @param WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @param bool            $creating  True when creating object, false when updating.
 			 */
 			do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, false );
 		} catch ( WC_Data_Exception $e ) {
@@ -425,7 +425,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * Return false to disable trash support for the object.
 		 *
-		 * @param boolean $supports_trash Whether the object type support trashing.
+		 * @param bool    $supports_trash Whether the object type support trashing.
 		 * @param WC_Data $object         The object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );

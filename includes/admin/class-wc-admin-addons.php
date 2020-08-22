@@ -595,7 +595,7 @@ class WC_Admin_Addons {
 	 * Should an extension be shown on the featured page.
 	 *
 	 * @param object $item Item data.
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function show_extension( $item ) {
 		$location = WC()->countries->get_base_country();

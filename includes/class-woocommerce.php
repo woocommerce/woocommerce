@@ -907,7 +907,7 @@ final class WooCommerce {
 	 * Is the WooCommerce Admin actively included in the WooCommerce core?
 	 * Based on presence of a basic WC Admin function.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_wc_admin_active() {
 		return function_exists( 'wc_admin_url' );

@@ -42,7 +42,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	/**
 	 * Is job running?
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_running() {
 		return $this->is_queue_empty();

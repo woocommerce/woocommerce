@@ -272,7 +272,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param stdObject       $attribute Inserted attribute object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 * @param bool            $creating  True when creating attribute, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, true );
 
@@ -339,7 +339,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param stdObject       $attribute Inserted attribute object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 * @param bool            $creating  True when creating attribute, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, false );
 

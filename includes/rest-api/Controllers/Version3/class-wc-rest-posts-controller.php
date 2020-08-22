@@ -127,7 +127,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 *
 	 * @param P_REST_Request $request Full details about the request.
 	 *
-	 * @return boolean|WP_Error
+	 * @return bool|WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
@@ -211,7 +211,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param bool            $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
 
@@ -289,7 +289,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @param bool            $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
 
@@ -428,7 +428,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * Return false to disable trash support for the item.
 		 *
-		 * @param boolean $supports_trash Whether the item type support trashing.
+		 * @param bool    $supports_trash Whether the item type support trashing.
 		 * @param WP_Post $post           The Post object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );

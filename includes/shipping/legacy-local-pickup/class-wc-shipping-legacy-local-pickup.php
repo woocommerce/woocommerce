@@ -159,7 +159,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	 *
 	 * @param string $postcode Postcode to check.
 	 * @param string $country code Code of the country to check postcode against.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_valid_postcode( $postcode, $country ) {
 		$codes              = $this->get_valid_postcodes();

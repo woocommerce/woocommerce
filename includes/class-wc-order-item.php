@@ -199,7 +199,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * Type checking.
 	 *
 	 * @param string|array $type Type.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function is_type( $type ) {
 		return is_array( $type ) ? in_array( $this->get_type(), $type, true ) : $type === $this->get_type();
