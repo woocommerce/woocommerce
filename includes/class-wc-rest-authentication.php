@@ -307,7 +307,7 @@ class WC_REST_Authentication {
 	 * 2) The OAuth parameters are included as part of the request query string instead of part of the Authorization header,
 	 *    This is because there is no cross-OS function within PHP to get the raw Authorization header.
 	 *
-	 * @link http://tools.ietf.org/html/rfc5849 for the full spec.
+	 * @link http://tools.ietf.org/html/rfc5849
 	 *
 	 * @return int|bool
 	 */

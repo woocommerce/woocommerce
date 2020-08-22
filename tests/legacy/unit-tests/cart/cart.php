@@ -262,7 +262,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Test for subtotal when multiple tax slabs are present and round at subtotal is enabled.
 	 *
-	 * Ticket: @link https://github.com/woocommerce/woocommerce/issues/23917
+	 * @link https://github.com/woocommerce/woocommerce/issues/23917
 	 */
 	public function test_cart_calculate_total_rounding_23917() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );

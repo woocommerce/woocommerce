@@ -764,7 +764,7 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
 	 *
-	 * @link https://core.trac.wordpress.org/ticket/41358 .
+	 * @link https://core.trac.wordpress.org/ticket/41358
 	 */
 	protected function close_http_connection() {
 		// Only 1 PHP process can access a session object at a time, close this so the next request isn't kept waiting.
