@@ -444,7 +444,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Test that calculation rounding is done correctly with and without taxes.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/16305.
+	 * @link https://github.com/woocommerce/woocommerce/issues/16305.
 	 * @since 3.2
 	 */
 	public function test_discount_cart_rounding() {

@@ -57,7 +57,7 @@ interface WC_Queue_Interface {
 	 *
 	 * @param int    $timestamp The schedule will start on or after this time.
 	 * @param string $cron_schedule A cron-link schedule string.
-	 * @see http://en.wikipedia.org/wiki/Cron
+	 * @link http://en.wikipedia.org/wiki/Cron
 	 *   *    *    *    *    *    *
 	 *   ┬    ┬    ┬    ┬    ┬    ┬
 	 *   |    |    |    |    |    |

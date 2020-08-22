@@ -44,7 +44,7 @@ class WC_Cache_Helper {
 		/**
 		 * Allow plugins to enable nocache headers. Enabled for Google weblight.
 		 *
-		 * @see https://support.google.com/webmasters/answer/1061943?hl=en
+		 * @link https://support.google.com/webmasters/answer/1061943?hl=en
 		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
 		 */
 		if ( false !== strpos( $agent, 'googleweblight' ) || apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {

@@ -13,7 +13,7 @@
  *
  * @class WC_REST_Controller
  * @package Automattic/WooCommerce/RestApi
- * @see https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
+ * @link https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

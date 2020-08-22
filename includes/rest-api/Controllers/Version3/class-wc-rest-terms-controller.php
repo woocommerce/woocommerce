@@ -305,7 +305,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * Enables adding extra arguments or setting defaults for a terms
 		 * collection request.
 		 *
-		 * @see https://developer.wordpress.org/reference/functions/get_terms/
+		 * @link https://developer.wordpress.org/reference/functions/get_terms/
 		 *
 		 * @param array           $prepared_args Array of arguments to be
 		 *                                       passed to get_terms.

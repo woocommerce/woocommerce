@@ -993,7 +993,7 @@ class WC_Form_Handler {
 
 			if ( in_array( $field, array( 'password_1', 'password_2' ), true ) ) {
 				// Don't unslash password fields
-				// @see https://github.com/woocommerce/woocommerce/issues/23922.
+				// @link https://github.com/woocommerce/woocommerce/issues/23922.
 				$posted_fields[ $field ] = $_POST[ $field ]; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			} else {
 				$posted_fields[ $field ] = wp_unslash( $_POST[ $field ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

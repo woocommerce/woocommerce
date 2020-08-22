@@ -384,7 +384,7 @@ class WC_Data_Store_WP {
 					 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
 					 * 'after' string query, so we have to use the array format in 'day' precision.
 					 *
-					 * @see https://core.trac.wordpress.org/ticket/29908
+					 * @link https://core.trac.wordpress.org/ticket/29908
 					 */
 					$query_arg[ $comparison ]['year']  = $dates[ $index ]->date( 'Y' );
 					$query_arg[ $comparison ]['month'] = $dates[ $index ]->date( 'n' );

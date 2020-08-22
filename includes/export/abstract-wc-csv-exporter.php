@@ -360,8 +360,8 @@ abstract class WC_CSV_Exporter {
 	 * Additionally, Excel exposes the ability to launch arbitrary commands through
 	 * the DDE protocol.
 	 *
-	 * @see http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
-	 * @see https://hackerone.com/reports/72785
+	 * @link http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	 * @link https://hackerone.com/reports/72785
 	 *
 	 * @since 3.1.0
 	 * @param string $data CSV field to escape.
@@ -481,11 +481,11 @@ abstract class WC_CSV_Exporter {
 	 * PHP 5.5.4 uses '\' as the default escape character. This is not RFC-4180 compliant.
 	 * \0 disables the escape character.
 	 *
-	 * @see https://bugs.php.net/bug.php?id=43225
-	 * @see https://bugs.php.net/bug.php?id=50686
-	 * @see https://github.com/woocommerce/woocommerce/issues/19514
+	 * @link https://bugs.php.net/bug.php?id=43225
+	 * @link https://bugs.php.net/bug.php?id=50686
+	 * @link https://github.com/woocommerce/woocommerce/issues/19514
 	 * @since 3.4.0
-	 * @see https://github.com/woocommerce/woocommerce/issues/24579
+	 * @link https://github.com/woocommerce/woocommerce/issues/24579
 	 * @since 3.9.0
 	 * @param resource $buffer Resource we are writing to.
 	 * @param array    $export_row Row to export.

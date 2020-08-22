@@ -262,7 +262,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
 		 *
-		 * @see https://developer.wordpress.org/reference/classes/wp_user_query/
+		 * @link https://developer.wordpress.org/reference/classes/wp_user_query/
 		 *
 		 * @param array           $prepared_args Array of arguments for WP_User_Query.
 		 * @param WP_REST_Request $request       The current request.
