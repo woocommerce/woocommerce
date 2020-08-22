@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Page - Admin options.
+ * Admin View: Page - Admin options
  *
  * @package WooCommerce\Integrations
  */

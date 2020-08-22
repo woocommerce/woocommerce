@@ -1,6 +1,6 @@
 <?php
 /**
- * Calling codes.
+ * Calling codes
  *
  * Returns an array of calling codes.
  *

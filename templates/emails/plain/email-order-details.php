@@ -1,6 +1,6 @@
 <?php
 /**
- * Order details table shown in emails.
+ * Order details table shown in emails
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/email-order-details.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Attribute function tests.
+ * Attribute function tests
  *
  * @package WooCommerce\Tests\Attributes
  * @since 3.2.0

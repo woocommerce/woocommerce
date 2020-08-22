@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions.
+ * Installation related functions and actions
  *
  * @package WooCommerce\Classes
  * @version 3.0.0

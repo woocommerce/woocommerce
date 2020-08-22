@@ -1,6 +1,6 @@
 <?php
 /**
- * Twenty Ten support.
+ * Twenty Ten support
  *
  * @since 3.3.0
  * @package WooCommerce\Classes

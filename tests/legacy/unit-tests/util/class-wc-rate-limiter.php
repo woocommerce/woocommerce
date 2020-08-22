@@ -1,6 +1,6 @@
 <?php
 /**
- * File for the WC_Rate_Limiter class.
+ * File for the WC_Rate_Limiter class
  *
  * @package WooCommerce\Tests\Util
  */

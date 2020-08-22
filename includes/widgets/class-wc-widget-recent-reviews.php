@@ -1,6 +1,6 @@
 <?php
 /**
- * Recent Reviews Widget.
+ * Recent Reviews Widget
  *
  * @package WooCommerce\Widgets
  * @version 2.3.0

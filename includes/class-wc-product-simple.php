@@ -1,6 +1,6 @@
 <?php
 /**
- * Simple Product Class.
+ * Simple Product Class
  *
  * The default product type kinda product.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Product_CSV_Importer_Controller file.
+ * Class WC_Product_CSV_Importer_Controller file
  *
  * @package WooCommerce\Admin\Importers
  */

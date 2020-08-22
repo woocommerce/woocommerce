@@ -1,6 +1,7 @@
 <?php
 /**
- * Data Store Tests: Tests WC_Coupon's WC_Data_Store.
+ * Data Store Tests: Tests WC_Coupon's WC_Data_Store
+ *
  * @package WooCommerce\Tests\Coupon
  */
 class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {

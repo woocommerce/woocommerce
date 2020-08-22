@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout tests.
+ * Checkout tests
  *
  * @package WooCommerce\Tests\Checkout
  */

@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Order Item Tax Tests.
+ * Order Item Tax Tests
+ *
  * @package WooCommerce\Tests\Order_Items
  * @since 3.0.0
  */

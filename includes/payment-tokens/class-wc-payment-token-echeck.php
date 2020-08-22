@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Payment_Token_eCheck file.
+ * Class WC_Payment_Token_eCheck file
  *
  * @package WooCommerce\PaymentTokens
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Privacy data exporter.
+ * Privacy data exporter
  *
  * @package WooCommerce\Tests\Util
  */

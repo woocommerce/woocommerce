@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the totals class.
+ * Tests for the totals class
  *
  * @package WooCommerce\Tests\Discounts
  */

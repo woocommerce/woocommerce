@@ -2,6 +2,7 @@
 
 /**
  * Meta
+ *
  * @package WooCommerce\Tests\Exporter
  */
 class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {

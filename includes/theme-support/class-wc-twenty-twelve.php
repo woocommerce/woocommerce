@@ -1,6 +1,6 @@
 <?php
 /**
- * Twenty Twelve support.
+ * Twenty Twelve support
  *
  * @class WC_Twenty_Twelve
  * @since 3.3.0

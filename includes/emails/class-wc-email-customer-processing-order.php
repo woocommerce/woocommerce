@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Email_Customer_Processing_Order file.
+ * Class WC_Email_Customer_Processing_Order file
  *
  * @package WooCommerce\Emails
  */

@@ -2,6 +2,7 @@
 
 /**
  * Test WC_Product_Query
+ *
  * @package WooCommerce\Tests\Product
  */
 class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {

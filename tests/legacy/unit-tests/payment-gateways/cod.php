@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains tests for the COD Payment Gateway.
+ * Contains tests for the COD Payment Gateway
  *
  * @package WooCommerce\Tests\PaymentGateways
  */

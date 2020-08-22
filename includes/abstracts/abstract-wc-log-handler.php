@@ -1,6 +1,6 @@
 <?php
 /**
- * Log handling functionality.
+ * Log handling functionality
  *
  * @class WC_Log_Handler
  * @package WooCommerce\Abstracts

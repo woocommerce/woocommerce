@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the functions in includes/wc-page-functions.php.
+ * Tests for the functions in includes/wc-page-functions.php
  *
  * @package WooCommerce\Tests\PageFunctions
  */

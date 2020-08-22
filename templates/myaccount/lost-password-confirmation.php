@@ -1,6 +1,6 @@
 <?php
 /**
- * Lost password confirmation text.
+ * Lost password confirmation text
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/lost-password-confirmation.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for customer download logs.
+ * Class for customer download logs
  *
  * @package WooCommerce\Classes
  * @version 3.3.0

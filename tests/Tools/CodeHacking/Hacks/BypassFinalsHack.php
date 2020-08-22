@@ -1,6 +1,6 @@
 <?php
 /**
- * BypassFinalsHack class file.
+ * BypassFinalsHack class file
  *
  * @package WooCommerce\Testing
  */

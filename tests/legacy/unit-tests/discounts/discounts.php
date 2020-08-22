@@ -1,6 +1,7 @@
 <?php
 /**
- * Test for the discounts class.
+ * Test for the discounts class
+ *
  * @package WooCommerce\Tests\Discounts
  */
 

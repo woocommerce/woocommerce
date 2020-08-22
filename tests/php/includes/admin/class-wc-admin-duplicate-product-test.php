@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the WC_Admin_Duplicate_Product class.
+ * Unit tests for the WC_Admin_Duplicate_Product class
  *
  * @package WooCommerce\Tests\Admin
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * List tables: products.
+ * List tables: products
  *
  * @package WooCommerce\Admin
  * @version 3.3.0

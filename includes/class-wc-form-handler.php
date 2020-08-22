@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle frontend forms.
+ * Handle frontend forms
  *
  * @package WooCommerce\Classes\
  */

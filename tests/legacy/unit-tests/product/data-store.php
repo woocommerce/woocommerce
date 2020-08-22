@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Store Tests: Tests WC_Products's WC_Data_Store.
+ * Data Store Tests: Tests WC_Products's WC_Data_Store
  *
  * @package WooCommerce\Tests\Product
  * @since 3.0.0

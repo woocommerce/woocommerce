@@ -1,6 +1,6 @@
 <?php
 /**
- * Tax calculation and rate finding class.
+ * Tax calculation and rate finding class
  *
  * @package WooCommerce\Classes
  */

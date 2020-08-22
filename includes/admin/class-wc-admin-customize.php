@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup customize items.
+ * Setup customize items
  *
  * @package WooCommerce\Admin\Customize
  * @version 3.1.0

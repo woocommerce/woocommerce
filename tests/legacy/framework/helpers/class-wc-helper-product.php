@@ -1,6 +1,6 @@
 <?php
 /**
- * Product helpers.
+ * Product helpers
  *
  * @package WooCommerce\Tests
  */

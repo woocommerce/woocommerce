@@ -1,6 +1,6 @@
 <?php
 /**
- * MockableLegacyProxy class file.
+ * MockableLegacyProxy class file
  *
  * @package Automattic\WooCommerce\Testing\Tools\DependencyManagement
  */

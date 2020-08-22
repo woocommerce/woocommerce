@@ -1,6 +1,6 @@
 <?php
 /**
- * The database service class file.
+ * The database service class file
  *
  * @version 3.9.0
  * @package WooCommerce\Integrations

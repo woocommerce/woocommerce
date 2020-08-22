@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce: Db update note.
+ * WooCommerce: Db update note
  *
  * Adds a note to complete the WooCommerce db update after the upgrade in the WC Admin context.
  *

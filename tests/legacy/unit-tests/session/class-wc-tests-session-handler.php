@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Tests_Session_Handler file.
+ * Class WC_Tests_Session_Handler file
  *
  * @package WooCommerce\Tests\Session
  */

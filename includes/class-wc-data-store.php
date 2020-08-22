@@ -1,6 +1,6 @@
 <?php
 /**
- * WC Data Store.
+ * WC Data Store
  *
  * @package WooCommerce\Classes
  * @since 3.0.0

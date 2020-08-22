@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Email_Failed_Order file.
+ * Class WC_Email_Failed_Order file
  *
  * @package WooCommerce\Emails
  */

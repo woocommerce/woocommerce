@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for customer download permissions.
+ * Class for customer download permissions
  *
  * @package WooCommerce\Classes
  * @version 3.0.0

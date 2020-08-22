@@ -1,6 +1,6 @@
 <?php
 /**
- * Dummy WC data stores used to test data store functionality.
+ * Dummy WC data stores used to test data store functionality
  *
  * @package WooCommerce\Tests\Framework
  */

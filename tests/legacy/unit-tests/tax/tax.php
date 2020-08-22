@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class Tax.
+ * Class Tax
+ *
  * @package WooCommerce\Tests\Tax
  */
 class WC_Tests_Tax extends WC_Unit_Test_Case {

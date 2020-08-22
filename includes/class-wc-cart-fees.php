@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart fees API.
+ * Cart fees API
  *
  * Developers can add fees to the cart via WC()->cart->fees_api() which will reference this class.
  *

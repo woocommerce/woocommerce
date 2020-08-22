@@ -1,6 +1,6 @@
 <?php
 /**
- * Structured data's handler and generator using JSON-LD format.
+ * Structured data's handler and generator using JSON-LD format
  *
  * @package WooCommerce\Classes
  * @since 3.0.0

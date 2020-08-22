@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the WC_Install class.
+ * Tests for the WC_Install class
  *
  * @package WooCommerce\Tests\Util
  */

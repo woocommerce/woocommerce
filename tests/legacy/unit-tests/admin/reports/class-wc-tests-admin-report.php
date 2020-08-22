@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Tests_Admin_Report file.
+ * Class WC_Tests_Admin_Report file
  *
  * @package WooCommerce\Tests\Admin\Reports
  */

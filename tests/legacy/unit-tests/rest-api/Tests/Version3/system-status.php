@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Tests_REST_System_Status file.
+ * Class WC_Tests_REST_System_Status file
  *
  * @package Automattic/WooCommerce/Tests
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order items HTML for meta box.
+ * Order items HTML for meta box
  *
  * @package WooCommerce\Admin
  */

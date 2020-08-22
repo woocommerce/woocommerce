@@ -1,6 +1,6 @@
 <?php
 /**
- * Shopping Cart Widget.
+ * Shopping Cart Widget
  *
  * Displays shopping cart widget.
  *

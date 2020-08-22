@@ -1,6 +1,6 @@
 <?php
 /**
- * File for the WC_Tests_API_Functions class.
+ * File for the WC_Tests_API_Functions class
  *
  * @package WooCommerce\Tests\API
  */

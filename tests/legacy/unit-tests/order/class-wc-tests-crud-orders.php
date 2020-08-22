@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Tests_CRUD_Orders file.
+ * Class WC_Tests_CRUD_Orders file
  *
  * @package WooCommerce\Tests\CRUD
  */

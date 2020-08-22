@@ -1,6 +1,6 @@
 <?php
 /**
- * Layered Navigation Filters Widget.
+ * Layered Navigation Filters Widget
  *
  * @package WooCommerce\Widgets
  * @version 2.3.0

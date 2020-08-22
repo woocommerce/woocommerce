@@ -1,6 +1,7 @@
 <?php
 /**
- * Test for the queue class.
+ * Test for the queue class
+ *
  * @package WooCommerce\Tests\Queue
  */
 

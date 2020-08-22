@@ -1,6 +1,6 @@
 <?php
 /**
- * Provide basic rate limiting functionality via WP Options API.
+ * Provide basic rate limiting functionality via WP Options API
  *
  * Currently only provides a simple limit by delaying action by X seconds.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Personal data erasers.
+ * Personal data erasers
  *
  * @since 3.4.0
  * @package WooCommerce\Classes

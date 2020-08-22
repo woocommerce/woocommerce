@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - PHP & WP minimum requirements.
+ * Admin View: Notice - PHP & WP minimum requirements
  *
  * @package WooCommerce\Admin\Notices
  */

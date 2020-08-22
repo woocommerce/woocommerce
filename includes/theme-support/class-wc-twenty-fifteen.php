@@ -1,6 +1,6 @@
 <?php
 /**
- * Twenty Fifteen support.
+ * Twenty Fifteen support
  *
  * @class WC_Twenty_Fifteen
  * @since 3.3.0

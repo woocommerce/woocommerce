@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Updated.
+ * Admin View: Notice - Updated
  *
  * @package WooCommerce\Admin
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Product data meta box.
+ * Product data meta box
  *
  * @package WooCommerce\Admin
  */

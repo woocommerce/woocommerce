@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class Product_Simple.
+ * Class Product_Simple
+ *
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */

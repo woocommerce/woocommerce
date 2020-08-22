@@ -1,6 +1,7 @@
 <?php
 /**
- * Unit tests for Webhook functions.
+ * Unit tests for Webhook functions
+ *
  * @package WooCommerce\Tests\Webhook
  */
 

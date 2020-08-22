@@ -1,6 +1,6 @@
 <?php
 /**
- * Taxes by tax code report.
+ * Taxes by tax code report
  *
  * @package WooCommerce\Admin\Reports
  */

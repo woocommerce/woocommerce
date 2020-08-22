@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom control for radio buttons with nested options.
+ * Custom control for radio buttons with nested options
  *
  * Used for our image cropping settings.
  *

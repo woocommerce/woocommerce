@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Data currencies controller.
+ * REST API Data currencies controller
  *
  * Handles requests to the /data/currencies endpoint.
  *

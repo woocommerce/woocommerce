@@ -1,6 +1,6 @@
 <?php
 /**
- * Product general data panel.
+ * Product general data panel
  *
  * @package WooCommerce\Admin
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles responses from PayPal IPN.
+ * Handles responses from PayPal IPN
  *
  * @package WooCommerce\PayPal
  * @version 3.3.0

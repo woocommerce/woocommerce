@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the WC_Cart_Test class.
+ * Unit tests for the WC_Cart_Test class
  *
  * @package WooCommerce\Tests\Cart.
  */

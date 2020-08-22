@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Shipping Methods REST API.
+ * Tests for the Shipping Methods REST API
  *
  * @package WooCommerce\Tests\API
  * @since 3.5.0

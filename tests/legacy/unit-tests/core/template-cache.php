@@ -1,6 +1,6 @@
 <?php
 /**
- * Template cache tests class.
+ * Template cache tests class
  *
  * @package WooCommerce\Tests\Core
  */

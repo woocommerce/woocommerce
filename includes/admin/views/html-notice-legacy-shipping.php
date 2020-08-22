@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Legacy Shipping.
+ * Admin View: Notice - Legacy Shipping
  *
  * @package WooCommerce\Admin\Notices
  */

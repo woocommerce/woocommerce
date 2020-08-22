@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper to upload files via the REST API.
+ * Helper to upload files via the REST API
  *
  * @package Automattic/WooCommerce/Utilities
  */

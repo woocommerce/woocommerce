@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for validation.
+ * Unit tests for validation
  *
  * @package WooCommerce\Tests\Util
  */

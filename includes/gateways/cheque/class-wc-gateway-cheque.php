@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Gateway_Cheque file.
+ * Class WC_Gateway_Cheque file
  *
  * @package WooCommerce\Gateways
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tax settings.
+ * Tax settings
  *
  * @package WooCommerce\Admin\Settings.
  */

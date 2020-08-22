@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Coupon_Data_Store_CPT file.
+ * Class WC_Coupon_Data_Store_CPT file
  *
  * @package WooCommerce\DataStores
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order cleanup background process.
+ * Order cleanup background process
  *
  * @package WooCommerce\Classes
  * @version 3.4.0

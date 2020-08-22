@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Customer_Download tests file.
+ * WC_Customer_Download tests file
  *
  * @package WooCommerce\Tests\Customer
  */

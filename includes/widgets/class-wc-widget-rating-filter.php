@@ -1,6 +1,6 @@
 <?php
 /**
- * Rating Filter Widget and related functions.
+ * Rating Filter Widget and related functions
  *
  * @package WooCommerce\Widgets
  * @version 2.6.0

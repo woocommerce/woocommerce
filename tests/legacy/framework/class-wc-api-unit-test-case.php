@@ -1,6 +1,6 @@
 <?php
 /**
- * Base class for REST API test classes.
+ * Base class for REST API test classes
  *
  * @package WooCommerce\Tests\Framework
  */

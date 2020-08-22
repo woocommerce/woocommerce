@@ -2,6 +2,7 @@
 
 /**
  * Class WC_Tests_Logger
+ *
  * @package WooCommerce\Tests\Log
  * @since 2.3
  */

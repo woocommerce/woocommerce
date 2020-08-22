@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart tests.
+ * Cart tests
  *
  * @package WooCommerce\Tests\Cart
  */

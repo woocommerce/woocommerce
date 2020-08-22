@@ -1,6 +1,6 @@
 <?php
 /**
- * Init WooCommerce data importers.
+ * Init WooCommerce data importers
  *
  * @package WooCommerce\Admin
  */

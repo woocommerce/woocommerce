@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Functions.
+ * Class Functions
  *
  * @package WooCommerce\Tests\Geolocation
  */

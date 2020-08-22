@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Account Settings.
+ * WooCommerce Account Settings
  *
  * @package WooCommerce\Admin
  */

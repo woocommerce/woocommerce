@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for Variations API.
+ * Tests for Variations API
  *
  * @package WooCommerce\Tests\API
  * @since 3.5.0

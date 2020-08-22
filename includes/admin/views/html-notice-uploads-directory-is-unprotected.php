@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Uploads directory is unprotected.
+ * Admin View: Notice - Uploads directory is unprotected
  *
  * @package WooCommerce\Admin\Notices
  * @since 4.2.0

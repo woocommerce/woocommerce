@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the WC_Shopping_Zone class.
+ * Tests for the WC_Shopping_Zone class
  *
  * @package WooCommerce\Tests\Shipping
  */

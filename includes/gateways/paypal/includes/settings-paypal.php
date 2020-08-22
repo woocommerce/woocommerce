@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for PayPal Gateway.
+ * Settings for PayPal Gateway
  *
  * @package WooCommerce\Classes\Payment
  */

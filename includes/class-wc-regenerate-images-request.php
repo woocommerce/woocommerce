@@ -1,6 +1,6 @@
 <?php
 /**
- * All functionality to regenerate images in the background when settings change.
+ * All functionality to regenerate images in the background when settings change
  *
  * @package WooCommerce\Classes
  * @version 3.3.0

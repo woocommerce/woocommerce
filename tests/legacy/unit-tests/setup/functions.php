@@ -1,6 +1,7 @@
 <?php
 /**
- * Class WC_Tests_Setup_Functions.
+ * Class WC_Tests_Setup_Functions
+ *
  * @package WooCommerce\Tests\Setup
  */
 

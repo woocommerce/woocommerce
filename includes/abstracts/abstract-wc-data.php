@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Data.
+ * Abstract Data
  *
  * Handles generic data interaction which is implemented by
  * the different data store classes.

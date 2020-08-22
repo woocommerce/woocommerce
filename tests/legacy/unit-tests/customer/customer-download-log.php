@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class Customer_Download_Log.
+ * Class Customer_Download_Log
+ *
  * @since 3.3.0
  * @package WooCommerce\Tests\Customer
  */

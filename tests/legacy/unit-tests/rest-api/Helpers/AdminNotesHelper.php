@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin notes helper for wc-admin unit tests.
+ * Admin notes helper for wc-admin unit tests
  *
  * @package WooCommerce\Tests\Framework\Helpers
  */

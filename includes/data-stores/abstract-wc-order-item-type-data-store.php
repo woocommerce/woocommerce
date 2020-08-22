@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Abstract_WC_Order_Item_Type_Data_Store file.
+ * Class Abstract_WC_Order_Item_Type_Data_Store file
  *
  * @package WooCommerce\DataStores
  */

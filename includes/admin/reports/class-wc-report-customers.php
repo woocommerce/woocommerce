@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Report_Customers file.
+ * Class WC_Report_Customers file
  *
  * @package WooCommerce\Reports
  */

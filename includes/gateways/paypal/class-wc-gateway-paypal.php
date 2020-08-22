@@ -1,6 +1,6 @@
 <?php
 /**
- * PayPal Standard Payment Gateway.
+ * PayPal Standard Payment Gateway
  *
  * Provides a PayPal Standard Payment Gateway.
  *

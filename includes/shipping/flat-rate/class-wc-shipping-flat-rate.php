@@ -1,6 +1,6 @@
 <?php
 /**
- * Flat Rate Shipping Method.
+ * Flat Rate Shipping Method
  *
  * @version 2.6.0
  * @package WooCommerce\Classes\Shipping

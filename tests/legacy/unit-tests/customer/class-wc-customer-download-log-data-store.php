@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Tests_Customer_Download_Log_Data_Store file.
+ * Class WC_Tests_Customer_Download_Log_Data_Store file
  *
  * @version 3.5.0
  * @package WooCommerce\Tests\Customer

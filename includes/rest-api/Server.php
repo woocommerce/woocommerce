@@ -1,6 +1,6 @@
 <?php
 /**
- * Initialize this version of the REST API.
+ * Initialize this version of the REST API
  *
  * @package Automattic/WooCommerce/RestApi
  */

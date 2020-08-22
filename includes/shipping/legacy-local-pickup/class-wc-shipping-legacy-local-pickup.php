@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Shipping_Legacy_Local_Pickup file.
+ * Class WC_Shipping_Legacy_Local_Pickup file
  *
  * @package WooCommerce\Shipping
  */

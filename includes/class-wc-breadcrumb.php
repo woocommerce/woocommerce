@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Breadcrumb class.
+ * WC_Breadcrumb class
  *
  * @package WooCommerce\Classes
  * @version 2.3.0

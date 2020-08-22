@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class Functions.
+ * Class Functions
+ *
  * @package WooCommerce\Tests\Cart
  */
 class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {

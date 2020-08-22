@@ -1,6 +1,6 @@
 <?php
 /**
- * Wraps an array (meta data for now) and tells if there was any changes.
+ * Wraps an array (meta data for now) and tells if there was any changes
  *
  * The main idea behind this class is to avoid doing unneeded
  * SQL updates if nothing changed.

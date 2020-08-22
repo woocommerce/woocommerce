@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Order Item Fee Tests.
+ * Order Item Fee Tests
+ *
  * @package WooCommerce\Tests\Order_Items
  * @since 3.2.0
  */

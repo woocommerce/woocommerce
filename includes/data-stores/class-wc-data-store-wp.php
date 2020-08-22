@@ -1,6 +1,7 @@
 <?php
 /**
- * Shared logic for WP based data.
+ * Shared logic for WP based data
+ *
  * Contains functions like meta handling for all default data stores.
  * Your own data store doesn't need to use WC_Data_Store_WP -- you can write
  * your own meta handling functions.

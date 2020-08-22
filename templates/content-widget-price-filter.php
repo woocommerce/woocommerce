@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying product price filter widget.
+ * The template for displaying product price filter widget
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-widget-price-filter.php
  *

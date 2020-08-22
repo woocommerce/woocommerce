@@ -3,7 +3,7 @@
 use Automattic\Jetpack\Constants;
 
 /**
- * WooCommerce class.
+ * WooCommerce class
  *
  * @package WooCommerce\Tests\Util
  */

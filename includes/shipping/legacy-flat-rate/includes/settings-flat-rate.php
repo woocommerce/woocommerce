@@ -1,6 +1,6 @@
 <?php
 /**
- * Legacy flat rate settings.
+ * Legacy flat rate settings
  *
  * @package WooCommerce\Shipping
  */

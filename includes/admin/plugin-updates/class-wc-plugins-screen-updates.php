@@ -1,6 +1,6 @@
 <?php
 /**
- * Manages WooCommerce plugin updating on the Plugins screen.
+ * Manages WooCommerce plugin updating on the Plugins screen
  *
  * @package WooCommerce\Admin
  * @version 3.2.0

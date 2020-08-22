@@ -1,6 +1,6 @@
 <?php
 /**
- * WP_Background_Processing Tests.
+ * WP_Background_Processing Tests
  *
  * @package WooCommerce\Tests\Libraries
  */

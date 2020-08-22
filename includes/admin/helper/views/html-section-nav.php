@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper admin navigation.
+ * Helper admin navigation
  *
  * @package WooCommerce\Helper
  */

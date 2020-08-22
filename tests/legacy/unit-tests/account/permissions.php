@@ -1,5 +1,6 @@
 <?php
-/** Account permission tests
+/**
+ * Account permission tests
  *
  * @package WooCommerce\Tests\Account
  */

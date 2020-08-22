@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Order Item Meta Tests.
+ * Order Item Meta Tests
+ *
  * @package WooCommerce\Tests\Order_Items
  * @since 3.0.8
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Product_Variation_Data_Store_CPT file.
+ * Class WC_Product_Variation_Data_Store_CPT file
  *
  * @package WooCommerce\DataStores
  */

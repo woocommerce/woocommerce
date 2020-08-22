@@ -1,6 +1,6 @@
 <?php
 /**
- * Outputs a variation for editing.
+ * Outputs a variation for editing
  *
  * @package WooCommerce\Admin
  * @var int $variation_id

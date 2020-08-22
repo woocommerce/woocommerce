@@ -1,6 +1,6 @@
 <?php
 /**
- * WP_CLI_Runner class file.
+ * WP_CLI_Runner class file
  *
  * @package WooCommerce\CLI
  */

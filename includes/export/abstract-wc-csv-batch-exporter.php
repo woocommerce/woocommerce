@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles Batch CSV export.
+ * Handles Batch CSV export
  *
  * Based on https://pippinsplugins.com/batch-processing-for-big-data/
  *

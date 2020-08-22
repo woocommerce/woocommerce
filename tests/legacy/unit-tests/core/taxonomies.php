@@ -1,6 +1,6 @@
 <?php
 /**
- * Taxonomy tests class.
+ * Taxonomy tests class
  *
  * @package WooCommerce\Tests\Core
  */

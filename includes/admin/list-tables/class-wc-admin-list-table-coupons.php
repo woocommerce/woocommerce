@@ -1,6 +1,6 @@
 <?php
 /**
- * List tables: coupons.
+ * List tables: coupons
  *
  * @package WooCommerce\Admin
  * @version 3.3.0

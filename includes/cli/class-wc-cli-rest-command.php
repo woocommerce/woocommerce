@@ -1,6 +1,6 @@
 <?php
 /**
- * WP_CLI_Rest_Command class file.
+ * WP_CLI_Rest_Command class file
  *
  * @package WooCommerce\CLI
  */

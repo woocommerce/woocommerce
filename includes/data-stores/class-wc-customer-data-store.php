@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Customer_Data_Store file.
+ * Class WC_Customer_Data_Store file
  *
  * @package WooCommerce\DataStores
  */

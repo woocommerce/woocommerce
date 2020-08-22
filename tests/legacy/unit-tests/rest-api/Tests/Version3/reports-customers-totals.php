@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the reports customers totals REST API.
+ * Tests for the reports customers totals REST API
  *
  * @package WooCommerce\Tests\API
  * @since 3.5.0

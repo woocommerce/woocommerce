@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Email_Customer_Reset_Password file.
+ * Class WC_Email_Customer_Reset_Password file
  *
  * @package WooCommerce\Emails
  */

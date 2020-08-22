@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Gateway_COD file.
+ * Class WC_Gateway_COD file
  *
  * @package WooCommerce\Gateways
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Notes_Run_Db_Update file.
+ * Class WC_Notes_Run_Db_Update file
  *
  * @package WooCommerce\Tests\Admin\Notes
  */

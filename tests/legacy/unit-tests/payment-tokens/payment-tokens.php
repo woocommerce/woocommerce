@@ -1,6 +1,6 @@
 <?php
 /**
- * Payment_Tokens class file.
+ * Payment_Tokens class file
  *
  * @package WooCommerce\Tests\Payment_Tokens
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for gateways.
+ * Unit tests for gateways
  *
  * @package WooCommerce\Tests\Gateways
  */

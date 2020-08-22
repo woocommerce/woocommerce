@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Search Widget.
+ * Product Search Widget
  *
  * @package WooCommerce\Widgets
  * @version 2.3.0

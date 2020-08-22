@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Shipping_Legacy_International_Delivery file.
+ * Class WC_Shipping_Legacy_International_Delivery file
  *
  * @package WooCommerce\Shipping
  */

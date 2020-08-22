@@ -1,6 +1,6 @@
 <?php
 /**
- * Download report.
+ * Download report
  *
  * @author      WooThemes
  * @category    Admin

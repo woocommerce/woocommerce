@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Downloads.
+ * Email Downloads
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/email-downloads.php.
  *

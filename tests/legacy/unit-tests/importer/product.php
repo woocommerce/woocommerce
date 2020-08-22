@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Product_CSV_Importer unit tests.
+ * Class WC_Product_CSV_Importer unit tests
  *
  * @package WooCommerce\Tests\Importer
  */

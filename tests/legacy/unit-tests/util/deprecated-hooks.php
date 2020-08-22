@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Classes WC_Deprecated_Filter_Hooks & WC_Deprecated_Action_Hooks.
+ * Classes WC_Deprecated_Filter_Hooks & WC_Deprecated_Action_Hooks
+ *
  * @package WooCommerce\Tests\Util
  * @since 3.0
  */

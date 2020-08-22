@@ -1,6 +1,8 @@
 <?php
 /**
- * Order refund. Refunds are based on orders (essentially negative orders) and
+ * Order refund
+ *
+ * Refunds are based on orders (essentially negative orders) and
  * contain much of the same data.
  *
  * @version 3.0.0

@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class Payment_Token_CC.
+ * Class Payment_Token_CC
+ *
  * @package WooCommerce\Tests\Payment_Tokens
  */
 class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {

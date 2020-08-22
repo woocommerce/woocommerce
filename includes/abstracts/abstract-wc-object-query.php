@@ -1,6 +1,6 @@
 <?php
 /**
- * Query abstraction layer functionality.
+ * Query abstraction layer functionality
  *
  * @package WooCommerce\Abstracts
  */

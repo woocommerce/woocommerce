@@ -1,6 +1,6 @@
 <?php
 /**
- * Linked product options.
+ * Linked product options
  *
  * @package WooCommerce\Admin
  */

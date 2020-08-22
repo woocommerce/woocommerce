@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract WP_Background_Process class.
+ * Abstract WP_Background_Process class
  *
  * Uses https://github.com/A5hleyRich/wp-background-processing to handle DB
  * updates in the background.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the WC_Product_CSV_Exporter_Test class.
+ * Unit tests for the WC_Product_CSV_Exporter_Test class
  *
  * @package WooCommerce\Tests\Exporter.
  */

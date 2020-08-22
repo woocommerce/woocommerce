@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce product base class.
+ * WooCommerce product base class
  *
  * @package WooCommerce\Abstracts
  */

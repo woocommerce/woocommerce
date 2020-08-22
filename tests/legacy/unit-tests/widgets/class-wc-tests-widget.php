@@ -1,6 +1,6 @@
 <?php
 /**
- * Testing WC_Widget functionality.
+ * Testing WC_Widget functionality
  *
  * @package WooCommerce\Tests\Widgets
  */

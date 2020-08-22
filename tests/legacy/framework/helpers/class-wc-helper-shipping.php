@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper class for shipping related unit tests.
+ * Helper class for shipping related unit tests
  *
  * @package WooCommerce\Tests\Helper
  */

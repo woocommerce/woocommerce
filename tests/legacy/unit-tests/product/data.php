@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the product data methods.
+ * Unit tests for the product data methods
  *
  * @package WooCommerce\Tests\Product
  */

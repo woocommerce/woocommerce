@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class WC_Cart_Fees.
+ * Class WC_Cart_Fees
+ *
  * @package WooCommerce\Tests\Cart
  * @since 3.2.0
  */

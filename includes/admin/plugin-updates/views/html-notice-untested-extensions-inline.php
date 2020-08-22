@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Untested extensions.
+ * Admin View: Notice - Untested extensions
  *
  * @package WooCommerce\Admin
  */

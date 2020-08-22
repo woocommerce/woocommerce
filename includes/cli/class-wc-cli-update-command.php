@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_CLI_Update_Command class file.
+ * WC_CLI_Update_Command class file
  *
  * @package WooCommerce\CLI
  */

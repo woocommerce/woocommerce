@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce abstract privacy class.
+ * WooCommerce abstract privacy class
  *
  * @since 3.4.0
  * @package WooCommerce\Abstracts

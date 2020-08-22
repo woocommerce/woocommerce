@@ -2,6 +2,7 @@
 
 /**
  * WC_Object_Query tests
+ *
  * @package WooCommerce\Tests\CRUD
  * @since 3.1.0
  */

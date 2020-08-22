@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the WC_Query class.
+ * Tests for the WC_Query class
  *
  * @package WooCommerce\Tests\Util
  * @since 3.3.0

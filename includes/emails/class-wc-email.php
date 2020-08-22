@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Email file.
+ * Class WC_Email file
  *
  * @package WooCommerce\Emails
  */

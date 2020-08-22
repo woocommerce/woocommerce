@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - No Shipping methods.
+ * Admin View: Notice - No Shipping methods
  *
  * @package WooCommerce\Admin\Notices
  */

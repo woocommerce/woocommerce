@@ -1,6 +1,6 @@
 <?php // @codingStandardsIgnoreLine.
 /**
- * Abstract WP_Background_Process class.
+ * Abstract WP_Background_Process class
  *
  * @package WP-Background-Processing
  * @extends WP_Async_Request

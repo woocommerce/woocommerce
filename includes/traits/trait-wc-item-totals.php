@@ -1,6 +1,6 @@
 <?php
 /**
- * This ongoing trait will have shared calculation logic between WC_Abstract_Order and WC_Cart_Totals classes.
+ * This ongoing trait will have shared calculation logic between WC_Abstract_Order and WC_Cart_Totals classes
  *
  * @package WooCommerce\Traits
  * @version 3.9.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Request file.
+ * Class WC_Gateway_Paypal_Request file
  *
  * @package WooCommerce\Gateways
  */

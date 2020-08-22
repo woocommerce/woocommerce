@@ -1,6 +1,6 @@
 <?php
 /**
- * DependencyManagementTestHook class file.
+ * DependencyManagementTestHook class file
  *
  * @package Automattic\WooCommerce\Testing\Tools\DependencyManagement
  */

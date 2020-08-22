@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the WC_Data class.
+ * Tests for the WC_Data class
  *
  * @package WooCommerce\Tests\CRUD
  */

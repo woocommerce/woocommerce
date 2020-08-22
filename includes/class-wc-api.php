@@ -1,6 +1,6 @@
 <?php
 /**
- * WC-API endpoint handler.
+ * WC-API endpoint handler
  *
  * This handles API related functionality in WooCommerce.
  * - wc-api endpoint - Commonly used by Payment gateways for callbacks.

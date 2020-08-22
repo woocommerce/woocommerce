@@ -1,6 +1,6 @@
 <?php
 /**
- * Send Tracks events on behalf of a user.
+ * Send Tracks events on behalf of a user
  *
  * @package WooCommerce\Tracks
  */

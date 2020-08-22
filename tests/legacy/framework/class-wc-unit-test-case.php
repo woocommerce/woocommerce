@@ -1,6 +1,6 @@
 <?php
 /**
- * Base test case for all WooCommerce tests.
+ * Base test case for all WooCommerce tests
  *
  * @package WooCommerce\Tests
  */

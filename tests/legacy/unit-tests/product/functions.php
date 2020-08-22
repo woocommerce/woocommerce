@@ -1,6 +1,7 @@
 <?php
 /**
- * Class Functions.
+ * Class Functions
+ *
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */

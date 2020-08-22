@@ -1,6 +1,7 @@
 <?php
 /**
- * Top Rated Products Widget.
+ * Top Rated Products Widget
+ *
  * Gets and displays top rated products in an unordered list.
  *
  * @package WooCommerce\Widgets

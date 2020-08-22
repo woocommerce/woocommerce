@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce coupons.
+ * WooCommerce coupons
  *
  * The WooCommerce coupons class gets coupon data from storage and checks coupon validity.
  *

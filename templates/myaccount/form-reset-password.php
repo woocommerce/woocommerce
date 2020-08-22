@@ -1,6 +1,6 @@
 <?php
 /**
- * Lost password reset form.
+ * Lost password reset form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/form-reset-password.php.
  *

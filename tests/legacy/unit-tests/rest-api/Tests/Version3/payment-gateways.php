@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Payment Gateways REST API.
+ * Tests for the Payment Gateways REST API
  *
  * @package WooCommerce\Tests\API
  * @since 3.5.0

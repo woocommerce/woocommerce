@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce.com Product Installation.
+ * WooCommerce.com Product Installation
  *
  * @package WooCommerce\WCCom
  * @since 3.7.0

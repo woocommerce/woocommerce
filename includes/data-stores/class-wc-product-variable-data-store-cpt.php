@@ -1,6 +1,6 @@
 <?php
 /**
- * File for WC Variable Product Data Store class.
+ * File for WC Variable Product Data Store class
  *
  * @package WooCommerce\Classes
  */

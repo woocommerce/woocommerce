@@ -1,6 +1,6 @@
 <?php
 /**
- * Represents a file which can be downloaded.
+ * Represents a file which can be downloaded
  *
  * @package WooCommerce\Classes
  * @version 3.0.0

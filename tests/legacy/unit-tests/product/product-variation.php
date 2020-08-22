@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the WC_Product_Variation class.
+ * Tests for the WC_Product_Variation class
  *
  * @package WooCommerce\Tests\Product
  */

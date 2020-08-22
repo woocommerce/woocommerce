@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_AJAX_Test file.
+ * Class WC_AJAX_Test file
  *
  * @package WooCommerce\Tests\WC_AJAX.
  */

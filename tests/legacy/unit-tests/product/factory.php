@@ -1,6 +1,7 @@
 <?php
 /**
  * Products Factory Tests
+ *
  * @package WooCommerce\Tests\Product
  * @since 3.0.0
  */

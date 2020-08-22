@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles CSV export.
+ * Handles CSV export
  *
  * @package WooCommerce\Export
  * @version 3.1.0

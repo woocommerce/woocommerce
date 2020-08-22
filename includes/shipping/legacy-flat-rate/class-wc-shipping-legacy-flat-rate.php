@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Shipping_Legacy_Flat_Rate file.
+ * Class WC_Shipping_Legacy_Flat_Rate file
  *
  * @package WooCommerce\Shipping
  */

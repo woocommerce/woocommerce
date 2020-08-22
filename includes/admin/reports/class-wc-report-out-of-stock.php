@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Out_Of_Stock.
+ * WC_Report_Out_Of_Stock
  *
  * @package WooCommerce\Admin\Reports
  */

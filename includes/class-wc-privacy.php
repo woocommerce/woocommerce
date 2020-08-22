@@ -1,6 +1,6 @@
 <?php
 /**
- * Privacy/GDPR related functionality which ties into WordPress functionality.
+ * Privacy/GDPR related functionality which ties into WordPress functionality
  *
  * @since 3.4.0
  * @package WooCommerce\Classes

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Regenerating product lookup table.
+ * Admin View: Notice - Regenerating product lookup table
  *
  * @package WooCommerce\Admin
  */

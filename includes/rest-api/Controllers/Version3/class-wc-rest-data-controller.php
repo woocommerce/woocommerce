@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Data controller.
+ * REST API Data controller
  *
  * Handles requests to the /data endpoint.
  *

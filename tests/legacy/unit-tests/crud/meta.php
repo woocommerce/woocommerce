@@ -1,6 +1,6 @@
 <?php
 /**
- * Test meta for https://github.com/woocommerce/woocommerce/issues/13533.
+ * Test meta for https://github.com/woocommerce/woocommerce/issues/13533
  *
  * @package WooCommerce\Tests\CRUD
  */

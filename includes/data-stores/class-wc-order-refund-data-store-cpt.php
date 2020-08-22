@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Order_Refund_Data_Store_CPT file.
+ * Class WC_Order_Refund_Data_Store_CPT file
  *
  * @package WooCommerce\DataStores
  */

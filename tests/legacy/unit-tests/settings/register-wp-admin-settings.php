@@ -2,6 +2,7 @@
 
 /**
  * Settings API: WP-Admin Helper Tests
+ *
  * Tests the helper class that makes settings (currently present in wp-admin)
  * available to the REST API.
  *

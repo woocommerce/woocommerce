@@ -1,6 +1,6 @@
 <?php
 /**
- * Coupon tests.
+ * Coupon tests
  *
  * @package WooCommerce\Tests\Coupon
  */

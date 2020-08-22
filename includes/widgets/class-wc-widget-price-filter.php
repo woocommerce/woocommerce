@@ -1,6 +1,6 @@
 <?php
 /**
- * Price Filter Widget and related functions.
+ * Price Filter Widget and related functions
  *
  * Generates a range slider to filter products by price.
  *

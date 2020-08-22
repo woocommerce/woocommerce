@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the shipping class.
+ * Unit tests for the shipping class
  *
  * @package WooCommerce\Tests\Shipping
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Base table missing.
+ * Admin View: Notice - Base table missing
  *
  * @package WooCommerce\Admin
  */

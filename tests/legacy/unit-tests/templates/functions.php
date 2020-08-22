@@ -1,6 +1,6 @@
 <?php
 /**
- * Test template funcitons.
+ * Test template funcitons
  *
  * @package WooCommerce\Tests\Templates
  * @since 3.4.0

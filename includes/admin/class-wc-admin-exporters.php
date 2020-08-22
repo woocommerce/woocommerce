@@ -1,6 +1,6 @@
 <?php
 /**
- * Init WooCommerce data exporters.
+ * Init WooCommerce data exporters
  *
  * @package WooCommerce\Admin
  * @version 3.1.0

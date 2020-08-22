@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Order Item Coupon Tests.
+ * Order Item Coupon Tests
+ *
  * @package WooCommerce\Tests\Order_Items
  * @since 3.2.0
  */

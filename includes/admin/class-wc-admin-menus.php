@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup menus in WP admin.
+ * Setup menus in WP admin
  *
  * @package WooCommerce\Admin
  * @version 2.5.0

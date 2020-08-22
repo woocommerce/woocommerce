@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Most_Stocked.
+ * WC_Report_Most_Stocked
  *
  * @package WooCommerce\Admin\Reports
  */

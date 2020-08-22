@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for WC_Test_Admin_Post_Types class.
+ * Tests for WC_Test_Admin_Post_Types class
  *
  * @package WooCommerce\Tests\Util
  */

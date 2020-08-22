@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Downloads.
+ * Order Downloads
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/order-downloads.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for flat rate shipping.
+ * Settings for flat rate shipping
  *
  * @package WooCommerce\Classes\Shipping
  */

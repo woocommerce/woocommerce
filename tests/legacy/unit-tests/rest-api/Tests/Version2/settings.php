@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings API Tests.
+ * Settings API Tests
  *
  * @package WooCommerce\Tests\API
  * @since 3.0.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * Send Tracks events on behalf of a user using pixel images in page footer.
+ * Send Tracks events on behalf of a user using pixel images in page footer
  *
  * @package WooCommerce\Tracks
  */

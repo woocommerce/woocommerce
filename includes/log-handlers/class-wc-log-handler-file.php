@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Log_Handler_File file.
+ * Class WC_Log_Handler_File file
  *
  * @package WooCommerce\Log Handlers
  */

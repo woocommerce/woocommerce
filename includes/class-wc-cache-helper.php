@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Cache_Helper class.
+ * WC_Cache_Helper class
  *
  * @package WooCommerce\Classes
  */

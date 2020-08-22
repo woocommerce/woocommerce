@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_PDT_Handler file.
+ * Class WC_Gateway_Paypal_PDT_Handler file
  *
  * @package WooCommerce\Gateways
  */

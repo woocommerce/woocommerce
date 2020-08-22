@@ -1,6 +1,6 @@
 <?php
 /**
- * Personal data exporters.
+ * Personal data exporters
  *
  * @since 3.4.0
  * @package WooCommerce\Classes

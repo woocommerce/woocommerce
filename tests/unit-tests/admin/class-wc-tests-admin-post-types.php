@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the post types admin class.
+ * Unit tests for the post types admin class
  *
  * @package WooCommerce\Tests\Admin
  */

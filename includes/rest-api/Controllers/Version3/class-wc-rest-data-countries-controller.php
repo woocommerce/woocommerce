@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Data countries controller.
+ * REST API Data countries controller
  *
  * Handles requests to the /data/countries endpoint.
  *

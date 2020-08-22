@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the WP_Countries class.
+ * Unit tests for the WP_Countries class
  *
  * @package WooCommerce\Tests\Countries
  */

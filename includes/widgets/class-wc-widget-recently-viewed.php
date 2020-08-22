@@ -1,6 +1,6 @@
 <?php
 /**
- * Recent Products Widget.
+ * Recent Products Widget
  *
  * @package WooCommerce\Widgets
  * @version 3.3.0

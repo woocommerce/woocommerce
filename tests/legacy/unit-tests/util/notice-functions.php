@@ -1,6 +1,7 @@
 <?php
 /**
- * Class Notice_Functions.
+ * Class Notice_Functions
+ *
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */

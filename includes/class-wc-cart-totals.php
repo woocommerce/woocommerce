@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart totals calculation class.
+ * Cart totals calculation class
  *
  * Methods are protected and class is final to keep this as an internal API.
  * May be opened in the future once structure is stable.

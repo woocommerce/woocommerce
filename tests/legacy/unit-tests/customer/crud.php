@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Class CustomerCRUD.
+ * Class CustomerCRUD
+ *
  * @package WooCommerce\Tests\Customer
  */
 class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {

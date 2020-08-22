@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Secure connection.
+ * Admin View: Notice - Secure connection
  *
  * @package WooCommerce\Admin\Notices
  */

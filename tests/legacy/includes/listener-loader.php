@@ -1,6 +1,6 @@
 <?php
 /**
- * Listener loader.
+ * Listener loader
  *
  * @package WooCommerce\UnitTests
  */

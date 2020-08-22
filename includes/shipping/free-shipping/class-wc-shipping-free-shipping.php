@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Shipping_Free_Shipping file.
+ * Class WC_Shipping_Free_Shipping file
  *
  * @package WooCommerce\Shipping
  */

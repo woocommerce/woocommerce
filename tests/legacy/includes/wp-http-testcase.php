@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A test case parent for testing HTTP requests.
+ * A test case parent for testing HTTP requests
  *
  * @package WP_HTTP_Testcase
  * @since 1.0.0

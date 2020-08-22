@@ -1,6 +1,8 @@
 <?php
 /**
- * Admin -> WooCommerce -> Extensions -> WooCommerce.com Subscriptions main page.
+ * WooCommerce.com Subscriptions main page
+ *
+ * Admin -> WooCommerce -> Extensions -> WooCommerce.com.
  *
  * @package WooCommerce\Views
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for Paypal standard gateway request.
+ * Unit tests for Paypal standard gateway request
  *
  * @package WooCommerce\Tests\Gateways\Paypal
  */

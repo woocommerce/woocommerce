@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the user functions.
+ * Unit tests for the user functions
  *
  * @package WooCommerce\Tests\Util
  * @since 3.4.6

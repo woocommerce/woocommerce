@@ -2,6 +2,7 @@
 
 /**
  * Shipping Zones API Tests
+ *
  * @package WooCommerce\Tests\API
  * @since 3.0.0
  */

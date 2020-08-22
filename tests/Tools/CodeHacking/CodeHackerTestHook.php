@@ -1,6 +1,6 @@
 <?php
 /**
- * CodeHackerTestHook class file.
+ * CodeHackerTestHook class file
  *
  * @package WooCommerce\Testing
  */

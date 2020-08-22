@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for WC_Order_Refund.
+ * Tests for WC_Order_Refund
  *
  * @package WooCommerce\Tests\CRUD
  */

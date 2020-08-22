@@ -1,6 +1,6 @@
 <?php
 /**
- * FunctionsMockerHack class file.
+ * FunctionsMockerHack class file
  *
  * @package WooCommerce\Testing
  */

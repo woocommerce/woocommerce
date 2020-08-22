@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Order_Data_Store_CPT class file.
+ * WC_Order_Data_Store_CPT class file
  *
  * @package WooCommerce\Classes
  */

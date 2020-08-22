@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Payment_Gateway_eCheck file.
+ * Class WC_Payment_Gateway_eCheck file
  *
  * @package WooCommerce\Gateways
  */

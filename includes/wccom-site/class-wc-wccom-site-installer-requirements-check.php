@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce.com Product Installation Requirements Check.
+ * WooCommerce.com Product Installation Requirements Check
  *
  * @package WooCommerce\WCCom
  * @since 3.8.0

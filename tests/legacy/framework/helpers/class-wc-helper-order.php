@@ -1,6 +1,6 @@
 <?php
 /**
- * Order helpers.
+ * Order helpers
  *
  * @package WooCommerce\Tests
  */

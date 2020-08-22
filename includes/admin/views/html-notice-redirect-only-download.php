@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Redirect only download method is selected.
+ * Admin View: Notice - Redirect only download method is selected
  *
  * @package WooCommerce\Admin\Notices
  */

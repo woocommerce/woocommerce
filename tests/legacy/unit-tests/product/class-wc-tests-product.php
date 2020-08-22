@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the base product class.
+ * Unit tests for the base product class
  *
  * @package WooCommerce\Tests\Product
  */

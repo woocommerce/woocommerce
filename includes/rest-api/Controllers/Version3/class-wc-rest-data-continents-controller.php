@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Data continents controller.
+ * REST API Data continents controller
  *
  * Handles requests to the /data/continents endpoint.
  *
