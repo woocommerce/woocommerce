@@ -4,7 +4,7 @@
  * when running unit tests. If you need to mock a public static method of a class that isn't in the list,
  * simply add it. Please keep it sorted alphabetically.
  *
- * @package WooCommerce Tests
+ * @package WooCommerce\Tests
  */
 
 return array(

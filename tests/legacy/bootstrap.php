@@ -3,7 +3,7 @@
  * WooCommerce Unit Tests Bootstrap
  *
  * @since 2.2
- * @package WooCommerce Tests
+ * @package WooCommerce\Tests
  */
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
