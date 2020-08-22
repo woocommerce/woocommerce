@@ -26,6 +26,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<tbody>
 			<?php
 			$quantites_required      = false;
+			$has_items_in_stock      = false;
 			$previous_post           = $post;
 			$grouped_product_columns = apply_filters(
 				'woocommerce_grouped_product_columns',
@@ -42,6 +43,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			foreach ( $grouped_products as $grouped_product_child ) {
 				$post_object        = get_post( $grouped_product_child->get_id() );
 				$quantites_required = $quantites_required || ( $grouped_product_child->is_purchasable() && ! $grouped_product_child->has_options() );
+				$has_items_in_stock = $has_items_in_stock || $grouped_product_child->is_in_stock();
 				$post               = $post_object; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				setup_postdata( $post );
 
@@ -107,7 +109,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 	<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" />
 
-	<?php if ( $quantites_required ) : ?>
+	<?php if ( $quantites_required && $has_items_in_stock ) : ?>
 
 		<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
