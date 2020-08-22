@@ -2,7 +2,7 @@
 /**
  * Post data tests
  *
- * @package WooCommerce\Tests\Post_Data.
+ * @package WooCommerce\Tests\Post_Data
  */
 
 /**

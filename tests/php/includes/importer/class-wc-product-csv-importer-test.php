@@ -2,7 +2,7 @@
 /**
  * Unit tests for the WC_Product_CSV_Importer_Test class
  *
- * @package WooCommerce\Tests\Importer.
+ * @package WooCommerce\Tests\Importer
  */
 
 /**

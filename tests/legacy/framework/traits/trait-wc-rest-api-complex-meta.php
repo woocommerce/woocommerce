@@ -2,7 +2,7 @@
 /**
  * Trait for easier testing of objects that have `mixed` data type somewhere
  *
- * @package Automattic/WooCommerce/Tests/WC_REST_API_Complex_Meta.
+ * @package Automattic/WooCommerce/Tests/WC_REST_API_Complex_Meta
  */
 
 /**

@@ -2,7 +2,7 @@
 /**
  * Tax settings
  *
- * @package WooCommerce\Admin\Settings.
+ * @package WooCommerce\Admin\Settings
  */
 
 defined( 'ABSPATH' ) || exit;
