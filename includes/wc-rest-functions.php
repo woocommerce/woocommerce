@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
  * Required WP 4.4 or later.
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
- * @since  2.6.0
- * @param  string|null|WC_DateTime $date Date.
- * @param  bool                    $utc  Send false to get local/offset time.
+ * @since 2.6.0
+ * @param string|null|WC_DateTime $date Date.
+ * @param bool                    $utc  Send false to get local/offset time.
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
 function wc_rest_prepare_date_response( $date, $utc = true ) {
@@ -41,7 +41,7 @@ function wc_rest_prepare_date_response( $date, $utc = true ) {
 /**
  * Returns image mime types users are allowed to upload via the API.
  *
- * @since  2.6.4
+ * @since 2.6.4
  * @return array
  */
 function wc_rest_allowed_image_mime_types() {

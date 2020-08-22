@@ -244,7 +244,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param bool       $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 *
 	 * @return array of prices
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
 
@@ -391,7 +391,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 * @param bool       $for_display If taxes should be calculated or not.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	protected function get_price_hash( &$product, $for_display = false ) {
@@ -418,7 +418,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @param WC_Product $product Product object.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function child_has_weight( $product ) {
@@ -439,7 +439,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @param WC_Product $product Product object.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function child_has_dimensions( $product ) {
@@ -460,7 +460,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @param WC_Product $product Product object.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
@@ -473,7 +473,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 * @param string     $status 'instock', 'outofstock', or 'onbackorder'.
 	 *
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 * @return boolean
 	 */
 	public function child_has_stock_status( $product, $status ) {

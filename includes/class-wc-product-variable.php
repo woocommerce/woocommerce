@@ -74,7 +74,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
-	 * @param  bool $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param bool $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $for_display = false ) {
@@ -90,8 +90,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation regular price.
 	 *
-	 * @param  string  $min_or_max Min or max price.
-	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string  $min_or_max Min or max price.
+	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $for_display = false ) {
@@ -104,8 +104,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation sale price.
 	 *
-	 * @param  string  $min_or_max Min or max price.
-	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string  $min_or_max Min or max price.
+	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_sale_price( $min_or_max = 'min', $for_display = false ) {
@@ -118,8 +118,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation (active) price.
 	 *
-	 * @param  string  $min_or_max Min or max price.
-	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param string  $min_or_max Min or max price.
+	 * @param boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
 	public function get_variation_price( $min_or_max = 'min', $for_display = false ) {
@@ -177,8 +177,8 @@ class WC_Product_Variable extends WC_Product {
 	 * has dynamic values such as {price_excluding_tax} for variable products.
 	 *
 	 * @see get_price_html for an explanation as to why.
-	 * @param  string  $price Price to calculate, left blank to just use get_price().
-	 * @param  integer $qty   Quantity passed on to get_price_including_tax() or get_price_excluding_tax().
+	 * @param string  $price Price to calculate, left blank to just use get_price().
+	 * @param integer $qty   Quantity passed on to get_price_including_tax() or get_price_excluding_tax().
 	 * @return string
 	 */
 	public function get_price_suffix( $price = '', $qty = 1 ) {
@@ -346,8 +346,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns an array of data for a variation. Used in the add to cart form.
 	 *
-	 * @since  2.4.0
-	 * @param  WC_Product $variation Variation product object or ID.
+	 * @since 2.4.0
+	 * @param WC_Product $variation Variation product object or ID.
 	 * @return array|bool
 	 */
 	public function get_available_variation( $variation ) {
@@ -501,7 +501,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit. What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit. What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
@@ -586,7 +586,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Returns whether or not the product has additional options that need
 	 * selecting before adding to cart.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function has_options() {

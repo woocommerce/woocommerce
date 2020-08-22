@@ -2,8 +2,8 @@
 /**
  * List tables: products.
  *
- * @package  WooCommerce\Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -407,7 +407,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Change views on the edit product screen.
 	 *
-	 * @param  array $views Array of views.
+	 * @param array $views Array of views.
 	 * @return array
 	 */
 	public function product_views( $views ) {

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -322,7 +322,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get attribute taxonomy label.
 	 *
-	 * @param  string $name Taxonomy name.
+	 * @param string $name Taxonomy name.
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {

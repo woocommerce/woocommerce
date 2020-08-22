@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 	 *
 	 * Customer note emails are sent when you add a note to an order.
 	 *
-	 * @class       WC_Email_Customer_Note
-	 * @version     3.5.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_Customer_Note
+	 * @version 3.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Customer_Note extends WC_Email {
 
@@ -55,7 +55,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 		/**
 		 * Get email subject.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading() {

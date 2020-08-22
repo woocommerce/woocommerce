@@ -7,7 +7,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -103,7 +103,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order ID this meta belongs to.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_order_id( $context = 'view' ) {
@@ -113,7 +113,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -198,7 +198,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Type checking.
 	 *
-	 * @param  string|array $type Type.
+	 * @param string|array $type Type.
 	 * @return boolean
 	 */
 	public function is_type( $type ) {
@@ -208,8 +208,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Calculate item taxes.
 	 *
-	 * @since  3.2.0
-	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @since 3.2.0
+	 * @param array $calculate_tax_for Location data to get taxes for. Required.
 	 * @return bool  True if taxes were calculated.
 	 */
 	public function calculate_taxes( $calculate_tax_for = array() ) {

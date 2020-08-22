@@ -303,7 +303,7 @@ final class WC_Cart_Session {
 	/**
 	 * Get the persistent cart from the database.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return array
 	 */
 	private function get_saved_cart() {
@@ -323,7 +323,7 @@ final class WC_Cart_Session {
 	/**
 	 * Get a cart from an order, if user has permission.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 *
 	 * @param int   $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.

@@ -141,7 +141,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * The product_type property is deprecated but is used here for BW compatibility with child classes which may be defining product_type and not have a get_type method.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_type() {
@@ -151,8 +151,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product name.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -162,8 +162,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product slug.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_slug( $context = 'view' ) {
@@ -173,8 +173,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product created date.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
@@ -184,8 +184,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product modified date.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
@@ -195,8 +195,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product status.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
@@ -206,8 +206,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * If the product is featured.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return boolean
 	 */
 	public function get_featured( $context = 'view' ) {
@@ -217,8 +217,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get catalog visibility.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_catalog_visibility( $context = 'view' ) {
@@ -228,8 +228,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product description.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_description( $context = 'view' ) {
@@ -239,8 +239,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get product short description.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_short_description( $context = 'view' ) {
@@ -250,7 +250,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get SKU (Stock-keeping unit) - product unique ID.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_sku( $context = 'view' ) {
@@ -260,7 +260,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product's active price.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string price
 	 */
 	public function get_price( $context = 'view' ) {
@@ -270,7 +270,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product's regular price.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string price
 	 */
 	public function get_regular_price( $context = 'view' ) {
@@ -280,7 +280,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product's sale price.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string price
 	 */
 	public function get_sale_price( $context = 'view' ) {
@@ -290,8 +290,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get date on sale from.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_on_sale_from( $context = 'view' ) {
@@ -301,8 +301,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get date on sale to.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_on_sale_to( $context = 'view' ) {
@@ -312,8 +312,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get number total of sales.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_total_sales( $context = 'view' ) {
@@ -323,7 +323,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the tax status.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_tax_status( $context = 'view' ) {
@@ -333,7 +333,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the tax class.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -343,8 +343,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Return if product manage stock.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return boolean
 	 */
 	public function get_manage_stock( $context = 'view' ) {
@@ -354,7 +354,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns number of items available for sale.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int|null
 	 */
 	public function get_stock_quantity( $context = 'view' ) {
@@ -364,8 +364,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Return the stock status.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @since  3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
 	 * @return string
 	 */
 	public function get_stock_status( $context = 'view' ) {
@@ -375,8 +375,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get backorders.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @since  3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
 	 * @return string yes no or notify
 	 */
 	public function get_backorders( $context = 'view' ) {
@@ -386,8 +386,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get low stock amount.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @since  3.5.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @since 3.5.0
 	 * @return int|string Returns empty string if value not set
 	 */
 	public function get_low_stock_amount( $context = 'view' ) {
@@ -397,8 +397,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Return if should be sold individually.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @since  3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function get_sold_individually( $context = 'view' ) {
@@ -408,7 +408,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product's weight.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_weight( $context = 'view' ) {
@@ -418,7 +418,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product length.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_length( $context = 'view' ) {
@@ -428,7 +428,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product width.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_width( $context = 'view' ) {
@@ -438,7 +438,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the product height.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_height( $context = 'view' ) {
@@ -448,7 +448,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns formatted dimensions.
 	 *
-	 * @param  bool $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
+	 * @param bool $formatted True by default for legacy support - will be false/not set in future versions to return the array only. Use wc_format_dimensions for formatted versions instead.
 	 * @return string|array
 	 */
 	public function get_dimensions( $formatted = true ) {
@@ -466,8 +466,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get upsell IDs.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_upsell_ids( $context = 'view' ) {
@@ -477,8 +477,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get cross sell IDs.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_cross_sell_ids( $context = 'view' ) {
@@ -488,8 +488,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get parent ID.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_parent_id( $context = 'view' ) {
@@ -499,8 +499,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Return if reviews is allowed.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function get_reviews_allowed( $context = 'view' ) {
@@ -510,8 +510,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get purchase note.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_purchase_note( $context = 'view' ) {
@@ -521,7 +521,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns product attributes.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_attributes( $context = 'view' ) {
@@ -531,8 +531,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get default attributes.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_default_attributes( $context = 'view' ) {
@@ -542,8 +542,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get menu order.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_menu_order( $context = 'view' ) {
@@ -553,8 +553,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get post password.
 	 *
-	 * @since  3.6.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.6.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_post_password( $context = 'view' ) {
@@ -564,8 +564,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get category ids.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_category_ids( $context = 'view' ) {
@@ -575,8 +575,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get tag ids.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_tag_ids( $context = 'view' ) {
@@ -586,8 +586,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get virtual.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function get_virtual( $context = 'view' ) {
@@ -597,7 +597,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the gallery attachment ids.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_gallery_image_ids( $context = 'view' ) {
@@ -607,8 +607,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get shipping class ID.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_shipping_class_id( $context = 'view' ) {
@@ -618,8 +618,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get downloads.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_downloads( $context = 'view' ) {
@@ -629,8 +629,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get download expiry.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_download_expiry( $context = 'view' ) {
@@ -640,8 +640,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get downloadable.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function get_downloadable( $context = 'view' ) {
@@ -651,8 +651,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get download limit.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_download_limit( $context = 'view' ) {
@@ -662,8 +662,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_image_id( $context = 'view' ) {
@@ -673,7 +673,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get rating count.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array of counts
 	 */
 	public function get_rating_counts( $context = 'view' ) {
@@ -683,7 +683,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get average rating.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return float
 	 */
 	public function get_average_rating( $context = 'view' ) {
@@ -693,7 +693,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get review count.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_review_count( $context = 'view' ) {
@@ -773,9 +773,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set catalog visibility.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
-	 * @param  string $visibility Options: 'hidden', 'visible', 'search' and 'catalog'.
+	 * @param string $visibility Options: 'hidden', 'visible', 'search' and 'catalog'.
 	 */
 	public function set_catalog_visibility( $visibility ) {
 		$options = array_keys( wc_get_product_visibility_options() );
@@ -808,9 +808,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set SKU.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
-	 * @param  string $sku Product SKU.
+	 * @param string $sku Product SKU.
 	 */
 	public function set_sku( $sku ) {
 		$sku = (string) $sku;
@@ -884,9 +884,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set the tax status.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
-	 * @param  string $status Tax status.
+	 * @param string $status Tax status.
 	 */
 	public function set_tax_status( $status ) {
 		$options = array(
@@ -1356,7 +1356,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Save data (either create or update depending on if we are working on an existing product).
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return int
 	 */
 	public function save() {
@@ -1396,7 +1396,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Delete the product, set its ID to 0, and return result.
 	 *
-	 * @param  bool $force_delete Should the product be deleted permanently.
+	 * @param bool $force_delete Should the product be deleted permanently.
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
@@ -1430,9 +1430,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * Product classes should override this to declare support (or lack of support) for a feature.
 	 *
-	 * @param  string $feature string The name of a feature to test support for.
+	 * @param string $feature string The name of a feature to test support for.
 	 * @return bool True if the product supports the feature, false otherwise.
-	 * @since  2.5.0
+	 * @since 2.5.0
 	 */
 	public function supports( $feature ) {
 		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports, true ), $feature, $this );
@@ -1452,7 +1452,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * Backwards compatibility with downloadable/virtual.
 	 *
-	 * @param  string|array $type Array or string of types.
+	 * @param string|array $type Array or string of types.
 	 * @return bool
 	 */
 	public function is_type( $type ) {
@@ -1546,7 +1546,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
@@ -1654,7 +1654,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Check if a product is on backorder.
 	 *
-	 * @param  int $qty_in_cart (default: 0).
+	 * @param int $qty_in_cart (default: 0).
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
@@ -1668,7 +1668,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns whether or not the product has enough stock for the order.
 	 *
-	 * @param  mixed $quantity Quantity of a product added to an order.
+	 * @param mixed $quantity Quantity of a product added to an order.
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
@@ -1701,7 +1701,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Does a child have dimensions?
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function child_has_dimensions() {
@@ -1711,7 +1711,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Does a child have a weight?
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function child_has_weight() {
@@ -1723,7 +1723,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 1.6.2
 	 *
-	 * @param  string $download_id file identifier.
+	 * @param string $download_id file identifier.
 	 * @return bool Whether downloadable product has a file attached.
 	 */
 	public function has_file( $download_id = '' ) {
@@ -1734,7 +1734,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Returns whether or not the product has additional options that need
 	 * selecting before adding to cart.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function has_options() {
@@ -1777,7 +1777,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * If the stock level comes from another product ID, this should be modified.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return int
 	 */
 	public function get_stock_managed_by_id() {
@@ -1820,7 +1820,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get min quantity which can be purchased at once.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return int
 	 */
 	public function get_min_purchase_quantity() {
@@ -1830,7 +1830,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get max quantity which can be purchased at once.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return int Quantity or -1 if unlimited.
 	 */
 	public function get_max_purchase_quantity() {
@@ -1867,7 +1867,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get the add to cart button text description - used in aria tags.
 	 *
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 * @return string
 	 */
 	public function add_to_cart_description() {
@@ -1878,9 +1878,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the main product image.
 	 *
-	 * @param  string $size (default: 'woocommerce_thumbnail').
-	 * @param  array  $attr Image attributes.
-	 * @param  bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param string $size (default: 'woocommerce_thumbnail').
+	 * @param array  $attr Image attributes.
+	 * @param bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
@@ -1921,7 +1921,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns a single product attribute as a string.
 	 *
-	 * @param  string $attribute to get.
+	 * @param string $attribute to get.
 	 * @return string
 	 */
 	public function get_attribute( $attribute ) {
@@ -1941,7 +1941,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get the total amount (COUNT) of ratings, or just the count for one rating e.g. number of 5 star ratings.
 	 *
-	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
+	 * @param int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
@@ -1959,7 +1959,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get a file by $download_id.
 	 *
-	 * @param  string $download_id file identifier.
+	 * @param string $download_id file identifier.
 	 * @return array|false if not found
 	 */
 	public function get_file( $download_id = '' ) {
@@ -1979,7 +1979,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get file download path identified by $download_id.
 	 *
-	 * @param  string $download_id file identifier.
+	 * @param string $download_id file identifier.
 	 * @return string
 	 */
 	public function get_file_download_path( $download_id ) {
@@ -1993,8 +1993,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get the suffix to display after prices > 0.
 	 *
-	 * @param  string  $price to calculate, left blank to just use get_price().
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax().
+	 * @param string  $price to calculate, left blank to just use get_price().
+	 * @param integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax().
 	 * @return string
 	 */
 	public function get_price_suffix( $price = '', $qty = 1 ) {

@@ -2,8 +2,8 @@
 /**
  * Post Types Admin
  *
- * @package  WooCommerce\Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -115,7 +115,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Change messages when a post type is updated.
 	 *
-	 * @param  array $messages Array of messages.
+	 * @param array $messages Array of messages.
 	 * @return array
 	 */
 	public function post_updated_messages( $messages ) {
@@ -187,8 +187,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Specify custom bulk actions messages for different post types.
 	 *
-	 * @param  array $bulk_messages Array of messages.
-	 * @param  array $bulk_counts Array of how many objects were updated.
+	 * @param array $bulk_messages Array of messages.
+	 * @param array $bulk_counts Array of how many objects were updated.
 	 * @return array
 	 */
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
@@ -637,8 +637,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param  array  $hidden Hidden boxes.
-	 * @param  object $screen Current screen.
+	 * @param array  $hidden Hidden boxes.
+	 * @param object $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {

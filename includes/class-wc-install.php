@@ -391,7 +391,7 @@ class WC_Install {
 	 *
 	 * A brand new install has no version yet. Also treat empty installs as 'new'.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return boolean
 	 */
 	public static function is_new_install() {
@@ -403,7 +403,7 @@ class WC_Install {
 	/**
 	 * Is a DB update needed?
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return boolean
 	 */
 	public static function needs_db_update() {
@@ -455,7 +455,7 @@ class WC_Install {
 	/**
 	 * Get list of DB update callbacks.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public static function get_db_update_callbacks() {
@@ -1405,7 +1405,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 * @param array  $plugin_to_install Plugin information.
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
@@ -1564,7 +1564,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 * @param string $theme_slug Theme slug.
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.

@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Legacy Shipping Zone.
  *
- * @version  3.0.0
- * @package  WooCommerce\Classes
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   WooThemes
  */

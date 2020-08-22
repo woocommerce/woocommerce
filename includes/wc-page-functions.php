@@ -4,8 +4,8 @@
  *
  * Functions related to pages and menus.
  *
- * @package  WooCommerce\Functions
- * @version  2.6.0
+ * @package WooCommerce\Functions
+ * @version 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Replace a page title with the endpoint title.
  *
- * @param  string $title Post title.
+ * @param string $title Post title.
  * @return string
  */
 function wc_page_endpoint_title( $title ) {
@@ -78,9 +78,9 @@ function wc_get_page_permalink( $page, $fallback = null ) {
  *
  * Gets the URL for an endpoint, which varies depending on permalink settings.
  *
- * @param  string $endpoint  Endpoint slug.
- * @param  string $value     Query param value.
- * @param  string $permalink Permalink.
+ * @param string $endpoint  Endpoint slug.
+ * @param string $value     Query param value.
+ * @param string $permalink Permalink.
  *
  * @return string
  */

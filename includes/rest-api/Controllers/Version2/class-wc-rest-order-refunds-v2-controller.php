@@ -5,7 +5,7 @@
  * Handles requests to the /orders/<order_id>/refunds endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -121,8 +121,8 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @since  3.0.0
-	 * @param  int $id Object ID.
+	 * @since 3.0.0
+	 * @param int $id Object ID.
 	 * @return WC_Data
 	 */
 	protected function get_object( $id ) {
@@ -132,8 +132,8 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @since 3.0.0
+	 * @param C_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -175,10 +175,10 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Prepare a single order output for response.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 *
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param C_Data         $object  Object data.
+	 * @param P_REST_Request $request Request object.
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -245,8 +245,8 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -261,9 +261,9 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Prepares one object for create or update operation.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -319,9 +319,9 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	/**
 	 * Save an object data.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request  Full details about the request.
-	 * @param  bool            $creating If is creating a new object.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request  Full details about the request.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {

@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 	 *
 	 * An email sent to the admin when payment fails to go through.
 	 *
-	 * @class       WC_Email_Failed_Order
-	 * @version     2.5.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_Failed_Order
+	 * @version 2.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Failed_Order extends WC_Email {
 
@@ -51,7 +51,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		/**
 		 * Get email subject.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -61,7 +61,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading() {

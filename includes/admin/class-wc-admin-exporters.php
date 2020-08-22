@@ -2,8 +2,8 @@
 /**
  * Init WooCommerce data exporters.
  *
- * @package     WooCommerce\Admin
- * @version     3.1.0
+ * @package WooCommerce\Admin
+ * @version 3.1.0
  */
 
 use Automattic\Jetpack\Constants;

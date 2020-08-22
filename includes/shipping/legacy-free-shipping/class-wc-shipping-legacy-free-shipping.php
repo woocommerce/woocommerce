@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This class is here for backwards compatibility for methods existing before zones existed.
  *
- * @deprecated  2.6.0
+ * @deprecated 2.6.0
  * @version 2.4.0
  * @package WooCommerce\Classes\Shipping
  */

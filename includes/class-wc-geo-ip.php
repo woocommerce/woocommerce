@@ -4,8 +4,8 @@
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *
- * @package    WooCommerce\Classes
- * @version    2.4.0
+ * @package WooCommerce\Classes
+ * @version 2.4.0
  * @deprecated 3.4.0
  */
 
@@ -1370,7 +1370,7 @@ class WC_Geo_IP {
 	/**
 	 * Common get record.
 	 *
-	 * @param  string $seek_country
+	 * @param string $seek_country
 	 * @return WC_Geo_IP_Record instance
 	 */
 	private function _common_get_record( $seek_country ) {
@@ -1485,7 +1485,7 @@ class WC_Geo_IP {
 	/**
 	 * Get record.
 	 *
-	 * @param  int $ipnum
+	 * @param int $ipnum
 	 * @return WC_Geo_IP_Record instance
 	 */
 	private function _get_record( $ipnum ) {
@@ -1500,7 +1500,7 @@ class WC_Geo_IP {
 	/**
 	 * Seek country IPv6.
 	 *
-	 * @param  int $ipnum
+	 * @param int $ipnum
 	 * @return string
 	 */
 	public function _geoip_seek_country_v6( $ipnum ) {
@@ -1561,7 +1561,7 @@ class WC_Geo_IP {
 	/**
 	 * Seek country.
 	 *
-	 * @param  int $ipnum
+	 * @param int $ipnum
 	 * @return string
 	 */
 	private function _geoip_seek_country( $ipnum ) {
@@ -1616,7 +1616,7 @@ class WC_Geo_IP {
 	/**
 	 * Record by addr.
 	 *
-	 * @param  string $addr
+	 * @param string $addr
 	 *
 	 * @return WC_Geo_IP_Record
 	 */
@@ -1632,7 +1632,7 @@ class WC_Geo_IP {
 	/**
 	 * Country ID by addr IPv6.
 	 *
-	 * @param  string $addr
+	 * @param string $addr
 	 * @return int|bool
 	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
@@ -1647,7 +1647,7 @@ class WC_Geo_IP {
 	/**
 	 * Country ID by addr.
 	 *
-	 * @param  string $addr
+	 * @param string $addr
 	 * @return int
 	 */
 	public function geoip_country_id_by_addr( $addr ) {
@@ -1658,7 +1658,7 @@ class WC_Geo_IP {
 	/**
 	 * Country code by addr IPv6.
 	 *
-	 * @param  string $addr
+	 * @param string $addr
 	 * @return string
 	 */
 	public function geoip_country_code_by_addr_v6( $addr ) {
@@ -1673,7 +1673,7 @@ class WC_Geo_IP {
 	/**
 	 * Country code by addr.
 	 *
-	 * @param  string $addr
+	 * @param string $addr
 	 * @return string
 	 */
 	public function geoip_country_code_by_addr( $addr ) {
@@ -1695,9 +1695,9 @@ class WC_Geo_IP {
 	/**
 	 * Encode string.
 	 *
-	 * @param  string $string
-	 * @param  int    $start
-	 * @param  int    $length
+	 * @param string $string
+	 * @param int    $start
+	 * @param int    $length
 	 * @return string
 	 */
 	private function _safe_substr( $string, $start, $length ) {

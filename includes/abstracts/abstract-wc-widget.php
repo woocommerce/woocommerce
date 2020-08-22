@@ -3,7 +3,7 @@
  * Abstract widget class
  *
  * @class WC_Widget
- * @package  WooCommerce\Abstracts
+ * @package WooCommerce\Abstracts
  */
 
 use Automattic\Jetpack\Constants;
@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Widget
  *
- * @package  WooCommerce\Abstracts
- * @version  2.5.0
- * @extends  WP_Widget
+ * @package WooCommerce\Abstracts
+ * @version 2.5.0
+ * @extends WP_Widget
  */
 abstract class WC_Widget extends WP_Widget {
 
@@ -76,7 +76,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Get cached widget.
 	 *
-	 * @param  array $args Arguments.
+	 * @param array $args Arguments.
 	 * @return bool true if the widget is cached otherwise false
 	 */
 	public function get_cached_widget( $args ) {
@@ -102,8 +102,8 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Cache the widget.
 	 *
-	 * @param  array  $args Arguments.
-	 * @param  string $content Content.
+	 * @param array  $args Arguments.
+	 * @param string $content Content.
 	 * @return string the content that was cached
 	 */
 	public function cache_widget( $args, $content ) {
@@ -171,7 +171,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Output the html at the end of a widget.
 	 *
-	 * @param  array $args Arguments.
+	 * @param array $args Arguments.
 	 */
 	public function widget_end( $args ) {
 		echo $args['after_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
@@ -180,9 +180,9 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Updates a particular instance of a widget.
 	 *
-	 * @see    WP_Widget->update
-	 * @param  array $new_instance New instance.
-	 * @param  array $old_instance Old instance.
+	 * @see WP_Widget->update
+	 * @param array $new_instance New instance.
+	 * @param array $old_instance Old instance.
 	 * @return array
 	 */
 	public function update( $new_instance, $old_instance ) {
@@ -237,7 +237,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Outputs the settings update form.
 	 *
-	 * @see   WP_Widget->form
+	 * @see WP_Widget->form
 	 *
 	 * @param array $instance Instance.
 	 */
@@ -318,7 +318,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * Get current page URL with various filtering props supported by WC.
 	 *
 	 * @return string
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 */
 	protected function get_current_page_url() {
 		if ( Constants::is_defined( 'SHOP_IS_ON_FRONT' ) ) {
@@ -390,9 +390,9 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Get widget id plus scheme/protocol to prevent serving mixed content from (persistently) cached widgets.
 	 *
-	 * @since  3.4.0
-	 * @param  string $widget_id Id of the cached widget.
-	 * @param  string $scheme    Scheme for the widget id.
+	 * @since 3.4.0
+	 * @param string $widget_id Id of the cached widget.
+	 * @param string $scheme    Scheme for the widget id.
 	 * @return string            Widget id including scheme/protocol.
 	 */
 	protected function get_widget_id_for_cache( $widget_id, $scheme = '' ) {

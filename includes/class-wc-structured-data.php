@@ -3,7 +3,7 @@
  * Structured data's handler and generator using JSON-LD format.
  *
  * @package WooCommerce\Classes
- * @since   3.0.0
+ * @since 3.0.0
  * @version 3.0.0
  */
 
@@ -39,8 +39,8 @@ class WC_Structured_Data {
 	/**
 	 * Sets data.
 	 *
-	 * @param  array $data  Structured data.
-	 * @param  bool  $reset Unset data (default: false).
+	 * @param array $data  Structured data.
+	 * @param ool  $reset Unset data (default: false).
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
@@ -77,7 +77,7 @@ class WC_Structured_Data {
 	 * 'website',
 	 * 'order',
 	 *
-	 * @param  array $types Structured data types.
+	 * @param rray $types Structured data types.
 	 * @return array
 	 */
 	public function get_structured_data( $types ) {

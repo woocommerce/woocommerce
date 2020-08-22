@@ -15,12 +15,12 @@ defined( 'ABSPATH' ) || exit;
  *
  * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
  *
- * @since  3.0.0 this supports set, increase and decrease.
+ * @since 3.0.0 this supports set, increase and decrease.
  *
- * @param  int|WC_Product $product        Product ID or product instance.
- * @param  int|null       $stock_quantity Stock quantity.
- * @param  string         $operation      Type of opertion, allows 'set', 'increase' and 'decrease'.
- * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
+ * @param int|WC_Product $product        Product ID or product instance.
+ * @param int|null       $stock_quantity Stock quantity.
+ * @param string         $operation      Type of opertion, allows 'set', 'increase' and 'decrease'.
+ * @param bool           $updating       If true, the product object won't be saved here as it will be updated later.
  * @return bool|int|null
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set', $updating = false ) {
@@ -383,8 +383,8 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
 /**
  * Return low stock amount to determine if notification needs to be sent
  *
- * @param  WC_Product $product Product to get data from.
- * @since  3.5.0
+ * @param WC_Product $product Product to get data from.
+ * @since 3.5.0
  * @return int
  */
 function wc_get_low_stock_amount( WC_Product $product ) {

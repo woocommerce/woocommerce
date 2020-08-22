@@ -5,7 +5,7 @@
  * Handles requests to the /system_status endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -54,7 +54,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to view system status.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -1237,8 +1237,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare the system status response
 	 *
-	 * @param  array           $system_status System status data.
-	 * @param  WP_REST_Request $request       Request object.
+	 * @param rray           $system_status System status data.
+	 * @param P_REST_Request $request       Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $system_status, $request ) {

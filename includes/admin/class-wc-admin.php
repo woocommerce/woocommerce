@@ -2,9 +2,9 @@
 /**
  * WooCommerce Admin
  *
- * @class    WC_Admin
- * @package  WooCommerce\Admin
- * @version  2.6.0
+ * @class WC_Admin
+ * @package WooCommerce\Admin
+ * @version 2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -243,8 +243,8 @@ class WC_Admin {
 	/**
 	 * Change the admin footer text on WooCommerce admin pages.
 	 *
-	 * @since  2.3
-	 * @param  string $footer_text text to be rendered in the footer.
+	 * @since 2.3
+	 * @param string $footer_text text to be rendered in the footer.
 	 * @return string
 	 */
 	public function admin_footer_text( $footer_text ) {

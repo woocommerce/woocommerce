@@ -45,7 +45,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Get product url.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_product_url( $context = 'view' ) {
@@ -55,7 +55,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Get button text.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_button_text( $context = 'view' ) {

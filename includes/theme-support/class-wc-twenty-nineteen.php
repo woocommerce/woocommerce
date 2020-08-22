@@ -2,7 +2,7 @@
 /**
  * Twenty Nineteen support.
  *
- * @since   3.5.X
+ * @since 3.5.X
  * @package WooCommerce\Classes
  */
 
@@ -71,7 +71,7 @@ class WC_Twenty_Nineteen {
 	/**
 	 * Enqueue CSS for this theme.
 	 *
-	 * @param  array $styles Array of registered styles.
+	 * @param array $styles Array of registered styles.
 	 * @return array
 	 */
 	public static function enqueue_styles( $styles ) {

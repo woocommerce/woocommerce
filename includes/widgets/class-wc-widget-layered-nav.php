@@ -229,9 +229,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Show dropdown layered nav.
 	 *
-	 * @param  array  $terms Terms.
-	 * @param  string $taxonomy Taxonomy.
-	 * @param  string $query_type Query Type.
+	 * @param array  $terms Terms.
+	 * @param string $taxonomy Taxonomy.
+	 * @param string $query_type Query Type.
 	 * @return bool Will nav display?
 	 */
 	protected function layered_nav_dropdown( $terms, $taxonomy, $query_type ) {
@@ -336,9 +336,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * This query allows counts to be generated based on the viewed products, not all products.
 	 *
-	 * @param  array  $term_ids Term IDs.
-	 * @param  string $taxonomy Taxonomy.
-	 * @param  string $query_type Query Type.
+	 * @param array  $term_ids Term IDs.
+	 * @param string $taxonomy Taxonomy.
+	 * @param string $query_type Query Type.
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -510,9 +510,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	/**
 	 * Show list based layered nav.
 	 *
-	 * @param  array  $terms Terms.
-	 * @param  string $taxonomy Taxonomy.
-	 * @param  string $query_type Query Type.
+	 * @param array  $terms Terms.
+	 * @param string $taxonomy Taxonomy.
+	 * @param string $query_type Query Type.
 	 * @return bool   Will nav display?
 	 */
 	protected function layered_nav_list( $terms, $taxonomy, $query_type ) {

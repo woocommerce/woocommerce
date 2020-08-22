@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Legacy Customer.
  *
- * @version  3.0.0
- * @package  WooCommerce\Classes
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   WooThemes
  */
@@ -75,7 +75,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Address and shipping_address are aliased, so we want to get the 'real' key name.
 	 * For all other keys, we can just return it.
 	 * @since 3.0.0
-	 * @param  string $key
+	 * @param string $key
 	 * @return string
 	 */
 	private function filter_legacy_key( $key ) {

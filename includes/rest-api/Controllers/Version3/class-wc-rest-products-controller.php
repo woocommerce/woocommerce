@@ -5,7 +5,7 @@
  * Handles requests to the /products endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -289,8 +289,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	/**
 	 * Prepare a single product for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param WP_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {

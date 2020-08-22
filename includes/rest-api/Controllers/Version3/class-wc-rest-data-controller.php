@@ -5,7 +5,7 @@
  * Handles requests to the /data endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -53,7 +53,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read site data.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -67,7 +67,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read site settings.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -81,8 +81,8 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	/**
 	 * Return the list of data resources.
 	 *
-	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.5.0
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -155,7 +155,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	/**
 	 * Get the data index schema, conforming to JSON Schema.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return array
 	 */
 	public function get_item_schema() {

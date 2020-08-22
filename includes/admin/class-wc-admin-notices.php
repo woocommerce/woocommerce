@@ -526,7 +526,7 @@ class WC_Admin_Notices {
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
-	 * @since  3.5.1
+	 * @since 3.5.1
 	 */
 	protected static function is_ssl() {
 		$shop_page = wc_get_page_permalink( 'shop' );

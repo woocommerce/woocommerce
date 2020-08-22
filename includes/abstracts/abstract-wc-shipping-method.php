@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extended by shipping methods to handle shipping calculations etc.
  *
- * @class       WC_Shipping_Method
- * @version     3.0.0
- * @package     WooCommerce\Abstracts
+ * @class WC_Shipping_Method
+ * @version 3.0.0
+ * @package WooCommerce\Abstracts
  */
 abstract class WC_Shipping_Method extends WC_Settings_API {
 
@@ -330,7 +330,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Calc taxes per item being shipping in costs array.
 	 *
 	 * @since 2.6.0
-	 * @param  array $costs Costs.
+	 * @param array $costs Costs.
 	 * @return array of taxes
 	 */
 	protected function get_taxes_per_item( $costs ) {
@@ -455,8 +455,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
-	 * @param  string $key Key.
-	 * @param  mixed  $empty_value Empty value.
+	 * @param string $key Key.
+	 * @param mixed  $empty_value Empty value.
 	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
@@ -473,8 +473,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Gets an option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
-	 * @param  string $key Key.
-	 * @param  mixed  $empty_value Empty value.
+	 * @param string $key Key.
+	 * @param mixed  $empty_value Empty value.
 	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
 	public function get_instance_option( $key, $empty_value = null ) {

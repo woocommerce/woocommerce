@@ -5,7 +5,7 @@
  * Handles requests to the products/categories endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;

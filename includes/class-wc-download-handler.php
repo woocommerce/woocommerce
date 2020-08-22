@@ -248,7 +248,7 @@ class WC_Download_Handler {
 	/**
 	 * Parse file path and see if its remote or local.
 	 *
-	 * @param  string $file_path File path.
+	 * @param string $file_path File path.
 	 * @return array
 	 */
 	public static function parse_file_path( $file_path ) {
@@ -448,7 +448,7 @@ class WC_Download_Handler {
 	/**
 	 * Get content type of a download.
 	 *
-	 * @param  string $file_path File path.
+	 * @param string $file_path File path.
 	 * @return string
 	 */
 	private static function get_download_content_type( $file_path ) {
@@ -542,9 +542,9 @@ class WC_Download_Handler {
 	 *
 	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/.
 	 *
-	 * @param  string $file   File.
-	 * @param  int    $start  Byte offset/position of the beginning from which to read from the file.
-	 * @param  int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
+	 * @param string $file   File.
+	 * @param int    $start  Byte offset/position of the beginning from which to read from the file.
+	 * @param int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
 	 * @return bool Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {

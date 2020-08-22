@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -446,7 +446,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
 	 */
 	protected function prepare_item_for_database( $request ) {
@@ -514,7 +514,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Only return writable props from schema.
-	 * @param  array $schema
+	 * @param rray $schema
 	 * @return bool
 	 */
 	protected function filter_writable_props( $schema ) {

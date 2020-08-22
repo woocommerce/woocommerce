@@ -663,7 +663,7 @@ class WC_Post_Types {
 	/**
 	 * Added product for Jetpack related posts.
 	 *
-	 * @param  array $post_types Post types.
+	 * @param array $post_types Post types.
 	 * @return array
 	 */
 	public static function rest_api_allowed_post_types( $post_types ) {

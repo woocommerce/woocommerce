@@ -2,7 +2,7 @@
 /**
  * Twenty Seventeen support.
  *
- * @since   2.6.9
+ * @since 2.6.9
  * @package WooCommerce\Classes
  */
 
@@ -42,7 +42,7 @@ class WC_Twenty_Seventeen {
 	/**
 	 * Enqueue CSS for this theme.
 	 *
-	 * @param  array $styles Array of registered styles.
+	 * @param array $styles Array of registered styles.
 	 * @return array
 	 */
 	public static function enqueue_styles( $styles ) {
@@ -81,9 +81,9 @@ class WC_Twenty_Seventeen {
 	/**
 	 * Custom colors.
 	 *
-	 * @param  string $css Styles.
-	 * @param  string $hue Color.
-	 * @param  string $saturation Saturation.
+	 * @param tring $css Styles.
+	 * @param tring $hue Color.
+	 * @param tring $saturation Saturation.
 	 * @return string
 	 */
 	public static function custom_colors_css( $css, $hue, $saturation ) {

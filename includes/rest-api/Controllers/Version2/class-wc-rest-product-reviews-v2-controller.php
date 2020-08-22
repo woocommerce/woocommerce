@@ -5,7 +5,7 @@
  * Handles requests to /products/<product_id>/reviews.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -60,7 +60,7 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 	/**
 	 * Check if a given request has access to batch manage product reviews.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function batch_items_permissions_check( $request ) {
@@ -112,7 +112,7 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */

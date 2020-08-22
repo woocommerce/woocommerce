@@ -5,7 +5,7 @@
  * Handles requests to the /settings endpoints.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -57,7 +57,7 @@ class WC_REST_Settings_Controller extends WC_REST_Settings_V2_Controller {
 	/**
 	 * Update a setting.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -70,7 +70,7 @@ class WC_REST_Settings_Controller extends WC_REST_Settings_V2_Controller {
 	/**
 	 * Get the groups schema, conforming to JSON Schema.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {

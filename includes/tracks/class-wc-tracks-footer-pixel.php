@@ -49,7 +49,7 @@ class WC_Tracks_Footer_Pixel {
 	/**
 	 * Record a Tracks event
 	 *
-	 * @param  array $event Array of event properties.
+	 * @param array $event Array of event properties.
 	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	public static function record_event( $event ) {

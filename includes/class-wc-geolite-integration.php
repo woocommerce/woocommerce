@@ -7,7 +7,7 @@
  * Requires PHP 5.4+.
  *
  * @package WooCommerce\Classes
- * @since   3.4.0
+ * @since 3.4.0
  * @deprecated 3.9.0
  */
 

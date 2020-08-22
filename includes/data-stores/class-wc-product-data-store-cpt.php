@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Product Data Store: Stored in CPT.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface, WC_Product_Data_Store_Interface {
 
@@ -1055,9 +1055,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Find a matching (enabled) variation within a variable product.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Product $product Variable product.
-	 * @param  array      $match_attributes Array of attributes we want to try to match.
+	 * @since 3.0.0
+	 * @param WC_Product $product Variable product.
+	 * @param rray      $match_attributes Array of attributes we want to try to match.
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
@@ -1146,10 +1146,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Creates all possible combinations of variations from the attributes, without creating duplicates.
 	 *
-	 * @since  3.6.0
-	 * @todo   Add to interface in 4.0.
-	 * @param  WC_Product $product Variable product.
-	 * @param  int        $limit Limit the number of created variations.
+	 * @since 3.6.0
+	 * @todo Add to interface in 4.0.
+	 * @param C_Product $product Variable product.
+	 * @param nt        $limit Limit the number of created variations.
 	 * @return int        Number of created variations.
 	 */
 	public function create_all_product_variations( $product, $limit = -1 ) {
@@ -1342,10 +1342,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Ignores manage stock setting on the product and sets quantities directly in the db: post meta and lookup tables.
 	 * Uses locking to update the quantity. If the lock is not acquired, change is lost.
 	 *
-	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int            $product_id_with_stock Product ID.
-	 * @param  int|float|null $stock_quantity Stock quantity.
-	 * @param  string         $operation Set, increase and decrease.
+	 * @since 3.0.0 this supports set, increase and decrease.
+	 * @param nt            $product_id_with_stock Product ID.
+	 * @param nt|float|null $stock_quantity Stock quantity.
+	 * @param tring         $operation Set, increase and decrease.
 	 * @return int|float New stock level.
 	 */
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
@@ -1419,10 +1419,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
-	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int      $product_id Product ID.
-	 * @param  int|null $quantity Quantity.
-	 * @param  string   $operation set, increase and decrease.
+	 * @since 3.0.0 this supports set, increase and decrease.
+	 * @param nt      $product_id Product ID.
+	 * @param nt|null $quantity Quantity.
+	 * @param tring   $operation set, increase and decrease.
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
@@ -1528,7 +1528,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns an array of products.
 	 *
-	 * @param  array $args Args to pass to WC_Product_Query().
+	 * @param rray $args Args to pass to WC_Product_Query().
 	 * @return array|object
 	 * @see wc_get_products
 	 */
@@ -1540,13 +1540,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Search product data for a term and return ids.
 	 *
-	 * @param  string     $term Search term.
-	 * @param  string     $type Type of product.
-	 * @param  bool       $include_variations Include variations in search or not.
-	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
-	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
-	 * @param  null|array $include Keep specific results. @since 3.6.0.
-	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
+	 * @param tring     $term Search term.
+	 * @param tring     $type Type of product.
+	 * @param ool       $include_variations Include variations in search or not.
+	 * @param ool       $all_statuses Should we search all statuses or limit to published.
+	 * @param ull|int   $limit Limit returned results. @since 3.5.0.
+	 * @param ull|array $include Keep specific results. @since 3.6.0.
+	 * @param ull|array $exclude Discard specific results. @since 3.6.0.
 	 * @return array of ids
 	 */
 	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null, $include = null, $exclude = null ) {

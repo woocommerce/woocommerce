@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Product
  *
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 

@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -76,7 +76,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get download id.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_download_id( $context = 'view' ) {
@@ -86,7 +86,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get product id.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_product_id( $context = 'view' ) {
@@ -96,7 +96,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get user id.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_user_id( $context = 'view' ) {
@@ -106,7 +106,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get user_email.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_user_email( $context = 'view' ) {
@@ -116,7 +116,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order_id.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_order_id( $context = 'view' ) {
@@ -126,7 +126,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order_key.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_order_key( $context = 'view' ) {
@@ -136,7 +136,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get downloads_remaining.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer|string
 	 */
 	public function get_downloads_remaining( $context = 'view' ) {
@@ -146,7 +146,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get access_granted.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_granted( $context = 'view' ) {
@@ -156,7 +156,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get access_expires.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_expires( $context = 'view' ) {
@@ -166,7 +166,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get download_count.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_download_count( $context = 'view' ) {
@@ -386,7 +386,7 @@ WHERE permission_id = %d",
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 *
-	 * @param  string $key Key name.
+	 * @param string $key Key name.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
@@ -396,7 +396,7 @@ WHERE permission_id = %d",
 	/**
 	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
 	 *
-	 * @param  string $key Key name.
+	 * @param string $key Key name.
 	 * @return mixed
 	 */
 	public function __get( $key ) {

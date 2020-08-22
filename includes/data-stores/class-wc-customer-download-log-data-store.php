@@ -2,7 +2,7 @@
 /**
  * Class WC_Customer_Download_Log_Data_Store file.
  *
- * @version  3.3.0
+ * @version 3.3.0
  * @package WooCommerce\Classes
  */
 
@@ -141,7 +141,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Get a download log object.
 	 *
-	 * @param  array $data From the DB.
+	 * @param array $data From the DB.
 	 * @return WC_Customer_Download_Log
 	 */
 	private function get_download_log( $data ) {
@@ -151,7 +151,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Get array of download log ids by specified args.
 	 *
-	 * @param  array $args Arguments to define download logs to retrieve.
+	 * @param rray $args Arguments to define download logs to retrieve.
 	 * @return array
 	 */
 	public function get_download_logs( $args = array() ) {

@@ -85,8 +85,8 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * + starts with `action.woocommerce_` or `action.wc_`.
  * + it has a valid resource & event.
  *
- * @since  2.2.0
- * @param  string $topic Webhook topic.
+ * @since 2.2.0
+ * @param string $topic Webhook topic.
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
@@ -135,7 +135,7 @@ function wc_is_webhook_valid_status( $status ) {
 /**
  * Get Webhook statuses.
  *
- * @since  2.3.0
+ * @since 2.3.0
  * @return array
  */
 function wc_get_webhook_statuses() {
@@ -152,10 +152,10 @@ function wc_get_webhook_statuses() {
 /**
  * Load webhooks.
  *
- * @since  3.3.0
+ * @since 3.3.0
  * @throws Exception If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
- * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
- * @param  null|int $limit Limit number of webhooks loaded. @since 3.6.0.
+ * @param string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
+ * @param null|int $limit Limit number of webhooks loaded. @since 3.6.0.
  * @return bool
  */
 function wc_load_webhooks( $status = '', $limit = null ) {
@@ -179,7 +179,7 @@ function wc_load_webhooks( $status = '', $limit = null ) {
 /**
  * Get webhook.
  *
- * @param  int|WC_Webhook $id Webhook ID or object.
+ * @param int|WC_Webhook $id Webhook ID or object.
  * @throws Exception          If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
  * @return WC_Webhook|null
  */

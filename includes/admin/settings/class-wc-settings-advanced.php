@@ -2,7 +2,7 @@
 /**
  * WooCommerce advanced settings
  *
- * @package  WooCommerce\Admin
+ * @package WooCommerce\Admin
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -430,7 +430,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 *
 	 * @deprecated 3.4.4
 	 *
-	 * @param  string $method Method name.
+	 * @param string $method Method name.
 	 *
 	 * @return string
 	 */

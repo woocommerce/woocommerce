@@ -4,9 +4,9 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    2.1.0
- * @version  2.4.0
+ * @package WooCommerce\API
+ * @since 2.1.0
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -188,8 +188,8 @@ class WC_API_Authentication {
 	/**
 	 * Get user by ID
 	 *
-	 * @since  2.4.0
-	 * @param  int $user_id
+	 * @since 2.4.0
+	 * @param int $user_id
 	 * @return WP_User
 	 * @throws Exception
 	 */

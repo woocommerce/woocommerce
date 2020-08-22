@@ -8,7 +8,7 @@
  * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
  *
  * @package WooCommerce\API
- * @since   2.0.0
+ * @since 2.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -126,7 +126,7 @@ class WC_API extends WC_Legacy_API {
 	/**
 	 * API request - Trigger any API requests.
 	 *
-	 * @since   2.0
+	 * @since 2.0
 	 * @version 2.4
 	 */
 	public function handle_api_requests() {
@@ -169,7 +169,7 @@ class WC_API extends WC_Legacy_API {
 	/**
 	 * Register WC settings from WP-API to the REST API.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 */
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();

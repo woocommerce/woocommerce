@@ -5,9 +5,9 @@
  * Extension of the Settings API which in turn gets extended
  * by individual integrations to offer additional functionality.
  *
- * @class       WC_Settings_API
- * @version     2.6.0
- * @package     WooCommerce\Abstracts
+ * @class WC_Settings_API
+ * @version 2.6.0
+ * @package WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extended by individual integrations to offer additional functionality.
  *
- * @class    WC_Integration
- * @extends  WC_Settings_API
- * @version  2.6.0
- * @package  WooCommerce\Abstracts
+ * @class WC_Integration
+ * @extends WC_Settings_API
+ * @version 2.6.0
+ * @package WooCommerce\Abstracts
  */
 abstract class WC_Integration extends WC_Settings_API {
 

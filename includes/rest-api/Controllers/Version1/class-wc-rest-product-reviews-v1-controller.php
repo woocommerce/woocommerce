@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -126,7 +126,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read webhook deliveries.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -140,7 +140,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -156,7 +156,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to create a new product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -170,7 +170,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to update a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -184,7 +184,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to delete a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -449,7 +449,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single product review to be inserted into the database.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param P_REST_Request $request Request object.
 	 * @return array|WP_Error  $prepared_review
 	 */
 	protected function prepare_item_for_database( $request ) {

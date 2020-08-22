@@ -337,7 +337,7 @@ function pick_fields( $item, $fields ) {
  * @access public
  * @category Input
  *
- * @param  string  $content  Some form of text to edit (e.g. post content)
+ * @param string  $content  Some form of text to edit (e.g. post content)
  * @return string|bool       Edited text, if file is saved from editor; false, if no change to file.
  */
 function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
@@ -593,8 +593,8 @@ function http_request( $method, $url, $data = null, $headers = array(), $options
  * If $new_version == "same" the version string is not changed
  * If $new_version is not a known keyword, it will be used as the new version string directly
  *
- * @param  string $current_version
- * @param  string $new_version
+ * @param string $current_version
+ * @param string $new_version
  * @return string
  */
 function increment_version( $current_version, $new_version ) {

@@ -834,7 +834,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets the url to re-add an item into the cart.
 	 *
-	 * @param  string $cart_item_key Cart item key to undo.
+	 * @param string $cart_item_key Cart item key to undo.
 	 * @return string url to page
 	 */
 	public function get_undo_url( $cart_item_key ) {
@@ -1250,8 +1250,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Remove a cart item.
 	 *
-	 * @since  2.3.0
-	 * @param  string $cart_item_key Cart item key to remove from the cart.
+	 * @since 2.3.0
+	 * @param string $cart_item_key Cart item key to remove from the cart.
 	 * @return bool
 	 */
 	public function remove_cart_item( $cart_item_key ) {
@@ -1274,7 +1274,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Restore a cart item.
 	 *
-	 * @param  string $cart_item_key Cart item key to restore to the cart.
+	 * @param string $cart_item_key Cart item key to restore to the cart.
 	 * @return bool
 	 */
 	public function restore_cart_item( $cart_item_key ) {
@@ -1335,7 +1335,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get cart's owner.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return WC_Customer
 	 */
 	public function get_customer() {
@@ -1421,8 +1421,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Filter items needing shipping callback.
 	 *
-	 * @since  3.0.0
-	 * @param  array $item Item to check for shipping.
+	 * @since 3.0.0
+	 * @param array $item Item to check for shipping.
 	 * @return bool
 	 */
 	protected function filter_items_needing_shipping( $item ) {
@@ -1433,7 +1433,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get only items that need shipping.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	protected function get_items_needing_shipping() {
@@ -1767,8 +1767,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get the discount amount for a used coupon.
 	 *
-	 * @param  string $code coupon code.
-	 * @param  bool   $ex_tax inc or ex tax.
+	 * @param string $code coupon code.
+	 * @param bool   $ex_tax inc or ex tax.
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
@@ -1785,7 +1785,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
 	 *
-	 * @param  string $code coupon code.
+	 * @param string $code coupon code.
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
@@ -1808,7 +1808,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Remove a single coupon by code.
 	 *
-	 * @param  string $coupon_code Code of the coupon to remove.
+	 * @param string $coupon_code Code of the coupon to remove.
 	 * @return bool
 	 */
 	public function remove_coupon( $coupon_code ) {
@@ -1838,7 +1838,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return reference to fees API.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return WC_Cart_Fees
 	 */
 	public function fees_api() {
@@ -2000,7 +2000,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get a tax amount.
 	 *
-	 * @param  string $tax_rate_id ID of the tax rate to get taxes for.
+	 * @param string $tax_rate_id ID of the tax rate to get taxes for.
 	 * @return float amount
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
@@ -2011,7 +2011,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get a tax amount.
 	 *
-	 * @param  string $tax_rate_id ID of the tax rate to get taxes for.
+	 * @param string $tax_rate_id ID of the tax rate to get taxes for.
 	 * @return float amount
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
@@ -2022,8 +2022,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get tax row amounts with or without compound taxes includes.
 	 *
-	 * @param  bool $compound True if getting compound taxes.
-	 * @param  bool $display  True if getting total to display.
+	 * @param bool $compound True if getting compound taxes.
+	 * @param bool $display  True if getting total to display.
 	 * @return float price
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {

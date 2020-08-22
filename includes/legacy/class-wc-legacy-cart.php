@@ -5,8 +5,8 @@
  * Legacy and deprecated functions are here to keep the WC_Cart class clean.
  * This class will be removed in future versions.
  *
- * @version  3.2.0
- * @package  WooCommerce\Classes
+ * @version 3.2.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   Automattic
  */

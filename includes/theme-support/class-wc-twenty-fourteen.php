@@ -2,8 +2,8 @@
 /**
  * Twenty Fourteen support.
  *
- * @class   WC_Twenty_Fourteen
- * @since   3.3.0
+ * @class WC_Twenty_Fourteen
+ * @since 3.3.0
  * @package WooCommerce\Classes
  */
 

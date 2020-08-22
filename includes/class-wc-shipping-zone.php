@@ -2,7 +2,7 @@
 /**
  * Represents a single shipping zone
  *
- * @since   2.6.0
+ * @since 2.6.0
  * @version 3.0.0
  * @package WooCommerce\Classes
  */
@@ -72,7 +72,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Get zone name.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_zone_name( $context = 'view' ) {
@@ -82,7 +82,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Get zone order.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param tring $context View or edit context.
 	 * @return int
 	 */
 	public function get_zone_order( $context = 'view' ) {
@@ -92,7 +92,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Get zone locations.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param tring $context View or edit context.
 	 * @return array of zone objects
 	 */
 	public function get_zone_locations( $context = 'view' ) {
@@ -102,8 +102,8 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Return a text string representing what this zone is for.
 	 *
-	 * @param  int    $max Max locations to return.
-	 * @param  string $context View or edit context.
+	 * @param nt    $max Max locations to return.
+	 * @param tring $context View or edit context.
 	 * @return string
 	 */
 	public function get_formatted_location( $max = 10, $context = 'view' ) {
@@ -307,7 +307,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Location type detection.
 	 *
-	 * @param  object $location Location to check.
+	 * @param bject $location Location to check.
 	 * @return boolean
 	 */
 	private function location_is_continent( $location ) {
@@ -317,7 +317,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Location type detection.
 	 *
-	 * @param  object $location Location to check.
+	 * @param bject $location Location to check.
 	 * @return boolean
 	 */
 	private function location_is_country( $location ) {
@@ -327,7 +327,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Location type detection.
 	 *
-	 * @param  object $location Location to check.
+	 * @param bject $location Location to check.
 	 * @return boolean
 	 */
 	private function location_is_state( $location ) {
@@ -337,7 +337,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Location type detection.
 	 *
-	 * @param  object $location Location to check.
+	 * @param bject $location Location to check.
 	 * @return boolean
 	 */
 	private function location_is_postcode( $location ) {
@@ -347,7 +347,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	/**
 	 * Is passed location type valid?
 	 *
-	 * @param  string $type Type to check.
+	 * @param tring $type Type to check.
 	 * @return boolean
 	 */
 	public function is_valid_location_type( $type ) {

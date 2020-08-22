@@ -2,9 +2,9 @@
 /**
  * Handles taxonomies in admin
  *
- * @class    WC_Admin_Taxonomies
- * @version  2.3.10
- * @package  WooCommerce\Admin
+ * @class WC_Admin_Taxonomies
+ * @version 2.3.10
+ * @package WooCommerce\Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -455,7 +455,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Maintain term hierarchy when editing a product.
 	 *
-	 * @param  array $args Term checklist args.
+	 * @param array $args Term checklist args.
 	 * @return array
 	 */
 	public function disable_checked_ontop( $args ) {

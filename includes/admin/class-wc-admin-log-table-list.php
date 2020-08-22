@@ -4,8 +4,8 @@
  *
  * @author   WooThemes
  * @category Admin
- * @package  WooCommerce\Admin
- * @version  1.0.0
+ * @package WooCommerce\Admin
+ * @version 1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -110,7 +110,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Column cb.
 	 *
-	 * @param  array $log
+	 * @param array $log
 	 * @return string
 	 */
 	public function column_cb( $log ) {
@@ -120,7 +120,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Timestamp column.
 	 *
-	 * @param  array $log
+	 * @param array $log
 	 * @return string
 	 */
 	public function column_timestamp( $log ) {
@@ -135,7 +135,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Level column.
 	 *
-	 * @param  array $log
+	 * @param array $log
 	 * @return string
 	 */
 	public function column_level( $log ) {
@@ -163,7 +163,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Message column.
 	 *
-	 * @param  array $log
+	 * @param array $log
 	 * @return string
 	 */
 	public function column_message( $log ) {
@@ -173,7 +173,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	/**
 	 * Source column.
 	 *
-	 * @param  array $log
+	 * @param array $log
 	 * @return string
 	 */
 	public function column_source( $log ) {

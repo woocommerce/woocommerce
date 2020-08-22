@@ -5,7 +5,7 @@
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,8 +28,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	/**
 	 * Prepare a single variation output for response.
 	 *
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param WC_Data         $object  Object data.
+	 * @param P_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -101,8 +101,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	/**
 	 * Prepare a single variation for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param P_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -347,8 +347,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * Set variation image.
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
-	 * @param  WC_Product_Variation $variation Variation instance.
-	 * @param  array                $image    Image data.
+	 * @param C_Product_Variation $variation Variation instance.
+	 * @param rray                $image    Image data.
 	 * @return WC_Product_Variation
 	 */
 	protected function set_variation_image( $variation, $image ) {
@@ -750,8 +750,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {

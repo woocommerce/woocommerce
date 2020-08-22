@@ -2,8 +2,8 @@
 /**
  * Manages WooCommerce plugin updating on the Updates screen.
  *
- * @package     WooCommerce\Admin
- * @version     3.2.0
+ * @package WooCommerce\Admin
+ * @version 3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -3,7 +3,7 @@
  * WCCOM Site Installer Errors Class
  *
  * @package WooCommerce\WCCom\API
- * @since   3.9.0
+ * @since 3.9.0
  */
 
 defined( 'ABSPATH' ) || exit;

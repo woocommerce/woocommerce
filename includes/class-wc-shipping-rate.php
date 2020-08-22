@@ -5,7 +5,7 @@
  * Simple Class for storing rates.
  *
  * @package WooCommerce\Classes\Shipping
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -19,7 +19,7 @@ class WC_Shipping_Rate {
 	 * Stores data for this rate.
 	 *
 	 * @since 3.2.0
-	 * @var   array
+	 * @var array
 	 */
 	protected $data = array(
 		'id'          => '',
@@ -34,7 +34,7 @@ class WC_Shipping_Rate {
 	 * Stores meta data for this rate.
 	 *
 	 * @since 2.6.0
-	 * @var   array
+	 * @var array
 	 */
 	protected $meta_data = array();
 

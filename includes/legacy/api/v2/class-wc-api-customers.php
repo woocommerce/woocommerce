@@ -6,8 +6,8 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    2.2
+ * @package WooCommerce\API
+ * @since 2.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -242,7 +242,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get customer billing address fields.
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 * @return array
 	 */
 	protected function get_customer_billing_address() {
@@ -266,7 +266,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get customer shipping address fields.
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 * @return array
 	 */
 	protected function get_customer_shipping_address() {

@@ -395,7 +395,7 @@ EOT;
 	/**
 	 * Get the route for this resource
 	 *
-	 * @param  array $args Positional arguments passed to the originating WP-CLI command.
+	 * @param array $args Positional arguments passed to the originating WP-CLI command.
 	 * @return string
 	 */
 	private function get_filled_route( $args = array() ) {
@@ -420,8 +420,8 @@ EOT;
 	/**
 	 * Reduce an item to specific fields.
 	 *
-	 * @param  array $item Item to reduce.
-	 * @param  array $fields Fields to keep.
+	 * @param rray $item Item to reduce.
+	 * @param rray $fields Fields to keep.
 	 * @return array
 	 */
 	private static function limit_item_to_fields( $item, $fields ) {

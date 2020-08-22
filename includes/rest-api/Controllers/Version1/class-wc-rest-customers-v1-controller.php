@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -127,7 +127,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read customers.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -141,7 +141,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access create customers.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -156,7 +156,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -172,7 +172,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access update a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -189,7 +189,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access delete a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -206,7 +206,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -510,8 +510,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single customer output for response.
 	 *
-	 * @param  WP_User          $user_data User object.
-	 * @param  WP_REST_Request  $request Request object.
+	 * @param P_User          $user_data User object.
+	 * @param P_REST_Request  $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {

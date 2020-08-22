@@ -4,8 +4,8 @@
  *
  * @author   WooThemes
  * @category Admin
- * @package  WooCommerce\Admin
- * @version  2.4.0
+ * @package WooCommerce\Admin
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

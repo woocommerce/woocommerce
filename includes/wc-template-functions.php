@@ -4,8 +4,8 @@
  *
  * Functions for the templating system.
  *
- * @package  WooCommerce\Functions
- * @version  2.5.0
+ * @package WooCommerce\Functions
+ * @version 2.5.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -81,7 +81,7 @@ add_action( 'template_redirect', 'wc_template_redirect' );
  *
  * Can be disabled with: remove_action( 'template_redirect', 'wc_send_frame_options_header' );
  *
- * @since  2.3.10
+ * @since 2.3.10
  */
 function wc_send_frame_options_header() {
 
@@ -295,7 +295,7 @@ function wc_generator_tag( $gen, $type ) {
 /**
  * Add body classes for WC pages.
  *
- * @param  array $classes Body Classes.
+ * @param array $classes Body Classes.
  * @return array
  */
 function wc_body_class( $classes ) {
@@ -1064,7 +1064,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	/**
 	 * Page Title function.
 	 *
-	 * @param  bool $echo Should echo title.
+	 * @param bool $echo Should echo title.
 	 * @return string
 	 */
 	function woocommerce_page_title( $echo = true ) {
@@ -1697,9 +1697,9 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	/**
 	 * Output the quantity input for add to cart forms.
 	 *
-	 * @param  array           $args Args for the input.
-	 * @param  WC_Product|null $product Product.
-	 * @param  boolean         $echo Whether to return or echo|string.
+	 * @param array           $args Args for the input.
+	 * @param WC_Product|null $product Product.
+	 * @param boolean         $echo Whether to return or echo|string.
 	 *
 	 * @return string
 	 */
@@ -2065,10 +2065,10 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	/**
 	 * Output the cart cross-sells.
 	 *
-	 * @param  int    $limit (default: 2).
-	 * @param  int    $columns (default: 2).
-	 * @param  string $orderby (default: 'rand').
-	 * @param  string $order (default: 'desc').
+	 * @param int    $limit (default: 2).
+	 * @param int    $columns (default: 2).
+	 * @param string $orderby (default: 'rand').
+	 * @param string $order (default: 'desc').
 	 */
 	function woocommerce_cross_sell_display( $limit = 2, $columns = 2, $orderby = 'rand', $order = 'desc' ) {
 		if ( is_checkout() ) {
@@ -3255,9 +3255,9 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Order_Item $item Order Item.
-	 * @param  array         $args Arguments.
+	 * @since 3.0.0
+	 * @param WC_Order_Item $item Order Item.
+	 * @param array         $args Arguments.
 	 * @return string|void
 	 */
 	function wc_display_item_meta( $item, $args = array() ) {
@@ -3300,9 +3300,9 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
 	 * Display item download links.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Order_Item $item Order Item.
-	 * @param  array         $args Arguments.
+	 * @since 3.0.0
+	 * @param WC_Order_Item $item Order Item.
+	 * @param array         $args Arguments.
 	 * @return string|void
 	 */
 	function wc_display_item_downloads( $item, $args = array() ) {
@@ -3366,8 +3366,8 @@ if ( ! function_exists( 'woocommerce_photoswipe' ) ) {
 /**
  * Outputs a list of product attributes for a product.
  *
- * @since  3.0.0
- * @param  WC_Product $product Product Object.
+ * @since 3.0.0
+ * @param WC_Product $product Product Object.
  */
 function wc_display_product_attributes( $product ) {
 	$product_attributes = array();
@@ -3446,8 +3446,8 @@ function wc_display_product_attributes( $product ) {
 /**
  * Get HTML to show product stock.
  *
- * @since  3.0.0
- * @param  WC_Product $product Product Object.
+ * @since 3.0.0
+ * @param WC_Product $product Product Object.
  * @return string
  */
 function wc_get_stock_html( $product ) {
@@ -3480,9 +3480,9 @@ function wc_get_stock_html( $product ) {
 /**
  * Get HTML for ratings.
  *
- * @since  3.0.0
- * @param  float $rating Rating being shown.
- * @param  int   $count  Total number of ratings.
+ * @since 3.0.0
+ * @param float $rating Rating being shown.
+ * @param int   $count  Total number of ratings.
  * @return string
  */
 function wc_get_rating_html( $rating, $count = 0 ) {
@@ -3500,9 +3500,9 @@ function wc_get_rating_html( $rating, $count = 0 ) {
 /**
  * Get HTML for star rating.
  *
- * @since  3.1.0
- * @param  float $rating Rating being shown.
- * @param  int   $count  Total number of ratings.
+ * @since 3.1.0
+ * @param float $rating Rating being shown.
+ * @param int   $count  Total number of ratings.
  * @return string
  */
 function wc_get_star_rating_html( $rating, $count = 0 ) {
@@ -3524,7 +3524,7 @@ function wc_get_star_rating_html( $rating, $count = 0 ) {
 /**
  * Returns a 'from' prefix if you want to show where prices start at.
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @return string
  */
 function wc_get_price_html_from_text() {
@@ -3534,7 +3534,7 @@ function wc_get_price_html_from_text() {
 /**
  * Get logout endpoint.
  *
- * @since  2.6.9
+ * @since 2.6.9
  *
  * @param string $redirect Redirect URL.
  *
@@ -3671,7 +3671,7 @@ function wc_get_cart_remove_url( $cart_item_key ) {
  * Gets the url to re-add an item into the cart.
  *
  * @since 3.3.0
- * @param  string $cart_item_key Cart item key to undo.
+ * @param string $cart_item_key Cart item key to undo.
  * @return string url to page
  */
 function wc_get_cart_undo_url( $cart_item_key ) {

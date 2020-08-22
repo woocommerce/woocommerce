@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 	 *
 	 * An email sent to the admin when a new order is received/paid for.
 	 *
-	 * @class       WC_Email_New_Order
-	 * @version     2.0.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_New_Order
+	 * @version 2.0.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_New_Order extends WC_Email {
 
@@ -58,7 +58,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Get email subject.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -68,7 +68,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading() {

@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy and deprecated functions are here to keep the WC_Legacy_Coupon class clean.
  * This class will be removed in future versions.
  *
- * @class       WC_Legacy_Coupon
- * @version     3.0.0
- * @package     WooCommerce\Classes
+ * @class WC_Legacy_Coupon
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  * @category    Class
  * @author      WooThemes
  */
@@ -19,7 +19,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
-	 * @param  string $key
+	 * @param string $key
 	 * @return bool
 	 */
 	public function __isset( $key ) {
@@ -54,7 +54,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 
 	/**
 	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
-	 * @param  string $key
+	 * @param tring $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -138,7 +138,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 
 	/**
 	 * Format loaded data as array.
-	 * @param  string|array $array
+	 * @param tring|array $array
 	 * @return array
 	 */
 	public function format_array( $array ) {

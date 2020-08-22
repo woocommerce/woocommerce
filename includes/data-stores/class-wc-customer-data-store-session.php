@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store which stores the data in session.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
 

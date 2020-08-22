@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
@@ -59,7 +59,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Get all product ids in a category (and its children).
 	 *
-	 * @param  int $category_id Category ID.
+	 * @param int $category_id Category ID.
 	 * @return array
 	 */
 	public function get_products_in_category( $category_id ) {

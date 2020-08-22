@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -231,7 +231,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get product ID.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_product_id( $context = 'view' ) {
@@ -241,7 +241,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get variation ID.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_variation_id( $context = 'view' ) {
@@ -251,7 +251,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get quantity.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_quantity( $context = 'view' ) {
@@ -261,7 +261,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get tax class.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -271,7 +271,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get subtotal.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_subtotal( $context = 'view' ) {
@@ -281,7 +281,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get subtotal tax.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_subtotal_tax( $context = 'view' ) {
@@ -291,7 +291,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get total.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total( $context = 'view' ) {
@@ -301,7 +301,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get total tax.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -311,7 +311,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get taxes.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_taxes( $context = 'view' ) {
@@ -341,7 +341,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the Download URL.
 	 *
-	 * @param  int $download_id Download ID.
+	 * @param int $download_id Download ID.
 	 * @return string
 	 */
 	public function get_item_download_url( $download_id ) {

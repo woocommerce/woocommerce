@@ -158,7 +158,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Find and trash old orders.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
+	 * @param int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_pending_orders( $limit = 20 ) {
@@ -185,7 +185,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Find and trash old orders.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
+	 * @param int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_failed_orders( $limit = 20 ) {
@@ -212,7 +212,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Find and trash old orders.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
+	 * @param int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_cancelled_orders( $limit = 20 ) {
@@ -260,7 +260,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Anonymize old completed orders.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
+	 * @param int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
 	public static function anonymize_completed_orders( $limit = 20 ) {
@@ -309,7 +309,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Delete inactive accounts.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit users to process per batch.
+	 * @param int $limit Limit users to process per batch.
 	 * @return int Number of users processed.
 	 */
 	public static function delete_inactive_accounts( $limit = 20 ) {

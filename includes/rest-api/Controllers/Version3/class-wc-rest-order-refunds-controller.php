@@ -5,7 +5,7 @@
  * Handles requests to the /orders/<order_id>/refunds endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,9 +28,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	/**
 	 * Prepares one object for create or update operation.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @since 3.0.0
+	 * @param WP_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {

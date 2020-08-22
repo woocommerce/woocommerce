@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Credit Card Payment Gateway
  *
- * @since       2.6.0
- * @package     WooCommerce\Classes
+ * @since 2.6.0
+ * @package WooCommerce\Classes
  */
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
@@ -39,8 +39,8 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	 *
 	 * Gateways which support tokenization do not require names - we don't want the data to post to the server.
 	 *
-	 * @since  2.6.0
-	 * @param  string $name Field name.
+	 * @since 2.6.0
+	 * @param string $name Field name.
 	 * @return string
 	 */
 	public function field_name( $name ) {

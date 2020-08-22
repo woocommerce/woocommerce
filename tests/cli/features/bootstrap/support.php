@@ -132,8 +132,8 @@ function checkThatJsonStringContainsJsonString( $actualJson, $expectedJson ) {
  * Both strings are expected to have headers for their CSVs.
  * $actualCSV must match all data rows in $expectedCSV
  *
- * @param  string   A CSV string
- * @param  array    A nested array of values
+ * @param string   A CSV string
+ * @param rray    A nested array of values
  * @return bool     Whether $actualCSV contains $expectedCSV
  */
 function checkThatCsvStringContainsValues( $actualCSV, $expectedCSV ) {

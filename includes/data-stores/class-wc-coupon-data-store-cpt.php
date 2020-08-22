@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Coupon Data Store: Custom Post Type.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Data_Store_Interface, WC_Object_Data_Store_Interface {
 

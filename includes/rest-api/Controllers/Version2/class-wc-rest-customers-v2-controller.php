@@ -5,7 +5,7 @@
  * Handles requests to the /customers endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,8 +28,8 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @since 3.0.0
+	 * @param WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -67,8 +67,8 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 	/**
 	 * Prepare a single customer output for response.
 	 *
-	 * @param  WP_User         $user_data User object.
-	 * @param  WP_REST_Request $request   Request object.
+	 * @param P_User         $user_data User object.
+	 * @param P_REST_Request $request   Request object.
 	 * @return WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {

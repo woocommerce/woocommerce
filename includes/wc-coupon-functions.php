@@ -40,7 +40,7 @@ function wc_get_coupon_type( $type = '' ) {
 /**
  * Coupon types that apply to individual products. Controls which validation rules will apply.
  *
- * @since  2.5.0
+ * @since 2.5.0
  * @return array
  */
 function wc_get_product_coupon_types() {
@@ -50,7 +50,7 @@ function wc_get_product_coupon_types() {
 /**
  * Coupon types that apply to the cart as a whole. Controls which validation rules will apply.
  *
- * @since  2.5.0
+ * @since 2.5.0
  * @return array
  */
 function wc_get_cart_coupon_types() {
@@ -61,7 +61,7 @@ function wc_get_cart_coupon_types() {
  * Check if coupons are enabled.
  * Filterable.
  *
- * @since  2.5.0
+ * @since 2.5.0
  *
  * @return bool
  */

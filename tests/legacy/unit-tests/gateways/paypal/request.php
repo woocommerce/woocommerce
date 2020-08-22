@@ -181,8 +181,8 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Test large order with 30 items, URL length > 2083 characters.
 	 *
-	 * @param  bool $shipping_tax_included Whether the shipping tax should be included or not.
-	 * @param  bool $testmode              Whether to use Paypal sandbox.
+	 * @param bool $shipping_tax_included Whether the shipping tax should be included or not.
+	 * @param bool $testmode              Whether to use Paypal sandbox.
 	 * @throws WC_Data_Exception Exception on failure.
 	 */
 	protected function check_large_order( $shipping_tax_included, $testmode ) {
@@ -218,7 +218,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Test removing HTML tags from product title and request URL
 	 *
-	 * @param  bool $testmode Whether to use Paypal sandbox.
+	 * @param bool $testmode Whether to use Paypal sandbox.
 	 */
 	protected function check_product_title_containing_html( $testmode ) {
 		$order = WC_Helper_Order::create_order();

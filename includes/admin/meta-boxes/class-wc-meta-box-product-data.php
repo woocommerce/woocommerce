@@ -4,8 +4,8 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @package  WooCommerce\Admin\Meta Boxes
- * @version  3.0.0
+ * @package WooCommerce\Admin\Meta Boxes
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -158,7 +158,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Filter callback for finding variation attributes.
 	 *
-	 * @param  WC_Product_Attribute $attribute Product attribute.
+	 * @param WC_Product_Attribute $attribute Product attribute.
 	 * @return bool
 	 */
 	private static function filter_variation_attributes( $attribute ) {
@@ -281,9 +281,9 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Prepare attributes for a specific variation or defaults.
 	 *
-	 * @param  array  $all_attributes List of attribute keys.
-	 * @param  string $key_prefix Attribute key prefix.
-	 * @param  int    $index Attribute array index.
+	 * @param rray  $all_attributes List of attribute keys.
+	 * @param tring $key_prefix Attribute key prefix.
+	 * @param nt    $index Attribute array index.
 	 * @return array
 	 */
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {

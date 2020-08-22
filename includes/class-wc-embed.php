@@ -2,8 +2,8 @@
 /**
  * WooCommerce product embed
  *
- * @version  2.4.11
- * @package  WooCommerce\Classes\Embed
+ * @version 2.4.11
+ * @package WooCommerce\Classes\Embed
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

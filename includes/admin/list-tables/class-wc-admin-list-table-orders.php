@@ -436,7 +436,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	/**
 	 * Get items to display in the preview as HTML.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
 	public static function get_order_preview_item_html( $order ) {
@@ -549,7 +549,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	/**
 	 * Get actions to display in the preview as HTML.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
 	public static function get_order_preview_actions_html( $order ) {
@@ -596,7 +596,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	/**
 	 * Get order details to send to the ajax endpoint for previews.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
 	public static function order_preview_get_order_details( $order ) {
@@ -647,9 +647,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	/**
 	 * Handle bulk actions.
 	 *
-	 * @param  string $redirect_to URL to redirect to.
-	 * @param  string $action      Action name.
-	 * @param  array  $ids         List of ids.
+	 * @param string $redirect_to URL to redirect to.
+	 * @param string $action      Action name.
+	 * @param array  $ids         List of ids.
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {

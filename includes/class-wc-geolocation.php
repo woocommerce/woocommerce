@@ -130,9 +130,9 @@ class WC_Geolocation {
 	/**
 	 * Geolocate an IP address.
 	 *
-	 * @param  string $ip_address   IP Address.
-	 * @param  bool   $fallback     If true, fallbacks to alternative IP detection (can be slower).
-	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
+	 * @param string $ip_address   IP Address.
+	 * @param bool   $fallback     If true, fallbacks to alternative IP detection (can be slower).
+	 * @param bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
@@ -200,7 +200,7 @@ class WC_Geolocation {
 	 * Path to our local db.
 	 *
 	 * @deprecated 3.9.0
-	 * @param  string $deprecated Deprecated since 3.4.0.
+	 * @param string $deprecated Deprecated since 3.4.0.
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
@@ -258,7 +258,7 @@ class WC_Geolocation {
 	 * If APIs are defined, one will be chosen at random to fulfil the request. After completing, the result
 	 * will be cached in a transient.
 	 *
-	 * @param  string $ip_address IP address.
+	 * @param string $ip_address IP address.
 	 * @return string
 	 */
 	private static function geolocate_via_api( $ip_address ) {
@@ -341,8 +341,8 @@ class WC_Geolocation {
 	 * Maybe trigger a DB update for the first time.
 	 *
 	 * @deprecated 3.9.0
-	 * @param  string $new_value New value.
-	 * @param  string $old_value Old value.
+	 * @param string $new_value New value.
+	 * @param string $old_value Old value.
 	 * @return string
 	 */
 	public static function maybe_update_database( $new_value, $old_value ) {

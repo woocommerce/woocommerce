@@ -2,8 +2,8 @@
 /**
  * List tables.
  *
- * @package  WooCommerce\Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -86,7 +86,7 @@ abstract class WC_Admin_List_Table {
 	 * View mode is seen on posts where you can switch between list or excerpt. Our post types don't support
 	 * it, so we want to hide the useless UI from the screen options tab.
 	 *
-	 * @param  array $post_types Array of post types supporting view mode.
+	 * @param array $post_types Array of post types supporting view mode.
 	 * @return array             Array of post types supporting view mode, without this type.
 	 */
 	public function disable_view_mode( $post_types ) {
@@ -178,8 +178,8 @@ abstract class WC_Admin_List_Table {
 	/**
 	 * Set list table primary column.
 	 *
-	 * @param  string $default Default value.
-	 * @param  string $screen_id Current screen ID.
+	 * @param tring $default Default value.
+	 * @param tring $screen_id Current screen ID.
 	 * @return string
 	 */
 	public function list_table_primary_column( $default, $screen_id ) {
@@ -265,9 +265,9 @@ abstract class WC_Admin_List_Table {
 	/**
 	 * Handle bulk actions.
 	 *
-	 * @param  string $redirect_to URL to redirect to.
-	 * @param  string $action      Action name.
-	 * @param  array  $ids         List of ids.
+	 * @param tring $redirect_to URL to redirect to.
+	 * @param tring $action      Action name.
+	 * @param rray  $ids         List of ids.
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {

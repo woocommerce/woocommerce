@@ -26,7 +26,7 @@ class WC_Admin_Webhooks {
 	 * Check if should allow save settings.
 	 * This prevents "Your settings have been saved." notices on the table list.
 	 *
-	 * @param  bool $allow If allow save settings.
+	 * @param bool $allow If allow save settings.
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {

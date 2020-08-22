@@ -77,7 +77,7 @@ function wc_maybe_define_constant( $name, $value ) {
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
- * @param  array $args Order arguments.
+ * @param array $args Order arguments.
  * @return WC_Order|WP_Error
  */
 function wc_create_order( $args = array() ) {
@@ -140,7 +140,7 @@ function wc_create_order( $args = array() ) {
 /**
  * Update an order. Uses wc_create_order.
  *
- * @param  array $args Order arguments.
+ * @param array $args Order arguments.
  * @return WC_Order|WP_Error
  */
 function wc_update_order( $args ) {
@@ -856,9 +856,9 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
 /**
  * Return "theme support" values from the current theme, if set.
  *
- * @since  3.3.0
- * @param  string $prop Name of prop (or key::subkey for arrays of props) if you want a specific value. Leave blank to get all props as an array.
- * @param  mixed  $default Optional value to return if the theme does not declare support for a prop.
+ * @since 3.3.0
+ * @param string $prop Name of prop (or key::subkey for arrays of props) if you want a specific value. Leave blank to get all props as an array.
+ * @param mixed  $default Optional value to return if the theme does not declare support for a prop.
  * @return mixed  Value of prop(s).
  */
 function wc_get_theme_support( $prop = '', $default = null ) {
@@ -1024,11 +1024,11 @@ function wc_print_js() {
 /**
  * Set a cookie - wrapper for setcookie using WP constants.
  *
- * @param  string  $name   Name of the cookie being set.
- * @param  string  $value  Value of the cookie.
- * @param  integer $expire Expiry of the cookie.
- * @param  bool    $secure Whether the cookie should be served only over https.
- * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
+ * @param string  $name   Name of the cookie being set.
+ * @param string  $value  Value of the cookie.
+ * @param integer $expire Expiry of the cookie.
+ * @param bool    $secure Whether the cookie should be served only over https.
+ * @param bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	if ( ! headers_sent() ) {
@@ -1089,7 +1089,7 @@ function wc_get_log_file_name( $handle ) {
 /**
  * Recursively get page children.
  *
- * @param  int $page_id Page ID.
+ * @param int $page_id Page ID.
  * @return int[]
  */
 function wc_get_page_children( $page_id ) {
@@ -1191,8 +1191,8 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
 /**
  * Prevent product attachment links from breaking when using complex rewrite structures.
  *
- * @param  string $link    Link.
- * @param  int    $post_id Post ID.
+ * @param string $link    Link.
+ * @param int    $post_id Post ID.
  * @return string
  */
 function wc_fix_product_attachment_link( $link, $post_id ) {
@@ -1230,7 +1230,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * Formats a string in the format COUNTRY:STATE into an array.
  *
  * @since 2.3.0
- * @param  string $country_string Country string.
+ * @param string $country_string Country string.
  * @return array
  */
 function wc_format_country_state_string( $country_string ) {
@@ -1300,7 +1300,7 @@ function wc_get_customer_default_location() {
 /**
  * Get user agent string.
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @return string
  */
 function wc_get_user_agent() {
@@ -1310,7 +1310,7 @@ function wc_get_user_agent() {
 /**
  * Generate a rand hash.
  *
- * @since  2.4.0
+ * @since 2.4.0
  * @return string
  */
 function wc_rand_hash() {
@@ -1324,8 +1324,8 @@ function wc_rand_hash() {
 /**
  * WC API - Hash.
  *
- * @since  2.4.0
- * @param  string $data Message to be hashed.
+ * @since 2.4.0
+ * @param string $data Message to be hashed.
  * @return string
  */
 function wc_api_hash( $data ) {
@@ -1430,7 +1430,7 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 /**
  * Gets the url to the cart page.
  *
- * @since  2.5.0
+ * @since 2.5.0
  *
  * @return string Url to cart page
  */
@@ -1441,7 +1441,7 @@ function wc_get_cart_url() {
 /**
  * Gets the url to the checkout page.
  *
- * @since  2.5.0
+ * @since 2.5.0
  *
  * @return string Url to checkout page
  */
@@ -1471,9 +1471,9 @@ if ( ! function_exists( 'wc_get_shipping_zone' ) ) {
 	/**
 	 * Get the shipping zone matching a given package from the cart.
 	 *
-	 * @since  2.6.0
-	 * @uses   WC_Shipping_Zones::get_zone_matching_package
-	 * @param  array $package Shipping package.
+	 * @since 2.6.0
+	 * @uses WC_Shipping_Zones::get_zone_matching_package
+	 * @param array $package Shipping package.
 	 * @return WC_Shipping_Zone
 	 */
 	function wc_get_shipping_zone( $package ) {
@@ -1484,8 +1484,8 @@ if ( ! function_exists( 'wc_get_shipping_zone' ) ) {
 /**
  * Get a nice name for credit card providers.
  *
- * @since  2.6.0
- * @param  string $type Provider Slug/Type.
+ * @since 2.6.0
+ * @param string $type Provider Slug/Type.
  * @return string
  */
 function wc_get_credit_card_type_label( $type ) {
@@ -1522,10 +1522,10 @@ function wc_back_link( $label, $url ) {
 /**
  * Display a WooCommerce help tip.
  *
- * @since  2.5.0
+ * @since 2.5.0
  *
- * @param  string $tip        Help tip text.
- * @param  bool   $allow_html Allow sanitized HTML if true or escape.
+ * @param string $tip        Help tip text.
+ * @param bool   $allow_html Allow sanitized HTML if true or escape.
  * @return string
  */
 function wc_help_tip( $tip, $allow_html = false ) {
@@ -1542,8 +1542,8 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * Return a list of potential postcodes for wildcard searching.
  *
  * @since 2.6.0
- * @param  string $postcode Postcode.
- * @param  string $country  Country to format postcode for matching.
+ * @param string $postcode Postcode.
+ * @param string $country  Country to format postcode for matching.
  * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
@@ -1620,9 +1620,9 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
  * Gets number of shipping methods currently enabled. Used to identify if
  * shipping is configured.
  *
- * @since  2.6.0
- * @param  bool $include_legacy Count legacy shipping methods too.
- * @param  bool $enabled_only   Whether non-legacy shipping methods should be
+ * @since 2.6.0
+ * @param bool $include_legacy Count legacy shipping methods too.
+ * @param bool $enabled_only   Whether non-legacy shipping methods should be
  *                              restricted to enabled ones. It doesn't affect
  *                              legacy shipping methods. @since 4.3.0.
  * @return int
@@ -1795,9 +1795,9 @@ function wc_get_rounding_precision() {
 /**
  * Add precision to a number and return a number.
  *
- * @since  3.2.0
- * @param  float $value Number to add precision to.
- * @param  bool  $round If should round after adding precision.
+ * @since 3.2.0
+ * @param float $value Number to add precision to.
+ * @param bool  $round If should round after adding precision.
  * @return int|float
  */
 function wc_add_number_precision( $value, $round = true ) {
@@ -1809,8 +1809,8 @@ function wc_add_number_precision( $value, $round = true ) {
 /**
  * Remove precision from a number and return a float.
  *
- * @since  3.2.0
- * @param  float $value Number to add precision to.
+ * @since 3.2.0
+ * @param float $value Number to add precision to.
  * @return float
  */
 function wc_remove_number_precision( $value ) {
@@ -1821,9 +1821,9 @@ function wc_remove_number_precision( $value ) {
 /**
  * Add precision to an array of number and return an array of int.
  *
- * @since  3.2.0
- * @param  array $value Number to add precision to.
- * @param  bool  $round Should we round after adding precision?.
+ * @since 3.2.0
+ * @param array $value Number to add precision to.
+ * @param bool  $round Should we round after adding precision?.
  * @return int|array
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
@@ -1841,8 +1841,8 @@ function wc_add_number_precision_deep( $value, $round = true ) {
 /**
  * Remove precision from an array of number and return an array of int.
  *
- * @since  3.2.0
- * @param  array $value Number to add precision to.
+ * @since 3.2.0
+ * @param array $value Number to add precision to.
  * @return int|array
  */
 function wc_remove_number_precision_deep( $value ) {
@@ -2038,7 +2038,7 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  *
  * This is more inline with WP core behavior which does not localize slugs.
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
@@ -2120,9 +2120,9 @@ function wc_make_phone_clickable( $phone ) {
 /**
  * Get an item of post data if set, otherwise return a default value.
  *
- * @since  3.0.9
- * @param  string $key     Meta key.
- * @param  string $default Default value.
+ * @since 3.0.9
+ * @param string $key     Meta key.
+ * @param string $default Default value.
  * @return mixed Value sanitized by wc_clean.
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
@@ -2133,9 +2133,9 @@ function wc_get_post_data_by_key( $key, $default = '' ) {
 /**
  * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
  *
- * @since  3.2.0
- * @param  mixed  $var     Variable.
- * @param  string $default Default value.
+ * @since 3.2.0
+ * @param mixed  $var     Variable.
+ * @param string $default Default value.
  * @return mixed
  */
 function wc_get_var( &$var, $default = null ) {
@@ -2172,8 +2172,8 @@ add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
  * Prevent auto-updating the WooCommerce plugin on major releases if there are untested extensions active.
  *
  * @since 3.2.0
- * @param  bool   $should_update If should update.
- * @param  object $plugin        Plugin data.
+ * @param bool   $should_update If should update.
+ * @param object $plugin        Plugin data.
  * @return bool
  */
 function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
@@ -2349,8 +2349,8 @@ function wc_decimal_to_fraction( $decimal ) {
 /**
  * Round discount.
  *
- * @param  double $value Amount to round.
- * @param  int    $precision DP to round.
+ * @param double $value Amount to round.
+ * @param int    $precision DP to round.
  * @return float
  */
 function wc_round_discount( $value, $precision ) {

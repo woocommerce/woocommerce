@@ -5,7 +5,7 @@
  * Uses WC_Queue to ensure marketplace suggestions data is up to date and cached locally.
  *
  * @package WooCommerce\Classes
- * @since   3.6.0
+ * @since 3.6.0
  */
 
 defined( 'ABSPATH' ) || exit;

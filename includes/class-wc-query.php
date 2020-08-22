@@ -88,7 +88,7 @@ class WC_Query {
 	/**
 	 * Get page title for an endpoint.
 	 *
-	 * @param  string $endpoint Endpoint key.
+	 * @param string $endpoint Endpoint key.
 	 * @return string
 	 */
 	public function get_endpoint_title( $endpoint ) {
@@ -722,8 +722,8 @@ class WC_Query {
 	/**
 	 * Appends meta queries to an array.
 	 *
-	 * @param  array $meta_query Meta query.
-	 * @param  bool  $main_query If is main query.
+	 * @param array $meta_query Meta query.
+	 * @param bool  $main_query If is main query.
 	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array(), $main_query = false ) {
@@ -736,8 +736,8 @@ class WC_Query {
 	/**
 	 * Appends tax queries to an array.
 	 *
-	 * @param  array $tax_query  Tax query.
-	 * @param  bool  $main_query If is main query.
+	 * @param array $tax_query  Tax query.
+	 * @param bool  $main_query If is main query.
 	 * @return array
 	 */
 	public function get_tax_query( $tax_query = array(), $main_query = false ) {

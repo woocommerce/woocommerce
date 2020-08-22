@@ -3,7 +3,7 @@
  * Discount calculation
  *
  * @package WooCommerce\Classes
- * @since   3.2.0
+ * @since 3.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -126,7 +126,7 @@ class WC_Discounts {
 	/**
 	 * Get the object concerned.
 	 *
-	 * @since  3.3.2
+	 * @since 3.3.2
 	 * @return object
 	 */
 	public function get_object() {
@@ -136,7 +136,7 @@ class WC_Discounts {
 	/**
 	 * Get items.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return object[]
 	 */
 	public function get_items() {
@@ -146,7 +146,7 @@ class WC_Discounts {
 	/**
 	 * Get items to validate.
 	 *
-	 * @since  3.3.2
+	 * @since 3.3.2
 	 * @return object[]
 	 */
 	public function get_items_to_validate() {
@@ -156,9 +156,9 @@ class WC_Discounts {
 	/**
 	 * Get discount by key with or without precision.
 	 *
-	 * @since  3.2.0
-	 * @param  string $key name of discount row to return.
-	 * @param  bool   $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param string $key name of discount row to return.
+	 * @param bool   $in_cents Should the totals be returned in cents, or without precision.
 	 * @return float
 	 */
 	public function get_discount( $key, $in_cents = false ) {
@@ -169,8 +169,8 @@ class WC_Discounts {
 	/**
 	 * Get all discount totals.
 	 *
-	 * @since  3.2.0
-	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param bool $in_cents Should the totals be returned in cents, or without precision.
 	 * @return array
 	 */
 	public function get_discounts( $in_cents = false ) {
@@ -181,8 +181,8 @@ class WC_Discounts {
 	/**
 	 * Get all discount totals per item.
 	 *
-	 * @since  3.2.0
-	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param bool $in_cents Should the totals be returned in cents, or without precision.
 	 * @return array
 	 */
 	public function get_discounts_by_item( $in_cents = false ) {
@@ -201,8 +201,8 @@ class WC_Discounts {
 	/**
 	 * Get all discount totals per coupon.
 	 *
-	 * @since  3.2.0
-	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param bool $in_cents Should the totals be returned in cents, or without precision.
 	 * @return array
 	 */
 	public function get_discounts_by_coupon( $in_cents = false ) {
@@ -214,8 +214,8 @@ class WC_Discounts {
 	/**
 	 * Get discounted price of an item without precision.
 	 *
-	 * @since  3.2.0
-	 * @param  object $item Get data for this item.
+	 * @since 3.2.0
+	 * @param object $item Get data for this item.
 	 * @return float
 	 */
 	public function get_discounted_price( $item ) {
@@ -225,8 +225,8 @@ class WC_Discounts {
 	/**
 	 * Get discounted price of an item to precision (in cents).
 	 *
-	 * @since  3.2.0
-	 * @param  object $item Get data for this item.
+	 * @since 3.2.0
+	 * @param object $item Get data for this item.
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
@@ -236,9 +236,9 @@ class WC_Discounts {
 	/**
 	 * Apply a discount to all items using a coupon.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
-	 * @param  bool      $validate Set to false to skip coupon validation.
+	 * @since 3.2.0
+	 * @param WC_Coupon $coupon Coupon object being applied to the items.
+	 * @param bool      $validate Set to false to skip coupon validation.
 	 * @throws Exception Error message when coupon isn't valid.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
@@ -281,9 +281,9 @@ class WC_Discounts {
 	/**
 	 * Sort by price.
 	 *
-	 * @since  3.2.0
-	 * @param  array $a First element.
-	 * @param  array $b Second element.
+	 * @since 3.2.0
+	 * @param array $a First element.
+	 * @param array $b Second element.
 	 * @return int
 	 */
 	protected function sort_by_price( $a, $b ) {
@@ -299,8 +299,8 @@ class WC_Discounts {
 	 * Filter out all products which have been fully discounted to 0.
 	 * Used as array_filter callback.
 	 *
-	 * @since  3.2.0
-	 * @param  object $item Get data for this item.
+	 * @since 3.2.0
+	 * @param object $item Get data for this item.
 	 * @return bool
 	 */
 	protected function filter_products_with_price( $item ) {
@@ -310,8 +310,8 @@ class WC_Discounts {
 	/**
 	 * Get items which the coupon should be applied to.
 	 *
-	 * @since  3.2.0
-	 * @param  object $coupon Coupon object.
+	 * @since 3.2.0
+	 * @param object $coupon Coupon object.
 	 * @return array
 	 */
 	protected function get_items_to_apply_coupon( $coupon ) {
@@ -336,9 +336,9 @@ class WC_Discounts {
 	/**
 	 * Apply percent discount to items and return an array of discounts granted.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
+	 * @since 3.2.0
+	 * @param WC_Coupon $coupon Coupon object. Passed through filters.
+	 * @param array     $items_to_apply Array of items to apply the coupon to.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
@@ -401,10 +401,10 @@ class WC_Discounts {
 	/**
 	 * Apply fixed product discount to items.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
+	 * @since 3.2.0
+	 * @param WC_Coupon $coupon Coupon object. Passed through filters.
+	 * @param array     $items_to_apply Array of items to apply the coupon to.
+	 * @param int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
@@ -452,10 +452,10 @@ class WC_Discounts {
 	/**
 	 * Apply fixed cart discount to items.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
+	 * @since 3.2.0
+	 * @param WC_Coupon $coupon Coupon object. Passed through filters.
+	 * @param array     $items_to_apply Array of items to apply the coupon to.
+	 * @param int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
@@ -493,9 +493,9 @@ class WC_Discounts {
 	/**
 	 * Apply custom coupon discount to items.
 	 *
-	 * @since  3.3
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
+	 * @since 3.3
+	 * @param WC_Coupon $coupon Coupon object. Passed through filters.
+	 * @param array     $items_to_apply Array of items to apply the coupon to.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_custom( $coupon, $items_to_apply ) {
@@ -538,9 +538,9 @@ class WC_Discounts {
 	 * until the amount is expired, discounting 1 cent at a time.
 	 *
 	 * @since 3.2.0
-	 * @param  WC_Coupon $coupon Coupon object if appliable. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  int       $amount Fixed discount amount to apply.
+	 * @param WC_Coupon $coupon Coupon object if appliable. Passed through filters.
+	 * @param array     $items_to_apply Array of items to apply the coupon to.
+	 * @param int       $amount Fixed discount amount to apply.
 	 * @return int Total discounted.
 	 */
 	protected function apply_coupon_remainder( $coupon, $items_to_apply, $amount ) {
@@ -574,9 +574,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon exists or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_exists( $coupon ) {
@@ -591,9 +591,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon usage limit is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_usage_limit( $coupon ) {
@@ -610,10 +610,10 @@ class WC_Discounts {
 	 * Per user usage limit - check here if user is logged in (against user IDs).
 	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon  Coupon data.
-	 * @param  int       $user_id User ID.
+	 * @param WC_Coupon $coupon  Coupon data.
+	 * @param int       $user_id User ID.
 	 * @return bool
 	 */
 	protected function validate_coupon_user_usage_limit( $coupon, $user_id = 0 ) {
@@ -639,9 +639,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon date is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_expiry_date( $coupon ) {
@@ -655,9 +655,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon amount is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon   Coupon data.
+	 * @param WC_Coupon $coupon   Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
@@ -674,9 +674,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon amount is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon   Coupon data.
+	 * @param WC_Coupon $coupon   Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
@@ -693,9 +693,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon is valid for products in the list is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_product_ids( $coupon ) {
@@ -720,9 +720,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon is valid for product categories in the list is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_product_categories( $coupon ) {
@@ -758,9 +758,9 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon is valid for sale items in the list is valid or throw exception.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_sale_items( $coupon ) {
@@ -785,9 +785,9 @@ class WC_Discounts {
 	/**
 	 * All exclusion rules must pass at the same time for a product coupon to be valid.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_items( $coupon ) {
@@ -813,9 +813,9 @@ class WC_Discounts {
 	/**
 	 * Cart discounts cannot be added if non-eligible product is found.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_eligible_items( $coupon ) {
@@ -831,9 +831,9 @@ class WC_Discounts {
 	/**
 	 * Exclude products.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_product_ids( $coupon ) {
@@ -859,9 +859,9 @@ class WC_Discounts {
 	/**
 	 * Exclude categories from product list.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_product_categories( $coupon ) {
@@ -939,9 +939,9 @@ class WC_Discounts {
 	 * - 113: Excluded products.
 	 * - 114: Excluded categories.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
 	 * @return bool|WP_Error
 	 */
 	public function is_coupon_valid( $coupon ) {

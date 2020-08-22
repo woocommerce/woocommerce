@@ -5,7 +5,7 @@
  * Behaviour for displaying in-context suggestions for marketplace extensions.
  *
  * @package WooCommerce\Classes
- * @since   3.6.0
+ * @since 3.6.0
  */
 
 defined( 'ABSPATH' ) || exit;

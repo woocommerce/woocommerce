@@ -29,7 +29,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 /**
  * Abstract Rest API Test Class
  *
- * @extends  WC_REST_Unit_Test_Case
+ * @extends WC_REST_Unit_Test_Case
  */
 abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 

@@ -13,8 +13,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 class WC_Report_Stock extends WP_List_Table {
 

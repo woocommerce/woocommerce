@@ -147,7 +147,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get default blank set of props used per item.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	protected function get_default_item_props() {
@@ -170,7 +170,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get default blank set of props used per fee.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	protected function get_default_fee_props() {
@@ -186,7 +186,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get default blank set of props used per shipping row.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	protected function get_default_shipping_props() {
@@ -234,7 +234,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get item costs grouped by tax class.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	protected function get_tax_class_costs() {
@@ -352,7 +352,7 @@ final class WC_Cart_Totals {
 	 * Return array of coupon objects from the cart. Normalises data
 	 * into the same format for use by this class.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 */
 	protected function get_coupons_from_cart() {
 		$this->coupons = $this->cart->get_coupons();
@@ -466,8 +466,8 @@ final class WC_Cart_Totals {
 	/**
 	 * Get discounted price of an item with precision (in cents).
 	 *
-	 * @since  3.2.0
-	 * @param  object $item_key Item to get the price of.
+	 * @since 3.2.0
+	 * @param object $item_key Item to get the price of.
 	 * @return int
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
@@ -479,7 +479,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get tax rates for an item. Caches rates in class to avoid multiple look ups.
 	 *
-	 * @param  object $item Item to get tax rates for.
+	 * @param object $item Item to get tax rates for.
 	 * @return array of taxes
 	 */
 	protected function get_item_tax_rates( $item ) {
@@ -496,7 +496,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Get item costs grouped by tax class.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	protected function get_item_costs_by_tax_class() {
@@ -522,9 +522,9 @@ final class WC_Cart_Totals {
 	/**
 	 * Get a single total with or without precision (in cents).
 	 *
-	 * @since  3.2.0
-	 * @param  string $key Total to get.
-	 * @param  bool   $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param string $key Total to get.
+	 * @param bool   $in_cents Should the totals be returned in cents, or without precision.
 	 * @return int|float
 	 */
 	public function get_total( $key = 'total', $in_cents = false ) {
@@ -535,7 +535,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Set a single total.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @param string $key Total name you want to set.
 	 * @param int    $total Total to set.
 	 */
@@ -546,8 +546,8 @@ final class WC_Cart_Totals {
 	/**
 	 * Get all totals with or without precision (in cents).
 	 *
-	 * @since  3.2.0
-	 * @param  bool $in_cents Should the totals be returned in cents, or without precision.
+	 * @since 3.2.0
+	 * @param bool $in_cents Should the totals be returned in cents, or without precision.
 	 * @return array.
 	 */
 	public function get_totals( $in_cents = false ) {
@@ -568,8 +568,8 @@ final class WC_Cart_Totals {
 	 * Get taxes merged by type.
 	 *
 	 * @since 3.2.0
-	 * @param  bool         $in_cents If returned value should be in cents.
-	 * @param  array|string $types    Types to merge and return. Defaults to all.
+	 * @param bool         $in_cents If returned value should be in cents.
+	 * @param array|string $types    Types to merge and return. Defaults to all.
 	 * @return array
 	 */
 	protected function get_merged_taxes( $in_cents = false, $types = array( 'items', 'fees', 'shipping' ) ) {
@@ -759,7 +759,7 @@ final class WC_Cart_Totals {
 	 * Calculate COUPON based discounts which change item prices.
 	 *
 	 * @since 3.2.0
-	 * @uses  WC_Discounts class.
+	 * @uses WC_Discounts class.
 	 */
 	protected function calculate_discounts() {
 		$this->get_coupons_from_cart();

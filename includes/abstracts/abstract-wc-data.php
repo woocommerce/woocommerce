@@ -5,9 +5,9 @@
  * Handles generic data interaction which is implemented by
  * the different data store classes.
  *
- * @class       WC_Data
- * @version     3.0.0
- * @package     WooCommerce\Classes
+ * @class WC_Data
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Implemented by classes using the same CRUD(s) pattern.
  *
- * @version  2.6.0
- * @package  WooCommerce\Abstracts
+ * @version 2.6.0
+ * @package WooCommerce\Abstracts
  */
 abstract class WC_Data {
 
@@ -160,7 +160,7 @@ abstract class WC_Data {
 	/**
 	 * Get the data store.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return object
 	 */
 	public function get_data_store() {
@@ -170,7 +170,7 @@ abstract class WC_Data {
 	/**
 	 * Returns the unique ID for this object.
 	 *
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 * @return int
 	 */
 	public function get_id() {
@@ -180,8 +180,8 @@ abstract class WC_Data {
 	/**
 	 * Delete an object, set the ID to 0, and return result.
 	 *
-	 * @since  2.6.0
-	 * @param  bool $force_delete Should the date be deleted permanently.
+	 * @since 2.6.0
+	 * @param bool $force_delete Should the date be deleted permanently.
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
@@ -196,7 +196,7 @@ abstract class WC_Data {
 	/**
 	 * Save should create or update based on object existence.
 	 *
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 * @return int
 	 */
 	public function save() {
@@ -232,7 +232,7 @@ abstract class WC_Data {
 	/**
 	 * Change data to JSON format.
 	 *
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 * @return string Data in JSON format.
 	 */
 	public function __toString() {
@@ -242,7 +242,7 @@ abstract class WC_Data {
 	/**
 	 * Returns all data for this object.
 	 *
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -252,7 +252,7 @@ abstract class WC_Data {
 	/**
 	 * Returns array of expected data keys for this object.
 	 *
-	 * @since   3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_data_keys() {
@@ -262,7 +262,7 @@ abstract class WC_Data {
 	/**
 	 * Returns all "extra" data keys for an object (for sub objects like product types).
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_extra_data_keys() {
@@ -272,7 +272,7 @@ abstract class WC_Data {
 	/**
 	 * Filter null meta values from array.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @param mixed $meta Meta value to check.
 	 * @return bool
 	 */
@@ -294,8 +294,8 @@ abstract class WC_Data {
 	/**
 	 * Check if the key is an internal one.
 	 *
-	 * @since  3.2.0
-	 * @param  string $key Key to check.
+	 * @since 3.2.0
+	 * @param string $key Key to check.
 	 * @return bool   true if it's an internal key, false otherwise
 	 */
 	protected function is_internal_meta_key( $key ) {
@@ -319,10 +319,10 @@ abstract class WC_Data {
 	/**
 	 * Get Meta Data by Key.
 	 *
-	 * @since  2.6.0
-	 * @param  string $key Meta Key.
-	 * @param  bool   $single return first found meta with key, or all with $key.
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 2.6.0
+	 * @param string $key Meta Key.
+	 * @param bool   $single return first found meta with key, or all with $key.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
@@ -358,8 +358,8 @@ abstract class WC_Data {
 	/**
 	 * See if meta data exists, since get_meta always returns a '' or array().
 	 *
-	 * @since  3.0.0
-	 * @param  string $key Meta Key.
+	 * @since 3.0.0
+	 * @param string $key Meta Key.
 	 * @return boolean
 	 */
 	public function meta_exists( $key = '' ) {
@@ -425,11 +425,11 @@ abstract class WC_Data {
 	/**
 	 * Update meta data by key or ID, if provided.
 	 *
-	 * @since  2.6.0
+	 * @since 2.6.0
 	 *
-	 * @param  string       $key Meta key.
-	 * @param  string|array $value Meta value.
-	 * @param  int          $meta_id Meta ID.
+	 * @param string       $key Meta key.
+	 * @param string|array $value Meta value.
+	 * @param int          $meta_id Meta ID.
 	 */
 	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
@@ -633,7 +633,7 @@ abstract class WC_Data {
 	/**
 	 * Get object read property.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function get_object_read() {
@@ -644,7 +644,7 @@ abstract class WC_Data {
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 *
 	 * @param array  $props Key value pairs to set. Key is the prop and should map to a setter function name.
 	 * @param string $context In what context to run this.
@@ -723,7 +723,7 @@ abstract class WC_Data {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -736,9 +736,9 @@ abstract class WC_Data {
 	 * Gets the value from either current pending changes, or the data itself.
 	 * Context controls what happens to the value before it's returned.
 	 *
-	 * @since  3.0.0
-	 * @param  string $prop Name of prop to get.
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to get.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
 	protected function get_prop( $prop, $context = 'view' ) {

@@ -3,7 +3,7 @@
  * Test template funcitons.
  *
  * @package WooCommerce\Tests\Templates
- * @since   3.4.0
+ * @since 3.4.0
  */
 
 /**

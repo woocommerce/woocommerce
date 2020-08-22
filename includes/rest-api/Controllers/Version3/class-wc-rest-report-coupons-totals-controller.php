@@ -5,7 +5,7 @@
  * Handles requests to the /reports/coupons/count endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -76,8 +76,8 @@ class WC_REST_Report_Coupons_Totals_Controller extends WC_REST_Reports_Controlle
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param  stdClass        $report Report data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param stdClass        $report Report data.
+	 * @param P_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $report, $request ) {

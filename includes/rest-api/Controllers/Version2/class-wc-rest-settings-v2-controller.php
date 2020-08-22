@@ -5,7 +5,7 @@
  * Handles requests to the /settings endpoints.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -53,8 +53,8 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings groups items.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.0.0
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -108,7 +108,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @param array           $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -130,7 +130,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	 * only return known values via the API.
 	 *
 	 * @since 3.0.0
-	 * @param  array $group Group.
+	 * @param rray $group Group.
 	 * @return array
 	 */
 	public function filter_group( $group ) {
@@ -143,8 +143,8 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each group response.
 	 *
-	 * @since  3.0.0
-	 * @param  string $key Key to check.
+	 * @since 3.0.0
+	 * @param tring $key Key to check.
 	 * @return boolean
 	 */
 	public function allowed_group_keys( $key ) {
@@ -154,7 +154,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Returns default settings for groups. null means the field is required.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	protected function group_defaults() {
@@ -170,7 +170,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -185,7 +185,7 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Get the groups schema, conforming to JSON Schema.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {

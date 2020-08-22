@@ -177,7 +177,7 @@ class WC_Checkout {
 	/**
 	 * Is registration required to checkout?
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_required() {
@@ -187,7 +187,7 @@ class WC_Checkout {
 	/**
 	 * Is registration enabled on the checkout page?
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return boolean
 	 */
 	public function is_registration_enabled() {
@@ -197,7 +197,7 @@ class WC_Checkout {
 	/**
 	 * Get an array of checkout fields.
 	 *
-	 * @param  string $fieldset to get.
+	 * @param string $fieldset to get.
 	 * @return array
 	 */
 	public function get_checkout_fields( $fieldset = '' ) {
@@ -313,7 +313,7 @@ class WC_Checkout {
 	 *      529 - Cannot create coupon item.
 	 *
 	 * @throws Exception When checkout validation fails.
-	 * @param  array $data Posted data.
+	 * @param array $data Posted data.
 	 * @return int|WP_ERROR
 	 */
 	public function create_order( $data ) {
@@ -663,7 +663,7 @@ class WC_Checkout {
 	/**
 	 * Get posted data from the checkout form.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return array of data.
 	 */
 	public function get_posted_data() {
@@ -722,9 +722,9 @@ class WC_Checkout {
 	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
-	 * @since  3.0.0
-	 * @param  array    $data   An array of posted data.
-	 * @param  WP_Error $errors Validation error.
+	 * @since 3.0.0
+	 * @param array    $data   An array of posted data.
+	 * @param WP_Error $errors Validation error.
 	 */
 	protected function validate_posted_data( &$data, &$errors ) {
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
@@ -819,9 +819,9 @@ class WC_Checkout {
 	/**
 	 * Validates that the checkout has enough info to proceed.
 	 *
-	 * @since  3.0.0
-	 * @param  array    $data   An array of posted data.
-	 * @param  WP_Error $errors Validation errors.
+	 * @since 3.0.0
+	 * @param array    $data   An array of posted data.
+	 * @param WP_Error $errors Validation errors.
 	 */
 	protected function validate_checkout( &$data, &$errors ) {
 		$this->validate_posted_data( $data, $errors );

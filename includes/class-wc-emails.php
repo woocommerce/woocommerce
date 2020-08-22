@@ -279,8 +279,8 @@ class WC_Emails {
 	/**
 	 * Replace placeholder text in strings.
 	 *
-	 * @since  3.7.0
-	 * @param  string $string Email footer text.
+	 * @since 3.7.0
+	 * @param string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
 	public function replace_placeholders( $string ) {
@@ -308,9 +308,9 @@ class WC_Emails {
 	/**
 	 * Filter callback to replace {site_title} in email footer
 	 *
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 * @deprecated 3.7.0
-	 * @param  string $string Email footer text.
+	 * @param string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
 	public function email_footer_replace_site_title( $string ) {
@@ -530,7 +530,7 @@ class WC_Emails {
 	/**
 	 * Is customer detail field valid?
 	 *
-	 * @param  array $field Field data to check if is valid.
+	 * @param array $field Field data to check if is valid.
 	 * @return boolean
 	 */
 	public function customer_detail_field_is_valid( $field ) {

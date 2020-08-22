@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 	 *
 	 * An email sent to the customer via admin.
 	 *
-	 * @class       WC_Email_Customer_Invoice
-	 * @version     3.5.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_Customer_Invoice
+	 * @version 3.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Customer_Invoice extends WC_Email {
 
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * Get email subject.
 		 *
 		 * @param bool $paid Whether the order has been paid or not.
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject( $paid = false ) {
@@ -63,7 +63,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * Get email heading.
 		 *
 		 * @param bool $paid Whether the order has been paid or not.
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading( $paid = false ) {

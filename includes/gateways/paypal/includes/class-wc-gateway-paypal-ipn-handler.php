@@ -56,7 +56,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * There was a valid response.
 	 *
-	 * @param  array $posted Post data after wp_unslash.
+	 * @param array $posted Post data after wp_unslash.
 	 */
 	public function valid_response( $posted ) {
 		$order = ! empty( $posted['custom'] ) ? $this->get_paypal_order( $posted['custom'] ) : false;

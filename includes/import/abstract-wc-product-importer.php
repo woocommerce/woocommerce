@@ -2,8 +2,8 @@
 /**
  * Abstract Product importer
  *
- * @package  WooCommerce\Import
- * @version  3.1.0
+ * @package WooCommerce\Import
+ * @version 3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -164,7 +164,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Prepare a single product for create or update.
 	 *
-	 * @param  array $data     Item data.
+	 * @param array $data     Item data.
 	 * @return WC_Product|WP_Error
 	 */
 	protected function get_product_object( $data ) {
@@ -219,7 +219,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Process a single item and save.
 	 *
 	 * @throws Exception If item cannot be processed.
-	 * @param  array $data Raw CSV data.
+	 * @param rray $data Raw CSV data.
 	 * @return array|WP_Error
 	 */
 	protected function process_item( $data ) {
@@ -505,8 +505,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get variation parent attributes and set "is_variation".
 	 *
-	 * @param  array      $attributes Attributes list.
-	 * @param  WC_Product $parent     Parent product data.
+	 * @param rray      $attributes Attributes list.
+	 * @param C_Product $parent     Parent product data.
 	 * @return array
 	 */
 	protected function get_variation_parent_attributes( $attributes, $parent ) {
@@ -549,8 +549,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get attachment ID.
 	 *
-	 * @param  string $url        Attachment URL.
-	 * @param  int    $product_id Product ID.
+	 * @param tring $url        Attachment URL.
+	 * @param nt    $product_id Product ID.
 	 * @return int
 	 * @throws Exception If attachment cannot be loaded.
 	 */
@@ -642,7 +642,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
-	 * @param  string $raw_name Attribute name.
+	 * @param tring $raw_name Attribute name.
 	 * @return int
 	 * @throws Exception If taxonomy cannot be loaded.
 	 */
@@ -767,9 +767,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Explode CSV cell values using commas by default, and handling escaped
 	 * separators.
 	 *
-	 * @since  3.2.0
-	 * @param  string $value     Value to explode.
-	 * @param  string $separator Separator separating each value. Defaults to comma.
+	 * @since 3.2.0
+	 * @param tring $value     Value to explode.
+	 * @param tring $separator Separator separating each value. Defaults to comma.
 	 * @return array
 	 */
 	protected function explode_values( $value, $separator = ',' ) {
@@ -783,8 +783,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Remove formatting and trim each value.
 	 *
-	 * @since  3.2.0
-	 * @param  string $value Value to format.
+	 * @since 3.2.0
+	 * @param tring $value Value to format.
 	 * @return string
 	 */
 	protected function explode_values_formatter( $value ) {
@@ -796,7 +796,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Remove the prepended ' character preceding those characters.
 	 *
 	 * @since 3.5.2
-	 * @param  string $value A string that may or may not have been escaped with '.
+	 * @param tring $value A string that may or may not have been escaped with '.
 	 * @return string
 	 */
 	protected function unescape_data( $value ) {

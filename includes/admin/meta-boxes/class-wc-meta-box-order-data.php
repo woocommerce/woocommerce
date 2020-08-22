@@ -6,8 +6,8 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Meta Boxes
- * @version     2.2.0
+ * @package WooCommerce\Admin\Meta Boxes
+ * @version 2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

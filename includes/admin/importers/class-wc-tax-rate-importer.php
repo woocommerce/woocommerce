@@ -17,8 +17,8 @@ if ( ! class_exists( 'WP_Importer' ) ) {
 /**
  * Tax Rates importer - import tax rates and local tax rates into WooCommerce.
  *
- * @package     WooCommerce\Admin\Importers
- * @version     2.3.0
+ * @package WooCommerce\Admin\Importers
+ * @version 2.3.0
  */
 class WC_Tax_Rate_Importer extends WP_Importer {
 
@@ -317,7 +317,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	/**
 	 * Show import error and quit.
 	 *
-	 * @param  string $message Error message.
+	 * @param string $message Error message.
 	 */
 	private function import_error( $message = '' ) {
 		echo '<p><strong>' . esc_html__( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
@@ -332,7 +332,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	/**
 	 * Added to http_request_timeout filter to force timeout at 60 seconds during import.
 	 *
-	 * @param  int $val Value.
+	 * @param nt $val Value.
 	 * @return int 60
 	 */
 	public function bump_request_timeout( $val ) {

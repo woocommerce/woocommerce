@@ -3,7 +3,7 @@
  * WooCommerce setup
  *
  * @package WooCommerce
- * @since   3.2.0
+ * @since 3.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -309,7 +309,7 @@ final class WooCommerce {
 	/**
 	 * What type of request is this?
 	 *
-	 * @param  string $type admin, ajax, cron or frontend.
+	 * @param string $type admin, ajax, cron or frontend.
 	 * @return bool
 	 */
 	private function is_request( $type ) {

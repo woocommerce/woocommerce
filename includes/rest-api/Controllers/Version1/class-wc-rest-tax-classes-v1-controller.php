@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -82,7 +82,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read tax classes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -96,7 +96,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access create tax classes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */
@@ -111,7 +111,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access delete a tax.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
 	 */

@@ -7,7 +7,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,8 +37,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get item costs grouped by tax class.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Order $order Order object.
+	 * @since 3.2.0
+	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
 	protected function get_tax_class_costs( $order ) {
@@ -65,8 +65,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Calculate item taxes.
 	 *
-	 * @since  3.2.0
-	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @since 3.2.0
+	 * @param array $calculate_tax_for Location data to get taxes for. Required.
 	 * @return bool  True if taxes were calculated.
 	 */
 	public function calculate_taxes( $calculate_tax_for = array() ) {
@@ -197,7 +197,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get fee amount.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_amount( $context = 'view' ) {
@@ -207,7 +207,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -231,7 +231,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get tax class.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -241,7 +241,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get tax status.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_status( $context = 'view' ) {
@@ -251,7 +251,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get total fee.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total( $context = 'view' ) {
@@ -261,7 +261,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get total tax.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -271,7 +271,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	/**
 	 * Get fee taxes.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_taxes( $context = 'view' ) {

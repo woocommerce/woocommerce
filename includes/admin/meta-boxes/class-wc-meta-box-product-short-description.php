@@ -4,8 +4,8 @@
  *
  * Replaces the standard excerpt box.
  *
- * @package     WooCommerce\Admin\Meta Boxes
- * @version     2.1.0
+ * @package WooCommerce\Admin\Meta Boxes
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_REST_Posts_Controller
  *
  * @package Automattic/WooCommerce/RestApi
- * @version  2.6.0
+ * @version 2.6.0
  */
 abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
@@ -49,7 +49,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -63,7 +63,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to create an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -77,7 +77,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -93,7 +93,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -109,7 +109,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to delete an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -125,7 +125,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 *
 	 * @return boolean|WP_Error
 	 */

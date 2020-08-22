@@ -5,7 +5,7 @@
  * Handles requests to the /webhooks/<webhook_id>/deliveries endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -29,8 +29,8 @@ class WC_REST_Webhook_Deliveries_V2_Controller extends WC_REST_Webhook_Deliverie
 	/**
 	 * Prepare a single webhook delivery output for response.
 	 *
-	 * @param  stdClass        $log Delivery log object.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param stdClass        $log Delivery log object.
+	 * @param P_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $log, $request ) {

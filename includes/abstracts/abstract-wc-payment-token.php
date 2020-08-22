@@ -20,10 +20,10 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-payment-token.php'
  * Representation of a general payment token to be extended by individuals types of tokens
  * examples: Credit Card, eCheck.
  *
- * @class       WC_Payment_Token
- * @version     3.0.0
- * @since       2.6.0
- * @package     WooCommerce\Abstracts
+ * @class WC_Payment_Token
+ * @version 3.0.0
+ * @since 2.6.0
+ * @package WooCommerce\Abstracts
  */
 abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 
@@ -89,8 +89,8 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	/**
 	 * Returns the raw payment token.
 	 *
-	 * @since  2.6.0
-	 * @param  string $context Context in which to call this.
+	 * @since 2.6.0
+	 * @param string $context Context in which to call this.
 	 * @return string Raw token
 	 */
 	public function get_token( $context = 'view' ) {
@@ -101,8 +101,8 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Returns the type of this payment token (CC, eCheck, or something else).
 	 * Overwritten by child classes.
 	 *
-	 * @since  2.6.0
-	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
+	 * @since 2.6.0
+	 * @param string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
 	public function get_type( $deprecated = '' ) {
@@ -113,8 +113,8 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Get type to display to user.
 	 * Get's overwritten by child classes.
 	 *
-	 * @since  2.6.0
-	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
+	 * @since 2.6.0
+	 * @param string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string
 	 */
 	public function get_display_name( $deprecated = '' ) {
@@ -125,7 +125,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Returns the user ID associated with the token or false if this token is not associated.
 	 *
 	 * @since 2.6.0
-	 * @param  string $context In what context to execute this.
+	 * @param string $context In what context to execute this.
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
 	public function get_user_id( $context = 'view' ) {
@@ -136,7 +136,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Returns the ID of the gateway associated with this payment token.
 	 *
 	 * @since 2.6.0
-	 * @param  string $context In what context to execute this.
+	 * @param string $context In what context to execute this.
 	 * @return string Gateway ID
 	 */
 	public function get_gateway_id( $context = 'view' ) {
@@ -147,7 +147,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * Returns the ID of the gateway associated with this payment token.
 	 *
 	 * @since 2.6.0
-	 * @param  string $context In what context to execute this.
+	 * @param string $context In what context to execute this.
 	 * @return string Gateway ID
 	 */
 	public function get_is_default( $context = 'view' ) {

@@ -56,7 +56,7 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
@@ -139,7 +139,7 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Return the children of this product.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_children( $context = 'view' ) {

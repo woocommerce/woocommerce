@@ -94,7 +94,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Mock the WC session using the abstract class as cookies are not available.
 	 * during tests.
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 * @return string The $output string, sans newlines and tabs.
 	 */
 	public function set_mock_session_handler() {

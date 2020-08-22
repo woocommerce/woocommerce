@@ -56,7 +56,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Column cb.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_cb( $key ) {
@@ -66,7 +66,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return title column.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_title( $key ) {
@@ -125,7 +125,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return truncated consumer key column.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_truncated_key( $key ) {
@@ -135,7 +135,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return user column.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_user( $key ) {
@@ -155,7 +155,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return permissions column.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_permissions( $key ) {
@@ -176,7 +176,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Return last access column.
 	 *
-	 * @param  array $key Key data.
+	 * @param array $key Key data.
 	 * @return string
 	 */
 	public function column_last_access( $key ) {
@@ -208,8 +208,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	/**
 	 * Search box.
 	 *
-	 * @param  string $text     Button text.
-	 * @param  string $input_id Input ID.
+	 * @param string $text     Button text.
+	 * @param string $input_id Input ID.
 	 */
 	public function search_box( $text, $input_id ) {
 		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.

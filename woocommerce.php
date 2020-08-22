@@ -40,7 +40,7 @@ $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 /**
  * Returns the main instance of WC.
  *
- * @since  2.1
+ * @since 2.1
  * @return WooCommerce
  */
 function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid

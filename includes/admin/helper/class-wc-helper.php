@@ -2,8 +2,8 @@
 /**
  * WooCommerce Admin
  *
- * @class    WC_Helper
- * @package  WooCommerce\Admin
+ * @class WC_Helper
+ * @package WooCommerce\Admin
  */
 
 use Automattic\Jetpack\Constants;

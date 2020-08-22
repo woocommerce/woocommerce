@@ -35,7 +35,7 @@ class WC_Helper_Order {
 	/**
 	 * Create a order.
 	 *
-	 * @since   2.4
+	 * @since 2.4
 	 * @version 3.0 New parameter $product.
 	 *
 	 * @param int        $customer_id The ID of the customer the order is for.

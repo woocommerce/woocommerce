@@ -281,7 +281,7 @@ class WC_Shipping {
 	 *
 	 * Packages are shippable until proven otherwise e.g. after getting a shipping country.
 	 *
-	 * @param  array $package Package of cart items.
+	 * @param array $package Package of cart items.
 	 * @return bool
 	 */
 	public function is_package_shippable( $package ) {

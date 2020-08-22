@@ -120,7 +120,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -334,8 +334,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the customer's username.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_username( $context = 'view' ) {
@@ -345,8 +345,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the customer's email.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_email( $context = 'view' ) {
@@ -356,8 +356,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's first name.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_first_name( $context = 'view' ) {
@@ -367,8 +367,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's last name.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_last_name( $context = 'view' ) {
@@ -378,8 +378,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's display name.
 	 *
-	 * @since  3.1.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.1.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_display_name( $context = 'view' ) {
@@ -389,8 +389,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return customer's user role.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_role( $context = 'view' ) {
@@ -400,8 +400,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the date this customer was created.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
@@ -411,8 +411,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return the date this customer was last updated.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
@@ -422,10 +422,10 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Gets a prop for a getter method.
 	 *
-	 * @since  3.0.0
-	 * @param  string $prop Name of prop to get.
-	 * @param  string $address billing or shipping.
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'. What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to get.
+	 * @param string $address billing or shipping.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'. What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
 	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
@@ -444,8 +444,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing.
 	 *
-	 * @since  3.2.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.2.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_billing( $context = 'view' ) {
@@ -455,7 +455,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_first_name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_first_name( $context = 'view' ) {
@@ -465,7 +465,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_last_name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_last_name( $context = 'view' ) {
@@ -475,7 +475,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_company.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_company( $context = 'view' ) {
@@ -485,7 +485,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_address_1.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_address( $context = 'view' ) {
@@ -495,7 +495,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_address_1.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_address_1( $context = 'view' ) {
@@ -505,7 +505,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_address_2.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string $value
 	 */
 	public function get_billing_address_2( $context = 'view' ) {
@@ -515,7 +515,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_city.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string $value
 	 */
 	public function get_billing_city( $context = 'view' ) {
@@ -525,7 +525,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_state.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_state( $context = 'view' ) {
@@ -535,7 +535,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_postcode.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_postcode( $context = 'view' ) {
@@ -545,7 +545,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_country.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_country( $context = 'view' ) {
@@ -555,7 +555,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_email.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_email( $context = 'view' ) {
@@ -565,7 +565,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get billing_phone.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_billing_phone( $context = 'view' ) {
@@ -575,8 +575,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping.
 	 *
-	 * @since  3.2.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.2.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_shipping( $context = 'view' ) {
@@ -586,7 +586,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_first_name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_first_name( $context = 'view' ) {
@@ -596,7 +596,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_last_name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_last_name( $context = 'view' ) {
@@ -606,7 +606,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_company.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_company( $context = 'view' ) {
@@ -616,7 +616,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_address_1.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_address( $context = 'view' ) {
@@ -626,7 +626,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_address_1.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_address_1( $context = 'view' ) {
@@ -636,7 +636,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_address_2.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_address_2( $context = 'view' ) {
@@ -646,7 +646,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_city.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_city( $context = 'view' ) {
@@ -656,7 +656,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_state.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_state( $context = 'view' ) {
@@ -666,7 +666,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_postcode.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_postcode( $context = 'view' ) {
@@ -676,7 +676,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get shipping_country.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_country( $context = 'view' ) {
@@ -686,8 +686,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Is the user a paying customer?
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return bool
 	 */
 	public function get_is_paying_customer( $context = 'view' ) {
@@ -772,8 +772,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since  3.0.0
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
 	public function set_date_created( $date = null ) {
 		$this->set_date_prop( 'date_created', $date );
@@ -782,8 +782,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Set the date this customer was last updated.
 	 *
-	 * @since  3.0.0
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @since 3.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 */
 	public function set_date_modified( $date = null ) {
 		$this->set_date_prop( 'date_modified', $date );

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Returns the url to the lost password endpoint url.
  *
- * @param  string $default_url Default lost password URL.
+ * @param string $default_url Default lost password URL.
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
@@ -54,8 +54,8 @@ function wc_customer_edit_account_url() {
 /**
  * Get the edit address slug translation.
  *
- * @param  string $id   Address ID.
- * @param  bool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
+ * @param tring $id   Address ID.
+ * @param ool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
  *
  * @return string       Address slug i18n.
  */
@@ -266,8 +266,8 @@ function wc_get_account_payment_methods_types() {
 /**
  * Get account orders actions.
  *
- * @since  3.2.0
- * @param  int|WC_Order $order Order instance or ID.
+ * @since 3.2.0
+ * @param nt|WC_Order $order Order instance or ID.
  * @return array
  */
 function wc_get_account_orders_actions( $order ) {
@@ -305,11 +305,11 @@ function wc_get_account_orders_actions( $order ) {
 /**
  * Get account formatted address.
  *
- * @since  3.2.0
- * @param  string $address_type Address type.
+ * @since 3.2.0
+ * @param tring $address_type Address type.
  *                              Accepts: 'billing' or 'shipping'.
  *                              Default to 'billing'.
- * @param  int    $customer_id  Customer ID.
+ * @param nt    $customer_id  Customer ID.
  *                              Default to 0.
  * @return string
  */
@@ -334,9 +334,9 @@ function wc_get_account_formatted_address( $address_type = 'billing', $customer_
 /**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
- * @since  2.6
- * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list().
- * @param  int   $customer_id  The customer to fetch payment methods for.
+ * @since 2.6
+ * @param rray $list         List of payment methods passed from wc_get_customer_saved_methods_list().
+ * @param nt   $customer_id  The customer to fetch payment methods for.
  * @return array               Filtered list of customers payment methods.
  */
 function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
@@ -381,8 +381,8 @@ add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_paym
  * Controls the output for credit cards on the my account page.
  *
  * @since 2.6
- * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @param rray            $item         Individual list item from woocommerce_saved_payment_methods_list.
+ * @param C_Payment_Token $payment_token The payment token associated with this method entry.
  * @return array                           Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_token ) {
@@ -404,8 +404,8 @@ add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payme
  * Controls the output for eChecks on the my account page.
  *
  * @since 2.6
- * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @param rray            $item         Individual list item from woocommerce_saved_payment_methods_list.
+ * @param C_Payment_Token $payment_token The payment token associated with this method entry.
  * @return array                           Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_token ) {

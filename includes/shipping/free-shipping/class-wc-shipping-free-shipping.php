@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A simple shipping method for free shipping.
  *
- * @class   WC_Shipping_Free_Shipping
+ * @class WC_Shipping_Free_Shipping
  * @version 2.6.0
  * @package WooCommerce\Classes\Shipping
  */

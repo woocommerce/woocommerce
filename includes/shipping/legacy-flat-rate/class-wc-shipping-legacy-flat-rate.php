@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This class is here for backwards compatibility for methods existing before zones existed.
  *
- * @deprecated  2.6.0
- * @version     2.4.0
- * @package     WooCommerce\Classes\Shipping
+ * @deprecated 2.6.0
+ * @version 2.4.0
+ * @package WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
@@ -91,8 +91,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Evaluate a cost from a sum/string.
 	 *
-	 * @param  string $sum Sum to evaluate.
-	 * @param  array  $args Arguments.
+	 * @param string $sum Sum to evaluate.
+	 * @param array  $args Arguments.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
@@ -138,7 +138,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Work out fee (shortcode).
 	 *
-	 * @param  array $atts Shortcode attributes.
+	 * @param array $atts Shortcode attributes.
 	 * @return string
 	 */
 	public function fee( $atts ) {
@@ -258,7 +258,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Get items in package.
 	 *
-	 * @param  array $package Package information.
+	 * @param array $package Package information.
 	 * @return int
 	 */
 	public function get_package_item_qty( $package ) {
@@ -334,10 +334,10 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Calculate the percentage adjustment for each shipping rate.
 	 *
 	 * @deprecated 2.4.0
-	 * @param  float  $cost Cost.
-	 * @param  float  $percent_adjustment Percent adjusment.
-	 * @param  string $percent_operator Percent operator.
-	 * @param  float  $base_price Base price.
+	 * @param float  $cost Cost.
+	 * @param float  $percent_adjustment Percent adjusment.
+	 * @param string $percent_operator Percent operator.
+	 * @param float  $base_price Base price.
 	 * @return float
 	 */
 	public function calc_percentage_adjustment( $cost, $percent_adjustment, $percent_operator, $base_price ) {
@@ -353,9 +353,9 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Get extra cost.
 	 *
 	 * @deprecated 2.4.0
-	 * @param  string $cost_string Cost string.
-	 * @param  string $type Type.
-	 * @param  array  $package Package information.
+	 * @param string $cost_string Cost string.
+	 * @param string $type Type.
+	 * @param array  $package Package information.
 	 * @return float
 	 */
 	public function get_extra_cost( $cost_string, $type, $package ) {

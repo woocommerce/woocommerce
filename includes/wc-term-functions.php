@@ -121,11 +121,11 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
  * Helper to get cached object terms and filter by field using wp_list_pluck().
  * Works as a cached alternative for wp_get_post_terms() and wp_get_object_terms().
  *
- * @since  3.0.0
- * @param  int    $object_id Object ID.
- * @param  string $taxonomy  Taxonomy slug.
- * @param  string $field     Field name.
- * @param  string $index_key Index key name.
+ * @since 3.0.0
+ * @param int    $object_id Object ID.
+ * @param string $taxonomy  Taxonomy slug.
+ * @param string $field     Field name.
+ * @param string $index_key Index key name.
  * @return array
  */
 function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key = null ) {
@@ -143,10 +143,10 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
  * Cached version of wp_get_post_terms().
  * This is a private function (internal use ONLY).
  *
- * @since  3.0.0
- * @param  int    $product_id Product ID.
- * @param  string $taxonomy   Taxonomy slug.
- * @param  array  $args       Query arguments.
+ * @since 3.0.0
+ * @param int    $product_id Product ID.
+ * @param string $taxonomy   Taxonomy slug.
+ * @param array  $args       Query arguments.
  * @return array
  */
 function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() ) {
@@ -168,9 +168,9 @@ function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() )
 /**
  * Wrapper used to get terms for a product.
  *
- * @param  int    $product_id Product ID.
- * @param  string $taxonomy   Taxonomy slug.
- * @param  array  $args       Query arguments.
+ * @param int    $product_id Product ID.
+ * @param string $taxonomy   Taxonomy slug.
+ * @param array  $args       Query arguments.
  * @return array
  */
 function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
@@ -184,8 +184,8 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 /**
  * Sort by name (numeric).
  *
- * @param  WP_Post $a First item to compare.
- * @param  WP_Post $b Second item to compare.
+ * @param WP_Post $a First item to compare.
+ * @param WP_Post $b Second item to compare.
  * @return int
  */
 function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
@@ -202,8 +202,8 @@ function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
 /**
  * Sort by parent.
  *
- * @param  WP_Post $a First item to compare.
- * @param  WP_Post $b Second item to compare.
+ * @param WP_Post $a First item to compare.
+ * @param WP_Post $b Second item to compare.
  * @return int
  */
 function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
@@ -601,7 +601,7 @@ add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
 /**
  * Get full list of product visibilty term ids.
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @return int[]
  */
 function wc_get_product_visibility_term_ids() {

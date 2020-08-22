@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by order store classes.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 interface WC_Order_Data_Store_Interface {
 	/**
@@ -61,7 +61,7 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Get all orders matching the passed in args.
 	 *
-	 * @see    wc_get_orders()
+	 * @see wc_get_orders()
 	 * @param array $args Arguments.
 	 * @return array of orders
 	 */
@@ -78,7 +78,7 @@ interface WC_Order_Data_Store_Interface {
 	/**
 	 * Search order data for a term and return ids.
 	 *
-	 * @param  string $term Term name.
+	 * @param string $term Term name.
 	 * @return array of ids
 	 */
 	public function search_orders( $term );

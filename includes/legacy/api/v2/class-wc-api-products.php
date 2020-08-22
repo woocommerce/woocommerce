@@ -6,9 +6,9 @@
  *
  * @author      WooThemes
  * @category    API
- * @package     WooCommerce\API
- * @since       2.1
- * @version     3.0
+ * @package WooCommerce\API
+ * @since 2.1
+ * @version 3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -893,9 +893,9 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product meta
 	 *
-	 * @since  2.2
-	 * @param  WC_Product $product
-	 * @param  array $data
+	 * @since 2.2
+	 * @param WC_Product $product
+	 * @param rray $data
 	 * @return WC_Product
 	 * @throws WC_API_Exception
 	 */
@@ -1269,9 +1269,9 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save variations
 	 *
-	 * @since  2.2
-	 * @param  WC_Product $product
-	 * @param  array $request
+	 * @since 2.2
+	 * @param C_Product $product
+	 * @param rray $request
 	 *
 	 * @return true
 	 *
@@ -1629,7 +1629,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product images
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 *
 	 * @param WC_Product $product
 	 * @param array      $images
@@ -1687,9 +1687,9 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Upload image from URL
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 *
-	 * @param  string $image_url
+	 * @param tring $image_url
 	 *
 	 * @return array
 	 *
@@ -1915,12 +1915,12 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Validate attribute data.
 	 *
-	 * @since  2.4.0
-	 * @param  string $name
-	 * @param  string $slug
-	 * @param  string $type
-	 * @param  string $order_by
-	 * @param  bool   $new_data
+	 * @since 2.4.0
+	 * @param tring $name
+	 * @param tring $slug
+	 * @param tring $type
+	 * @param tring $order_by
+	 * @param ool   $new_data
 	 * @return bool
 	 * @throws WC_API_Exception
 	 */
@@ -2120,9 +2120,9 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product attribute
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
-	 * @param  int $id the product attribute ID
+	 * @param nt $id the product attribute ID
 	 *
 	 * @return array|WP_Error
 	 */
@@ -2184,10 +2184,10 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @deprecated 2.4.0
 	 *
-	 * @since  2.3.0
+	 * @since 2.3.0
 	 *
-	 * @param  int    $sku the product SKU
-	 * @param  string $fields
+	 * @param nt    $sku the product SKU
+	 * @param tring $fields
 	 *
 	 * @return array|WP_Error
 	 */

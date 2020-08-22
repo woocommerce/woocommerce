@@ -3,7 +3,7 @@
  * WooCommerce.com Product Installation.
  *
  * @package WooCommerce\WCCom
- * @since   3.7.0
+ * @since 3.7.0
  */
 
 defined( 'ABSPATH' ) || exit;

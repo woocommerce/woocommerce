@@ -72,7 +72,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	/**
 	 * Return the taxonomy being displayed.
 	 *
-	 * @param  object $instance Widget instance.
+	 * @param object $instance Widget instance.
 	 * @return string
 	 */
 	public function get_current_taxonomy( $instance ) {
@@ -97,7 +97,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 * Return the taxonomy being displayed.
 	 *
 	 * @deprecated 3.4.0
-	 * @param  object $instance Widget instance.
+	 * @param object $instance Widget instance.
 	 * @return string
 	 */
 	public function _get_current_taxonomy( $instance ) {

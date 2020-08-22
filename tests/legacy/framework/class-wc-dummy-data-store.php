@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Used to test swapping out data stores.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 	public function create( &$data ) { }
@@ -43,7 +43,7 @@ class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store_Interface {
  *
  * Used to test swapping out data stores.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Dummy_Data_Store_Custom_Table implements WC_Object_Data_Store_Interface {
 	public function create( &$data ) { }

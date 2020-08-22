@@ -3,7 +3,7 @@
  * The marketplace suggestions tab HTML in the product tabs
  *
  * @package WooCommerce\Classes
- * @since   3.6.0
+ * @since 3.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

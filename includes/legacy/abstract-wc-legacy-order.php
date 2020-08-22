@@ -99,7 +99,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * or for a particular right or service, and not supposed to be negative.
 	 *
 	 * @throws WC_Data_Exception
-	 * @param  object $fee Fee data.
+	 * @param object $fee Fee data.
 	 * @return int         Updated order item ID.
 	 */
 	public function add_fee( $fee ) {
@@ -480,7 +480,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Display meta data belonging to an item.
-	 * @param  array $item
+	 * @param rray $item
 	 */
 	public function display_item_meta( $item ) {
 		wc_deprecated_function( 'WC_Order::display_item_meta', '3.0', 'wc_display_item_meta' );
@@ -491,7 +491,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Display download links for an order item.
-	 * @param  array $item
+	 * @param rray $item
 	 */
 	public function display_item_downloads( $item ) {
 		wc_deprecated_function( 'WC_Order::display_item_downloads', '3.0', 'wc_display_item_downloads' );
@@ -516,8 +516,8 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	/**
 	 * Get the Download URL.
 	 *
-	 * @param  int $product_id
-	 * @param  int $download_id
+	 * @param nt $product_id
+	 * @param nt $download_id
 	 * @return string
 	 */
 	public function get_download_url( $product_id, $download_id ) {
@@ -533,7 +533,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	/**
 	 * Get the downloadable files for an item in this order.
 	 *
-	 * @param  array $item
+	 * @param rray $item
 	 * @return array
 	 */
 	public function get_item_downloads( $item ) {

@@ -5,9 +5,9 @@
  * Handles generic order data and database interaction which is extended by both
  * WC_Order (regular orders) and WC_Order_Refund (refunds are negative orders).
  *
- * @class       WC_Abstract_Order
- * @version     3.0.0
- * @package     WooCommerce\Classes
+ * @class WC_Abstract_Order
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -91,7 +91,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
-	 * @param  int|object|WC_Order $order Order to read.
+	 * @param int|object|WC_Order $order Order to read.
 	 */
 	public function __construct( $order = 0 ) {
 		parent::__construct( $order );
@@ -267,7 +267,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get parent order ID.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return integer
 	 */
 	public function get_parent_id( $context = 'view' ) {
@@ -277,7 +277,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets order currency.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_currency( $context = 'view' ) {
@@ -287,7 +287,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get order_version.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_version( $context = 'view' ) {
@@ -297,7 +297,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get prices_include_tax.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return bool
 	 */
 	public function get_prices_include_tax( $context = 'view' ) {
@@ -307,7 +307,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get date_created.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
@@ -317,7 +317,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get date_modified.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
@@ -327,7 +327,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order statuses without wc- internal prefix.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
@@ -343,7 +343,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get discount_total.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_discount_total( $context = 'view' ) {
@@ -353,7 +353,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get discount_tax.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_discount_tax( $context = 'view' ) {
@@ -363,7 +363,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get shipping_total.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_shipping_total( $context = 'view' ) {
@@ -373,7 +373,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get shipping_tax.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_shipping_tax( $context = 'view' ) {
@@ -383,7 +383,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets cart tax amount.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return float
 	 */
 	public function get_cart_tax( $context = 'view' ) {
@@ -393,7 +393,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets order grand total. incl. taxes. Used in gateways.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return float
 	 */
 	public function get_total( $context = 'view' ) {
@@ -403,7 +403,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get total tax amount. Alias for get_order_tax().
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return float
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -419,7 +419,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets the total discount amount.
 	 *
-	 * @param  bool $ex_tax Show discount excl any tax.
+	 * @param bool $ex_tax Show discount excl any tax.
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
@@ -486,7 +486,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get user ID. Used by orders, not other order types like refunds.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return int
 	 */
 	public function get_user_id( $context = 'view' ) {
@@ -595,7 +595,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_created.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_created( $date = null ) {
@@ -605,7 +605,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set date_modified.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_modified( $date = null ) {
@@ -786,7 +786,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return an array of coupons within this order.
 	 *
-	 * @since  3.7.0
+	 * @since 3.7.0
 	 * @return WC_Order_Item_Coupon[]
 	 */
 	public function get_coupons() {
@@ -871,9 +871,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get an order item object, based on its type.
 	 *
-	 * @since  3.0.0
-	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatility with that. If false, uses the local items variable instead.
+	 * @since 3.0.0
+	 * @param int  $item_id ID of item to get.
+	 * @param bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
@@ -905,8 +905,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get key for where a certain item type is stored in _items.
 	 *
-	 * @since  3.0.0
-	 * @param  string $item object Order item (product, shipping, fee, coupon, tax).
+	 * @since 3.0.0
+	 * @param string $item object Order item (product, shipping, fee, coupon, tax).
 	 * @return string
 	 */
 	protected function get_items_key( $item ) {
@@ -1178,8 +1178,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Manual discounts are not affected; those are separate and do not affect
 	 * stored line totals.
 	 *
-	 * @since  3.2.0
-	 * @param  string $code Coupon code.
+	 * @since 3.2.0
+	 * @param string $code Coupon code.
 	 * @return void
 	 */
 	public function remove_coupon( $code ) {
@@ -1343,9 +1343,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Add a product line item to the order. This is the only line item type with
 	 * its own method because it saves looking up order amounts (costs are added up for you).
 	 *
-	 * @param  WC_Product $product Product object.
-	 * @param  int        $qty Quantity to add.
-	 * @param  array      $args Args for the added product.
+	 * @param WC_Product $product Product object.
+	 * @param int        $qty Quantity to add.
+	 * @param array      $args Args for the added product.
 	 * @return int
 	 * @throws WC_Data_Exception Exception thrown if the item cannot be added to the cart.
 	 */
@@ -1661,7 +1661,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
-	 * @param  bool $and_taxes Calc taxes if true.
+	 * @param bool $and_taxes Calc taxes if true.
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
@@ -1978,7 +1978,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 *
-	 * @since  2.3.0
+	 * @since 2.3.0
 	 * @param string $tax_display Excl or incl tax display mode.
 	 * @return string
 	 */

@@ -5,7 +5,7 @@
  * Handles requests to /installer.
  *
  * @package WooCommerce\WCCom\API
- * @since   3.7.0
+ * @since 3.7.0
  */
 
 defined( 'ABSPATH' ) || exit;

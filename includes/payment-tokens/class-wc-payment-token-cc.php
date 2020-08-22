@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Representation of a payment token for credit cards.
  *
- * @class       WC_Payment_Token_CC
- * @version     3.0.0
- * @since       2.6.0
- * @package     WooCommerce\PaymentTokens
+ * @class WC_Payment_Token_CC
+ * @version 3.0.0
+ * @since 2.6.0
+ * @package WooCommerce\PaymentTokens
  */
 class WC_Payment_Token_CC extends WC_Payment_Token {
 
@@ -43,8 +43,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/**
 	 * Get type to display to user.
 	 *
-	 * @since  2.6.0
-	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
+	 * @since 2.6.0
+	 * @param string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string
 	 */
 	public function get_display_name( $deprecated = '' ) {
@@ -115,8 +115,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/**
 	 * Returns the card type (mastercard, visa, ...).
 	 *
-	 * @since  2.6.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 2.6.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string Card type
 	 */
 	public function get_card_type( $context = 'view' ) {
@@ -136,8 +136,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/**
 	 * Returns the card expiration year (YYYY).
 	 *
-	 * @since  2.6.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 2.6.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string Expiration year
 	 */
 	public function get_expiry_year( $context = 'view' ) {
@@ -157,8 +157,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/**
 	 * Returns the card expiration month (MM).
 	 *
-	 * @since  2.6.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 2.6.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string Expiration month
 	 */
 	public function get_expiry_month( $context = 'view' ) {
@@ -178,8 +178,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/**
 	 * Returns the last four digits.
 	 *
-	 * @since  2.6.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 2.6.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string Last 4 digits
 	 */
 	public function get_last4( $context = 'view' ) {

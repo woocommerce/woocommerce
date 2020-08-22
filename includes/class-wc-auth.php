@@ -5,7 +5,7 @@
  * Handles wc-auth endpoint requests.
  *
  * @package WooCommerce\API
- * @since   2.4.0
+ * @since 2.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -41,8 +41,8 @@ class WC_Auth {
 	/**
 	 * Add query vars.
 	 *
-	 * @since  2.4.0
-	 * @param  array $vars Query variables.
+	 * @since 2.4.0
+	 * @param array $vars Query variables.
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
@@ -64,7 +64,7 @@ class WC_Auth {
 	 * Get scope name.
 	 *
 	 * @since 2.4.0
-	 * @param  string $scope Permission scope.
+	 * @param string $scope Permission scope.
 	 * @return string
 	 */
 	protected function get_i18n_scope( $scope ) {
@@ -80,8 +80,8 @@ class WC_Auth {
 	/**
 	 * Return a list of permissions a scope allows.
 	 *
-	 * @since  2.4.0
-	 * @param  string $scope Permission scope.
+	 * @since 2.4.0
+	 * @param string $scope Permission scope.
 	 * @return array
 	 */
 	protected function get_permissions_in_scope( $scope ) {
@@ -114,9 +114,9 @@ class WC_Auth {
 	/**
 	 * Build auth urls.
 	 *
-	 * @since  2.4.0
-	 * @param  array  $data     Data to build URL.
-	 * @param  string $endpoint Endpoint.
+	 * @since 2.4.0
+	 * @param array  $data     Data to build URL.
+	 * @param string $endpoint Endpoint.
 	 * @return string
 	 */
 	protected function build_url( $data, $endpoint ) {
@@ -136,7 +136,7 @@ class WC_Auth {
 	/**
 	 * Decode and format a URL.
 	 *
-	 * @param  string $url URL.
+	 * @param string $url URL.
 	 * @return string
 	 */
 	protected function get_formatted_url( $url ) {
@@ -152,7 +152,7 @@ class WC_Auth {
 	/**
 	 * Make validation.
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 * @throws Exception When validate fails.
 	 */
 	protected function make_validation() {
@@ -198,11 +198,11 @@ class WC_Auth {
 	/**
 	 * Create keys.
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
-	 * @param  string $app_name    App name.
-	 * @param  string $app_user_id User ID.
-	 * @param  string $scope       Scope.
+	 * @param string $app_name    App name.
+	 * @param string $app_user_id User ID.
+	 * @param string $scope       Scope.
 	 *
 	 * @return array
 	 */
@@ -256,11 +256,11 @@ class WC_Auth {
 	/**
 	 * Post consumer data.
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
 	 * @throws Exception When validation fails.
-	 * @param  array  $consumer_data Consumer data.
-	 * @param  string $url           URL.
+	 * @param array  $consumer_data Consumer data.
+	 * @param string $url           URL.
 	 * @return bool
 	 */
 	protected function post_consumer_data( $consumer_data, $url ) {

@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * clean.
  * This class will be removed in future versions.
  *
- * @version  3.0.0
- * @package  WooCommerce\Abstracts
+ * @version 3.0.0
+ * @package WooCommerce\Abstracts
  * @category Abstract Class
  * @author   WooThemes
  */
@@ -20,7 +20,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 *
-	 * @param  string $key Key name.
+	 * @param string $key Key name.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
@@ -60,7 +60,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	/**
 	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
 	 *
-	 * @param  string $key Key name.
+	 * @param tring $key Key name.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -291,8 +291,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
 	 * @deprecated 3.0.0 Use wc_format_sale_price instead.
-	 * @param  string $from String or float to wrap with 'from' text
-	 * @param  mixed $to String or float to wrap with 'to' text
+	 * @param tring $from String or float to wrap with 'from' text
+	 * @param ixed $to String or float to wrap with 'to' text
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
@@ -313,8 +313,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @deprecated 3.0.0 Use wc_get_price_including_tax instead.
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @param nt $qty
+	 * @param tring $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
@@ -326,8 +326,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
 	 *
 	 * @deprecated 3.0.0 Use wc_get_price_to_display instead.
-	 * @param  string  $price to calculate, left blank to just use get_price()
-	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @param tring  $price to calculate, left blank to just use get_price()
+	 * @param nteger $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
 	 * @return string
 	 */
 	public function get_display_price( $price = '', $qty = 1 ) {
@@ -340,8 +340,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @deprecated 3.0.0 Use wc_get_price_excluding_tax instead.
-	 * @param  int $qty
-	 * @param  string $price to calculate, left blank to just use get_price()
+	 * @param nt $qty
+	 * @param tring $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
 	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
@@ -649,7 +649,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Sync product rating. Can be called statically.
 	 *
 	 * @deprecated 3.0.0
-	 * @param  int $post_id
+	 * @param nt $post_id
 	 */
 	public static function sync_average_rating( $post_id ) {
 		wc_deprecated_function( 'WC_Product::sync_average_rating', '3.0', 'WC_Comments::get_average_rating_for_product or leave to CRUD.' );
@@ -664,7 +664,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * Sync product rating count. Can be called statically.
 	 *
 	 * @deprecated 3.0.0
-	 * @param  int $post_id
+	 * @param nt $post_id
 	 */
 	public static function sync_rating_count( $post_id ) {
 		wc_deprecated_function( 'WC_Product::sync_rating_count', '3.0', 'WC_Comments::get_rating_counts_for_product or leave to CRUD.' );

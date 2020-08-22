@@ -52,9 +52,9 @@ class WC_Product_Factory {
 	/**
 	 * Gets a product classname and allows filtering. Returns WC_Product_Simple if the class does not exist.
 	 *
-	 * @since  3.0.0
-	 * @param  int    $product_id   Product ID.
-	 * @param  string $product_type Product type.
+	 * @since 3.0.0
+	 * @param int    $product_id   Product ID.
+	 * @param string $product_type Product type.
 	 * @return string
 	 */
 	public static function get_product_classname( $product_id, $product_type ) {
@@ -71,7 +71,7 @@ class WC_Product_Factory {
 	 * Get the product type for a product.
 	 *
 	 * @since 3.0.0
-	 * @param  int $product_id Product ID.
+	 * @param int $product_id Product ID.
 	 * @return string|false
 	 */
 	public static function get_product_type( $product_id ) {
@@ -87,7 +87,7 @@ class WC_Product_Factory {
 	/**
 	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class.
 	 *
-	 * @param  string $product_type Product type.
+	 * @param string $product_type Product type.
 	 * @return string|false
 	 */
 	public static function get_classname_from_product_type( $product_type ) {
@@ -97,8 +97,8 @@ class WC_Product_Factory {
 	/**
 	 * Get the product ID depending on what was passed.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
+	 * @since 3.0.0
+	 * @param WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
 	 * @return int|bool false on failure
 	 */
 	private function get_product_id( $product ) {

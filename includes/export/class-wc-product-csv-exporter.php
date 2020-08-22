@@ -85,7 +85,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return void
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
@@ -95,7 +95,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Return an array of columns to export.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return array
 	 */
 	public function get_default_column_names() {
@@ -258,7 +258,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return int
 	 */
 	protected function get_column_value_published( $product ) {
@@ -306,7 +306,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_category_ids( $product ) {
@@ -319,7 +319,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_tag_ids( $product ) {
@@ -332,7 +332,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_shipping_class_id( $product ) {
@@ -345,7 +345,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_images( $product ) {
@@ -368,7 +368,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param int[] $linked_products Array of linked product ids.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function prepare_linked_products_for_export( $linked_products ) {
@@ -390,7 +390,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_cross_sell_ids( $product ) {
@@ -402,7 +402,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_upsell_ids( $product ) {
@@ -414,7 +414,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_parent_id( $product ) {
@@ -434,7 +434,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_grouped_products( $product ) {
@@ -460,7 +460,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_download_limit( $product ) {
@@ -472,7 +472,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_download_expiry( $product ) {
@@ -484,7 +484,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_stock( $product ) {
@@ -505,7 +505,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_stock_status( $product ) {
@@ -523,7 +523,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_backorders( $product ) {
@@ -542,7 +542,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return int|string Empty string if value not set
 	 */
 	protected function get_column_value_low_stock_amount( $product ) {
@@ -554,7 +554,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_type( $product ) {
@@ -578,7 +578,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @param string $description Product description text to filter.
 	 *
-	 * @since  3.5.4
+	 * @since 3.5.4
 	 * @return string
 	 */
 	protected function filter_description_field( $description ) {

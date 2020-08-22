@@ -148,8 +148,8 @@ class WC_Admin_Status {
 	/**
 	 * Retrieve metadata from a file. Based on WP Core's get_file_data function.
 	 *
-	 * @since  2.1.1
-	 * @param  string $file Path to the file.
+	 * @since 2.1.1
+	 * @param string $file Path to the file.
 	 * @return string
 	 */
 	public static function get_file_version( $file ) {
@@ -192,7 +192,7 @@ class WC_Admin_Status {
 	/**
 	 * Scan the template files.
 	 *
-	 * @param  string $template_path Path to the template directory.
+	 * @param string $template_path Path to the template directory.
 	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
@@ -231,7 +231,7 @@ class WC_Admin_Status {
 	/**
 	 * Get latest version of a theme by slug.
 	 *
-	 * @param  object $theme WP_Theme object.
+	 * @param object $theme WP_Theme object.
 	 * @return string Version number if found.
 	 */
 	public static function get_latest_theme_version( $theme ) {

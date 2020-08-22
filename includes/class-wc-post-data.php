@@ -137,9 +137,9 @@ class WC_Post_Data {
 	/**
 	 * When editing a term, check for product attributes.
 	 *
-	 * @param  int    $term_id  Term ID.
-	 * @param  int    $tt_id    Term taxonomy ID.
-	 * @param  string $taxonomy Taxonomy slug.
+	 * @param int    $term_id  Term ID.
+	 * @param int    $tt_id    Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -152,9 +152,9 @@ class WC_Post_Data {
 	/**
 	 * When a term is edited, check for product attributes and update variations.
 	 *
-	 * @param  int    $term_id  Term ID.
-	 * @param  int    $tt_id    Term taxonomy ID.
-	 * @param  string $taxonomy Taxonomy slug.
+	 * @param int    $term_id  Term ID.
+	 * @param int    $tt_id    Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
 		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -181,11 +181,11 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null   $check      Whether to allow updating metadata for the given type.
-	 * @param  int    $object_id  Object ID.
-	 * @param  string $meta_key   Meta key.
-	 * @param  mixed  $meta_value Meta value. Must be serializable if non-scalar.
-	 * @param  mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
+	 * @param null   $check      Whether to allow updating metadata for the given type.
+	 * @param int    $object_id  Object ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value. Must be serializable if non-scalar.
+	 * @param mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
 	 * @return null|bool
 	 */
 	public static function update_order_item_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
@@ -205,11 +205,11 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null   $check      Whether to allow updating metadata for the given type.
-	 * @param  int    $object_id  Object ID.
-	 * @param  string $meta_key   Meta key.
-	 * @param  mixed  $meta_value Meta value. Must be serializable if non-scalar.
-	 * @param  mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
+	 * @param null   $check      Whether to allow updating metadata for the given type.
+	 * @param int    $object_id  Object ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value. Must be serializable if non-scalar.
+	 * @param mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
 	 * @return null|bool
 	 */
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
@@ -459,10 +459,10 @@ class WC_Post_Data {
 	/**
 	 * Flush meta cache for CRUD objects on direct update.
 	 *
-	 * @param  int    $meta_id    Meta ID.
-	 * @param  int    $object_id  Object ID.
-	 * @param  string $meta_key   Meta key.
-	 * @param  string $meta_value Meta value.
+	 * @param int    $meta_id    Meta ID.
+	 * @param int    $object_id  Object ID.
+	 * @param string $meta_key   Meta key.
+	 * @param string $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
@@ -492,18 +492,18 @@ class WC_Post_Data {
 	/**
 	 * When setting stock level, ensure the stock status is kept in sync.
 	 *
-	 * @param  int    $meta_id    Meta ID.
-	 * @param  int    $object_id  Object ID.
-	 * @param  string $meta_key   Meta key.
-	 * @param  mixed  $meta_value Meta value.
-	 * @deprecated    3.3
+	 * @param int    $meta_id    Meta ID.
+	 * @param int    $object_id  Object ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 * @deprecated 3.3
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {}
 
 	/**
 	 * Update changed downloads.
 	 *
-	 * @deprecated  3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
+	 * @deprecated 3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
 	 * @param int   $product_id   Product ID.
 	 * @param int   $variation_id Variation ID. Optional product variation identifier.
 	 * @param array $downloads    Newly set files.
@@ -515,7 +515,7 @@ class WC_Post_Data {
 	/**
 	 * Delete transients when terms are set.
 	 *
-	 * @deprecated   3.6
+	 * @deprecated 3.6
 	 * @param int    $object_id  Object ID.
 	 * @param mixed  $terms      An array of object terms.
 	 * @param array  $tt_ids     An array of term taxonomy IDs.

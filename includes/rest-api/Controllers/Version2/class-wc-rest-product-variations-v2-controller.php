@@ -5,7 +5,7 @@
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -133,8 +133,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Get object.
 	 *
-	 * @since  3.0.0
-	 * @param  int $id Object ID.
+	 * @since 3.0.0
+	 * @param int $id Object ID.
 	 * @return WC_Data
 	 */
 	protected function get_object( $id ) {
@@ -144,7 +144,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -165,9 +165,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Prepare a single variation output for response.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @since 3.0.0
+	 * @param C_Data         $object  Object data.
+	 * @param P_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -239,8 +239,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -254,8 +254,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Prepare a single variation for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param P_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -578,7 +578,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */

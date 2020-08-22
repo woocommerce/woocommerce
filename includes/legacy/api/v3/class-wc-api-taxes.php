@@ -6,8 +6,8 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    2.5.0
+ * @package WooCommerce\API
+ * @since 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -390,8 +390,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param  array $args
-	 * @param  bool  $count_only
+	 * @param array $args
+	 * @param ool  $count_only
 	 *
 	 * @return array
 	 */

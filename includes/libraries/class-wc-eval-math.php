@@ -105,7 +105,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		/**
 		 * Convert infix to postfix notation.
 		 *
-		 * @param  string $expr
+		 * @param string $expr
 		 *
 		 * @return array|string
 		 */
@@ -246,8 +246,8 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		/**
 		 * Evaluate postfix notation.
 		 *
-		 * @param  mixed $tokens
-		 * @param  array $vars
+		 * @param ixed $tokens
+		 * @param rray $vars
 		 *
 		 * @return mixed
 		 */
@@ -312,7 +312,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		/**
 		 * Trigger an error, but nicely, if need be.
 		 *
-		 * @param  string $msg
+		 * @param tring $msg
 		 *
 		 * @return bool
 		 */
@@ -370,7 +370,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		/**
 		 * Push value into stack.
 		 *
-		 * @param  mixed $val
+		 * @param ixed $val
 		 */
 		public function push( $val ) {
 			$this->stack[ $this->count ] = $val;
@@ -393,7 +393,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		/**
 		 * Get last value from stack.
 		 *
-		 * @param  int $n
+		 * @param nt $n
 		 *
 		 * @return mixed
 		 */

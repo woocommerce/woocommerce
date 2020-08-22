@@ -244,7 +244,7 @@ add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
 /**
  * Footer.
  *
- * @see  wc_print_js()
+ * @see wc_print_js()
  * @see woocommerce_demo_store()
  */
 add_action( 'wp_footer', 'wc_print_js', 25 );

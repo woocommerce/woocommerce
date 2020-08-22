@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Provides a Bank Transfer Payment Gateway. Based on code by Mike Pepper.
  *
- * @class       WC_Gateway_BACS
- * @extends     WC_Payment_Gateway
- * @version     2.1.0
- * @package     WooCommerce\Classes\Payment
+ * @class WC_Gateway_BACS
+ * @extends WC_Payment_Gateway
+ * @version 2.1.0
+ * @package WooCommerce\Classes\Payment
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
 

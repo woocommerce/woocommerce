@@ -2,8 +2,8 @@
 /**
  * Handles CSV export.
  *
- * @package  WooCommerce\Export
- * @version  3.1.0
+ * @package WooCommerce\Export
+ * @version 3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -141,7 +141,7 @@ abstract class WC_CSV_Exporter {
 	 * See if a column is to be exported or not.
 	 *
 	 * @since 3.1.0
-	 * @param  string $column_id ID of the column being exported.
+	 * @param string $column_id ID of the column being exported.
 	 * @return boolean
 	 */
 	public function is_column_exporting( $column_id ) {
@@ -208,7 +208,7 @@ abstract class WC_CSV_Exporter {
 	/**
 	 * Set filename to export to.
 	 *
-	 * @param  string $filename Filename to export to.
+	 * @param tring $filename Filename to export to.
 	 */
 	public function set_filename( $filename ) {
 		$this->filename = sanitize_file_name( str_replace( '.csv', '', $filename ) . '.csv' );
@@ -381,7 +381,7 @@ abstract class WC_CSV_Exporter {
 	 * Format and escape data ready for the CSV file.
 	 *
 	 * @since 3.1.0
-	 * @param  string $data Data to format.
+	 * @param tring $data Data to format.
 	 * @return string
 	 */
 	public function format_data( $data ) {
@@ -409,8 +409,8 @@ abstract class WC_CSV_Exporter {
 	 * Format term ids to names.
 	 *
 	 * @since 3.1.0
-	 * @param  array  $term_ids Term IDs to format.
-	 * @param  string $taxonomy Taxonomy name.
+	 * @param rray  $term_ids Term IDs to format.
+	 * @param tring $taxonomy Taxonomy name.
 	 * @return string
 	 */
 	public function format_term_ids( $term_ids, $taxonomy ) {
@@ -459,8 +459,8 @@ abstract class WC_CSV_Exporter {
 	 * Implode CSV cell values using commas by default, and wrapping values
 	 * which contain the separator.
 	 *
-	 * @since  3.2.0
-	 * @param  array $values Values to implode.
+	 * @since 3.2.0
+	 * @param rray $values Values to implode.
 	 * @return string
 	 */
 	protected function implode_values( $values ) {

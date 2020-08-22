@@ -57,7 +57,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Prefix for action and filter hooks on data.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	protected function get_hook_prefix() {
@@ -76,7 +76,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * If the stock level comes from another product ID.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return int
 	 */
 	public function get_stock_managed_by_id() {
@@ -129,7 +129,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns a single product attribute as a string.
 	 *
-	 * @param  string $attribute to get.
+	 * @param string $attribute to get.
 	 * @return string
 	 */
 	public function get_attribute( $attribute ) {
@@ -155,7 +155,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
-	 * @param  array|null $item_object item array If a cart or order item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
+	 * @param array|null $item_object item array If a cart or order item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
 	 * @return string
 	 */
 	public function get_permalink( $item_object = null ) {
@@ -206,7 +206,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get SKU (Stock-keeping unit) - product unique ID.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_sku( $context = 'view' ) {
@@ -222,7 +222,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the product's weight.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_weight( $context = 'view' ) {
@@ -238,7 +238,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the product length.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_length( $context = 'view' ) {
@@ -254,7 +254,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the product width.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_width( $context = 'view' ) {
@@ -270,7 +270,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the product height.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_height( $context = 'view' ) {
@@ -288,7 +288,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 *
 	 * Does not use get_prop so it can handle 'parent' Inheritance correctly.
 	 *
-	 * @param  string $context view, edit, or unfiltered.
+	 * @param string $context view, edit, or unfiltered.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -312,7 +312,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Return if product manage stock.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return boolean|string true, false, or parent.
 	 */
 	public function get_manage_stock( $context = 'view' ) {
@@ -328,7 +328,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns number of items available for sale.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int|null
 	 */
 	public function get_stock_quantity( $context = 'view' ) {
@@ -344,7 +344,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get backorders.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @since 3.0.0
 	 * @return string yes no or notify
 	 */
@@ -362,7 +362,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_image_id( $context = 'view' ) {
@@ -379,7 +379,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get purchase note.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_purchase_note( $context = 'view' ) {
@@ -396,7 +396,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get shipping class ID.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_shipping_class_id( $context = 'view' ) {
@@ -412,7 +412,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get catalog visibility.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_catalog_visibility( $context = 'view' ) {
@@ -495,7 +495,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Get the parent data array for this variation.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_parent_data() {
@@ -587,8 +587,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Delete variation, set the ID to 0, and return result.
 	 *
-	 * @since  4.4.0
-	 * @param  bool $force_delete Should the variation be deleted permanently.
+	 * @since 4.4.0
+	 * @param bool $force_delete Should the variation be deleted permanently.
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {

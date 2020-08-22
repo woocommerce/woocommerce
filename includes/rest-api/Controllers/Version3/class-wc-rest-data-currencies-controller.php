@@ -5,7 +5,7 @@
  * Handles requests to the /data/currencies endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -76,8 +76,8 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Get currency information.
 	 *
-	 * @param  string          $code    Currency code.
-	 * @param  WP_REST_Request $request Request data.
+	 * @param string          $code    Currency code.
+	 * @param P_REST_Request $request Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_currency( $code = false, $request ) {
@@ -100,7 +100,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of currencies.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -117,7 +117,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return information for a specific currency.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -131,7 +131,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return information for the current site currency.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_current_item( $request ) {

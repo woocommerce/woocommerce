@@ -2,9 +2,9 @@
 /**
  * Provides logging capabilities for debugging purposes.
  *
- * @class          WC_Logger
- * @version        2.0.0
- * @package        WooCommerce\Classes
+ * @class WC_Logger
+ * @version 2.0.0
+ * @package WooCommerce\Classes
  */
 
 use Automattic\Jetpack\Constants;

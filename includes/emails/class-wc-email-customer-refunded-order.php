@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 	 *
 	 * Order refunded emails are sent to the customer when the order is marked refunded.
 	 *
-	 * @class    WC_Email_Customer_Refunded_Order
-	 * @version  3.5.0
-	 * @package  WooCommerce\Classes\Emails
-	 * @extends  WC_Email
+	 * @class WC_Email_Customer_Refunded_Order
+	 * @version 3.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Customer_Refunded_Order extends WC_Email {
 
@@ -64,7 +64,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 * Get email subject.
 		 *
 		 * @param bool $partial Whether it is a partial refund or a full refund.
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject( $partial = false ) {
@@ -79,7 +79,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 * Get email heading.
 		 *
 		 * @param bool $partial Whether it is a partial refund or a full refund.
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading( $partial = false ) {

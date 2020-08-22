@@ -4,7 +4,7 @@
  *
  * Admin Settings API used by Integrations, Shipping Methods, and Payment Gateways.
  *
- * @package  WooCommerce\Abstracts
+ * @package WooCommerce\Abstracts
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -90,7 +90,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Add an array of fields to be displayed on the gateway's settings screen.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 */
 	public function init_form_fields() {}
 
@@ -107,7 +107,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get a fields type. Defaults to "text" if not set.
 	 *
-	 * @param  array $field Field key.
+	 * @param array $field Field key.
 	 * @return string
 	 */
 	public function get_field_type( $field ) {
@@ -117,7 +117,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get a fields default value. Defaults to "" if not set.
 	 *
-	 * @param  array $field Field key.
+	 * @param array $field Field key.
 	 * @return string
 	 */
 	public function get_field_default( $field ) {
@@ -273,8 +273,8 @@ abstract class WC_Settings_API {
 	 *
 	 * Gets an option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
-	 * @param  string $key Option key.
-	 * @param  mixed  $empty_value Value when empty.
+	 * @param string $key Option key.
+	 * @param mixed  $empty_value Value when empty.
 	 * @return string The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
@@ -298,7 +298,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Prefix key for settings.
 	 *
-	 * @param  string $key Field key.
+	 * @param string $key Field key.
 	 * @return string
 	 */
 	public function get_field_key( $key ) {
@@ -313,8 +313,8 @@ abstract class WC_Settings_API {
 	 * @param array $form_fields (default: array()) Array of form fields.
 	 * @param bool  $echo Echo or return.
 	 * @return string the html for the settings
-	 * @since  1.0.0
-	 * @uses   method_exists()
+	 * @since 1.0.0
+	 * @uses method_exists()
 	 */
 	public function generate_settings_html( $form_fields = array(), $echo = true ) {
 		if ( empty( $form_fields ) ) {
@@ -342,7 +342,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get HTML for tooltips.
 	 *
-	 * @param  array $data Data for the tooltip.
+	 * @param array $data Data for the tooltip.
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
@@ -360,7 +360,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get HTML for descriptions.
 	 *
-	 * @param  array $data Data for the description.
+	 * @param array $data Data for the description.
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
@@ -380,7 +380,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Get custom attributes.
 	 *
-	 * @param  array $data Field data.
+	 * @param array $data Field data.
 	 * @return string
 	 */
 	public function get_custom_attribute_html( $data ) {
@@ -400,7 +400,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_text_html( $key, $data ) {
@@ -443,7 +443,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_price_html( $key, $data ) {
@@ -486,7 +486,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_decimal_html( $key, $data ) {
@@ -529,7 +529,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_password_html( $key, $data ) {
@@ -542,7 +542,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_color_html( $key, $data ) {
@@ -586,7 +586,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_textarea_html( $key, $data ) {
@@ -629,7 +629,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_checkbox_html( $key, $data ) {
@@ -677,7 +677,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_select_html( $key, $data ) {
@@ -725,7 +725,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_multiselect_html( $key, $data ) {
@@ -786,7 +786,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param string $key Field key.
 	 * @param array  $data Field data.
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @return string
 	 */
 	public function generate_title_html( $key, $data ) {
@@ -816,8 +816,8 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_text_field( $key, $value ) {
@@ -830,8 +830,8 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_price_field( $key, $value ) {
@@ -844,8 +844,8 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_decimal_field( $key, $value ) {
@@ -856,8 +856,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Password Field. No input sanitization is used to avoid corrupting passwords.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_password_field( $key, $value ) {
@@ -868,8 +868,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_textarea_field( $key, $value ) {
@@ -895,8 +895,8 @@ abstract class WC_Settings_API {
 	 *
 	 * If not set, return "no", otherwise return "yes".
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_checkbox_field( $key, $value ) {
@@ -906,8 +906,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Select Field.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_select_field( $key, $value ) {
@@ -918,8 +918,8 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Multiselect Field.
 	 *
-	 * @param  string $key Field key.
-	 * @param  string $value Posted Value.
+	 * @param string $key Field key.
+	 * @param string $value Posted Value.
 	 * @return string|array
 	 */
 	public function validate_multiselect_field( $key, $value ) {
@@ -940,7 +940,7 @@ abstract class WC_Settings_API {
 	 * Format settings if needed.
 	 *
 	 * @deprecated 2.6.0 Unused.
-	 * @param  array $value Value to format.
+	 * @param array $value Value to format.
 	 * @return array
 	 */
 	public function format_settings( $value ) {

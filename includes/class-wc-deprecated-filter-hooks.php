@@ -3,7 +3,7 @@
  * Deprecated filter hooks
  *
  * @package WooCommerce\Abstracts
- * @since   3.0.0
+ * @since 3.0.0
  * @version 3.3.0
  */
 
@@ -117,10 +117,10 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	/**
 	 * If the old hook is in-use, trigger it.
 	 *
-	 * @param  string $new_hook          New hook name.
-	 * @param  string $old_hook          Old hook name.
-	 * @param  array  $new_callback_args New callback args.
-	 * @param  mixed  $return_value      Returned value.
+	 * @param string $new_hook          New hook name.
+	 * @param string $old_hook          Old hook name.
+	 * @param array  $new_callback_args New callback args.
+	 * @param mixed  $return_value      Returned value.
 	 * @return mixed
 	 */
 	public function handle_deprecated_hook( $new_hook, $old_hook, $new_callback_args, $return_value ) {
@@ -134,8 +134,8 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	/**
 	 * Fire off a legacy hook with it's args.
 	 *
-	 * @param  string $old_hook          Old hook name.
-	 * @param  array  $new_callback_args New callback args.
+	 * @param string $old_hook          Old hook name.
+	 * @param array  $new_callback_args New callback args.
 	 * @return mixed
 	 */
 	protected function trigger_hook( $old_hook, $new_callback_args ) {

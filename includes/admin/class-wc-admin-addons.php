@@ -2,8 +2,8 @@
 /**
  * Addons Page
  *
- * @package  WooCommerce\Admin
- * @version  2.5.0
+ * @package WooCommerce\Admin
+ * @version 2.5.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -43,9 +43,9 @@ class WC_Admin_Addons {
 	/**
 	 * Build url parameter string
 	 *
-	 * @param  string $category Addon (sub) category.
-	 * @param  string $term     Search terms.
-	 * @param  string $country  Store country.
+	 * @param string $category Addon (sub) category.
+	 * @param string $term     Search terms.
+	 * @param string $country  Store country.
 	 *
 	 * @return string url parameter string
 	 */
@@ -63,9 +63,9 @@ class WC_Admin_Addons {
 	/**
 	 * Call API to get extensions
 	 *
-	 * @param  string $category Addon (sub) category.
-	 * @param  string $term     Search terms.
-	 * @param  string $country  Store country.
+	 * @param string $category Addon (sub) category.
+	 * @param string $term     Search terms.
+	 * @param string $country  Store country.
 	 *
 	 * @return array of extensions
 	 */
@@ -104,7 +104,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param  string $section_id Required section ID.
+	 * @param string $section_id Required section ID.
 	 *
 	 * @return object|bool
 	 */
@@ -119,7 +119,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param  string $section_id Required section ID.
+	 * @param string $section_id Required section ID.
 	 *
 	 * @return array
 	 */

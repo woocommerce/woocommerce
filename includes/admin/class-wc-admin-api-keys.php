@@ -26,7 +26,7 @@ class WC_Admin_API_Keys {
 	 * Check if should allow save settings.
 	 * This prevents "Your settings have been saved." notices on the table list.
 	 *
-	 * @param  bool $allow If allow save settings.
+	 * @param bool $allow If allow save settings.
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
@@ -124,7 +124,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Get key data.
 	 *
-	 * @param  int $key_id API Key ID.
+	 * @param int $key_id API Key ID.
 	 * @return array
 	 */
 	private static function get_key_data( $key_id ) {
@@ -259,7 +259,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Remove key.
 	 *
-	 * @param  int $key_id API Key ID.
+	 * @param int $key_id API Key ID.
 	 * @return bool
 	 */
 	private function remove_key( $key_id ) {

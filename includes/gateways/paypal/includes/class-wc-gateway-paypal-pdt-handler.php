@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Validate a PDT transaction to ensure its authentic.
 	 *
-	 * @param  string $transaction TX ID.
+	 * @param string $transaction TX ID.
 	 * @return bool|array False or result array if successful and valid.
 	 */
 	protected function validate_transaction( $transaction ) {

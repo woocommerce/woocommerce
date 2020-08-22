@@ -9,8 +9,8 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    2.1
+ * @package WooCommerce\API
+ * @since 2.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -378,8 +378,8 @@ class WC_API_Server {
 	/**
 	 * urldecode deep.
 	 *
-	 * @since  2.2
-	 * @param  string|array $value Data to decode with urldecode.
+	 * @since 2.2
+	 * @param string|array $value Data to decode with urldecode.
 	 * @return string|array        Decoded data.
 	 */
 	protected function urldecode_deep( $value ) {

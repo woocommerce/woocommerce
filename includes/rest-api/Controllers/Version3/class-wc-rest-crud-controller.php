@@ -2,9 +2,9 @@
 /**
  * Abstract Rest CRUD Controller Class
  *
- * @class    WC_REST_CRUD_Controller
+ * @class WC_REST_CRUD_Controller
  * @package Automattic/WooCommerce/RestApi
- * @version  3.0.0
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,7 +35,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get object.
 	 *
-	 * @param  int $id Object ID.
+	 * @param int $id Object ID.
 	 * @return object WC_Data object or WP_Error object.
 	 */
 	protected function get_object( $id ) {
@@ -46,7 +46,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -62,7 +62,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -78,7 +78,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Check if a given request has access to delete an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -94,7 +94,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get object permalink.
 	 *
-	 * @param  object $object Object.
+	 * @param bject $object Object.
 	 * @return string
 	 */
 	protected function get_permalink( $object ) {
@@ -104,9 +104,9 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepares the object for the REST response.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @since 3.0.0
+	 * @param C_Data         $object  Object data.
+	 * @param P_REST_Request $request Request object.
 	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
@@ -117,9 +117,9 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepares one object for create or update operation.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Request object.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -153,9 +153,9 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Save an object data.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request  Full details about the request.
-	 * @param  bool            $creating If is creating a new object.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request  Full details about the request.
+	 * @param ool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
@@ -266,8 +266,8 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare objects query.
 	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @since 3.0.0
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -319,8 +319,8 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get objects.
 	 *
-	 * @since  3.0.0
-	 * @param  array $query_args Query args.
+	 * @since 3.0.0
+	 * @param rray $query_args Query args.
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {

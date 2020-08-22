@@ -34,7 +34,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	/**
 	 * Count products after other filters have occurred by adjusting the main query.
 	 *
-	 * @param  int $rating Rating.
+	 * @param int $rating Rating.
 	 * @return int
 	 */
 	protected function get_filtered_product_count( $rating ) {

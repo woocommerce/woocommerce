@@ -5,7 +5,7 @@
  * Handles requests to the /data/continents endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -69,9 +69,9 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of countries and states for a given continent.
 	 *
-	 * @since  3.5.0
-	 * @param  string          $continent_code Continent code.
-	 * @param  WP_REST_Request $request        Request data.
+	 * @since 3.5.0
+	 * @param string          $continent_code Continent code.
+	 * @param P_REST_Request $request        Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_continent( $continent_code = false, $request ) {
@@ -155,8 +155,8 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of states for all continents.
 	 *
-	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.5.0
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -175,8 +175,8 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of locations for a given continent.
 	 *
-	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.5.0
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -190,7 +190,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Prepare the data object for response.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @param object          $item Data object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -236,7 +236,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Get the location schema, conforming to JSON Schema.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return array
 	 */
 	public function get_item_schema() {

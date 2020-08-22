@@ -36,7 +36,7 @@ class WC_Autoloader {
 	/**
 	 * Take a class name and turn it into a file name.
 	 *
-	 * @param  string $class Class name.
+	 * @param string $class Class name.
 	 * @return string
 	 */
 	private function get_file_name_from_class( $class ) {
@@ -46,7 +46,7 @@ class WC_Autoloader {
 	/**
 	 * Include a class file.
 	 *
-	 * @param  string $path File path.
+	 * @param string $path File path.
 	 * @return bool Successful or not.
 	 */
 	private function load_file( $path ) {

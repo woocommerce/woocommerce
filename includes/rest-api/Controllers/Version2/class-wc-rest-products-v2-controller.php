@@ -5,7 +5,7 @@
  * Handles requests to the /products endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -141,7 +141,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param int $id Object ID.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return WC_Data
 	 */
 	protected function get_object( $id ) {
@@ -154,7 +154,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param WC_Data         $object  Object data.
 	 * @param WP_REST_Request $request Request object.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -194,7 +194,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -438,7 +438,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string $name Taxonomy name.
 	 *
 	 * @deprecated 3.0.0
-	 * @return     string
+	 * @return string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
 		$tax    = get_taxonomy( $name );
@@ -453,7 +453,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string     $slug    Taxonomy name.
 	 * @param WC_Product $product Product data.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_name( $slug, $product ) {
@@ -1270,7 +1270,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param WC_Product      $product Product instance.
 	 * @param WP_REST_Request $request Request data.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return WC_Product
 	 */
 	protected function save_default_attributes( $product, $request ) {

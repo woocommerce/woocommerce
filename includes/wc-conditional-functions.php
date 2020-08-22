@@ -4,8 +4,8 @@
  *
  * Functions for determining the current query/page.
  *
- * @package     WooCommerce\Functions
- * @version     2.3.0
+ * @package WooCommerce\Functions
+ * @version 2.3.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -52,7 +52,7 @@ if ( ! function_exists( 'is_product_category' ) ) {
 	/**
 	 * Is_product_category - Returns true when viewing a product category.
 	 *
-	 * @param  string $term (default: '') The term slug your checking for. Leave blank to return true on any.
+	 * @param string $term (default: '') The term slug your checking for. Leave blank to return true on any.
 	 * @return bool
 	 */
 	function is_product_category( $term = '' ) {
@@ -65,7 +65,7 @@ if ( ! function_exists( 'is_product_tag' ) ) {
 	/**
 	 * Is_product_tag - Returns true when viewing a product tag.
 	 *
-	 * @param  string $term (default: '') The term slug your checking for. Leave blank to return true on any.
+	 * @param string $term (default: '') The term slug your checking for. Leave blank to return true on any.
 	 * @return bool
 	 */
 	function is_product_tag( $term = '' ) {
@@ -297,8 +297,8 @@ if ( ! function_exists( 'taxonomy_is_product_attribute' ) ) {
 	/**
 	 * Returns true when the passed taxonomy name is a product attribute.
 	 *
-	 * @uses   $wc_product_attributes global which stores taxonomy names upon registration
-	 * @param  string $name of the attribute.
+	 * @uses $wc_product_attributes global which stores taxonomy names upon registration
+	 * @param string $name of the attribute.
 	 * @return bool
 	 */
 	function taxonomy_is_product_attribute( $name ) {
@@ -313,9 +313,9 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	/**
 	 * Returns true when the passed meta name is a product attribute.
 	 *
-	 * @param  string $name of the attribute.
-	 * @param  string $value of the attribute.
-	 * @param  int    $product_id to check for attribute.
+	 * @param string $name of the attribute.
+	 * @param string $value of the attribute.
+	 * @param int    $product_id to check for attribute.
 	 * @return bool
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {
@@ -371,7 +371,7 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
  * Simple check for validating a URL, it must start with http:// or https://.
  * and pass FILTER_VALIDATE_URL validation.
  *
- * @param  string $url to check.
+ * @param string $url to check.
  * @return bool
  */
 function wc_is_valid_url( $url ) {
@@ -392,7 +392,7 @@ function wc_is_valid_url( $url ) {
 /**
  * Check if the home URL is https. If it is, we don't need to do things such as 'force ssl'.
  *
- * @since  2.4.13
+ * @since 2.4.13
  * @return bool
  */
 function wc_site_is_https() {
@@ -402,7 +402,7 @@ function wc_site_is_https() {
 /**
  * Check if the checkout is configured for https. Look at options, WP HTTPS plugin, or the permalink itself.
  *
- * @since  2.5.0
+ * @since 2.5.0
  * @return bool
  */
 function wc_checkout_is_https() {
@@ -412,7 +412,7 @@ function wc_checkout_is_https() {
 /**
  * Checks whether the content passed contains a specific short code.
  *
- * @param  string $tag Shortcode tag to check.
+ * @param string $tag Shortcode tag to check.
  * @return bool
  */
 function wc_post_content_has_shortcode( $tag = '' ) {

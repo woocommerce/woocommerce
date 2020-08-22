@@ -55,9 +55,9 @@ class WC_Data_Store_WP {
 	/**
 	 * Get and store terms from a taxonomy.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data|integer $object WC_Data object or object ID.
-	 * @param  string          $taxonomy Taxonomy name e.g. product_cat.
+	 * @since 3.0.0
+	 * @param WC_Data|integer $object WC_Data object or object ID.
+	 * @param tring          $taxonomy Taxonomy name e.g. product_cat.
 	 * @return array of terms
 	 */
 	protected function get_term_ids( $object, $taxonomy ) {
@@ -76,8 +76,8 @@ class WC_Data_Store_WP {
 	/**
 	 * Returns an array of meta for an object.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data object.
+	 * @since 3.0.0
+	 * @param C_Data $object WC_Data object.
 	 * @return array
 	 */
 	public function read_meta( &$object ) {
@@ -103,9 +103,9 @@ class WC_Data_Store_WP {
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing at least ->id).
+	 * @since 3.0.0
+	 * @param C_Data  $object WC_Data object.
+	 * @param tdClass $meta (containing at least ->id).
 	 */
 	public function delete_meta( &$object, $meta ) {
 		delete_metadata_by_mid( $this->meta_type, $meta->id );
@@ -114,9 +114,9 @@ class WC_Data_Store_WP {
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @since 3.0.0
+	 * @param C_Data  $object WC_Data object.
+	 * @param tdClass $meta (containing ->key and ->value).
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
@@ -126,9 +126,9 @@ class WC_Data_Store_WP {
 	/**
 	 * Update meta.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 * @since 3.0.0
+	 * @param C_Data  $object WC_Data object.
+	 * @param tdClass $meta (containing ->id, ->key and ->value).
 	 */
 	public function update_meta( &$object, $meta ) {
 		update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
@@ -137,7 +137,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Table structure is slightly different between meta types, this function will return what we need to know.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */
 	protected function get_db_info() {
@@ -198,9 +198,9 @@ class WC_Data_Store_WP {
 	 * Gets a list of props and meta keys that need updated based on change state
 	 * or if they are present in the database or not.
 	 *
-	 * @param  WC_Data $object              The WP_Data object (WC_Coupon for coupons, etc).
-	 * @param  array   $meta_key_to_props   A mapping of meta keys => prop names.
-	 * @param  string  $meta_type           The internal WP meta type (post, user, etc).
+	 * @param C_Data $object              The WP_Data object (WC_Coupon for coupons, etc).
+	 * @param rray   $meta_key_to_props   A mapping of meta keys => prop names.
+	 * @param tring  $meta_type           The internal WP meta type (post, user, etc).
 	 * @return array                        A mapping of meta keys => prop names, filtered by ones that should be updated.
 	 */
 	protected function get_props_to_update( $object, $meta_key_to_props, $meta_type = 'post' ) {

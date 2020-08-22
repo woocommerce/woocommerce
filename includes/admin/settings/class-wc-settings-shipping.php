@@ -2,8 +2,8 @@
 /**
  * WooCommerce Shipping Settings
  *
- * @package     WooCommerce\Admin
- * @version     2.6.0
+ * @package WooCommerce\Admin
+ * @version 2.6.0
  */
 
 use Automattic\Jetpack\Constants;

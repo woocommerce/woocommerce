@@ -21,7 +21,7 @@ class WC_Helper_Settings {
 	 * Registers some example setting groups, including invalid ones that should not show up in JSON responses.
 	 *
 	 * @since 3.0.0
-	 * @param  array $groups
+	 * @param array $groups
 	 * @return array
 	 */
 	public static function register_groups( $groups ) {
@@ -55,7 +55,7 @@ class WC_Helper_Settings {
 	 * Registers some example settings.
 	 *
 	 * @since 3.0.0
-	 * @param  array $settings
+	 * @param rray $settings
 	 * @return array
 	 */
 	public static function register_test_settings( $settings ) {

@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -220,7 +220,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Only return writable props from schema.
-	 * @param  array $schema
+	 * @param array $schema
 	 * @return bool
 	 */
 	protected function filter_writable_props( $schema ) {

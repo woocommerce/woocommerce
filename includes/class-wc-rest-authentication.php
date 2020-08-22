@@ -2,8 +2,8 @@
 /**
  * REST API Authentication
  *
- * @package  WooCommerce\API
- * @since    2.6.0
+ * @package WooCommerce\API
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -393,9 +393,9 @@ class WC_REST_Authentication {
 	/**
 	 * Creates an array of urlencoded strings out of each array key/value pairs.
 	 *
-	 * @param  array  $params       Array of parameters to convert.
-	 * @param  array  $query_params Array to extend.
-	 * @param  string $key          Optional Array key to append.
+	 * @param array  $params       Array of parameters to convert.
+	 * @param array  $query_params Array to extend.
+	 * @param string $key          Optional Array key to append.
 	 * @return string               Array of urlencoded strings.
 	 */
 	private function join_with_equals_sign( $params, $query_params = array(), $key = '' ) {

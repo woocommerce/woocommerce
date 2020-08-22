@@ -2,8 +2,8 @@
 /**
  * WooCommerce Importer Interface
  *
- * @package  WooCommerce\Interface
- * @version  3.1.0
+ * @package WooCommerce\Interface
+ * @version 3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

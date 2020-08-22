@@ -2,8 +2,8 @@
 /**
  * WooCommerce Admin Functions
  *
- * @package  WooCommerce\Admin\Functions
- * @version  2.4.0
+ * @package WooCommerce\Admin\Functions
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -2,8 +2,8 @@
 /**
  * WooCommerce Admin Settings Class
  *
- * @package  WooCommerce\Admin
- * @version  3.4.0
+ * @package WooCommerce\Admin
+ * @version 3.4.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -687,7 +687,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * given form field. Plugins can call this when implementing their own custom
 		 * settings types.
 		 *
-		 * @param  array $value The form field value array.
+		 * @param array $value The form field value array.
 		 * @return array The description and tip as a 2 element array.
 		 */
 		public static function get_field_description( $value ) {

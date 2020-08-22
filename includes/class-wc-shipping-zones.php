@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.3.0
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -119,9 +119,9 @@ class WC_Shipping_Zones {
 	/**
 	 * Find a matching zone for a given package.
 	 *
-	 * @since  2.6.0
-	 * @uses   wc_make_numeric_postcode()
-	 * @param  array $package Shipping package.
+	 * @since 2.6.0
+	 * @uses wc_make_numeric_postcode()
+	 * @param array $package Shipping package.
 	 * @return WC_Shipping_Zone
 	 */
 	public static function get_zone_matching_package( $package ) {

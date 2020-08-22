@@ -18,10 +18,10 @@ if ( class_exists( 'WC_Email', false ) ) {
  *
  * WooCommerce Email Class which is extended by specific email template classes to add emails to WooCommerce
  *
- * @class       WC_Email
- * @version     2.5.0
- * @package     WooCommerce\Classes\Emails
- * @extends     WC_Settings_API
+ * @class WC_Email
+ * @version 2.5.0
+ * @package WooCommerce\Classes\Emails
+ * @extends WC_Settings_API
  */
 class WC_Email extends WC_Settings_API {
 
@@ -257,7 +257,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Handle multipart mail.
 	 *
-	 * @param  PHPMailer $mailer PHPMailer object.
+	 * @param PHPMailer $mailer PHPMailer object.
 	 * @return PHPMailer
 	 */
 	public function handle_multipart( $mailer ) {
@@ -331,7 +331,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email subject.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	public function get_default_subject() {
@@ -341,7 +341,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email heading.
 	 *
-	 * @since  3.1.0
+	 * @since 3.1.0
 	 * @return string
 	 */
 	public function get_default_heading() {
@@ -746,7 +746,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get template.
 	 *
-	 * @param  string $type Template type. Can be either 'template_html' or 'template_plain'.
+	 * @param tring $type Template type. Can be either 'template_html' or 'template_plain'.
 	 * @return string
 	 */
 	public function get_template( $type ) {
@@ -794,7 +794,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get the template file in the current theme.
 	 *
-	 * @param  string $template Template name.
+	 * @param tring $template Template name.
 	 *
 	 * @return string
 	 */

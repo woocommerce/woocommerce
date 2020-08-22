@@ -3,7 +3,7 @@
  * Tests for the Customers REST API.
  *
  * @package WooCommerce\Tests\API
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 /**

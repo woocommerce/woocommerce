@@ -56,9 +56,9 @@ class WC_Comments {
 	/**
 	 * See if comments are open.
 	 *
-	 * @since  3.1.0
-	 * @param  bool $open    Whether the current post is open for comments.
-	 * @param  int  $post_id Post ID.
+	 * @since 3.1.0
+	 * @param bool $open    Whether the current post is open for comments.
+	 * @param int  $post_id Post ID.
 	 * @return bool
 	 */
 	public static function comments_open( $open, $post_id ) {
@@ -77,7 +77,7 @@ class WC_Comments {
 	 *
 	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments'), 10, 1 );
 	 *
-	 * @param  array $clauses A compacted array of comment query clauses.
+	 * @param array $clauses A compacted array of comment query clauses.
 	 * @return array
 	 */
 	public static function exclude_order_comments( $clauses ) {
@@ -98,7 +98,7 @@ class WC_Comments {
 	/**
 	 * Exclude order comments from queries and RSS.
 	 *
-	 * @param  string $where The WHERE clause of the query.
+	 * @param string $where The WHERE clause of the query.
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_where( $where ) {
@@ -108,8 +108,8 @@ class WC_Comments {
 	/**
 	 * Exclude webhook comments from queries and RSS.
 	 *
-	 * @since  2.2
-	 * @param  array $clauses A compacted array of comment query clauses.
+	 * @since 2.2
+	 * @param array $clauses A compacted array of comment query clauses.
 	 * @return array
 	 */
 	public static function exclude_webhook_comments( $clauses ) {
@@ -130,8 +130,8 @@ class WC_Comments {
 	/**
 	 * Exclude webhook comments from queries and RSS.
 	 *
-	 * @since  2.1
-	 * @param  string $where The WHERE clause of the query.
+	 * @since 2.1
+	 * @param string $where The WHERE clause of the query.
 	 * @return string
 	 */
 	public static function exclude_webhook_comments_from_feed_where( $where ) {
@@ -141,7 +141,7 @@ class WC_Comments {
 	/**
 	 * Validate the comment ratings.
 	 *
-	 * @param  array $comment_data Comment data.
+	 * @param array $comment_data Comment data.
 	 * @return array
 	 */
 	public static function check_comment_rating( $comment_data ) {
@@ -217,9 +217,9 @@ class WC_Comments {
 	/**
 	 * Remove order notes and webhook delivery logs from wp_count_comments().
 	 *
-	 * @since  2.2
-	 * @param  object $stats   Comment stats.
-	 * @param  int    $post_id Post ID.
+	 * @since 2.2
+	 * @param object $stats   Comment stats.
+	 * @param int    $post_id Post ID.
 	 * @return object
 	 */
 	public static function wp_count_comments( $stats, $post_id ) {
@@ -282,8 +282,8 @@ class WC_Comments {
 	/**
 	 * Make sure WP displays avatars for comments with the `review` type.
 	 *
-	 * @since  2.3
-	 * @param  array $comment_types Comment types.
+	 * @since 2.3
+	 * @param array $comment_types Comment types.
 	 * @return array
 	 */
 	public static function add_avatar_for_review_comment_type( $comment_types ) {

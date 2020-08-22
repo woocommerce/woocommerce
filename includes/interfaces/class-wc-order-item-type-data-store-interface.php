@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by order item store classes.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 interface WC_Order_Item_Type_Data_Store_Interface {
 	/**

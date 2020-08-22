@@ -93,7 +93,7 @@ class WC_Template_Loader {
 	/**
 	 * Get the default filename for a template.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
@@ -118,8 +118,8 @@ class WC_Template_Loader {
 	/**
 	 * Get an array of filenames to search for a given template.
 	 *
-	 * @since  3.0.0
-	 * @param  string $default_file The default file name.
+	 * @since 3.0.0
+	 * @param string $default_file The default file name.
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {

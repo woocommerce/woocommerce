@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Payment Token Data Store: Custom Table.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment_Token_Data_Store_Interface, WC_Object_Data_Store_Interface {
 

@@ -2,8 +2,8 @@
 /**
  * Webhook Data Store
  *
- * @version  3.3.0
- * @package  WooCommerce\Classes\Data_Store
+ * @version 3.3.0
+ * @package WooCommerce\Classes\Data_Store
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,8 +67,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Read a webhook from the database.
 	 *
-	 * @since  3.3.0
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @since 3.3.0
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @throws Exception When webhook is invalid.
 	 */
 	public function read( &$webhook ) {
@@ -192,8 +192,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get API version number.
 	 *
-	 * @since  3.3.0
-	 * @param  string $api_version REST API version.
+	 * @since 3.3.0
+	 * @param tring $api_version REST API version.
 	 * @return int
 	 */
 	public function get_api_version_number( $api_version ) {
@@ -203,9 +203,9 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get webhooks IDs from the database.
 	 *
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 * @throws InvalidArgumentException If a $status value is passed in that is not in the known wc_get_webhook_statuses() keys.
-	 * @param  string $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
+	 * @param tring $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
 	 * @return int[]
 	 */
 	public function get_webhooks_ids( $status = '' ) {
@@ -232,7 +232,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Search webhooks.
 	 *
-	 * @param  array $args Search arguments.
+	 * @param rray $args Search arguments.
 	 * @return array|object
 	 */
 	public function search_webhooks( $args ) {
@@ -402,9 +402,9 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Check if a given string is in known statuses, based on return value of @see wc_get_webhook_statuses().
 	 *
-	 * @since  3.6.0
+	 * @since 3.6.0
 	 * @throws InvalidArgumentException If $status is not empty and not in the known wc_get_webhook_statuses() keys.
-	 * @param  string $status Status to check.
+	 * @param tring $status Status to check.
 	 */
 	private function validate_status( $status ) {
 		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
@@ -415,8 +415,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	/**
 	 * Get the transient key used to cache a set of webhook IDs, optionally filtered by status.
 	 *
-	 * @since  3.6.0
-	 * @param  string $status Optional - status of cache key.
+	 * @since 3.6.0
+	 * @param tring $status Optional - status of cache key.
 	 * @return string
 	 */
 	private function get_transient_key( $status = '' ) {

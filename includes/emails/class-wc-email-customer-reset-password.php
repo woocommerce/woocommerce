@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 	 *
 	 * An email sent to the customer when they reset their password.
 	 *
-	 * @class       WC_Email_Customer_Reset_Password
-	 * @version     3.5.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_Customer_Reset_Password
+	 * @version 3.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Customer_Reset_Password extends WC_Email {
 
@@ -75,7 +75,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		/**
 		 * Get email subject.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -85,7 +85,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading() {

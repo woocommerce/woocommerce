@@ -4,9 +4,9 @@
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
- * @package     WooCommerce\Classes
- * @deprecated  3.0.0 wc_display_item_meta function is used instead.
- * @version     2.4
+ * @package WooCommerce\Classes
+ * @deprecated 3.0.0 wc_display_item_meta function is used instead.
+ * @version 2.4
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -70,7 +70,7 @@ class WC_Order_Item_Meta {
 	 * @param bool   $flat       Flat (default: false).
 	 * @param bool   $return     Return (default: false).
 	 * @param string $hideprefix Hide prefix (default: _).
-	 * @param  string $delimiter Delimiter used to separate items when $flat is true.
+	 * @param string $delimiter Delimiter used to separate items when $flat is true.
 	 * @return string|void
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_', $delimiter = ", \n" ) {

@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 

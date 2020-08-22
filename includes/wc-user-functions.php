@@ -32,10 +32,10 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
-	 * @param  string $email    Customer email.
-	 * @param  string $username Customer username.
-	 * @param  string $password Customer password.
-	 * @param  array  $args     List of arguments to pass to `wp_insert_user()`.
+	 * @param string $email    Customer email.
+	 * @param string $username Customer username.
+	 * @param string $password Customer password.
+	 * @param array  $args     List of arguments to pass to `wp_insert_user()`.
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
 	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
@@ -227,7 +227,7 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 /**
  * Get past orders (by email) and update them.
  *
- * @param  int $customer_id Customer ID.
+ * @param int $customer_id Customer ID.
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
@@ -490,7 +490,7 @@ add_filter( 'user_has_cap', 'wc_shop_manager_has_capability', 10, 4 );
 /**
  * Modify the list of editable roles to prevent non-admin adding admin users.
  *
- * @param  array $roles Roles.
+ * @param array $roles Roles.
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
@@ -515,10 +515,10 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  *
  * $args[0] will be the user being edited in this case.
  *
- * @param  array  $caps    Array of caps.
- * @param  string $cap     Name of the cap we are checking.
- * @param  int    $user_id ID of the user being checked against.
- * @param  array  $args    Arguments.
+ * @param array  $caps    Array of caps.
+ * @param string $cap     Name of the cap we are checking.
+ * @param int    $user_id ID of the user being checked against.
+ * @param array  $args    Arguments.
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
@@ -657,7 +657,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 /**
  * Get total spent by customer.
  *
- * @param  int $user_id User ID.
+ * @param int $user_id User ID.
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
@@ -668,7 +668,7 @@ function wc_get_customer_total_spent( $user_id ) {
 /**
  * Get total orders by customer.
  *
- * @param  int $user_id User ID.
+ * @param int $user_id User ID.
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
@@ -701,7 +701,7 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
 /**
  * Get review verification status.
  *
- * @param  int $comment_id Comment ID.
+ * @param int $comment_id Comment ID.
  * @return bool
  */
 function wc_review_is_from_verified_owner( $comment_id ) {

@@ -4,8 +4,8 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Reports
- * @version     3.3.0
+ * @package WooCommerce\Admin\Reports
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -483,8 +483,8 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get order key.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_order_key( $context = 'view' ) {
@@ -494,7 +494,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get customer_id.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_customer_id( $context = 'view' ) {
@@ -504,7 +504,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Alias for get_customer_id().
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_user_id( $context = 'view' ) {
@@ -523,10 +523,10 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Gets a prop for a getter method.
 	 *
-	 * @since  3.0.0
-	 * @param  string $prop Name of prop to get.
-	 * @param  string $address billing or shipping.
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.0.0
+	 * @param string $prop Name of prop to get.
+	 * @param string $address billing or shipping.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
 	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
@@ -545,7 +545,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing first name.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_first_name( $context = 'view' ) {
@@ -555,7 +555,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing last name.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_last_name( $context = 'view' ) {
@@ -565,7 +565,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing company.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_company( $context = 'view' ) {
@@ -575,7 +575,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing address line 1.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_address_1( $context = 'view' ) {
@@ -585,7 +585,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing address line 2.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_address_2( $context = 'view' ) {
@@ -595,7 +595,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing city.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_city( $context = 'view' ) {
@@ -605,7 +605,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing state.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_state( $context = 'view' ) {
@@ -615,7 +615,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing postcode.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_postcode( $context = 'view' ) {
@@ -625,7 +625,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing country.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_country( $context = 'view' ) {
@@ -635,7 +635,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing email.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_email( $context = 'view' ) {
@@ -645,7 +645,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get billing phone.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_billing_phone( $context = 'view' ) {
@@ -655,7 +655,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping first name.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_first_name( $context = 'view' ) {
@@ -665,7 +665,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping_last_name.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_last_name( $context = 'view' ) {
@@ -675,7 +675,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping company.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_company( $context = 'view' ) {
@@ -685,7 +685,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping address line 1.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_address_1( $context = 'view' ) {
@@ -695,7 +695,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping address line 2.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_address_2( $context = 'view' ) {
@@ -705,7 +705,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping city.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_city( $context = 'view' ) {
@@ -715,7 +715,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping state.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_state( $context = 'view' ) {
@@ -725,7 +725,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping postcode.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_postcode( $context = 'view' ) {
@@ -735,7 +735,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping country.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_shipping_country( $context = 'view' ) {
@@ -745,7 +745,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the payment method.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_payment_method( $context = 'view' ) {
@@ -755,7 +755,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get payment method title.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_payment_method_title( $context = 'view' ) {
@@ -765,7 +765,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get transaction d.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_transaction_id( $context = 'view' ) {
@@ -775,7 +775,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get customer ip address.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_customer_ip_address( $context = 'view' ) {
@@ -785,7 +785,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get customer user agent.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_customer_user_agent( $context = 'view' ) {
@@ -795,7 +795,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get created via.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_created_via( $context = 'view' ) {
@@ -805,7 +805,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get customer note.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_customer_note( $context = 'view' ) {
@@ -815,7 +815,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get date completed.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_completed( $context = 'view' ) {
@@ -825,7 +825,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get date paid.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
 	 */
 	public function get_date_paid( $context = 'view' ) {
@@ -841,7 +841,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get cart hash.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_cart_hash( $context = 'view' ) {
@@ -852,8 +852,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * Returns the requested address in raw, non-formatted way.
 	 * Note: Merges raw data with get_prop data so changes are returned too.
 	 *
-	 * @since  2.4.0
-	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
+	 * @since 2.4.0
+	 * @param string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
 	 * @return array The stored address after filter.
 	 */
 	public function get_address( $type = 'billing' ) {
@@ -946,7 +946,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Returns true if the order has a billing address.
 	 *
-	 * @since  3.0.4
+	 * @since 3.0.4
 	 * @return boolean
 	 */
 	public function has_billing_address() {
@@ -956,7 +956,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Returns true if the order has a shipping address.
 	 *
-	 * @since  3.0.4
+	 * @since 3.0.4
 	 * @return boolean
 	 */
 	public function has_shipping_address() {
@@ -1313,7 +1313,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date completed.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
 	 */
 	public function set_date_completed( $date = null ) {
@@ -1323,7 +1323,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set date paid.
 	 *
-	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
 	 */
 	public function set_date_paid( $date = null ) {
@@ -1443,7 +1443,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get downloads from all line items for this order.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 * @return array
 	 */
 	public function get_downloadable_items() {
@@ -1552,7 +1552,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
 	 *
-	 * @param  bool $on_checkout If on checkout.
+	 * @param bool $on_checkout If on checkout.
 	 * @return string
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
@@ -1677,9 +1677,9 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Adds a note (comment) to the order. Order must exist.
 	 *
-	 * @param  string $note              Note to add.
-	 * @param  int    $is_customer_note  Is this a note for the customer?.
-	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param string $note              Note to add.
+	 * @param int    $is_customer_note  Is this a note for the customer?.
+	 * @param bool   $added_by_user     Was the note added by a user?.
 	 * @return int                       Comment ID.
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
@@ -1843,7 +1843,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @since  2.3
+	 * @since 2.3
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
@@ -1864,7 +1864,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the total shipping refunded.
 	 *
-	 * @since  2.4
+	 * @since 2.4
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
@@ -1885,7 +1885,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Gets the count of order items of a certain type that have been refunded.
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 * @param string $item_type Item type.
 	 * @return string
 	 */
@@ -1910,9 +1910,9 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the total number of items refunded.
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
-	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @param string $item_type Type of the item we're checking, if not a line_item.
 	 * @return int
 	 */
 	public function get_total_qty_refunded( $item_type = 'line_item' ) {
@@ -1928,8 +1928,8 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the refunded amount for a line item.
 	 *
-	 * @param  int    $item_id   ID of the item we're checking.
-	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @param int    $item_id   ID of the item we're checking.
+	 * @param string $item_type Type of the item we're checking, if not a line_item.
 	 * @return int
 	 */
 	public function get_qty_refunded_for_item( $item_id, $item_type = 'line_item' ) {
@@ -1947,8 +1947,8 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the refunded amount for a line item.
 	 *
-	 * @param  int    $item_id   ID of the item we're checking.
-	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @param int    $item_id   ID of the item we're checking.
+	 * @param string $item_type Type of the item we're checking, if not a line_item.
 	 * @return int
 	 */
 	public function get_total_refunded_for_item( $item_id, $item_type = 'line_item' ) {
@@ -1966,9 +1966,9 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the refunded tax amount for a line item.
 	 *
-	 * @param  int    $item_id   ID of the item we're checking.
-	 * @param  int    $tax_id    ID of the tax we're checking.
-	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @param int    $item_id   ID of the item we're checking.
+	 * @param int    $tax_id    ID of the tax we're checking.
+	 * @param string $item_type Type of the item we're checking, if not a line_item.
 	 * @return double
 	 */
 	public function get_tax_refunded_for_item( $item_id, $tax_id, $item_type = 'line_item' ) {
@@ -1989,7 +1989,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get total tax refunded by rate ID.
 	 *
-	 * @param  int $rate_id Rate ID.
+	 * @param int $rate_id Rate ID.
 	 * @return float
 	 */
 	public function get_total_tax_refunded_by_rate_id( $rate_id ) {

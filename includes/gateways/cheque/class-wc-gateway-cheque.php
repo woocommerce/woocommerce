@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Provides a Cheque Payment Gateway, mainly for testing purposes.
  *
- * @class       WC_Gateway_Cheque
- * @extends     WC_Payment_Gateway
- * @version     2.1.0
- * @package     WooCommerce\Classes\Payment
+ * @class WC_Gateway_Cheque
+ * @extends WC_Payment_Gateway
+ * @version 2.1.0
+ * @package WooCommerce\Classes\Payment
  */
 class WC_Gateway_Cheque extends WC_Payment_Gateway {
 

@@ -20,8 +20,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
  *
- * @since  3.0.0
- * @param  array $args Array of args (above).
+ * @since 3.0.0
+ * @param array $args Array of args (above).
  * @return array|stdClass Number of pages and an array of product objects if
  *                             paginate is true, or just an array of values.
  */
@@ -203,8 +203,8 @@ function wc_get_featured_product_ids() {
 /**
  * Filter to allow product_cat in the permalinks for products.
  *
- * @param  string  $permalink The existing permalink URL.
- * @param  WP_Post $post WP_Post object.
+ * @param string  $permalink The existing permalink URL.
+ * @param WP_Post $post WP_Post object.
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
@@ -599,8 +599,8 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 /**
  * Force a unique SKU.
  *
- * @since  3.0.0
- * @param  integer $product_id Product ID.
+ * @since 3.0.0
+ * @param integer $product_id Product ID.
  */
 function wc_product_force_unique_sku( $product_id ) {
 	$product     = wc_get_product( $product_id );
@@ -621,10 +621,10 @@ function wc_product_force_unique_sku( $product_id ) {
 /**
  * Recursively appends a suffix until a unique SKU is found.
  *
- * @since  3.0.0
- * @param  integer $product_id Product ID.
- * @param  string  $sku Product SKU.
- * @param  integer $index An optional index that can be added to the product SKU.
+ * @since 3.0.0
+ * @param integer $product_id Product ID.
+ * @param string  $sku Product SKU.
+ * @param integer $index An optional index that can be added to the product SKU.
  * @return string
  */
 function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
@@ -640,8 +640,8 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
 /**
  * Get product ID by SKU.
  *
- * @since  2.3.0
- * @param  string $sku Product SKU.
+ * @since 2.3.0
+ * @param string $sku Product SKU.
  * @return int
  */
 function wc_get_product_id_by_sku( $sku ) {
@@ -652,8 +652,8 @@ function wc_get_product_id_by_sku( $sku ) {
 /**
  * Get attibutes/data for an individual variation from the database and maintain it's integrity.
  *
- * @since  2.4.0
- * @param  int $variation_id Variation ID.
+ * @since 2.4.0
+ * @param int $variation_id Variation ID.
  * @return array
  */
 function wc_get_product_variation_attributes( $variation_id ) {
@@ -711,8 +711,8 @@ function wc_get_product_variation_attributes( $variation_id ) {
 /**
  * Get all product cats for a product by ID, including hierarchy
  *
- * @since  2.5.0
- * @param  int $product_id Product ID.
+ * @since 2.5.0
+ * @param int $product_id Product ID.
  * @return array
  */
 function wc_get_product_cat_ids( $product_id ) {
@@ -867,10 +867,10 @@ function wc_get_product_backorder_options() {
 /**
  * Get related products based on product category and tags.
  *
- * @since  3.0.0
- * @param  int   $product_id  Product ID.
- * @param  int   $limit       Limit of results.
- * @param  array $exclude_ids Exclude IDs from the results.
+ * @since 3.0.0
+ * @param int   $product_id  Product ID.
+ * @param int   $limit       Limit of results.
+ * @param array $exclude_ids Exclude IDs from the results.
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
@@ -932,9 +932,9 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 /**
  * Retrieves product term ids for a taxonomy.
  *
- * @since  3.0.0
- * @param  int    $product_id Product ID.
- * @param  string $taxonomy   Taxonomy slug.
+ * @since 3.0.0
+ * @param int    $product_id Product ID.
+ * @param string $taxonomy   Taxonomy slug.
  * @return array
  */
 function wc_get_product_term_ids( $product_id, $taxonomy ) {
@@ -945,9 +945,9 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
 /**
  * For a given product, and optionally price/qty, work out the price with tax included, based on store settings.
  *
- * @since  3.0.0
- * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @since 3.0.0
+ * @param WC_Product $product WC_Product object.
+ * @param array      $args Optional arguments to pass product quantity and price.
  * @return float
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
@@ -1029,9 +1029,9 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 /**
  * For a given product, and optionally price/qty, work out the price with tax excluded, based on store settings.
  *
- * @since  3.0.0
- * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @since 3.0.0
+ * @param WC_Product $product WC_Product object.
+ * @param array      $args Optional arguments to pass product quantity and price.
  * @return float
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
@@ -1069,9 +1069,9 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 /**
  * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
  *
- * @since  3.0.0
- * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @since 3.0.0
+ * @param WC_Product $product WC_Product object.
+ * @param array      $args Optional arguments to pass product quantity and price.
  * @return float
  */
 function wc_get_price_to_display( $product, $args = array() ) {
@@ -1132,8 +1132,8 @@ function wc_get_product_tag_list( $product_id, $sep = ', ', $before = '', $after
 /**
  * Callback for array filter to get visible only.
  *
- * @since  3.0.0
- * @param  WC_Product $product WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $product WC_Product object.
  * @return bool
  */
 function wc_products_array_filter_visible( $product ) {
@@ -1143,8 +1143,8 @@ function wc_products_array_filter_visible( $product ) {
 /**
  * Callback for array filter to get visible grouped products only.
  *
- * @since  3.1.0
- * @param  WC_Product $product WC_Product object.
+ * @since 3.1.0
+ * @param WC_Product $product WC_Product object.
  * @return bool
  */
 function wc_products_array_filter_visible_grouped( $product ) {
@@ -1154,8 +1154,8 @@ function wc_products_array_filter_visible_grouped( $product ) {
 /**
  * Callback for array filter to get products the user can edit only.
  *
- * @since  3.0.0
- * @param  WC_Product $product WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $product WC_Product object.
  * @return bool
  */
 function wc_products_array_filter_editable( $product ) {
@@ -1165,8 +1165,8 @@ function wc_products_array_filter_editable( $product ) {
 /**
  * Callback for array filter to get products the user can view only.
  *
- * @since  3.4.0
- * @param  WC_Product $product WC_Product object.
+ * @since 3.4.0
+ * @param WC_Product $product WC_Product object.
  * @return bool
  */
 function wc_products_array_filter_readable( $product ) {
@@ -1176,7 +1176,7 @@ function wc_products_array_filter_readable( $product ) {
 /**
  * Sort an array of products by a value.
  *
- * @since  3.0.0
+ * @since 3.0.0
  *
  * @param array  $products List of products to be ordered.
  * @param string $orderby Optional order criteria.
@@ -1211,9 +1211,9 @@ function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc
 /**
  * Sort by title.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_title( $a, $b ) {
@@ -1223,9 +1223,9 @@ function wc_products_array_orderby_title( $a, $b ) {
 /**
  * Sort by id.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_id( $a, $b ) {
@@ -1238,9 +1238,9 @@ function wc_products_array_orderby_id( $a, $b ) {
 /**
  * Sort by date.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_date( $a, $b ) {
@@ -1253,9 +1253,9 @@ function wc_products_array_orderby_date( $a, $b ) {
 /**
  * Sort by modified.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_modified( $a, $b ) {
@@ -1268,9 +1268,9 @@ function wc_products_array_orderby_modified( $a, $b ) {
 /**
  * Sort by menu order.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_menu_order( $a, $b ) {
@@ -1283,9 +1283,9 @@ function wc_products_array_orderby_menu_order( $a, $b ) {
 /**
  * Sort by price low to high.
  *
- * @since  3.0.0
- * @param  WC_Product $a First WC_Product object.
- * @param  WC_Product $b Second WC_Product object.
+ * @since 3.0.0
+ * @param WC_Product $a First WC_Product object.
+ * @param WC_Product $b Second WC_Product object.
  * @return int
  */
 function wc_products_array_orderby_price( $a, $b ) {

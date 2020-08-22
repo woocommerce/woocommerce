@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by product variable store classes.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 interface WC_Product_Variable_Data_Store_Interface {
 	/**

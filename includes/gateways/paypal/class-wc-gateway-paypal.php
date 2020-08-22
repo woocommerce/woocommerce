@@ -4,10 +4,10 @@
  *
  * Provides a PayPal Standard Payment Gateway.
  *
- * @class       WC_Gateway_Paypal
- * @extends     WC_Payment_Gateway
- * @version     2.3.0
- * @package     WooCommerce\Classes\Payment
+ * @class WC_Gateway_Paypal
+ * @extends WC_Payment_Gateway
+ * @version 2.3.0
+ * @package WooCommerce\Classes\Payment
  */
 
 use Automattic\Jetpack\Constants;
@@ -167,7 +167,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the link for an icon based on country.
 	 *
-	 * @param  string $country Country two letter code.
+	 * @param string $country Country two letter code.
 	 * @return string
 	 */
 	protected function get_icon_url( $country ) {
@@ -300,7 +300,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the transaction URL.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
@@ -315,7 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Process the payment and return the result.
 	 *
-	 * @param  int $order_id Order ID.
+	 * @param nt $order_id Order ID.
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
@@ -333,7 +333,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Can the order be refunded via PayPal?
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return bool
 	 */
 	public function can_refund_order( $order ) {
@@ -363,9 +363,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Process a refund if supported.
 	 *
-	 * @param  int    $order_id Order ID.
-	 * @param  float  $amount Refund amount.
-	 * @param  string $reason Refund reason.
+	 * @param nt    $order_id Order ID.
+	 * @param loat  $amount Refund amount.
+	 * @param tring $reason Refund reason.
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
@@ -402,7 +402,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Capture payment when the order is changed from on-hold to complete or processing
 	 *
-	 * @param  int $order_id Order ID.
+	 * @param nt $order_id Order ID.
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );

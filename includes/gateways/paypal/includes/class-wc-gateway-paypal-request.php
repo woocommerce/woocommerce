@@ -56,8 +56,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the PayPal request URL for an order.
 	 *
-	 * @param  WC_Order $order Order object.
-	 * @param  bool     $sandbox Whether to use sandbox mode or not.
+	 * @param WC_Order $order Order object.
+	 * @param ool     $sandbox Whether to use sandbox mode or not.
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
@@ -89,8 +89,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Limit length of an arg.
 	 *
-	 * @param  string  $string Argument to limit.
-	 * @param  integer $limit Limit size in characters.
+	 * @param tring  $string Argument to limit.
+	 * @param nteger $limit Limit size in characters.
 	 * @return string
 	 */
 	protected function limit_length( $string, $limit = 127 ) {
@@ -185,7 +185,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get PayPal Args for passing to PP.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return array
 	 */
 	protected function get_paypal_args( $order ) {
@@ -212,7 +212,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get phone number args for paypal request.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
@@ -244,7 +244,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get shipping args for paypal request.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return array
 	 */
 	protected function get_shipping_args( $order ) {
@@ -272,8 +272,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get shipping cost line item args for paypal request.
 	 *
-	 * @param  WC_Order $order Order object.
-	 * @param  bool     $force_one_line_item Whether one line item was forced by validation or URL length.
+	 * @param C_Order $order Order object.
+	 * @param ool     $force_one_line_item Whether one line item was forced by validation or URL length.
 	 * @return array
 	 */
 	protected function get_shipping_cost_line_item( $order, $force_one_line_item ) {
@@ -299,7 +299,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get line item args for paypal request as a single line item.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return array
 	 */
 	protected function get_line_item_args_single_item( $order ) {
@@ -315,8 +315,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get line item args for paypal request.
 	 *
-	 * @param  WC_Order $order Order object.
-	 * @param  bool     $force_one_line_item Create only one item for this order.
+	 * @param C_Order $order Order object.
+	 * @param ool     $force_one_line_item Create only one item for this order.
 	 * @return array
 	 */
 	protected function get_line_item_args( $order, $force_one_line_item = false ) {
@@ -351,7 +351,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get order item names as a string.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return string
 	 */
 	protected function get_order_item_names( $order ) {
@@ -385,8 +385,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get order item names as a string.
 	 *
-	 * @param  WC_Order      $order Order object.
-	 * @param  WC_Order_Item $item Order item object.
+	 * @param C_Order      $order Order object.
+	 * @param C_Order_Item $item Order item object.
 	 * @return string
 	 */
 	protected function get_order_item_name( $order, $item ) {
@@ -458,7 +458,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get line items to send to paypal.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 */
 	protected function prepare_line_items( $order ) {
 		$this->delete_line_items();
@@ -480,10 +480,10 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Add PayPal Line Item.
 	 *
-	 * @param  string $item_name Item name.
-	 * @param  int    $quantity Item quantity.
-	 * @param  float  $amount Amount.
-	 * @param  string $item_number Item number.
+	 * @param tring $item_name Item name.
+	 * @param nt    $quantity Item quantity.
+	 * @param loat  $amount Amount.
+	 * @param tring $item_number Item number.
 	 */
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0.0, $item_number = '' ) {
 		$index = ( count( $this->line_items ) / 4 ) + 1;
@@ -511,8 +511,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the state to send to paypal.
 	 *
-	 * @param  string $cc Country two letter code.
-	 * @param  string $state State code.
+	 * @param tring $cc Country two letter code.
+	 * @param tring $state State code.
 	 * @return string
 	 */
 	protected function get_paypal_state( $cc, $state ) {
@@ -532,7 +532,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Check if currency has decimals.
 	 *
-	 * @param  string $currency Currency to check.
+	 * @param tring $currency Currency to check.
 	 * @return bool
 	 */
 	protected function currency_has_decimals( $currency ) {
@@ -546,8 +546,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Round prices.
 	 *
-	 * @param  double   $price Price to round.
-	 * @param  WC_Order $order Order object.
+	 * @param ouble   $price Price to round.
+	 * @param C_Order $order Order object.
 	 * @return double
 	 */
 	protected function round( $price, $order ) {
@@ -563,8 +563,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Format prices.
 	 *
-	 * @param  float|int $price Price to format.
-	 * @param  WC_Order  $order Order object.
+	 * @param loat|int $price Price to format.
+	 * @param C_Order  $order Order object.
 	 * @return string
 	 */
 	protected function number_format( $price, $order ) {

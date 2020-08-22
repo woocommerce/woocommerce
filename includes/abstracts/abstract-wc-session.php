@@ -2,9 +2,9 @@
 /**
  * Handle data for the current customers session
  *
- * @class       WC_Session
- * @version     2.0.0
- * @package     WooCommerce\Abstracts
+ * @class WC_Session
+ * @version 2.0.0
+ * @package WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

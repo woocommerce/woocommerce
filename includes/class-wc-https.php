@@ -7,9 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_HTTPS class.
  *
- * @class    WC_HTTPS
- * @version  2.2.0
- * @package  WooCommerce\Classes
+ * @class WC_HTTPS
+ * @version 2.2.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   WooThemes
  */

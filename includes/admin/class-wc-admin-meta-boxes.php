@@ -178,8 +178,8 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Check if we're saving, the trigger an action based on the post type.
 	 *
-	 * @param  int    $post_id Post ID.
-	 * @param  object $post Post object.
+	 * @param int    $post_id Post ID.
+	 * @param object $post Post object.
 	 */
 	public function save_meta_boxes( $post_id, $post ) {
 		$post_id = absint( $post_id );

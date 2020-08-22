@@ -20,10 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extended by individual payment gateways to handle payments.
  *
- * @class       WC_Payment_Gateway
- * @extends     WC_Settings_API
- * @version     2.1.0
- * @package     WooCommerce\Abstracts
+ * @class WC_Payment_Gateway
+ * @extends WC_Settings_API
+ * @version 2.1.0
+ * @package WooCommerce\Abstracts
  */
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
@@ -234,7 +234,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Get a link to the transaction on the 3rd party gateway site (if applicable).
 	 *
-	 * @param  WC_Order $order the order object.
+	 * @param WC_Order $order the order object.
 	 * @return string transaction URL, or empty string.
 	 */
 	public function get_transaction_url( $order ) {
@@ -369,9 +369,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * If the gateway declares 'refunds' support, this will allow it to refund.
 	 * a passed in amount.
 	 *
-	 * @param  int    $order_id Order ID.
-	 * @param  float  $amount Refund amount.
-	 * @param  string $reason Refund reason.
+	 * @param int    $order_id Order ID.
+	 * @param float  $amount Refund amount.
+	 * @param string $reason Refund reason.
 	 * @return boolean True or false based on success, or a WP_Error object.
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
@@ -423,7 +423,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * Should be extended by gateways to do their own checks.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 * @return bool If false, the automatic refund button is hidden in the UI.
 	 */
 	public function can_refund_order( $order ) {
@@ -433,8 +433,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Core credit card form which gateways can use if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
 	 *
-	 * @param  array $args Arguments.
-	 * @param  array $fields Fields.
+	 * @param array $args Arguments.
+	 * @param array $fields Fields.
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
 		wc_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
@@ -489,7 +489,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Gets saved payment method HTML from a token.
 	 *
 	 * @since 2.6.0
-	 * @param  WC_Payment_Token $token Payment Token.
+	 * @param WC_Payment_Token $token Payment Token.
 	 * @return string Generated payment method HTML
 	 */
 	public function get_saved_payment_method_option_html( $token ) {

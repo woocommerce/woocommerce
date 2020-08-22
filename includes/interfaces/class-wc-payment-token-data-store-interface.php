@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Functions that must be defined by payment token store classes.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 interface WC_Payment_Token_Data_Store_Interface {
 	/**

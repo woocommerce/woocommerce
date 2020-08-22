@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This legacy class is for backwards compatibility in case any code called ->read, ->update or ->create
  * directly on the object.
  *
- * @version  3.0.0
- * @package  WooCommerce\Classes
+ * @version 3.0.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   WooCommerce
  */

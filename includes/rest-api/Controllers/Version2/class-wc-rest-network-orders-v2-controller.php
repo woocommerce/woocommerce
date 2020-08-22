@@ -5,7 +5,7 @@
  * Handles requests to the /orders/network endpoint
  *
  * @package Automattic/WooCommerce/RestApi
- * @since    3.4.0
+ * @since 3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;

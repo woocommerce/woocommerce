@@ -152,7 +152,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	/**
 	 * Simple get content.
 	 *
-	 * @param  string $context
+	 * @param string $context
 	 * @return string
 	 */
 	public function get_content( $context = 'view' ) {
@@ -171,7 +171,7 @@ class WC_Mock_WC_Data extends WC_Data {
 	/**
 	 * Simple get bool value.
 	 *
-	 * @param  string $context
+	 * @param tring $context
 	 * @return bool
 	 */
 	public function get_bool_value( $context = 'view' ) {

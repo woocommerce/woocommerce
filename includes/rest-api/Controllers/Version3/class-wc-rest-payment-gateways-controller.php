@@ -5,7 +5,7 @@
  * Handles requests to the /payment_gateways endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,8 +28,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 	/**
 	 * Prepare a payment gateway for response.
 	 *
-	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
-	 * @param  WP_REST_Request    $request    Request object.
+	 * @param WC_Payment_Gateway $gateway    Payment gateway object.
+	 * @param P_REST_Request    $request    Request object.
 	 * @return WP_REST_Response   $response   Response data.
 	 */
 	public function prepare_item_for_response( $gateway, $request ) {

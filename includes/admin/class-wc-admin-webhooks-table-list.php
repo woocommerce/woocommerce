@@ -55,7 +55,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Column cb.
 	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @return string
 	 */
 	public function column_cb( $webhook ) {
@@ -65,7 +65,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Return title column.
 	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @return string
 	 */
 	public function column_title( $webhook ) {
@@ -109,7 +109,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Return status column.
 	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @return string
 	 */
 	public function column_status( $webhook ) {
@@ -119,7 +119,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Return topic column.
 	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @return string
 	 */
 	public function column_topic( $webhook ) {
@@ -129,7 +129,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Return delivery URL column.
 	 *
-	 * @param  WC_Webhook $webhook Webhook instance.
+	 * @param WC_Webhook $webhook Webhook instance.
 	 * @return string
 	 */
 	public function column_delivery_url( $webhook ) {
@@ -249,8 +249,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Search box.
 	 *
-	 * @param  string $text     Button text.
-	 * @param  string $input_id Input ID.
+	 * @param string $text     Button text.
+	 * @param string $input_id Input ID.
 	 */
 	public function search_box( $text, $input_id ) {
 		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.

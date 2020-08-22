@@ -26,9 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * If you understand these limitations, feel free to use this handler or borrow parts of the design
  * to implement your own!
  *
- * @class          WC_Log_Handler_Email
- * @version        1.0.0
- * @package        WooCommerce\Classes\Log_Handlers
+ * @class WC_Log_Handler_Email
+ * @version 1.0.0
+ * @package WooCommerce\Classes\Log_Handlers
  */
 class WC_Log_Handler_Email extends WC_Log_Handler {
 

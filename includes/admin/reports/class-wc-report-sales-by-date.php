@@ -2,8 +2,8 @@
 /**
  * WC_Report_Sales_By_Date
  *
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -52,7 +52,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Get status - always completed for refunds.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
@@ -71,7 +71,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Get refunded amount.
 	 *
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int|float
 	 */
 	public function get_amount( $context = 'view' ) {
@@ -82,7 +82,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Get refund reason.
 	 *
 	 * @since 2.2
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int|float
 	 */
 	public function get_reason( $context = 'view' ) {
@@ -93,7 +93,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Get ID of user who did the refund.
 	 *
 	 * @since 3.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_refunded_by( $context = 'view' ) {
@@ -103,8 +103,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Return if the payment was refunded via API.
 	 *
-	 * @since  3.3
-	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since 3.3
+	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function get_refunded_payment( $context = 'view' ) {

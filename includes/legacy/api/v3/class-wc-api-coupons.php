@@ -6,8 +6,8 @@
  *
  * @author      WooThemes
  * @category    API
- * @package     WooCommerce\API
- * @since       2.1
+ * @package WooCommerce\API
+ * @since 2.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -442,7 +442,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Delete a coupon
 	 *
-	 * @since  2.2
+	 * @since 2.2
 	 *
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
@@ -465,8 +465,8 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * expiry_date format
 	 *
-	 * @since  2.3.0
-	 * @param  string $expiry_date
+	 * @since 2.3.0
+	 * @param string $expiry_date
 	 * @param bool $as_timestamp (default: false)
 	 * @return string|int
 	 */

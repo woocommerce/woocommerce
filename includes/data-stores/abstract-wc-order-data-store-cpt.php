@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract Order Data Store: Stored in CPT.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface, WC_Abstract_Order_Data_Store_Interface {
 
@@ -220,7 +220,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Plugins extending the order classes can override this to change the stored status/add prefixes etc.
 	 *
 	 * @since 3.6.0
-	 * @param  WC_order $order Order object.
+	 * @param WC_order $order Order object.
 	 * @return string
 	 */
 	protected function get_post_status( $order ) {
@@ -247,7 +247,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Excerpt for post.
 	 *
-	 * @param  WC_order $order Order object.
+	 * @param C_order $order Order object.
 	 * @return string
 	 */
 	protected function get_post_excerpt( $order ) {
@@ -365,8 +365,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Read order items of a specific type from the database for this order.
 	 *
-	 * @param  WC_Order $order Order object.
-	 * @param  string   $type Order item type.
+	 * @param C_Order $order Order object.
+	 * @param tring   $type Order item type.
 	 * @return array
 	 */
 	public function read_items( $order, $type ) {

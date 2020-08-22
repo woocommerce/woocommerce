@@ -5,7 +5,7 @@
  * Extends Exception to provide additional data.
  *
  * @package WooCommerce\Classes
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -6,7 +6,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   2.6.0
+ * @since 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -19,8 +19,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
-	 * @since  2.6.0
-	 * @param  array $args Query argyments {
+	 * @since 2.6.0
+	 * @param array $args Query argyments {
 	 *     Array of query parameters.
 	 *
 	 *     @type string $token_id   Token ID.
@@ -61,8 +61,8 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 *
 	 * @since 2.6.0
-	 * @param  int    $customer_id Customer ID.
-	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
+	 * @param int    $customer_id Customer ID.
+	 * @param string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
 	 * @return WC_Payment_Token[]  Array of token objects.
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {
@@ -83,8 +83,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns a customers default token or NULL if there is no default token.
 	 *
-	 * @since  2.6.0
-	 * @param  int $customer_id Customer ID.
+	 * @since 2.6.0
+	 * @param int $customer_id Customer ID.
 	 * @return WC_Payment_Token|null
 	 */
 	public static function get_customer_default_token( $customer_id ) {
@@ -205,8 +205,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns what type (credit card, echeck, etc) of token a token is by ID.
 	 *
-	 * @since  2.6.0
-	 * @param  int $token_id Token ID.
+	 * @since 2.6.0
+	 * @param int $token_id Token ID.
 	 * @return string        Type.
 	 */
 	public static function get_token_type_by_id( $token_id ) {

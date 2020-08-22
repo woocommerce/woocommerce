@@ -4,8 +4,8 @@
  *
  * Based on https://pippinsplugins.com/batch-processing-for-big-data/
  *
- * @package  WooCommerce\Export
- * @version  3.1.0
+ * @package WooCommerce\Export
+ * @version 3.1.0
  */
 
 defined( 'ABSPATH' ) || exit;

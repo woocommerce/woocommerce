@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class for eCheck Payment Gateway
  *
- * @since       2.6.0
- * @package     WooCommerce\Classes
+ * @since 2.6.0
+ * @package WooCommerce\Classes
  */
 class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 

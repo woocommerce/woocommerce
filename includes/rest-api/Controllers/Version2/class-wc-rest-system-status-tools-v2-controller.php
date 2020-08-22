@@ -5,7 +5,7 @@
  * Handles requests to the /system_status/tools/* endpoints.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -79,7 +79,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to view system status tools.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -92,7 +92,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to view a specific system status tool.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -105,7 +105,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to execute a specific system status tool.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -260,7 +260,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Return a single tool.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -285,7 +285,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Update (execute) a tool.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -321,8 +321,8 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a tool item for serialization.
 	 *
-	 * @param  array           $item     Object.
-	 * @param  WP_REST_Request $request  Request object.
+	 * @param rray           $item     Object.
+	 * @param P_REST_Request $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -431,7 +431,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Actually executes a tool.
 	 *
-	 * @param  string $tool Tool.
+	 * @param tring $tool Tool.
 	 * @return array
 	 */
 	public function execute_tool( $tool ) {

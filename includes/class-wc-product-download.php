@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -47,7 +47,7 @@ class WC_Product_Download implements ArrayAccess {
 	/**
 	 * Get type of file path set.
 	 *
-	 * @param  string $file_path optional.
+	 * @param string $file_path optional.
 	 * @return string absolute, relative, or shortcode.
 	 */
 	public function get_type_of_file_path( $file_path = '' ) {

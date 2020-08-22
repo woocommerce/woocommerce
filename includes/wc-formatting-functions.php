@@ -63,8 +63,8 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
  *
  * Cannot use wc_clean because it sometimes strips % chars and breaks the user's setting.
  *
- * @since  2.6.0
- * @param  string $value Permalink.
+ * @since 2.6.0
+ * @param string $value Permalink.
  * @return string
  */
 function wc_sanitize_permalink( $value ) {
@@ -220,8 +220,8 @@ function wc_trim_zeros( $price ) {
 /**
  * Round a tax amount.
  *
- * @param  double $value Amount to round.
- * @param  int    $precision DP to round. Defaults to wc_get_price_decimals.
+ * @param double $value Amount to round.
+ * @param int    $precision DP to round. Defaults to wc_get_price_decimals.
  * @return float
  */
 function wc_round_tax_total( $value, $precision = null ) {
@@ -280,9 +280,9 @@ function wc_format_refund_total( $amount ) {
  *
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
- * @param  float|string $number     Expects either a float or a string with a decimal separator only (no thousands).
- * @param  mixed        $dp number  Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
- * @param  bool         $trim_zeros From end of string.
+ * @param float|string $number     Expects either a float or a string with a decimal separator only (no thousands).
+ * @param mixed        $dp number  Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
+ * @param bool         $trim_zeros From end of string.
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
@@ -317,7 +317,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 /**
  * Convert a float to a string without locale formatting which PHP adds when changing floats to strings.
  *
- * @param  float $float Float value to format.
+ * @param float $float Float value to format.
  * @return string
  */
 function wc_float_to_string( $float ) {
@@ -335,7 +335,7 @@ function wc_float_to_string( $float ) {
 /**
  * Format a price with WC Currency Locale settings.
  *
- * @param  string $value Price to localize.
+ * @param string $value Price to localize.
  * @return string
  */
 function wc_format_localized_price( $value ) {
@@ -345,7 +345,7 @@ function wc_format_localized_price( $value ) {
 /**
  * Format a decimal with PHP Locale settings.
  *
- * @param  string $value Decimal to localize.
+ * @param string $value Decimal to localize.
  * @return string
  */
 function wc_format_localized_decimal( $value ) {
@@ -356,8 +356,8 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Format a coupon code.
  *
- * @since  3.0.0
- * @param  string $value Coupon code to format.
+ * @since 3.0.0
+ * @param string $value Coupon code to format.
  * @return string
  */
 function wc_format_coupon_code( $value ) {
@@ -370,8 +370,8 @@ function wc_format_coupon_code( $value ) {
  * Uses sanitize_post_field since coupon codes are stored as
  * post_titles - the sanitization and escaping must match.
  *
- * @since  3.6.0
- * @param  string $value Coupon code to format.
+ * @since 3.6.0
+ * @param string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
@@ -410,8 +410,8 @@ function wc_check_invalid_utf8( $var ) {
 /**
  * Run wc_clean over posted textarea but maintain line breaks.
  *
- * @since  3.0.0
- * @param  string $var Data to sanitize.
+ * @since 3.0.0
+ * @param string $var Data to sanitize.
  * @return string
  */
 function wc_sanitize_textarea( $var ) {
@@ -421,8 +421,8 @@ function wc_sanitize_textarea( $var ) {
 /**
  * Sanitize a string destined to be a tooltip.
  *
- * @since  2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
- * @param  string $var Data to sanitize.
+ * @since 2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
+ * @param string $var Data to sanitize.
  * @return string
  */
 function wc_sanitize_tooltip( $var ) {
@@ -468,7 +468,7 @@ function wc_array_overlay( $a1, $a2 ) {
 /**
  * Formats a stock amount by running it through a filter.
  *
- * @param  int|float $amount Stock amount.
+ * @param int|float $amount Stock amount.
  * @return int|float
  */
 function wc_stock_amount( $amount ) {
@@ -505,7 +505,7 @@ function get_woocommerce_price_format() {
 /**
  * Return the thousand separator for prices.
  *
- * @since  2.3
+ * @since 2.3
  * @return string
  */
 function wc_get_price_thousand_separator() {
@@ -515,7 +515,7 @@ function wc_get_price_thousand_separator() {
 /**
  * Return the decimal separator for prices.
  *
- * @since  2.3
+ * @since 2.3
  * @return string
  */
 function wc_get_price_decimal_separator() {
@@ -526,7 +526,7 @@ function wc_get_price_decimal_separator() {
 /**
  * Return the number of decimals after the decimal point.
  *
- * @since  2.3
+ * @since 2.3
  * @return int
  */
 function wc_get_price_decimals() {
@@ -536,8 +536,8 @@ function wc_get_price_decimals() {
 /**
  * Format the price with a currency symbol.
  *
- * @param  float $price Raw price.
- * @param  array $args  Arguments to format a price {
+ * @param float $price Raw price.
+ * @param array $args  Arguments to format a price {
  *     Array of arguments.
  *     Defaults to empty array.
  *
@@ -604,7 +604,7 @@ function wc_price( $price, $args = array() ) {
  *
  * This function transforms the php.ini notation for numbers (like '2M') to an integer.
  *
- * @param  string $size Size value.
+ * @param string $size Size value.
  * @return int
  */
 function wc_let_to_num( $size ) {
@@ -653,9 +653,9 @@ function wc_time_format() {
  *
  * Based on wcs_strtotime_dark_knight() from WC Subscriptions by Prospress.
  *
- * @since  3.0.0
- * @param  string   $time_string    Time string.
- * @param  int|null $from_timestamp Timestamp to convert from.
+ * @since 3.0.0
+ * @param string   $time_string    Time string.
+ * @param int|null $from_timestamp Timestamp to convert from.
  * @return int
  */
 function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
@@ -679,8 +679,8 @@ function wc_string_to_timestamp( $time_string, $from_timestamp = null ) {
 /**
  * Convert a date string to a WC_DateTime.
  *
- * @since  3.1.0
- * @param  string $time_string Time string.
+ * @since 3.1.0
+ * @param string $time_string Time string.
  * @return WC_DateTime
  */
 function wc_string_to_datetime( $time_string ) {
@@ -756,7 +756,7 @@ function wc_timezone_string() {
 /**
  * Get timezone offset in seconds.
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @return float
  */
 function wc_timezone_offset() {
@@ -773,8 +773,8 @@ function wc_timezone_offset() {
 /**
  * Callback which can flatten post meta (gets the first value if it's an array).
  *
- * @since  3.0.0
- * @param  array $value Value to flatten.
+ * @since 3.0.0
+ * @param array $value Value to flatten.
  * @return mixed
  */
 function wc_flatten_meta_callback( $value ) {
@@ -1002,8 +1002,8 @@ function wc_sanitize_phone_number( $phone ) {
 /**
  * Wrapper for mb_strtoupper which see's if supported first.
  *
- * @since  3.1.0
- * @param  string $string String to format.
+ * @since 3.1.0
+ * @param string $string String to format.
  * @return string
  */
 function wc_strtoupper( $string ) {
@@ -1014,8 +1014,8 @@ function wc_strtoupper( $string ) {
  * Make a string lowercase.
  * Try to use mb_strtolower() when available.
  *
- * @since  2.3
- * @param  string $string String to format.
+ * @since 2.3
+ * @param string $string String to format.
  * @return string
  */
 function wc_strtolower( $string ) {
@@ -1025,10 +1025,10 @@ function wc_strtolower( $string ) {
 /**
  * Trim a string and append a suffix.
  *
- * @param  string  $string String to trim.
- * @param  integer $chars  Amount of characters.
+ * @param string  $string String to trim.
+ * @param integer $chars  Amount of characters.
  *                         Defaults to 200.
- * @param  string  $suffix Suffix.
+ * @param string  $suffix Suffix.
  *                         Defaults to '...'.
  * @return string
  */
@@ -1046,8 +1046,8 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 /**
  * Format content to display shortcodes.
  *
- * @since  2.3.0
- * @param  string $raw_string Raw string.
+ * @since 2.3.0
+ * @param string $raw_string Raw string.
  * @return string
  */
 function wc_format_content( $raw_string ) {
@@ -1059,8 +1059,8 @@ function wc_format_content( $raw_string ) {
  * Adds support for Jetpack Markdown.
  *
  * @codeCoverageIgnore
- * @since  2.4.0
- * @param  string $content Product short description.
+ * @since 2.4.0
+ * @param string $content Product short description.
  * @return string
  */
 function wc_format_product_short_description( $content ) {
@@ -1085,9 +1085,9 @@ function wc_format_product_short_description( $content ) {
  * Formats curency symbols when saved in settings.
  *
  * @codeCoverageIgnore
- * @param  string $value     Option value.
- * @param  array  $option    Option name.
- * @param  string $raw_value Raw value.
+ * @param string $value     Option value.
+ * @param array  $option    Option name.
+ * @param string $raw_value Raw value.
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
@@ -1100,9 +1100,9 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousa
  * Formats decimals when saved in settings.
  *
  * @codeCoverageIgnore
- * @param  string $value     Option value.
- * @param  array  $option    Option name.
- * @param  string $raw_value Raw value.
+ * @param string $value     Option value.
+ * @param array  $option    Option name.
+ * @param string $raw_value Raw value.
  * @return string
  */
 function wc_format_option_price_num_decimals( $value, $option, $raw_value ) {
@@ -1114,9 +1114,9 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
  * Formats hold stock option and sets cron event up.
  *
  * @codeCoverageIgnore
- * @param  string $value     Option value.
- * @param  array  $option    Option name.
- * @param  string $raw_value Raw value.
+ * @param string $value     Option value.
+ * @param array  $option    Option name.
+ * @param string $raw_value Raw value.
  * @return string
  */
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
@@ -1135,8 +1135,8 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
 /**
  * Sanitize terms from an attribute text based.
  *
- * @since  2.4.5
- * @param  string $term Term value.
+ * @since 2.4.5
+ * @param string $term Term value.
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
@@ -1178,8 +1178,8 @@ if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
 /**
  * Format the stock amount ready for display based on settings.
  *
- * @since  3.0.0
- * @param  WC_Product $product Product object for which the stock you need to format.
+ * @since 3.0.0
+ * @param WC_Product $product Product object for which the stock you need to format.
  * @return string
  */
 function wc_format_stock_for_display( $product ) {
@@ -1209,9 +1209,9 @@ function wc_format_stock_for_display( $product ) {
 /**
  * Format the stock quantity ready for display.
  *
- * @since  3.0.0
- * @param  int        $stock_quantity Stock quantity.
- * @param  WC_Product $product        Product instance so that we can pass through the filters.
+ * @since 3.0.0
+ * @param int        $stock_quantity Stock quantity.
+ * @param WC_Product $product        Product instance so that we can pass through the filters.
  * @return string
  */
 function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
@@ -1221,9 +1221,9 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
 /**
  * Format a sale price for display.
  *
- * @since  3.0.0
- * @param  string $regular_price Regular price.
- * @param  string $sale_price    Sale price.
+ * @since 3.0.0
+ * @param string $regular_price Regular price.
+ * @param string $sale_price    Sale price.
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
@@ -1234,8 +1234,8 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 /**
  * Format a price range for display.
  *
- * @param  string $from Price from.
- * @param  string $to   Price to.
+ * @param string $from Price from.
+ * @param string $to   Price to.
  * @return string
  */
 function wc_format_price_range( $from, $to ) {
@@ -1247,8 +1247,8 @@ function wc_format_price_range( $from, $to ) {
 /**
  * Format a weight for display.
  *
- * @since  3.0.0
- * @param  float $weight Weight.
+ * @since 3.0.0
+ * @param float $weight Weight.
  * @return string
  */
 function wc_format_weight( $weight ) {
@@ -1266,8 +1266,8 @@ function wc_format_weight( $weight ) {
 /**
  * Format dimensions for display.
  *
- * @since  3.0.0
- * @param  array $dimensions Array of dimensions.
+ * @since 3.0.0
+ * @param array $dimensions Array of dimensions.
  * @return string
  */
 function wc_format_dimensions( $dimensions ) {
@@ -1285,9 +1285,9 @@ function wc_format_dimensions( $dimensions ) {
 /**
  * Format a date for output.
  *
- * @since  3.0.0
- * @param  WC_DateTime $date   Instance of WC_DateTime.
- * @param  string      $format Data format.
+ * @since 3.0.0
+ * @param WC_DateTime $date   Instance of WC_DateTime.
+ * @param string      $format Data format.
  *                             Defaults to the wc_date_format function if not set.
  * @return string
  */
@@ -1304,8 +1304,8 @@ function wc_format_datetime( $date, $format = '' ) {
 /**
  * Process oEmbeds.
  *
- * @since  3.1.0
- * @param  string $content Content.
+ * @since 3.1.0
+ * @param string $content Content.
  * @return string
  */
 function wc_do_oembeds( $content ) {
@@ -1322,8 +1322,8 @@ function wc_do_oembeds( $content ) {
  * Used for example in shipping methods ids where they take the format
  * method_id:instance_id
  *
- * @since  3.2.0
- * @param  string $string String to extract.
+ * @since 3.2.0
+ * @param string $string String to extract.
  * @return string
  */
 function wc_get_string_before_colon( $string ) {

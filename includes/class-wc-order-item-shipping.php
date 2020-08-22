@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -34,8 +34,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Calculate item taxes.
 	 *
-	 * @since  3.2.0
-	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @since 3.2.0
+	 * @param array $calculate_tax_for Location data to get taxes for. Required.
 	 * @return bool  True if taxes were calculated.
 	 */
 	public function calculate_taxes( $calculate_tax_for = array() ) {
@@ -182,7 +182,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -192,7 +192,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get title.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_method_title( $context = 'view' ) {
@@ -207,7 +207,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get method ID.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_method_id( $context = 'view' ) {
@@ -217,7 +217,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get instance ID.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_instance_id( $context = 'view' ) {
@@ -227,7 +227,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get total cost.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_total( $context = 'view' ) {
@@ -237,7 +237,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get total tax.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -247,7 +247,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get taxes.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return array
 	 */
 	public function get_taxes( $context = 'view' ) {
@@ -257,7 +257,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get tax class.
 	 *
-	 * @param  string $context View or edit context.
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {

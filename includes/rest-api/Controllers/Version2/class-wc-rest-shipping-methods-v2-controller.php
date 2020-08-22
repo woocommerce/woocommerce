@@ -5,7 +5,7 @@
  * Handles requests to the /shipping_methods endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -71,7 +71,7 @@ class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to view shipping methods.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -84,7 +84,7 @@ class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read a shipping method.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -133,8 +133,8 @@ class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a shipping method for response.
 	 *
-	 * @param  WC_Shipping_Method $method   Shipping method object.
-	 * @param  WP_REST_Request    $request  Request object.
+	 * @param C_Shipping_Method $method   Shipping method object.
+	 * @param P_REST_Request    $request  Request object.
 	 * @return WP_REST_Response   $response Response data.
 	 */
 	public function prepare_item_for_response( $method, $request ) {

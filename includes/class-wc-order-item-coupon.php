@@ -4,7 +4,7 @@
  *
  * @package WooCommerce\Classes
  * @version 3.0.0
- * @since   3.0.0
+ * @since 3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -86,7 +86,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -96,7 +96,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get coupon code.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_code( $context = 'view' ) {
@@ -106,7 +106,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get discount amount.
 	 *
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_discount( $context = 'view' ) {

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
@@ -424,8 +424,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Search customers and return customer IDs.
 	 *
-	 * @param  string     $term Search term.
-	 * @param  int|string $limit Limit search results.
+	 * @param string     $term Search term.
+	 * @param nt|string $limit Limit search results.
 	 * @since 3.0.7
 	 *
 	 * @return array

@@ -4,9 +4,9 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    2.1.0
- * @version  2.4.0
+ * @package WooCommerce\API
+ * @since 2.1.0
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -184,9 +184,9 @@ class WC_API_Authentication {
 	/**
 	 * Get user by ID
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
-	 * @param  int $user_id
+	 * @param int $user_id
 	 *
 	 * @return WP_User
 	 * @throws Exception
@@ -303,7 +303,7 @@ class WC_API_Authentication {
 	 * Encodes a value according to RFC 3986. Supports multidimensional arrays.
 	 *
 	 * @since 2.4
-	 * @param  string|array $value The value to encode
+	 * @param tring|array $value The value to encode
 	 * @return string|array        Encoded values
 	 */
 	public static function urlencode_rfc3986( $value ) {

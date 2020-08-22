@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Download Data Store.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store_Interface {
 
@@ -264,7 +264,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Get a download object.
 	 *
-	 * @param  array $data From the DB.
+	 * @param array $data From the DB.
 	 * @return WC_Customer_Download
 	 */
 	private function get_download( $data ) {
@@ -274,7 +274,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Get array of download ids by specified args.
 	 *
-	 * @param  array $args Arguments to filter downloads. $args['return'] accepts the following values: 'objects' (default), 'ids' or a comma separeted list of fields (for example: 'order_id,user_id,user_email').
+	 * @param rray $args Arguments to filter downloads. $args['return'] accepts the following values: 'objects' (default), 'ids' or a comma separeted list of fields (for example: 'order_id,user_id,user_email').
 	 * @return array Can be an array of permission_ids, an array of WC_Customer_Download objects or an array of arrays containing specified fields depending on the value of $args['return'].
 	 */
 	public function get_downloads( $args = array() ) {
@@ -364,9 +364,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 *
 	 * @deprecated 3.3.0 Download id is now a static UUID and should not be changed based on file hash.
 	 *
-	 * @param  int    $product_id Product ID.
-	 * @param  string $old_id Old download_id.
-	 * @param  string $new_id New download_id.
+	 * @param nt    $product_id Product ID.
+	 * @param tring $old_id Old download_id.
+	 * @param tring $new_id New download_id.
 	 */
 	public function update_download_id( $product_id, $old_id, $new_id ) {
 		global $wpdb;
@@ -388,7 +388,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Get a customers downloads.
 	 *
-	 * @param  int $customer_id Customer ID.
+	 * @param nt $customer_id Customer ID.
 	 * @return array
 	 */
 	public function get_downloads_for_customer( $customer_id ) {
@@ -420,9 +420,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Update user prop for downloads based on order id.
 	 *
-	 * @param  int    $order_id Order ID.
-	 * @param  int    $customer_id Customer ID.
-	 * @param  string $email Customer email address.
+	 * @param nt    $order_id Order ID.
+	 * @param nt    $customer_id Customer ID.
+	 * @param tring $email Customer email address.
 	 */
 	public function update_user_by_order_id( $order_id, $customer_id, $email ) {
 		global $wpdb;

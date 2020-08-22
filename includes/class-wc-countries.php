@@ -30,7 +30,7 @@ class WC_Countries {
 	/**
 	 * Auto-load in-accessible properties on demand.
 	 *
-	 * @param  mixed $key Key.
+	 * @param mixed $key Key.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -150,7 +150,7 @@ class WC_Countries {
 	/**
 	 * Get the states for a country.
 	 *
-	 * @param  string $cc Country code.
+	 * @param string $cc Country code.
 	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
@@ -350,7 +350,7 @@ class WC_Countries {
 	/**
 	 * Gets an array of countries in the EU.
 	 *
-	 * @param  string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
+	 * @param string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
 	 * @return string[]
 	 */
 	public function get_european_union_countries( $type = '' ) {
@@ -547,8 +547,8 @@ class WC_Countries {
 	/**
 	 * Get country address format.
 	 *
-	 * @param  array  $args Arguments.
-	 * @param  string $separator How to separate address lines. @since 3.5.0.
+	 * @param array  $args Arguments.
+	 * @param string $separator How to separate address lines. @since 3.5.0.
 	 * @return string
 	 */
 	public function get_formatted_address( $args = array(), $separator = '<br/>' ) {
@@ -636,7 +636,7 @@ class WC_Countries {
 	/**
 	 * Trim white space and commas off a line.
 	 *
-	 * @param  string $line Line.
+	 * @param string $line Line.
 	 * @return string
 	 */
 	private function trim_formatted_address_line( $line ) {
@@ -1391,8 +1391,8 @@ class WC_Countries {
 	/**
 	 * Apply locale and get address fields.
 	 *
-	 * @param  mixed  $country Country.
-	 * @param  string $type    Address type, defaults to 'billing_'.
+	 * @param mixed  $country Country.
+	 * @param string $type    Address type, defaults to 'billing_'.
 	 * @return array
 	 */
 	public function get_address_fields( $country = '', $type = 'billing_' ) {

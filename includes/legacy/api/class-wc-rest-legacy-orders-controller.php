@@ -6,8 +6,8 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
- * @since    3.0.0
+ * @package WooCommerce\API
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -159,7 +159,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @deprecated 3.0
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
 	 */
 	protected function prepare_item_for_database( $request ) {

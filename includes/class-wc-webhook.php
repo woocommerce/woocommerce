@@ -6,9 +6,9 @@
  *
  * Webhooks are enqueued to their associated actions, delivered, and logged.
  *
- * @version  3.2.0
- * @package  WooCommerce\Webhooks
- * @since    2.2.0
+ * @version 3.2.0
+ * @package WooCommerce\Webhooks
+ * @since 2.2.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -102,8 +102,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Process the webhook for delivery by verifying that it should be delivered.
 	 * and scheduling the delivery (in the background by default, or immediately).
 	 *
-	 * @since  2.2.0
-	 * @param  mixed $arg The first argument provided from the associated hooks.
+	 * @since 2.2.0
+	 * @param mixed $arg The first argument provided from the associated hooks.
 	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
@@ -131,8 +131,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Helper to check if the webhook should be delivered, as some hooks.
 	 * (like `wp_trash_post`) will fire for every post type, not just ours.
 	 *
-	 * @since  2.2.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 2.2.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
@@ -151,7 +151,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Returns if webhook is active.
 	 *
-	 * @since  3.6.0
+	 * @since 3.6.0
 	 * @return bool  True if validation passes.
 	 */
 	private function is_active() {
@@ -161,7 +161,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Returns if topic is valid.
 	 *
-	 * @since  3.6.0
+	 * @since 3.6.0
 	 * @return bool  True if validation passes.
 	 */
 	private function is_valid_topic() {
@@ -171,8 +171,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Validates the criteria for certain actions.
 	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 3.6.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_action( $arg ) {
@@ -200,8 +200,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Validates post actions.
 	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 3.6.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
@@ -220,8 +220,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Validates user actions.
 	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 3.6.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_user_action( $arg ) {
@@ -238,8 +238,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Validates WC processing actions.
 	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 3.6.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_processing_action( $arg ) {
@@ -265,8 +265,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Checks the resource for this webhook is valid e.g. valid post status.
 	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
+	 * @since 3.6.0
+	 * @param ixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_resource( $arg ) {
@@ -356,10 +356,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get Legacy API payload.
 	 *
-	 * @since  3.0.0
-	 * @param  string $resource    Resource type.
-	 * @param  int    $resource_id Resource ID.
-	 * @param  string $event       Event type.
+	 * @since 3.0.0
+	 * @param tring $resource    Resource type.
+	 * @param nt    $resource_id Resource ID.
+	 * @param tring $event       Event type.
 	 * @return array
 	 */
 	private function get_legacy_api_payload( $resource, $resource_id, $event ) {
@@ -407,10 +407,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get WP API integration payload.
 	 *
-	 * @since  3.0.0
-	 * @param  string $resource    Resource type.
-	 * @param  int    $resource_id Resource ID.
-	 * @param  string $event       Event type.
+	 * @since 3.0.0
+	 * @param tring $resource    Resource type.
+	 * @param nt    $resource_id Resource ID.
+	 * @param tring $event       Event type.
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
@@ -447,8 +447,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Build the payload data for the webhook.
 	 *
-	 * @since  2.2.0
-	 * @param  mixed $resource_id First hook argument, typically the resource ID.
+	 * @since 2.2.0
+	 * @param ixed $resource_id First hook argument, typically the resource ID.
 	 * @return mixed              Payload data.
 	 */
 	public function build_payload( $resource_id ) {
@@ -485,8 +485,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * recipient can verify the authenticity of the webhook. Note that the signature.
 	 * is calculated after the body has already been encoded (JSON by default).
 	 *
-	 * @since  2.2.0
-	 * @param  string $payload Payload data to hash.
+	 * @since 2.2.0
+	 * @param tring $payload Payload data to hash.
 	 * @return string
 	 */
 	public function generate_signature( $payload ) {
@@ -499,7 +499,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Generate a new unique hash as a delivery id based on current time and wehbook id.
 	 * Return the hash for inclusion in the webhook request.
 	 *
-	 * @since  2.2.0
+	 * @since 2.2.0
 	 * @return string
 	 */
 	public function get_new_delivery_id() {
@@ -603,7 +603,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery logs for this webhook.
 	 *
-	 * @since  3.3.0
+	 * @since 3.3.0
 	 * @return string
 	 */
 	public function get_delivery_logs() {
@@ -631,7 +631,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
-	 * @since  2.2.0
+	 * @since 2.2.0
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
@@ -668,8 +668,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the friendly name for the webhook.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -684,8 +684,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * - 'paused' - does not deliver payload, paused by admin.
 	 * - 'disabled' - does not delivery payload, paused automatically due to consecutive failures.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string status
 	 */
@@ -696,8 +696,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get webhook created date.
 	 *
-	 * @since  3.2.0
-	 * @param  string $context  What the value is for.
+	 * @since 3.2.0
+	 * @param tring $context  What the value is for.
 	 *                          Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
@@ -708,8 +708,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get webhook modified date.
 	 *
-	 * @since  3.2.0
-	 * @param  string $context  What the value is for.
+	 * @since 3.2.0
+	 * @param tring $context  What the value is for.
 	 *                          Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
@@ -720,8 +720,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the secret used for generating the HMAC-SHA256 signature.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -732,8 +732,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the webhook topic, e.g. `order.created`.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -744,8 +744,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery URL.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -756,8 +756,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the user ID for this webhook.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
@@ -768,8 +768,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * API version.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for.
+	 * @since 3.0.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -782,8 +782,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the failure count.
 	 *
-	 * @since  2.2.0
-	 * @param  string $context What the value is for.
+	 * @since 2.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
@@ -794,8 +794,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get pending delivery.
 	 *
-	 * @since  3.2.0
-	 * @param  string $context What the value is for.
+	 * @since 3.2.0
+	 * @param tring $context What the value is for.
 	 *                         Valid values are 'view' and 'edit'.
 	 * @return bool
 	 */
@@ -949,8 +949,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the associated hook names for a topic.
 	 *
-	 * @since  2.2.0
-	 * @param  string $topic Topic name.
+	 * @since 2.2.0
+	 * @param tring $topic Topic name.
 	 * @return array
 	 */
 	private function get_topic_hooks( $topic ) {
@@ -1020,7 +1020,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the hook names for the webhook.
 	 *
-	 * @since  2.2.0
+	 * @since 2.2.0
 	 * @return array
 	 */
 	public function get_hooks() {
@@ -1036,7 +1036,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the resource for the webhook, e.g. `order`.
 	 *
-	 * @since  2.2.0
+	 * @since 2.2.0
 	 * @return string
 	 */
 	public function get_resource() {
@@ -1048,7 +1048,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the event for the webhook, e.g. `created`.
 	 *
-	 * @since  2.2.0
+	 * @since 2.2.0
 	 * @return string
 	 */
 	public function get_event() {

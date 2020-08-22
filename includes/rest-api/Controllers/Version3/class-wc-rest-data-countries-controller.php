@@ -5,7 +5,7 @@
  * Handles requests to the /data/countries endpoint.
  *
  * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @since 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -69,8 +69,8 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Get a list of countries and states.
 	 *
-	 * @param  string          $country_code Country code.
-	 * @param  WP_REST_Request $request      Request data.
+	 * @param string          $country_code Country code.
+	 * @param P_REST_Request $request      Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_country( $country_code = false, $request ) {
@@ -103,8 +103,8 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of states for all countries.
 	 *
-	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.5.0
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -123,8 +123,8 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Return the list of states for a given country.
 	 *
-	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @since 3.5.0
+	 * @param P_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -138,7 +138,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Prepare the data object for response.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @param object          $item Data object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
@@ -186,7 +186,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Get the location schema, conforming to JSON Schema.
 	 *
-	 * @since  3.5.0
+	 * @since 3.5.0
 	 * @return array
 	 */
 	public function get_item_schema() {

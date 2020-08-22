@@ -2,8 +2,8 @@
 /**
  * Twenty Fifteen support.
  *
- * @class   WC_Twenty_Fifteen
- * @since   3.3.0
+ * @class WC_Twenty_Fifteen
+ * @since 3.3.0
  * @package WooCommerce\Classes
  */
 

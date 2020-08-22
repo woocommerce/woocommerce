@@ -64,7 +64,7 @@ class WC_Tracks_Event {
 	/**
 	 * Annotate the event with all relevant info.
 	 *
-	 * @param  array $event Event arguments.
+	 * @param array $event Event arguments.
 	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	public static function validate_and_sanitize( $event ) {

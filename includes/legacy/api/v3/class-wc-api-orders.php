@@ -6,8 +6,8 @@
  *
  * @author      WooThemes
  * @category    API
- * @package     WooCommerce\API
- * @since       2.1
+ * @package WooCommerce\API
+ * @since 2.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1005,7 +1005,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * We can't just trust input from the API to pass a variation_id manually, otherwise you could pass
 	 * the cheapest variation ID but provide other information so we have to look up the variation ID.
 	 *
-	 * @param  WC_Product $product Product instance
+	 * @param WC_Product $product Product instance
 	 * @param array $variations
 	 *
 	 * @return int Returns an ID if a valid variation was found for this product

@@ -6,8 +6,8 @@
  *
  * @author   Automattic
  * @category Core
- * @package  WooCommerce\Functions
- * @version  3.3.0
+ * @package WooCommerce\Functions
+ * @version 3.3.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -102,7 +102,7 @@ function wc_caught_exception( $exception_object, $function = '', $args = array()
 /**
  * Wrapper for _doing_it_wrong().
  *
- * @since  3.0.0
+ * @since 3.0.0
  * @param string $function Function used.
  * @param string $message Message to log.
  * @param string $version Version the message was added in.
@@ -123,10 +123,10 @@ function wc_doing_it_wrong( $function, $message, $version ) {
 /**
  * Wrapper for deprecated arguments so we can apply some extra logic.
  *
- * @since  3.0.0
- * @param  string $argument
- * @param  string $version
- * @param  string $replacement
+ * @since 3.0.0
+ * @param string $argument
+ * @param string $version
+ * @param string $replacement
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( is_ajax() || WC()->is_rest_api_request() ) {
@@ -1044,10 +1044,10 @@ function wc_get_min_max_price_meta_query( $args ) {
  * When a term is split, ensure meta data maintained.
  *
  * @deprecated 3.6.0
- * @param  int    $old_term_id      Old term ID.
- * @param  int    $new_term_id      New term ID.
- * @param  string $term_taxonomy_id Term taxonomy ID.
- * @param  string $taxonomy         Taxonomy.
+ * @param int    $old_term_id      Old term ID.
+ * @param int    $new_term_id      New term ID.
+ * @param string $term_taxonomy_id Term taxonomy ID.
+ * @param string $taxonomy         Taxonomy.
  */
 function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
 	wc_deprecated_function( 'wc_taxonomy_metadata_update_content_for_split_terms', '3.6' );

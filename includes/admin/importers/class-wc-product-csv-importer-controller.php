@@ -16,8 +16,8 @@ if ( ! class_exists( 'WP_Importer' ) ) {
 /**
  * Product importer controller - handles file upload and forms in admin.
  *
- * @package     WooCommerce\Admin\Importers
- * @version     3.1.0
+ * @package WooCommerce\Admin\Importers
+ * @version 3.1.0
  */
 class WC_Product_CSV_Importer_Controller {
 
@@ -73,8 +73,8 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Get importer instance.
 	 *
-	 * @param  string $file File to import.
-	 * @param  array  $args Importer arguments.
+	 * @param string $file File to import.
+	 * @param rray  $args Importer arguments.
 	 * @return WC_Product_CSV_Importer
 	 */
 	public static function get_importer( $file, $args = array() ) {
@@ -469,7 +469,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Columns to normalize.
 	 *
-	 * @param  array $columns List of columns names and keys.
+	 * @param rray $columns List of columns names and keys.
 	 * @return array
 	 */
 	protected function normalize_columns_names( $columns ) {
@@ -485,8 +485,8 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Auto map column names.
 	 *
-	 * @param  array $raw_headers Raw header columns.
-	 * @param  bool  $num_indexes If should use numbers or raw header columns as indexes.
+	 * @param rray $raw_headers Raw header columns.
+	 * @param ool  $num_indexes If should use numbers or raw header columns as indexes.
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
@@ -602,7 +602,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Map columns using the user's lastest import mappings.
 	 *
-	 * @param  array $headers Header columns.
+	 * @param rray $headers Header columns.
 	 * @return array
 	 */
 	public function auto_map_user_preferences( $headers ) {
@@ -618,7 +618,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Sanitize special column name regex.
 	 *
-	 * @param  string $value Raw special column name.
+	 * @param tring $value Raw special column name.
 	 * @return string
 	 */
 	protected function sanitize_special_column_name_regex( $value ) {
@@ -628,7 +628,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Get special columns.
 	 *
-	 * @param  array $columns Raw special columns.
+	 * @param rray $columns Raw special columns.
 	 * @return array
 	 */
 	protected function get_special_columns( $columns ) {
@@ -646,7 +646,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Get mapping options.
 	 *
-	 * @param  string $item Item name.
+	 * @param tring $item Item name.
 	 * @return array
 	 */
 	protected function get_mapping_options( $item = '' ) {

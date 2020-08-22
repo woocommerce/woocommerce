@@ -54,8 +54,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Evaluate a cost from a sum/string.
 	 *
-	 * @param  string $sum Sum of shipping.
-	 * @param  array  $args Args, must contain `cost` and `qty` keys. Having `array()` as default is for back compat reasons.
+	 * @param string $sum Sum of shipping.
+	 * @param rray  $args Args, must contain `cost` and `qty` keys. Having `array()` as default is for back compat reasons.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
@@ -107,7 +107,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Work out fee (shortcode).
 	 *
-	 * @param  array $atts Attributes.
+	 * @param rray $atts Attributes.
 	 * @return string
 	 */
 	public function fee( $atts ) {
@@ -219,7 +219,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * Get items in package.
 	 *
-	 * @param  array $package Package of items from cart.
+	 * @param rray $package Package of items from cart.
 	 * @return int
 	 */
 	public function get_package_item_qty( $package ) {

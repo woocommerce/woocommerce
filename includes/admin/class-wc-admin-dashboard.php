@@ -2,8 +2,8 @@
 /**
  * Admin Dashboard
  *
- * @package     WooCommerce\Admin
- * @version     2.1.0
+ * @package WooCommerce\Admin
+ * @version 2.1.0
  */
 
 use Automattic\Jetpack\Constants;

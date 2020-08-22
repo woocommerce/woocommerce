@@ -5,8 +5,8 @@
  * Legacy and deprecated functions are here to keep the WC_Legacy_Webhook class clean.
  * This class will be removed in future versions.
  *
- * @version  3.2.0
- * @package  WooCommerce\Classes
+ * @version 3.2.0
+ * @package WooCommerce\Classes
  * @category Class
  * @author   Automattic
  */
@@ -23,7 +23,7 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 *
-	 * @param  string $key Item to check.
+	 * @param string $key Item to check.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
@@ -51,7 +51,7 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	/**
 	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
 	 *
-	 * @param  string $key Item to get.
+	 * @param tring $key Item to get.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -104,8 +104,8 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	 * Get the post data for the webhook.
 	 *
 	 * @deprecated 3.2.0
-	 * @since      2.2
-	 * @return     null|WP_Post
+	 * @since 2.2
+	 * @return null|WP_Post
 	 */
 	public function get_post_data() {
 		wc_deprecated_function( 'WC_Webhook::get_post_data', '3.2' );
@@ -117,8 +117,8 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	 * Update the webhook status.
 	 *
 	 * @deprecated 3.2.0
-	 * @since      2.2.0
-	 * @param      string $status Status to set.
+	 * @since 2.2.0
+	 * @param string $status Status to set.
 	 */
 	public function update_status( $status ) {
 		wc_deprecated_function( 'WC_Webhook::update_status', '3.2', 'WC_Webhook::set_status' );

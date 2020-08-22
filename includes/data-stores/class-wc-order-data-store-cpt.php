@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Order Data Store: Stored in CPT.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Order_Data_Store_Interface {
 
@@ -297,7 +297,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Excerpt for post.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
 	protected function get_post_excerpt( $order ) {
@@ -322,7 +322,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get amount already refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_refunded( $order ) {
@@ -345,7 +345,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
@@ -369,7 +369,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the total shipping refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param C_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_shipping_refunded( $order ) {
@@ -404,7 +404,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Return count of orders with a specific status.
 	 *
-	 * @param  string $status Order status. Function wc_get_order_statuses() returns a list of valid statuses.
+	 * @param tring $status Order status. Function wc_get_order_statuses() returns a list of valid statuses.
 	 * @return int
 	 */
 	public function get_order_count( $status ) {
@@ -416,9 +416,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get all orders matching the passed in args.
 	 *
 	 * @deprecated 3.1.0 - Use wc_get_orders instead.
-	 * @see    wc_get_orders()
+	 * @see wc_get_orders()
 	 *
-	 * @param  array $args List of args passed to wc_get_orders().
+	 * @param rray $args List of args passed to wc_get_orders().
 	 *
 	 * @return array|object
 	 */
@@ -430,8 +430,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Generate meta query for wc_get_orders.
 	 *
-	 * @param  array  $values List of customers ids or emails.
-	 * @param  string $relation 'or' or 'and' relation used to build the WP meta_query.
+	 * @param rray  $values List of customers ids or emails.
+	 * @param tring $relation 'or' or 'and' relation used to build the WP meta_query.
 	 * @return array
 	 */
 	private function get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
@@ -480,7 +480,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get unpaid orders after a certain date,
 	 *
-	 * @param  int $date Timestamp.
+	 * @param nt $date Timestamp.
 	 * @return array
 	 */
 	public function get_unpaid_orders( $date ) {
@@ -505,7 +505,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Search order data for a term and return ids.
 	 *
-	 * @param  string $term Searched term.
+	 * @param tring $term Searched term.
 	 * @return array of ids
 	 */
 	public function search_orders( $term ) {
@@ -881,9 +881,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Return the order type of a given item which belongs to WC_Order.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Order $order Order Object.
-	 * @param  int      $order_item_id Order item id.
+	 * @since 3.2.0
+	 * @param C_Order $order Order Object.
+	 * @param nt      $order_item_id Order item id.
 	 * @return string Order Item type
 	 */
 	public function get_order_item_type( $order, $order_item_id ) {

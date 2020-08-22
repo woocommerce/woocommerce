@@ -16,10 +16,10 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 	 *
 	 * An email sent to the customer when they create an account.
 	 *
-	 * @class       WC_Email_Customer_New_Account
-	 * @version     3.5.0
-	 * @package     WooCommerce\Classes\Emails
-	 * @extends     WC_Email
+	 * @class WC_Email_Customer_New_Account
+	 * @version 3.5.0
+	 * @package WooCommerce\Classes\Emails
+	 * @extends WC_Email
 	 */
 	class WC_Email_Customer_New_Account extends WC_Email {
 
@@ -69,7 +69,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		/**
 		 * Get email subject.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -79,7 +79,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @since  3.1.0
+		 * @since 3.1.0
 		 * @return string
 		 */
 		public function get_default_heading() {

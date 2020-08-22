@@ -3,7 +3,7 @@
  * Abstract deprecated hooks
  *
  * @package WooCommerce\Abstracts
- * @since   3.0.0
+ * @since 3.0.0
  * @version 3.3.0
  */
 
@@ -52,7 +52,7 @@ abstract class WC_Deprecated_Hooks {
 	/**
 	 * Get old hooks to map to new hook.
 	 *
-	 * @param  string $new_hook New hook name.
+	 * @param string $new_hook New hook name.
 	 * @return array
 	 */
 	public function get_old_hooks( $new_hook ) {
@@ -81,10 +81,10 @@ abstract class WC_Deprecated_Hooks {
 	/**
 	 * If the old hook is in-use, trigger it.
 	 *
-	 * @param  string $new_hook          New hook name.
-	 * @param  string $old_hook          Old hook name.
-	 * @param  array  $new_callback_args New callback args.
-	 * @param  mixed  $return_value      Returned value.
+	 * @param string $new_hook          New hook name.
+	 * @param string $old_hook          Old hook name.
+	 * @param array  $new_callback_args New callback args.
+	 * @param mixed  $return_value      Returned value.
 	 * @return mixed
 	 */
 	abstract public function handle_deprecated_hook( $new_hook, $old_hook, $new_callback_args, $return_value );
@@ -112,8 +112,8 @@ abstract class WC_Deprecated_Hooks {
 	/**
 	 * Fire off a legacy hook with it's args.
 	 *
-	 * @param  string $old_hook          Old hook name.
-	 * @param  array  $new_callback_args New callback args.
+	 * @param string $old_hook          Old hook name.
+	 * @param array  $new_callback_args New callback args.
 	 * @return mixed
 	 */
 	abstract protected function trigger_hook( $old_hook, $new_callback_args );

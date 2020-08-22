@@ -40,8 +40,8 @@ class WC_Tax {
 	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
 	 *
 	 * @deprecated 3.7.0
-	 * @param  string $old_value Old rates value.
-	 * @param  string $value New rates value.
+	 * @param string $old_value Old rates value.
+	 * @param string $value New rates value.
 	 */
 	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
 		wc_deprecated_function( 'WC_Tax::maybe_remove_tax_class_rates', '3.7', 'WC_Tax::delete_tax_class_by' );
@@ -57,10 +57,10 @@ class WC_Tax {
 	/**
 	 * Calculate tax for a line.
 	 *
-	 * @param  float   $price              Price to calc tax on.
-	 * @param  array   $rates              Rates to apply.
-	 * @param  boolean $price_includes_tax Whether the passed price has taxes included.
-	 * @param  boolean $deprecated         Whether to suppress any rounding from taking place. No longer used here.
+	 * @param float   $price              Price to calc tax on.
+	 * @param array   $rates              Rates to apply.
+	 * @param boolean $price_includes_tax Whether the passed price has taxes included.
+	 * @param boolean $deprecated         Whether to suppress any rounding from taking place. No longer used here.
 	 * @return array                       Array of rates + prices after tax.
 	 */
 	public static function calc_tax( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
@@ -104,8 +104,8 @@ class WC_Tax {
 	/**
 	 * Calc tax from inclusive price.
 	 *
-	 * @param  float $price Price to calculate tax for.
-	 * @param  array $rates Array of tax rates.
+	 * @param float $price Price to calculate tax for.
+	 * @param array $rates Array of tax rates.
 	 * @return array
 	 */
 	public static function calc_inclusive_tax( $price, $rates ) {
@@ -157,8 +157,8 @@ class WC_Tax {
 	/**
 	 * Calc tax from exclusive price.
 	 *
-	 * @param  float $price Price to calculate tax for.
-	 * @param  array $rates Array of tax rates.
+	 * @param float $price Price to calculate tax for.
+	 * @param array $rates Array of tax rates.
 	 * @return array
 	 */
 	public static function calc_exclusive_tax( $price, $rates ) {
@@ -323,7 +323,7 @@ class WC_Tax {
 	/**
 	 * Logical sort order for tax rates based on the following in order of priority.
 	 *
-	 * @param  array $rates Rates to be sorted.
+	 * @param array $rates Rates to be sorted.
 	 * @return array
 	 */
 	private static function sort_rates( $rates ) {
@@ -338,11 +338,11 @@ class WC_Tax {
 	/**
 	 * Loop through a set of tax rates and get the matching rates (1 per priority).
 	 *
-	 * @param  string $country Country code to match against.
-	 * @param  string $state State code to match against.
-	 * @param  string $postcode Postcode to match against.
-	 * @param  string $city City to match against.
-	 * @param  string $tax_class Tax class to match against.
+	 * @param string $country Country code to match against.
+	 * @param string $state State code to match against.
+	 * @param string $postcode Postcode to match against.
+	 * @param string $city City to match against.
+	 * @param string $tax_class Tax class to match against.
 	 * @return array
 	 */
 	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class ) {
@@ -444,8 +444,8 @@ class WC_Tax {
 	 *
 	 * Used by get_rates(), get_shipping_rates().
 	 *
-	 * @param  string $tax_class string Optional, passed to the filter for advanced tax setups.
-	 * @param  object $customer Override the customer object to get their location.
+	 * @param string $tax_class string Optional, passed to the filter for advanced tax setups.
+	 * @param object $customer Override the customer object to get their location.
 	 * @return array
 	 */
 	public static function get_tax_location( $tax_class = '', $customer = null ) {
@@ -474,7 +474,7 @@ class WC_Tax {
 	 *
 	 * @param string $tax_class Tax class to get rates for.
 	 * @param object $customer Override the customer object to get their location.
-	 * @return  array
+	 * @return array
 	 */
 	public static function get_rates( $tax_class = '', $customer = null ) {
 		$tax_class         = sanitize_title( $tax_class );
@@ -626,7 +626,7 @@ class WC_Tax {
 	 * Return true/false depending on if a rate is a compound rate.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.
-	 * @return  bool
+	 * @return bool
 	 */
 	public static function is_compound( $key_or_rate ) {
 		global $wpdb;
@@ -646,7 +646,7 @@ class WC_Tax {
 	 * Return a given rates label.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.
-	 * @return  string
+	 * @return string
 	 */
 	public static function get_rate_label( $key_or_rate ) {
 		global $wpdb;
@@ -670,7 +670,7 @@ class WC_Tax {
 	 * Return a given rates percent.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.
-	 * @return  string
+	 * @return string
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
@@ -682,7 +682,7 @@ class WC_Tax {
 	 * Return a given rates percent.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.
-	 * @return  float
+	 * @return float
 	 */
 	public static function get_rate_percent_value( $key_or_rate ) {
 		global $wpdb;
@@ -732,7 +732,7 @@ class WC_Tax {
 	/**
 	 * Sums a set of taxes to form a single total. Values are pre-rounded to precision from 3.6.0.
 	 *
-	 * @param  array $taxes Array of taxes.
+	 * @param array $taxes Array of taxes.
 	 * @return float
 	 */
 	public static function get_tax_total( $taxes ) {
@@ -775,7 +775,7 @@ class WC_Tax {
 	/**
 	 * Get store tax classes as slugs.
 	 *
-	 * @since  3.0.0
+	 * @since 3.0.0
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
@@ -915,7 +915,7 @@ class WC_Tax {
 	/**
 	 * Format the city.
 	 *
-	 * @param  string $city Value to format.
+	 * @param string $city Value to format.
 	 * @return string
 	 */
 	private static function format_tax_rate_city( $city ) {
@@ -925,7 +925,7 @@ class WC_Tax {
 	/**
 	 * Format the state.
 	 *
-	 * @param  string $state Value to format.
+	 * @param string $state Value to format.
 	 * @return string
 	 */
 	private static function format_tax_rate_state( $state ) {
@@ -936,7 +936,7 @@ class WC_Tax {
 	/**
 	 * Format the country.
 	 *
-	 * @param  string $country Value to format.
+	 * @param string $country Value to format.
 	 * @return string
 	 */
 	private static function format_tax_rate_country( $country ) {
@@ -947,7 +947,7 @@ class WC_Tax {
 	/**
 	 * Format the tax rate name.
 	 *
-	 * @param  string $name Value to format.
+	 * @param string $name Value to format.
 	 * @return string
 	 */
 	private static function format_tax_rate_name( $name ) {
@@ -957,7 +957,7 @@ class WC_Tax {
 	/**
 	 * Format the rate.
 	 *
-	 * @param  float $rate Value to format.
+	 * @param float $rate Value to format.
 	 * @return string
 	 */
 	private static function format_tax_rate( $rate ) {
@@ -967,7 +967,7 @@ class WC_Tax {
 	/**
 	 * Format the priority.
 	 *
-	 * @param  string $priority Value to format.
+	 * @param string $priority Value to format.
 	 * @return int
 	 */
 	private static function format_tax_rate_priority( $priority ) {
@@ -977,7 +977,7 @@ class WC_Tax {
 	/**
 	 * Format the class.
 	 *
-	 * @param  string $class Value to format.
+	 * @param string $class Value to format.
 	 * @return string
 	 */
 	public static function format_tax_rate_class( $class ) {
@@ -992,7 +992,7 @@ class WC_Tax {
 	/**
 	 * Prepare and format tax rate for DB insertion.
 	 *
-	 * @param  array $tax_rate Tax rate to format.
+	 * @param array $tax_rate Tax rate to format.
 	 * @return array
 	 */
 	private static function prepare_tax_rate( $tax_rate ) {
@@ -1015,7 +1015,7 @@ class WC_Tax {
 	 *
 	 * @since 2.3.0
 	 *
-	 * @param  array $tax_rate Tax rate to insert.
+	 * @param array $tax_rate Tax rate to insert.
 	 * @return int tax rate id
 	 */
 	public static function _insert_tax_rate( $tax_rate ) {
@@ -1093,7 +1093,7 @@ class WC_Tax {
 	 * Internal use only.
 	 *
 	 * @since 2.3.0
-	 * @param  int $tax_rate_id Tax rate to delete.
+	 * @param int $tax_rate_id Tax rate to delete.
 	 */
 	public static function _delete_tax_rate( $tax_rate_id ) {
 		global $wpdb;

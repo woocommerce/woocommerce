@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
- * @since    3.0.0
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -83,7 +83,7 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check whether a given request has permission to read taxes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -97,7 +97,7 @@ class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check if a given request has access to read a tax.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param P_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {

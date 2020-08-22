@@ -2,7 +2,7 @@
 /**
  * Twenty Ten support.
  *
- * @since   3.3.0
+ * @since 3.3.0
  * @package WooCommerce\Classes
  */
 

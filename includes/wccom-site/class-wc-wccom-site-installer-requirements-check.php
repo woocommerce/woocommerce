@@ -3,7 +3,7 @@
  * WooCommerce.com Product Installation Requirements Check.
  *
  * @package WooCommerce\WCCom
- * @since   3.8.0
+ * @since 3.8.0
  */
 
 use Automattic\Jetpack\Constants;

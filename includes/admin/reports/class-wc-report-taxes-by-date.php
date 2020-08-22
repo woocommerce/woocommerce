@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce\Admin\Reports
- * @version     2.1.0
+ * @package WooCommerce\Admin\Reports
+ * @version 2.1.0
  */
 class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
