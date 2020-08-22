@@ -4,7 +4,7 @@
  *
  * Handles requests to the /webhooks/<webhook_id>/deliveries endpoint.
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
  * @since 3.0.0

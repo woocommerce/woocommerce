@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version 3.0.0
  * @package WooCommerce\Abstracts
  * @category Abstract Class
- * @author   WooThemes
+ * @author WooThemes
  */
 abstract class WC_Abstract_Legacy_Product extends WC_Data {
 

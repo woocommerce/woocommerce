@@ -8,7 +8,7 @@
  * @version 3.2.0
  * @package WooCommerce\Classes
  * @category Class
- * @author   Automattic
+ * @author Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

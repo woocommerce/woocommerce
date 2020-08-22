@@ -2,8 +2,8 @@
 /**
  * WooCommerce Settings Page/Tab
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin
  * @version 2.1.0
  */

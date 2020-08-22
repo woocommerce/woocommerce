@@ -4,7 +4,7 @@
  *
  * Handles requests to the /orders/<order_id>/refunds endpoint.
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category API
  * @package Automattic/WooCommerce/RestApi
  * @since 2.6.0

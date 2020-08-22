@@ -4,7 +4,7 @@
  *
  * Handles requests to the /webhooks endpoint
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category API
  * @package WooCommerce\API
  * @since 2.2

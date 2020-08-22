@@ -4,7 +4,7 @@
  *
  * Handles requests to the /products endpoint.
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category API
  * @package WooCommerce\API
  * @since 3.0.0

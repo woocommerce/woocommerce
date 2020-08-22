@@ -2,7 +2,7 @@
 /**
  * WooCommerce Log Table List
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category Admin
  * @package WooCommerce\Admin
  * @version 1.0.0

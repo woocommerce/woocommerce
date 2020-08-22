@@ -2,7 +2,7 @@
 /**
  * Add extra profile fields for users in admin
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category Admin
  * @package WooCommerce\Admin
  * @version 2.4.0

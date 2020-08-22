@@ -4,8 +4,8 @@
  *
  * Defines an interface that API request/response handlers should implement
  *
- * @author      WooThemes
- * @category    API
+ * @author WooThemes
+ * @category API
  * @package WooCommerce\API
  * @since 2.1
  * @version 2.1

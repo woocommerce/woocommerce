@@ -2,8 +2,8 @@
 /**
  * WooCommerce Meta Box Functions
  *
- * @author      WooThemes
- * @category    Core
+ * @author WooThemes
+ * @category Core
  * @package WooCommerce\Admin\Functions
  * @version 2.3.0
  */

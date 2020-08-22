@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version 3.0.0
  * @package WooCommerce\Classes
  * @category Class
- * @author   WooCommerce
+ * @author WooCommerce
  */
 abstract class WC_Legacy_Payment_Token extends WC_Data {
 

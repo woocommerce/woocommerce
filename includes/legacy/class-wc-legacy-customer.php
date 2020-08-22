@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version 3.0.0
  * @package WooCommerce\Classes
  * @category Class
- * @author   WooThemes
+ * @author WooThemes
  */
 abstract class WC_Legacy_Customer extends WC_Data {
 

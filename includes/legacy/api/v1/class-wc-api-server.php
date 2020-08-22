@@ -7,8 +7,8 @@
  * This class and related code (JSON response handler, resource classes) are based on WP-API v0.6 (https://github.com/WP-API/WP-API)
  * Many thanks to Ryan McCue and any other contributors!
  *
- * @author      WooThemes
- * @category    API
+ * @author WooThemes
+ * @category API
  * @package WooCommerce\API
  * @since 2.1
  * @version 2.1

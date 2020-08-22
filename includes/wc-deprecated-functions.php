@@ -4,7 +4,7 @@
  *
  * Where functions come to die.
  *
- * @author   Automattic
+ * @author Automattic
  * @category Core
  * @package WooCommerce\Functions
  * @version 3.3.0

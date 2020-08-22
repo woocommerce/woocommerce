@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class WC_Legacy_Coupon
  * @version 3.0.0
  * @package WooCommerce\Classes
- * @category    Class
- * @author      WooThemes
+ * @category Class
+ * @author WooThemes
  */
 abstract class WC_Legacy_Coupon extends WC_Data {
 

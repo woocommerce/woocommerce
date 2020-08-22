@@ -2,7 +2,7 @@
 /**
  * WooCommerce Legacy API. Was deprecated with 2.6.0.
  *
- * @author   WooThemes
+ * @author WooThemes
  * @category API
  * @package WooCommerce\API
  * @since 2.6

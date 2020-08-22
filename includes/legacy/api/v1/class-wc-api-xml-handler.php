@@ -4,8 +4,8 @@
  *
  * Handles parsing XML request bodies and generating XML responses
  *
- * @author      WooThemes
- * @category    API
+ * @author WooThemes
+ * @category API
  * @package WooCommerce\API
  * @since 2.1
  * @version 2.1

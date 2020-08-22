@@ -11,8 +11,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * WC_Report_Stock.
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin\Reports
  * @version 2.1.0
  */

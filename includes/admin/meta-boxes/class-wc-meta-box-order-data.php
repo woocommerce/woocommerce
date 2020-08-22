@@ -4,8 +4,8 @@
  *
  * Functions for displaying the order data meta box.
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin\Meta Boxes
  * @version 2.2.0
  */

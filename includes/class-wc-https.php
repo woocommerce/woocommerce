@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version 2.2.0
  * @package WooCommerce\Classes
  * @category Class
- * @author   WooThemes
+ * @author WooThemes
  */
 class WC_HTTPS {
 

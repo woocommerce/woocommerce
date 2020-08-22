@@ -4,8 +4,8 @@
  *
  * Display the coupon data meta box.
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin\Meta Boxes
  * @version 2.1.0
  */

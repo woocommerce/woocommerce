@@ -2,8 +2,8 @@
 /**
  * Download report
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin\Reports
  * @version 3.3.0
  */

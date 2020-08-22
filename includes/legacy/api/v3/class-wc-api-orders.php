@@ -4,8 +4,8 @@
  *
  * Handles requests to the /orders endpoint
  *
- * @author      WooThemes
- * @category    API
+ * @author WooThemes
+ * @category API
  * @package WooCommerce\API
  * @since 2.1
  */

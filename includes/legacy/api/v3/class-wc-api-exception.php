@@ -4,8 +4,8 @@
  *
  * Extends Exception to provide additional data
  *
- * @author      WooThemes
- * @category    API
+ * @author WooThemes
+ * @category API
  * @package WooCommerce\API
  * @since 2.2
  */

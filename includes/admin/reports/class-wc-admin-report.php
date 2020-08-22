@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extended by reports to show charts and stats in admin.
  *
- * @author      WooThemes
- * @category    Admin
+ * @author WooThemes
+ * @category Admin
  * @package WooCommerce\Admin\Reports
  * @version 2.1.0
  */
