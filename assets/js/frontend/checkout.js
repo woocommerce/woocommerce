@@ -578,7 +578,7 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
-			$( 'form.checkout_coupon' ).hide().submit( this.submit );
+			$( document.body ).on( 'submit', 'form.checkout_coupon', this.submit );
 		},
 		show_coupon_form: function() {
 			$( '.checkout_coupon' ).slideToggle( 400, function() {
