@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
-import PropTypes from 'prop-types';
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
@@ -17,135 +16,107 @@ import { recordEvent } from '@woocommerce/tracks';
 import './style.scss';
 import ActivityPanel from './activity-panel';
 
-class Header extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isScrolled: false,
-		};
+const trackLinkClick = ( event ) => {
+	const target = event.target.closest( 'a' );
+	const href = target.getAttribute( 'href' );
 
-		this.headerRef = createRef();
-
-		this.onWindowScroll = this.onWindowScroll.bind( this );
-		this.updateIsScrolled = this.updateIsScrolled.bind( this );
-		this.trackLinkClick = this.trackLinkClick.bind( this );
-		this.updateDocumentTitle = this.updateDocumentTitle.bind( this );
-	}
-
-	componentDidMount() {
-		this.threshold = this.headerRef.current.offsetTop;
-		window.addEventListener( 'scroll', this.onWindowScroll );
-		this.updateIsScrolled();
-	}
-
-	componentWillUnmount() {
-		window.removeEventListener( 'scroll', this.onWindowScroll );
-		window.cancelAnimationFrame( this.handle );
-	}
-
-	onWindowScroll() {
-		this.handle = window.requestAnimationFrame( this.updateIsScrolled );
-	}
-
-	updateIsScrolled() {
-		const isScrolled = window.pageYOffset > this.threshold - 20;
-		if ( isScrolled !== this.state.isScrolled ) {
-			this.setState( {
-				isScrolled,
-			} );
-		}
-	}
-
-	trackLinkClick( event ) {
-		const href = event.target.closest( 'a' ).getAttribute( 'href' );
-
+	if ( href ) {
 		recordEvent( 'navbar_breadcrumb_click', {
 			href,
-			text: event.target.innerText,
+			text: target.innerText,
 		} );
 	}
+};
 
-	updateDocumentTitle() {
-		const { sections, isEmbedded } = this.props;
+export const Header = ( { sections, isEmbedded = false, query } ) => {
+	const headerElement = useRef( null );
+	const rafHandle = useRef( null );
+	const threshold = useRef( null );
+	const siteTitle = getSetting( 'siteTitle', '' );
+	const _sections = Array.isArray( sections ) ? sections : [ sections ];
+	const [ isScrolled, setIsScrolled ] = useState( false );
 
-		// Don't modify the document title on existing WooCommerce pages.
-		if ( isEmbedded ) {
-			return;
+	const className = classnames( 'woocommerce-layout__header', {
+		'is-scrolled': isScrolled,
+	} );
+
+	useEffect( () => {
+		threshold.current = headerElement.current.offsetTop;
+
+		const updateIsScrolled = () => {
+			setIsScrolled( window.pageYOffset > threshold.current - 20 );
+		};
+
+		const scrollListener = () => {
+			rafHandle.current = window.requestAnimationFrame(
+				updateIsScrolled
+			);
+		};
+
+		window.addEventListener( 'scroll', scrollListener );
+
+		return () => {
+			window.removeEventListener( 'scroll', scrollListener );
+			window.cancelAnimationFrame( rafHandle.current );
+		};
+	}, [] );
+
+	useEffect( () => {
+		if ( ! isEmbedded ) {
+			const documentTitle = _sections
+				.map( ( section ) => {
+					return Array.isArray( section ) ? section[ 1 ] : section;
+				} )
+				.reverse()
+				.join( ' &lsaquo; ' );
+
+			const decodedTitle = decodeEntities(
+				sprintf(
+					/* translators: 1: document title. 2: page title */
+					__(
+						'%1$s &lsaquo; %2$s &#8212; WooCommerce',
+						'woocommerce-admin'
+					),
+					documentTitle,
+					siteTitle
+				)
+			);
+
+			if ( document.title !== decodedTitle ) {
+				document.title = decodedTitle;
+			}
 		}
+	}, [ isEmbedded, _sections, siteTitle ] );
 
-		const _sections = Array.isArray( sections ) ? sections : [ sections ];
-
-		const documentTitle = _sections
-			.map( ( section ) => {
-				return Array.isArray( section ) ? section[ 1 ] : section;
-			} )
-			.reverse()
-			.join( ' &lsaquo; ' );
-
-		document.title = decodeEntities(
-			sprintf(
-				__(
-					'%1$s &lsaquo; %2$s &#8212; WooCommerce',
-					'woocommerce-admin'
-				),
-				documentTitle,
-				getSetting( 'siteTitle', '' )
-			)
-		);
-	}
-
-	render() {
-		const { sections, isEmbedded, query } = this.props;
-		const { isScrolled } = this.state;
-		const _sections = Array.isArray( sections ) ? sections : [ sections ];
-
-		this.updateDocumentTitle();
-
-		const className = classnames( 'woocommerce-layout__header', {
-			'is-scrolled': isScrolled,
-		} );
-
-		return (
-			<div className={ className } ref={ this.headerRef }>
-				<h1 className="woocommerce-layout__header-breadcrumbs">
-					{ _sections.map( ( section, i ) => {
-						const sectionPiece = Array.isArray( section ) ? (
-							<Link
-								href={
-									isEmbedded
-										? getAdminLink( section[ 0 ] )
-										: getNewPath( {}, section[ 0 ], {} )
-								}
-								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
-								onClick={ this.trackLinkClick }
-							>
-								{ section[ 1 ] }
-							</Link>
-						) : (
-							section
-						);
-						return (
-							<span key={ i }>
-								{ decodeEntities( sectionPiece ) }
-							</span>
-						);
-					} ) }
-				</h1>
-				{ window.wcAdminFeatures[ 'activity-panels' ] && (
-					<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
-				) }
-			</div>
-		);
-	}
-}
-
-Header.propTypes = {
-	sections: PropTypes.node.isRequired,
-	isEmbedded: PropTypes.bool,
+	return (
+		<div className={ className } ref={ headerElement }>
+			<h1 className="woocommerce-layout__header-breadcrumbs">
+				{ _sections.map( ( section, i ) => {
+					const sectionPiece = Array.isArray( section ) ? (
+						<Link
+							href={
+								isEmbedded
+									? getAdminLink( section[ 0 ] )
+									: getNewPath( {}, section[ 0 ], {} )
+							}
+							type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
+							onClick={ trackLinkClick }
+						>
+							{ section[ 1 ] }
+						</Link>
+					) : (
+						section
+					);
+					return (
+						<span key={ i }>
+							{ decodeEntities( sectionPiece ) }
+						</span>
+					);
+				} ) }
+			</h1>
+			{ window.wcAdminFeatures[ 'activity-panels' ] && (
+				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
+			) }
+		</div>
+	);
 };
-
-Header.defaultProps = {
-	isEmbedded: false,
-};
-
-export default Header;

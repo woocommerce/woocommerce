@@ -23,7 +23,7 @@ import { recordPageView } from '@woocommerce/tracks';
  */
 import './style.scss';
 import { Controller, getPages } from './controller';
-import Header from '../header';
+import { Header } from '../header';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
 
