@@ -2,7 +2,7 @@
 /**
  * WC_Order_Data_Store_CPT class file.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -81,7 +81,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
-		$order->set_order_key( wc_generate_order_key() );
+		if ( '' === $order->get_order_key() ) {
+			$order->set_order_key( wc_generate_order_key() );
+		}
 		parent::create( $order );
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
@@ -274,7 +276,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( in_array( 'date_completed', $updated_props, true ) ) {
 			$value = $order->get_date_completed( 'edit' );
-			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			// In 2.6.x date_completed was stored as _completed_date in local mysql format.
 			update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 		}
 
@@ -300,6 +302,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function get_post_excerpt( $order ) {
 		return $order->get_customer_note();
+	}
+
+	/**
+	 * Get order key.
+	 *
+	 * @since 4.3.0
+	 * @param WC_order $order Order object.
+	 * @return string
+	 */
+	protected function get_order_key( $order ) {
+		if ( '' !== $order->get_order_key() ) {
+			return $order->get_order_key();
+		}
+
+		return parent::get_order_key( $order );
 	}
 
 	/**

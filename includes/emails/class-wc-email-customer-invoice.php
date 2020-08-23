@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_Invoice
 	 * @version     3.5.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Invoice extends WC_Email {
@@ -112,7 +112,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Thanks for using {site_address}!', 'woocommerce' );
+			return __( 'Thanks for using {site_url}!', 'woocommerce' );
 		}
 
 		/**

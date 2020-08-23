@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
- * @version 3.6.0
+ * @package WooCommerce\Templates
+ * @version 4.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -102,7 +102,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 			<?php do_action( 'woocommerce_register_form' ); ?>
 
-			<p class="woocommerce-FormRow form-row">
+			<p class="woocommerce-form-row form-row">
 				<?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
 				<button type="submit" class="woocommerce-Button woocommerce-button button woocommerce-form-register__submit" name="register" value="<?php esc_attr_e( 'Register', 'woocommerce' ); ?>"><?php esc_html_e( 'Register', 'woocommerce' ); ?></button>
 			</p>

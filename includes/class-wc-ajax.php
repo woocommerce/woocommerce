@@ -3,8 +3,10 @@
  * WooCommerce WC_AJAX. AJAX Event Handlers.
  *
  * @class   WC_AJAX
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -62,7 +64,7 @@ class WC_AJAX {
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 			header( 'X-Robots-Tag: noindex' );
 			status_header( 200 );
-		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 			headers_sent( $file, $line );
 			trigger_error( "wc_ajax_headers cannot set headers - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 		}
@@ -744,7 +746,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		echo esc_html( $data_store->create_all_product_variations( $product, WC_MAX_LINKED_VARIATIONS ) );
+		echo esc_html( $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) ) );
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 		wp_die();
@@ -859,30 +861,47 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$response = array();
+		if ( ! isset( $_POST['order_id'] ) ) {
+			throw new Exception( __( 'Invalid order', 'woocommerce' ) );
+		}
+		$order_id = absint( wp_unslash( $_POST['order_id'] ) );
+
+		// If we passed through items it means we need to save first before adding a new one.
+		$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		try {
-			if ( ! isset( $_POST['order_id'] ) ) {
-				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
-			}
+			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
+			wp_send_json_success( $response );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
+	}
 
-			$order_id = absint( wp_unslash( $_POST['order_id'] ) ); // WPCS: input var ok.
-			$order    = wc_get_order( $order_id );
+	/**
+	 * Add order item via AJAX. This is refactored for better unit testing.
+	 *
+	 * @param int          $order_id     ID of order to add items to.
+	 * @param string|array $items        Existing items in order. Empty string if no items to add.
+	 * @param array        $items_to_add Array of items to add.
+	 *
+	 * @return array     Fragments to render and notes HTML.
+	 * @throws Exception When unable to add item.
+	 */
+	private static function maybe_add_order_item( $order_id, $items, $items_to_add ) {
+		try {
+			$order = wc_get_order( $order_id );
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
-
-			// If we passed through items it means we need to save first before adding a new one.
-			$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
-
-			$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			// Add items to order.
 			$order_notes = array();
@@ -906,19 +925,14 @@ class WC_AJAX {
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
-					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $validation_error->get_error_message() );
+					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
 				}
 				$item_id                 = $order->add_product( $product, $qty );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
 
-				if ( $product->managing_stock() ) {
-					$new_stock               = wc_update_product_stock( $product, $qty, 'decrease' );
-					$order_notes[ $item_id ] = $product->get_formatted_name() . ' &ndash; ' . ( $new_stock + $qty ) . '&rarr;' . $new_stock;
-					$item->add_meta_data( '_reduced_stock', $qty, true );
-					$item->save();
-				}
+				// We do not perform any stock operations here because they will be handled when order is moved to a status where stock operations are applied (like processing, completed etc).
 
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
@@ -940,18 +954,13 @@ class WC_AJAX {
 			include 'admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
-			wp_send_json_success(
-				array(
-					'html'       => $items_html,
-					'notes_html' => $notes_html,
-				)
+			return array(
+				'html'       => $items_html,
+				'notes_html' => $notes_html,
 			);
 		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			throw $e; // Forward exception to caller.
 		}
-
-		// wp_send_json_success must be outside the try block not to break phpunit tests.
-		wp_send_json_success( $response );
 	}
 
 	/**

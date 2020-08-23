@@ -374,7 +374,7 @@ class WC_Order extends WC_Abstract_Order {
 
 					// Work out if this was for a payment, and trigger a payment_status hook instead.
 					if (
-						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ) ), true )
+						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this ), true )
 						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
 					) {
 						/**
@@ -420,6 +420,19 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Get basic order data in array format.
+	 *
+	 * @return array
+	 */
+	public function get_base_data() {
+		return array_merge(
+			array( 'id'     => $this->get_id() ),
+			$this->data,
+			array( 'number' => $this->get_order_number() )
+		);
+	}
+
+	/**
 	 * Get all class data in array format.
 	 *
 	 * @since 3.0.0
@@ -427,12 +440,8 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_data() {
 		return array_merge(
+			$this->get_base_data(),
 			array(
-				'id' => $this->get_id(),
-			),
-			$this->data,
-			array(
-				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),
@@ -1402,8 +1411,7 @@ class WC_Order extends WC_Abstract_Order {
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			// Remove any instance IDs after ":".
-			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
+			$shipping_method_id = $shipping_method->get_method_id();
 
 			if ( ! in_array( $shipping_method_id, $hide, true ) ) {
 				$needs_address = true;
@@ -1679,7 +1687,7 @@ class WC_Order extends WC_Abstract_Order {
 			return 0;
 		}
 
-		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
+		if ( is_user_logged_in() && current_user_can( 'edit_shop_orders', $this->get_id() ) && $added_by_user ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
 			$comment_author_email = $user->user_email;
@@ -1721,6 +1729,16 @@ class WC_Order extends WC_Abstract_Order {
 				)
 			);
 		}
+
+		/**
+		 * Action hook fired after an order note is added.
+		 *
+		 * @param int      $order_note_id Order note ID.
+		 * @param WC_Order $order         Order data.
+		 *
+		 * @since 4.4.0
+		 */
+		do_action( 'woocommerce_order_note_added', $comment_id, $this );
 
 		return $comment_id;
 	}
@@ -2058,5 +2076,16 @@ class WC_Order extends WC_Abstract_Order {
 		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
+	}
+
+	/**
+	 * Check if order has been created via admin, checkout, or in another way.
+	 *
+	 * @since 4.0.0
+	 * @param string $modus Way of creating the order to test for.
+	 * @return bool
+	 */
+	public function is_created_via( $modus ) {
+		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
 	}
 }

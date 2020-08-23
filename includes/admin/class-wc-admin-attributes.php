@@ -4,7 +4,7 @@
  *
  * The attributes section lets users add custom attributes to assign to products - they can also be used in the "Filter Products by Attribute" widget.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.3.0
  */
 
@@ -14,6 +14,13 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Attributes Class.
  */
 class WC_Admin_Attributes {
+
+	/**
+	 * Edited attribute ID.
+	 *
+	 * @var int
+	 */
+	private static $edited_attribute_id;
 
 	/**
 	 * Handles output of the attributes page in admin.
@@ -135,7 +142,7 @@ class WC_Admin_Attributes {
 			return $id;
 		}
 
-		echo '<div class="updated"><p>' . esc_html__( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . esc_url( admin_url( 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . esc_html__( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
+		self::$edited_attribute_id = $id;
 
 		return true;
 	}
@@ -180,6 +187,10 @@ class WC_Admin_Attributes {
 			if ( ! $attribute_to_edit ) {
 				echo '<div id="woocommerce_errors" class="error"><p>' . esc_html__( 'Error: non-existing attribute ID.', 'woocommerce' ) . '</p></div>';
 			} else {
+				if ( self::$edited_attribute_id > 0 ) {
+					echo '<div id="message" class="updated"><p>' . esc_html__( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . esc_url( admin_url( 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . esc_html__( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
+					self::$edited_attribute_id = null;
+				}
 				$att_type    = $attribute_to_edit->attribute_type;
 				$att_label   = format_to_edit( $attribute_to_edit->attribute_label );
 				$att_name    = $attribute_to_edit->attribute_name;

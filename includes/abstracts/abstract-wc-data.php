@@ -7,7 +7,7 @@
  *
  * @class       WC_Data
  * @version     3.0.0
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Implemented by classes using the same CRUD(s) pattern.
  *
  * @version  2.6.0
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
 
@@ -346,10 +346,10 @@ abstract class WC_Data {
 			} else {
 				$value = array_intersect_key( $meta_data, array_flip( $array_keys ) );
 			}
+		}
 
-			if ( 'view' === $context ) {
-				$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
-			}
+		if ( 'view' === $context ) {
+			$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
 		}
 
 		return $value;

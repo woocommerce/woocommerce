@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
- * @version 3.6.0
+ * @package WooCommerce\Templates
+ * @version 4.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -121,7 +121,7 @@ if ( ! comments_open() ) {
 				}
 
 				if ( wc_review_ratings_enabled() ) {
-					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . '</label><select name="rating" id="rating" required>
+					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
 						<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
 						<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
 						<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>

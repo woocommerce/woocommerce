@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Shipping_Free_Shipping
  * @version 2.6.0
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
@@ -62,9 +62,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->title      = $this->get_option( 'title' );
-		$this->min_amount = $this->get_option( 'min_amount', 0 );
-		$this->requires   = $this->get_option( 'requires' );
+		$this->title            = $this->get_option( 'title' );
+		$this->min_amount       = $this->get_option( 'min_amount', 0 );
+		$this->requires         = $this->get_option( 'requires' );
+		$this->ignore_discounts = $this->get_option( 'ignore_discounts' );
 
 		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -102,6 +103,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'placeholder' => wc_format_localized_price( 0 ),
 				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
 				'default'     => '0',
+				'desc_tip'    => true,
+			),
+			'ignore_discounts' => array(
+				'title'       => __( 'Coupons discounts', 'woocommerce' ),
+				'label'       => __( 'Apply minimum order rule before coupon discount', 'woocommerce' ),
+				'type'        => 'checkbox',
+				'description' => __( 'If checked, free shipping would be available based on pre-discount order amount.', 'woocommerce' ),
+				'default'     => 'no',
 				'desc_tip'    => true,
 			),
 		);
@@ -143,10 +152,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
-				$total = round( $total - ( WC()->cart->get_discount_total() + WC()->cart->get_discount_tax() ), wc_get_price_decimals() );
-			} else {
-				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
+				$total = $total - WC()->cart->get_discount_tax();
 			}
+
+			if ( 'no' === $this->ignore_discounts ) {
+				$total = $total - WC()->cart->get_discount_total();
+			}
+
+			$total = round( $total, wc_get_price_decimals() );
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;
@@ -203,10 +216,13 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				function wcFreeShippingShowHideMinAmountField( el ) {
 					var form = $( el ).closest( 'form' );
 					var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+					var ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
 					if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
 						minAmountField.hide();
+						ignoreDiscountField.hide();
 					} else {
 						minAmountField.show();
+						ignoreDiscountField.show();
 					}
 				}
 

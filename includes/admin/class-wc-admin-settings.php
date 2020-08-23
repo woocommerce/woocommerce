@@ -2,9 +2,11 @@
 /**
  * WooCommerce Admin Settings Class
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.4.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -128,7 +130,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function output() {
 			global $current_section, $current_tab;
 
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 			do_action( 'woocommerce_settings_start' );
 
@@ -141,7 +143,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					'i18n_nav_warning'                    => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 					'i18n_moved_up'                       => __( 'Item moved up', 'woocommerce' ),
 					'i18n_moved_down'                     => __( 'Item moved down', 'woocommerce' ),
-					'i18n_no_specific_countries_selected' => __( 'Selecting no country to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
+					'i18n_no_specific_countries_selected' => __( 'Selecting no country / region to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
 				)
 			);
 
@@ -198,7 +200,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Output admin fields.
 		 *
-		 * Loops though the woocommerce options array and outputs each field.
+		 * Loops through the woocommerce options array and outputs each field.
 		 *
 		 * @param array[] $options Opens array to output.
 		 */
@@ -594,7 +596,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
-							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 							</select> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
@@ -619,7 +621,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
-								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
@@ -724,7 +726,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Save admin fields.
 		 *
-		 * Loops though the woocommerce options array and outputs each field.
+		 * Loops through the woocommerce options array and outputs each field.
 		 *
 		 * @param array $options Options array to output.
 		 * @param array $data    Optional. Data to use for saving. Defaults to $_POST.
@@ -867,25 +869,29 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * If using force or x-sendfile, this ensures the .htaccess is in place.
 		 */
 		public static function check_download_folder_protection() {
-			$upload_dir      = wp_upload_dir();
-			$downloads_url   = $upload_dir['basedir'] . '/woocommerce_uploads';
+			$upload_dir      = wp_get_upload_dir();
+			$downloads_path  = $upload_dir['basedir'] . '/woocommerce_uploads';
 			$download_method = get_option( 'woocommerce_file_download_method' );
+			$file_path       = $downloads_path . '/.htaccess';
+			$file_content    = 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all';
+			$create          = false;
 
-			if ( 'redirect' === $download_method ) {
-
-				// Redirect method - don't protect.
-				if ( file_exists( $downloads_url . '/.htaccess' ) ) {
-					unlink( $downloads_url . '/.htaccess' ); // @codingStandardsIgnoreLine
-				}
+			if ( wp_mkdir_p( $downloads_path ) && ! file_exists( $file_path ) ) {
+				$create = true;
 			} else {
+				$current_content = @file_get_contents( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Force method - protect, add rules to the htaccess file.
-				if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
-					$file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ); // @codingStandardsIgnoreLine
-					if ( $file_handle ) {
-						fwrite( $file_handle, 'deny from all' ); // @codingStandardsIgnoreLine
-						fclose( $file_handle ); // @codingStandardsIgnoreLine
-					}
+				if ( $current_content !== $file_content ) {
+					unlink( $file_path );
+					$create = true;
+				}
+			}
+
+			if ( $create ) {
+				$file_handle = @fopen( $file_path, 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				if ( $file_handle ) {
+					fwrite( $file_handle, $file_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 				}
 			}
 		}

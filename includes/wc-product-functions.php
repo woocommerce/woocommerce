@@ -4,9 +4,11 @@
  *
  * Functions for product specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.0.0
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1334,7 +1336,7 @@ function wc_update_product_lookup_tables_is_running() {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	$is_cli = defined( 'WP_CLI' ) && WP_CLI;
+	$is_cli = Constants::is_true( 'WP_CLI' );
 
 	if ( ! $is_cli ) {
 		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
@@ -1365,7 +1367,9 @@ function wc_update_product_lookup_tables() {
 		'total_sales',
 		'downloadable',
 		'virtual',
-		'onsale', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
+		'onsale',
+		'tax_class',
+		'tax_status', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
 	foreach ( $columns as $index => $column ) {
@@ -1457,6 +1461,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 		case 'stock_status':
 		case 'average_rating':
 		case 'total_sales':
+		case 'tax_class':
+		case 'tax_status':
 			if ( 'total_sales' === $column ) {
 				$meta_key = 'total_sales';
 			} elseif ( 'average_rating' === $column ) {
@@ -1523,9 +1529,12 @@ function wc_update_product_lookup_tables_column( $column ) {
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
+	}
+
+	// Final column - mark complete.
+	if ( 'tax_status' === $column ) {
+		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 	}
 }
 add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );

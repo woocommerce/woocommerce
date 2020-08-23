@@ -9,7 +9,7 @@
  * - if something is being stored e.g. item total, store unrounded. This is so taxes can be recalculated later accurately.
  * - if calculating a total, round (if settings allow).
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.2.0
  */
 
@@ -341,7 +341,8 @@ final class WC_Cart_Totals {
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-			$shipping_line->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $shipping_line->taxes ) );
+			$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
+			$shipping_line->total_tax = array_sum( $shipping_line->taxes );
 
 			$this->shipping[ $key ] = $shipping_line;
 		}
@@ -606,10 +607,8 @@ final class WC_Cart_Totals {
 	 * @return array
 	 */
 	protected function round_merged_taxes( $taxes ) {
-		if ( $this->round_at_subtotal() ) {
-			foreach ( $taxes as $rate_id => $tax ) {
-				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
-			}
+		foreach ( $taxes as $rate_id => $tax ) {
+			$taxes[ $rate_id ] = $this->round_line_tax( $tax );
 		}
 
 		return $taxes;
@@ -686,7 +685,7 @@ final class WC_Cart_Totals {
 
 		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
 
-		$this->set_total( 'items_total', round( $items_total ) );
+		$this->set_total( 'items_total', $items_total );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
 		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
@@ -860,7 +859,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + wc_round_tax_total( array_sum( $this->get_merged_taxes( true ) ), 0 ), 0 ) );
+		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.

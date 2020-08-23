@@ -4,7 +4,7 @@
  *
  * @author   WooThemes
  * @category Admin
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.4.0
  */
 
@@ -71,11 +71,11 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								'description' => '',
 							),
 							'billing_country'    => array(
-								'label'       => __( 'Country', 'woocommerce' ),
+								'label'       => __( 'Country / Region', 'woocommerce' ),
 								'description' => '',
 								'class'       => 'js_field-country',
 								'type'        => 'select',
-								'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+								'options'     => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 							),
 							'billing_state'      => array(
 								'label'       => __( 'State / County', 'woocommerce' ),
@@ -131,11 +131,11 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								'description' => '',
 							),
 							'shipping_country'    => array(
-								'label'       => __( 'Country', 'woocommerce' ),
+								'label'       => __( 'Country / Region', 'woocommerce' ),
 								'description' => '',
 								'class'       => 'js_field-country',
 								'type'        => 'select',
-								'options'     => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+								'options'     => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 							),
 							'shipping_state'      => array(
 								'label'       => __( 'State / County', 'woocommerce' ),

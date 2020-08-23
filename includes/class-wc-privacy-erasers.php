@@ -51,7 +51,7 @@ class WC_Privacy_Erasers {
 				'billing_city'        => __( 'Billing City', 'woocommerce' ),
 				'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
 				'billing_state'       => __( 'Billing State', 'woocommerce' ),
-				'billing_country'     => __( 'Billing Country', 'woocommerce' ),
+				'billing_country'     => __( 'Billing Country / Region', 'woocommerce' ),
 				'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
 				'billing_email'       => __( 'Email Address', 'woocommerce' ),
 				'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
@@ -62,7 +62,7 @@ class WC_Privacy_Erasers {
 				'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
 				'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
 				'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
-				'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
+				'shipping_country'    => __( 'Shipping Country / Region', 'woocommerce' ),
 			),
 			$customer
 		);

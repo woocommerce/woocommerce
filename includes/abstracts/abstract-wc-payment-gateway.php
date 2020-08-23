@@ -6,8 +6,10 @@
  *
  * @class WC_Payment_Gateway
  * @version 2.1.0
- * @package WooCommerce/Abstracts
+ * @package WooCommerce\Abstracts
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Payment_Gateway
  * @extends     WC_Settings_API
  * @version     2.1.0
- * @package     WooCommerce/Abstracts
+ * @package     WooCommerce\Abstracts
  */
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
@@ -450,7 +452,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function tokenization_script() {
 		wp_enqueue_script(
 			'woocommerce-tokenization-form',
-			plugins_url( '/assets/js/frontend/tokenization-form' . ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
+			plugins_url( '/assets/js/frontend/tokenization-form' . ( Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC()->version
 		);

@@ -3,8 +3,10 @@
  * Twenty Nineteen support.
  *
  * @since   3.5.X
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -78,7 +80,7 @@ class WC_Twenty_Nineteen {
 		$styles['woocommerce-general'] = array(
 			'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/twenty-nineteen.css',
 			'deps'    => '',
-			'version' => WC_VERSION,
+			'version' => Constants::get_constant( 'WC_VERSION' ),
 			'media'   => 'all',
 			'has_rtl' => true,
 		);

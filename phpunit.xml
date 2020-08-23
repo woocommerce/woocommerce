@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
-	bootstrap="tests/bootstrap.php"
+	bootstrap="tests/legacy/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -10,7 +10,8 @@
 	>
 	<testsuites>
 		<testsuite name="WooCommerce Test Suite">
-			<directory suffix=".php">./tests/unit-tests</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+			<directory suffix=".php">./tests/php</directory>
 		</testsuite>
 	</testsuites>
 	<filter>
@@ -46,6 +47,10 @@
 		</whitelist>
 	</filter>
 	<listeners>
-		<listener class="SpeedTrapListener" file="tests/includes/listener-loader.php" />
+		<listener class="SpeedTrapListener" file="tests/legacy/includes/listener-loader.php" />
 	</listeners>
+	<extensions>
+		<extension class="\Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHackerTestHook" />
+		<extension class="\Automattic\WooCommerce\Testing\Tools\DependencyManagement\DependencyManagementTestHook" />
+	</extensions>
 </phpunit>

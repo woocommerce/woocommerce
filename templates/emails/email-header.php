@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails
- * @version 2.4.0
+ * @package WooCommerce\Templates\Emails
+ * @version 4.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<tr>
 								<td align="center" valign="top">
 									<!-- Header -->
-									<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header">
+									<table border="0" cellpadding="0" cellspacing="0" width="100%" id="template_header">
 										<tr>
 											<td id="header_wrapper">
 												<h1><?php echo $email_heading; ?></h1>

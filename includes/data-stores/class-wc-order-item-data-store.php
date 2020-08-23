@@ -40,7 +40,11 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 			)
 		);
 
-		return absint( $wpdb->insert_id );
+		$item_id = absint( $wpdb->insert_id );
+
+		$this->clear_caches( $item_id, $order_id );
+
+		return $item_id;
 	}
 
 	/**
@@ -53,7 +57,9 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 */
 	public function update_order_item( $item_id, $item ) {
 		global $wpdb;
-		return $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
+		$updated = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
+		$this->clear_caches( $item_id, null );
+		return $updated;
 	}
 
 	/**
@@ -63,9 +69,14 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  int $item_id Item ID.
 	 */
 	public function delete_order_item( $item_id ) {
+		// Load the order ID before the deletion, since after, it won't exist in the database.
+		$order_id = $this->get_order_id_by_order_item_id( $item_id );
+
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
+
+		$this->clear_caches( $item_id, $order_id );
 	}
 
 	/**
@@ -93,7 +104,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @return int    New row ID or 0
 	 */
 	public function add_metadata( $item_id, $meta_key, $meta_value, $unique = false ) {
-		return add_metadata( 'order_item', $item_id, $meta_key, is_string( $meta_value ) ? wp_slash( $meta_value ) : $meta_value, $unique );
+		return add_metadata( 'order_item', $item_id, wp_slash( $meta_key ), is_string( $meta_value ) ? wp_slash( $meta_value ) : $meta_value, $unique );
 	}
 
 	/**
@@ -157,5 +168,22 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 		);
 
 		return $order_item_type;
+	}
+
+	/**
+	 * Clear meta cache.
+	 *
+	 * @param int      $item_id Item ID.
+	 * @param int|null $order_id Order ID. If not set, it will be loaded using the item ID.
+	 */
+	protected function clear_caches( $item_id, $order_id ) {
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+
+		if ( ! $order_id ) {
+			$order_id = $this->get_order_id_by_order_item_id( $item_id );
+		}
+		if ( $order_id ) {
+			wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		}
 	}
 }

@@ -2,7 +2,7 @@
 /**
  * Add some content to the help tab
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
 
@@ -49,12 +49,12 @@ class WC_Admin_Help {
 					) . '</p>' .
 					'<p>' . sprintf(
 						/* translators: %s: Forum URL */
-						__( 'For further assistance with WooCommerce core you can use the <a href="%1$s">community forum</a>. If you need help with premium extensions sold by WooCommerce, please <a href="%2$s">use our helpdesk</a>.', 'woocommerce' ),
+						__( 'For further assistance with WooCommerce core, use the <a href="%1$s">community forum</a>. For help with premium extensions sold on WooCommerce.com, <a href="%2$s">open a support request at WooCommerce.com</a>.', 'woocommerce' ),
 						'https://wordpress.org/support/plugin/woocommerce',
-						'https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin'
+						'https://woocommerce.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin'
 					) . '</p>' .
-					'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woocommerce.com/my-account/tickets/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'WooCommerce helpdesk', 'woocommerce' ) . '</a></p>',
+					'<p>' . __( 'Before asking for help, we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
+					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woocommerce.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'WooCommerce.com support', 'woocommerce' ) . '</a></p>',
 			)
 		);
 
@@ -68,17 +68,6 @@ class WC_Admin_Help {
 					'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%1$s">Github issues</a>. Ensure you read the <a href="%2$s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%3$s">system status report</a>.', 'woocommerce' ), 'https://github.com/woocommerce/woocommerce/issues?state=open', 'https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 					'<p><a href="https://github.com/woocommerce/woocommerce/issues/new?template=4-Bug-report.md" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System status', 'woocommerce' ) . '</a></p>',
 
-			)
-		);
-
-		$screen->add_help_tab(
-			array(
-				'id'      => 'woocommerce_education_tab',
-				'title'   => __( 'Education', 'woocommerce' ),
-				'content' =>
-					'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
-					'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider a WooCommerce course to further your education.', 'woocommerce' ) . '</p>' .
-					'<p><a href="https://docs.woocommerce.com/document/further-education/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin" class="button button-primary">' . __( 'Further education', 'woocommerce' ) . '</a></p>',
 			)
 		);
 

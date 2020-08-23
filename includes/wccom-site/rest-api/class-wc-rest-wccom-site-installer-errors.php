@@ -2,7 +2,7 @@
 /**
  * WCCOM Site Installer Errors Class
  *
- * @package WooCommerce\WooCommerce_Site\Rest_Api
+ * @package WooCommerce\WCCom\API
  * @since   3.9.0
  */
 
@@ -23,25 +23,18 @@ class WC_REST_WCCOM_Site_Installer_Errors {
 	const NOT_AUTHENTICATED_HTTP_CODE = 401;
 
 	/**
-	 * No Authorization header
+	 * No access token provided
 	 */
-	const NO_AUTH_HEADER_CODE      = 'no_auth_header';
-	const NO_AUTH_HEADER_MESSAGE   = 'No header "Authorization" present';
-	const NO_AUTH_HEADER_HTTP_CODE = 400;
+	const NO_ACCESS_TOKEN_CODE      = 'no_access_token';
+	const NO_ACCESS_TOKEN_MESSAGE   = 'No access token provided';
+	const NO_ACCESS_TOKEN_HTTP_CODE = 400;
 
 	/**
-	 * Authorization header invalid
+	 * No signature provided
 	 */
-	const INVALID_AUTH_HEADER_CODE      = 'no_auth_header';
-	const INVALID_AUTH_HEADER_MESSAGE   = 'Header "Authorization" is invalid';
-	const INVALID_AUTH_HEADER_HTTP_CODE = 400;
-
-	/**
-	 * No Signature header
-	 */
-	const NO_SIGNATURE_HEADER_CODE      = 'no_signature_header';
-	const NO_SIGNATURE_HEADER_MESSAGE   = 'No header "X-Woo-Signature" present';
-	const NO_SIGNATURE_HEADER_HTTP_CODE = 400;
+	const NO_SIGNATURE_CODE      = 'no_signature';
+	const NO_SIGNATURE_MESSAGE   = 'No signature provided';
+	const NO_SIGNATURE_HTTP_CODE = 400;
 
 	/**
 	 * Site not connected to WooCommerce.com

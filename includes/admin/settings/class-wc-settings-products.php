@@ -2,7 +2,7 @@
 /**
  * WooCommerce Product Settings
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.4.0
  */
 
@@ -218,7 +218,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 					array(
 						'title'    => __( 'File download method', 'woocommerce' ),
-						'desc'     => sprintf(
+						'desc_tip' => sprintf(
 							/* translators: 1: X-Accel-Redirect 2: X-Sendfile 3: mod_xsendfile */
 							__( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, %1$s / %2$s can be used to serve downloads instead (server requires %3$s).', 'woocommerce' ),
 							'<code>X-Accel-Redirect</code>',
@@ -230,11 +230,15 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'class'    => 'wc-enhanced-select',
 						'css'      => 'min-width:300px;',
 						'default'  => 'force',
-						'desc_tip' => true,
+						'desc'     => sprintf(
+							// translators: Link to WooCommerce Docs.
+							__( "If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='%s'>Digital/Downloadable Product Handling</a> guide.", 'woocommerce' ),
+							'https://docs.woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'
+						),
 						'options'  => array(
 							'force'     => __( 'Force downloads', 'woocommerce' ),
 							'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-							'redirect'  => __( 'Redirect only', 'woocommerce' ),
+							'redirect'  => apply_filters( 'woocommerce_redirect_only_method_is_secure', false ) ? __( 'Redirect only', 'woocommerce' ) : __( 'Redirect only (Insecure)', 'woocommerce' ),
 						),
 						'autoload' => false,
 					),
@@ -258,6 +262,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
 						'checkboxgroup' => 'end',
 						'autoload'      => false,
+					),
+
+					array(
+						'title' => __( 'Filename', 'woocommerce' ),
+						'desc' => __( 'Append a unique string to filename for security', 'woocommerce' ),
+						'id' => 'woocommerce_downloads_add_hash_to_filename',
+						'type' => 'checkbox',
+						'default' => 'yes',
+						'desc_tip' => sprintf(
+							// translators: Link to WooCommerce Docs.
+							__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
+							'https://docs.woocommerce.com/document/digital-downloadable-product-handling#unique-string'
+						),
 					),
 
 					array(

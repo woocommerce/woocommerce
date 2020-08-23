@@ -6,7 +6,7 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @package     WooCommerce\Admin\Meta Boxes
  * @version     2.2.0
  */
 
@@ -70,11 +70,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'class'   => 'js_field-country select short',
 					'type'    => 'select',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
@@ -122,11 +122,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'type'    => 'select',
 					'class'   => 'js_field-country select short',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
@@ -404,9 +404,9 @@ class WC_Meta_Box_Order_Data {
 									}
 
 									if ( ! $found_method && ! empty( $payment_method ) ) {
-										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									} else {
-										echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									}
 									?>
 								</select>
