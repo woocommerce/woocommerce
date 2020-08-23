@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import 'core-js/fn/object/assign';
-import 'core-js/fn/array/from';
+import 'core-js/features/object/assign';
+import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
