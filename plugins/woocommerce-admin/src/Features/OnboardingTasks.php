@@ -53,7 +53,7 @@ class OnboardingTasks {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		// Old settings injection.
 		// Run after Onboarding.
-		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 );
+		add_filter( 'woocommerce_components_settings', array( __CLASS__, 'component_settings' ), 30 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
 
@@ -72,20 +72,12 @@ class OnboardingTasks {
 	}
 
 	/**
-	 * Add task items to component settings.
+	 * Get task item data for settings filter.
 	 *
-	 * @param array $settings Component settings.
 	 * @return array
 	 */
-	public function component_settings( $settings ) {
-		// Bail early if not on a wc-admin powered page, or task list shouldn't be shown.
-		if (
-			! \Automattic\WooCommerce\Admin\Loader::is_admin_page() ||
-			! \Automattic\WooCommerce\Admin\Features\Onboarding::should_show_tasks()
-		) {
-			return $settings;
-		}
-
+	public static function get_settings() {
+		$settings            = array();
 		$wc_pay_is_connected = false;
 		if ( class_exists( '\WC_Payments' ) ) {
 			$wc_payments_gateway = \WC_Payments::get_gateway();
@@ -104,10 +96,10 @@ class OnboardingTasks {
 
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
-		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
-		$settings['onboarding']['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
-		$settings['onboarding']['hasPaymentGateway']              = ! empty( $enabled_gateways );
-		$settings['onboarding']['hasPhysicalProducts']            = count(
+		$settings['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
+		$settings['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
+		$settings['hasPaymentGateway']              = ! empty( $enabled_gateways );
+		$settings['hasPhysicalProducts']            = count(
 			wc_get_products(
 				array(
 					'virtual' => false,
@@ -115,14 +107,44 @@ class OnboardingTasks {
 				)
 			)
 		) > 0;
-		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
-		$settings['onboarding']['isAppearanceComplete']           = get_option( 'woocommerce_task_list_appearance_complete' );
-		$settings['onboarding']['isTaxComplete']                  = self::check_task_completion( 'tax' );
-		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
-		$settings['onboarding']['stylesheet']                     = get_option( 'stylesheet' );
-		$settings['onboarding']['taxJarActivated']                = class_exists( 'WC_Taxjar' );
-		$settings['onboarding']['themeMods']                      = get_theme_mods();
-		$settings['onboarding']['wcPayIsConnected']               = $wc_pay_is_connected;
+		$settings['hasProducts']                    = self::check_task_completion( 'products' );
+		$settings['isAppearanceComplete']           = get_option( 'woocommerce_task_list_appearance_complete' );
+		$settings['isTaxComplete']                  = self::check_task_completion( 'tax' );
+		$settings['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
+		$settings['stylesheet']                     = get_option( 'stylesheet' );
+		$settings['taxJarActivated']                = class_exists( 'WC_Taxjar' );
+		$settings['themeMods']                      = get_theme_mods();
+		$settings['wcPayIsConnected']               = $wc_pay_is_connected;
+
+		return $settings;
+	}
+
+	/**
+	 * Add task items to component settings.
+	 *
+	 * @param array $settings Component settings.
+	 * @return array
+	 */
+	public function component_settings( $settings ) {
+		// Bail early if not on a wc-admin powered page, or task list shouldn't be shown.
+		if (
+			! \Automattic\WooCommerce\Admin\Loader::is_admin_page() ||
+			! \Automattic\WooCommerce\Admin\Features\Onboarding::should_show_tasks()
+		) {
+			return $settings;
+		}
+
+		// If onboarding isn't enabled this will throw warnings.
+		if ( ! isset( $settings['onboarding'] ) ) {
+			$settings['onboarding'] = array();
+		}
+
+		$settings['onboarding'] = array_merge(
+			$settings['onboarding'],
+			array(
+				'tasksStatus' => self::get_settings(),
+			)
+		);
 
 		return $settings;
 	}

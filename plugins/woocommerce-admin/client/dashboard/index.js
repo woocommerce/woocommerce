@@ -49,9 +49,14 @@ class Dashboard extends Component {
 	}
 }
 
+const onboardingData = getSetting( 'onboarding', {} );
+
 export default compose(
-	getSetting( 'onboarding', {} ).profile
-		? withOnboardingHydration( getSetting( 'onboarding', {} ).profile )
+	onboardingData.profile || onboardingData.tasksStatus
+		? withOnboardingHydration( {
+				profileItems: onboardingData.profile,
+				tasksStatus: onboardingData.tasksStatus,
+		  } )
 		: identity,
 	withSelect( ( select ) => {
 		if ( ! isOnboardingEnabled() ) {

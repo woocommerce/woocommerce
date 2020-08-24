@@ -33,6 +33,13 @@ export function setProfileItems( profileItems, replace = false ) {
 	};
 }
 
+export function setTasksStatus( tasksStatus ) {
+	return {
+		type: TYPES.SET_TASKS_STATUS,
+		tasksStatus,
+	};
+}
+
 export function* updateProfileItems( items ) {
 	yield setIsRequesting( 'updateProfileItems', true );
 

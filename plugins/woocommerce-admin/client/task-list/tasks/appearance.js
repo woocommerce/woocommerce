@@ -16,8 +16,7 @@ import {
 	ImageUpload,
 } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -28,7 +27,7 @@ import { WC_ADMIN_NAMESPACE } from '../../wc-api/constants';
 class Appearance extends Component {
 	constructor( props ) {
 		super( props );
-		const { hasHomepage, hasProducts } = getSetting( 'onboarding', {} );
+		const { hasHomepage, hasProducts } = props.tasksStatus;
 
 		this.stepVisibility = {
 			homepage: ! hasHomepage,
@@ -53,9 +52,9 @@ class Appearance extends Component {
 	}
 
 	componentDidMount() {
-		const { themeMods } = getSetting( 'onboarding', {} );
+		const { themeMods } = this.props.tasksStatus;
 
-		if ( themeMods.custom_logo ) {
+		if ( themeMods && themeMods.custom_logo ) {
 			/* eslint-disable react/no-did-mount-set-state */
 			this.setState( { logo: { id: themeMods.custom_logo } } );
 			/* eslint-enable react/no-did-mount-set-state */
@@ -106,7 +105,7 @@ class Appearance extends Component {
 	}
 
 	importProducts() {
-		const { createNotice } = this.props;
+		const { clearTaskStatusCache, createNotice } = this.props;
 		this.setState( { isPending: true } );
 
 		recordEvent( 'tasklist_appearance_import_demo', {} );
@@ -132,10 +131,7 @@ class Appearance extends Component {
 							'woocommerce-admin'
 						)
 					);
-					setSetting( 'onboarding', {
-						...getSetting( 'onboarding', {} ),
-						hasProducts: true,
-					} );
+					clearTaskStatusCache();
 				}
 
 				this.setState( { isPending: false } );
@@ -148,7 +144,7 @@ class Appearance extends Component {
 	}
 
 	createHomepage() {
-		const { createNotice } = this.props;
+		const { clearTaskStatusCache, createNotice } = this.props;
 		this.setState( { isPending: true } );
 
 		recordEvent( 'tasklist_appearance_create_homepage', {
@@ -160,6 +156,7 @@ class Appearance extends Component {
 			method: 'POST',
 		} )
 			.then( ( response ) => {
+				clearTaskStatusCache();
 				createNotice( response.status, response.message, {
 					actions: response.edit_post_link
 						? [
@@ -190,9 +187,14 @@ class Appearance extends Component {
 	}
 
 	async updateLogo() {
-		const { updateOptions, createNotice } = this.props;
+		const {
+			clearTaskStatusCache,
+			createNotice,
+			stylesheet,
+			themeMods,
+			updateOptions,
+		} = this.props;
 		const { logo } = this.state;
-		const { stylesheet, themeMods } = getSetting( 'onboarding', {} );
 		const updatedThemeMods = {
 			...themeMods,
 			custom_logo: logo ? logo.id : null,
@@ -200,15 +202,12 @@ class Appearance extends Component {
 
 		recordEvent( 'tasklist_appearance_upload_logo' );
 
-		setSetting( 'onboarding', {
-			...getSetting( 'onboarding', {} ),
-			themeMods: updatedThemeMods,
-		} );
-
 		this.setState( { isUpdatingLogo: true } );
 		const update = await updateOptions( {
 			[ `theme_mods_${ stylesheet }` ]: updatedThemeMods,
 		} );
+
+		clearTaskStatusCache();
 
 		if ( update.success ) {
 			this.setState( { isUpdatingLogo: false } );
@@ -223,16 +222,15 @@ class Appearance extends Component {
 	}
 
 	async updateNotice() {
-		const { updateOptions, createNotice } = this.props;
+		const {
+			clearTaskStatusCache,
+			createNotice,
+			updateOptions,
+		} = this.props;
 		const { storeNoticeText } = this.state;
 
 		recordEvent( 'tasklist_appearance_set_store_notice', {
 			added_text: Boolean( storeNoticeText.length ),
-		} );
-
-		setSetting( 'onboarding', {
-			...getSetting( 'onboarding', {} ),
-			isAppearanceComplete: true,
 		} );
 
 		this.setState( { isUpdatingNotice: true } );
@@ -241,6 +239,8 @@ class Appearance extends Component {
 			woocommerce_demo_store: storeNoticeText.length ? 'yes' : 'no',
 			woocommerce_demo_store_notice: storeNoticeText,
 		} );
+
+		clearTaskStatusCache();
 
 		if ( update.success ) {
 			this.setState( { isUpdatingNotice: false } );
@@ -418,16 +418,25 @@ class Appearance extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTasksStatus } = select( ONBOARDING_STORE_NAME );
+		const tasksStatus = getTasksStatus();
 
 		return {
 			demoStoreNotice: getOption( 'woocommerce_demo_store_notice' ),
+			stylesheet: getOption( 'stylesheet' ),
+			tasksStatus,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
+		const { invalidateResolutionForStoreSelector } = dispatch(
+			ONBOARDING_STORE_NAME
+		);
 
 		return {
+			clearTaskStatusCache: () =>
+				invalidateResolutionForStoreSelector( 'getTasksStatus' ),
 			createNotice,
 			updateOptions,
 		};

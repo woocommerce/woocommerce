@@ -9,32 +9,59 @@ import { useSelect } from '@wordpress/data';
  */
 import { STORE_NAME } from './constants';
 
-export const withOnboardingHydration = ( data ) => ( OriginalComponent ) => {
-	return ( props ) => {
-		const onboardingRef = useRef( data );
+export const withOnboardingHydration = ( data ) => {
+	let hydratedProfileItems = false;
+	let hydratedTasksStatus = false;
 
-		useSelect( ( select, registry ) => {
-			if ( ! onboardingRef.current ) {
-				return;
-			}
+	return ( OriginalComponent ) => {
+		return ( props ) => {
+			const onboardingRef = useRef( data );
 
-			const { isResolving, hasFinishedResolution } = select( STORE_NAME );
-			const {
-				startResolution,
-				finishResolution,
-				setProfileItems,
-			} = registry.dispatch( STORE_NAME );
+			useSelect( ( select, registry ) => {
+				if ( ! onboardingRef.current ) {
+					return;
+				}
 
-			if (
-				! isResolving( 'getProfileItems', [] ) &&
-				! hasFinishedResolution( 'getProfileItems', [] )
-			) {
-				startResolution( 'getProfileItems', [] );
-				setProfileItems( onboardingRef.current, true );
-				finishResolution( 'getProfileItems', [] );
-			}
-		}, [] );
+				const { isResolving, hasFinishedResolution } = select(
+					STORE_NAME
+				);
+				const {
+					startResolution,
+					finishResolution,
+					setProfileItems,
+					setTasksStatus,
+				} = registry.dispatch( STORE_NAME );
 
-		return <OriginalComponent { ...props } />;
+				const { profileItems, tasksStatus } = onboardingRef.current;
+
+				if (
+					profileItems &&
+					! hydratedProfileItems &&
+					! isResolving( 'getProfileItems', [] ) &&
+					! hasFinishedResolution( 'getProfileItems', [] )
+				) {
+					startResolution( 'getProfileItems', [] );
+					setProfileItems( profileItems, true );
+					finishResolution( 'getProfileItems', [] );
+
+					hydratedProfileItems = true;
+				}
+
+				if (
+					tasksStatus &&
+					! hydratedTasksStatus &&
+					! isResolving( 'getTasksStatus', [] ) &&
+					! hasFinishedResolution( 'getTasksStatus', [] )
+				) {
+					startResolution( 'getTasksStatus', [] );
+					setTasksStatus( tasksStatus, true );
+					finishResolution( 'getTasksStatus', [] );
+
+					hydratedTasksStatus = true;
+				}
+			}, [] );
+
+			return <OriginalComponent { ...props } />;
+		};
 	};
 };

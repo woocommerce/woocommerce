@@ -58,10 +58,11 @@ function getAppearanceItems() {
 }
 
 function getPaymentsItems( props ) {
-	const { countryCode, profileItems } = props;
+	const { countryCode, onboardingStatus, profileItems } = props;
 	const paymentMethods = props.getPaymentMethods( {
 		activePlugins: [],
 		countryCode,
+		onboardingStatus,
 		options: {},
 		profileItems,
 	} );
@@ -364,11 +365,14 @@ HelpPanel.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems, getTasksStatus } = select(
+			ONBOARDING_STORE_NAME
+		);
 		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const activePlugins = getActivePlugins();
+		const onboardingStatus = getTasksStatus();
 		const profileItems = getProfileItems();
 
 		const countryCode = getCountryCode(
@@ -378,6 +382,7 @@ export default compose(
 		return {
 			activePlugins,
 			countryCode,
+			onboardingStatus,
 			profileItems,
 		};
 	} )

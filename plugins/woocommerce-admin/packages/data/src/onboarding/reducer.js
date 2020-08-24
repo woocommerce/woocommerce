@@ -5,41 +5,45 @@ import TYPES from './action-types';
 
 const onboarding = (
 	state = {
-		profileItems: {},
 		errors: {},
+		profileItems: {},
 		requesting: {},
+		tasksStatus: {},
 	},
-	{ type, profileItems, replace, error, isRequesting, selector }
+	{ type, profileItems, replace, error, isRequesting, selector, tasksStatus }
 ) => {
 	switch ( type ) {
 		case TYPES.SET_PROFILE_ITEMS:
-			state = {
+			return {
 				...state,
 				profileItems: replace
 					? profileItems
 					: { ...state.profileItems, ...profileItems },
 			};
-			break;
+		case TYPES.SET_TASKS_STATUS:
+			return {
+				...state,
+				tasksStatus: { ...state.tasksStatus, ...tasksStatus },
+			};
 		case TYPES.SET_ERROR:
-			state = {
+			return {
 				...state,
 				errors: {
 					...state.errors,
 					[ selector ]: error,
 				},
 			};
-			break;
 		case TYPES.SET_IS_REQUESTING:
-			state = {
+			return {
 				...state,
 				requesting: {
 					...state.requesting,
 					[ selector ]: isRequesting,
 				},
 			};
-			break;
+		default:
+			return state;
 	}
-	return state;
 };
 
 export default onboarding;

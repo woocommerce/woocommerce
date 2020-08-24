@@ -10,15 +10,12 @@ import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Card, H, Link, Stepper, Plugins } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
-	getAdminLink,
-	getSetting,
-	setSetting,
-} from '@woocommerce/wc-admin-settings';
-import {
-	SETTINGS_STORE_NAME,
-	PLUGINS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 
@@ -71,11 +68,11 @@ class Tax extends Component {
 	}
 
 	isTaxJarSupported() {
-		const { countryCode } = this.props;
+		const { countryCode, tasksStatus } = this.props;
 		const {
 			automatedTaxSupportedCountries = [],
 			taxJarActivated,
-		} = getSetting( 'onboarding', {} );
+		} = tasksStatus;
 
 		return (
 			! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
@@ -116,6 +113,7 @@ class Tax extends Component {
 
 	updateAutomatedTax( isEnabling ) {
 		const {
+			clearTaskStatusCache,
 			createNotice,
 			updateAndPersistSettingsForGroup,
 			generalSettings,
@@ -137,12 +135,8 @@ class Tax extends Component {
 			} ),
 		] )
 			.then( () => {
-				// @todo This is a workaround to force the task to mark as complete.
-				// This should probably be updated to use wc-api so we can fetch tax rates.
-				setSetting( 'onboarding', {
-					...getSetting( 'onboarding', {} ),
-					isTaxComplete: true,
-				} );
+				clearTaskStatusCache();
+
 				if ( isEnabling ) {
 					createNotice(
 						'success',
@@ -449,6 +443,7 @@ export default compose(
 			isJetpackConnected,
 			isPluginsRequesting,
 		} = select( PLUGINS_STORE_NAME );
+		const { getTasksStatus } = select( ONBOARDING_STORE_NAME );
 
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const countryCode = getCountryCode(
@@ -474,6 +469,8 @@ export default compose(
 			connectOptions.tos_accepted ||
 			getOption( 'woocommerce_setup_jetpack_opted_in' );
 
+		const tasksStatus = getTasksStatus();
+
 		const isPending =
 			isUpdateSettingsRequesting( 'tax' ) ||
 			isUpdateSettingsRequesting( 'general' );
@@ -487,6 +484,7 @@ export default compose(
 			isPending,
 			isResolving,
 			pluginsToActivate,
+			tasksStatus,
 			taxSettings,
 			tosAccepted,
 		};
@@ -497,8 +495,13 @@ export default compose(
 		const { updateAndPersistSettingsForGroup } = dispatch(
 			SETTINGS_STORE_NAME
 		);
+		const { invalidateResolutionForStoreSelector } = dispatch(
+			ONBOARDING_STORE_NAME
+		);
 
 		return {
+			clearTaskStatusCache: () =>
+				invalidateResolutionForStoreSelector( 'getTasksStatus' ),
 			createNotice,
 			updateAndPersistSettingsForGroup,
 			updateOptions,

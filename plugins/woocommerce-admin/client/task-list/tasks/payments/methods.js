@@ -7,7 +7,6 @@ import { Fragment } from '@wordpress/element';
 import { filter, some } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import {
-	getSetting,
 	getAdminLink,
 	WC_ASSET_URL as wcAssetUrl,
 } from '@woocommerce/wc-admin-settings';
@@ -72,14 +71,14 @@ export function getPaymentMethods( {
 	countryCode,
 	createNotice,
 	installAndActivatePlugins,
+	onboardingStatus,
 	options,
 	profileItems,
 } ) {
-	const settings = getSetting( 'onboarding', {
-		stripeSupportedCountries: [],
-		wcPayIsConnected: false,
-	} );
-	const { stripeSupportedCountries, wcPayIsConnected } = settings;
+	const {
+		stripeSupportedCountries = [],
+		wcPayIsConnected = false,
+	} = onboardingStatus;
 
 	const hasCbdIndustry =
 		some( profileItems.industry, {

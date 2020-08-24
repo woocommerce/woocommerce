@@ -9,9 +9,10 @@ import reducer from '../reducer';
 import TYPES from '../action-types';
 
 const defaultState = {
-	profileItems: {},
 	errors: {},
+	profileItems: {},
 	requesting: {},
+	tasksStatus: {},
 };
 
 describe( 'plugins reducer', () => {
@@ -76,5 +77,22 @@ describe( 'plugins reducer', () => {
 		/* eslint-disable dot-notation */
 		expect( state.requesting[ 'updateProfileItems' ] ).toBeTruthy();
 		/* eslint-enable dot-notation */
+	} );
+
+	it( 'should handle SET_TASKS_STATUS', () => {
+		const state = reducer(
+			{
+				tasksStatus: { hasProducts: true },
+			},
+			{
+				type: TYPES.SET_TASKS_STATUS,
+				tasksStatus: { isTaxComplete: false },
+			}
+		);
+
+		expect( state.tasksStatus ).toHaveProperty( 'hasProducts' );
+		expect( state.tasksStatus ).toHaveProperty( 'isTaxComplete' );
+		expect( state.tasksStatus.hasProducts ).toBe( true );
+		expect( state.tasksStatus.isTaxComplete ).toBe( false );
 	} );
 } );
