@@ -97,6 +97,15 @@ class DataStore extends SqlQuery {
 	public function __construct() {
 		self::set_db_table_name();
 		$this->assign_report_columns();
+
+		if ( property_exists( $this, 'report_columns' ) ) {
+			$this->report_columns = apply_filters(
+				'woocommerce_admin_report_columns',
+				$this->report_columns,
+				$this->context,
+				self::get_db_table_name()
+			);
+		}
 	}
 
 	/**
