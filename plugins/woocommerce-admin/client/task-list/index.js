@@ -203,19 +203,11 @@ class TaskDashboard extends Component {
 		} );
 	}
 
-	keepTaskCard() {
-		recordEvent( 'tasklist_completed', {
-			action: 'keep_card',
-		} );
-
-		this.props.updateOptions( {
-			woocommerce_task_list_prompt_shown: true,
-		} );
-	}
-
 	hideTaskCard( action ) {
 		recordEvent( 'tasklist_completed', {
 			action,
+			completed_task_count: this.getCompletedTaskKeys().length,
+			incomplete_task_count: this.getIncompleteTasks().length,
 		} );
 		this.props.updateOptions( {
 			woocommerce_task_list_hidden: 'yes',
