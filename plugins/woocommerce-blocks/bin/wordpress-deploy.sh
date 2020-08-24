@@ -40,37 +40,6 @@ output_list() {
   echo "$(tput setaf "$1") • $2:$(tput sgr0) \"$3\""
 }
 
-# Sync dest files
-copy_dest_files() {
-  cd "$2" || exit
-  rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded \
-	--exclude=".*/" \
-	--exclude="*.md" \
-	--exclude=".*" \
-	--exclude="composer.*" \
-	--exclude="*.lock" \
-	--exclude=bin/ \
-	--exclude=node_modules/ \
-	--exclude=tests/ \
-	--exclude=docs/ \
-	--exclude=phpcs.xml \
-	--exclude=phpunit.xml.dist \
-	--exclude=CODEOWNERS \
-	--exclude=renovate.json \
-	--exclude="*.config.js" \
-	--exclude="*-config.js" \
-	--exclude="*.config.json" \
-	--exclude=package.json \
-	--exclude=package-lock.json \
-	--exclude=none \
-	--exclude=blocks.ini \
-	--exclude=docker-compose.yml \
-	--exclude=tsconfig.json \
-	--exclude=globals.d.ts
-  output 2 "Done copying files!"
-  cd "$3" || exit
-}
-
 # Release script
 echo
 output 4 "BLOCKS->WordPress.org RELEASE SCRIPT"
@@ -173,7 +142,8 @@ fi
 
 # Copy GIT directory to trunk
 output 2 "Copying project files to SVN trunk..."
-copy_dest_files "trunk" "$GIT_PATH" "$SVN_PATH"
+sh ${RELEASER_PATH}/bin/copy-plugin-files.sh "$GIT_PATH" "$SVN_PATH/trunk"
+cd "$SVN_PATH"
 
 # Update stable tag on trunk/readme.txt
 if [ $IS_PRE_RELEASE = false ]; then
