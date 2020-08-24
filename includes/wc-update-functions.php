@@ -4,7 +4,7 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.3.0
  */
 
@@ -2174,4 +2174,71 @@ function wc_update_440_insert_attribute_terms_for_variable_products() {
  */
 function wc_update_440_db_version() {
 	WC_Install::update_db_version( '4.4.0' );
+}
+
+/**
+ * Update DB version to 4.5.0.
+ */
+function wc_update_450_db_version() {
+	WC_Install::update_db_version( '4.5.0' );
+}
+
+/**
+ * Sanitize all coupons code.
+ *
+ * @return bool True to run again, false if completed.
+ */
+function wc_update_450_sanitize_coupons_code() {
+	global $wpdb;
+
+	$coupon_id      = 0;
+	$last_coupon_id = get_option( 'woocommerce_update_450_last_coupon_id', '0' );
+
+	$coupons = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10",
+			$last_coupon_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $coupons ) ) {
+		delete_option( 'woocommerce_update_450_last_coupon_id' );
+		return false;
+	}
+
+	foreach ( $coupons as $key => $data ) {
+		$coupon_id = intval( $data['ID'] );
+		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+
+		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_title' => $code,
+				),
+				array(
+					'ID' => $coupon_id,
+				),
+				array(
+					'%s',
+				),
+				array(
+					'%d',
+				)
+			);
+
+			// Clean cache.
+			clean_post_cache( $coupon_id );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+		}
+	}
+
+	// Start the run again.
+	if ( $coupon_id ) {
+		return update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id );
+	}
+
+	delete_option( 'woocommerce_update_450_last_coupon_id' );
+	return false;
 }

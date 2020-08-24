@@ -41,6 +41,10 @@
     "access": "public"
   },
   "scripts": {
+    "clean": "rm -rf ./build ./build-module",
+    "compile": "node ./../bin/build.js",
+    "build": "npm run clean && npm run compile",
+    "prepare": "npm run build",
     "docker:up": "./bin/docker-compose.js up",
     "docker:down": "./bin/docker-compose.js down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",

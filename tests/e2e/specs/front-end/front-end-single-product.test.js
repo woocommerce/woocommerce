@@ -5,9 +5,13 @@
 /**
  * Internal dependencies
  */
-import { createSimpleProduct, createVariableProduct } from '../../utils/components';
-import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
-import { uiUnblocked } from '../../utils';
+import {
+	CustomerFlow,
+	StoreOwnerFlow,
+	createSimpleProduct,
+	createVariableProduct,
+	uiUnblocked
+} from '@woocommerce/e2e-utils';
 
 let simplePostIdValue;
 let variablePostIdValue;

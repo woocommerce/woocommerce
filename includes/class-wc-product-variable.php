@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes/Products
+ * @package WooCommerce\Classes\Products
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -282,12 +282,11 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
-	 * @param bool $render_variations Prepares a data array for each variant for output in the add to cart form. Pass `false` to only return the available variations as objects.
-	 * @param bool $return_array_of_data If true, return an array of data for the variation; if false, return a WC_Product_Variation object.
+	 * @param string $return Optional. The format to return the results in. Can be 'array' to return an array of variation data or 'objects' for the product objects. Default 'array'.
 	 *
-	 * @return array|WC_Product_Variation
+	 * @return array[]|WC_Product_Variation[]
 	 */
-	public function get_available_variations( $render_variations = true, $return_array_of_data = true ) {
+	public function get_available_variations( $return = 'array' ) {
 		$variation_ids        = $this->get_children();
 		$available_variations = array();
 
@@ -309,14 +308,14 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			if ( $render_variations ) {
-				$available_variations[] = $return_array_of_data ? $this->get_available_variation( $variation ) : $variation;
+			if ( 'array' === $return ) {
+				$available_variations[] = $this->get_available_variation( $variation );
 			} else {
 				$available_variations[] = $variation;
 			}
 		}
 
-		if ( $render_variations ) {
+		if ( 'array' === $return ) {
 			$available_variations = array_values( array_filter( $available_variations ) );
 		}
 
@@ -622,7 +621,7 @@ class WC_Product_Variable extends WC_Product {
 			}
 		);
 
-		$variations = $this->get_available_variations( true, false );
+		$variations = $this->get_available_variations( 'objects' );
 		foreach ( $variations as $variation ) {
 			if ( $this->variation_matches_filters( $variation, $attributes_with_terms ) ) {
 				return true;

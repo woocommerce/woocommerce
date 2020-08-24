@@ -5,15 +5,16 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { completeOnboardingWizard } from '../../utils/components';
 import {
+	StoreOwnerFlow,
+	completeOldSetupWizard,
+	completeOnboardingWizard,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	settingsPageSaveChanges,
 	verifyCheckboxIsSet,
 	verifyValueOfInputField
-} from '../../utils';
+} from '@woocommerce/e2e-utils';
 
 describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 	beforeAll( async () => {

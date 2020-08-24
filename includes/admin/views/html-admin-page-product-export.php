@@ -2,7 +2,7 @@
 /**
  * Admin View: Product Export
  *
- * @package WooCommerce/Admin/Export
+ * @package WooCommerce\Admin\Export
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

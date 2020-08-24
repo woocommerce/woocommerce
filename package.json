@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -9,11 +9,17 @@
   },
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
+  "config": {
+    "wp_org_slug": "woocommerce"
+  },
   "scripts": {
-    "build": "grunt && npm run makepot && npm run build:packages",
+    "build": "./bin/build-zip.sh",
+    "build:core": "grunt && npm run makepot",
+    "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
-    "build:packages": "node ./tests/e2e/bin/build.js",
-    "build:zip": "./bin/build-zip.sh",
+    "build:packages": "lerna run build",
+    "build:zip": "npm run build && composer install && npm run build:dev",
+    "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
     "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",
@@ -21,7 +27,7 @@
     "test:e2e-dev": "npm explore @woocommerce/e2e-environment -- npm run test:e2e-dev",
     "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
-    "publish-packages": "npm run build:packages && lerna publish from-package",
+    "publish-packages": "lerna publish from-package",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
@@ -30,12 +36,16 @@
     "@babel/polyfill": "7.10.4",
     "@babel/preset-env": "7.10.4",
     "@babel/register": "7.10.4",
-    "@jest/test-sequencer": "^25.0.0",
+    "@jest/test-sequencer": "25.1.0",
+    "@typescript-eslint/eslint-plugin": "3.1.0",
+    "@typescript-eslint/parser": "3.1.0",
     "@woocommerce/e2e-environment": "file:tests/e2e/env",
+    "@woocommerce/model-factories": "file:tests/e2e/factories",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
     "@wordpress/babel-preset-default": "3.0.2",
-    "@wordpress/e2e-test-utils": "4.6.0",
-    "autoprefixer": "9.8.4",
+    "@wordpress/eslint-plugin": "7.1.0",
+    "@woocommerce/e2e-utils": "file:tests/e2e/utils",
+    "autoprefixer": "9.8.6",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
@@ -47,7 +57,7 @@
     "eslint-config-wpcalypso": "5.0.0",
     "eslint-plugin-jest": "23.19.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
-    "grunt": "1.1.0",
+    "grunt": "1.2.1",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-concat": "1.0.1",
     "grunt-contrib-copy": "1.0.0",
@@ -68,11 +78,12 @@
     "lint-staged": "9.5.0",
     "mocha": "7.2.0",
     "node-sass": "4.13.0",
-    "prettier": "github:automattic/calypso-prettier#c56b4251",
+    "prettier": "npm:wp-prettier@^2.0.5",
     "puppeteer": "2.0.0",
     "puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
+    "typescript": "3.9.5",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11",
     "wp-textdomain": "^1.0.1"
@@ -98,6 +109,10 @@
       "git add"
     ],
     "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.ts": [
       "eslint --fix",
       "git add"
     ]

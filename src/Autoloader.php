@@ -1,8 +1,6 @@
 <?php
 /**
  * Includes the composer Autoloader used for packages and classes in the src/ directory.
- *
- * @package Automattic/WooCommerce
  */
 
 namespace Automattic\WooCommerce;
@@ -35,20 +33,6 @@ class Autoloader {
 			self::missing_autoloader();
 			return false;
 		}
-
-		/**
-		 * In order to support local development for feature plugins the autoloader must support dev versions.
-		 *
-		 * - If the checked out branch cannot supply Composer with version information then it
-		 *   assigns it a dev version string for the Jetpack Autoloader to use.
-		 * - By default the Jetpack Autoloader will ignore these dev versions in favor of tagged versions.
-		 *
-		 * Due to this interaction, feature plugin files from the included packages will always be loaded instead
-		 * of the versions in the feature plugin when checked out from a repository as a dev version. By setting
-		 * this constant we change the behavior of the autoloader so that dev versions are prioritized over the
-		 * tagged versions included in WooCommerce Core.
-		 */
-		define( 'JETPACK_AUTOLOAD_DEV', true );
 
 		$autoloader_result = require $autoloader;
 		if ( ! $autoloader_result ) {

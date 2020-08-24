@@ -2,7 +2,7 @@
 /**
  * Order Notes
  *
- * @package WooCommerce/Admin/Meta Boxes
+ * @package WooCommerce\Admin\Meta Boxes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

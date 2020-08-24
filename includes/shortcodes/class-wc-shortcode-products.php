@@ -2,7 +2,7 @@
 /**
  * Products shortcode
  *
- * @package  WooCommerce/Shortcodes
+ * @package  WooCommerce\Shortcodes
  * @version  3.2.4
  */
 

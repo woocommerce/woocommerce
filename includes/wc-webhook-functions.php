@@ -2,7 +2,7 @@
 /**
  * WooCommerce Webhook functions
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.3.0
  */
 

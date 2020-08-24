@@ -111,7 +111,7 @@ class WC_Notes_Run_Db_Update {
 	private static function update_needed_notice( $note_id = null ) {
 		$update_url = html_entity_decode(
 			wp_nonce_url(
-				add_query_arg( 'do_update_woocommerce', 'true', admin_url( 'admin.php?page=wc-settings' ) ),
+				add_query_arg( 'do_update_woocommerce', 'true', wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' ) ),
 				'wc_db_update',
 				'wc_db_update_nonce'
 			)
@@ -210,7 +210,7 @@ class WC_Notes_Run_Db_Update {
 				add_query_arg(
 					'wc-hide-notice',
 					'update',
-					admin_url( 'admin.php?page=wc-settings' )
+					wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
 				),
 				'woocommerce_hide_notices_nonce',
 				'_wc_notice_nonce'

@@ -1,10 +1,10 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.2
-Tested up to: 5.4
+Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.3.0
+Stable tag: 4.4.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,9 +179,43 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.4.0 - 2020-08-18 =
 
-[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
+
+= 4.5.0 - 2020-09-08 =
+
+**WooCommerce**
+* Localization - Added postcode validation for Bosnia and Herzegovina. #27048
+* Localization - Added the postcode validation for Liechtenstein. #27059
+* Localization - Add i18n locale information for Liechtenstein, Switzerland and Austria. #27193
+* Fix - Remove whitespace within a link. #26897
+* Fix - `get_review_count_for_product` return all comments count not only 'review' types #26928
+* Fix - Hidden field type is now supported by `woocommerce_form_field`. #27023
+* Fix - Remove state for country liechtenstein. #27057
+* Fix - Fixed validation of variation attributes while adding products to the cart. #27115
+* Fix - Coupon code inconsistent between admins and shop owners. #27140
+* Fix - Fixed the logic behind "Hide shipping costs until an address is entered". #27143
+* Fix - Searches for variations now will fallback to parent SKU if one is not entered. #27171
+* Fix - Release coupon holds for cancelled orders previously in pending status. #27179
+* Fix - Fixes Japan zip code format issue (dash is now optional). #27244
+* Fix - Restore backward compatibility with WC 4.x and forward compatibility with WC 5.5. #27318
+* Fix - Switch to site locale before translating refund reason. #27323
+* Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
+* Dev - Changed text domain to `woocommerce` for REST API files. #27248
+* Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
+* Dev - Merge API Package into core. #27100
+
+**WooCommerce Admin 1.5.0**
+* Enhancement - Add eWAY to Payment Setup for AU/NZ Stores. #4947
+* Fix - Use clipRule and fillRule props. #4889, part of #4864
+* Tweak: Remove the Composite products option from the onboarding wizard #4703
+* Dev - New notification: Don't forget to test your checkout. #4805
+* Dev - Enable tax calculation before redirecting to standard tax rates page. #4878
+* Dev - Added event recording to Orders, Stock, and Reviews panels. #4861
+* Dev - Added personalization to purchase extension task. #4849
+* Dev - Display modal with more info about the new homescreen. #4890
+* Dev - Task list - add a shortcut back to store setup. #4853
+* Dev - Update the colors of the illustrations in the welcome modal. #4945
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
 == Upgrade Notice ==
 

@@ -4,7 +4,7 @@
  *
  * The WooCommerce product variation class handles product variation data.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 

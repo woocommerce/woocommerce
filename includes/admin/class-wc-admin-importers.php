@@ -2,7 +2,7 @@
 /**
  * Init WooCommerce data importers.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 use Automattic\Jetpack\Constants;

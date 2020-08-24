@@ -2,7 +2,7 @@
 /**
  * Recent Reviews Widget.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.3.0
  */
 

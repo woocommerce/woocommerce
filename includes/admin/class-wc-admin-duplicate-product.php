@@ -2,7 +2,7 @@
 /**
  * Duplicate product functionality
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     3.0.0
  */
 

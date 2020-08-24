@@ -3,7 +3,7 @@
  * WooCommerce Admin
  *
  * @class    WC_Helper_API
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

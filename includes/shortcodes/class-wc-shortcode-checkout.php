@@ -4,7 +4,7 @@
  *
  * Used on the checkout page, the checkout shortcode displays the checkout process.
  *
- * @package WooCommerce/Shortcodes/Checkout
+ * @package WooCommerce\Shortcodes\Checkout
  * @version 2.0.0
  */
 

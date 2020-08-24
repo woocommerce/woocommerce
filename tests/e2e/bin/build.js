@@ -19,29 +19,18 @@ const deasync = require( 'deasync' );
 /**
  * Internal dependencies
  */
-const getPackages = require( './get-packages' );
 const getBabelConfig = require( './get-babel-config' );
 
 /**
  * Module Constants
  */
-const PACKAGES_DIR = path.resolve( __dirname, '../' );
+const PACKAGE_DIR = process.cwd();
 const SRC_DIR = 'src';
 const BUILD_DIR = {
 	main: 'build',
 	module: 'build-module',
 };
 const DONE = chalk.reset.inverse.bold.green( ' DONE ' );
-
-/**
- * Get the package name for a specified file
- *
- * @param  {string} file File name
- * @return {string}      Package name
- */
-function getPackageName( file ) {
-	return path.relative( PACKAGES_DIR, file ).split( path.sep )[ 0 ];
-}
 
 const isJsFile = ( filepath ) => {
 	return /.\.js$/.test( filepath );
@@ -55,9 +44,8 @@ const isJsFile = ( filepath ) => {
  * @return {string}             Build path
  */
 function getBuildPath( file, buildFolder ) {
-	const pkgName = getPackageName( file );
-	const pkgSrcPath = path.resolve( PACKAGES_DIR, pkgName, SRC_DIR );
-	const pkgBuildPath = path.resolve( PACKAGES_DIR, pkgName, buildFolder );
+	const pkgSrcPath = path.resolve( PACKAGE_DIR, SRC_DIR );
+	const pkgBuildPath = path.resolve( PACKAGE_DIR, buildFolder );
 	const relativeToSrcPath = path.relative( pkgSrcPath, file );
 	return path.resolve( pkgBuildPath, relativeToSrcPath );
 }
@@ -121,9 +109,9 @@ function buildJsFileFor( file, silent, environment ) {
 	if ( ! silent ) {
 		process.stdout.write(
 			chalk.green( '  \u2022 ' ) +
-				path.relative( PACKAGES_DIR, file ) +
+				path.relative( PACKAGE_DIR, file ) +
 				chalk.green( ' \u21D2 ' ) +
-				path.relative( PACKAGES_DIR, destPath ) +
+				path.relative( PACKAGE_DIR, destPath ) +
 				'\n'
 		);
 	}
@@ -136,6 +124,15 @@ function buildJsFileFor( file, silent, environment ) {
  */
 function buildPackage( packagePath ) {
 	const srcDir = path.resolve( packagePath, SRC_DIR );
+
+	let packageName;
+	try {
+		packageName = require( path.resolve( PACKAGE_DIR, 'package.json' ) ).name;
+	} catch ( e ) {
+		packageName = PACKAGE_DIR.split( path.sep ).pop();
+	}
+	process.stdout.write( chalk.inverse( `>> Building package: ${ packageName }\n` ) );
+
 	const jsFiles = glob.sync( `${ srcDir }/**/*.js`, {
 		ignore: [
 			`${ srcDir }/**/test/**/*.js`,
@@ -143,8 +140,6 @@ function buildPackage( packagePath ) {
 		],
 		nodir: true,
 	} );
-
-	process.stdout.write( `${ path.basename( packagePath ) }\n` );
 
 	// Build js files individually.
 	jsFiles.forEach( ( file ) => buildJsFile( file, true ) );
@@ -157,7 +152,5 @@ const files = process.argv.slice( 2 );
 if ( files.length ) {
 	buildFiles( files );
 } else {
-	process.stdout.write( chalk.inverse( '>> Building packages \n' ) );
-	getPackages().forEach( buildPackage );
-	process.stdout.write( '\n' );
+	buildPackage( PACKAGE_DIR );
 }

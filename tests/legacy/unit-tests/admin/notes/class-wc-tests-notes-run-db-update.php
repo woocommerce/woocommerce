@@ -17,6 +17,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	 *
 	 */
 	public static function setUpBeforeClass() {
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/wc-admin-functions.php';
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/notes/class-wc-notes-run-db-update.php';
 
 	}

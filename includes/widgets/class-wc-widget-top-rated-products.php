@@ -3,7 +3,7 @@
  * Top Rated Products Widget.
  * Gets and displays top rated products in an unordered list.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 3.3.0
  */
 
