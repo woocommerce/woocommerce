@@ -170,28 +170,6 @@ class Loader {
 	}
 
 	/**
-	 * Returns if the onboarding feature of WooCommerce Admin should be enabled.
-	 *
-	 * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build, but only if the user received the test/opted in.
-	 *
-	 * @return bool Returns true if the onboarding is enabled.
-	 */
-	public static function is_onboarding_enabled() {
-		if ( ! self::is_feature_enabled( 'onboarding' ) ) {
-			return false;
-		}
-
-		$onboarding_opt_in        = 'yes' === get_option( Onboarding::OPT_IN_OPTION, 'no' );
-		$legacy_onboarding_opt_in = 'yes' === get_option( 'wc_onboarding_opt_in', 'no' );
-
-		if ( $onboarding_opt_in || $legacy_onboarding_opt_in ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Determines if a minified JS file should be served.
 	 *
 	 * @param  boolean $script_debug Only serve unminified files if script debug is on.
@@ -1028,12 +1006,11 @@ class Loader {
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
 		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
 		// and `wcAssetUrl` can be used in its place throughout the codebase.
-		$settings['wcAdminAssetUrl']   = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
-		$settings['wcVersion']         = WC_VERSION;
-		$settings['siteUrl']           = site_url();
-		$settings['onboardingEnabled'] = self::is_onboarding_enabled();
-		$settings['dateFormat']        = get_option( 'date_format' );
-		$settings['plugins']           = array(
+		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
+		$settings['wcVersion']       = WC_VERSION;
+		$settings['siteUrl']         = site_url();
+		$settings['dateFormat']      = get_option( 'date_format' );
+		$settings['plugins']         = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
 			'activePlugins'    => Plugins::get_active_plugins(),
 		);

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
 	Card,
@@ -59,13 +58,6 @@ class StoreDetails extends Component {
 
 		this.onContinue = this.onContinue.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
-	}
-
-	componentWillUnmount() {
-		apiFetch( {
-			path: '/wc-admin/onboarding/tasks/create_store_pages',
-			method: 'POST',
-		} );
 	}
 
 	deriveCurrencySettings( countryState ) {

@@ -28,7 +28,7 @@ import {
 	getUnapprovedReviews,
 	getUnreadStock,
 } from './unread-indicators';
-import { isOnboardingEnabled, isWCAdmin } from '../../dashboard/utils';
+import { isWCAdmin } from '../../dashboard/utils';
 import withSelect from '../../wc-api/with-select';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
@@ -127,7 +127,6 @@ export class ActivityPanel extends Component {
 			taskListEnabledResolving,
 			taskListComplete,
 			taskListHidden,
-			taskListEnabled,
 			query,
 		} = this.props;
 
@@ -148,7 +147,7 @@ export class ActivityPanel extends Component {
 			return [];
 		}
 
-		if ( ! taskListComplete && taskListEnabled && showInbox ) {
+		if ( ! taskListComplete && showInbox ) {
 			return [
 				{
 					name: 'inbox',
@@ -395,22 +394,13 @@ export default compose(
 			'woocommerce_homescreen_enabled',
 		] );
 
-		// This indicates the task list is in progress, but not if it has been hidden or not
-		const taskListEnabled = isOnboardingEnabled();
-
-		let requestingTaskListOptions, taskListComplete, taskListHidden;
-
-		if ( isOnboardingEnabled() ) {
-			taskListComplete =
-				getOption( 'woocommerce_task_list_complete' ) === 'yes';
-			taskListHidden =
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes';
-			requestingTaskListOptions =
-				isResolving( 'getOption', [
-					'woocommerce_task_list_complete',
-				] ) ||
-				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
-		}
+		const taskListComplete =
+			getOption( 'woocommerce_task_list_complete' ) === 'yes';
+		const taskListHidden =
+			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
+		const requestingTaskListOptions =
+			isResolving( 'getOption', [ 'woocommerce_task_list_complete' ] ) ||
+			isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
 
 		return {
 			hasUnreadNotes,
@@ -421,7 +411,6 @@ export default compose(
 			taskListEnabledResolving,
 			taskListComplete,
 			taskListHidden,
-			taskListEnabled,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

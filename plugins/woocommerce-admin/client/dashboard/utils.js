@@ -164,22 +164,6 @@ export function getPriceValue( string ) {
 }
 
 /**
- * Returns if the onboarding feature of WooCommerce Admin should be enabled.
- *
- * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build,
- * but only if the user recieved the test/opted in.
- *
- * @return {boolean} True if the onboarding is enabled.
- */
-export function isOnboardingEnabled() {
-	if ( ! window.wcAdminFeatures.onboarding ) {
-		return false;
-	}
-
-	return getSetting( 'onboardingEnabled', false );
-}
-
-/**
  * Determines if a URL is a WC admin url.
  *
  * @param {*} url - the url to test

@@ -22,7 +22,6 @@ import QuickLinks from '../quick-links';
 import StatsOverview from './stats-overview';
 import './style.scss';
 import '../dashboard/style.scss';
-import { isOnboardingEnabled } from '../dashboard/utils';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../header/activity-panel/panels/inbox';
 import withWCApiSelect from '../wc-api/with-select';
@@ -177,27 +176,18 @@ export default compose(
 		const shouldShowWelcomeModal =
 			! welcomeModalDismissedIsResolving && ! welcomeModalDismissed;
 
-		if ( isOnboardingEnabled() ) {
-			return {
-				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-				shouldShowWelcomeModal,
-				taskListComplete:
-					getOption( 'woocommerce_task_list_complete' ) === 'yes',
-				taskListHidden:
-					getOption( 'woocommerce_task_list_hidden' ) === 'yes',
-				requestingTaskList:
-					isResolving( 'getOption', [
-						'woocommerce_task_list_complete',
-					] ) ||
-					isResolving( 'getOption', [
-						'woocommerce_task_list_hidden',
-					] ),
-			};
-		}
-
 		return {
+			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
-			requestingTaskList: false,
+			taskListComplete:
+				getOption( 'woocommerce_task_list_complete' ) === 'yes',
+			taskListHidden:
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+			requestingTaskList:
+				isResolving( 'getOption', [
+					'woocommerce_task_list_complete',
+				] ) ||
+				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

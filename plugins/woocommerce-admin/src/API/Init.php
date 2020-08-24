@@ -91,18 +91,10 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Taxes',
 			'Automattic\WooCommerce\Admin\API\Themes',
 			'Automattic\WooCommerce\Admin\API\Plugins',
+			'Automattic\WooCommerce\Admin\API\OnboardingProfile',
+			'Automattic\WooCommerce\Admin\API\OnboardingTasks',
+			'Automattic\WooCommerce\Admin\API\OnboardingThemes',
 		);
-
-		if ( Loader::is_onboarding_enabled() ) {
-			$controllers = array_merge(
-				$controllers,
-				array(
-					'Automattic\WooCommerce\Admin\API\OnboardingProfile',
-					'Automattic\WooCommerce\Admin\API\OnboardingTasks',
-					'Automattic\WooCommerce\Admin\API\OnboardingThemes',
-				)
-			);
-		}
 
 		// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 		$controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';

@@ -25,7 +25,6 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 * GET `/wc-admin/onboarding/profile` - Returns the information gathered during the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.
 * POST `/wc-admin/onboarding/profile` - Sets data for the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.
 * POST `/wc-admin/onboarding/tasks/import_sample_products` - Used for importing sample products during the appearance task.
-* POST `/wc-admin/onboarding/tasks/create_store_pages` - Used for creating default store pages (like my account and checkout) during the profile wizard.
 * POST `/wc-admin/onboarding/tasks/create_homepage` - Used for creating a homepage using Gutenberg templates.
 
 ## Onboarding filters

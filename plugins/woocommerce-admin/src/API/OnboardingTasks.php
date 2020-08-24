@@ -51,19 +51,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/create_store_pages',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_store_pages' ),
-					'permission_callback' => array( $this, 'create_pages_permission_check' ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/create_homepage',
 			array(
 				array(
@@ -408,17 +395,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		return $images_for_post;
-	}
-
-	/**
-	 * Creates base store starter pages like my account and checkout.
-	 * Note that WC_Install::create_pages already checks if pages exist before creating them again.
-	 *
-	 * @return bool
-	 */
-	public static function create_store_pages() {
-		\WC_Install::create_pages();
-		return true;
 	}
 
 	/**

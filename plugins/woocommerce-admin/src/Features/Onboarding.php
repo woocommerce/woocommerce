@@ -42,11 +42,6 @@ class Onboarding {
 	const PROFILE_DATA_OPTION = 'woocommerce_onboarding_profile';
 
 	/**
-	 * Onboarding opt-in option name.
-	 */
-	const OPT_IN_OPTION = 'woocommerce_onboarding_opt_in';
-
-	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -67,10 +62,6 @@ class Onboarding {
 			OnboardingTasks::get_instance();
 		}
 
-		if ( ! Loader::is_onboarding_enabled() ) {
-			return;
-		}
-
 		// Add onboarding notes.
 		new WC_Admin_Notes_Onboarding_Profiler();
 
@@ -86,18 +77,9 @@ class Onboarding {
 	 * Adds the ability to toggle the new onboarding experience on or off.
 	 */
 	private function add_toggle_actions() {
-		// @todo This toggle option should be removed when a/b testing is complete.
-		add_action( 'current_screen', array( $this, 'enable_onboarding' ) );
 		add_action( 'woocommerce_updated', array( $this, 'maybe_mark_complete' ) );
-		// Track the onboarding toggle event earlier so they are captured before redirecting.
-		add_action( 'add_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
-		add_action( 'update_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
 		add_action( 'update_option_' . self::PROFILE_DATA_OPTION, array( $this, 'send_profile_data_on_update' ), 10, 2 );
 		add_action( 'woocommerce_helper_connected', array( $this, 'send_profile_data_on_connect' ) );
-
-		if ( ! Loader::is_onboarding_enabled() ) {
-			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
-		}
 	}
 
 	/**
@@ -878,53 +860,6 @@ class Onboarding {
 	}
 
 	/**
-	 * Update the existing help tab and add an option to enable the new onboarding experience.
-	 */
-	public static function update_help_tab() {
-		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
-			return;
-		}
-
-		$screen = get_current_screen();
-
-		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
-			return;
-		}
-
-		$help_tabs = $screen->get_help_tabs();
-
-		foreach ( $help_tabs as $help_tab ) {
-			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
-				continue;
-			}
-
-			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
-			$help_tab['content'] .= '<h3>' . __( 'New onboarding experience', 'woocommerce-admin' ) . '</h3>';
-			$help_tab['content'] .= '<p>' . __( 'If you want to try out the new WooCommerce onboarding experience, click the button below.', 'woocommerce-admin' ) . '</p>';
-			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&enable_onboarding=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>';
-			$screen->add_help_tab( $help_tab );
-		}
-	}
-
-	/**
-	 * Reset the onboarding profiler and redirect to the profiler.
-	 */
-	public static function enable_onboarding() {
-		if (
-			! Loader::is_admin_page() ||
-			! isset( $_GET['enable_onboarding'] ) // phpcs:ignore CSRF ok.
-		) {
-			return;
-		}
-
-		$enabled = 1 === absint( $_GET['enable_onboarding'] ); // phpcs:ignore CSRF ok.
-
-		update_option( self::OPT_IN_OPTION, $enabled ? 'yes' : 'no' );
-		wp_safe_redirect( wc_admin_url() );
-		exit;
-	}
-
-	/**
 	 * Track changes to the onboarding option.
 	 *
 	 * @param mixed  $mixed Option name or previous value if option previously existed.
@@ -958,47 +893,49 @@ class Onboarding {
 			return;
 		}
 
+		// Remove the old help tab if it exists.
 		$help_tabs = $screen->get_help_tabs();
-
 		foreach ( $help_tabs as $help_tab ) {
 			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
 				continue;
 			}
 
 			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
+		}
 
-			$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
+		// Add the new help tab.
+		$help_tab = array(
+			'title' => __( 'Setup wizard', 'woocommerce-admin' ),
+			'id'    => 'woocommerce_onboard_tab',
+		);
 
-			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
+		$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
 
-			$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
-			$help_tab['content'] .= '<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-				'<p><a href="' . wc_admin_url( '&path=/profiler' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
+		$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
-			$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce-admin' ) . '</h3>';
-			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task list, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-			( 'yes' === $task_list_hidden
-				? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
-				: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
-			);
+		$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
+		$help_tab['content'] .= '<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+			'<p><a href="' . wc_admin_url( '&path=/profiler' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
 
-			if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$help_tab['content'] .= '<h3>' . __( 'Calypso / WordPress.com', 'woocommerce-admin' ) . '</h3>';
-				if ( class_exists( 'Jetpack' ) ) {
-					$help_tab['content'] .= '<p>' . __( 'Quickly access the Jetpack connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
-					$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_jetpack_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
-				}
+		$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce-admin' ) . '</h3>';
+		$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task list, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+		( 'yes' === $task_list_hidden
+			? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+			: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+		);
 
-				$help_tab['content'] .= '<p>' . __( 'Quickly access the WooCommerce.com connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
-				$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_helper_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
+		if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$help_tab['content'] .= '<h3>' . __( 'Calypso / WordPress.com', 'woocommerce-admin' ) . '</h3>';
+			if ( class_exists( 'Jetpack' ) ) {
+				$help_tab['content'] .= '<p>' . __( 'Quickly access the Jetpack connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
+				$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_jetpack_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
 			}
 
-			$help_tab['content'] .= '<h3>' . __( 'New onboarding experience', 'woocommerce-admin' ) . '</h3>';
-			$help_tab['content'] .= '<p>' . __( 'To disable the new WooCommerce onboarding experience, click the button below.', 'woocommerce-admin' ) . '</p>';
-			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&enable_onboarding=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>';
-
-			$screen->add_help_tab( $help_tab );
+			$help_tab['content'] .= '<p>' . __( 'Quickly access the WooCommerce.com connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
+			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_helper_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
 		}
+
+		$screen->add_help_tab( $help_tab );
 	}
 
 	/**

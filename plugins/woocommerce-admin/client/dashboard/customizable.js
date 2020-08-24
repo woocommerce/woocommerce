@@ -29,7 +29,6 @@ import './style.scss';
 import defaultSections from './default-sections';
 import Section from './section';
 import withSelect from '../wc-api/with-select';
-import { isOnboardingEnabled } from './utils';
 import ReportFilters from '../analytics/components/report-filters';
 import {
 	CurrencyContext,
@@ -84,8 +83,7 @@ const CustomizableDashboard = ( {
 
 	const sections = mergeSectionsWithDefaults( userPrefs.dashboard_sections );
 
-	const isTaskListEnabled =
-		! homepageEnabled && isOnboardingEnabled() && ! taskListHidden;
+	const isTaskListEnabled = ! homepageEnabled && ! taskListHidden;
 
 	const isDashboardShown =
 		! isTaskListEnabled || ( ! query.task && taskListComplete );
@@ -329,15 +327,13 @@ export default compose(
 			defaultDateRange,
 		};
 
-		if ( isOnboardingEnabled() ) {
-			withSelectData.homepageEnabled =
-				window.wcAdminFeatures.homescreen &&
-				getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
-			withSelectData.taskListHidden =
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes';
-			withSelectData.taskListComplete =
-				getOption( 'woocommerce_task_list_complete' ) === 'yes';
-		}
+		withSelectData.homepageEnabled =
+			window.wcAdminFeatures.homescreen &&
+			getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
+		withSelectData.taskListHidden =
+			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
+		withSelectData.taskListComplete =
+			getOption( 'woocommerce_task_list_complete' ) === 'yes';
 
 		return withSelectData;
 	} )
