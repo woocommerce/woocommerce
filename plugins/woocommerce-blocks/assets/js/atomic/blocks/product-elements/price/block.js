@@ -206,6 +206,7 @@ const SalePrice = ( {
 			<span
 				className={ classnames(
 					'wc-block-components-product-price__value',
+					'is-discounted',
 					{
 						[ `${ parentClassName }__product-price__value` ]: parentClassName,
 						[ saleClasses ]: isFeaturePluginBuild() }
