@@ -53,8 +53,7 @@ const FrontendConfig = {
 };
 
 /**
- * This is a temporary config for building the payment methods integration script until it can be
- * moved into the payment extension(s).
+ * Config for building the payment methods integration scripts.
  */
 const PaymentsConfig = {
 	...sharedConfig,
