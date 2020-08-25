@@ -51,7 +51,15 @@ class CartItems extends TestCase {
 
 		$this->keys   = [];
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id(), 1, current( $this->products[1]->get_children() ), [ 'size' => 'small' ] );
+		$this->keys[] = wc()->cart->add_to_cart(
+			$this->products[1]->get_id(),
+			1,
+			current( $this->products[1]->get_children() ),
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
 	}
 
 	/**
