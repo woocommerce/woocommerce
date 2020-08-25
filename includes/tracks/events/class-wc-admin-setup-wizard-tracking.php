@@ -30,7 +30,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		add_action( 'shutdown', array( $this, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( $this, 'track_start' ), 10, 2 );
 		add_action( 'admin_init', array( $this, 'track_ready_next_steps' ), 1 );
-		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_whitelisted_scripts' ) );
+		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_allowed_scripts' ) );
 		$this->add_step_save_events();
 		add_action( 'woocommerce_setup_footer', array( $this, 'add_footer_scripts' ) );
 	}
@@ -56,12 +56,12 @@ class WC_Admin_Setup_Wizard_Tracking {
 	/**
 	 * Dequeue unwanted scripts from OBW footer.
 	 */
-	public function dequeue_non_whitelisted_scripts() {
+	public function dequeue_non_allowed_scripts() {
 		global $wp_scripts;
-		$whitelist = array( 'woo-tracks' );
+		$allowed = array( 'woo-tracks' );
 
 		foreach ( $wp_scripts->queue as $script ) {
-			if ( in_array( $script, $whitelist, true ) ) {
+			if ( in_array( $script, $allowed, true ) ) {
 				continue;
 			}
 			wp_dequeue_script( $script );
