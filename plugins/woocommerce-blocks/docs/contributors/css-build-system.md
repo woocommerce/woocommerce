@@ -10,11 +10,13 @@ CSS files are built with Webpack, which gathers all SCSS files in the app and pr
 
 ## Legacy builds
 
-When building WC Blocks, a special build targeting old versions of WordPress is generated. Some blocks might not be available in that legacy build. For example, All Products and Filter blocks not being available on WP 5.2.
+In the past, when building WC Blocks, special builds targeting old versions of WordPress were generated. Those builds were named 'legacy builds' and might have a smaller set of blocks available. For example, All Products and Filter blocks were not available on WP 5.2.
 
-Legacy builds use their own CSS files with the suffix `-legacy`, this allows saving some bytes because non-legacy block styles are not included.
+Currently, those builds are no longer generated since WC Blocks doesn't support WP 5.2 anymore, but the built system is still in place in case we need legacy builds in the future.
 
-> Note: All components' styles are included in legacy CSS files no matter if they are only used by non-legacy blocks. See [#2818](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2818) for more details.
+Legacy builds used their own CSS files with the suffix `-legacy`, this allowed saving some bytes because non-legacy block styles were not included.
+
+> Note: All components' styles were included in legacy CSS files no matter if they were only used by non-legacy blocks. See [#2818](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2818) for more details.
 
 ## Right-to-left
 
@@ -24,6 +26,6 @@ All files described above are generated in a LTR version and a RTL version. The 
 
 Webpack config is split between several files, some relevant ones for the CSS build system are:
 
--   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/webpack.config.js): file that exports the configs.
--   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-configs.js): definition of the different configs used by Webpack.
--   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-entries.js): entries used by Webpack definitions.
+-   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/webpack.config.js): Top level webpack config. Includes support for legacy and main build.
+    -   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
+        -   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
