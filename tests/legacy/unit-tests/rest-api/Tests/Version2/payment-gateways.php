@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.0.0
  */
+
+/**
+ * Payment gateway test class.
+ */
 class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -102,7 +106,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'id'                 => 'paypal',
-				'title'              => 'PayPal Standard',
+				'title'              => 'PayPal',
 				'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
 				'order'              => '',
 				'enabled'            => false,
