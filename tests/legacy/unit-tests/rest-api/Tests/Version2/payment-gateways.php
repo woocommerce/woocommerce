@@ -106,7 +106,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 				'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
 				'order'              => '',
 				'enabled'            => false,
-				'method_title'       => 'PayPal',
+				'method_title'       => 'PayPal Standard',
 				'method_description' => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
 				'settings'           => array_diff_key(
 					$this->get_settings( 'WC_Gateway_Paypal' ),
