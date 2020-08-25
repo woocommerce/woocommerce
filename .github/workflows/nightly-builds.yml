@@ -18,8 +18,6 @@ jobs:
       - name: Build
         id: build
         uses: woocommerce/action-build@v2
-        with:
-          generate_zip: true
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.0.3
         env:
