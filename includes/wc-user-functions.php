@@ -272,6 +272,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 		update_user_meta( $customer_id, 'paying_customer', 1 );
 		update_user_meta( $customer_id, '_order_count', '' );
 		update_user_meta( $customer_id, '_money_spent', '' );
+		delete_user_meta( $customer_id, '_last_order' );
 	}
 
 	return $linked;
