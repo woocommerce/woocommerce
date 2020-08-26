@@ -69,7 +69,7 @@ class Onboarding {
 		$this->add_actions();
 		$this->add_filters();
 
-		// Hook up dependant classes.
+		// Hook up dependent classes.
 		new OnboardingSetUpShipping();
 	}
 
