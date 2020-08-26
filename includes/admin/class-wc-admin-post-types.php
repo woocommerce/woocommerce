@@ -28,11 +28,10 @@ class WC_Admin_Post_Types {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$dir = __DIR__ . DIRECTORY_SEPARATOR;
-		include_once $dir . 'class-wc-admin-meta-boxes.php';
+		include_once __DIR__ . '/class-wc-admin-meta-boxes.php';
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
-			include_once $dir . 'class-wc-admin-duplicate-product.php';
+			include_once __DIR__ . '/class-wc-admin-duplicate-product.php';
 		}
 
 		// Load correct list table classes for current screen.
@@ -95,15 +94,15 @@ class WC_Admin_Post_Types {
 
 		switch ( $screen_id ) {
 			case 'edit-shop_order':
-				include_once $dir . 'list-tables/class-wc-admin-list-table-orders.php';
+				include_once __DIR__ . '/list-tables/class-wc-admin-list-table-orders.php';
 				$wc_list_table = new WC_Admin_List_Table_Orders();
 				break;
 			case 'edit-shop_coupon':
-				include_once $dir . 'list-tables/class-wc-admin-list-table-coupons.php';
+				include_once __DIR__ . '/list-tables/class-wc-admin-list-table-coupons.php';
 				$wc_list_table = new WC_Admin_List_Table_Coupons();
 				break;
 			case 'edit-product':
-				include_once $dir . 'list-tables/class-wc-admin-list-table-products.php';
+				include_once __DIR__ . '/list-tables/class-wc-admin-list-table-products.php';
 				$wc_list_table = new WC_Admin_List_Table_Products();
 				break;
 		}

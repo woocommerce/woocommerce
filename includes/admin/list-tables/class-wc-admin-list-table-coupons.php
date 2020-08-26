@@ -15,7 +15,7 @@ if ( class_exists( 'WC_Admin_List_Table_Coupons', false ) ) {
 }
 
 if ( ! class_exists( 'WC_Admin_List_Table', false ) ) {
-	include_once __DIR__ . DIRECTORY_SEPARATOR . 'abstract-class-wc-admin-list-table.php';
+	include_once __DIR__ . '/abstract-class-wc-admin-list-table.php';
 }
 
 /**
