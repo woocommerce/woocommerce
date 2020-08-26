@@ -91,6 +91,7 @@ class SearchFilter extends Component {
 				components: {
 					filter: <Fragment>{ filterStr }</Fragment>,
 					rule: <Fragment>{ rule.label }</Fragment>,
+					title: <Fragment />,
 				},
 			} )
 		);

@@ -59,6 +59,7 @@ class SelectFilter extends Component {
 				components: {
 					filter: <Fragment>{ value.label }</Fragment>,
 					rule: <Fragment>{ rule.label }</Fragment>,
+					title: <Fragment />,
 				},
 			} )
 		);

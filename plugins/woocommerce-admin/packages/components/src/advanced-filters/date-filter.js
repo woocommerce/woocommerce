@@ -88,6 +88,7 @@ class DateFilter extends Component {
 				components: {
 					filter: <Fragment>{ filterStr }</Fragment>,
 					rule: <Fragment>{ rule.label }</Fragment>,
+					title: <Fragment />,
 				},
 			} )
 		);
