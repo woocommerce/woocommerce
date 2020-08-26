@@ -80,7 +80,7 @@
 		"@testing-library/react": "10.4.8",
 		"@types/jest": "25.2.3",
 		"@types/react": "16.9.46",
-		"@types/wordpress__data": "4.6.7",
+		"@types/wordpress__data": "4.6.8",
 		"@types/wordpress__element": "2.4.1",
 		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/babel-preset-default": "4.10.0",
