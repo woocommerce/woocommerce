@@ -237,7 +237,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-settings-tax' );
 
-		include dirname( __FILE__ ) . 'views/html-settings-tax.php';
+		include __DIR__ . '/views/html-settings-tax.php';
 	}
 
 	/**
