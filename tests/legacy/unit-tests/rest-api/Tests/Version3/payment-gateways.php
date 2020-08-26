@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+/**
+ * Payment gateway test class.
+ */
 class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -110,7 +113,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 				'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
 				'order'              => '',
 				'enabled'            => false,
-				'method_title'       => 'PayPal',
+				'method_title'       => 'PayPal Standard',
 				'method_description' => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
 				'method_supports'    => array(
 					'products',
@@ -158,7 +161,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	public function test_update_payment_gateway() {
 		wp_set_current_user( $this->user );
 
-		// Test defaults
+		// Test defaults.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/paypal' ) );
 		$paypal   = $response->get_data();
 
@@ -166,7 +169,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'admin@example.org', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'no', $paypal['settings']['testmode']['value'] );
 
-		// test updating single setting
+		// Test updating single setting.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(
@@ -183,7 +186,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'no', $paypal['settings']['testmode']['value'] );
 
-		// test updating multiple settings
+		// Test updating multiple settings.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(
@@ -201,7 +204,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
-		// Test other parameters, and recheck settings
+		// Test other parameters, and recheck settings.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(
@@ -218,7 +221,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
-		// test bogus
+		// Test bogus paramter.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(
@@ -316,7 +319,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$settings = array();
 		$gateway->init_form_fields();
 		foreach ( $gateway->form_fields as $id => $field ) {
-			// Make sure we at least have a title and type
+			// Make sure we at least have a title and type.
 			if ( empty( $field['title'] ) || empty( $field['type'] ) ) {
 				continue;
 			}
