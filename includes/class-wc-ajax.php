@@ -1057,7 +1057,7 @@ class WC_AJAX {
 			$item_id = $item->save();
 
 			ob_start();
-			include __DIR__ . DIRECTORY_SEPARATOR. 'admin/meta-boxes/views/html-order-shipping.php';
+			include __DIR__ . '/admin/meta-boxes/views/html-order-shipping.php';
 			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
@@ -1104,7 +1104,7 @@ class WC_AJAX {
 			$item->save();
 
 			ob_start();
-			include __DIR__ . DIRECTORY_SEPARATOR . 'admin/meta-boxes/views/html-order-items.php';
+			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
 			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
