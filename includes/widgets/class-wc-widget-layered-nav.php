@@ -2,7 +2,7 @@
 /**
  * Layered nav widget
  *
- * @package WooCommerce\Widgets
+ * @package WooCommerce/Widgets
  * @version 2.6.0
  */
 
@@ -365,7 +365,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$main_tax_query_sql = $this->convert_tax_query_to_sql( $main_tax_query );
 		$term_ids_sql       = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
 
-		// Generate query.
+		// Generate the first part of the query.
+		// This one will count non-variable products and variable products with concrete values for the attributes.
 		$query           = array();
 		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
 		$query['from']   = "FROM {$wpdb->posts}";
@@ -411,7 +412,36 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		$query['group_by'] = 'GROUP BY terms.term_id';
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
-		$query_sql         = implode( ' ', $query );
+		$main_query_sql    = implode( ' ', $query );
+
+		// Generate the second part of the query.
+		// This one will count products having "Any..." as the value of the attribute.
+
+		$query_sql_for_attributes_with_any_value = "
+			SELECT COUNT( {$wpdb->posts}.post_parent ) AS term_count, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->postmeta}
+			JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
+			JOIN {$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.post_parent
+			WHERE {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
+			AND {$wpdb->postmeta}.meta_value = ''
+			AND {$wpdb->posts}.post_type = 'product_variation'
+			AND {$wpdb->posts}.post_status = 'publish'
+			AND {$wpdb->term_relationships}.term_taxonomy_id in $term_ids_sql
+			AND NOT EXISTS (
+		        SELECT ID FROM {$wpdb->posts} AS parent
+		        WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status NOT IN ('publish')
+		    )
+			{$main_tax_query_sql['where']}
+			GROUP BY {$wpdb->term_relationships}.term_taxonomy_id";
+
+		// Generate the final query as the union+sum of both.
+		$query_sql = "
+			SELECT SUM(term_count) AS term_count, term_count_id FROM (
+				{$main_query_sql}
+				UNION ALL
+				{$query_sql_for_attributes_with_any_value}
+			) AS x GROUP BY term_count_id
+
+		";
 
 		// We have a query - let's see if cached results of this query already exist.
 		$query_hash = md5( $query_sql );

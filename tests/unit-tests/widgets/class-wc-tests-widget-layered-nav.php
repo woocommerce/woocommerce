@@ -476,4 +476,163 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * Create a product that has two variations for two styles, and each variation
+	 * has a value of "Any" for the color.
+	 *
+	 * @param bool $set_one_as_out_of_stock If true, set one of the variations as "Out of stock".
+	 * @param bool $set_one_as_unpublished If true, set one of the variations as "draft".
+	 * @param bool $set_main_as_unpublished If true, set the main product as "draft".
+	 *
+	 * @return WC_Product_Variable
+	 */
+	private function create_product_with_all_styles_and_any_color( $set_one_as_out_of_stock, $set_one_as_unpublished, $set_main_as_unpublished ) {
+		$main_product = new WC_Product_Variable();
+
+		$main_product->set_props(
+			array(
+				'name' => 'Some shoes',
+				'sku'  => 'SKU for Some shoes',
+			)
+		);
+
+		$existing_colors = array( 'black', 'brown', 'blue', 'green', 'pink', 'yellow' );
+		$existing_styles = array( 'classic', 'sport' );
+
+		$attributes = array(
+			WC_Helper_Product::create_product_attribute_object( 'color', array_values( $existing_colors ) ),
+			WC_Helper_Product::create_product_attribute_object( 'style', array_values( $existing_styles ) ),
+		);
+		$main_product->set_attributes( $attributes );
+		$main_product->save();
+
+		if ( $set_main_as_unpublished ) {
+			wp_update_post(
+				array(
+					'ID'          => $main_product->get_id(),
+					'post_status' => 'draft',
+				)
+			);
+		}
+
+		$variation_objects = array();
+		foreach ( $existing_styles as $style ) {
+			$variation_attributes = array(
+				'pa_color' => '',
+				'pa_style' => $style,
+			);
+			$variation_object     = WC_Helper_Product::create_product_variation_object(
+				$main_product->get_id(),
+				"SKU for $style Some shoes",
+				10,
+				$variation_attributes
+			);
+			if ( $set_one_as_out_of_stock && $style === $existing_styles[0] ) {
+				$variation_object->set_stock_status( 'outofstock' );
+			}
+
+			$variation_object->save();
+
+			if ( $set_one_as_unpublished && $style === $existing_styles[0] ) {
+				wp_update_post(
+					array(
+						'ID'          => $variation_object->get_id(),
+						'post_status' => 'draft',
+					)
+				);
+			}
+
+			array_push( $variation_objects, $variation_object->get_id() );
+		}
+
+		$main_product->set_children( $variation_objects );
+
+		return $main_product;
+	}
+
+	/**
+	 * @testdox When a variation has a value of "Any" for an attribute it should be included in the count of all the attribute values used by the main product.
+	 *
+	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
+	 */
+	public function test_product_count_per_attribute_with_any_valued_variations() {
+		$this->create_product_with_all_styles_and_any_color( false, false, false );
+		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
+
+		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
+
+		$expected = array(
+			'black'  => 3,
+			'brown'  => 3,
+			'blue'   => 3,
+			'pink'   => 2,
+			'green'  => 2,
+			'yellow' => 2,
+		);
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox When a variation has a value of "Any" for an attribute BUT it's out of stock, it should NOT be included in the count of all the attribute values used by the main product.
+	 *
+	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
+	 */
+	public function test_product_count_per_attribute_with_any_valued_variations_when_one_is_out_of_stock() {
+		$this->create_product_with_all_styles_and_any_color( true, false, false );
+		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
+
+		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
+
+		$expected = array(
+			'black'  => 2,
+			'brown'  => 2,
+			'blue'   => 2,
+			'pink'   => 1,
+			'green'  => 1,
+			'yellow' => 1,
+		);
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox When a variation has a value of "Any" for an attribute BUT it's unpublished, it should NOT be included in the count of all the attribute values used by the main product.
+	 *
+	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
+	 */
+	public function test_product_count_per_attribute_with_any_valued_variations_when_one_is_unpublished() {
+		$this->create_product_with_all_styles_and_any_color( false, true, false );
+		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
+
+		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
+
+		$expected = array(
+			'black'  => 2,
+			'brown'  => 2,
+			'blue'   => 2,
+			'pink'   => 1,
+			'green'  => 1,
+			'yellow' => 1,
+		);
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox When variations have a value of "Any" for an attribute BUT the main product is unpublished, none of them should be included in the count of all the attribute values used by the main product.
+	 *
+	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
+	 */
+	public function test_product_count_per_attribute_with_any_valued_variations_when_main_is_unpublished() {
+		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
+		$this->create_product_with_all_styles_and_any_color( false, false, true );
+
+		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
+
+		$expected = array(
+			'black' => 1,
+			'brown' => 1,
+			'blue'  => 1,
+		);
+		$this->assertEquals( $expected, $actual );
+	}
 }
