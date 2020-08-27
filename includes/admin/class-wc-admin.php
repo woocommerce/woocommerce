@@ -137,7 +137,7 @@ class WC_Admin {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		// Nonced plugin install redirects (whitelisted).
+		// Nonced plugin install redirects.
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
 			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
 
