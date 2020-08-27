@@ -521,7 +521,7 @@ class WC_Shortcode_Products {
 	 * Get wrapper classes.
 	 *
 	 * @since  3.2.0
-	 * @param  array $columns Number of columns.
+	 * @param  int $columns Number of columns.
 	 * @return array
 	 */
 	protected function get_wrapper_classes( $columns ) {
