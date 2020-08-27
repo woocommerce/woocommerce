@@ -20,7 +20,7 @@ const Homescreen = ( { profileItems, query } ) => {
 	const { completed: profilerCompleted, skipped: profilerSkipped } =
 		profileItems || {};
 	if ( ! profilerCompleted && ! profilerSkipped ) {
-		getHistory().push( getNewPath( {}, `/profiler`, {} ) );
+		getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
 	}
 
 	return <Layout query={ query } />;

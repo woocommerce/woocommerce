@@ -69,7 +69,7 @@ class Loader {
 		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'register_page_handler' ) );
-		add_action( 'admin_menu', array( __CLASS__, 'register_profiler_page' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'register_store_details_page' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_user_data' ) );
 		add_action( 'in_admin_header', array( __CLASS__, 'embed_page_header' ) );
@@ -266,14 +266,14 @@ class Loader {
 	}
 
 	/**
-	 * Registers the profiler page.
+	 * Registers the store details (profiler) page.
 	 */
-	public static function register_profiler_page() {
+	public static function register_store_details_page() {
 		wc_admin_register_page(
 			array(
-				'title'  => 'Profiler',
+				'title'  => __( 'Setup Wizard', 'woocommerce-admin' ),
 				'parent' => '',
-				'path'   => '/profiler',
+				'path'   => '/setup-wizard',
 			)
 		);
 	}

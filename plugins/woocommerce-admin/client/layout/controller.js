@@ -183,10 +183,10 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures.onboarding ) {
 		pages.push( {
 			container: ProfileWizard,
-			path: '/profiler',
+			path: '/setup-wizard',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[ '/profiler', __( 'Profiler', 'woocommerce-admin' ) ],
+				[ '/setup-wizard', __( 'Setup Wizard', 'woocommerce-admin' ) ],
 			],
 		} );
 	}
