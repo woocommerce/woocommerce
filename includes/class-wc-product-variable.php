@@ -468,9 +468,16 @@ class WC_Product_Variable extends WC_Product {
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-		// Get names before save.
+		// Get names and variation attributes before save.
 		$previous_name = $this->data['name'];
 		$new_name      = $this->get_name( 'edit' );
+
+		if ( $this->get_id() ) {
+			$previous_product              = wc_get_product( $this );
+			$previous_variation_attributes = array_keys( $this->data_store->read_variation_attributes( $previous_product ) );
+		} else {
+			$previous_variation_attributes = array();
+		}
 
 		if ( $this->get_id() ) {
 			$this->data_store->update( $this );
@@ -480,6 +487,17 @@ class WC_Product_Variable extends WC_Product {
 
 		$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
 		$this->data_store->sync_managed_variation_stock_status( $this );
+
+		// Get variation attributes after save.
+		$current_attributes           = array_filter( array_values( $this->get_attributes() ) );
+		$current_variation_attributes = array();
+		foreach ( $current_attributes as $attribute ) {
+			if ( $attribute->get_variation() ) {
+				$current_variation_attributes[] = $attribute->get_name();
+			}
+		}
+
+		$this->data_store->sync_meta_for_variation_attributes( $this, $previous_variation_attributes, $current_variation_attributes );
 
 		/**
 		 * Trigger action after saving to the DB.
