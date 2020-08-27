@@ -21,6 +21,7 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
+import { createNoticesFromResponse } from '../../../lib/notices';
 
 class Shipping extends Component {
 	constructor( props ) {
@@ -250,13 +251,17 @@ class Shipping extends Component {
 					  ),
 				content: (
 					<Plugins
-						onComplete={ () => {
+						onComplete={ ( plugins, response ) => {
+							createNoticesFromResponse( response );
 							recordEvent( 'tasklist_shipping_label_printing', {
 								install: true,
 								plugins_to_activate: pluginsToActivate,
 							} );
 							this.completeStep();
 						} }
+						onError={ ( errors, response ) =>
+							createNoticesFromResponse( response )
+						}
 						onSkip={ () => {
 							recordEvent( 'tasklist_shipping_label_printing', {
 								install: false,

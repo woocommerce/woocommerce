@@ -9,11 +9,6 @@ import PropTypes from 'prop-types';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
-/**
- * Internal dependencies
- */
-import { createNoticesFromResponse } from '../../../../client/lib/notices';
-
 export class Plugins extends Component {
 	constructor() {
 		super( ...arguments );
@@ -54,25 +49,23 @@ export class Plugins extends Component {
 
 		installAndActivatePlugins( pluginSlugs )
 			.then( ( response ) => {
-				createNoticesFromResponse( response );
-				this.handleSuccess( response.data.activated );
+				this.handleSuccess( response.data.activated, response );
 			} )
-			.catch( ( error ) => {
-				createNoticesFromResponse( error );
-				this.handleErrors( error.errors );
+			.catch( ( response ) => {
+				this.handleErrors( response.errors, response );
 			} );
 	}
 
-	handleErrors( errors ) {
+	handleErrors( errors, response ) {
 		const { onError } = this.props;
 
 		this.setState( { hasErrors: true } );
-		onError( errors );
+		onError( errors, response );
 	}
 
-	handleSuccess( activePlugins ) {
+	handleSuccess( activePlugins, response ) {
 		const { onComplete } = this.props;
-		onComplete( activePlugins );
+		onComplete( activePlugins, response );
 	}
 
 	skipInstaller() {
@@ -140,9 +133,13 @@ export class Plugins extends Component {
 
 Plugins.propTypes = {
 	/**
-	 * Called when the plugin installer is completed.
+	 * Called when the plugin installer is successfully completed.
 	 */
 	onComplete: PropTypes.func.isRequired,
+	/**
+	 * Called when the plugin installer completes with an error.
+	 */
+	onError: PropTypes.func,
 	/**
 	 * Called when the plugin installer is skipped.
 	 */

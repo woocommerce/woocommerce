@@ -18,7 +18,6 @@ describe( 'Rendering', () => {
 				activated: [ 'jetpack' ],
 			},
 		} );
-		const createNotice = jest.fn();
 		const onComplete = jest.fn();
 
 		const pluginsWrapper = shallow(
@@ -27,7 +26,6 @@ describe( 'Rendering', () => {
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ onComplete }
 				installAndActivatePlugins={ installAndActivatePlugins }
-				createNotice={ createNotice }
 			/>
 		);
 
@@ -59,12 +57,13 @@ describe( 'Rendering', () => {
 
 describe( 'Installing and activating', () => {
 	let pluginsWrapper;
-	const installAndActivatePlugins = jest.fn().mockResolvedValue( {
+	const response = {
 		success: true,
 		data: {
 			activated: [ 'jetpack' ],
 		},
-	} );
+	};
+	const installAndActivatePlugins = jest.fn().mockResolvedValue( response );
 	const onComplete = jest.fn();
 
 	beforeEach( () => {
@@ -90,20 +89,21 @@ describe( 'Installing and activating', () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		await expect( onComplete ).toHaveBeenCalledWith( [ 'jetpack' ] );
+		await expect( onComplete ).toHaveBeenCalledWith(
+			[ 'jetpack' ],
+			response
+		);
 	} );
 } );
 
 describe( 'Installing and activating errors', () => {
 	let pluginsWrapper;
-	const errors = {
+	const response = {
 		errors: {
 			'failed-plugin': [ 'error message' ],
 		},
 	};
-	const installAndActivatePlugins = jest.fn().mockRejectedValue( {
-		errors,
-	} );
+	const installAndActivatePlugins = jest.fn().mockRejectedValue( response );
 	const onComplete = jest.fn();
 	const onError = jest.fn();
 
@@ -129,6 +129,6 @@ describe( 'Installing and activating errors', () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( onError ).toHaveBeenCalledWith( errors );
+		expect( onError ).toHaveBeenCalledWith( response.errors, response );
 	} );
 } );

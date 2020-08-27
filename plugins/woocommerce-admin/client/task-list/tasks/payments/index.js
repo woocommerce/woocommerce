@@ -25,6 +25,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { createNoticesFromResponse } from '../../../lib/notices';
 import { getCountryCode } from '../../../dashboard/utils';
 import withSelect from '../../../wc-api/with-select';
 import { getPaymentMethods } from './methods';
@@ -118,11 +119,15 @@ class Payments extends Component {
 			),
 			content: (
 				<Plugins
-					onComplete={ () => {
+					onComplete={ ( plugins, response ) => {
+						createNoticesFromResponse( response );
 						recordEvent( 'tasklist_payment_install_method', {
 							plugins: currentMethod.plugins,
 						} );
 					} }
+					onError={ ( errors, response ) =>
+						createNoticesFromResponse( response )
+					}
 					autoInstall
 					pluginSlugs={ currentMethod.plugins }
 				/>

@@ -1,9 +1,11 @@
 # 5.1.0 (unreleased)
 
--   Fixed default value for `<Table />` component `onQueryChange` prop.
+-   Fix default value for `<Table />` component `onQueryChange` prop.
 -   Deprecate our bespoke component `useFilters` in favor of using the WordPress variety `withFilters`.
 -   Fix screen reader text in `<AdvancedFilters />`.
--   Added `<AttributeFilter />` component to `<AdvancedFilters />`.
+-   Add `<AttributeFilter />` component to `<AdvancedFilters />`.
+-   Fix internal dependencies for `<Plugins />`.
+-   Add full response to `<Plugins />` callbacks `onError` and `onComplete`.
 
 # 5.0.0
 
