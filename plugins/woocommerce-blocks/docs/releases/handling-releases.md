@@ -158,7 +158,7 @@ _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to 
 
 -   Merge the release branch back into `main` (without the branch being up to date with `main`). This may have merge conflicts needing resolved if there are cherry-picked commits in the release branch.
 -   Restore the branch if it is deleted. Release branches are kept open for potential patch releases for that version.
--   For _major_ & _minor_ releases, update version on `main` with dev suffix, e.g. [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
+-   For _major_ & _minor_ releases, confirm version on `main` is correct and has dev suffix [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158). **Note:** this should have already been taken care for you by the release deploy script, just verify that the versions have been updated correctly.
 -   Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 
 _Outcome:_ __Main branch contains all changes and metadata tweaks for the release.__
@@ -207,7 +207,7 @@ In particular, please review and update as needed:
 
 - Are there any new blocks in this release? Ensure they have adequate user documentation.
 - Ensure any major improvements or changes are documented.
-- Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including: 
+- Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including:
   - [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
   - [WooCommerce blocks main documentation page](https://docs.woocommerce.com/document/woocommerce-blocks/)
 

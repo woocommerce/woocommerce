@@ -77,7 +77,7 @@ fi
 
 
 echo
-output 3 "Will this release get published to WordPress.org (if no, then only a tag will be created)? [y/N]:"
+output 3 "Will this release get published to WordPress.org? Note: If the version on WordPress.org is greater than ${VERSION}, then you should answer 'N' here. [y/N]:"
 read -r DO_WP_DEPLOY
 echo
 
@@ -88,14 +88,34 @@ fi
 
 # Safety check, if a patch release is detected ask for verification.
 VERSION_PIECES=${VERSION//[^.]}
-if [[ "${#VERSION_PIECES}" -ge "2" && "$(echo "${DO_WP_DEPLOY:-n}" | tr "[:upper:]" "[:lower:]")" = "y" ]]; then
+
+# explode version parts
+split_version() {
+	echo ${VERSION} \
+	| sed 's/\./ /g'
+}
+
+SPLIT_VERSION=($(split_version))
+
+# IF VERSION_PIECES is less than 2 then its invalid so let's update it and notify
+if [[ "${#VERSION_PIECES}" -lt "2" ]]; then
+	if [[ ${#VERSION_PIECES} -eq "0" ]]; then
+		VERSION=${VERSION}.0.0
+	else
+		VERSION=${VERSION}.0
+	fi
+fi
+
+if [[ "${#VERSION_PIECES}" -ge "2" && "${SPLIT_VERSION[2]}" -ne "0" && "$(echo "${DO_WP_DEPLOY:-n}" | tr "[:upper:]" "[:lower:]")" = "y" ]]; then
 	output 1 "The version you entered (${VERSION}) looks like a patch version. Since this version will be deployed to WordPress.org, it will become the latest available version. Are you sure you want that (no will abort)?: [y/N]"
 	read -r ABORT
+	echo
 	if [ "$(echo "${ABORT:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
 		output 1 "Release cancelled!"
 		exit 1
 	fi
 else
+	echo "$(output 4 "The version is set as ") $(output 3 "${VERSION}") $(output 4 " and the next step will be to bump all the version strings in relevant files.")"
 	printf "Ready to proceed? [y/N]: "
 	read -r PROCEED
 	echo
@@ -111,6 +131,9 @@ output 2 "Updating version numbers in files and regenerating php autoload classm
 source $RELEASER_PATH/bin/version-changes.sh
 
 composer dump-autoload
+
+# remove composer.json version bump after autoload regen (we don't commit it)
+git checkout -- composer.json
 
 output 2 "Committing version change..."
 echo
@@ -157,5 +180,8 @@ fi
 git checkout $CURRENTBRANCH
 git branch -D $BRANCH
 git push origin --delete $BRANCH
+
+# regenerate classmap for development
+composer dump-autoload
 
 output 2 "GitHub release complete."
