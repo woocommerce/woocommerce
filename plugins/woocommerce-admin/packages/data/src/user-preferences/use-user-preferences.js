@@ -102,6 +102,7 @@ export const useUserPreferences = () => {
 					'dashboard_leaderboard_rows',
 					'activity_panel_inbox_last_read',
 					'homepage_stats',
+					'android_app_banner_dismissed',
 				];
 
 				// Prep valid fields for update.

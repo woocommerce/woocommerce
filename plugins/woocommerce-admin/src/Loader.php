@@ -76,6 +76,7 @@ class Loader {
 		add_filter( 'woocommerce_settings_groups', array( __CLASS__, 'add_settings_group' ) );
 		add_filter( 'woocommerce_settings-wc_admin', array( __CLASS__, 'add_settings' ) );
 		add_action( 'admin_head', array( __CLASS__, 'remove_notices' ) );
+		add_action( 'admin_head', array( __CLASS__, 'smart_app_banner' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
 
@@ -845,6 +846,18 @@ class Loader {
 
 		$admin_body_class = implode( ' ', array_unique( $classes ) );
 		return " $admin_body_class ";
+	}
+
+	/**
+	 * Adds an iOS "Smart App Banner" for display on iOS Safari.
+	 * See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html
+	 */
+	public static function smart_app_banner() {
+		if ( self::is_admin_page() ) {
+			echo "
+				<meta name='apple-itunes-app' content='app-id=1389130815'>
+			";
+		}
 	}
 
 

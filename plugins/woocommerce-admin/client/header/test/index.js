@@ -10,6 +10,15 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: () => ( {
+		updateUserPreferences: () => {},
+		// mock to disable the mobile app banner while testing this component
+		android_app_banner_dismissed: 'yes',
+	} ),
+} ) );
+
 /**
  * External dependencies
  */
@@ -34,6 +43,8 @@ describe( 'Header', () => {
 				cb();
 			}
 		);
+
+		// Mock user preferences to avoid testing the MobileAppBanner here
 
 		// Disable the ActivityPanel so it isn't tested here
 		window.wcAdminFeatures[ 'activity-panels' ] = false;

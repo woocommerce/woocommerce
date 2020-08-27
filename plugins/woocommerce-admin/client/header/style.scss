@@ -1,14 +1,9 @@
-
-
 .woocommerce-layout__header {
 	background: $studio-white;
-	display: flex;
-	justify-content: space-between;
-	flex-direction: row;
 	box-sizing: border-box;
 	border-bottom: 1px solid $studio-white;
 	padding: 0;
-	height: $header-height;
+	min-height: $header-height;
 	position: fixed;
 	width: 100%;
 	top: $adminbar-height;
@@ -21,6 +16,12 @@
 	@include breakpoint( '<782px' ) {
 		flex-flow: row wrap;
 		top: $adminbar-height-mobile;
+	}
+
+	.woocommerce-layout__header-breadcrumbs-wrapper {
+		display: flex;
+		justify-content: space-between;
+		flex-direction: row;
 	}
 
 	.woocommerce-layout__header-breadcrumbs {

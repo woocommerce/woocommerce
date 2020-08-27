@@ -9,10 +9,11 @@
 		"marketing": true,
 		"onboarding": true,
 		"remote-inbox-notifications": false,
-	  	"shipping-label-banner": true,
+		"shipping-label-banner": true,
 		"store-alerts": true,
 		"unminified-js": false,
 		"wcpay": true,
-		"homescreen": true
+		"homescreen": true,
+		"mobile-app-banner": true
 	}
 }

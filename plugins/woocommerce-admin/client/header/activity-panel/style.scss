@@ -4,6 +4,7 @@
 	align-items: center;
 	position: fixed;
 	right: 0;
+	top: 32px;
 	height: $header-height;
 
 	@include breakpoint( '<782px' ) {
@@ -161,9 +162,9 @@
 	margin-right: 10px;
 	max-width: 48px;
 	height: $header-height;
-	position: fixed;
-	top: $adminbar-height-mobile;
+	position: absolute;
 	right: 0;
+	bottom: 0;
 	@include breakpoint( '>782px' ) {
 		display: none;
 	}
