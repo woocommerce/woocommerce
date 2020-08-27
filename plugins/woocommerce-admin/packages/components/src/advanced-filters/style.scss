@@ -237,3 +237,13 @@
 		text-align: center;
 	}
 }
+
+.woocommerce-filters-advanced__attribute-fieldset {
+	align-items: center;
+	display: grid;
+	grid-template-columns: 1fr 20px 1fr;
+
+	.woocommerce-filters-advanced__attribute-field-separator {
+		padding: 0 6px;
+	}
+}

@@ -96,12 +96,7 @@ import ProductImage from '../../product-image';
  * @return {string} - variation name
  */
 function getVariationName( variation ) {
-	return variation.attributes.reduce(
-		( desc, attribute, index, arr ) =>
-			desc +
-			`${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`,
-		''
-	);
+	return variation.attributes.map( ( { option } ) => option ).join( ', ' );
 }
 
 /**
@@ -117,7 +112,8 @@ export default {
 		const query = search
 			? {
 					search,
-					per_page: 10,
+					per_page: 30,
+					_fields: [ 'id', 'sku', 'description', 'attributes' ],
 			  }
 			: {};
 		const product = getQuery().products;
@@ -155,7 +151,6 @@ export default {
 					height={ 18 }
 					alt=""
 				/>
-				,
 				<span
 					key="name"
 					className="woocommerce-search__result-name"
@@ -167,7 +162,6 @@ export default {
 					</strong>
 					{ match.suggestionAfterMatch }
 				</span>
-				,
 			</Fragment>
 		);
 	},

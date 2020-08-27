@@ -114,6 +114,32 @@ const variationsConfig = {
 			value: 'all',
 		},
 		{
+			label: __( 'Single Variation', 'woocommerce-admin' ),
+			value: 'select_variation',
+			subFilters: [
+				{
+					component: 'Search',
+					value: 'single_variation',
+					path: [ 'select_variation' ],
+					settings: {
+						type: 'variations',
+						param: 'variations',
+						getLabels: getVariationLabels,
+						labels: {
+							placeholder: __(
+								'Type to search for a variation',
+								'woocommerce-admin'
+							),
+							button: __(
+								'Single Variation',
+								'woocommerce-admin'
+							),
+						},
+					},
+				},
+			],
+		},
+		{
 			label: __( 'Comparison', 'woocommerce-admin' ),
 			chartMode: 'item-comparison',
 			value: 'compare-variations',

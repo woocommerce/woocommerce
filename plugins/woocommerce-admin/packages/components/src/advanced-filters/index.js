@@ -27,6 +27,7 @@ import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
 import NumberFilter from './number-filter';
 import DateFilter from './date-filter';
+import AttributeFilter from './attribute-filter';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
@@ -322,6 +323,20 @@ class AdvancedFilters extends Component {
 									) }
 									{ input.component === 'Date' && (
 										<DateFilter
+											className="woocommerce-filters-advanced__fieldset-item"
+											filter={ filter }
+											config={ config.filters[ key ] }
+											onFilterChange={
+												this.onFilterChange
+											}
+											isEnglish={ isEnglish }
+											query={ query }
+											updateFilter={ this.updateFilter }
+										/>
+									) }
+									{ input.component ===
+										'ProductAttribute' && (
+										<AttributeFilter
 											className="woocommerce-filters-advanced__fieldset-item"
 											filter={ filter }
 											config={ config.filters[ key ] }

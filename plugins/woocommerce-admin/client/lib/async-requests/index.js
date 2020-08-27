@@ -82,14 +82,9 @@ export const getVariationLabels = getRequestByIdString(
 	( variation ) => {
 		return {
 			key: variation.id,
-			label: variation.attributes.reduce(
-				( desc, attribute, index, arr ) =>
-					desc +
-					`${ attribute.option }${
-						arr.length === index + 1 ? '' : ', '
-					}`,
-				''
-			),
+			label: variation.attributes
+				.map( ( { option } ) => option )
+				.join( ', ' ),
 		};
 	}
 );
