@@ -39,4 +39,26 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Product_Variation::class, $variations[0] );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]->get_sku() );
 	}
+
+	/**
+	 * @testdox 'save' adds empty 'attribute_' meta values for any newly added variation attribute, and removes the existing meta values for removed attributes.
+	 */
+	public function test_save_updates_meta_for_added_and_removed_variation_attributes() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$attributes             = array_values( $product->get_attributes() );
+		$removed_attribute_name = $attributes[0]->get_name();
+		$attributes[0]          = WC_Helper_Product::create_product_attribute_object( 'foobar', array( 'foo', 'bar' ) );
+
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$variation_ids = $product->get_children();
+		foreach ( $variation_ids as $variation_id ) {
+			// There's an empty attribute value for the added attribute...
+			$this->assertEquals( array( '' ), get_post_meta( $variation_id, 'attribute_pa_foobar' ) );
+			// ...and the attribute value for the removed attribute has been removed as well.
+			$this->assertEquals( array(), get_post_meta( $variation_id, 'attribute_' . $removed_attribute_name ) );
+		}
+	}
 }
