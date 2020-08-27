@@ -253,14 +253,14 @@ class Shipping extends Component {
 						onComplete={ () => {
 							recordEvent( 'tasklist_shipping_label_printing', {
 								install: true,
-								pluginsToActivate,
+								plugins_to_activate: pluginsToActivate,
 							} );
 							this.completeStep();
 						} }
 						onSkip={ () => {
 							recordEvent( 'tasklist_shipping_label_printing', {
 								install: false,
-								pluginsToActivate,
+								plugins_to_activate: pluginsToActivate,
 							} );
 							getHistory().push( getNewPath( {}, '/', {} ) );
 						} }
