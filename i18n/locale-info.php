@@ -177,7 +177,7 @@ return array(
 		'thousand_sep'   => "'",
 		'decimal_sep'    => '.',
 		'num_decimals'   => 2,
-    'weight_unit'    => 'kg',
+		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
 	'MD' => array(
