@@ -155,6 +155,7 @@ class WC_Install {
 		),
 		'4.5.0' => array(
 			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_insert_attribute_metadata_for_variations_not_having_it',
 			'wc_update_450_db_version',
 		),
 	);
