@@ -1,0 +1,307 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductTypes should render product types 1`] = `
+<div>
+  <div
+    class="woocommerce-profile-wizard__product-types"
+  >
+    <h2
+      class="woocommerce-profile-wizard__header-title"
+    >
+      What type of products will be listed?
+    </h2>
+    <h2
+      class="woocommerce-profile-wizard__header-subtitle"
+    >
+      Choose any that apply
+    </h2>
+    <div
+      class="woocommerce-card"
+    >
+      <div
+        class="woocommerce-card__body"
+      >
+        <div
+          class="woocommerce-profile-wizard__checkbox-group"
+        >
+          <div
+            class="components-base-control woocommerce-profile-wizard__checkbox"
+          >
+            <div
+              class="components-base-control__field"
+            >
+              <span
+                class="components-checkbox-control__input-container"
+              >
+                <input
+                  class="components-checkbox-control__input"
+                  id="inspector-checkbox-control-0"
+                  type="checkbox"
+                  value="1"
+                />
+              </span>
+              <label
+                class="components-checkbox-control__label"
+                for="inspector-checkbox-control-0"
+              >
+                <div
+                  class="woocommerce-product-type"
+                >
+                  <span
+                    class="woocommerce-product-type__label"
+                  >
+                    Paid product
+                  </span>
+                  <button
+                    aria-label="Learn more about recommended free business features"
+                    class="components-button is-tertiary"
+                    type="button"
+                  >
+                    <i
+                      aria-hidden="true"
+                      class="material-icons-outlined"
+                    >
+                      info
+                    </i>
+                  </button>
+                  
+                  <span
+                    class="woocommerce-pill"
+                  >
+                    <span
+                      class="screen-reader-text"
+                    >
+                      This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later.
+                    </span>
+                    $10 per month
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="components-base-control woocommerce-profile-wizard__checkbox"
+          >
+            <div
+              class="components-base-control__field"
+            >
+              <span
+                class="components-checkbox-control__input-container"
+              >
+                <input
+                  class="components-checkbox-control__input"
+                  id="inspector-checkbox-control-1"
+                  type="checkbox"
+                  value="1"
+                />
+              </span>
+              <label
+                class="components-checkbox-control__label"
+                for="inspector-checkbox-control-1"
+              >
+                Free product
+              </label>
+            </div>
+          </div>
+          <div
+            class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
+          >
+            <label
+              for="woocommerce-product-types__pricing-toggle"
+            >
+              Display monthly prices
+              <span
+                class="components-form-toggle is-checked"
+              >
+                <input
+                  checked=""
+                  class="components-form-toggle__input"
+                  id="woocommerce-product-types__pricing-toggle"
+                  type="checkbox"
+                />
+                <span
+                  class="components-form-toggle__track"
+                />
+                <span
+                  class="components-form-toggle__thumb"
+                />
+              </span>
+            </label>
+          </div>
+        </div>
+        <div
+          class="woocommerce-profile-wizard__card-actions"
+        >
+          <button
+            class="components-button is-primary"
+            disabled=""
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="woocommerce-profile-wizard__card-help-text"
+    >
+      Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProductTypes should show annual prices on toggle 1`] = `
+<div>
+  <div
+    class="woocommerce-profile-wizard__product-types"
+  >
+    <h2
+      class="woocommerce-profile-wizard__header-title"
+    >
+      What type of products will be listed?
+    </h2>
+    <h2
+      class="woocommerce-profile-wizard__header-subtitle"
+    >
+      Choose any that apply
+    </h2>
+    <div
+      class="woocommerce-card"
+    >
+      <div
+        class="woocommerce-card__body"
+      >
+        <div
+          class="woocommerce-profile-wizard__checkbox-group"
+        >
+          <div
+            class="components-base-control woocommerce-profile-wizard__checkbox"
+          >
+            <div
+              class="components-base-control__field"
+            >
+              <span
+                class="components-checkbox-control__input-container"
+              >
+                <input
+                  class="components-checkbox-control__input"
+                  id="inspector-checkbox-control-2"
+                  type="checkbox"
+                  value="1"
+                />
+              </span>
+              <label
+                class="components-checkbox-control__label"
+                for="inspector-checkbox-control-2"
+              >
+                <div
+                  class="woocommerce-product-type"
+                >
+                  <span
+                    class="woocommerce-product-type__label"
+                  >
+                    Paid product
+                  </span>
+                  <button
+                    aria-label="Learn more about recommended free business features"
+                    class="components-button is-tertiary"
+                    type="button"
+                  >
+                    <i
+                      aria-hidden="true"
+                      class="material-icons-outlined"
+                    >
+                      info
+                    </i>
+                  </button>
+                  
+                  <span
+                    class="woocommerce-pill"
+                  >
+                    <span
+                      class="screen-reader-text"
+                    >
+                      This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later.
+                    </span>
+                    $120 per year
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="components-base-control woocommerce-profile-wizard__checkbox"
+          >
+            <div
+              class="components-base-control__field"
+            >
+              <span
+                class="components-checkbox-control__input-container"
+              >
+                <input
+                  class="components-checkbox-control__input"
+                  id="inspector-checkbox-control-3"
+                  type="checkbox"
+                  value="1"
+                />
+              </span>
+              <label
+                class="components-checkbox-control__label"
+                for="inspector-checkbox-control-3"
+              >
+                Free product
+              </label>
+            </div>
+          </div>
+          <div
+            class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
+          >
+            <label
+              for="woocommerce-product-types__pricing-toggle"
+            >
+              Display monthly prices
+              <span
+                class="components-form-toggle"
+              >
+                <input
+                  checked=""
+                  class="components-form-toggle__input"
+                  id="woocommerce-product-types__pricing-toggle"
+                  type="checkbox"
+                />
+                <span
+                  class="components-form-toggle__track"
+                />
+                <span
+                  class="components-form-toggle__thumb"
+                />
+              </span>
+            </label>
+          </div>
+        </div>
+        <div
+          class="woocommerce-profile-wizard__card-actions"
+        >
+          <button
+            class="components-button is-primary"
+            disabled=""
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="woocommerce-profile-wizard__card-help-text"
+    >
+      Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+    </div>
+  </div>
+</div>
+`;

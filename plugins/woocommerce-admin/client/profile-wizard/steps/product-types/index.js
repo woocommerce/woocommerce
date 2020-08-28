@@ -1,60 +1,24 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, CheckboxControl, Tooltip } from '@wordpress/components';
+import { Button, CheckboxControl, FormToggle } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
-import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { H, Card, Link, Pill } from '@woocommerce/components';
+import { H, Card } from '@woocommerce/components';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import './product-types.scss';
+import ProductType from './product-type';
+import './style.scss';
 
-function getLabel( description, yearlyPrice ) {
-	if ( ! yearlyPrice ) {
-		return description;
-	}
-
-	const monthlyPrice = ( yearlyPrice / 12.0 ).toFixed( 2 );
-	const priceDescription = sprintf(
-		__( '$%f per month, billed annually', 'woocommerce-admin' ),
-		monthlyPrice
-	);
-	/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
-	const toolTipText = __(
-		"This product type requires a paid extension.\nWe'll add this to a cart so that\nyou can purchase and install it later.",
-		'woocommerce-admin'
-	);
-	/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
-
-	return (
-		<Fragment>
-			<span className="woocommerce-product-wizard__product-types__label">
-				{ description }
-			</span>
-			<Tooltip text={ toolTipText } position="bottom center">
-				<span>
-					<Pill>
-						<span className="screen-reader-text">
-							{ toolTipText }
-						</span>
-						{ priceDescription }
-					</Pill>
-				</span>
-			</Tooltip>
-		</Fragment>
-	);
-}
-
-class ProductTypes extends Component {
+export class ProductTypes extends Component {
 	constructor( props ) {
 		super();
 		const profileItems = get( props, 'profileItems', {} );
@@ -66,6 +30,7 @@ class ProductTypes extends Component {
 
 		this.state = {
 			error: null,
+			isMonthlyPricing: true,
 			selected: profileItems.product_types || defaultProductTypes,
 		};
 
@@ -73,7 +38,7 @@ class ProductTypes extends Component {
 		this.onChange = this.onChange.bind( this );
 	}
 
-	async validateField() {
+	validateField() {
 		const error = this.state.selected.length
 			? null
 			: __(
@@ -81,37 +46,31 @@ class ProductTypes extends Component {
 					'woocommerce-admin'
 			  );
 		this.setState( { error } );
+		return ! error;
 	}
 
-	async onContinue() {
-		await this.validateField();
-		if ( this.state.error ) {
+	onContinue() {
+		if ( ! this.validateField() ) {
 			return;
 		}
 
-		const {
-			createNotice,
-			goToNextStep,
-			isError,
-			updateProfileItems,
-		} = this.props;
+		const { createNotice, goToNextStep, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_product_type_continue', {
 			product_type: this.state.selected,
 		} );
-		await updateProfileItems( { product_types: this.state.selected } );
 
-		if ( ! isError ) {
-			goToNextStep();
-		} else {
-			createNotice(
-				'error',
-				__(
-					'There was a problem updating your product types.',
-					'woocommerce-admin'
+		updateProfileItems( { product_types: this.state.selected } )
+			.then( () => goToNextStep() )
+			.catch( () =>
+				createNotice(
+					'error',
+					__(
+						'There was a problem updating your product types.',
+						'woocommerce-admin'
+					)
 				)
 			);
-		}
 	}
 
 	onChange( slug ) {
@@ -135,15 +94,9 @@ class ProductTypes extends Component {
 		);
 	}
 
-	onLearnMore( slug ) {
-		recordEvent( 'storeprofiler_store_product_type_learn_more', {
-			product_type: slug,
-		} );
-	}
-
 	render() {
 		const { productTypes = {} } = getSetting( 'onboarding', {} );
-		const { error, selected } = this.state;
+		const { error, isMonthlyPricing, selected } = this.state;
 
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
@@ -160,51 +113,51 @@ class ProductTypes extends Component {
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( productTypes ).map( ( slug ) => {
-							const label = getLabel(
-								productTypes[ slug ].label,
-								productTypes[ slug ].yearly_price
-							);
-							const moreUrl = productTypes[ slug ].more_url;
-							const helpText =
-								productTypes[ slug ].description &&
-								interpolateComponents( {
-									mixedString:
-										productTypes[ slug ].description +
-										( productTypes[ slug ].more_url
-											? ' {{moreLink/}}'
-											: '' ),
-									components: {
-										moreLink: moreUrl ? (
-											<Link
-												href={ moreUrl }
-												target="_blank"
-												type="external"
-												onClick={ () =>
-													this.onLearnMore( slug )
-												}
-											>
-												{ __(
-													'Learn more',
-													'woocommerce-admin'
-												) }
-											</Link>
-										) : (
-											''
-										),
-									},
-								} );
-
 							return (
 								<CheckboxControl
 									key={ slug }
-									label={ label }
-									help={ helpText }
+									label={
+										<ProductType
+											description={
+												productTypes[ slug ].description
+											}
+											label={ productTypes[ slug ].label }
+											annualPrice={
+												productTypes[ slug ]
+													.yearly_price
+											}
+											isMonthlyPricing={
+												isMonthlyPricing
+											}
+											moreUrl={
+												productTypes[ slug ].more_url
+											}
+											slug={ slug }
+										/>
+									}
 									onChange={ () => this.onChange( slug ) }
 									checked={ selected.includes( slug ) }
 									className="woocommerce-profile-wizard__checkbox"
 								/>
 							);
 						} ) }
+						<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
+							<label htmlFor="woocommerce-product-types__pricing-toggle">
+								{ __(
+									'Display monthly prices',
+									'woocommerce-admin'
+								) }
+								<FormToggle
+									id="woocommerce-product-types__pricing-toggle"
+									checked={ isMonthlyPricing }
+									onChange={ () =>
+										this.setState( {
+											isMonthlyPricing: ! isMonthlyPricing,
+										} )
+									}
+								/>
+							</label>
+						</div>
 						{ error && (
 							<span className="woocommerce-profile-wizard__error">
 								{ error }
@@ -222,6 +175,12 @@ class ProductTypes extends Component {
 						</Button>
 					</div>
 				</Card>
+				<div className="woocommerce-profile-wizard__card-help-text">
+					{ __(
+						'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
+						'woocommerce-admin'
+					) }
+				</div>
 			</div>
 		);
 	}

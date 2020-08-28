@@ -35,6 +35,13 @@
 		}
 	}
 
+	.woocommerce-card + .woocommerce-profile-wizard__card-help-text {
+		font-size: 14px;
+		color: $gray-600;
+		text-align: center;
+		margin-top: $gap;
+	}
+
 	.woocommerce-profile-wizard__header {
 		height: 56px;
 		border-bottom: 1px solid $studio-gray-5;

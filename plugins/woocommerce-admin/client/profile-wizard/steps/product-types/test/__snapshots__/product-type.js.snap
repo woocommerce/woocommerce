@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductType should render the product type 1`] = `
+<div
+  className="woocommerce-product-type"
+>
+  <span
+    className="woocommerce-product-type__label"
+  >
+    Product type label
+  </span>
+  <ForwardRef(Button)
+    isTertiary={true}
+    label="Learn more about recommended free business features"
+    onClick={[Function]}
+  >
+    <i
+      aria-hidden="true"
+      className="material-icons-outlined"
+    >
+      info
+    </i>
+  </ForwardRef(Button)>
+  <Tooltip
+    position="bottom center"
+    text="This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later."
+  >
+    <Pill>
+      <span
+        className="screen-reader-text"
+      >
+        This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later.
+      </span>
+      $120 per year
+    </Pill>
+  </Tooltip>
+</div>
+`;
+
+exports[`ProductType should render the product type with monthly prices 1`] = `
+<div
+  className="woocommerce-product-type"
+>
+  <span
+    className="woocommerce-product-type__label"
+  >
+    Product type label
+  </span>
+  <ForwardRef(Button)
+    isTertiary={true}
+    label="Learn more about recommended free business features"
+    onClick={[Function]}
+  >
+    <i
+      aria-hidden="true"
+      className="material-icons-outlined"
+    >
+      info
+    </i>
+  </ForwardRef(Button)>
+  <Tooltip
+    position="bottom center"
+    text="This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later."
+  >
+    <Pill>
+      <span
+        className="screen-reader-text"
+      >
+        This product type requires a paid extension.
+We'll add this to a cart so that
+you can purchase and install it later.
+      </span>
+      $10 per month
+    </Pill>
+  </Tooltip>
+</div>
+`;
