@@ -789,7 +789,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			/**
 			 * Allows filter if product have enough stock to get added to the cart.
 			 *
-			 * @since 4.4.0
+			 * @since 4.6.0
 			 * @param bool       $has_stock If have enough stock.
 			 * @param WC_Product $product   Product instance.
 			 * @param array      $values    Cart item values.
