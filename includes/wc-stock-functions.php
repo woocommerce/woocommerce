@@ -4,7 +4,7 @@
  *
  * Functions used to manage product stock levels.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.4.0
  */
 
@@ -64,8 +64,8 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 /**
  * Update a product's stock status.
  *
- * @param  int $product_id Product ID.
- * @param  string $status     Status.
+ * @param int    $product_id Product ID.
+ * @param string $status     Status.
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
@@ -170,6 +170,13 @@ function wc_reduce_stock_levels( $order_id ) {
 			continue;
 		}
 
+		/**
+		 * Filter order item quantity.
+		 *
+		 * @param int|float             $quantity Quantity.
+		 * @param WC_Order              $order    Order data.
+		 * @param WC_Order_Item_Product $item Order item data.
+		 */
 		$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 		$item_name = $product->get_formatted_name();
 		$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );

@@ -2,7 +2,7 @@
 /**
  * WP_CLI_Rest_Command class file.
  *
- * @package WooCommerce\Cli
+ * @package WooCommerce\CLI
  */
 
 use Automattic\Jetpack\Constants;

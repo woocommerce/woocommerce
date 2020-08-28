@@ -2,7 +2,7 @@
 /**
  * Handle frontend forms.
  *
- * @package WooCommerce/Classes/
+ * @package WooCommerce\Classes\
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,7 +46,7 @@ class WC_Form_Handler {
 				$user    = get_user_by( 'login', sanitize_user( wp_unslash( $_GET['login'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$user_id = $user ? $user->ID : 0;
 			} else {
-				$user_id = absint( $_GET['id'] );
+				$user_id = absint( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 
 			$value = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
@@ -638,7 +638,7 @@ class WC_Form_Handler {
 		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			$cart_updated = false;
-			$cart_totals  = isset( $_POST['cart'] ) ? wp_unslash( $_POST['cart'] ) : ''; // PHPCS: input var ok, CSRF ok, sanitization ok.
+			$cart_totals  = isset( $_POST['cart'] ) ? wp_unslash( $_POST['cart'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( ! WC()->cart->is_empty() && is_array( $cart_totals ) ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
@@ -868,108 +868,16 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
-		try {
-			$variation_id         = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$quantity             = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$missing_attributes   = array();
-			$variations           = array();
-			$variation_attributes = array();
-			$adding_to_cart       = wc_get_product( $product_id );
+		$variation_id = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$variations   = array();
 
-			if ( ! $adding_to_cart ) {
-				return false;
+		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {
+				continue;
 			}
 
-			// If the $product_id was in fact a variation ID, update the variables.
-			if ( $adding_to_cart->is_type( 'variation' ) ) {
-				$variation_attributes = $adding_to_cart->get_variation_attributes();
-				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
-				$variation_attributes = array_filter( $variation_attributes );
-				$variation_id   = $product_id;
-				$product_id     = $adding_to_cart->get_parent_id();
-				$adding_to_cart = wc_get_product( $product_id );
-
-				if ( ! $adding_to_cart ) {
-					return false;
-				}
-			}
-
-			// Gather posted attributes.
-			$posted_attributes = array();
-
-			foreach ( $adding_to_cart->get_attributes() as $attribute ) {
-				if ( ! $attribute['is_variation'] ) {
-					continue;
-				}
-				$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-
-				if ( isset( $_REQUEST[ $attribute_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					if ( $attribute['is_taxonomy'] ) {
-						// Don't use wc_clean as it destroys sanitized characters.
-						$value = sanitize_title( wp_unslash( $_REQUEST[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					} else {
-						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					}
-
-					$posted_attributes[ $attribute_key ] = $value;
-				}
-			}
-
-			// Merge variation attributes and posted attributes.
-			$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
-
-			// If no variation ID is set, attempt to get a variation ID from posted attributes.
-			if ( empty( $variation_id ) ) {
-				$data_store   = WC_Data_Store::load( 'product' );
-				$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, $posted_attributes );
-			}
-
-			// Do we have a variation ID?
-			if ( empty( $variation_id ) ) {
-				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
-			}
-
-			// Check the data we have is valid.
-			$variation_data = wc_get_product_variation_attributes( $variation_id );
-
-			foreach ( $adding_to_cart->get_attributes() as $attribute ) {
-				if ( ! $attribute['is_variation'] ) {
-					continue;
-				}
-
-				// Get valid value from variation data.
-				$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-				$valid_value   = isset( $variation_data[ $attribute_key ] ) ? $variation_data[ $attribute_key ] : '';
-
-				/**
-				 * If the attribute value was posted, check if it's valid.
-				 *
-				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
-				 */
-				if ( isset( $posted_and_variation_attributes[ $attribute_key ] ) ) {
-					$value = $posted_and_variation_attributes[ $attribute_key ];
-
-					// Allow if valid or show error.
-					if ( $valid_value === $value ) {
-						$variations[ $attribute_key ] = $value;
-					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs(), true ) ) {
-						// If valid values are empty, this is an 'any' variation so get all possible values.
-						$variations[ $attribute_key ] = $value;
-					} else {
-						/* translators: %s: Attribute name. */
-						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
-					}
-				} elseif ( '' === $valid_value ) {
-					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
-				}
-			}
-			if ( ! empty( $missing_attributes ) ) {
-				/* translators: %s: Attribute name. */
-				throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
-			}
-		} catch ( Exception $e ) {
-			wc_add_notice( $e->getMessage(), 'error' );
-			return false;
+			$variations[ sanitize_title( wp_unslash( $key ) ) ] = wp_unslash( $value );
 		}
 
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
@@ -1083,7 +991,7 @@ class WC_Form_Handler {
 				return;
 			}
 
-			if ( in_array( $field, array( 'password_1', 'password_2' ) ) ) {
+			if ( in_array( $field, array( 'password_1', 'password_2' ), true ) ) {
 				// Don't unslash password fields
 				// @see https://github.com/woocommerce/woocommerce/issues/23922.
 				$posted_fields[ $field ] = $_POST[ $field ]; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash

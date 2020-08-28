@@ -5,15 +5,15 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
 import {
+	StoreOwnerFlow,
 	clearAndFillInput,
 	setCheckbox,
 	settingsPageSaveChanges,
 	uiUnblocked,
 	verifyCheckboxIsSet,
 	verifyValueOfInputField
-} from '../../utils';
+} from '@woocommerce/e2e-utils';
 
 describe( 'WooCommerce Tax Settings', () => {
 	beforeAll( async () => {
