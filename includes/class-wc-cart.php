@@ -776,7 +776,15 @@ class WC_Cart extends WC_Legacy_Cart {
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
-			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
+			/**
+			 * Allows filter if product have enough stock to get added to the cart.
+			 *
+			 * @since 4.6.0
+			 * @param bool       $has_stock If have enough stock.
+			 * @param WC_Product $product   Product instance.
+			 * @param array      $values    Cart item values.
+			 */
+			if ( apply_filters( 'woocommerce_cart_item_required_stock_is_not_enough', $product->get_stock_quantity() < ( $held_stock + $required_stock ), $product, $values ) ) {
 				/* translators: 1: product name 2: quantity in stock */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
 				return $error;
