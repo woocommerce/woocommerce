@@ -4,7 +4,7 @@
  *
  * Functions for cart specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.5.0
  */
 

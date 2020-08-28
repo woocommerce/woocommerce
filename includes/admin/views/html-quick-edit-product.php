@@ -2,7 +2,7 @@
 /**
  * Admin View: Quick Edit Product
  *
- * @package admin.
+ * @package WooCommerce\Admin\Notices
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -1,6 +1,6 @@
 <?php
 /**
- * @package WooCommerce/Tests/PaymentGateways
+ * @package WooCommerce\Tests\PaymentGateways
  */
 
 /**

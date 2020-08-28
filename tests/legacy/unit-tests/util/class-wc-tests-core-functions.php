@@ -405,7 +405,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		);
 
 		// This filter will sequentially remove handlers, allowing us to test as though our
-		// functions were accumulatively blacklisted, adding one on each call.
+		// functions were accumulatively blocked, adding one on each call.
 		add_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
 
 		$this->expectOutputString(

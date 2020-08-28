@@ -31,6 +31,14 @@
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
 
+	<rule ref="WooCommerce.Functions.InternalInjectionMethod">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/php/src/</include-pattern>
+		<properties>
+			<property name="injectionMethod" value="init"/>
+		</properties>
+	</rule>
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array" value="woocommerce" />
@@ -73,6 +81,15 @@
 		<exclude-pattern>tests/Tools/</exclude-pattern>
 	</rule>
 
+	<rule ref="Squiz.Commenting.FileComment.MissingPackageTag">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php/</exclude-pattern>
+	</rule>
+
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
@@ -80,7 +97,7 @@
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
-	
+
 	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
 		<exclude-pattern>src/</exclude-pattern>
 	</rule>

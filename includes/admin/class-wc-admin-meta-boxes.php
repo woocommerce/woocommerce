@@ -4,7 +4,7 @@
  *
  * Sets up the write panels used by products and orders (custom post types).
  *
- * @package WooCommerce/Admin/Meta Boxes
+ * @package WooCommerce\Admin\Meta Boxes
  */
 
 use Automattic\Jetpack\Constants;

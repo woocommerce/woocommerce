@@ -4,7 +4,7 @@
  *
  * Based on https://pippinsplugins.com/batch-processing-for-big-data/
  *
- * @package  WooCommerce/Export
+ * @package  WooCommerce\Export
  * @version  3.1.0
  */
 

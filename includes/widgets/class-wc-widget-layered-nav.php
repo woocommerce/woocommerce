@@ -2,7 +2,7 @@
 /**
  * Layered nav widget
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.6.0
  */
 
