@@ -3,7 +3,7 @@
  * MaxMind Geolocation Integration
  *
  * @version 3.9.0
- * @package WooCommerce/Integrations
+ * @package WooCommerce\Integrations
  */
 
 defined( 'ABSPATH' ) || exit;

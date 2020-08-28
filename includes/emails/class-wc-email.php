@@ -20,7 +20,7 @@ if ( class_exists( 'WC_Email', false ) ) {
  *
  * @class       WC_Email
  * @version     2.5.0
- * @package     WooCommerce/Classes/Emails
+ * @package     WooCommerce\Classes\Emails
  * @extends     WC_Settings_API
  */
 class WC_Email extends WC_Settings_API {
@@ -233,6 +233,7 @@ class WC_Email extends WC_Settings_API {
 			array(
 				'{site_title}'   => $this->get_blogname(),
 				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'{site_url}'     => wp_parse_url( home_url(), PHP_URL_HOST ),
 			),
 			$this->placeholders
 		);

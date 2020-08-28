@@ -2,7 +2,7 @@
 /**
  * Addons Page
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.5.0
  */
 
@@ -51,13 +51,13 @@ class WC_Admin_Addons {
 	 */
 	public static function build_parameter_string( $category, $term, $country ) {
 
-		$paramters = array(
+		$parameters = array(
 			'category' => $category,
 			'term'     => $term,
 			'country'  => $country,
 		);
 
-		return '?' . http_build_query( $paramters );
+		return '?' . http_build_query( $parameters );
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * Abstract widget class
  *
  * @class WC_Widget
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 
 use Automattic\Jetpack\Constants;
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Widget
  *
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  * @version  2.5.0
  * @extends  WP_Widget
  */

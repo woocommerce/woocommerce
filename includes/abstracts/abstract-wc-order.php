@@ -7,7 +7,7 @@
  *
  * @class       WC_Abstract_Order
  * @version     3.0.0
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -87,8 +87,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
-	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
-	 * should be used. It is possible, but the aforementioned are preferred and are the only.
+	 * This class should NOT be instantiated, but the wc_get_order function or new WC_Order_Factory
+	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
 	 * @param  int|object|WC_Order $order Order to read.
@@ -437,12 +437,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_subtotal() {
-		$subtotal = 0;
-
-		foreach ( $this->get_items() as $item ) {
-			$subtotal += wc_remove_number_precision( self::round_item_subtotal( wc_add_number_precision( $item->get_subtotal() ) ) );
-		}
-
+		$subtotal = round( $this->get_cart_subtotal_for_order(), wc_get_price_decimals() );
 		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
@@ -467,7 +462,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->is_compound      = $tax->is_compound();
 			$tax_totals[ $code ]->label            = $tax->get_label();
 			$tax_totals[ $code ]->amount          += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
+			$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount, array( 'currency' => $this->get_currency() ) );
 		}
 
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
@@ -677,7 +672,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_total_tax( $value ) {
 		// We round here because this is a total entry, as opposed to line items in other setters.
-		$this->set_prop( 'total_tax', wc_format_decimal( wc_round_tax_total( $value ) ) );
+		$this->set_prop( 'total_tax', wc_format_decimal( round( $value, wc_get_price_decimals() ) ) );
 	}
 
 	/**
@@ -1672,18 +1667,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
 		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs without rounding.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += $item->get_subtotal();
-			$cart_total    += $item->get_total();
-		}
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {

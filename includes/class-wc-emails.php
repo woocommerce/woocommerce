@@ -4,7 +4,7 @@
  *
  * WooCommerce Emails Class which handles the sending on transactional emails and email templates. This class loads in available emails.
  *
- * @package WooCommerce/Classes/Emails
+ * @package WooCommerce\Classes\Emails
  * @version 2.3.0
  */
 
@@ -290,11 +290,13 @@ class WC_Emails {
 			array(
 				'{site_title}',
 				'{site_address}',
+				'{site_url}',
 				'{woocommerce}',
 				'{WooCommerce}',
 			),
 			array(
 				$this->get_blogname(),
+				$domain,
 				$domain,
 				'<a href="https://woocommerce.com">WooCommerce</a>',
 				'<a href="https://woocommerce.com">WooCommerce</a>',

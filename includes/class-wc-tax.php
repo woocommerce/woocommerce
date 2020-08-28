@@ -2,7 +2,7 @@
 /**
  * Tax calculation and rate finding class.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -495,7 +495,7 @@ class WC_Tax {
 			);
 		}
 
-		return apply_filters( 'woocommerce_matched_rates', $matched_tax_rates, $tax_class );
+		return apply_filters( 'woocommerce_matched_rates', $matched_tax_rates, $tax_class, $customer );
 	}
 
 	/**

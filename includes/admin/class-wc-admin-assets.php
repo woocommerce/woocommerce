@@ -2,7 +2,7 @@
 /**
  * Load assets
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 3.7.0
  */
 
@@ -44,6 +44,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), $version );
 			wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), $version, 'print' );
 			wp_register_style( 'woocommerce_admin_marketplace_styles', WC()->plugin_url() . '/assets/css/marketplace-suggestions.css', array(), $version );
+			wp_register_style( 'woocommerce_admin_privacy_styles', WC()->plugin_url() . '/assets/css/privacy.css', array(), $version );
 
 			// Add RTL support for admin styles.
 			wp_style_add_data( 'woocommerce_admin_menu_styles', 'rtl', 'replace' );
@@ -51,6 +52,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_dashboard_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_print_reports_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_marketplace_styles', 'rtl', 'replace' );
+			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			// Sitewide menu CSS.
 			wp_enqueue_style( 'woocommerce_admin_menu_styles' );
@@ -68,6 +70,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			if ( in_array( $screen_id, array( 'woocommerce_page_wc-reports', 'toplevel_page_wc-reports' ) ) ) {
 				wp_enqueue_style( 'woocommerce_admin_print_reports_styles' );
+			}
+
+			// Privacy Policy Guide css for back-compat.
+			if ( isset( $_GET['wp-privacy-policy-guide'] ) || in_array( $screen_id, array( 'privacy-policy-guide' ) ) ) {
+				wp_enqueue_style( 'woocommerce_admin_privacy_styles' );
 			}
 
 			// @deprecated 2.3.
@@ -423,6 +430,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'woocommerce_admin_system_status',
 					array(
 						'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
+						'run_tool_confirmation'   => esc_js( __( 'Are you sure you want to run this tool?', 'woocommerce' ) ),
 					)
 				);
 			}

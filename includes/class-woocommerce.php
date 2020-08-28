@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 /**
  * Main WooCommerce Class.
  *
@@ -20,7 +22,16 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '4.1.0';
+	public $version = '4.5.0';
+
+	/**
+	 * WooCommerce Schema version.
+	 *
+	 * @since 4.3 started with version string 430.
+	 *
+	 * @var string
+	 */
+	public $db_version = '430';
 
 	/**
 	 * The single instance of the class.
@@ -187,6 +198,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
+		add_action( 'init', array( $this, 'load_rest_api' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -229,7 +241,7 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.0' );
+		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
 		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
 	}
@@ -246,6 +258,7 @@ final class WooCommerce {
 			'order_itemmeta'         => 'woocommerce_order_itemmeta',
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
 			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+			'wc_reserved_stock'      => 'wc_reserved_stock',
 		);
 
 		foreach ( $tables as $name => $table ) {
@@ -284,6 +297,13 @@ final class WooCommerce {
 		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
+	}
+
+	/**
+	 * Load REST API.
+	 */
+	public function load_rest_api() {
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
 	/**
@@ -643,7 +663,7 @@ final class WooCommerce {
 		/**
 		 * Legacy image sizes.
 		 *
-		 * @deprecated These sizes will be removed in 4.0.
+		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
 		 */
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );

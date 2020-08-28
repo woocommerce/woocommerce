@@ -1,19 +1,17 @@
+version: ~> 1.0
+
 language: php
 dist: xenial
+
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 # Since Xenial services are not started by default, we need to instruct it below to start.
 services:
   - xvfb
   - mysql
   - docker
-  - docker-compose
-
-sudo: false
-
-cache:
-  directories:
-    - vendor
-    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
@@ -28,44 +26,43 @@ env:
 
 # Additional tests against stable PHP (min version is 7.0)
 # and code coverage report.
-matrix:
+jobs:
   fast_finish: true
   include:
-  - name: "Coding standard check"
+  - name: "Core E2E Tests"
     php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "E2E tests"
-    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     script:
-      - composer require wp-cli/i18n-command
-      - npm run build
-      - docker-compose up --build -d
-      - bash tests/bin/run-e2e-CI.sh
+      - npm run build:assets
+      - npm run build:packages
+      - npm install jest --global
+      - npm run docker:up
+      - npm run test:e2e
     after_script:
-      - docker-compose down -v
-  - name: "Unit tests code coverage"
-    php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
-  - name: "WooCommerce unit tests using WordPress nightly"
+      - npm run docker:down
+  - name: "WP Nightly"
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
-  - name: "WP latest - 1"
+  - name: "WP Latest"
+    php: 7.2
+    env: WP_VERSION=5.4 WP_MULTISITE=0
+  - name: "WP Latest - 1"
     php: 7.2
     env: WP_VERSION=5.3 WP_MULTISITE=0
-  - name: "WP latest - 2"
+  - name: "WP Latest - 2"
     php: 7.2
     env: WP_VERSION=5.2 WP_MULTISITE=0
-  - name: "WP 5.1"
-    php: 7.2
-    env: WP_VERSION=5.1 WP_MULTISITE=0
-  - name: "WP 5.0"
-    php: 7.0
-    env: WP_VERSION=5.0 WP_MULTISITE=0
+  - name: "Code Standards"
+    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - name: "Code Coverage"
+    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
   - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
-before_script:
+install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     # Remove Xdebug for a huge performance increase:
@@ -81,7 +78,7 @@ before_script:
     # Install WP Test suite, install PHPUnit globally:
     if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      composer global require "phpunit/phpunit=5.7.*|7.5.*"
+      composer global require "phpunit/phpunit=6.5.*|7.5.*"
     fi
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 

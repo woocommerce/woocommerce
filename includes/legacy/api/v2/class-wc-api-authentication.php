@@ -4,7 +4,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce/API
+ * @package  WooCommerce\API
  * @since    2.1.0
  * @version  2.4.0
  */

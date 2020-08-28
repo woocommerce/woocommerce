@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
- * @version 3.4.0
+ * @package WooCommerce\Templates
+ * @version 4.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,6 +46,8 @@ if ( $available_gateways ) : ?>
 				}
 				?>
 			</ul>
+
+			<?php do_action( 'woocommerce_add_payment_method_form_bottom' ); ?>
 
 			<div class="form-row">
 				<?php wp_nonce_field( 'woocommerce-add-payment-method', 'woocommerce-add-payment-method-nonce' ); ?>

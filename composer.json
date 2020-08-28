@@ -8,19 +8,19 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "^1.6.0",
-    "automattic/jetpack-constants": "^1.1",
+    "automattic/jetpack-autoloader": "2.2.0",
+    "automattic/jetpack-constants": "1.4.0",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",
-    "pelago/emogrifier": "^3.1",
-    "woocommerce/action-scheduler": "3.1.4",
-    "woocommerce/woocommerce-blocks": "2.5.16",
-    "woocommerce/woocommerce-rest-api": "1.0.7",
-    "woocommerce/woocommerce-admin": "1.1.0"
+    "pelago/emogrifier": "3.1.0",
+    "psr/container": "^1.0",
+    "woocommerce/action-scheduler": "3.1.6",
+    "woocommerce/woocommerce-admin": "1.5.0-rc.2",
+    "woocommerce/woocommerce-blocks": "3.1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
-    "woocommerce/woocommerce-sniffs": "0.0.10",
+    "woocommerce/woocommerce-sniffs": "^0.1.0",
     "wp-cli/i18n-command": "^2.2"
   },
   "config": {
@@ -39,9 +39,21 @@
       "includes/legacy",
       "includes/libraries"
     ],
+    "classmap": [
+      "includes/rest-api"
+    ],
     "psr-4": {
       "Automattic\\WooCommerce\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
+      "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
+    },
+    "classmap": [
+      "tests/legacy/unit-tests/rest-api/Helpers"
+    ]
   },
   "scripts": {
     "post-install-cmd": [
@@ -63,7 +75,7 @@
       "phpcbf -p"
     ],
     "makepot-audit": [
-      "wp i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+      "wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
     ],
     "makepot": [
       "@makepot-audit --skip-audit"
@@ -80,8 +92,8 @@
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
-      "makepot-audit": "Generate i18n/langauges/woocommerce.pot file and run audit",
-      "makepot": "Generate i18n/langauges/woocommerce.pot file"
+      "makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
+      "makepot": "Generate i18n/languages/woocommerce.pot file"
     }
   }
 }

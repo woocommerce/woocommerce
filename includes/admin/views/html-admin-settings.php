@@ -38,7 +38,7 @@ if ( ! $tab_exists ) {
 			self::show_messages();
 
 			do_action( 'woocommerce_settings_' . $current_tab );
-			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated hook. @todo remove in 4.0.
+			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
 		?>
 		<p class="submit">
 			<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>

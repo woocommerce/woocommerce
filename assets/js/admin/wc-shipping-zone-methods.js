@@ -34,11 +34,16 @@
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
-					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
-						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
-						changes                 : this.changes,
-						zone_id                 : data.zone_id
-					}, this.onSaveResponse, 'json' );
+					$.post(
+						ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes',
+						{
+							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+							changes                 : this.changes,
+							zone_id                 : data.zone_id
+						},
+						this.onSaveResponse,
+						'json'
+					);
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
@@ -46,7 +51,11 @@
 							if ( response.data.zone_id !== data.zone_id ) {
 								data.zone_id = response.data.zone_id;
 								if ( window.history.pushState ) {
-									window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+									window.history.pushState(
+										{},
+										'',
+										'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+									);
 								}
 							}
 							shippingMethod.set( 'methods', response.data.methods );
@@ -72,7 +81,12 @@
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 
-					$( document.body ).on( 'input change', '#zone_name, #zone_locations, #zone_postcodes', { view: this }, this.onUpdateZone );
+					$( document.body ).on(
+						'input change',
+						'#zone_name, #zone_locations, #zone_postcodes',
+						{ view: this },
+						this.onUpdateZone
+					);
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
@@ -128,9 +142,13 @@
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
 							if ( 'yes' === rowData.enabled ) {
-								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' + data.strings.yes + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' +
+									data.strings.yes +
+									'</span>';
 							} else {
-								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' + data.strings.no + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' +
+									data.strings.no +
+									'</span>';
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -138,7 +156,9 @@
 							var $tr = view.$el.find( 'tr[data-id="' + rowData.instance_id + '"]');
 
 							if ( ! rowData.has_settings ) {
-								$tr.find( '.wc-shipping-zone-method-title > a' ).replaceWith('<span>' + $tr.find( '.wc-shipping-zone-method-title > a' ).text() + '</span>' );
+								$tr
+									.find( '.wc-shipping-zone-method-title > a' )
+									.replaceWith('<span>' + $tr.find( '.wc-shipping-zone-method-title > a' ).text() + '</span>' );
 								var $del = $tr.find( '.wc-shipping-zone-method-delete' );
 								$tr.find( '.wc-shipping-zone-method-title .row-actions' ).empty().html($del);
 							}
@@ -241,7 +261,9 @@
 						if ( old_position !== new_position ) {
 							methods[ method.instance_id ].method_order = new_position;
 							changes.methods = changes.methods || { methods : {} };
-							changes.methods[ method.instance_id ] = _.extend( changes.methods[ method.instance_id ] || {}, { method_order : new_position } );
+							changes.methods[ method.instance_id ] = _.extend(
+								changes.methods[ method.instance_id ] || {}, { method_order : new_position }
+							);
 						}
 					} );
 
@@ -281,30 +303,35 @@
 						shippingMethodView.block();
 
 						// Save method settings via ajax call
-						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_settings', {
-							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
-							instance_id             : posted_data.instance_id,
-							data                    : posted_data
-						}, function( response, textStatus ) {
-							if ( 'success' === textStatus && response.success ) {
-								$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
+						$.post(
+							ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_settings',
+							{
+								wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+								instance_id             : posted_data.instance_id,
+								data                    : posted_data
+							},
+							function( response, textStatus ) {
+								if ( 'success' === textStatus && response.success ) {
+									$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
 
-								// If there were errors, prepend the form.
-								if ( response.data.errors.length > 0 ) {
-									shippingMethodView.showErrors( response.data.errors );
-								}
+									// If there were errors, prepend the form.
+									if ( response.data.errors.length > 0 ) {
+										shippingMethodView.showErrors( response.data.errors );
+									}
 
-								// Method was saved. Re-render.
-								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.save();
+									// Method was saved. Re-render.
+									if ( _.size( shippingMethodView.model.changes ) ) {
+										shippingMethodView.model.save();
+									} else {
+										shippingMethodView.model.onSaveResponse( response, textStatus );
+									}
 								} else {
-									shippingMethodView.model.onSaveResponse( response, textStatus );
+									window.alert( data.strings.save_failed );
+									shippingMethodView.unblock();
 								}
-							} else {
-								window.alert( data.strings.save_failed );
-								shippingMethodView.unblock();
-							}
-						}, 'json' );
+							},
+							'json'
+						);
 					}
 				},
 				showErrors: function( errors ) {
@@ -343,7 +370,11 @@
 								if ( response.data.zone_id !== data.zone_id ) {
 									data.zone_id = response.data.zone_id;
 									if ( window.history.pushState ) {
-										window.history.pushState({}, '', 'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id );
+										window.history.pushState(
+											{},
+											'',
+											'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+										);
 									}
 								}
 								// Trigger save if there are changes, or just re-render

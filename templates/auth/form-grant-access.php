@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Auth
- * @version 2.4.0
+ * @package WooCommerce\Templates\Auth
+ * @version 4.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +50,7 @@ defined( 'ABSPATH' ) || exit;
 		printf( esc_html__( 'Logged in as %s', 'woocommerce' ), esc_html( $user->display_name ) );
 		?>
 		<a href="<?php echo esc_url( $logout_url ); ?>" class="wc-auth-logout"><?php esc_html_e( 'Logout', 'woocommerce' ); ?></a>
+	</p>
 </div>
 
 <p class="wc-auth-actions">

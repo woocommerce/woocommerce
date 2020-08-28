@@ -2,7 +2,7 @@
 /**
  * Class WC_Coupon_Data_Store_CPT file.
  *
- * @package WooCommerce\DataStore
+ * @package WooCommerce\DataStores
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +69,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon $coupon Coupon object.
 	 */
 	public function create( &$coupon ) {
-		$coupon->set_date_created( time() );
+		if ( ! $coupon->get_date_created( 'edit' ) ) {
+			$coupon->set_date_created( time() );
+		}
 
 		$coupon_id = wp_insert_post(
 			apply_filters(
@@ -719,7 +721,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		return $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
-				$code
+				wc_sanitize_coupon_code( $code )
 			)
 		);
 	}

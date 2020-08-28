@@ -496,10 +496,17 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 		?>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0">
+<table id="status-database" class="wc_status_table widefat" cellspacing="0">
 	<thead>
 	<tr>
-		<th colspan="3" data-export-label="Database"><h2><?php esc_html_e( 'Database', 'woocommerce' ); ?></h2></th>
+		<th colspan="3" data-export-label="Database">
+			<h2>
+				<?php
+					esc_html_e( 'Database', 'woocommerce' );
+					self::output_tables_info();
+				?>
+			</h2>
+		</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -792,7 +799,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		</tr>
 		<tr>
 			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 	</tbody>

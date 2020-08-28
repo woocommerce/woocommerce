@@ -2,11 +2,12 @@
 /**
  * Installation related functions and actions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -148,6 +149,14 @@ class WC_Install {
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
 		),
+		'4.4.0' => array(
+			'wc_update_440_insert_attribute_terms_for_variable_products',
+			'wc_update_440_db_version',
+		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
+		),
 	);
 
 	/**
@@ -287,6 +296,7 @@ class WC_Install {
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
 		self::create_tables();
+		self::verify_base_tables();
 		self::create_options();
 		self::create_roles();
 		self::setup_environment();
@@ -296,11 +306,60 @@ class WC_Install {
 		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_enable_homescreen();
 
 		delete_transient( 'wc_installing' );
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Check if all the base tables are present.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return array List of querues.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		if ( $execute ) {
+			self::create_tables();
+		}
+		$queries        = dbDelta( self::get_schema(), false );
+		$missing_tables = array();
+		foreach ( $queries as $table_name => $result ) {
+			if ( "Created table $table_name" === $result ) {
+				$missing_tables[] = $table_name;
+			}
+		}
+
+		if ( 0 < count( $missing_tables ) ) {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::add_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
+		} else {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_version', WC()->db_version );
+			delete_option( 'woocommerce_schema_missing_tables' );
+		}
+		return $missing_tables;
+	}
+
+	/**
+	 * Check if the homepage should be enabled and set the appropriate option if thats the case.
+	 *
+	 * @since 4.3.0
+	 */
+	private static function maybe_enable_homescreen() {
+		if ( self::is_new_install() && ! get_option( 'woocommerce_homescreen_enabled' ) ) {
+			add_option( 'woocommerce_homescreen_enabled', 'yes' );
+		}
 	}
 
 	/**
@@ -621,6 +680,11 @@ class WC_Install {
 
 	/**
 	 * Set up the database tables which the plugin needs to function.
+	 * WARNING: If you are modifying this method, make sure that its safe to call regardless of the state of database.
+	 *
+	 * This is called from `install` method and is executed in-sync when WC is installed or updated. This can also be called optionally from `verify_base_tables`.
+	 *
+	 * TODO: Add all crucial tables that we have created from workers in the past.
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
@@ -689,21 +753,14 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row(
-				"SELECT COUNT(*) AS fk_count
-				FROM information_schema.TABLE_CONSTRAINTS
-				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
-				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-			); // WPCS: unprepared SQL ok.
-			if ( 0 === (int) $fk_result->fk_count ) {
+			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" ); // WPCS: unprepared SQL ok.
+			if ( false === strpos( $fk_result->{'Create Table'}, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				); // WPCS: unprepared SQL ok.
+				);
 			}
 		}
 
@@ -947,6 +1004,14 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   PRIMARY KEY  (tax_rate_class_id),
   UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
+	`order_id` bigint(20) NOT NULL,
+	`product_id` bigint(20) NOT NULL,
+	`stock_quantity` double NOT NULL DEFAULT 0,
+	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY  (`order_id`, `product_id`)
+) $collate;
 		";
 
 		return $tables;
@@ -980,6 +1045,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
+			"{$wpdb->prefix}wc_reserved_stock",
 		);
 
 		/**
@@ -1111,7 +1177,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 	 *
 	 * @return array
 	 */
-	private static function get_core_capabilities() {
+	public static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
@@ -1187,7 +1253,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		}
 
 		// Install files and folders for uploading files and prevent hotlinking.
-		$upload_dir      = wp_upload_dir();
+		$upload_dir      = wp_get_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
@@ -1206,19 +1272,16 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 				'file'    => 'index.html',
 				'content' => '',
 			),
-		);
-
-		if ( 'redirect' !== $download_method ) {
-			$files[] = array(
+			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			);
-		}
+				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',
+			),
+		);
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
@@ -1304,17 +1367,21 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 	 * @return array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME === $file ) {
-			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>',
-			);
-
-			return array_merge( $links, $row_meta );
+		if ( WC_PLUGIN_BASENAME !== $file ) {
+			return $links;
 		}
 
-		return (array) $links;
+		$row_meta = array(
+			'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_community_support_url', 'https://wordpress.org/support/plugin/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'Visit community forums', 'woocommerce' ) . '">' . esc_html__( 'Community support', 'woocommerce' ) . '</a>',
+		);
+
+		if ( WCConnectionHelper::is_connected() ) {
+			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
+		}
+
+		return array_merge( $links, $row_meta );
 	}
 
 	/**
