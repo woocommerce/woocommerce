@@ -1481,8 +1481,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 				$post_thumbnail_id = array_shift( $gallery_image_ids );
 			}
 		}
-		$args = compact( 'post_thumbnail_id', 'gallery_image_ids' );
-		wc_get_template( 'single-product/product-image.php', $args );
+		wc_get_template( 'single-product/product-thumbnails.php', array( 'post_thumbnail_id' => $post_thumbnail_id ) );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
@@ -1495,7 +1494,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 		$attachment_ids = $product->get_gallery_image_ids();
 
 		if ( $attachment_ids && ! $product->get_image_id() ) {
-				array_shift( $attachment_ids );
+			array_shift( $attachment_ids );
 		}
 		wc_get_template( 'single-product/product-thumbnails.php', array( 'attachment_ids' => $attachment_ids ) );
 	}
