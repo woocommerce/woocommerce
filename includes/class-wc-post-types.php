@@ -489,7 +489,7 @@ class WC_Post_Types {
 	 * @since 4.4.0
 	 * @return bool
 	 */
-	public function updated_term_messages( $messages ) {
+	public static function updated_term_messages( $messages ) {
 		$messages['product_cat'] = array(
 			0 => '',
 			1 => __( 'Category added.', 'woocommerce' ),

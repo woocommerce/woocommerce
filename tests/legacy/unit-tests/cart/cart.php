@@ -1299,7 +1299,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_shift( $variations );
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
-		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
+		$result = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_colour' => 'red', // Set a value since this is an 'any' attribute.
+				'attribute_pa_number' => '2', // Set a value since this is an 'any' attribute.
+			)
+		);
+		$this->assertNotFalse( $result );
 
 		// Check if the item is in the cart.
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
@@ -2252,10 +2261,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertCount( 0, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
-		// Check that the notices contain an error message about an invalid colour.
+		// Check that the notices contain an error message about invalid colour and number.
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertCount( 1, $notices['error'] );
-		$this->assertEquals( 'colour is a required field', $notices['error'][0]['notice'] );
+		$this->assertEquals( 'colour and number are required fields', $notices['error'][0]['notice'] );
 	}
 
 	/**

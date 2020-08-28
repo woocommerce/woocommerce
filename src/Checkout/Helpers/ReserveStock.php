@@ -219,7 +219,7 @@ final class ReserveStock {
 		 * Filter: woocommerce_query_for_reserved_stock
 		 * Allows to filter the query for getting reserved stock of a product.
 		 *
-		 * @since 4.4.0
+		 * @since 4.5.0
 		 * @param string $query            The query for getting reserved stock of a product.
 		 * @param int    $product_id       Product ID.
 		 * @param int    $exclude_order_id Order to exclude from the results.

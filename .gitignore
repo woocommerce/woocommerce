@@ -49,6 +49,8 @@ tests/cli/vendor
 /tests/e2e/env/docker/wp-cli/initialize.sh
 /tests/e2e/env/build/
 /tests/e2e/env/build-module/
+/tests/e2e/utils/build/
+/tests/e2e/utils/build-module/
 
 # Logs
 /logs

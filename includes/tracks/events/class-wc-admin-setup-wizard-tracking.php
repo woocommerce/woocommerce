@@ -54,8 +54,17 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @deprecated 4.5.0
 	 */
-	public function dequeue_non_whitelisted_scripts() {
+	public function dequeue_non_allowed_scripts() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		global $wp_scripts;
+		$allowed = array( 'woo-tracks' );
+
+		foreach ( $wp_scripts->queue as $script ) {
+			if ( in_array( $script, $allowed, true ) ) {
+				continue;
+			}
+			wp_dequeue_script( $script );
+		}
 	}
 
 	/**

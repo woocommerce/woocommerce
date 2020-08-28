@@ -82,7 +82,7 @@ function wc_get_coupon_code_by_id( $id ) {
 }
 
 /**
- * Get coupon code by ID.
+ * Get coupon ID by code.
  *
  * @since 3.0.0
  * @param string $code    Coupon code.

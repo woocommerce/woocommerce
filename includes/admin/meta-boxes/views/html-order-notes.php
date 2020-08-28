@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 		}
 	} else {
 		?>
-		<li><?php esc_html_e( 'There are no notes yet.', 'woocommerce' ); ?></li>
+		<li class="no-items"><?php esc_html_e( 'There are no notes yet.', 'woocommerce' ); ?></li>
 		<?php
 	}
 	?>
