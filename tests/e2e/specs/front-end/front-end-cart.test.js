@@ -5,9 +5,12 @@
 /**
  * Internal dependencies
  */
-import { createSimpleProduct } from '../../utils/components';
-import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
-import { uiUnblocked } from '../../utils';
+import {
+	CustomerFlow,
+	StoreOwnerFlow,
+	createSimpleProduct,
+	uiUnblocked
+} from '@woocommerce/e2e-utils';
 
 describe( 'Cart page', () => {
 	beforeAll( async () => {

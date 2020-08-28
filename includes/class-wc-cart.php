@@ -1022,6 +1022,95 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 
+			if ( $product_data->is_type( 'variation' ) ) {
+				$missing_attributes = array();
+				$parent_data        = wc_get_product( $product_data->get_parent_id() );
+
+				$variation_attributes = $product_data->get_variation_attributes();
+				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
+				$variation_attributes = array_filter( $variation_attributes );
+
+				// Gather posted attributes.
+				$posted_attributes = array();
+
+				foreach ( $parent_data->get_attributes() as $attribute ) {
+					if ( ! $attribute['is_variation'] ) {
+						continue;
+					}
+					$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+
+					if ( isset( $variation[ $attribute_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						if ( $attribute['is_taxonomy'] ) {
+							// Don't use wc_clean as it destroys sanitized characters.
+							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						} else {
+							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						}
+
+						// Don't include if it's empty.
+						if ( ! empty( $value ) ) {
+							$posted_attributes[ $attribute_key ] = $value;
+						}
+					}
+				}
+
+				// Merge variation attributes and posted attributes.
+				$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
+
+				// If no variation ID is set, attempt to get a variation ID from posted attributes.
+				if ( empty( $variation_id ) ) {
+					$data_store   = WC_Data_Store::load( 'product' );
+					$variation_id = $data_store->find_matching_product_variation( $parent_data, $posted_attributes );
+				}
+
+				// Do we have a variation ID?
+				if ( empty( $variation_id ) ) {
+					throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+				}
+
+				// Check the data we have is valid.
+				$variation_data = wc_get_product_variation_attributes( $variation_id );
+				$attributes     = array();
+
+				foreach ( $parent_data->get_attributes() as $attribute ) {
+					if ( ! $attribute['is_variation'] ) {
+						continue;
+					}
+
+					// Get valid value from variation data.
+					$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+					$valid_value   = isset( $variation_data[ $attribute_key ] ) ? $variation_data[ $attribute_key ] : '';
+
+					/**
+					 * If the attribute value was posted, check if it's valid.
+					 *
+					 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
+					 */
+					if ( isset( $posted_and_variation_attributes[ $attribute_key ] ) ) {
+						$value = $posted_and_variation_attributes[ $attribute_key ];
+
+						// Allow if valid or show error.
+						if ( $valid_value === $value ) {
+							$attributes[ $attribute_key ] = $value;
+						} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs(), true ) ) {
+							// If valid values are empty, this is an 'any' variation so get all possible values.
+							$attributes[ $attribute_key ] = $value;
+						} else {
+							/* translators: %s: Attribute name. */
+							throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
+						}
+					} elseif ( '' === $valid_value ) {
+						$missing_attributes[] = wc_attribute_label( $attribute['name'] );
+					}
+
+					$variation = $attributes;
+				}
+				if ( ! empty( $missing_attributes ) ) {
+					/* translators: %s: Attribute name. */
+					throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
+				}
+			}
+
 			// Load cart item data - may be added by other plugins.
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
@@ -1039,9 +1128,11 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( $found_in_cart ) {
 					/* translators: %s: product name */
 					$message = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
+
 					/**
 					 * Filters message about more than 1 product being added to cart.
 					 *
+					 * @since 4.5.0
 					 * @param string     $message Message.
 					 * @param WC_Product $product_data Product data.
 					 */
@@ -1068,9 +1159,11 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $product_data->is_in_stock() ) {
 				/* translators: %s: product name */
 				$message = sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_name() );
+
 				/**
 				 * Filters message about product being out of stock.
 				 *
+				 * @since 4.5.0
 				 * @param string     $message Message.
 				 * @param WC_Product $product_data Product data.
 				 */
@@ -1083,9 +1176,11 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				/* translators: 1: product name 2: quantity in stock */
 				$message = sprintf( __( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ), $product_data->get_name(), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ) );
+
 				/**
 				 * Filters message about product not having enough stock.
 				 *
+				 * @since 4.5.0
 				 * @param string     $message Message.
 				 * @param WC_Product $product_data Product data.
 				 * @param int        $stock_quantity Quantity remaining.
@@ -1425,10 +1520,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! $this->get_customer()->has_calculated_shipping() ) {
-				if ( ! $this->get_customer()->get_shipping_country() || ( ! $this->get_customer()->get_shipping_state() && ! $this->get_customer()->get_shipping_postcode() ) ) {
-					return false;
-				}
+			if ( ! $this->get_customer()->get_shipping_country() || ! $this->get_customer()->get_shipping_state() || ! $this->get_customer()->get_shipping_postcode() ) {
+				return false;
 			}
 		}
 
@@ -1509,7 +1602,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( 0 < $coupon_usage_limit && 0 === get_current_user_id() ) {
 					// For guest, usage per user has not been enforced yet. Enforce it now.
 					$coupon_data_store = $coupon->get_data_store();
-					$billing_email = strtolower( sanitize_email( $billing_email ) );
+					$billing_email     = strtolower( sanitize_email( $billing_email ) );
 					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
 					}

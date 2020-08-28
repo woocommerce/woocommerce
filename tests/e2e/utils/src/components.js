@@ -6,9 +6,9 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
-import modelRegistry from './factories';
+import modelRegistry from '../../utils/factories';
 import { SimpleProduct } from '@woocommerce/model-factories';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -115,7 +115,7 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( productTypesCheckboxes ).toHaveLength( 8 );
+	expect( productTypesCheckboxes ).toHaveLength( 7 );
 
 	// Select Physical and Downloadable products
 	for ( let i = 1; i < 2; i++ ) {
@@ -189,16 +189,26 @@ const completeOnboardingWizard = async () => {
 
 	// End of onboarding wizard
 
-	// Wait for "Woo-hoo almost there" window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
+	// Wait for homescreen welcome modal to appear
+	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );
 	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Woo hoo - you\'re almost there!' }
+		'.woocommerce__welcome-modal__page-content__header', { text: 'Welcome to your WooCommerce store\’s online HQ!' }
 	);
 
-	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-	// Click on "Continue" button to move to the next step
-	await page.click( 'button.is-primary:not(:disabled)' );
+	// Wait for "Next" button to become active
+	await page.waitForSelector( 'button.components-guide__forward-button' );
+	// Click on "Next" button to move to the next step
+	await page.click( 'button.components-guide__forward-button' );
+
+	// Wait for "Next" button to become active
+	await page.waitForSelector( 'button.components-guide__forward-button' );
+	// Click on "Next" button to move to the next step
+	await page.click( 'button.components-guide__forward-button' );
+
+	// Wait for "Let's go" button to become active
+	await page.waitForSelector( 'button.components-guide__finish-button' );
+	// Click on "Let's go" button to move to the next step
+	await page.click( 'button.components-guide__finish-button' );
 };
 
 /**

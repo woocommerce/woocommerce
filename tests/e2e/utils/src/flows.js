@@ -10,7 +10,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { clearAndFillInput } from './index';
+import { clearAndFillInput } from './page-utils';
 
 const config = require( 'config' );
 const baseUrl = config.get( 'url' );

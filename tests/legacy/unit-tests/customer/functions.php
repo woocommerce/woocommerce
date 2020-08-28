@@ -13,7 +13,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Set illegal login
 	 *
-	 * @param array $logins Array of blacklisted logins.
+	 * @param array $logins Array of blocked logins.
 	 * @return array
 	 */
 	public function setup_illegal_user_logins( $logins ) {

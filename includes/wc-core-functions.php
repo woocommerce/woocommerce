@@ -1918,8 +1918,8 @@ add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
 /**
  * Prints human-readable information about a variable.
  *
- * Some server environments blacklist some debugging functions. This function provides a safe way to
- * turn an expression into a printable, readable form without calling blacklisted functions.
+ * Some server environments block some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form without calling blocked functions.
  *
  * @since 3.0
  *

@@ -1288,7 +1288,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => array( 'string', 'null' ),
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
