@@ -3685,6 +3685,16 @@ function wc_get_cart_undo_url( $cart_item_key ) {
 }
 
 /**
+ * Outputs notices wrapper.
+ *
+ * @since 4.6.0
+ */
+function woocommerce_output_notices_wrapper() {
+	echo '<div class="woocommerce-notices-wrapper">';
+	echo '</div>';
+}
+
+/**
  * Outputs all queued notices on WC pages.
  *
  * @since 3.5.0
