@@ -3716,6 +3716,7 @@ function woocommerce_output_all_notices( $return = false ) {
 	}
 
 	echo $notices_with_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 }
 
 /**
