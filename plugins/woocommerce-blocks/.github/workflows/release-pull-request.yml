@@ -6,11 +6,19 @@ on:
   create:
 jobs:
   release-pull-request-automation:
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     if: ${{ github.event.ref_type == 'branch' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: |
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+          if: always()
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create changeset for pull request
+        run: |
           date > .release-artifact
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -19,7 +27,13 @@ jobs:
           rm .release-artifact
           git commit -am "generating changeset for pull request"
           git push
-      - uses: woocommerce/automations@v1
+      - name: Create Release Pull Request
+        uses: woocommerce/automations@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           automations: release
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+        if: always()
