@@ -5,8 +5,10 @@
  * Handles shipping and loads shipping methods via hooks.
  *
  * @version 2.6.0
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -163,7 +165,7 @@ class WC_Shipping {
 			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
 
 			// Debug output.
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+			if ( $debug_mode && ! Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) && ! Constants::is_defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
 				wc_add_notice( $matched_zone_notice );
 			}
 		} else {
@@ -282,8 +284,7 @@ class WC_Shipping {
 	 * @param  array $package Package of cart items.
 	 * @return bool
 	 */
-	protected function is_package_shippable( $package ) {
-
+	public function is_package_shippable( $package ) {
 		// Packages are shippable until proven otherwise.
 		if ( empty( $package['destination']['country'] ) ) {
 			return true;
@@ -331,7 +332,26 @@ class WC_Shipping {
 			if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 				foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
 					if ( ! $shipping_method->supports( 'shipping-zones' ) || $shipping_method->get_instance_id() ) {
-						$package['rates'] = $package['rates'] + $shipping_method->get_rates_for_package( $package ); // + instead of array_merge maintains numeric keys
+						/**
+						 * Fires before getting shipping rates for a package.
+						 *
+						 * @since 4.3.0
+						 * @param array $package Package of cart items.
+						 * @param WC_Shipping_Method $shipping_method Shipping method instance.
+						 */
+						do_action( 'woocommerce_before_get_rates_for_package', $package, $shipping_method );
+
+						// Use + instead of array_merge to maintain numeric keys.
+						$package['rates'] = $package['rates'] + $shipping_method->get_rates_for_package( $package );
+
+						/**
+						 * Fires after getting shipping rates for a package.
+						 *
+						 * @since 4.3.0
+						 * @param array $package Package of cart items.
+						 * @param WC_Shipping_Method $shipping_method Shipping method instance.
+						 */
+						do_action( 'woocommerce_after_get_rates_for_package', $package, $shipping_method );
 					}
 				}
 

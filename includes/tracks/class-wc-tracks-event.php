@@ -5,6 +5,8 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -52,10 +54,7 @@ class WC_Tracks_Event {
 	 * @return bool Always returns true.
 	 */
 	public function record() {
-		if (
-			wp_doing_ajax() ||
-			( defined( 'REST_REQUEST' ) && REST_REQUEST )
-		) {
+		if ( wp_doing_ajax() || Constants::is_true( 'REST_REQUEST' ) ) {
 			return WC_Tracks_Client::record_event( $this );
 		}
 
@@ -87,7 +86,7 @@ class WC_Tracks_Event {
 
 		$_event = (object) array_merge( (array) $event, $validated );
 
-		// If you want to blacklist property names, do it here.
+		// If you want to block property names, do it here.
 		// Make sure we have an event timestamp.
 		if ( ! isset( $_event->_ts ) ) {
 			$_event->_ts = WC_Tracks_Client::build_timestamp();
@@ -151,13 +150,13 @@ class WC_Tracks_Event {
 			return;
 		}
 
-		$whitelisted_key_names = array(
+		$allowed_key_names = array(
 			'anonId',
 			'Browser_Type',
 		);
 
 		foreach ( array_keys( (array) $event ) as $key ) {
-			if ( in_array( $key, $whitelisted_key_names, true ) ) {
+			if ( in_array( $key, $allowed_key_names, true ) ) {
 				continue;
 			}
 			if ( ! self::prop_name_is_valid( $key ) ) {

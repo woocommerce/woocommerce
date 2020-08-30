@@ -7,8 +7,10 @@
  *
  * @class WC_Tracker
  * @since 2.3.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,7 +40,7 @@ class WC_Tracker {
 	 */
 	public static function send_tracking_data( $override = false ) {
 		// Don't trigger this on AJAX Requests.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		if ( Constants::is_true( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -85,6 +87,28 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Test whether this site is a staging site according to the Jetpack criteria.
+	 *
+	 * With Jetpack 8.1+, Jetpack::is_staging_site has been deprecated.
+	 * \Automattic\Jetpack\Status::is_staging_site is the replacement.
+	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
+	 * so with those, code still needs to use the previous check as a fallback.
+	 *
+	 * @return bool
+	 */
+	private static function is_jetpack_staging_site() {
+		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
+			// Preferred way of checking with Jetpack 8.1+.
+			$jp_status = new \Automattic\Jetpack\Status();
+			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				return $jp_status->is_staging_site();
+			}
+		}
+
+		return ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
+	}
+
+	/**
 	 * Get all the tracking data.
 	 *
 	 * @return array
@@ -109,9 +133,10 @@ class WC_Tracker {
 		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
-		$data['jetpack_version']    = defined( 'JETPACK__VERSION' ) ? JETPACK__VERSION : 'none';
+
+		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
-		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = self::is_jetpack_staging_site() ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 		$data['helper_connected']   = self::get_helper_connected();
@@ -137,6 +162,9 @@ class WC_Tracker {
 
 		// Template overrides.
 		$data['admin_user_agents'] = self::get_admin_user_agents();
+
+		// Cart & checkout tech (blocks or shortcodes).
+		$data['cart_checkout'] = self::get_cart_checkout_info();
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
@@ -528,8 +556,25 @@ class WC_Tracker {
 			$gross_total = 0;
 		}
 
+		$processing_gross_total = $wpdb->get_var(
+			"
+			SELECT
+				SUM( order_meta.meta_value ) AS 'gross_total'
+			FROM {$wpdb->prefix}posts AS orders
+			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+			WHERE order_meta.meta_key =  '_order_total'
+				AND orders.post_status = 'wc-processing'
+			GROUP BY order_meta.meta_key
+		"
+		);
+
+		if ( is_null( $processing_gross_total ) ) {
+			$processing_gross_total = 0;
+		}
+
 		return array(
-			'gross' => $gross_total,
+			'gross'            => $gross_total,
+			'processing_gross' => $processing_gross_total,
 		);
 	}
 
@@ -559,7 +604,151 @@ class WC_Tracker {
 			);
 		}
 
-		return $min_max;
+		$processing_min_max = $wpdb->get_row(
+			"
+			SELECT
+				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
+			FROM {$wpdb->prefix}posts
+			WHERE post_type = 'shop_order'
+			AND post_status = 'wc-processing'
+		",
+			ARRAY_A
+		);
+
+		if ( is_null( $processing_min_max ) ) {
+			$processing_min_max = array(
+				'processing_first' => '-',
+				'processing_last'  => '-',
+			);
+		}
+
+		return array_merge( $min_max, $processing_min_max );
+	}
+
+	/**
+	 * Search a specific post for text content.
+	 *
+	 * @param integer $post_id The id of the post to search.
+	 * @param string  $text    The text to search for.
+	 * @return string 'Yes' if post contains $text (otherwise 'No').
+	 */
+	public static function post_contains_text( $post_id, $text ) {
+		global $wpdb;
+
+		// Search for the text anywhere in the post.
+		$wildcarded = "%{$text}%";
+
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT COUNT( * ) FROM {$wpdb->prefix}posts
+				WHERE ID=%d
+				AND {$wpdb->prefix}posts.post_content LIKE %s
+				",
+				array( $post_id, $wildcarded )
+			)
+		);
+
+		return ( '0' !== $result ) ? 'Yes' : 'No';
+	}
+
+	/**
+	 * Get blocks from a woocommerce page.
+	 *
+	 * @param string $woo_page_name A woocommerce page e.g. `checkout` or `cart`.
+	 * @return array Array of blocks as returned by parse_blocks().
+	 */
+	private static function get_all_blocks_from_page( $woo_page_name ) {
+		$page_id = wc_get_page_id( $woo_page_name );
+
+		$page = get_post( $page_id );
+		if ( ! $page ) {
+			return array();
+		}
+
+		$blocks = parse_blocks( $page->post_content );
+		if ( ! $blocks ) {
+			return array();
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * Get all instances of the specified block on a specific woo page
+	 * (e.g. `cart` or `checkout` page).
+	 *
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
+	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
+	 * @return array Array of blocks as returned by parse_blocks().
+	 */
+	private static function get_blocks_from_page( $block_name, $woo_page_name ) {
+		$page_blocks = self::get_all_blocks_from_page( $woo_page_name );
+
+		// Get any instances of the specified block.
+		return array_values(
+			array_filter(
+				$page_blocks,
+				function ( $block ) use ( $block_name ) {
+					return ( $block_name === $block['blockName'] );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Get tracker data for a specific block type on a woocommerce page.
+	 *
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
+	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
+	 * @return array Associative array of tracker data with keys:
+	 * - page_contains_block
+	 * - block_attributes
+	 */
+	public static function get_block_tracker_data( $block_name, $woo_page_name ) {
+		$blocks = self::get_blocks_from_page( $block_name, $woo_page_name );
+
+		$block_present = false;
+		$attributes    = array();
+		if ( $blocks && count( $blocks ) ) {
+			// Return any customised attributes from the first block.
+			$block_present = true;
+			$attributes    = $blocks[0]['attrs'];
+		}
+
+		return array(
+			'page_contains_block' => $block_present ? 'Yes' : 'No',
+			'block_attributes'    => $attributes,
+		);
+	}
+
+	/**
+	 * Get info about the cart & checkout pages.
+	 *
+	 * @return array
+	 */
+	public static function get_cart_checkout_info() {
+		$cart_page_id     = wc_get_page_id( 'cart' );
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+
+		$cart_block_data     = self::get_block_tracker_data( 'woocommerce/cart', 'cart' );
+		$checkout_block_data = self::get_block_tracker_data( 'woocommerce/checkout', 'checkout' );
+
+		return array(
+			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
+				$cart_page_id,
+				'[woocommerce_cart]'
+			),
+			'checkout_page_contains_checkout_shortcode' => self::post_contains_text(
+				$checkout_page_id,
+				'[woocommerce_checkout]'
+			),
+
+			'cart_page_contains_cart_block'             => $cart_block_data['page_contains_block'],
+			'cart_block_attributes'                     => $cart_block_data['block_attributes'],
+			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
+			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
+		);
 	}
 }
 

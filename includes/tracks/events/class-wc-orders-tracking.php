@@ -21,15 +21,40 @@ class WC_Orders_Tracking {
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
+		add_filter( 'woocommerce_shop_order_search_results', array( $this, 'track_order_search' ), 10, 3 );
+	}
+
+	/**
+	 * Send a track event when on the Order Listing page, and search results are being displayed.
+	 *
+	 * @param array  $order_ids Array of order_ids that are matches for the search.
+	 * @param string $term The string that was used in the search.
+	 * @param array  $search_fields Fields that were used in the original search.
+	 */
+	public function track_order_search( $order_ids, $term, $search_fields ) {
+		// Since `woocommerce_shop_order_search_results` can run in the front-end context, exit if get_current_screen isn't defined.
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $order_ids;
+		}
+
+		$screen = get_current_screen();
+
+		// We only want to record this track when the filter is executed on the order listing page.
+		if ( 'edit-shop_order' === $screen->id ) {
+			// we are on the order listing page, and query results are being shown.
+			WC_Tracks::record_event( 'orders_view_search' );
+		}
+
+		return $order_ids;
 	}
 
 	/**
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
 	public function track_orders_view() {
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-			// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+			// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 			$properties = array(
 				'status' => isset( $_GET['post_status'] ) ? sanitize_text_field( $_GET['post_status'] ) : 'all',
 			);
@@ -55,6 +80,7 @@ class WC_Orders_Tracking {
 			'previous_status' => $previous_status,
 			'date_created'    => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '',
 			'payment_method'  => $order->get_payment_method(),
+			'order_total'     => $order->get_total(),
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );
@@ -77,8 +103,8 @@ class WC_Orders_Tracking {
 		}
 
 		$order        = wc_get_order( $id );
-		$date_created = $order->get_date_created()->date( 'Y-m-d H:i:s' );
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		$date_created = $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '';
+		// phpcs:disable WordPress.Security.NonceVerification
 		$new_date = sprintf(
 			'%s %2d:%2d:%2d',
 			isset( $_POST['order_date'] ) ? wc_clean( wp_unslash( $_POST['order_date'] ) ) : '',
@@ -104,7 +130,7 @@ class WC_Orders_Tracking {
 	 * @param int $order_id Order ID.
 	 */
 	public function track_order_action( $order_id ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
 			$order      = wc_get_order( $order_id );
 			$action     = wc_clean( wp_unslash( $_POST['wc_order_action'] ) );
@@ -123,7 +149,7 @@ class WC_Orders_Tracking {
 	 * Track "add order" button on the Edit Order screen.
 	 */
 	public function track_add_order_from_edit() {
-		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) {
 			$referer = wp_get_referer();
 

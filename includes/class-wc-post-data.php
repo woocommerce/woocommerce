@@ -4,7 +4,7 @@
  *
  * Standardises certain post data on save.
  *
- * @package WooCommerce/Classes/Data
+ * @package WooCommerce\Classes\Data
  * @version 2.2.0
  */
 
@@ -255,6 +255,9 @@ class WC_Post_Data {
 			}
 		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
+		} elseif ( 'shop_coupon' === $data['post_type'] ) {
+			// Coupons should never allow unfiltered HTML.
+			$data['post_title'] = wp_filter_kses( $data['post_title'] );
 		}
 
 		return $data;
@@ -462,7 +465,7 @@ class WC_Post_Data {
 	 * @param  string $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
 	}
 
 	/**

@@ -7,8 +7,10 @@
  *
  * @class    WC_Session_Handler
  * @version  2.5.0
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -302,7 +304,7 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) ); // @codingStandardsIgnoreLine.
 
 		if ( class_exists( 'WC_Cache_Helper' ) ) {
-			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
+			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
 
@@ -316,7 +318,7 @@ class WC_Session_Handler extends WC_Session {
 	public function get_session( $customer_id, $default = false ) {
 		global $wpdb;
 
-		if ( defined( 'WP_SETUP_CONFIG' ) ) {
+		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
 			return false;
 		}
 

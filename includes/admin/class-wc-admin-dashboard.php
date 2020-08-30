@@ -2,9 +2,11 @@
 /**
  * Admin Dashboard
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -214,36 +216,61 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$lowinstock_count = get_transient( $transient_name );
 
 			if ( false === $lowinstock_count ) {
-				$lowinstock_count = (int) $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT( product_id )
-						FROM {$wpdb->wc_product_meta_lookup} AS lookup
-						INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-						WHERE stock_quantity <= %d
-						AND stock_quantity > %d
-						AND posts.post_status = 'publish'",
-						$stock,
-						$nostock
-					)
-				);
-				set_transient( $transient_name, $lowinstock_count, DAY_IN_SECONDS * 30 );
+				/**
+				 * Status widget low in stock count pre query.
+				 *
+				 * @since 4.3.0
+				 * @param null|string $low_in_stock_count Low in stock count, by default null.
+				 * @param int         $stock              Low stock amount.
+				 * @param int         $nostock            No stock amount
+				 */
+				$lowinstock_count = apply_filters( 'woocommerce_status_widget_low_in_stock_count_pre_query', null, $stock, $nostock );
+
+				if ( is_null( $lowinstock_count ) ) {
+					$lowinstock_count = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT( product_id )
+							FROM {$wpdb->wc_product_meta_lookup} AS lookup
+							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+							WHERE stock_quantity <= %d
+							AND stock_quantity > %d
+							AND posts.post_status = 'publish'",
+							$stock,
+							$nostock
+						)
+					);
+				}
+
+				set_transient( $transient_name, (int) $lowinstock_count, DAY_IN_SECONDS * 30 );
 			}
 
 			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
 
 			if ( false === $outofstock_count ) {
-				$outofstock_count = (int) $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT( product_id )
-						FROM {$wpdb->wc_product_meta_lookup} AS lookup
-						INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-						WHERE stock_quantity <= %d
-						AND posts.post_status = 'publish'",
-						$nostock
-					)
-				);
-				set_transient( $transient_name, $outofstock_count, DAY_IN_SECONDS * 30 );
+				/**
+				 * Status widget out of stock count pre query.
+				 *
+				 * @since 4.3.0
+				 * @param null|string $outofstock_count Out of stock count, by default null.
+				 * @param int         $nostock          No stock amount
+				 */
+				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
+
+				if ( is_null( $outofstock_count ) ) {
+					$outofstock_count = (int) $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT( product_id )
+							FROM {$wpdb->wc_product_meta_lookup} AS lookup
+							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+							WHERE stock_quantity <= %d
+							AND posts.post_status = 'publish'",
+							$nostock
+						)
+					);
+				}
+
+				set_transient( $transient_name, (int) $outofstock_count, DAY_IN_SECONDS * 30 );
 			}
 			?>
 			<li class="low-in-stock">
@@ -322,11 +349,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Network orders widget.
 		 */
 		public function network_orders() {
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
 
-			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), WC_VERSION );
+			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), $version );
 
-			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
+			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), $version, true );
 
 			$user     = wp_get_current_user();
 			$blogs    = get_blogs_of_user( $user->ID );

@@ -10,6 +10,8 @@
  * @version  3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -98,7 +100,7 @@ function wc_caught_exception( $exception_object, $function = '', $args = array()
 }
 
 /**
- * Wrapper for wc_doing_it_wrong.
+ * Wrapper for _doing_it_wrong().
  *
  * @since  3.0.0
  * @param string $function Function used.
@@ -883,8 +885,7 @@ function woocommerce_track_product_view() {
 }
 
 /**
- * @since 2.3
- * @deprecated has no replacement
+ * @deprecated 2.3 has no replacement
  */
 function woocommerce_compile_less_styles() {
 	wc_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
@@ -893,11 +894,11 @@ function woocommerce_compile_less_styles() {
 /**
  * woocommerce_calc_shipping was an option used to determine if shipping was enabled prior to version 2.6.0. This has since been replaced with wc_shipping_enabled() function and
  * the woocommerce_ship_to_countries setting.
- * @since 2.6.0
+ * @deprecated 2.6.0
  * @return string
  */
 function woocommerce_calc_shipping_backwards_compatibility( $value ) {
-	if ( defined( 'WC_UPDATING' ) ) {
+	if ( Constants::is_defined( 'WC_UPDATING' ) ) {
 		return $value;
 	}
 	return 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ? 'no' : 'yes';

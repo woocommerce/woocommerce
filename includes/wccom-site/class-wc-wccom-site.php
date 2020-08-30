@@ -2,7 +2,7 @@
 /**
  * WooCommerce.com Product Installation.
  *
- * @package WooCommerce\WooCommerce_Site
+ * @package WooCommerce\WCCom
  * @since   3.7.0
  */
 
@@ -14,6 +14,8 @@ defined( 'ABSPATH' ) || exit;
  * Main class for WooCommerce.com connected site.
  */
 class WC_WCCOM_Site {
+
+	const AUTH_ERROR_FILTER_NAME = 'wccom_auth_error';
 
 	/**
 	 * Load the WCCOM site class.
@@ -51,37 +53,103 @@ class WC_WCCOM_Site {
 			return $user_id;
 		}
 
-		$auth_header = self::get_authorization_header();
-		if ( empty( $auth_header ) ) {
+		$auth_header = trim( self::get_authorization_header() );
+
+		if ( stripos( $auth_header, 'Bearer ' ) === 0 ) {
+			$access_token = trim( substr( $auth_header, 7 ) );
+		} elseif ( ! empty( $_GET['token'] ) && is_string( $_GET['token'] ) ) {  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$access_token = trim( $_GET['token'] );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		} else {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_HTTP_CODE )
+					);
+				}
+			);
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_auth = trim( $auth_header );
-		if ( stripos( $request_auth, 'Bearer ' ) !== 0 ) {
-			return false;
-		}
-
-		if ( empty( $_SERVER['HTTP_X_WOO_SIGNATURE'] ) ) {
+		if ( ! empty( $_SERVER['HTTP_X_WOO_SIGNATURE'] ) ) {
+			$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		} elseif ( ! empty( $_GET['signature'] ) && is_string( $_GET['signature'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$signature = trim( $_GET['signature'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		} else {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_HTTP_CODE )
+					);
+				}
+			);
 			return false;
 		}
 
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
-		$access_token = trim( substr( $request_auth, 7 ) );
-		$site_auth    = WC_Helper_Options::get( 'auth' );
-		if ( empty( $site_auth['access_token'] ) || ! hash_equals( $access_token, $site_auth['access_token'] ) ) {
+		$site_auth = WC_Helper_Options::get( 'auth' );
+
+		if ( empty( $site_auth['access_token'] ) ) {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_HTTP_CODE )
+					);
+				}
+			);
 			return false;
 		}
 
-		$body      = WP_REST_Server::get_raw_data();
-		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ! hash_equals( $access_token, $site_auth['access_token'] ) ) {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_HTTP_CODE )
+					);
+				}
+			);
+			return false;
+		}
+
+		$body = WP_REST_Server::get_raw_data();
 
 		if ( ! self::verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_HTTP_CODE )
+					);
+				}
+			);
 			return false;
 		}
 
 		$user = get_user_by( 'id', $site_auth['user_id'] );
 		if ( ! $user ) {
+			add_filter(
+				self::AUTH_ERROR_FILTER_NAME,
+				function() {
+					return new WP_Error(
+						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_CODE,
+						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_MESSAGE,
+						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_HTTP_CODE )
+					);
+				}
+			);
 			return false;
 		}
 
@@ -124,11 +192,16 @@ class WC_WCCOM_Site {
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
-		$request_uri = add_query_arg( array() );
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
-		$request_uri = esc_url_raw( wp_unslash( $request_uri ) );
 
-		return false !== strpos( $request_uri, $rest_prefix . 'wccom-site/' );
+		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$route       = wp_unslash( $_REQUEST['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+			$rest_prefix = '';
+		} else {
+			$route       = wp_unslash( add_query_arg( array() ) );
+			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		}
+
+		return false !== strpos( $route, $rest_prefix . 'wccom-site/' );
 	}
 
 	/**
@@ -144,7 +217,7 @@ class WC_WCCOM_Site {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
-			'request_uri' => $_SERVER['REQUEST_URI'],
+			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ), $_SERVER['REQUEST_URI'] ) ),
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
 		// phpcs:enable
@@ -166,6 +239,7 @@ class WC_WCCOM_Site {
 	 * @return array Registered namespaces.
 	 */
 	public static function register_rest_namespace( $namespaces ) {
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-errors.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 
 		$namespaces['wccom-site/v1'] = array(

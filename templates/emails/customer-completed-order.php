@@ -11,7 +11,7 @@
  * the readme will list any important changes.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails
+ * @package WooCommerce\Templates\Emails
  * @version 3.7.0
  */
 
@@ -26,7 +26,6 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php /* translators: %s: Customer first name */ ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
-<?php /* translators: %s: Site title */ ?>
 <p><?php esc_html_e( 'We have finished processing your order.', 'woocommerce' ); ?></p>
 <?php
 

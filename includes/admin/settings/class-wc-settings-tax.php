@@ -4,7 +4,7 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
 
@@ -108,7 +108,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		global $current_section;
 
 		if ( ! $current_section ) {
@@ -118,7 +118,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			if ( isset( $_POST['woocommerce_tax_classes'] ) ) {
 				$this->save_tax_classes( wp_unslash( $_POST['woocommerce_tax_classes'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
-
 		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
 		}
@@ -128,9 +127,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		}
 
 		// Invalidate caches.
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
-		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -188,13 +187,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					'page'    => 'wc-settings',
 					'tab'     => 'tax',
 					'section' => $current_section,
-				), 'admin.php'
+				),
+				'admin.php'
 			)
 		);
 
 		// Localize and enqueue our js.
 		wp_localize_script(
-			'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
+			'wc-settings-tax',
+			'htmlSettingsTaxLocalizeScript',
+			array(
 				'current_class' => $current_class,
 				'wc_tax_nonce'  => wp_create_nonce( 'wc_tax_nonce-class:' . $current_class ),
 				'base_url'      => $base_url,

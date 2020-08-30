@@ -59,8 +59,10 @@ class WC_Helper_Plugin_Info {
 			add_query_arg(
 				array(
 					'product_id' => absint( $product_id ),
-				), 'info'
-			), array( 'authenticated' => true )
+				),
+				'info'
+			),
+			array( 'authenticated' => true )
 		);
 
 		$results = json_decode( wp_remote_retrieve_body( $request ), true );

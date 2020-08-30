@@ -2,7 +2,7 @@
 /**
  * Admin View: Page - Addons
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @var string $view
  * @var object $addons
  */

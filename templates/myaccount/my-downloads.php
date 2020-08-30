@@ -13,7 +13,7 @@
  * the readme will list any important changes.
  *
  * @see         https://docs.woocommerce.com/document/template-structure/
- * @package     WooCommerce/Templates
+ * @package     WooCommerce\Templates
  * @version     2.0.0
  * @deprecated  2.6.0
  */

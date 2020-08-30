@@ -20,7 +20,7 @@ if ( class_exists( 'WC_Email', false ) ) {
  *
  * @class       WC_Email
  * @version     2.5.0
- * @package     WooCommerce/Classes/Emails
+ * @package     WooCommerce\Classes\Emails
  * @extends     WC_Settings_API
  */
 class WC_Email extends WC_Settings_API {
@@ -233,6 +233,7 @@ class WC_Email extends WC_Settings_API {
 			array(
 				'{site_title}'   => $this->get_blogname(),
 				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'{site_url}'     => wp_parse_url( home_url(), PHP_URL_HOST ),
 			),
 			$this->placeholders
 		);
@@ -261,7 +262,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
-			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
 			);
 			$this->sending   = false;
@@ -441,17 +442,23 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email content type.
 	 *
+	 * @param string $default_content_type Default wp_mail() content type.
 	 * @return string
 	 */
-	public function get_content_type() {
+	public function get_content_type( $default_content_type = '' ) {
 		switch ( $this->get_email_type() ) {
 			case 'html':
-				return 'text/html';
+				$content_type = 'text/html';
+				break;
 			case 'multipart':
-				return 'multipart/alternative';
+				$content_type = 'multipart/alternative';
+				break;
 			default:
-				return 'text/plain';
+				$content_type = 'text/plain';
+				break;
 		}
+
+		return apply_filters( 'woocommerce_email_content_type', $content_type, $this, $default_content_type );
 	}
 
 	/**
@@ -542,6 +549,7 @@ class WC_Email extends WC_Settings_API {
 	 *
 	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
 	 *
+	 * @version 4.0.0
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
@@ -551,14 +559,18 @@ class WC_Email extends WC_Settings_API {
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
-			if ( $this->supports_emogrifier() ) {
-				$emogrifier_class = '\\Pelago\\Emogrifier';
-				if ( ! class_exists( $emogrifier_class ) ) {
-					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
-				}
+			$emogrifier_class = 'Pelago\\Emogrifier';
+
+			if ( $this->supports_emogrifier() && class_exists( $emogrifier_class ) ) {
 				try {
 					$emogrifier = new $emogrifier_class( $content, $css );
+
+					do_action( 'woocommerce_emogrifier', $emogrifier, $this );
+
 					$content    = $emogrifier->emogrify();
+					$html_prune = \Pelago\Emogrifier\HtmlProcessor\HtmlPruner::fromHtml( $content );
+					$html_prune->removeElementsWithDisplayNone();
+					$content    = $html_prune->render();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
 					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
@@ -567,17 +579,19 @@ class WC_Email extends WC_Settings_API {
 				$content = '<style type="text/css">' . $css . '</style>' . $content;
 			}
 		}
+
 		return $content;
 	}
 
 	/**
 	 * Return if emogrifier library is supported.
 	 *
+	 * @version 4.0.0
 	 * @since 3.5.0
 	 * @return bool
 	 */
 	protected function supports_emogrifier() {
-		return class_exists( 'DOMDocument' ) && version_compare( PHP_VERSION, '5.5', '>=' );
+		return class_exists( 'DOMDocument' );
 	}
 
 	/**
@@ -599,21 +613,23 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get the from name for outgoing emails.
 	 *
+	 * @param string $from_name Default wp_mail() name associated with the "from" email address.
 	 * @return string
 	 */
-	public function get_from_name() {
-		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this );
+	public function get_from_name( $from_name = '' ) {
+		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
 
 	/**
 	 * Get the from address for outgoing emails.
 	 *
+	 * @param string $from_email Default wp_mail() email address to send from.
 	 * @return string
 	 */
-	public function get_from_address() {
-		$from_address = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this );
-		return sanitize_email( $from_address );
+	public function get_from_address( $from_email = '' ) {
+		$from_email = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this, $from_email );
+		return sanitize_email( $from_email );
 	}
 
 	/**
@@ -634,7 +650,7 @@ class WC_Email extends WC_Settings_API {
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
-		$return               = call_user_func_array( $mail_callback, $mail_callback_params );
+		$return               = $mail_callback( ...$mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );

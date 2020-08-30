@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-len
 /*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard */
 jQuery( function ( $ ) {
 
@@ -11,7 +12,12 @@ jQuery( function ( $ ) {
 	var wc_meta_boxes_order = {
 		states: null,
 		init: function() {
-			if ( ! ( typeof woocommerce_admin_meta_boxes_order === 'undefined' || typeof woocommerce_admin_meta_boxes_order.countries === 'undefined' ) ) {
+			if (
+				! (
+					typeof woocommerce_admin_meta_boxes_order === 'undefined' ||
+					typeof woocommerce_admin_meta_boxes_order.countries === 'undefined'
+				)
+			) {
 				/* State/Country select boxes */
 				this.states = $.parseJSON( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
@@ -117,7 +123,8 @@ jQuery( function ( $ ) {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
 				'fadeOut': 50,
-				'delay': 200
+				'delay': 200,
+				'keepAlive': true
 			});
 		},
 
@@ -380,13 +387,23 @@ jQuery( function ( $ ) {
 			$( 'input.line_tax', $row ).each( function() {
 				var $line_total_tax    = $( this );
 				var tax_id             = $line_total_tax.data( 'tax_id' );
-				var unit_total_tax     = accounting.unformat( $line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+				var unit_total_tax     = accounting.unformat(
+					$line_total_tax.attr( 'data-total_tax' ),
+					woocommerce_admin.mon_decimal_point
+				) / o_qty;
 				var $line_subtotal_tax = $( 'input.line_subtotal_tax[data-tax_id="' + tax_id + '"]', $row );
-				var unit_subtotal_tax  = accounting.unformat( $line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+				var unit_subtotal_tax  = accounting.unformat(
+					$line_subtotal_tax.attr( 'data-subtotal_tax' ),
+					woocommerce_admin.mon_decimal_point
+				) / o_qty;
+				var round_at_subtotal  = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
+				var precision          = woocommerce_admin_meta_boxes[
+					round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
+				];
 
 				if ( 0 < unit_total_tax ) {
 					$line_total_tax.val(
-						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+						parseFloat( accounting.formatNumber( unit_total_tax * qty, precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -394,7 +411,7 @@ jQuery( function ( $ ) {
 
 				if ( 0 < unit_subtotal_tax ) {
 					$line_subtotal_tax.val(
-						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -875,7 +892,10 @@ jQuery( function ( $ ) {
 
 					$( '.refund input.refund_line_total' ).each(function( index, item ) {
 						if ( $( item ).closest( 'tr' ).data( 'order_item_id' ) ) {
-							line_item_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = accounting.unformat( item.value, woocommerce_admin.mon_decimal_point );
+							line_item_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = accounting.unformat(
+								item.value,
+								woocommerce_admin.mon_decimal_point
+							);
 						}
 					});
 
@@ -887,7 +907,10 @@ jQuery( function ( $ ) {
 								line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = {};
 							}
 
-							line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ][ tax_id ] = accounting.unformat( item.value, woocommerce_admin.mon_decimal_point );
+							line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ][ tax_id ] = accounting.unformat(
+								item.value,
+								woocommerce_admin.mon_decimal_point
+							);
 						}
 					});
 
@@ -1016,11 +1039,19 @@ jQuery( function ( $ ) {
 					var $refund_line_total_tax = $( this );
 					var tax_id                 = $refund_line_total_tax.data( 'tax_id' );
 					var line_total_tax         = $( 'input.line_tax[data-tax_id="' + tax_id + '"]', $row );
-					var unit_total_tax         = accounting.unformat( line_total_tax.data( 'total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
+					var unit_total_tax         = accounting.unformat(
+						line_total_tax.data( 'total_tax' ),
+						woocommerce_admin.mon_decimal_point
+					) / qty;
 
 					if ( 0 < unit_total_tax ) {
+						var round_at_subtotal = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
+						var precision         = woocommerce_admin_meta_boxes[
+							round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
+						];
+
 						$refund_line_total_tax.val(
-							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, precision, '' ) )
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).change();
@@ -1054,8 +1085,17 @@ jQuery( function ( $ ) {
 				var index  = $items.find('tr').length + 1;
 				var $row   = '<tr data-meta_id="0">' +
 					'<td>' +
-						'<input type="text" maxlength="255" placeholder="' + woocommerce_admin_meta_boxes_order.placeholder_name + '" name="meta_key[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']" />' +
-						'<textarea placeholder="' + woocommerce_admin_meta_boxes_order.placeholder_value + '" name="meta_value[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']"></textarea>' +
+						'<input type="text" maxlength="255" placeholder="' +
+						woocommerce_admin_meta_boxes_order.placeholder_name +
+						'" name="meta_key[' + $item.attr( 'data-order_item_id' ) +
+						'][new-' + index + ']" />' +
+						'<textarea placeholder="' +
+						woocommerce_admin_meta_boxes_order.placeholder_value +
+						'" name="meta_value[' +
+						$item.attr( 'data-order_item_id' ) +
+						'][new-' +
+						index +
+						']"></textarea>' +
 					'</td>' +
 					'<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>' +
 				'</tr>';
@@ -1275,6 +1315,7 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+				$( 'ul.order_notes .no-items' ).remove();
 				$( 'ul.order_notes' ).prepend( response );
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );

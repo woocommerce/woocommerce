@@ -2,7 +2,7 @@
 /**
  * Represents a file which can be downloaded.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   3.0.0
  */
@@ -21,9 +21,9 @@ class WC_Product_Download implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'id'     => '',
-		'name'   => '',
-		'file'   => '',
+		'id'   => '',
+		'name' => '',
+		'file' => '',
 	);
 
 	/**

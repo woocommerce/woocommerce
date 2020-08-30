@@ -1,16 +1,14 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Duplicate product functionality
  *
- * @author      WooCommerce
- * @category    Admin
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     3.0.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
 	return new WC_Admin_Duplicate_Product();
@@ -87,12 +85,10 @@ class WC_Admin_Duplicate_Product {
 			return;
 		}
 
-		if ( isset( $_GET['post'] ) ) {
-			$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
-			?>
-			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
-			<?php
-		}
+		$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $post->ID ) ), 'woocommerce-duplicate-product_' . $post->ID );
+		?>
+		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
+		<?php
 	}
 
 	/**
@@ -111,7 +107,7 @@ class WC_Admin_Duplicate_Product {
 
 		if ( false === $product ) {
 			/* translators: %s: product id */
-			wp_die( sprintf( esc_html__( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $product_id ) );
+			wp_die( sprintf( esc_html__( 'Product creation failed, could not find original product: %s', 'woocommerce' ), esc_html( $product_id ) ) );
 		}
 
 		$duplicate = $this->product_duplicate( $product );
@@ -120,7 +116,7 @@ class WC_Admin_Duplicate_Product {
 		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
 		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '3.0', 'Use woocommerce_product_duplicate action instead.' );
 
-		// Redirect to the edit screen for the new draft page
+		// Redirect to the edit screen for the new draft page.
 		wp_redirect( admin_url( 'post.php?action=edit&post=' . $duplicate->get_id() ) );
 		exit;
 	}
@@ -128,15 +124,33 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Function to create the duplicate of the product.
 	 *
-	 * @param WC_Product $product
-	 * @return WC_Product
+	 * @param WC_Product $product The product to duplicate.
+	 * @return WC_Product The duplicate.
 	 */
 	public function product_duplicate( $product ) {
-		// Filter to allow us to unset/remove data we don't want to copy to the duplicate. @since 2.6
-		$meta_to_exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array() ) );
+		/**
+		 * Filter to allow us to exclude meta keys from product duplication..
+		 *
+		 * @param array $exclude_meta The keys to exclude from the duplicate.
+		 * @param array $existing_meta_keys The meta keys that the product already has.
+		 * @since 2.6
+		 */
+		$meta_to_exclude = array_filter(
+			apply_filters(
+				'woocommerce_duplicate_product_exclude_meta',
+				array(),
+				array_map(
+					function ( $datum ) {
+						return $datum->key;
+					},
+					$product->get_meta_data()
+				)
+			)
+		);
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
+		/* translators: %s contains the name of the original product. */
 		$duplicate->set_name( sprintf( esc_html__( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
@@ -153,7 +167,11 @@ class WC_Admin_Duplicate_Product {
 			$duplicate->delete_meta_data( $meta_key );
 		}
 
-		// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
+		/**
+		 * This action can be used to modify the object further before it is created - it will be passed by reference.
+		 *
+		 * @since 3.0
+		 */
 		do_action( 'woocommerce_product_duplicate_before_save', $duplicate, $product );
 
 		// Save parent product.
@@ -168,6 +186,12 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate->set_id( 0 );
 				$child_duplicate->set_date_created( null );
 
+				// If we wait and let the insertion generate the slug, we will see extreme performance degradation
+				// in the case where a product is used as a template. Every time the template is duplicated, each
+				// variation will query every consecutive slug until it finds an empty one. To avoid this, we can
+				// optimize the generation ourselves, avoiding the issue altogether.
+				$this->generate_unique_slug( $child_duplicate );
+
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
 				}
@@ -176,7 +200,11 @@ class WC_Admin_Duplicate_Product {
 					$child_duplicate->delete_meta_data( $meta_key );
 				}
 
-				// This action can be used to modify the object further before it is created - it will be passed by reference. @since 3.0
+				/**
+				 * This action can be used to modify the object further before it is created - it will be passed by reference.
+				 *
+				 * @since 3.0
+				 */
 				do_action( 'woocommerce_product_duplicate_before_save', $child_duplicate, $child );
 
 				$child_duplicate->save();
@@ -193,7 +221,7 @@ class WC_Admin_Duplicate_Product {
 	 * Get a product from the database to duplicate.
 	 *
 	 * @deprecated 3.0.0
-	 * @param mixed $id
+	 * @param mixed $id The ID of the product to duplicate.
 	 * @return object|bool
 	 * @see duplicate_product
 	 */
@@ -214,6 +242,44 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		return $post;
+	}
+
+	/**
+	 * Generates a unique slug for a given product. We do this so that we can override the
+	 * behavior of wp_unique_post_slug(). The normal slug generation will run single
+	 * select queries on every non-unique slug, resulting in very bad performance.
+	 *
+	 * @param WC_Product $product The product to generate a slug for.
+	 * @since 3.9.0
+	 */
+	private function generate_unique_slug( $product ) {
+		global $wpdb;
+
+		// We want to remove the suffix from the slug so that we can find the maximum suffix using this root slug.
+		// This will allow us to find the next-highest suffix that is unique. While this does not support gap
+		// filling, this shouldn't matter for our use-case.
+		$root_slug = preg_replace( '/-[0-9]+$/', '', $product->get_slug() );
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare( "SELECT post_name FROM $wpdb->posts WHERE post_name LIKE %s AND post_type IN ( 'product', 'product_variation' )", $root_slug . '%' )
+		);
+
+		// The slug is already unique!
+		if ( empty( $results ) ) {
+			return;
+		}
+
+		// Find the maximum suffix so we can ensure uniqueness.
+		$max_suffix = 1;
+		foreach ( $results as $result ) {
+			// Pull a numerical suffix off the slug after the last hyphen.
+			$suffix = intval( substr( $result->post_name, strrpos( $result->post_name, '-' ) + 1 ) );
+			if ( $suffix > $max_suffix ) {
+				$max_suffix = $suffix;
+			}
+		}
+
+		$product->set_slug( $root_slug . '-' . ( $max_suffix + 1 ) );
 	}
 }
 

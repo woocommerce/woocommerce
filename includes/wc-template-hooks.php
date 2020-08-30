@@ -4,7 +4,7 @@
  *
  * Action/filter hooks used for WooCommerce functions/templates.
  *
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  * @version 2.1.0
  */
 
@@ -207,6 +207,9 @@ add_action( 'woocommerce_product_additional_information', 'wc_display_product_at
  * @see woocommerce_checkout_coupon_form()
  * @see woocommerce_order_review()
  * @see woocommerce_checkout_payment()
+ * @see wc_checkout_privacy_policy_text()
+ * @see wc_terms_and_conditions_page_content()
+ * @see wc_get_pay_buttons()
  */
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
@@ -214,6 +217,7 @@ add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 add_action( 'woocommerce_checkout_terms_and_conditions', 'wc_checkout_privacy_policy_text', 20 );
 add_action( 'woocommerce_checkout_terms_and_conditions', 'wc_terms_and_conditions_page_content', 30 );
+add_action( 'woocommerce_checkout_before_customer_details', 'wc_get_pay_buttons', 30 );
 
 /**
  * Cart widget
@@ -227,10 +231,13 @@ add_action( 'woocommerce_widget_shopping_cart_total', 'woocommerce_widget_shoppi
  *
  * @see woocommerce_cross_sell_display()
  * @see woocommerce_cart_totals()
+ * @see wc_get_pay_buttons()
  * @see woocommerce_button_proceed_to_checkout()
+ * @see wc_empty_cart_message()
  */
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
+add_action( 'woocommerce_proceed_to_checkout', 'wc_get_pay_buttons', 10 );
 add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
 add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
 

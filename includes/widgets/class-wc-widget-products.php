@@ -2,7 +2,7 @@
 /**
  * List products. One widget to rule them all.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 3.3.0
  */
 
@@ -193,7 +193,7 @@ class WC_Widget_Products extends WC_Widget {
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
 			$template_args = array(
-				'widget_id'   => $args['widget_id'],
+				'widget_id'   => isset( $args['widget_id'] ) ? $args['widget_id'] : $this->widget_id,
 				'show_rating' => true,
 			);
 

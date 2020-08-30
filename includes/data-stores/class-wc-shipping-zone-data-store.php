@@ -35,7 +35,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -60,7 +60,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -132,7 +132,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 
 			$zone->set_id( null );
 
-			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 			do_action( 'woocommerce_delete_shipping_zone', $zone_id );
@@ -282,7 +282,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			"SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
 			WHERE " . implode( ' ', $criteria ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			. ' ORDER BY zone_order ASC, zone_id ASC LIMIT 1'
+			. ' ORDER BY zone_order ASC, zones.zone_id ASC LIMIT 1'
 		);
 	}
 

@@ -2,9 +2,11 @@
 /**
  * Addons Page
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.5.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -49,13 +51,13 @@ class WC_Admin_Addons {
 	 */
 	public static function build_parameter_string( $category, $term, $country ) {
 
-		$paramters = array(
+		$parameters = array(
 			'category' => $category,
 			'term'     => $term,
 			'country'  => $country,
 		);
 
-		return '?' . http_build_query( $paramters );
+		return '?' . http_build_query( $parameters );
 	}
 
 	/**
@@ -488,8 +490,8 @@ class WC_Admin_Addons {
 		$back_admin_path = add_query_arg( array() );
 		return array(
 			'wccom-site'          => site_url(),
-			'wccom-back'          => esc_url( $back_admin_path ),
-			'wccom-woo-version'   => WC_VERSION,
+			'wccom-back'          => rawurlencode( $back_admin_path ),
+			'wccom-woo-version'   => Constants::get_constant( 'WC_VERSION' ),
 			'wccom-connect-nonce' => wp_create_nonce( 'connect' ),
 		);
 	}
@@ -537,7 +539,7 @@ class WC_Admin_Addons {
 	 */
 	public static function output() {
 		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_featured';
-		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
 
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			do_action( 'woocommerce_helper_output' );

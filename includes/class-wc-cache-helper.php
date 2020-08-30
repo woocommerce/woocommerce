@@ -2,7 +2,7 @@
 /**
  * WC_Cache_Helper class.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -40,8 +40,17 @@ class WC_Cache_Helper {
 	 * @since 3.6.0
 	 */
 	public static function additional_nocache_headers( $headers ) {
-		// no-transform: Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
-		$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
+		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		/**
+		 * Allow plugins to enable nocache headers. Enabled for Google weblight.
+		 *
+		 * @see   https://support.google.com/webmasters/answer/1061943?hl=en
+		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
+		 */
+		if ( false !== strpos( $agent, 'googleweblight' ) || apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
+			// no-transform: Opt-out of Google weblight. https://support.google.com/webmasters/answer/6211428?hl=en.
+			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
+		}
 		return $headers;
 	}
 
@@ -94,7 +103,7 @@ class WC_Cache_Helper {
 		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
 
 		if ( false === $prefix ) {
-			$prefix = 1;
+			$prefix = microtime();
 			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
 		}
 
@@ -107,7 +116,18 @@ class WC_Cache_Helper {
 	 * @param string $group Group of cache to clear.
 	 */
 	public static function incr_cache_prefix( $group ) {
-		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
+		wc_deprecated_function( 'WC_Cache_Helper::incr_cache_prefix', '3.9.0', 'WC_Cache_Helper::invalidate_cache_group' );
+		self::invalidate_cache_group( $group );
+	}
+
+	/**
+	 * Invalidate cache group.
+	 *
+	 * @param string $group Group of cache to clear.
+	 * @since 3.9.0
+	 */
+	public static function invalidate_cache_group( $group ) {
+		wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
 	}
 
 	/**

@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 	 *
 	 * @class       WC_Email_New_Order
 	 * @version     2.0.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_New_Order extends WC_Email {
@@ -156,13 +156,13 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			/* translators: %s: list of placeholders */
 			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' );
 			$this->form_fields = array(
-				'enabled'    => array(
+				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
 					'default' => 'yes',
 				),
-				'recipient'  => array(
+				'recipient'          => array(
 					'title'       => __( 'Recipient(s)', 'woocommerce' ),
 					'type'        => 'text',
 					/* translators: %s: WP admin email */
@@ -171,7 +171,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'default'     => '',
 					'desc_tip'    => true,
 				),
-				'subject'    => array(
+				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -179,7 +179,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
-				'heading'    => array(
+				'heading'            => array(
 					'title'       => __( 'Email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -196,7 +196,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'default'     => $this->get_default_additional_content(),
 					'desc_tip'    => true,
 				),
-				'email_type' => array(
+				'email_type'         => array(
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

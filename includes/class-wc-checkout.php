@@ -4,7 +4,7 @@
  *
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.4.0
  */
 
@@ -272,7 +272,7 @@ class WC_Checkout {
 			foreach ( $fields as $single_field_type => $field ) {
 				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
 					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
-					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
+					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = array( 'screen-reader-text' );
 				}
 			}
 		}
@@ -366,28 +366,17 @@ class WC_Checkout {
 				}
 			}
 
+			$order->hold_applied_coupons( $data['billing_email'] );
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
-			$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
-			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
-			$order->set_shipping_total( WC()->cart->get_shipping_total() );
-			$order->set_discount_total( WC()->cart->get_discount_total() );
-			$order->set_discount_tax( WC()->cart->get_discount_tax() );
-			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
-			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
-			$order->set_total( WC()->cart->get_total( 'edit' ) );
-			$this->create_order_line_items( $order, WC()->cart );
-			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
-			$this->create_order_tax_lines( $order, WC()->cart );
-			$this->create_order_coupon_lines( $order, WC()->cart );
+			$this->set_data_from_cart( $order );
 
 			/**
 			 * Action hook to adjust order before save.
@@ -399,14 +388,57 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			/**
+			 * Action hook fired after an order is created used to add custom meta to the order.
+			 *
+			 * @since 3.0.0
+			 */
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
+
+			/**
+			 * Action hook fired after an order is created.
+			 *
+			 * @since 4.3.0
+			 */
+			do_action( 'woocommerce_checkout_order_created', $order );
 
 			return $order_id;
 		} catch ( Exception $e ) {
+			if ( $order && $order instanceof WC_Order ) {
+				$order->get_data_store()->release_held_coupons( $order );
+				/**
+				 * Action hook fired when an order is discarded due to Exception.
+				 *
+				 * @since 4.3.0
+				 */
+				do_action( 'woocommerce_checkout_order_exception', $order );
+			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
 	}
 
+	/**
+	 * Copy line items, tax, totals data from cart to order.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @throws Exception When unable to create order.
+	 */
+	public function set_data_from_cart( &$order ) {
+		$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
+		$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
+		$order->set_shipping_total( WC()->cart->get_shipping_total() );
+		$order->set_discount_total( WC()->cart->get_discount_total() );
+		$order->set_discount_tax( WC()->cart->get_discount_tax() );
+		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
+		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
+		$order->set_total( WC()->cart->get_total( 'edit' ) );
+		$this->create_order_line_items( $order, WC()->cart );
+		$this->create_order_fee_lines( $order, WC()->cart );
+		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		$this->create_order_tax_lines( $order, WC()->cart );
+		$this->create_order_coupon_lines( $order, WC()->cart );
+	}
 	/**
 	 * Add line items to the order.
 	 *
@@ -422,8 +454,8 @@ class WC_Checkout {
 			 */
 			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
 			$product                    = $values['data'];
-			$item->legacy_values        = $values; // @deprecated For legacy actions.
-			$item->legacy_cart_item_key = $cart_item_key; // @deprecated For legacy actions.
+			$item->legacy_values        = $values; // @deprecated 4.4.0 For legacy actions.
+			$item->legacy_cart_item_key = $cart_item_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
@@ -470,8 +502,8 @@ class WC_Checkout {
 	public function create_order_fee_lines( &$order, $cart ) {
 		foreach ( $cart->get_fees() as $fee_key => $fee ) {
 			$item                 = new WC_Order_Item_Fee();
-			$item->legacy_fee     = $fee; // @deprecated For legacy actions.
-			$item->legacy_fee_key = $fee_key; // @deprecated For legacy actions.
+			$item->legacy_fee     = $fee; // @deprecated 4.4.0 For legacy actions.
+			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
 					'name'      => $fee->name,
@@ -509,7 +541,7 @@ class WC_Checkout {
 			if ( isset( $chosen_shipping_methods[ $package_key ], $package['rates'][ $chosen_shipping_methods[ $package_key ] ] ) ) {
 				$shipping_rate            = $package['rates'][ $chosen_shipping_methods[ $package_key ] ];
 				$item                     = new WC_Order_Item_Shipping();
-				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
+				$item->legacy_package_key = $package_key; // @deprecated 4.4.0 For legacy actions.
 				$item->set_props(
 					array(
 						'method_title' => $shipping_rate->label,
@@ -712,11 +744,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
+						$field_label = sprintf( _x( 'Shipping %s', 'checkout-validation', 'woocommerce' ), $field_label );
 						break;
 					case 'billing':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
+						$field_label = sprintf( _x( 'Billing %s', 'checkout-validation', 'woocommerce' ), $field_label );
 						break;
 				}
 
@@ -734,14 +766,14 @@ class WC_Checkout {
 								/* translators: %s: field name */
 								$postcode_validation_notice = sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' );
 						}
-						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ) );
+						$errors->add( $key . '_validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ), array( 'id' => $key ) );
 					}
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 					}
 				}
 
@@ -751,7 +783,7 @@ class WC_Checkout {
 
 					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 						continue;
 					}
 				}
@@ -771,14 +803,14 @@ class WC_Checkout {
 
 						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_values, true ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
+							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ), array( 'id' => $key ) );
 						}
 					}
 				}
 
 				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
+					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
 				}
 			}
 		}
@@ -1101,8 +1133,11 @@ class WC_Checkout {
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
 
-			foreach ( $errors->get_error_messages() as $message ) {
-				wc_add_notice( $message, 'error' );
+			foreach ( $errors->errors as $code => $messages ) {
+				$data = $errors->get_error_data( $code );
+				foreach ( $messages as $message ) {
+					wc_add_notice( $message, 'error', $data );
+				}
 			}
 
 			if ( empty( $posted_data['woocommerce_checkout_update_totals'] ) && 0 === wc_notice_count( 'error' ) ) {

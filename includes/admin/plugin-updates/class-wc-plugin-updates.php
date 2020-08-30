@@ -2,9 +2,11 @@
 /**
  * Class for displaying plugin warning notifications and determining 3rd party plugin compatibility.
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     3.2.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -42,13 +44,6 @@ class WC_Plugin_Updates {
 	 * @var array
 	 */
 	protected $major_untested_plugins = array();
-
-	/**
-	 * Array of plugins lacking testing with the minor version.
-	 *
-	 * @var array
-	 */
-	protected $minor_untested_plugins = array();
 
 	/**
 	 * Common JS for initializing and managing thickbox-based modals.
@@ -102,29 +97,6 @@ class WC_Plugin_Updates {
 	*/
 
 	/**
-	 * Get the inline warning notice for minor version updates.
-	 *
-	 * @return string
-	 */
-	protected function get_extensions_inline_warning_minor() {
-		$upgrade_type  = 'minor';
-		$plugins       = ! empty( $this->major_untested_plugins ) ? array_diff_key( $this->minor_untested_plugins, $this->major_untested_plugins ) : $this->minor_untested_plugins;
-		$version_parts = explode( '.', $this->new_version );
-		$new_version   = $version_parts[0] . '.' . $version_parts[1];
-
-		if ( empty( $plugins ) ) {
-			return;
-		}
-
-		/* translators: %s: version number */
-		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with the latest version of WooCommerce (%s).", 'woocommerce' ), $new_version );
-
-		ob_start();
-		include 'views/html-notice-untested-extensions-inline.php';
-		return ob_get_clean();
-	}
-
-	/**
 	 * Get the inline warning notice for major version updates.
 	 *
 	 * @return string
@@ -171,7 +143,11 @@ class WC_Plugin_Updates {
 	*/
 
 	/**
-	 * Get active plugins that have a tested version lower than the input version.
+	 * Get installed plugins that have a tested version lower than the input version.
+	 *
+	 * In case of testing major version compatibility and if current WC version is >= major version part
+	 * of the $new_version, no plugins are returned, even if they don't explicitly declare compatibility
+	 * with the $new_version.
 	 *
 	 * @param string $new_version WooCommerce version to test against.
 	 * @param string $release 'major' or 'minor'.
@@ -188,7 +164,7 @@ class WC_Plugin_Updates {
 		}
 
 		if ( 'major' === $release ) {
-			$current_version_parts = explode( '.', WC_VERSION );
+			$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
 
 			// If user has already moved to the major version, we don't need to flag up anything.
 			if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
