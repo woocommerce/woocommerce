@@ -4,11 +4,6 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 const CheckoutForm = ( {
 	className,
 	children,
@@ -18,12 +13,10 @@ const CheckoutForm = ( {
 		event.preventDefault();
 		onSubmit( event );
 	};
+
 	return (
 		<form
-			className={ classnames(
-				'wc-block-components-checkout-form',
-				className
-			) }
+			className={ classnames( 'wc-block-components-form', className ) }
 			onSubmit={ formOnSubmit }
 		>
 			{ children }
