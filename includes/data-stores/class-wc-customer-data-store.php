@@ -349,7 +349,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			update_user_meta( $customer->get_id(), '_last_order', $last_order );
 		}
 
-		if ( ! $last_order || '' === $last_order ) {
+		if ( ! $last_order ) {
 			return false;
 		}
 
