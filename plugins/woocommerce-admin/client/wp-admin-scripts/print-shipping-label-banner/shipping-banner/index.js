@@ -86,12 +86,12 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugin, activatePlugins, isRequesting } = this.props;
+		const { installPlugins, activatePlugins, isRequesting } = this.props;
 		if ( isRequesting ) {
 			return false;
 		}
-		const install = await installPlugin( pluginSlug );
-		if ( install.status !== 'success' ) {
+		const install = await installPlugins( [ pluginSlug ] );
+		if ( install.success !== true ) {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
@@ -100,7 +100,7 @@ export class ShippingBanner extends Component {
 		}
 
 		const activation = await activatePlugins( [ pluginSlug ] );
-		if ( activation.status !== 'success' ) {
+		if ( activation.success !== true ) {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
@@ -150,11 +150,15 @@ export class ShippingBanner extends Component {
 
 		return `
 <div id="${ nodeId }" class="postbox">
-	<button type="button" class="handlediv" aria-expanded="true">
-		<span class="screen-reader-text">${ togglePanelText } ${ title }</span>
-		<span class="toggle-indicator" aria-hidden="true"></span>
-	</button>
-	<h2 class="hndle"><span>${ title }</span></h2>
+	<div class="postbox-header">
+		<h2 class="hndle"><span>${ title }</span></h2>
+		<div class="handle-actions">
+			<button type="button" class="handlediv" aria-expanded="true">
+				<span class="screen-reader-text">${ togglePanelText } ${ title }</span>
+				<span class="toggle-indicator" aria-hidden="true"></span>
+			</button>
+		</div>
+	</div>
 	<div class="inside">
 		<div class="wcc-root woocommerce wc-connect-create-shipping-label" data-args="${ argsJsonString }">
 		</div>
@@ -171,8 +175,16 @@ export class ShippingBanner extends Component {
 
 		this.setState( { wcsAssetsLoading: true } );
 
-		const js = assets.wc_connect_admin_script;
-		const styles = assets.wc_connect_admin_style;
+		const jsPath = assets.wc_connect_admin_script;
+		const stylePath = assets.wc_connect_admin_style;
+
+		if ( undefined === window.wcsPluginData ) {
+			const assetPath = jsPath.substring(
+				0,
+				jsPath.lastIndexOf( '/' ) + 1
+			);
+			window.wcsPluginData = { assetPath };
+		}
 
 		const { orderId } = this.state;
 		const { itemsCount } = this.props;
@@ -181,7 +193,7 @@ export class ShippingBanner extends Component {
 			'woocommerce-order-label',
 			__( 'Shipping Label', 'woocommerce-admin' ),
 			{
-				orderId,
+				order: { id: orderId },
 				context: 'shipping_label',
 				items: itemsCount,
 			}
@@ -195,7 +207,7 @@ export class ShippingBanner extends Component {
 			'woocommerce-order-shipment-tracking',
 			__( 'Shipment Tracking', 'woocommerce-admin' ),
 			{
-				orderId,
+				order: { id: orderId },
 				context: 'shipment_tracking',
 				items: itemsCount,
 			}
@@ -216,22 +228,26 @@ export class ShippingBanner extends Component {
 		Promise.all( [
 			new Promise( ( resolve, reject ) => {
 				const script = document.createElement( 'script' );
-				script.src = js;
+				script.src = jsPath;
 				script.async = true;
 				script.onload = resolve;
 				script.onerror = reject;
 				document.body.appendChild( script );
 			} ),
 			new Promise( ( resolve, reject ) => {
-				const head = document.getElementsByTagName( 'head' )[ 0 ];
-				const link = document.createElement( 'link' );
-				link.rel = 'stylesheet';
-				link.type = 'text/css';
-				link.href = styles;
-				link.media = 'all';
-				link.onload = resolve;
-				link.onerror = reject;
-				head.appendChild( link );
+				if ( stylePath !== '' ) {
+					const head = document.getElementsByTagName( 'head' )[ 0 ];
+					const link = document.createElement( 'link' );
+					link.rel = 'stylesheet';
+					link.type = 'text/css';
+					link.href = stylePath;
+					link.media = 'all';
+					link.onload = resolve;
+					link.onerror = reject;
+					head.appendChild( link );
+				} else {
+					resolve();
+				}
 			} ),
 		] ).then( () => {
 			this.setState( {
@@ -259,106 +275,113 @@ export class ShippingBanner extends Component {
 	};
 
 	openWcsModal() {
-		if ( window.wcsGetAppStore ) {
-			const wcsStore = window.wcsGetAppStore(
-				'wc-connect-create-shipping-label'
-			);
-			const state = wcsStore.getState();
-			const { orderId } = this.state;
-			const siteId = state.ui.selectedSiteId;
+		if ( window.wcsGetAppStoreAsync ) {
+			window
+				.wcsGetAppStoreAsync( 'wc-connect-create-shipping-label' )
+				.then( ( wcsStore ) => {
+					const state = wcsStore.getState();
+					const { orderId } = this.state;
+					const siteId = state.ui.selectedSiteId;
 
-			const wcsStoreUnsubscribe = wcsStore.subscribe( () => {
-				const latestState = wcsStore.getState();
+					const wcsStoreUnsubscribe = wcsStore.subscribe( () => {
+						const latestState = wcsStore.getState();
 
-				const shippingLabelState = get(
-					latestState,
-					[
-						'extensions',
-						'woocommerce',
-						'woocommerceServices',
-						siteId,
-						'shippingLabel',
-						orderId,
-					],
-					null
-				);
+						const shippingLabelState = get(
+							latestState,
+							[
+								'extensions',
+								'woocommerce',
+								'woocommerceServices',
+								siteId,
+								'shippingLabel',
+								orderId,
+							],
+							null
+						);
 
-				const labelSettingsState = get(
-					latestState,
-					[
-						'extensions',
-						'woocommerce',
-						'woocommerceServices',
-						siteId,
-						'labelSettings',
-					],
-					null
-				);
+						const labelSettingsState = get(
+							latestState,
+							[
+								'extensions',
+								'woocommerce',
+								'woocommerceServices',
+								siteId,
+								'labelSettings',
+							],
+							null
+						);
 
-				const packageState = get(
-					latestState,
-					[
-						'extensions',
-						'woocommerce',
-						'woocommerceServices',
-						siteId,
-						'packages',
-					],
-					null
-				);
+						const packageState = get(
+							latestState,
+							[
+								'extensions',
+								'woocommerce',
+								'woocommerceServices',
+								siteId,
+								'packages',
+							],
+							null
+						);
 
-				const locationsState = get( latestState, [
-					'extensions',
-					'woocommerce',
-					'sites',
-					siteId,
-					'data',
-					'locations',
-				] );
+						const locationsState = get( latestState, [
+							'extensions',
+							'woocommerce',
+							'sites',
+							siteId,
+							'data',
+							'locations',
+						] );
 
-				if (
-					shippingLabelState &&
-					labelSettingsState &&
-					labelSettingsState.meta &&
-					packageState &&
-					locationsState
-				) {
-					if (
-						shippingLabelState.loaded &&
-						labelSettingsState.meta.isLoaded &&
-						packageState.isLoaded &&
-						isArray( locationsState ) &&
-						! this.state.isWcsModalOpen
-					) {
-						if ( window.jQuery ) {
-							this.setState( { isWcsModalOpen: true } );
-							window
-								.jQuery( '.shipping-label__new-label-button' )
-								.click();
+						if (
+							shippingLabelState &&
+							labelSettingsState &&
+							labelSettingsState.meta &&
+							packageState &&
+							locationsState
+						) {
+							if (
+								shippingLabelState.loaded &&
+								labelSettingsState.meta.isLoaded &&
+								packageState.isLoaded &&
+								isArray( locationsState ) &&
+								! this.state.isWcsModalOpen
+							) {
+								if ( window.jQuery ) {
+									this.setState( { isWcsModalOpen: true } );
+									window
+										.jQuery(
+											'.shipping-label__new-label-button'
+										)
+										.click();
+								}
+								wcsStore.dispatch( {
+									type: 'NOTICE_CREATE',
+									notice: {
+										duration: 10000,
+										status: 'is-success',
+										text: __(
+											'Plugin installed and activated',
+											'woocommerce-admin'
+										),
+									},
+								} );
+							} else if (
+								shippingLabelState.showPurchaseDialog
+							) {
+								wcsStoreUnsubscribe();
+								if ( window.jQuery ) {
+									window
+										.jQuery( '#woocommerce-order-label' )
+										.show();
+								}
+							}
 						}
-						wcsStore.dispatch( {
-							type: 'NOTICE_CREATE',
-							notice: {
-								duration: 10000,
-								status: 'is-success',
-								text: __(
-									'Plugin installed and activated',
-									'woocommerce-admin'
-								),
-							},
-						} );
-					} else if ( shippingLabelState.showPurchaseDialog ) {
-						wcsStoreUnsubscribe();
-						if ( window.jQuery ) {
-							window.jQuery( '#woocommerce-order-label' ).show();
-						}
-					}
-				}
-			} );
+					} );
 
-			document.getElementById(
-				'woocommerce-admin-print-label'
-			).style.display = 'none';
+					document.getElementById(
+						'woocommerce-admin-print-label'
+					).style.display = 'none';
+				} );
 		}
 	}
 
@@ -456,7 +479,7 @@ ShippingBanner.propTypes = {
 	isJetpackConnected: PropTypes.bool.isRequired,
 	activePlugins: PropTypes.array.isRequired,
 	activatePlugins: PropTypes.func.isRequired,
-	installPlugin: PropTypes.func.isRequired,
+	installPlugins: PropTypes.func.isRequired,
 	isRequesting: PropTypes.bool.isRequired,
 };
 
@@ -470,7 +493,7 @@ export default compose(
 
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||
-			isPluginsRequesting( 'installPlugin' );
+			isPluginsRequesting( 'installPlugins' );
 
 		return {
 			isRequesting,
@@ -479,13 +502,13 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugin } = dispatch(
+		const { activatePlugins, installPlugins } = dispatch(
 			PLUGINS_STORE_NAME
 		);
 
 		return {
 			activatePlugins,
-			installPlugin,
+			installPlugins,
 		};
 	} )
 )( ShippingBanner );

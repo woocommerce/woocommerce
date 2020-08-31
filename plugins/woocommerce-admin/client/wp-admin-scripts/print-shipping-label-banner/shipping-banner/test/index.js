@@ -37,7 +37,7 @@ describe( 'Tracking impression in shippingBanner', () => {
 				activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
 				itemsCount={ 1 }
 				activatePlugins={ jest.fn() }
-				installPlugin={ jest.fn() }
+				installPlugins={ jest.fn() }
 				isRequesting={ false }
 			/>
 		);
@@ -72,7 +72,7 @@ describe( 'Tracking clicks in shippingBanner', () => {
 			<ShippingBanner
 				isJetpackConnected={ isJetpackConnected }
 				activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
-				installPlugin={ jest.fn() }
+				installPlugins={ jest.fn() }
 				activatePlugins={ jest.fn() }
 				isRequesting={ false }
 				itemsCount={ 1 }
@@ -116,11 +116,11 @@ describe( 'Tracking clicks in shippingBanner', () => {
 
 describe( 'Create shipping label button', () => {
 	let shippingBannerWrapper;
-	const installPlugin = jest.fn().mockReturnValue( {
-		status: 'success',
+	const installPlugins = jest.fn().mockReturnValue( {
+		success: true,
 	} );
 	const activatePlugins = jest.fn().mockReturnValue( {
-		status: 'success',
+		success: true,
 	} );
 	delete window.location; // jsdom won't allow to rewrite window.location unless deleted first
 	window.location = {
@@ -133,7 +133,7 @@ describe( 'Create shipping label button', () => {
 				isJetpackConnected={ true }
 				activatePlugins={ activatePlugins }
 				activePlugins={ [] }
-				installPlugin={ installPlugin }
+				installPlugins={ installPlugins }
 				isRequesting={ false }
 				itemsCount={ 1 }
 			/>
@@ -144,7 +144,9 @@ describe( 'Create shipping label button', () => {
 		const createShippingLabelButton = shippingBannerWrapper.find( Button );
 		expect( createShippingLabelButton.length ).toBe( 1 );
 		createShippingLabelButton.simulate( 'click' );
-		expect( installPlugin ).toHaveBeenCalledWith( 'woocommerce-services' );
+		expect( installPlugins ).toHaveBeenCalledWith( [
+			'woocommerce-services',
+		] );
 	} );
 
 	it( 'should activate WooCommerce Shipping when installation finishes', () => {
@@ -241,16 +243,18 @@ describe( 'Create shipping label button', () => {
 		document.getElementsByTagName = getElementsByTagName;
 	} );
 
-	it( 'should open WCS modal', () => {
-		window.wcsGetAppStore = jest.fn();
+	it( 'should open WCS modal', async () => {
+		window.wcsGetAppStoreAsync = jest.fn();
 		const getState = jest.fn();
 		const dispatch = jest.fn();
 		const subscribe = jest.fn();
-		window.wcsGetAppStore.mockReturnValueOnce( {
-			getState,
-			dispatch,
-			subscribe,
-		} );
+		window.wcsGetAppStoreAsync.mockReturnValueOnce(
+			Promise.resolve( {
+				getState,
+				dispatch,
+				subscribe,
+			} )
+		);
 		getState.mockReturnValueOnce( {
 			ui: {
 				selectedSiteId: 'SITE_ID',
@@ -264,8 +268,8 @@ describe( 'Create shipping label button', () => {
 		const getElementById = document.getElementById;
 		document.getElementById = getElementByIdMock;
 
-		shippingBannerWrapper.instance().openWcsModal();
-		expect( window.wcsGetAppStore ).toHaveBeenCalledWith(
+		await shippingBannerWrapper.instance().openWcsModal();
+		expect( window.wcsGetAppStoreAsync ).toHaveBeenCalledWith(
 			'wc-connect-create-shipping-label'
 		);
 		expect( getState ).toHaveBeenCalledTimes( 1 );
@@ -287,7 +291,7 @@ describe( 'In the process of installing, activating, loading assets for WooComme
 				isJetpackConnected={ true }
 				activatePlugins={ jest.fn() }
 				activePlugins={ [ 'jetpack', 'woocommerce-services' ] }
-				installPlugin={ jest.fn() }
+				installPlugins={ jest.fn() }
 				isRequesting={ true }
 				itemsCount={ 1 }
 			/>
@@ -315,7 +319,7 @@ describe( 'Setup error message', () => {
 	const activatePlugins = jest.fn().mockReturnValue( {
 		status: 'failed',
 	} );
-	const installPlugin = jest.fn().mockReturnValue( {
+	const installPlugins = jest.fn().mockReturnValue( {
 		status: 'failed',
 	} );
 
@@ -325,7 +329,7 @@ describe( 'Setup error message', () => {
 				isJetpackConnected={ true }
 				activatePlugins={ activatePlugins }
 				activePlugins={ [ 'jetpack' ] }
-				installPlugin={ installPlugin }
+				installPlugins={ installPlugins }
 				itemsCount={ 1 }
 				isRequesting={ false }
 			/>
@@ -348,14 +352,14 @@ describe( 'Setup error message', () => {
 	} );
 
 	it( 'should show if there is activation error', async () => {
-		// Create a new wrapper with an installPlugin that passes.
+		// Create a new wrapper with an installPlugins that passes.
 		const wrapper = shallow(
 			<ShippingBanner
 				isJetpackConnected={ true }
 				activatePlugins={ activatePlugins }
 				activePlugins={ [ 'jetpack' ] }
-				installPlugin={ jest.fn().mockReturnValue( {
-					status: 'success',
+				installPlugins={ jest.fn().mockReturnValue( {
+					success: true,
 				} ) }
 				itemsCount={ 1 }
 				isRequesting={ false }
@@ -380,7 +384,7 @@ describe( 'The message in the banner', () => {
 				isJetpackConnected={ true }
 				activatePlugins={ jest.fn() }
 				activePlugins={ activePlugins }
-				installPlugin={ jest.fn() }
+				installPlugins={ jest.fn() }
 				wcsPluginSlug={ 'woocommerce-services' }
 				isRequesting={ true }
 				itemsCount={ 1 }

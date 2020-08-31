@@ -107,9 +107,9 @@ class ShippingLabelBanner {
 				'normal',
 				'high',
 				array(
-					'context'               => 'shipping_label',
-					'order_id'              => $post->ID,
-					'shippable_items_count' => $this->count_shippable_items( $order ),
+					'context' => 'shipping_label',
+					'order'   => $post->ID,
+					'items'   => $this->count_shippable_items( $order ),
 				)
 			);
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_print_shipping_label_script' ) );
