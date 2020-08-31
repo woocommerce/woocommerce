@@ -1,4 +1,4 @@
-# Class names update in 2.8.0
+# Class names update in 3.3.0
 
 WC Blocks 3.3.0, introduced express payment methods in the Cart block. In order to make it easy to write styles for express payment methods for the Cart and Checkout blocks separately, we updated several class names:
 

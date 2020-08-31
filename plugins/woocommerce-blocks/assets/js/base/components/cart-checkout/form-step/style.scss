@@ -1,8 +1,8 @@
-.wc-block-components-checkout-form {
+.wc-block-components-form {
 	counter-reset: checkout-step;
 }
 
-.wc-block-components-checkout-form .wc-block-components-checkout-step {
+.wc-block-components-form .wc-block-components-checkout-step {
 	position: relative;
 	border: none;
 	padding: 0 0 0 $gap-larger;
@@ -22,7 +22,7 @@
 	padding-bottom: em($gap-large);
 }
 
-.wc-block-components-checkout-form .wc-block-components-checkout-step:disabled {
+.wc-block-components-form .wc-block-components-checkout-step:disabled {
 	opacity: 0.6;
 }
 
