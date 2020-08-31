@@ -6,7 +6,7 @@ on:
   create:
 jobs:
   release-pull-request-automation:
-    if: ${{ github.event.ref_type == 'branch' }}
+    if: ${{ github.event.ref_type == 'branch' && contains( github.ref, 'release/' ) }}
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
       - uses: act10ns/slack@v1
         with:
           status: starting
-          if: always()
+          if: ${{ always() }}
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Create changeset for pull request
@@ -36,4 +36,4 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-        if: always()
+        if: ${{ always() }}
