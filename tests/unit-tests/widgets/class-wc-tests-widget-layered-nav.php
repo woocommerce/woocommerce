@@ -481,13 +481,13 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 	 * Create a product that has two variations for two styles, and each variation
 	 * has a value of "Any" for the color.
 	 *
-	 * @param bool $set_one_as_out_of_stock If true, set one of the variations as "Out of stock".
-	 * @param bool $set_one_as_unpublished If true, set one of the variations as "draft".
-	 * @param bool $set_main_as_unpublished If true, set the main product as "draft".
+	 * @param string $set_as_out_of_stock 'one': set one of the variations as "Out of stock", 'all': set all the variations as "Out of stock".
+	 * @param string $set_as_unpublished 'one': set one of the variations as "draft", 'all': set all the variations as "draft".
+	 * @param bool   $set_main_as_unpublished If true, set the main product as "draft".
 	 *
 	 * @return WC_Product_Variable
 	 */
-	private function create_product_with_all_styles_and_any_color( $set_one_as_out_of_stock, $set_one_as_unpublished, $set_main_as_unpublished ) {
+	private function create_product_with_all_styles_and_any_color( $set_as_out_of_stock, $set_as_unpublished, $set_main_as_unpublished ) {
 		$main_product = new WC_Product_Variable();
 
 		$main_product->set_props(
@@ -528,13 +528,13 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 				10,
 				$variation_attributes
 			);
-			if ( $set_one_as_out_of_stock && $style === $existing_styles[0] ) {
+			if ( 'all' === $set_as_out_of_stock || ( 'one' === $set_as_out_of_stock && $style === $existing_styles[0] ) ) {
 				$variation_object->set_stock_status( 'outofstock' );
 			}
 
 			$variation_object->save();
 
-			if ( $set_one_as_unpublished && $style === $existing_styles[0] ) {
+			if ( 'all' === $set_as_unpublished || ( 'one' === $set_as_unpublished && $style === $existing_styles[0] ) ) {
 				wp_update_post(
 					array(
 						'ID'          => $variation_object->get_id(),
@@ -554,54 +554,17 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 	/**
 	 * @testdox When a variation has a value of "Any" for an attribute it should be included in the count of all the attribute values used by the main product.
 	 *
-	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
-	 */
-	public function test_product_count_per_attribute_with_any_valued_variations() {
-		$this->create_product_with_all_styles_and_any_color( false, false, false );
-		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
-
-		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
-
-		$expected = array(
-			'black'  => 3,
-			'brown'  => 3,
-			'blue'   => 3,
-			'pink'   => 2,
-			'green'  => 2,
-			'yellow' => 2,
-		);
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/**
-	 * @testdox When a variation has a value of "Any" for an attribute BUT it's out of stock, it should NOT be included in the count of all the attribute values used by the main product.
+	 * @testWith [null, null]
+	 *           [null, "one"]
+	 *           ["one", null]
+	 *
+	 * @param string $set_as_out_of_stock "one" to set one of the variations as out of stock.
+	 * @param string $set_as_unpublished "one" to set one of the variations as a draft.
 	 *
 	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
 	 */
-	public function test_product_count_per_attribute_with_any_valued_variations_when_one_is_out_of_stock() {
-		$this->create_product_with_all_styles_and_any_color( true, false, false );
-		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
-
-		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
-
-		$expected = array(
-			'black'  => 2,
-			'brown'  => 2,
-			'blue'   => 2,
-			'pink'   => 1,
-			'green'  => 1,
-			'yellow' => 1,
-		);
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/**
-	 * @testdox When a variation has a value of "Any" for an attribute BUT it's unpublished, it should NOT be included in the count of all the attribute values used by the main product.
-	 *
-	 * @throws ReflectionException Error when dealing with reflection to invoke the tested method.
-	 */
-	public function test_product_count_per_attribute_with_any_valued_variations_when_one_is_unpublished() {
-		$this->create_product_with_all_styles_and_any_color( false, true, false );
+	public function test_product_count_per_attribute_with_any_valued_variations( $set_as_out_of_stock, $set_as_unpublished ) {
+		$this->create_product_with_all_styles_and_any_color( $set_as_out_of_stock, $set_as_unpublished, false );
 		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
 
 		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
@@ -624,7 +587,7 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 	 */
 	public function test_product_count_per_attribute_with_any_valued_variations_when_main_is_unpublished() {
 		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
-		$this->create_product_with_all_styles_and_any_color( false, false, true );
+		$this->create_product_with_all_styles_and_any_color( null, null, true );
 
 		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
 
