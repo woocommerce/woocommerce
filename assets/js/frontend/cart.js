@@ -67,7 +67,7 @@ jQuery( function( $ ) {
 		var $html       = $.parseHTML( html_str );
 		var $new_form   = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
-		var $notices    = $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html );
+		var $notices    = $( '.entry-content', $html ).find( '.woocommerce-error, .woocommerce-message, .woocommerce-info' );
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
@@ -305,6 +305,12 @@ jQuery( function( $ ) {
 				this.input_changed );
 
 			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
+
+			var $notices = $( '.entry-content .woocommerce-error, .entry-content .woocommerce-message, .entry-content .woocommerce-info');
+			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+			if ( $notices.length > 0 ) {
+				show_notice( $notices );
+			}
 		},
 
 		/**
