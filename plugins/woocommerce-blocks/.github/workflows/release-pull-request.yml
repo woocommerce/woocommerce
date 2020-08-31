@@ -6,9 +6,9 @@ on:
   create:
 jobs:
   release-pull-request-automation:
+    if: ${{ github.event.ref_type == 'branch' }}
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    if: ${{ github.event.ref_type == 'branch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: act10ns/slack@v1
