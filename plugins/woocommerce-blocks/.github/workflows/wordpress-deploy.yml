@@ -12,7 +12,7 @@ jobs:
       - uses: act10ns/slack@v1
         with:
           status: starting
-        if: always()
+        if: ${{ always() }}
       - name: Checkout code
         uses: actions/checkout@v2
       - name: WordPress Plugin Deploy
@@ -37,4 +37,4 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-        if: always()
+        if: ${{ always() }}
