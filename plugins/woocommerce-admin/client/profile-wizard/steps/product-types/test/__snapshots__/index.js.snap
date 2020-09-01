@@ -5,16 +5,20 @@ exports[`ProductTypes should render product types 1`] = `
   <div
     class="woocommerce-profile-wizard__product-types"
   >
-    <h2
-      class="woocommerce-profile-wizard__header-title"
+    <div
+      class="woocommerce-profile-wizard__step-header"
     >
-      What type of products will be listed?
-    </h2>
-    <h2
-      class="woocommerce-profile-wizard__header-subtitle"
-    >
-      Choose any that apply
-    </h2>
+      <h2
+        class="css-1ahfdc3-Text e15wbhsk0"
+      >
+        What type of products will be listed?
+      </h2>
+      <p
+        class="css-1f0yw52-Text e15wbhsk0"
+      >
+        Choose any that apply
+      </p>
+    </div>
     <div
       class="woocommerce-card"
     >
@@ -44,40 +48,36 @@ exports[`ProductTypes should render product types 1`] = `
                 class="components-checkbox-control__label"
                 for="inspector-checkbox-control-0"
               >
-                <div
-                  class="woocommerce-product-type"
+                <span
+                  class="woocommerce-product-wizard__product-types-label"
+                >
+                  Paid product
+                </span>
+                <button
+                  aria-label="Learn more about recommended free business features"
+                  class="components-button is-tertiary"
+                  type="button"
+                >
+                  <i
+                    aria-hidden="true"
+                    class="material-icons-outlined"
+                  >
+                    info
+                  </i>
+                </button>
+                
+                <span
+                  class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
                 >
                   <span
-                    class="woocommerce-product-type__label"
+                    class="screen-reader-text"
                   >
-                    Paid product
-                  </span>
-                  <button
-                    aria-label="Learn more about recommended free business features"
-                    class="components-button is-tertiary"
-                    type="button"
-                  >
-                    <i
-                      aria-hidden="true"
-                      class="material-icons-outlined"
-                    >
-                      info
-                    </i>
-                  </button>
-                  
-                  <span
-                    class="woocommerce-pill"
-                  >
-                    <span
-                      class="screen-reader-text"
-                    >
-                      This product type requires a paid extension.
+                    This product type requires a paid extension.
 We'll add this to a cart so that
 you can purchase and install it later.
-                    </span>
-                    $10 per month
                   </span>
-                </div>
+                  $10 per month
+                </span>
               </label>
             </div>
           </div>
@@ -111,7 +111,11 @@ you can purchase and install it later.
             <label
               for="woocommerce-product-types__pricing-toggle"
             >
-              Display monthly prices
+              <p
+                class="css-1f0yw52-Text e15wbhsk0"
+              >
+                Display monthly prices
+              </p>
               <span
                 class="components-form-toggle is-checked"
               >
@@ -130,24 +134,28 @@ you can purchase and install it later.
               </span>
             </label>
           </div>
-        </div>
-        <div
-          class="woocommerce-profile-wizard__card-actions"
-        >
-          <button
-            class="components-button is-primary"
-            disabled=""
-            type="button"
+          <div
+            class="woocommerce-profile-wizard__card-actions"
           >
-            Continue
-          </button>
+            <button
+              class="components-button is-primary"
+              disabled=""
+              type="button"
+            >
+              Continue
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <div
       class="woocommerce-profile-wizard__card-help-text"
     >
-      Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+      <p
+        class="css-1qmnemh-Text e15wbhsk0"
+      >
+        Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+      </p>
     </div>
   </div>
 </div>
@@ -158,16 +166,20 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
   <div
     class="woocommerce-profile-wizard__product-types"
   >
-    <h2
-      class="woocommerce-profile-wizard__header-title"
+    <div
+      class="woocommerce-profile-wizard__step-header"
     >
-      What type of products will be listed?
-    </h2>
-    <h2
-      class="woocommerce-profile-wizard__header-subtitle"
-    >
-      Choose any that apply
-    </h2>
+      <h2
+        class="css-1ahfdc3-Text e15wbhsk0"
+      >
+        What type of products will be listed?
+      </h2>
+      <p
+        class="css-1f0yw52-Text e15wbhsk0"
+      >
+        Choose any that apply
+      </p>
+    </div>
     <div
       class="woocommerce-card"
     >
@@ -197,40 +209,36 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
                 class="components-checkbox-control__label"
                 for="inspector-checkbox-control-2"
               >
-                <div
-                  class="woocommerce-product-type"
+                <span
+                  class="woocommerce-product-wizard__product-types-label"
+                >
+                  Paid product
+                </span>
+                <button
+                  aria-label="Learn more about recommended free business features"
+                  class="components-button is-tertiary"
+                  type="button"
+                >
+                  <i
+                    aria-hidden="true"
+                    class="material-icons-outlined"
+                  >
+                    info
+                  </i>
+                </button>
+                
+                <span
+                  class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
                 >
                   <span
-                    class="woocommerce-product-type__label"
+                    class="screen-reader-text"
                   >
-                    Paid product
-                  </span>
-                  <button
-                    aria-label="Learn more about recommended free business features"
-                    class="components-button is-tertiary"
-                    type="button"
-                  >
-                    <i
-                      aria-hidden="true"
-                      class="material-icons-outlined"
-                    >
-                      info
-                    </i>
-                  </button>
-                  
-                  <span
-                    class="woocommerce-pill"
-                  >
-                    <span
-                      class="screen-reader-text"
-                    >
-                      This product type requires a paid extension.
+                    This product type requires a paid extension.
 We'll add this to a cart so that
 you can purchase and install it later.
-                    </span>
-                    $120 per year
                   </span>
-                </div>
+                  $120 per year
+                </span>
               </label>
             </div>
           </div>
@@ -264,7 +272,11 @@ you can purchase and install it later.
             <label
               for="woocommerce-product-types__pricing-toggle"
             >
-              Display monthly prices
+              <p
+                class="css-1f0yw52-Text e15wbhsk0"
+              >
+                Display monthly prices
+              </p>
               <span
                 class="components-form-toggle"
               >
@@ -283,24 +295,28 @@ you can purchase and install it later.
               </span>
             </label>
           </div>
-        </div>
-        <div
-          class="woocommerce-profile-wizard__card-actions"
-        >
-          <button
-            class="components-button is-primary"
-            disabled=""
-            type="button"
+          <div
+            class="woocommerce-profile-wizard__card-actions"
           >
-            Continue
-          </button>
+            <button
+              class="components-button is-primary"
+              disabled=""
+              type="button"
+            >
+              Continue
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <div
       class="woocommerce-profile-wizard__card-help-text"
     >
-      Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+      <p
+        class="css-1qmnemh-Text e15wbhsk0"
+      >
+        Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
+      </p>
     </div>
   </div>
 </div>

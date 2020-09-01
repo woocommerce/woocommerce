@@ -4,18 +4,23 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, CheckboxControl, FormToggle } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	FormToggle,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
-import { withDispatch, withSelect } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { H, Card } from '@woocommerce/components';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { Card } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { withDispatch, withSelect } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import ProductType from './product-type';
+import ProductTypeLabel from './label';
 import './style.scss';
 
 export class ProductTypes extends Component {
@@ -100,15 +105,17 @@ export class ProductTypes extends Component {
 
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
-				<H className="woocommerce-profile-wizard__header-title">
-					{ __(
-						'What type of products will be listed?',
-						'woocommerce-admin'
-					) }
-				</H>
-				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __( 'Choose any that apply' ) }
-				</H>
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ __(
+							'What type of products will be listed?',
+							'woocommerce-admin'
+						) }
+					</Text>
+					<Text variant="body">
+						{ __( 'Choose any that apply' ) }
+					</Text>
+				</div>
 
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
@@ -117,7 +124,7 @@ export class ProductTypes extends Component {
 								<CheckboxControl
 									key={ slug }
 									label={
-										<ProductType
+										<ProductTypeLabel
 											description={
 												productTypes[ slug ].description
 											}
@@ -143,10 +150,12 @@ export class ProductTypes extends Component {
 						} ) }
 						<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
 							<label htmlFor="woocommerce-product-types__pricing-toggle">
-								{ __(
-									'Display monthly prices',
-									'woocommerce-admin'
-								) }
+								<Text variant="body">
+									{ __(
+										'Display monthly prices',
+										'woocommerce-admin'
+									) }
+								</Text>
 								<FormToggle
 									id="woocommerce-product-types__pricing-toggle"
 									checked={ isMonthlyPricing }
@@ -163,23 +172,24 @@ export class ProductTypes extends Component {
 								{ error }
 							</span>
 						) }
-					</div>
-
-					<div className="woocommerce-profile-wizard__card-actions">
-						<Button
-							isPrimary
-							onClick={ this.onContinue }
-							disabled={ ! selected.length }
-						>
-							{ __( 'Continue', 'woocommerce-admin' ) }
-						</Button>
+						<div className="woocommerce-profile-wizard__card-actions">
+							<Button
+								isPrimary
+								onClick={ this.onContinue }
+								disabled={ ! selected.length }
+							>
+								{ __( 'Continue', 'woocommerce-admin' ) }
+							</Button>
+						</div>
 					</div>
 				</Card>
 				<div className="woocommerce-profile-wizard__card-help-text">
-					{ __(
-						'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
-						'woocommerce-admin'
-					) }
+					<Text variant="caption">
+						{ __(
+							'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
+							'woocommerce-admin'
+						) }
+					</Text>
 				</div>
 			</div>
 		);

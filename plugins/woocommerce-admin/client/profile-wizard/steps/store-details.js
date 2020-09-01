@@ -11,11 +11,12 @@ import {
 	FlexItem,
 	Icon,
 	Tooltip,
+	__experimentalText as Text,
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { H, Form } from '@woocommerce/components';
+import { Form } from '@woocommerce/components';
 import { getCurrencyData } from '@woocommerce/currency';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -180,24 +181,26 @@ class StoreDetails extends Component {
 
 		return (
 			<Fragment>
-				<H className="woocommerce-profile-wizard__header-title">
-					{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
-				</H>
-				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __(
-						"Tell us about your store and we'll get you set up in no time",
-						'woocommerce-admin'
-					) }
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
+					</Text>
+					<Text variant="body">
+						{ __(
+							"Tell us about your store and we'll get you set up in no time",
+							'woocommerce-admin'
+						) }
 
-					<Tooltip text={ configureCurrencyText }>
-						<span
-							aria-label={ configureCurrencyText }
-							className="woocommerce-profile-wizard__tooltip-icon"
-						>
-							<Icon icon="info-outline" size={ 16 } />
-						</span>
-					</Tooltip>
-				</H>
+						<Tooltip text={ configureCurrencyText }>
+							<span
+								aria-label={ configureCurrencyText }
+								className="woocommerce-profile-wizard__tooltip-icon"
+							>
+								<Icon icon="info-outline" size={ 16 } />
+							</span>
+						</Tooltip>
+					</Text>
+				</div>
 
 				<Form
 					initialValues={ this.initialValues }

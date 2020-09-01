@@ -7,7 +7,12 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import Gridicon from 'gridicons';
-import { Button, TabPanel, Tooltip } from '@wordpress/components';
+import {
+	Button,
+	TabPanel,
+	Tooltip,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { Card, H } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
@@ -347,15 +352,17 @@ class Theme extends Component {
 
 		return (
 			<Fragment>
-				<H className="woocommerce-profile-wizard__header-title">
-					{ __( 'Choose a theme', 'woocommerce-admin' ) }
-				</H>
-				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __(
-						"Choose how your store appears to customers. And don't worry, you can always switch themes and edit them later.",
-						'woocommerce-admin'
-					) }
-				</H>
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ __( 'Choose a theme', 'woocommerce-admin' ) }
+					</Text>
+					<Text variant="body">
+						{ __(
+							"Choose how your store appears to customers. And don't worry, you can always switch themes and edit them later.",
+							'woocommerce-admin'
+						) }
+					</Text>
+				</div>
 				<TabPanel
 					className="woocommerce-profile-wizard__themes-tab-panel"
 					activeClass="is-active"

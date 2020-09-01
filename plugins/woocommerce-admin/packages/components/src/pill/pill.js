@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { __experimentalText as Text } from '@wordpress/components';
 export function Pill( { children } ) {
-	return <span className="woocommerce-pill">{ children }</span>;
+	return (
+		<Text className="woocommerce-pill" variant="caption" as="span">
+			{ children }
+		</Text>
+	);
 }

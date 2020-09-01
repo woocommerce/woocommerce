@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, __experimentalText as Text } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -220,12 +220,17 @@ class Benefits extends Component {
 		return (
 			<Card className="woocommerce-profile-wizard__benefits-card">
 				<Logo />
-				<H className="woocommerce-profile-wizard__header-title">
-					{ sprintf(
-						__( 'Enhance your store with %s', 'woocommerce-admin' ),
-						pluginNamesString
-					) }
-				</H>
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ sprintf(
+							__(
+								'Enhance your store with %s',
+								'woocommerce-admin'
+							),
+							pluginNamesString
+						) }
+					</Text>
+				</div>
 
 				{ this.renderBenefits() }
 

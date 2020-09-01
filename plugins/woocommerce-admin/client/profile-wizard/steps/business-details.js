@@ -9,6 +9,7 @@ import {
 	CheckboxControl,
 	FormToggle,
 	Popover,
+	__experimentalText as Text,
 } from '@wordpress/components';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -340,7 +341,7 @@ class BusinessDetails extends Component {
 
 		if ( isInstallingActivating ) {
 			return (
-				<p>
+				<Text variant="caption" as="p">
 					{ sprintf(
 						_n(
 							'Installing the following plugin: %s',
@@ -350,7 +351,7 @@ class BusinessDetails extends Component {
 						),
 						extensionsList
 					) }
-				</p>
+				</Text>
 			);
 		}
 		const accountRequiredText = this.bundleInstall
@@ -360,20 +361,18 @@ class BusinessDetails extends Component {
 			  )
 			: '';
 		return (
-			<Fragment>
-				<p>
-					{ sprintf(
-						_n(
-							'The following plugin will be installed for free: %s. %s',
-							'The following plugins will be installed for free: %s. %s',
-							extensions.length,
-							'woocommerce-admin'
-						),
-						extensionsList,
-						accountRequiredText
-					) }
-				</p>
-			</Fragment>
+			<Text variant="caption" as="p">
+				{ sprintf(
+					_n(
+						'The following plugin will be installed for free: %s. %s',
+						'The following plugins will be installed for free: %s. %s',
+						extensions.length,
+						'woocommerce-admin'
+					),
+					extensionsList,
+					accountRequiredText
+				) }
+			</Text>
 		);
 	}
 
@@ -772,18 +771,20 @@ class BusinessDetails extends Component {
 				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {
 					return (
 						<Fragment>
-							<H className="woocommerce-profile-wizard__header-title">
-								{ __(
-									'Tell us about your business',
-									'woocommerce-admin'
-								) }
-							</H>
-							<H className="woocommerce-profile-wizard__header-subtitle">
-								{ __(
-									"We'd love to know if you are just getting started or you already have a business in place.",
-									'woocommerce-admin'
-								) }
-							</H>
+							<div className="woocommerce-profile-wizard__step-header">
+								<Text variant="title.small" as="h2">
+									{ __(
+										'Tell us about your business',
+										'woocommerce-admin'
+									) }
+								</Text>
+								<Text variant="body">
+									{ __(
+										"We'd love to know if you are just getting started or you already have a business in place.",
+										'woocommerce-admin'
+									) }
+								</Text>
+							</div>
 							<Card>
 								<Fragment>
 									<SelectControl

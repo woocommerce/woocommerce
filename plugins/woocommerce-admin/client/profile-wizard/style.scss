@@ -1,6 +1,23 @@
 .woocommerce-profile-wizard__body {
-	.woocommerce-profile-wizard__container a {
-		color: $studio-pink-50;
+	.woocommerce-profile-wizard__step-header {
+		text-align: center;
+		margin: $gap 0 $gap-large;
+
+		h2 {
+			margin-bottom: $gap-smallest;
+			color: $gray-900;
+		}
+
+		p {
+			color: $gray-700;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			.woocommerce-profile-wizard__tooltip-icon {
+				height: 16px;
+			}
+		}
 	}
 
 	.woocommerce-card {
@@ -9,9 +26,9 @@
 		h1,
 		h2,
 		h3 {
-			color: $studio-gray-80;
+			color: $gray-900;
 		}
-		color: $studio-gray-60;
+		color: $gray-700;
 		text-align: left;
 
 		button.is-button {
@@ -51,21 +68,13 @@
 		background: $studio-white;
 	}
 
-	.woocommerce-profile-wizard__header-title,
 	.woocommerce-profile-wizard__header-subtitle {
 		font-weight: 400;
 		text-align: center;
 	}
 
-	.woocommerce-profile-wizard__header-title {
-		color: $studio-gray-80;
-		font-size: 24px;
-		line-height: 32px;
-		margin-bottom: $gap-smaller;
-	}
-
 	.woocommerce-profile-wizard__header-subtitle {
-		color: $studio-gray-60;
+		color: $gray-700;
 		font-size: 16px;
 		line-height: 24px;
 		margin-top: $gap-smaller;
@@ -103,24 +112,15 @@
 			margin-top: 0;
 		}
 
-		p,
-		div {
-			font-size: 16px;
-			line-height: 24px;
-			font-weight: 400;
-		}
-
 		.components-popover__content {
-			font-size: 16px;
-
 			> div {
-				padding: 11px 16px;
+				padding: $gap $gap-large;
 			}
 		}
 
 		.woocommerce-card ~ p {
-			font-size: 12px;
 			color: $gray-600;
+			text-align: center;
 		}
 
 		.woocommerce-profile-wizard__footer {
@@ -132,8 +132,6 @@
 		.woocommerce-profile-wizard__footer-link {
 			display: flex;
 			text-decoration: none;
-			font-size: 14px;
-			color: var(--wp-admin-theme-color);
 		}
 	}
 
@@ -285,8 +283,9 @@
 			margin-top: 0;
 			margin-bottom: 0;
 			position: relative;
-			padding: $gap-large $gap;
+			padding: $gap $gap-large;
 			min-height: 56px;
+			border-bottom: 1px solid $gray-100;
 
 			.components-base-control {
 				position: relative;
@@ -297,8 +296,7 @@
 			}
 
 			label.components-checkbox-control__label {
-				color: $studio-gray-80;
-				margin-left: $gap-small;
+				margin-left: 0;
 			}
 
 			.components-base-control__help {
@@ -307,7 +305,7 @@
 			}
 
 			.components-base-control__help {
-				color: $studio-gray-60;
+				color: $gray-600;
 				font-size: 14px;
 				line-height: 20px;
 				margin-top: 3px;
@@ -395,11 +393,6 @@
 		padding: $gap-large * 2;
 	}
 
-	.woocommerce-profile-wizard__header-title {
-		margin-top: $gap-large;
-		margin-bottom: $gap-large;
-	}
-
 	.woocommerce-profile-wizard__card-actions {
 		margin-top: $gap;
 		display: inline-flex;
@@ -468,7 +461,7 @@
 	color: $studio-gray-60;
 	display: flex;
 	align-items: center;
-	margin-left: 8px;
+	margin-left: $gap-smallest;
 	cursor: help;
 }
 
@@ -499,7 +492,7 @@
 .woocommerce-business-extensions {
 	margin-left: -$gap;
 	margin-right: -$gap;
-	padding: $gap-large $gap;
+	padding: $gap $gap-large;
 	border-top: 1px solid $gray-100;
 	border-bottom: 1px solid $gray-100;
 	display: flex;
@@ -507,7 +500,6 @@
 
 	label {
 		display: flex;
-		color: $gray-900;
 		align-items: center;
 	}
 
@@ -518,7 +510,6 @@
 	.woocommerce-business-extensions__label-subtext {
 		display: block;
 		color: $gray-600;
-		font-size: 14px;
 	}
 
 	.woocommerce-business-extensions__popover-wrapper {

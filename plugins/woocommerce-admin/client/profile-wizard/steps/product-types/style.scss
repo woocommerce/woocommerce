@@ -1,69 +1,67 @@
-.woocommerce-profile-wizard__product-types {
-	.components-base-control__field {
-		display: flex;
-	}
-
-	.woocommerce-product-type {
-		align-items: center;
-		display: flex;
-	}
-
-	.woocommerce-product-type__label {
-		display: inline-block;
-		margin-right: 12px;
-	}
-
-	.woocommerce-profile-wizard__checkbox {
-		display: flex;
-		align-items: center;
-		border-bottom: 1px solid $gray-100;
-
-		.components-button {
-			padding-top: 0;
-			padding-bottom: 0;
-			height: auto;
+.woocommerce-profile-wizard__body {
+	.woocommerce-profile-wizard__product-types {
+		.components-base-control__field {
+			display: flex;
 		}
-	}
 
-	.components-base-control__field {
-		display: flex;
-		width: 100%;
-		align-items: center;
-	}
-
-	.components-checkbox-control__label {
-		display: flex;
-		align-items: center;
-		width: 100%;
-
-		.woocommerce-pill {
-			margin-left: auto;
+		.woocommerce-product-wizard__product-types-label {
+			display: inline-block;
+			margin-right: $gap-smallest;
 		}
-	}
 
-	.components-popover .components-popover__content {
-		min-width: 360px;
-	}
+		.woocommerce-profile-wizard__checkbox-group {
+			.woocommerce-profile-wizard__checkbox {
+				display: flex;
+				align-items: center;
+				min-height: 64px;
 
-	.woocommerce-profile-wizard__product-types-pricing-toggle.woocommerce-profile-wizard__checkbox {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		color: $gray-600;
-		font-size: 14px;
+				.components-button {
+					padding: 0;
+					height: auto;
+				}
+			}
+		}
 
-		label {
-			display: inline-flex;
+		.components-base-control__field {
+			display: flex;
+			width: 100%;
 			align-items: center;
 		}
 
-		.components-form-toggle {
-			display: inline-flex;
-			margin-left: $gap;
-		}
-	}
+		.components-checkbox-control__label {
+			display: flex;
+			align-items: center;
+			width: 100%;
 
-	.woocommerce-profile-wizard__card-actions .components-button.is-primary {
-		margin-top: $gap;
+			.woocommerce-pill {
+				margin-left: auto;
+			}
+		}
+
+		.components-popover .components-popover__content {
+			min-width: 360px;
+		}
+
+		.woocommerce-profile-wizard__product-types-pricing-toggle.woocommerce-profile-wizard__checkbox {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			color: $gray-600;
+
+			label {
+				display: inline-flex;
+				align-items: center;
+			}
+
+			.components-form-toggle {
+				display: inline-flex;
+				margin-left: $gap;
+			}
+		}
+
+		.woocommerce-profile-wizard__card-actions
+		.components-button.is-primary {
+			margin-top: $gap;
+		}
 	}
 }

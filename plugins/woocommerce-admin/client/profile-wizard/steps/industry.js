@@ -3,13 +3,17 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Button, CheckboxControl } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
-import { H, Card, TextControl } from '@woocommerce/components';
+import { Card, TextControl } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -170,15 +174,17 @@ class Industry extends Component {
 
 		return (
 			<Fragment>
-				<H className="woocommerce-profile-wizard__header-title">
-					{ __(
-						'In which industry does the store operate?',
-						'woocommerce-admin'
-					) }
-				</H>
-				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __( 'Choose any that apply' ) }
-				</H>
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ __(
+							'In which industry does the store operate?',
+							'woocommerce-admin'
+						) }
+					</Text>
+					<Text variant="body">
+						{ __( 'Choose any that apply' ) }
+					</Text>
+				</div>
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ filteredIndustryKeys.map( ( slug ) => {

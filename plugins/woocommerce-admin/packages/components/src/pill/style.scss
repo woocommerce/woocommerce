@@ -3,9 +3,7 @@
 	border-radius: 28px;
 	color: $gray-700;
 	display: inline-block;
-	font-size: 12px;
-	padding: 2px 10px;
-	line-height: 16px;
+	padding: $gap-smallest $gap-smaller;
 
 	@include breakpoint( '<320px' ) {
 		font-size: 11px;
