@@ -2,7 +2,7 @@
 /**
  * Layered nav widget
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.6.0
  */
 
@@ -368,7 +368,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// Generate the first part of the query.
 		// This one will return non-variable products and variable products with concrete values for the attributes.
 		$query           = array();
-		$query['select'] = "SELECT {$wpdb->posts}.post_parent as product_id, terms.term_id as term_count_id";
+		$query['select'] = "SELECT IF({$wpdb->posts}.post_type='variable_product', {$wpdb->posts}.post_parent, {$wpdb->posts}.ID) AS product_id, terms.term_id AS term_count_id";
 		$query['from']   = "FROM {$wpdb->posts}";
 		$query['join']   = "
 			INNER JOIN {$wpdb->term_relationships} AS tr ON {$wpdb->posts}.ID = tr.object_id
@@ -417,11 +417,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// This one will return products having "Any..." as the value of the attribute.
 
 		$query_sql_for_attributes_with_any_value = "
-			SELECT {$wpdb->posts}.post_parent AS product_id, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->postmeta}
-			JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
+			SELECT {$wpdb->posts}.post_parent AS product_id, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
+			LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id AND {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
 			JOIN {$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.post_parent
-			WHERE {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
-			AND {$wpdb->postmeta}.meta_value = ''
+			WHERE ( {$wpdb->postmeta}.meta_key IS NULL OR {$wpdb->postmeta}.meta_value = '')
 			AND {$wpdb->posts}.post_type = 'product_variation'
 			AND {$wpdb->posts}.post_status = 'publish'
 			AND {$wpdb->term_relationships}.term_taxonomy_id in $term_ids_sql

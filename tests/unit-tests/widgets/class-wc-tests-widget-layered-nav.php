@@ -566,14 +566,15 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 	public function test_product_count_per_attribute_with_any_valued_variations( $set_as_out_of_stock, $set_as_unpublished ) {
 		$this->create_product_with_all_styles_and_any_color( $set_as_out_of_stock, $set_as_unpublished, false );
 		$this->create_colored_product( 'Medium shoes', array( 'black', 'brown', 'blue' ) );
+		$this->create_colored_product( 'Medium shoes 2', array( 'black', 'brown', 'blue', 'pink' ) );
 
 		$actual = $this->run_get_filtered_term_product_counts( 'or', array() );
 
 		$expected = array(
-			'black'  => 2,
-			'brown'  => 2,
-			'blue'   => 2,
-			'pink'   => 1,
+			'black'  => 3,
+			'brown'  => 3,
+			'blue'   => 3,
+			'pink'   => 2,
 			'green'  => 1,
 			'yellow' => 1,
 		);
