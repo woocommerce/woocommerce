@@ -26,18 +26,24 @@ export const formatParams = ( dateFormat, period, skipChecked ) => {
 };
 
 export const getStatus = ( {
+	cacheNeedsClearing,
 	customersProgress,
 	customersTotal,
+	isError,
 	inProgress,
 	ordersProgress,
 	ordersTotal,
 } ) => {
+	if ( isError ) {
+		return 'error';
+	}
 	if ( inProgress ) {
 		if (
 			isNil( customersProgress ) ||
 			isNil( ordersProgress ) ||
 			isNil( customersTotal ) ||
-			isNil( ordersTotal )
+			isNil( ordersTotal ) ||
+			cacheNeedsClearing
 		) {
 			return 'initializing';
 		}

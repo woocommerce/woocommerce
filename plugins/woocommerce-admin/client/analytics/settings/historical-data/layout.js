@@ -4,20 +4,19 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { isNil } from 'lodash';
-import { SECOND } from '@fresh-data/framework';
 import { SectionHeader } from '@woocommerce/components';
+import { IMPORT_STORE_NAME } from '@woocommerce/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { DEFAULT_REQUIREMENT } from '../../../wc-api/constants';
 import { formatParams, getStatus } from './utils';
 import HistoricalDataActions from './actions';
 import HistoricalDataPeriodSelector from './period-selector';
 import HistoricalDataProgress from './progress';
 import HistoricalDataStatus from './status';
 import HistoricalDataSkipCheckbox from './skip-checkbox';
-import withSelect from '../../../wc-api/with-select';
 import './style.scss';
 
 class HistoricalDataLayout extends Component {
@@ -28,25 +27,16 @@ class HistoricalDataLayout extends Component {
 			dateFormat,
 			importDate,
 			inProgress,
-			onPeriodChange,
-			onDateChange,
-			onSkipChange,
-			onDeletePreviousData,
-			onReimportData,
-			onStartImport,
-			onStopImport,
+			lastImportStartTimestamp,
+			clearStatusAndTotalsCache,
 			ordersProgress,
 			ordersTotal,
+			onImportStarted,
 			period,
+			stopImport,
 			skipChecked,
+			status,
 		} = this.props;
-		const status = getStatus( {
-			customersProgress,
-			customersTotal,
-			inProgress,
-			ordersProgress,
-			ordersTotal,
-		} );
 
 		return (
 			<Fragment>
@@ -71,14 +61,11 @@ class HistoricalDataLayout extends Component {
 									<HistoricalDataPeriodSelector
 										dateFormat={ dateFormat }
 										disabled={ inProgress }
-										onPeriodChange={ onPeriodChange }
-										onDateChange={ onDateChange }
 										value={ period }
 									/>
 									<HistoricalDataSkipCheckbox
 										disabled={ inProgress }
 										checked={ skipChecked }
-										onChange={ onSkipChange }
 									/>
 									<HistoricalDataProgress
 										label={ __(
@@ -106,11 +93,12 @@ class HistoricalDataLayout extends Component {
 					</div>
 				</div>
 				<HistoricalDataActions
+					clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
+					dateFormat={ dateFormat }
 					importDate={ importDate }
-					onDeletePreviousData={ onDeletePreviousData }
-					onReimportData={ onReimportData }
-					onStartImport={ onStartImport }
-					onStopImport={ onStopImport }
+					lastImportStartTimestamp={ lastImportStartTimestamp }
+					onImportStarted={ onImportStarted }
+					stopImport={ stopImport }
 					status={ status }
 				/>
 			</Fragment>
@@ -119,88 +107,85 @@ class HistoricalDataLayout extends Component {
 }
 
 export default withSelect( ( select, props ) => {
-	const {
-		getImportStatus,
-		isGetImportStatusRequesting,
-		getImportTotals,
-	} = select( 'wc-api' );
+	const { getImportError, getImportStatus, getImportTotals } = select(
+		IMPORT_STORE_NAME
+	);
 	const {
 		activeImport,
+		cacheNeedsClearing,
 		dateFormat,
-		lastImportStartTimestamp,
-		lastImportStopTimestamp,
+		inProgress,
 		onImportStarted,
 		onImportFinished,
 		period,
+		startStatusCheckInterval,
 		skipChecked,
 	} = props;
 
-	const inProgress =
-		( typeof lastImportStartTimestamp !== 'undefined' &&
-			typeof lastImportStopTimestamp === 'undefined' ) ||
-		lastImportStartTimestamp > lastImportStopTimestamp;
-
 	const params = formatParams( dateFormat, period, skipChecked );
-	// Use timestamp to invalidate previous totals when the import finished/stopped
-	const { customers, orders } = getImportTotals(
-		params,
-		lastImportStopTimestamp
+	const { customers, orders, lastImportStartTimestamp } = getImportTotals(
+		params
 	);
-	const requirement = inProgress
-		? {
-				freshness: 3 * SECOND,
-				timeout: 3 * SECOND,
-		  }
-		: DEFAULT_REQUIREMENT;
 
-	// Use timestamp to invalidate previous status when a new import starts
 	const {
 		customers: customersStatus,
 		imported_from: importDate,
 		is_importing: isImporting,
 		orders: ordersStatus,
-	} = getImportStatus( lastImportStartTimestamp, requirement );
+	} = getImportStatus( lastImportStartTimestamp );
 	const { imported: customersProgress, total: customersTotal } =
 		customersStatus || {};
 	const { imported: ordersProgress, total: ordersTotal } = ordersStatus || {};
-	const isStatusLoading = isGetImportStatusRequesting(
-		lastImportStartTimestamp
+
+	const isError = Boolean(
+		getImportError( lastImportStartTimestamp ) || getImportError( params )
 	);
 
 	const hasImportStarted = Boolean(
-		! lastImportStartTimestamp &&
-			! isStatusLoading &&
-			! inProgress &&
-			isImporting === true
+		! lastImportStartTimestamp && ! inProgress && isImporting === true
 	);
 	if ( hasImportStarted ) {
 		onImportStarted();
 	}
+
 	const hasImportFinished = Boolean(
-		! isStatusLoading &&
-			inProgress &&
+		inProgress &&
+			! cacheNeedsClearing &&
 			isImporting === false &&
-			( ( customersProgress === customersTotal && customersTotal > 0 ) ||
-				( ordersProgress === ordersTotal && ordersTotal > 0 ) )
+			( customersTotal > 0 || ordersTotal > 0 ) &&
+			customersProgress === customersTotal &&
+			ordersProgress === ordersTotal
 	);
+
+	let response = {
+		customersTotal: customers,
+		isError,
+		ordersTotal: orders,
+	};
+
+	if ( activeImport ) {
+		response = {
+			cacheNeedsClearing,
+			customersProgress,
+			customersTotal: isNil( customersTotal )
+				? customers
+				: customersTotal,
+			inProgress,
+			isError,
+			ordersProgress,
+			ordersTotal: isNil( ordersTotal ) ? orders : ordersTotal,
+		};
+	}
+
+	const status = getStatus( response );
+
+	if ( status === 'initializing' ) {
+		startStatusCheckInterval();
+	}
+
 	if ( hasImportFinished ) {
 		onImportFinished();
 	}
 
-	if ( ! activeImport ) {
-		return {
-			customersTotal: customers,
-			importDate,
-			ordersTotal: orders,
-		};
-	}
-
-	return {
-		customersProgress,
-		customersTotal: isNil( customersTotal ) ? customers : customersTotal,
-		importDate,
-		inProgress,
-		ordersProgress,
-		ordersTotal: isNil( ordersTotal ) ? orders : ordersTotal,
-	};
+	return { ...response, importDate, status };
 } )( HistoricalDataLayout );

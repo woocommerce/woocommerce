@@ -57,6 +57,18 @@ describe( 'getStatus', () => {
 			} )
 		).toEqual( 'initializing' );
 	} );
+	it( 'returns `initializing` when the process is "inProgress" and the cache is not clear', () => {
+		expect(
+			getStatus( {
+				cacheNeedsClearing: true,
+				customersProgress: 1,
+				customersTotal: 1,
+				inProgress: true,
+				ordersProgress: 1,
+				ordersTotal: 1,
+			} )
+		).toEqual( 'initializing' );
+	} );
 
 	it( 'returns `customers` when importing customers', () => {
 		expect(
