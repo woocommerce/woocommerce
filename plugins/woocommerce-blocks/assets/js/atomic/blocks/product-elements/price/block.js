@@ -106,7 +106,7 @@ const Block = ( {
 				'wc-block-components-product-price',
 				{
 					[ `${ parentClassName }__product-price` ]: parentClassName,
-					[ `wc-block-components-product-price__align-${ align }` ]:
+					[ `wc-block-components-product-price--align-${ align }` ]:
 						align && isFeaturePluginBuild(),
 				}
 			) }
@@ -159,7 +159,7 @@ const PriceRange = ( { currency, minAmount, maxAmount, classes, style } ) => {
 				'wc-block-components-product-price__value',
 				{
 					[ `${ parentClassName }__product-price__value` ]: parentClassName,
-					[ classes ]: isFeaturePluginBuild()
+					[ classes ]: isFeaturePluginBuild(),
 				}
 			) }
 			style={ isFeaturePluginBuild() ? style : {} }
@@ -194,7 +194,8 @@ const SalePrice = ( {
 					'wc-block-components-product-price__regular',
 					{
 						[ `${ parentClassName }__product-price__regular` ]: parentClassName,
-						[ classes ]: isFeaturePluginBuild() }
+						[ classes ]: isFeaturePluginBuild(),
+					}
 				) }
 				style={ isFeaturePluginBuild() ? style : {} }
 			>
@@ -209,7 +210,8 @@ const SalePrice = ( {
 					'is-discounted',
 					{
 						[ `${ parentClassName }__product-price__value` ]: parentClassName,
-						[ saleClasses ]: isFeaturePluginBuild() }
+						[ saleClasses ]: isFeaturePluginBuild(),
+					}
 				) }
 				style={ isFeaturePluginBuild() ? saleStyle : {} }
 			>
