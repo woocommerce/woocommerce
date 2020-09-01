@@ -67,7 +67,8 @@ jQuery( function( $ ) {
 		var $html       = $.parseHTML( html_str );
 		var $new_form   = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
-		var $notices    = $( '.entry-content', $html ).find( '.woocommerce-error, .woocommerce-message, .woocommerce-info' );
+		var $notices    = $( 'div.woocommerce-notices-wrapper:last', $html )
+			.find( '.woocommerce-error, .woocommerce-message, .woocommerce-info' );
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
@@ -134,7 +135,7 @@ jQuery( function( $ ) {
 	 */
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
-			$target = $( '.woocommerce-notices-wrapper:first' ) ||
+			$target = $( 'div.woocommerce-notices-wrapper:first' ) ||
 				$( '.cart-empty' ).closest( '.woocommerce' ) ||
 				$( '.woocommerce-cart-form' );
 		}
@@ -306,7 +307,7 @@ jQuery( function( $ ) {
 
 			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 
-			var $notices = $( '.entry-content .woocommerce-error, .entry-content .woocommerce-message, .entry-content .woocommerce-info');
+			var $notices = $( '.woocommerce-notices-wrapper:last').find( '.woocommerce-error, .woocommerce-message, .woocommerce-info');
 			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
