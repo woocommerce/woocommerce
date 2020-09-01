@@ -200,31 +200,41 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Expand meta_data to include user-friendly values.
 		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
 		$data['meta_data'] = array_map(
-			array( $this, 'clean_formatted_order_item_meta_data' ),
-			$formatted_meta_data,
-			array_keys( $formatted_meta_data )
+			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
+			$data['meta_data'],
+			array_fill( 0, count( $data['meta_data'] ), $formatted_meta_data )
 		);
 
 		return $data;
 	}
 
 	/**
-	 * Sanitizes an object from the array returned by {@link WC_Order_Item::get_formatted_meta_data} and includes
-	 * the {@link WC_Meta_Data} `id` in the resulting array.
+	 * Merge the `$formatted_meta_data` `display_key` and `display_value` attribute values into the corresponding
+	 * {@link WC_Meta_Data}. Returns the merged array.
 	 *
-	 * @param Object  $meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
-	 *        This is expected to have the properties `key`, `value`, `display_key`, and `display_value`.
-	 * @param integer $meta_data_id The id of the {@link WC_Meta_Data}.
+	 * @param WC_Meta_Data $meta_item An object from {@link WC_Order_Item::get_meta_data()}.
+	 * @param Object[]     $formatted_meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 * The keys are the IDs of {@link WC_Meta_Data}.
+	 *
 	 * @return array
 	 */
-	private function clean_formatted_order_item_meta_data( $meta_data, $meta_data_id ) {
-		return array(
-			'id' => $meta_data_id,
-			'key' => $meta_data->key,
-			'value' => $meta_data->value,
-			'display_key' => wc_clean( $meta_data->display_key ),
-			'display_value' => wc_clean( $meta_data->display_value ),
+	private function merge_meta_item_with_formatted_meta_display_attributes( $meta_item, $formatted_meta_data ) {
+		$result = array(
+			'id' => $meta_item->id,
+			'key' => $meta_item->key,
+			'value' => $meta_item->value,
+			'display_key' => null,
+			'display_value' => null,
 		);
+
+		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
+			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
+
+			$result['display_key'] = wc_clean( $formatted_meta_item->display_key );
+			$result['display_value'] = wc_clean( $formatted_meta_item->display_value );
+		}
+
+		return $result;
 	}
 
 	/**
