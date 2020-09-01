@@ -109,3 +109,4 @@ export const CHECKOUT_ALLOWS_SIGNUP = getSetting(
 	'checkoutAllowsSignup',
 	false
 );
+export const LOGIN_URL = getSetting( 'loginUrl', '/wp-login.php' );

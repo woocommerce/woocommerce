@@ -187,6 +187,7 @@ class Assets {
 				'baseLocation'                  => wc_get_base_location(),
 				'woocommerceBlocksPhase'        => WOOCOMMERCE_BLOCKS_PHASE,
 				'hasDarkEditorStyleSupport'     => current_theme_supports( 'dark-editor-style' ),
+				'loginUrl'                      => wp_login_url(),
 
 				/*
 				 * translators: If your word count is based on single characters (e.g. East Asian characters),
