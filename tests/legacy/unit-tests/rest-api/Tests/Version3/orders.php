@@ -316,8 +316,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
+
 		$shipping = current( $order->get_items( 'shipping' ) );
-		$expected = array(
+		$expected_shipping_line = array(
 			'id'           => $shipping->get_id(),
 			'method_title' => $shipping->get_method_title(),
 			'method_id'    => $shipping->get_method_id(),
@@ -325,9 +326,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'total'        => wc_format_decimal( $shipping->get_total(), '' ),
 			'total_tax'    => wc_format_decimal( $shipping->get_total_tax(), '' ),
 			'taxes'        => array(),
-			'meta_data'    => $shipping->get_meta_data(),
 		);
-		$this->assertEquals( $expected, $data['shipping_lines'][0] );
+		foreach ( $expected_shipping_line as $key => $value ) {
+			$this->assertEquals( $value, $data['shipping_lines'][0][ $key ] );
+		}
 	}
 
 	/**
