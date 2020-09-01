@@ -34,7 +34,7 @@ const Block = ( { className, align } ) => {
 
 	const alignClass =
 		typeof align === 'string'
-			? `wc-block-components-product-sale-badge--align${ align }`
+			? `wc-block-components-product-sale-badge--align-${ align }`
 			: '';
 
 	return (
