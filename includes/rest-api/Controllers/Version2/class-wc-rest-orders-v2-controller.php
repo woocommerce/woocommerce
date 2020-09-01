@@ -1313,12 +1313,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 											'context'     => array( 'view', 'edit' ),
 										),
 										'display_key' => array(
-											'description' => __( 'Meta key for UI display.', 'woocommerce-rest-api' ),
+											'description' => __( 'Meta key for UI display.', 'woocommerce' ),
 											'type' => 'string',
 											'context' => array( 'view', 'edit' ),
 										),
 										'display_value' => array(
-											'description' => __( 'Meta value for UI display.', 'woocommerce-rest-api' ),
+											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
 											'type' => 'string',
 											'context' => array( 'view', 'edit' ),
 										),
