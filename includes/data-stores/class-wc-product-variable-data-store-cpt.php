@@ -632,32 +632,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	}
 
 	/**
-	 * Sync attribute metadata when variation attributes are added or removed.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @param array      $previous_variation_attributes Names of the variation attributes the product had before saving.
-	 * @param array      $current_variation_attributes Names of the variation attributes the product has now.
-	 */
-	public function sync_meta_for_variation_attributes( $product, $previous_variation_attributes, $current_variation_attributes ) {
-		$added_attributes   = array_diff( $current_variation_attributes, $previous_variation_attributes );
-		$removed_attributes = array_diff( $previous_variation_attributes, $current_variation_attributes );
-
-		$variation_ids = $product->get_children();
-
-		foreach ( $added_attributes as $attribute ) {
-			foreach ( $variation_ids as $variation_id ) {
-				update_post_meta( $variation_id, 'attribute_' . $attribute, '' );
-			}
-		}
-
-		foreach ( $removed_attributes as $attribute ) {
-			foreach ( $variation_ids as $variation_id ) {
-				delete_post_meta( $variation_id, 'attribute_' . $attribute );
-			}
-		}
-	}
-
-	/**
 	 * Delete variations of a product.
 	 *
 	 * @param int  $product_id Product ID.
