@@ -295,7 +295,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function include_extended_info( &$orders_data, $query_args ) {
 		$mapped_orders    = $this->map_array_by_key( $orders_data, 'order_id' );
 		$products         = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
-		$mapped_products  = $this->map_array_by_key( $products, 'product_id' );
 		$coupons          = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
 		$customers        = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers = $this->map_array_by_key( $customers, 'customer_id' );
@@ -307,7 +306,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			$mapped_data[ $product['order_id'] ]['products'][] = array(
-				'id'       => $product['product_id'],
+				'id'       => '0' === $product['variation_id'] ? $product['product_id'] : $product['variation_id'],
 				'name'     => $product['product_name'],
 				'quantity' => $product['product_quantity'],
 			);
@@ -364,12 +363,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$included_order_ids         = implode( ',', $order_ids );
 
 		$products = $wpdb->get_results(
-			"SELECT order_id, ID as product_id, post_title as product_name, product_qty as product_quantity
-				FROM {$wpdb->posts}
-				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->posts}.ID
-				WHERE
-					order_id IN ({$included_order_ids})
-				",
+			"SELECT
+				order_id,
+				product_id,
+				variation_id,
+				post_title as product_name,
+				product_qty as product_quantity
+			FROM {$wpdb->posts}
+			JOIN
+				{$order_product_lookup_table}
+				ON {$wpdb->posts}.ID = (
+					CASE WHEN variation_id > 0
+						THEN variation_id
+						ELSE product_id
+					END
+				)
+			WHERE
+				order_id IN ({$included_order_ids})
+			",
 			ARRAY_A
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
