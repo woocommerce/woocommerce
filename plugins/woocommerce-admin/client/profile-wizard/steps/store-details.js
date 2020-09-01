@@ -38,6 +38,7 @@ class StoreDetails extends Component {
 
 		this.state = {
 			showUsageModal: false,
+			skipping: false,
 		};
 
 		// Check if a store address is set so that we don't default
@@ -71,7 +72,10 @@ class StoreDetails extends Component {
 	}
 
 	onSubmit() {
-		this.setState( { showUsageModal: true } );
+		this.setState( {
+			showUsageModal: true,
+			skipping: false,
+		} );
 	}
 
 	async onContinue( values ) {
@@ -159,7 +163,7 @@ class StoreDetails extends Component {
 	}
 
 	render() {
-		const { showUsageModal } = this.state;
+		const { showUsageModal, skipping } = this.state;
 		const { skipProfiler } = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
@@ -210,12 +214,17 @@ class StoreDetails extends Component {
 						<Card>
 							{ showUsageModal && (
 								<UsageModal
-									onContinue={ () =>
-										this.onContinue( values )
-									}
+									onContinue={ () => {
+										if ( skipping ) {
+											skipProfiler();
+										} else {
+											this.onContinue( values );
+										}
+									} }
 									onClose={ () =>
 										this.setState( {
 											showUsageModal: false,
+											skipping: false,
 										} )
 									}
 								/>
@@ -265,7 +274,11 @@ class StoreDetails extends Component {
 						isLink
 						className="woocommerce-profile-wizard__footer-link"
 						onClick={ () => {
-							skipProfiler();
+							this.setState( {
+								showUsageModal: true,
+								skipping: true,
+							} );
+							return false;
 						} }
 					>
 						{ __( 'Skip setup wizard', 'woocommerce-admin' ) }
