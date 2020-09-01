@@ -33,7 +33,7 @@ class SelectFilter extends Component {
 							config,
 							returnedOptions
 						);
-						onFilterChange( filter.key, 'value', value );
+						onFilterChange( 'value', value );
 					}
 				} );
 		}
@@ -74,7 +74,7 @@ class SelectFilter extends Component {
 			isEnglish,
 		} = this.props;
 		const { options } = this.state;
-		const { key, rule, value } = filter;
+		const { rule, value } = filter;
 		const { labels, rules } = config;
 		const children = interpolateComponents( {
 			mixedString: labels.title,
@@ -88,7 +88,7 @@ class SelectFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, key, 'rule' ) }
+						onChange={ partial( onFilterChange, 'rule' ) }
 						aria-label={ labels.rule }
 					/>
 				),
@@ -100,11 +100,7 @@ class SelectFilter extends Component {
 						) }
 						options={ options }
 						value={ value }
-						onChange={ partial(
-							onFilterChange,
-							filter.key,
-							'value'
-						) }
+						onChange={ partial( onFilterChange, 'value' ) }
 						aria-label={ labels.filter }
 					/>
 				) : (

@@ -11,7 +11,7 @@ import {
 import {
 	flattenFilters,
 	getActiveFiltersFromQuery,
-	getUrlKey,
+	getQueryFromActiveFilters,
 } from '@woocommerce/navigation';
 
 /**
@@ -114,18 +114,18 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 			return {};
 		}
 
-		return activeFilters
-			.map( ( filter ) =>
+		const filterQuery = getQueryFromActiveFilters(
+			activeFilters.map( ( filter ) =>
 				timeStampFilterDates( advancedFilters, filter )
-			)
-			.reduce(
-				( result, activeFilter ) => {
-					const { key, rule, value } = activeFilter;
-					result[ getUrlKey( key, rule ) ] = value;
-					return result;
-				},
-				{ match: query.match || 'all' }
-			);
+			),
+			{},
+			advancedFilters.filters
+		);
+
+		return {
+			match: query.match || 'all',
+			...filterQuery,
+		};
 	}
 
 	const filter = find( flattenFilters( config.filters ), {

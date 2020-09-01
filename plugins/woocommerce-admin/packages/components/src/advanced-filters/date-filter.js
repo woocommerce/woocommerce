@@ -40,7 +40,6 @@ class DateFilter extends Component {
 
 		this.onSingleDateChange = this.onSingleDateChange.bind( this );
 		this.onRangeDateChange = this.onRangeDateChange.bind( this );
-		this.onRuleChange = this.onRuleChange.bind( this );
 	}
 
 	getBetweenString() {
@@ -95,16 +94,16 @@ class DateFilter extends Component {
 	}
 
 	onSingleDateChange( { date, text, error } ) {
-		const { filter, onFilterChange } = this.props;
+		const { onFilterChange } = this.props;
 		this.setState( { before: date, beforeText: text, beforeError: error } );
 
 		if ( date ) {
-			onFilterChange( filter.key, 'value', date.format( isoDateFormat ) );
+			onFilterChange( 'value', date.format( isoDateFormat ) );
 		}
 	}
 
 	onRangeDateChange( input, { date, text, error } ) {
-		const { filter, onFilterChange } = this.props;
+		const { onFilterChange } = this.props;
 
 		this.setState( {
 			[ input ]: date,
@@ -128,10 +127,7 @@ class DateFilter extends Component {
 			}
 
 			if ( nextAfter && nextBefore ) {
-				onFilterChange( filter.key, 'value', [
-					nextAfter,
-					nextBefore,
-				] );
+				onFilterChange( 'value', [ nextAfter, nextBefore ] );
 			}
 		}
 	}
@@ -140,8 +136,20 @@ class DateFilter extends Component {
 		return moment().isBefore( moment( dateString ), 'day' );
 	}
 
-	getFilterInputs() {
-		const { filter } = this.props;
+	getFormControl( { date, error, onUpdate, text } ) {
+		return (
+			<DatePicker
+				date={ date }
+				dateFormat={ dateFormat }
+				error={ error }
+				isInvalidDate={ this.isFutureDate }
+				onUpdate={ onUpdate }
+				text={ text }
+			/>
+		);
+	}
+
+	getRangeInput() {
 		const {
 			before,
 			beforeText,
@@ -150,70 +158,50 @@ class DateFilter extends Component {
 			afterText,
 			afterError,
 		} = this.state;
-
-		if ( filter.rule === 'between' ) {
-			return interpolateComponents( {
-				mixedString: this.getBetweenString(),
-				components: {
-					after: (
-						<DatePicker
-							date={ after }
-							text={ afterText }
-							error={ afterError }
-							onUpdate={ partial(
-								this.onRangeDateChange,
-								'after'
-							) }
-							dateFormat={ dateFormat }
-							isInvalidDate={ this.isFutureDate }
-						/>
-					),
-					before: (
-						<DatePicker
-							date={ before }
-							text={ beforeText }
-							error={ beforeError }
-							onUpdate={ partial(
-								this.onRangeDateChange,
-								'before'
-							) }
-							dateFormat={ dateFormat }
-							isInvalidDate={ this.isFutureDate }
-						/>
-					),
-					span: <span className="separator" />,
-				},
-			} );
-		}
-
-		return (
-			<DatePicker
-				date={ before }
-				text={ beforeText }
-				error={ beforeError }
-				onUpdate={ this.onSingleDateChange }
-				dateFormat={ dateFormat }
-				isInvalidDate={ this.isFutureDate }
-			/>
-		);
+		return interpolateComponents( {
+			mixedString: this.getBetweenString(),
+			components: {
+				after: this.getFormControl( {
+					date: after,
+					error: afterError,
+					onUpdate: partial( this.onRangeDateChange, 'after' ),
+					text: afterText,
+				} ),
+				before: this.getFormControl( {
+					date: before,
+					error: beforeError,
+					onUpdate: partial( this.onRangeDateChange, 'before' ),
+					text: beforeText,
+				} ),
+				span: <span className="separator" />,
+			},
+		} );
 	}
 
-	onRuleChange( value ) {
-		const { onFilterChange, filter, updateFilter } = this.props;
-		const { before } = this.state;
-		if ( filter.rule === 'between' && value !== 'between' ) {
-			updateFilter( {
-				key: filter.key,
-				rule: value,
-				value: before ? before.format( isoDateFormat ) : undefined,
-			} );
-		} else {
-			onFilterChange( filter.key, 'rule', value );
+	getFilterInputs() {
+		const { filter } = this.props;
+		const { before, beforeText, beforeError } = this.state;
+
+		if ( filter.rule === 'between' ) {
+			return this.getRangeInput();
 		}
+
+		return this.getFormControl( {
+			date: before,
+			error: beforeError,
+			onUpdate: this.onSingleDateChange,
+			text: beforeText,
+		} );
 	}
 
 	render() {
-		const { className, config, filter, isEnglish } = this.props;
+		const {
+			className,
+			config,
+			filter,
+			isEnglish,
+			onFilterChange,
+		} = this.props;
 		const { rule } = filter;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
@@ -229,7 +217,7 @@ class DateFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ this.onRuleChange }
+						onChange={ partial( onFilterChange, 'rule' ) }
 						aria-label={ labels.rule }
 					/>
 				),

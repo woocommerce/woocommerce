@@ -79,6 +79,67 @@ describe( 'getActiveFiltersFromQuery', () => {
 		expect( with_no_rules.value ).toEqual( 'pending' );
 	} );
 
+	it( 'should handle multiple filter instances', () => {
+		const filterConfig = {
+			status: {
+				allowMultiple: true,
+				input: {
+					component: 'SelectControl',
+				},
+			},
+			attribute: {
+				allowMultiple: true,
+				rules: [
+					{
+						value: 'is',
+					},
+					{
+						value: 'is_not',
+					},
+				],
+				input: {
+					component: 'ProductAttribute',
+				},
+			},
+		};
+		const query = {
+			status: [ 'pending', 'processing' ],
+			attribute_is: [ [ 1, 2 ] ],
+			attribute_is_not: [
+				[ 1, 3 ],
+				[ 2, 4 ],
+			],
+		};
+
+		const activeFilters = getActiveFiltersFromQuery( query, filterConfig );
+
+		expect( activeFilters ).toEqual( [
+			{
+				key: 'status',
+				value: 'pending',
+			},
+			{
+				key: 'status',
+				value: 'processing',
+			},
+			{
+				key: 'attribute',
+				rule: 'is',
+				value: [ 1, 2 ],
+			},
+			{
+				key: 'attribute',
+				rule: 'is_not',
+				value: [ 1, 3 ],
+			},
+			{
+				key: 'attribute',
+				rule: 'is_not',
+				value: [ 2, 4 ],
+			},
+		] );
+	} );
+
 	it( 'should ignore irrelevant query parameters', () => {
 		const query = {
 			with_select: 'pending', // no rule associated
@@ -161,6 +222,71 @@ describe( 'getQueryFromActiveFilters', () => {
 		expect( nextQuery.valid_date_between ).toBeDefined();
 		expect( nextQuery.invalid_date_1_between ).toBeUndefined();
 		expect( nextQuery.invalid_date_2_between ).toBeUndefined();
+	} );
+
+	it( 'should handle filters with multiple instances', () => {
+		const filterConfig = {
+			status: {
+				allowMultiple: true,
+				input: {
+					component: 'SelectControl',
+				},
+			},
+			attribute: {
+				allowMultiple: true,
+				rules: [
+					{
+						value: 'is',
+					},
+					{
+						value: 'is_not',
+					},
+				],
+				input: {
+					component: 'ProductAttribute',
+				},
+			},
+		};
+		const activeFilters = [
+			{
+				key: 'status',
+				value: 'pending',
+			},
+			{
+				key: 'status',
+				value: 'processing',
+			},
+			{
+				key: 'attribute',
+				rule: 'is',
+				value: [ 1, 2 ],
+			},
+			{
+				key: 'attribute',
+				rule: 'is_not',
+				value: [ 1, 3 ],
+			},
+			{
+				key: 'attribute',
+				rule: 'is_not',
+				value: [ 2, 4 ],
+			},
+		];
+		const query = {};
+		const nextQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			filterConfig
+		);
+
+		expect( nextQuery ).toEqual( {
+			status: [ 'pending', 'processing' ],
+			attribute_is: [ [ 1, 2 ] ],
+			attribute_is_not: [
+				[ 1, 3 ],
+				[ 2, 4 ],
+			],
+		} );
 	} );
 } );
 

@@ -1,3 +1,7 @@
+# Unreleased Changes
+
+-   Support multiple advanced filter instances in getActiveFiltersFromQuery() and getQueryFromActiveFilters().
+
 # 5.0.0
 
 -   `getPersistedQuery` Add a filter for extensions to add a persisted query, `woocommerce_admin_persisted_queries`.

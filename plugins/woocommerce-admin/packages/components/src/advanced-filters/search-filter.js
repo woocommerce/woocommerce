@@ -70,9 +70,9 @@ class SearchFilter extends Component {
 		this.setState( {
 			selected: values,
 		} );
-		const { filter, onFilterChange } = this.props;
+		const { onFilterChange } = this.props;
 		const idList = values.map( ( value ) => value.key ).join( ',' );
-		onFilterChange( filter.key, 'value', idList );
+		onFilterChange( 'value', idList );
 	}
 
 	getScreenReaderText( filter, config ) {
@@ -106,7 +106,7 @@ class SearchFilter extends Component {
 			isEnglish,
 		} = this.props;
 		const { selected } = this.state;
-		const { key, rule } = filter;
+		const { rule } = filter;
 		const { input, labels, rules } = config;
 		const children = interpolateComponents( {
 			mixedString: labels.title,
@@ -120,7 +120,7 @@ class SearchFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, key, 'rule' ) }
+						onChange={ partial( onFilterChange, 'rule' ) }
 						aria-label={ labels.rule }
 					/>
 				),

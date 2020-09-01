@@ -1,5 +1,4 @@
-Advanced Filters
-===
+# Advanced Filters
 
 Displays a configurable set of filters which can modify query parameters. Display, behavior, and types of filters can be designated by a configuration object.
 
@@ -20,10 +19,16 @@ const config = {
 			labels: {
 				add: __( 'Order Status', 'woocommerce-admin' ),
 				remove: __( 'Remove order status filter', 'woocommerce-admin' ),
-				rule: __( 'Select an order status filter match', 'woocommerce-admin' ),
+				rule: __(
+					'Select an order status filter match',
+					'woocommerce-admin'
+				),
 				// A sentence describing an Order Status filter
 				// See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
-				title: __( 'Order Status {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				title: __(
+					'Order Status {{rule /}} {{filter /}}',
+					'woocommerce-admin'
+				),
 				filter: __( 'Select an order status', 'woocommerce-admin' ),
 			},
 			rules: [
@@ -44,11 +49,12 @@ const config = {
 			],
 			input: {
 				component: 'SelectControl',
-				options: Object.keys( orderStatuses ).map( key => ( {
+				options: Object.keys( orderStatuses ).map( ( key ) => ( {
 					value: key,
 					label: orderStatuses[ key ],
 				} ) ),
 			},
+			allowMultiple: false, // Set to true to allow multiple instances of this filter.
 		},
 	},
 };
@@ -60,18 +66,16 @@ Taking the above configuration as an example, applying the filter will result in
 
 ### Props
 
-Name | Type | Default | Description
---- | --- | --- | ---
-`config` | Object | `null` | (required) The configuration object required to render filters. See example above.
-`path` | String | `null` | (required) Name of this filter, used in translations.
-`query` | Object | `null` | The query string represented in object form.
-`onAdvancedFilterAction` | Function | `null` | Function to be called after an advanced filter action has been taken.
-`siteLocale` | string | `'en_US'` | The siteLocale for the site.
-`currency` | Object | `null` | (required) The currency instance for the site (@woocommerce/currency).
-
+| Name                     | Type     | Default   | Description                                                                        |
+| ------------------------ | -------- | --------- | ---------------------------------------------------------------------------------- |
+| `config`                 | Object   | `null`    | (required) The configuration object required to render filters. See example above. |
+| `path`                   | String   | `null`    | (required) Name of this filter, used in translations.                              |
+| `query`                  | Object   | `null`    | The query string represented in object form.                                       |
+| `onAdvancedFilterAction` | Function | `null`    | Function to be called after an advanced filter action has been taken.              |
+| `siteLocale`             | string   | `'en_US'` | The siteLocale for the site.                                                       |
+| `currency`               | Object   | `null`    | (required) The currency instance for the site (@woocommerce/currency).             |
 
 ## Input Components
-
 
 ### SelectControl
 
@@ -98,7 +102,6 @@ const config = {
 
 `options`: An array of objects with `key` and `label` properties.
 
-
 ### Search
 
 Render an input for users to search and select using an autocomplete.
@@ -123,7 +126,6 @@ const config = {
 
 `type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/components/src/search).
 `getLabels`: A function returning a Promise resolving to an array of objects with `id` and `label` properties.
-
 
 ### Date
 
@@ -155,7 +157,6 @@ const config = {
 	},
 };
 ```
-
 
 ### Numeric Value
 

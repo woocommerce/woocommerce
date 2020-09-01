@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { compact, find, get, omit } from 'lodash';
+import { find, get, omit } from 'lodash';
 
 /**
  * Collapse an array of filter values with subFilters into a 1-dimensional array.
@@ -40,35 +40,64 @@ export function flattenFilters( filters ) {
  * @return {Array} - array of activeFilters
  */
 export function getActiveFiltersFromQuery( query, config ) {
-	return compact(
-		Object.keys( config ).map( ( configKey ) => {
-			const filter = config[ configKey ];
-			if ( filter.rules ) {
-				const match = find( filter.rules, ( rule ) => {
-					return query.hasOwnProperty(
-						getUrlKey( configKey, rule.value )
-					);
-				} );
+	return Object.keys( config ).reduce( ( activeFilters, configKey ) => {
+		const filter = config[ configKey ];
 
-				if ( match ) {
-					const value = query[ getUrlKey( configKey, match.value ) ];
-					return {
+		if ( filter.rules ) {
+			// Get all rules found in the query string.
+			const matches = filter.rules.filter( ( rule ) =>
+				query.hasOwnProperty( getUrlKey( configKey, rule.value ) )
+			);
+
+			if ( matches.length ) {
+				if ( filter.allowMultiple ) {
+					// If rules were found in the query string, and this filter supports
+					// multiple instances, add all matches to the active filters array.
+					matches.forEach( ( match ) => {
+						const value =
+							query[ getUrlKey( configKey, match.value ) ];
+
+						value.forEach( ( filterValue ) => {
+							activeFilters.push( {
+								key: configKey,
+								rule: match.value,
+								value: filterValue,
+							} );
+						} );
+					} );
+				} else {
+					// If the filter is a single instance, just process the first rule match.
+					const value =
+						query[ getUrlKey( configKey, matches[ 0 ].value ) ];
+					activeFilters.push( {
 						key: configKey,
-						rule: match.value,
+						rule: matches[ 0 ].value,
 						value,
-					};
+					} );
 				}
-				return null;
 			}
-			if ( query[ configKey ] ) {
-				return {
+		} else if ( query[ configKey ] ) {
+			// If the filter doesn't have rules, but allows multiples.
+			if ( filter.allowMultiple ) {
+				const value = query[ configKey ];
+
+				value.forEach( ( filterValue ) => {
+					activeFilters.push( {
+						key: configKey,
+						value: filterValue,
+					} );
+				} );
+			} else {
+				// Filter with no rules and only one instance.
+				activeFilters.push( {
 					key: configKey,
 					value: query[ configKey ],
-				};
+				} );
 			}
-			return null;
-		} )
-	);
+		}
+
+		return activeFilters;
+	}, [] );
 }
 
 /**
@@ -121,7 +150,16 @@ export function getQueryFromActiveFilters( activeFilters, query, config ) {
 		}
 
 		if ( filter.value ) {
-			data[ getUrlKey( filter.key, filter.rule ) ] = filter.value;
+			const urlKey = getUrlKey( filter.key, filter.rule );
+
+			if ( config[ filter.key ] && config[ filter.key ].allowMultiple ) {
+				if ( ! data.hasOwnProperty( urlKey ) ) {
+					data[ urlKey ] = [];
+				}
+				data[ urlKey ].push( filter.value );
+			} else {
+				data[ urlKey ] = filter.value;
+			}
 		}
 		return data;
 	}, {} );

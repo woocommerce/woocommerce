@@ -25,7 +25,9 @@ const getScreenReaderText = ( {
 	selectedAttributeTerm,
 } ) => {
 	if (
+		! attributes ||
 		attributes.length === 0 ||
+		! attributeTerms ||
 		attributeTerms.length === 0 ||
 		selectedAttribute === '' ||
 		selectedAttributeTerm === ''
@@ -39,12 +41,15 @@ const getScreenReaderText = ( {
 		  ) || {}
 		: {};
 
-	const { label: attributeName } = attributes.find(
-		( attr ) => attr.key === selectedAttribute
-	);
-	const { label: attributeTerm } = attributeTerms.find(
-		( term ) => term.key === selectedAttributeTerm
-	);
+	const { label: attributeName } =
+		attributes.find( ( attr ) => attr.key === selectedAttribute ) || {};
+	const { label: attributeTerm } =
+		attributeTerms.find( ( term ) => term.key === selectedAttributeTerm ) ||
+		{};
+
+	if ( ! attributeName || ! attributeTerm ) {
+		return '';
+	}
 
 	const filterStr = interpolateComponents( {
 		/* eslint-disable-next-line max-len */
@@ -74,7 +79,7 @@ const getScreenReaderText = ( {
 
 const AttributeFilter = ( props ) => {
 	const { className, config, filter, isEnglish, onFilterChange } = props;
-	const { key: filterKey, rule, value } = filter;
+	const { rule, value } = filter;
 	const { labels, rules } = config;
 
 	const [ attributes, setAttributes ] = useState( [] );
@@ -104,14 +109,14 @@ const AttributeFilter = ( props ) => {
 		}
 	}, [ value ] );
 
-	const [ attributeTerms, setAttributeTerms ] = useState( [] );
+	const [ attributeTerms, setAttributeTerms ] = useState( false );
 
 	// Fetch all product attributes on mount.
 	useEffect( () => {
 		if ( ! selectedAttribute ) {
 			return;
 		}
-		setAttributeTerms( [] );
+		setAttributeTerms( false );
 		apiFetch( {
 			path: `/wc/v3/products/attributes/${ selectedAttribute }/terms`,
 		} )
@@ -164,11 +169,7 @@ const AttributeFilter = ( props ) => {
 								) }
 								options={ rules }
 								value={ rule }
-								onChange={ partial(
-									onFilterChange,
-									filterKey,
-									'rule'
-								) }
+								onChange={ partial( onFilterChange, 'rule' ) }
 								aria-label={ labels.rule }
 							/>
 						),
@@ -197,11 +198,7 @@ const AttributeFilter = ( props ) => {
 											}
 											setSelectedAttribute( attr );
 											setSelectedAttributeTerm( '' );
-											onFilterChange(
-												filterKey,
-												'value',
-												[ attr ]
-											);
+											onFilterChange( 'value', [ attr ] );
 										} }
 									/>
 								) : (
@@ -209,7 +206,7 @@ const AttributeFilter = ( props ) => {
 								) }
 								{ attributes.length > 0 &&
 									selectedAttribute !== '' &&
-									( attributeTerms.length ? (
+									( attributeTerms !== false ? (
 										<Fragment>
 											<span className="woocommerce-filters-advanced__attribute-field-separator">
 												=
@@ -236,14 +233,10 @@ const AttributeFilter = ( props ) => {
 													setSelectedAttributeTerm(
 														term
 													);
-													onFilterChange(
-														filterKey,
-														'value',
-														[
-															selectedAttribute,
-															term,
-														]
-													);
+													onFilterChange( 'value', [
+														selectedAttribute,
+														term,
+													] );
 												} }
 											/>
 										</Fragment>
