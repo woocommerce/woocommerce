@@ -127,21 +127,21 @@ class WC_Products_Tracking {
 	public function track_product_updated_client_side( $post ) {
 		wc_enqueue_js(
 			"
-			if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
-				var initialStockValue = $( '#_stock' ).val();
+			if ( jQuery( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
+				var initialStockValue = jQuery( '#_stock' ).val();
 				var hasRecordedEvent = false;
 
-				$( '#publish' ).click( function() {
+				jQuery( '#publish' ).click( function() {
 					if ( hasRecordedEvent ) {
 						return;
 					}
 
-					var currentStockValue = $( '#_stock' ).val();
+					var currentStockValue = jQuery( '#_stock' ).val();
 					var properties = {
-						product_type:			$( '#product-type' ).val(),
-						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
-						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
-						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Y' : 'N',
+						product_type:			jQuery( '#product-type' ).val(),
+						is_virtual:				jQuery( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
+						is_downloadable:		jQuery( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
+						manage_stock:			jQuery( '#_manage_stock' ).is( ':checked' ) ? 'Y' : 'N',
 						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Y' : 'N',
 					};
 

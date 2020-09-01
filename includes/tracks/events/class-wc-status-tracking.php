@@ -37,7 +37,7 @@ class WC_Status_Tracking {
 			if ( 'status' === $tab ) {
 				wc_enqueue_js(
 					"
-					$( 'a.debug-report' ).click( function() {
+					jQuery( 'a.debug-report' ).click( function() {
 						window.wcTracks.recordEvent( 'status_view_reports' );
 					} );
 				"

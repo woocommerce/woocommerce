@@ -26,7 +26,7 @@ class WC_Coupons_Tracking {
 			"
 			function onApplyBulkActions( event ) {
 				var id = event.data.id;
-				var action = $( '#' + id ).val();
+				var action = jQuery( '#' + id ).val();
 				
 				if ( action && '-1' !== action ) {
 					window.wcTracks.recordEvent( 'coupons_view_bulk_action', {
@@ -34,8 +34,8 @@ class WC_Coupons_Tracking {
 					} );
 				}
 			}
-			$( '#doaction' ).on( 'click', { id: 'bulk-action-selector-top' }, onApplyBulkActions );
-			$( '#doaction2' ).on( 'click', { id: 'bulk-action-selector-bottom' }, onApplyBulkActions );
+			jQuery( '#doaction' ).on( 'click', { id: 'bulk-action-selector-top' }, onApplyBulkActions );
+			jQuery( '#doaction2' ).on( 'click', { id: 'bulk-action-selector-bottom' }, onApplyBulkActions );
 		"
 		);
 	}
