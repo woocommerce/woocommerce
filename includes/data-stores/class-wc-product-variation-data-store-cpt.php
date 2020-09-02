@@ -499,6 +499,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			// Set the attributes as regular taxonomy terms too...
 			$variation_attributes = array_keys( $product->get_variation_attributes( false ) );
 			foreach ( $attributes as $name => $value ) {
+				$value = strval( $value );
 				if ( '' !== $value && in_array( $name, $variation_attributes, true ) && term_exists( $value, $name ) ) {
 					wp_set_post_terms( $product_id, array( $value ), $name );
 				} elseif ( taxonomy_exists( $name ) ) {
