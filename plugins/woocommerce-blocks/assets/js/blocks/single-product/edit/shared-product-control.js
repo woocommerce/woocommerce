@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import ProductControl from '@woocommerce/block-components/product-control';
+import ProductControl from '@woocommerce/editor-components/product-control';
 
 /**
  * Allows a product to be selected for display.

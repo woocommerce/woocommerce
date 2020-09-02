@@ -17,9 +17,9 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
-import GridContentControl from '@woocommerce/block-components/grid-content-control';
-import ProductsControl from '@woocommerce/block-components/products-control';
-import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
+import GridContentControl from '@woocommerce/editor-components/grid-content-control';
+import ProductsControl from '@woocommerce/editor-components/products-control';
+import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { Icon, widgets } from '@woocommerce/icons';
 

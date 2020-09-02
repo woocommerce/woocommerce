@@ -33,7 +33,7 @@ Current aliases are:
 
 - `@woocommerce/base-components` -> `assets/js/base/components/`
 - `@woocommerce/base-hocs` -> `assets/js/base/hocs/`
-- `@woocommerce/block-components` -> `assets/js/components`
+- `@woocommerce/editor-components` -> `assets/js/editor-components`
 - `@woocommerce/block-hocs` -> `assets/js/block-hocs`
 
 When importing, if outside the module referenced by that path, import from the alias. That will ensure that at compile time the bundles can pull from the appropriate location.

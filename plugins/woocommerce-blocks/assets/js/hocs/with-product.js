@@ -3,7 +3,7 @@
  */
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { getProduct } from '@woocommerce/block-components/utils';
+import { getProduct } from '@woocommerce/editor-components/utils';
 
 /**
  * Internal dependencies

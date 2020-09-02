@@ -10,7 +10,7 @@ https://woocommerce.github.io/woocommerce-gutenberg-products-block/
 We have components in a few folders, for different contexts.
 
 - [`assets/js/base/components`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/assets/js/base/components)
-- [`assets/js/components`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/assets/js/components)
+- [`assets/js/editor-components`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/assets/js/editor-components)
 - [`assets/js/icons`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/assets/js/icons)
 
 __`assets/js/base/components`__ are used in front-end code, as well as editor & admin. 
@@ -21,7 +21,7 @@ Because they can be used in the front end and editor, components in this folder 
 -  Have lean dependencies - i.e. not bloat the payload unnecessarily.
 -  Look consistent in common themes; ideally should allow themes to adjust appearance as necessary.
 
-__`assets/js/components`__ are used in the editor UI for our blocks. 
+__`assets/js/editor-components`__ are used in the editor UI for our blocks. 
 They allow us to build a consistent and powerful UI for merchants for authoring content relating to Woo data - e.g. selecting products or product attributes. Because they are focused on the editor, they can rely on known editor dependencies and optimise styling for the editor only.
 
 __`assets/js/icons`__ is a suite of icons and SVG images that we use in our interfaces. 

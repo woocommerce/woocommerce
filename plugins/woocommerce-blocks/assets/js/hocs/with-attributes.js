@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import { getAttributes, getTerms } from '@woocommerce/block-components/utils';
+import { getAttributes, getTerms } from '@woocommerce/editor-components/utils';
 import { find } from 'lodash';
 
 /**

@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { CartCheckoutFeedbackPrompt } from '@woocommerce/block-components/feedback-prompt';
+import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -22,7 +22,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
 import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
-import PageSelector from '@woocommerce/block-components/page-selector';
+import PageSelector from '@woocommerce/editor-components/page-selector';
 import {
 	previewCart,
 	previewSavedPaymentMethods,

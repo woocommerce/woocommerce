@@ -25,12 +25,12 @@ All class names assigned to an element must be prefixed. We use different prefix
 
 As a rule of thumb, this is the relation between location in the source tree and class name used:
 
-| Location in the tree      | Class names used                                      | Can be styled by themes? |
-| ------------------------- | ----------------------------------------------------- | :----------------------: |
-| assets/js/atomic/blocks   | `.wc-block-components-`                               |            ✓             |
-| assets/js/base/components | `.wc-block-components-`                               |            ✓             |
-| assets/js/blocks          | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` |          ✓<br>✘          |
-| assets/js/components      | `.wc-block-editor-components-`                        |            ✘             |
+| Location in the tree        | Class names used                                      | Can be styled by themes? |
+| --------------------------- | ----------------------------------------------------- | :----------------------: |
+| assets/js/atomic/blocks     | `.wc-block-components-`                               |            ✓             |
+| assets/js/base/components   | `.wc-block-components-`                               |            ✓             |
+| assets/js/blocks            | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` |          ✓<br>✘          |
+| assets/js/editor-components | `.wc-block-editor-components-`                        |            ✘             |
 
 After the prefix, class names are built using BEM:
 

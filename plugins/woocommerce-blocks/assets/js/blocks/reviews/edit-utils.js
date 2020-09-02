@@ -16,7 +16,7 @@ import {
 	REVIEW_RATINGS_ENABLED,
 	SHOW_AVATARS,
 } from '@woocommerce/block-settings';
-import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
+import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 
 export const getBlockControls = ( editMode, setAttributes ) => (
 	<BlockControls>

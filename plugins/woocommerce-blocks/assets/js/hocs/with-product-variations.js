@@ -5,7 +5,7 @@ import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { getProductVariations } from '@woocommerce/block-components/utils';
+import { getProductVariations } from '@woocommerce/editor-components/utils';
 
 /**
  * Internal dependencies

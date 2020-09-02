@@ -8,7 +8,7 @@ import { ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
 import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
 import { Icon, list } from '@woocommerce/icons';
-import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
+import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 
 const EmptyPlaceholder = () => (
 	<Placeholder

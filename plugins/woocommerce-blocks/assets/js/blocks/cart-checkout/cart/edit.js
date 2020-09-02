@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { CartCheckoutFeedbackPrompt } from '@woocommerce/block-components/feedback-prompt';
+import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	Disabled,
@@ -12,8 +12,8 @@ import {
 	Notice,
 } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import ViewSwitcher from '@woocommerce/block-components/view-switcher';
-import PageSelector from '@woocommerce/block-components/page-selector';
+import ViewSwitcher from '@woocommerce/editor-components/view-switcher';
+import PageSelector from '@woocommerce/editor-components/page-selector';
 import { SHIPPING_ENABLED, CART_PAGE_ID } from '@woocommerce/block-settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import {

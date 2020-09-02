@@ -33,8 +33,8 @@ import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { MIN_HEIGHT } from '@woocommerce/block-settings';
-import ProductControl from '@woocommerce/block-components/product-control';
-import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import ProductControl from '@woocommerce/editor-components/product-control';
+import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import { withProduct } from '@woocommerce/block-hocs';
 import { Icon, star } from '@woocommerce/icons';
 

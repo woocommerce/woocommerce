@@ -3,10 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import ProductControl from '@woocommerce/block-components/product-control';
+import ProductControl from '@woocommerce/editor-components/product-control';
 import { Placeholder, Button, Toolbar } from '@wordpress/components';
 import { BlockControls } from '@wordpress/block-editor';
-import TextToolbarButton from '@woocommerce/block-components/text-toolbar-button';
+import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 import { useProductDataContext } from '@woocommerce/shared-context';
 
 /**

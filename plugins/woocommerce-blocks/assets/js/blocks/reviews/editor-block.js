@@ -6,7 +6,7 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Disabled } from '@wordpress/components';
 import { REVIEW_RATINGS_ENABLED } from '@woocommerce/block-settings';
-import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
 import {
 	ReviewList,
