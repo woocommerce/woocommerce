@@ -184,6 +184,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Switch to site locale before translating refund reason. #27323
 * Fix - Declare `WC_Post_Types::updated_term_messages` as a static method to remove PHP deprecation warning. #27436
 * Fix - Allow HTML to be entered in product title for formatting purposes. #27465
+* Fix - Filter by attribute widget not working properly for variations having attribute values of "Any...". #27508
 * Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
 * Dev - Changed text domain to `woocommerce` for REST API files. #27248
 * Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
@@ -192,6 +193,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce Admin 1.5.0**
 * Enhancement - Add eWAY to Payment Setup for AU/NZ Stores. #4947
 * Fix - Use clipRule and fillRule props. #4889, part of #4864
+* Fix - Admin order page shipping label prompt compatibility with WCS 1.24. #5025
 * Dev - New notification: Don't forget to test your checkout. #4805
 * Dev - Enable tax calculation before redirecting to standard tax rates page. #4878
 * Dev - Added event recording to Orders, Stock, and Reviews panels. #4861
