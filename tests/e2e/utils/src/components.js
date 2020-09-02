@@ -115,7 +115,7 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( productTypesCheckboxes ).toHaveLength( 7 );
+	expect( productTypesCheckboxes ).toHaveLength( 8 );
 
 	// Select Physical and Downloadable products
 	for ( let i = 1; i < 2; i++ ) {
