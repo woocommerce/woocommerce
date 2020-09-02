@@ -90,7 +90,7 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( industryCheckboxes ).toHaveLength( 10 );
+	expect( industryCheckboxes ).toHaveLength( 9 );
 
 	// Select all industries including "Other"
 	for ( let i = 0; i < 10; i++ ) {
@@ -115,7 +115,7 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( productTypesCheckboxes ).toHaveLength( 7 );
+	expect( productTypesCheckboxes ).toHaveLength( 8 );
 
 	// Select Physical and Downloadable products
 	for ( let i = 1; i < 2; i++ ) {
