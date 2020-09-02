@@ -430,18 +430,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		    )
 			{$main_tax_query_sql['where']}";
 
-		// Generate the final query as the union+count of both.
-		$query_sql = "
-			SELECT COUNT(DISTINCT(product_id)) AS term_count, term_count_id FROM (
-				{$main_query_sql}
-				UNION ALL
-				{$query_sql_for_attributes_with_any_value}
-			) AS x GROUP BY term_count_id
-
-		";
-
-		// We have a query - let's see if cached results of this query already exist.
-		$query_hash = md5( $query_sql );
+		// We have two queries - let's see if cached results of this query already exist.
+		$query_hash = md5( $main_query_sql . $query_sql_for_attributes_with_any_value );
 
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
@@ -452,17 +442,51 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-			$results                      = $wpdb->get_results( $query_sql, ARRAY_A );
-			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+			$counts                       = $this->get_term_product_counts_from_queries( $main_query_sql, $query_sql_for_attributes_with_any_value );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
+	}
+
+	/**
+	 * Get the count of terms for products, using a set of SQL queries that are return pairs of product id - term id.
+	 *
+	 * @param string ...$queries SQL queries to use, each must return a "product_id" column and a "terms_count_id" column.
+	 *
+	 * @return array An array where the keys are term ids, and the values are term counts.
+	 */
+	private function get_term_product_counts_from_queries( ...$queries ) {
+		global $wpdb;
+
+		$total_counts = null;
+
+		foreach ( $queries as $query ) {
+			$query = "
+				SELECT COUNT(DISTINCT(product_id)) AS term_count, term_count_id FROM (
+					{$query}
+				) AS x GROUP BY term_count_id";
+
+			$results = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$counts  = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+
+			if ( is_null( $total_counts ) ) {
+				$total_counts = $counts;
+			} else {
+				foreach ( $counts as $term_id => $term_count ) {
+					if ( array_key_exists( $term_id, $total_counts ) ) {
+						$total_counts[ $term_id ] += $term_count;
+					} else {
+						$total_counts[ $term_id ] = $term_count;
+					}
+				}
+			}
+		}
+
+		return $total_counts;
 	}
 
 	/**
