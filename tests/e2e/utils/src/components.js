@@ -90,7 +90,7 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( industryCheckboxes ).toHaveLength( 10 );
+	expect( industryCheckboxes ).toHaveLength( 9 );
 
 	// Select all industries including "Other"
 	for ( let i = 0; i < 10; i++ ) {
