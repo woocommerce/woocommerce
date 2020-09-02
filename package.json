@@ -13,6 +13,7 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
+    "install": "lerna bootstrap",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && npm run makepot",
     "build:dev": "npm run build:core && npm run build:packages",
