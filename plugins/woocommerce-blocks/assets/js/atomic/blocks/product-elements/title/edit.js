@@ -14,7 +14,7 @@ import {
 	withFontSizes,
 } from '@wordpress/block-editor';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
-import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
+import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 
 /**
  * Internal dependencies
@@ -121,7 +121,7 @@ const Title = isFeaturePluginBuild()
 				icon: BLOCK_ICON,
 				label: BLOCK_TITLE,
 				description: __(
-					"Choose a product to display its title.",
+					'Choose a product to display its title.',
 					'woo-gutenberg-products-block'
 				),
 			} ),

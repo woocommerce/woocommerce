@@ -27,7 +27,7 @@ If you want to see what we're working on for future versions, or want to help ou
 ### Code Documentation
 
 - [Blocks](./assets/js/blocks)
-- [Components](assets/js/components)
+- [Editor Components](assets/js/editor-components)
 - [Other Docs](./docs)
 
 ### Contributing

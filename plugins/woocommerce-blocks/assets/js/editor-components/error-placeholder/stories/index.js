@@ -4,7 +4,7 @@
 import ErrorPlaceholder from '../';
 
 export default {
-	title: 'WooCommerce Blocks/components/ErrorPlaceholder',
+	title: 'WooCommerce Blocks/editor-components/ErrorPlaceholder',
 	component: ErrorPlaceholder,
 };
 

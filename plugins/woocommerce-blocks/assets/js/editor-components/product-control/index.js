@@ -13,7 +13,7 @@ import {
 	withTransformSingleSelectToMultipleSelect,
 } from '@woocommerce/block-hocs';
 import { Icon, radioSelected, radioUnselected } from '@woocommerce/icons';
-import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
+import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message.js';
 
 /**
  * Internal dependencies

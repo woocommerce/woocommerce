@@ -23,7 +23,7 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { Icon, grid } from '@woocommerce/icons';
-import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
+import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 import {
 	InnerBlockLayoutContextProvider,

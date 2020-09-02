@@ -411,13 +411,13 @@ const getStylingConfig = ( options = {} ) => {
 				minSize: 0,
 				cacheGroups: {
 					editor: {
-						// Capture all `editor` stylesheets and the components stylesheets.
+						// Capture all `editor` stylesheets and editor-components stylesheets.
 						test: ( module = {} ) =>
 							module.constructor.name === 'CssModule' &&
 							( findModuleMatch( module, /editor\.scss$/ ) ||
 								findModuleMatch(
 									module,
-									/[\\/]assets[\\/]js[\\/]components[\\/]/
+									/[\\/]assets[\\/]js[\\/]editor-components[\\/]/
 								) ),
 						name: 'editor',
 						chunks: 'all',

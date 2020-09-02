@@ -6,7 +6,7 @@ import { useState } from '@wordpress/element';
 import { Placeholder, Button, PanelBody } from '@wordpress/components';
 import { withProduct } from '@woocommerce/block-hocs';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
-import EditProductLink from '@woocommerce/block-components/edit-product-link';
+import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { singleProductBlockPreview } from '@woocommerce/resource-previews';
 import { InspectorControls } from '@wordpress/block-editor';
 

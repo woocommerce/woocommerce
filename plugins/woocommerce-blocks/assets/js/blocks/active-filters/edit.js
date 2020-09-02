@@ -4,14 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { Disabled, PanelBody, withSpokenMessages } from '@wordpress/components';
-import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
-import BlockTitle from '@woocommerce/block-components/block-title';
+import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
+import BlockTitle from '@woocommerce/editor-components/block-title';
+import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 
 /**
  * Internal dependencies
  */
 import Block from './block.js';
-import ToggleButtonControl from '../../components/toggle-button-control';
 
 const Edit = ( { attributes, setAttributes } ) => {
 	const { className, displayStyle, heading, headingLevel } = attributes;

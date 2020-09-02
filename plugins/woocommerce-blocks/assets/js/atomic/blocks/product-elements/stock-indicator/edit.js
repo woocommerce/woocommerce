@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import EditProductLink from '@woocommerce/block-components/edit-product-link';
+import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 
 /**
  * Internal dependencies
@@ -24,7 +24,7 @@ export default withProductSelector( {
 	icon: BLOCK_ICON,
 	label: BLOCK_TITLE,
 	description: __(
-		"Choose a product to display its stock.",
+		'Choose a product to display its stock.',
 		'woo-gutenberg-products-block'
 	),
 } )( Edit );

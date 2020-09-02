@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 
 /**
  * Shown when there is an API error getting a product.

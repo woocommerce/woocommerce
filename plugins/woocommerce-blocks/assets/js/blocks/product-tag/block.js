@@ -15,10 +15,10 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { HAS_TAGS } from '@woocommerce/block-settings';
-import GridContentControl from '@woocommerce/block-components/grid-content-control';
-import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
-import ProductTagControl from '@woocommerce/block-components/product-tag-control';
-import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
+import GridContentControl from '@woocommerce/editor-components/grid-content-control';
+import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
+import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
+import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import { Icon, more } from '@woocommerce/icons';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 

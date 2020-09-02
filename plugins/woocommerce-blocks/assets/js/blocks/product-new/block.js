@@ -7,9 +7,9 @@ import { Disabled, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
-import GridContentControl from '@woocommerce/block-components/grid-content-control';
-import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
-import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
+import GridContentControl from '@woocommerce/editor-components/grid-content-control';
+import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 
 /**
