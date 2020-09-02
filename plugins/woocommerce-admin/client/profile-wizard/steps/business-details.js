@@ -406,10 +406,13 @@ class BusinessDetails extends Component {
 			},
 			{
 				slug: 'kliken-marketing-for-google',
-				title: __( 'Drive sales with Google Ads', 'woocommerce-admin' ),
+				title: __(
+					'Drive traffic to your store with Google Ads & Marketing by Kliken',
+					'woocommerce-admin'
+				),
 				icon: 'onboarding/g-shopping.png',
 				description: __(
-					'Get in front of new customers on Google and secure $150 in ads credit with Kliken’s integration.',
+					'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
 					'woocommerce-admin'
 				),
 			},
