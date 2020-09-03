@@ -7,7 +7,7 @@
  */
 import { StoreOwnerFlow } from './flows';
 import modelRegistry from '../../utils/factories';
-import { SimpleProduct } from '@woocommerce/model-factories';
+import { SimpleProduct } from 'e2e/api';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 
 const config = require( 'config' );

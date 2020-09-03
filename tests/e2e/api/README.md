@@ -1,11 +1,11 @@
-# Model Factories
+# API
 
-A simple interface for generating models of different types.
+A simple interface for interacting with a WooCommerce installation.
 
 ## Installation
 
 ``bash
-npm install @woocommerce/model-factories --save-dev
+npm install @woocommerce/api --save-dev
 ``
 
 ## Usage
@@ -20,7 +20,7 @@ import {
     ModelRegistry,
     registerSimpleProduct,
     SimpleProduct
-} from '@woocommerce/model-factories';
+} from 'e2e/api';
 
 // The ModelRegistry instance is where all of the factories and adapters are stored in an easy-to-access way.
 const modelRegistry = new ModelRegistry()

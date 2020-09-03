@@ -3,7 +3,7 @@ import {
 	initializeUsingBasicAuth,
 	ModelRegistry,
 	registerSimpleProduct
-} from '@woocommerce/model-factories';
+} from '@woocommerce/api';
 
 const config = require( 'config' );
 
