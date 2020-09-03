@@ -178,6 +178,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			implode( ',', $query_args['tax_rate_excludes'] )
 		);
 
+		// Product attribute filters.
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
+		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
+			// Build a subquery for getting order IDs by product attribute(s).
+			// Done here since our use case is a little more complicated than get_object_where_filter() can handle.
+			$attribute_subquery = new SqlQuery();
+			$attribute_subquery->add_sql_clause( 'select', "{$orders_stats_table}.order_id" );
+			$attribute_subquery->add_sql_clause( 'from', $orders_stats_table );
+
+			// JOIN on product lookup.
+			$attribute_subquery->add_sql_clause( 'join', "JOIN {$product_lookup} ON {$orders_stats_table}.order_id = {$product_lookup}.order_id" );
+
+			// Add JOINs for matching attributes.
+			foreach ( $attribute_subqueries['join'] as $attribute_join ) {
+				$attribute_subquery->add_sql_clause( 'join', $attribute_join );
+			}
+			// Add WHEREs for matching attributes.
+			$attribute_subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $attribute_subqueries['where'] ) . ')' );
+
+			// Generate subquery statement and add to our where filters.
+			$where_filters[] = "{$orders_stats_table}.order_id IN (" . $attribute_subquery->get_query_statement() . ')';
+		}
+
 		$where_filters[] = $this->get_customer_subquery( $query_args );
 		$refund_subquery = $this->get_refund_subquery( $query_args );
 		$from_clause    .= $refund_subquery['from_clause'];

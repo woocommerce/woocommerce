@@ -1180,6 +1180,78 @@ class DataStore extends SqlQuery {
 	}
 
 	/**
+	 * Returns product attribute subquery elements used in JOIN and WHERE clauses,
+	 * based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_attribute_subqueries( $query_args ) {
+		global $wpdb;
+
+		$sql_clauses           = array(
+			'join'  => array(),
+			'where' => array(),
+		);
+		$match_operator        = $this->get_match_operator( $query_args );
+		$join_table            = $wpdb->prefix . 'wc_order_product_lookup';
+		$post_meta_comparators = array(
+			'='  => 'attribute_is',
+			'!=' => 'attribute_is_not',
+		);
+
+		foreach ( $post_meta_comparators as $comparator => $arg ) {
+			if ( ! isset( $query_args[ $arg ] ) || ! is_array( $query_args[ $arg ] ) ) {
+				continue;
+			}
+			foreach ( $query_args[ $arg ] as $attribute_term ) {
+				// We expect tuples of IDs.
+				if ( ! is_array( $attribute_term ) || 2 !== count( $attribute_term ) ) {
+					continue;
+				}
+
+				$attribute_id = intval( $attribute_term[0] );
+				$term_id      = intval( $attribute_term[1] );
+
+				// Tuple, but non-numeric.
+				if ( 0 === $attribute_id || 0 === $term_id ) {
+					continue;
+				}
+
+				// @todo: Use wc_get_attribute() instead ?
+				$attr_taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				// Invalid attribute ID.
+				if ( empty( $attr_taxonomy ) ) {
+					continue;
+				}
+
+				$attr_term = get_term_by( 'id', $term_id, $attr_taxonomy );
+				// Invalid term ID.
+				if ( false === $attr_term ) {
+					continue;
+				}
+
+				$meta_key   = wc_variation_attribute_name( $attr_taxonomy );
+				$meta_value = $attr_term->slug;
+				$join_alias = 'wpm1';
+
+				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
+				// If not, just one.
+				if ( 'AND' === $match_operator || empty( $sql_clauses['join'] ) ) {
+					$join_idx              = count( $sql_clauses['join'] ) + 1;
+					$join_alias            = 'wpm' . $join_idx;
+					$sql_clauses['join'][] = "JOIN {$wpdb->postmeta} as {$join_alias} ON {$join_alias}.post_id = {$join_table}.variation_id";
+				}
+
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, $meta_value );
+			}
+		}
+
+		return $sql_clauses;
+	}
+
+	/**
 	 * Returns logic operator for WHERE subclause based on 'match' query argument.
 	 *
 	 * @param array $query_args Parameters supplied by the user.

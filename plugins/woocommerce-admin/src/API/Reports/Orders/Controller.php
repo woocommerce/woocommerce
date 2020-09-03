@@ -61,6 +61,8 @@ class Controller extends ReportsController implements ExportableInterface {
 		$args['match']             = $request['match'];
 		$args['order_includes']    = $request['order_includes'];
 		$args['order_excludes']    = $request['order_excludes'];
+		$args['attribute_is']      = (array) $request['attribute_is'];
+		$args['attribute_is_not']  = (array) $request['attribute_is_not'];
 
 		return $args;
 	}
@@ -428,6 +430,24 @@ class Controller extends ReportsController implements ExportableInterface {
 			'items'             => array(
 				'type' => 'integer',
 			),
+		);
+		$params['attribute_is']      = array(
+			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute_is_not']  = array(
+			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

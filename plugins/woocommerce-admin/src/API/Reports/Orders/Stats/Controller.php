@@ -59,6 +59,8 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$args['tax_rate_excludes'] = (array) $request['tax_rate_excludes'];
 		$args['customer']          = $request['customer'];
 		$args['refunds']           = $request['refunds'];
+		$args['attribute_is']      = (array) $request['attribute_is'];
+		$args['attribute_is_not']  = (array) $request['attribute_is_not'];
 		$args['categories']        = (array) $request['categories'];
 		$args['segmentby']         = $request['segmentby'];
 
@@ -490,6 +492,24 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 				'full',
 				'none',
 			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute_is']      = array(
+			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute_is_not']  = array(
+			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['segmentby']         = array(

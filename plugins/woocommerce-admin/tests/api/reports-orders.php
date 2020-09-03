@@ -128,4 +128,109 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'customer_type', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
 	}
+
+	/**
+	 * Test filtering by product attribute(s).
+	 */
+	public function test_product_attributes_filter() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a variable product.
+		$variable_product   = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
+		$product_variations = $variable_product->get_children();
+		$order_variation_1  = wc_get_product( $product_variations[0] ); // Variation: size = small.
+		$order_variation_2  = wc_get_product( $product_variations[2] ); // Variation: size = huge, colour = red, number = 0.
+
+		// Create orders for variations.
+		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
+		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->save();
+
+		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
+		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->save();
+
+		// Create more orders for simple products.
+		for ( $i = 0; $i < 10; $i++ ) {
+			$order = WC_Helper_Order::create_order( $this->user );
+			$order->set_status( 'completed' );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 15 ) );
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		// Sanity check before filtering by attribute.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 12, count( $response_orders ) );
+
+		// To filter by later.
+		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
+		$small_term   = get_term_by( 'slug', 'small', 'pa_size' );
+
+		// Test bad values to filter parameter.
+		$bad_args = array(
+			'not an array!',                   // Not an array.
+			array( 1, 2, 3 ),                  // Not a tuple.
+			array( 'a', 1 ),                   // Non-numeric attribute ID.
+			array( 1, 'a' ),                   // Non-numeric term ID.
+			array( -1, $small_term->term_id ), // Invaid attribute ID.
+			array( $size_attr_id, -1 ),        // Invaid term ID.
+		);
+
+		foreach ( $bad_args as $bad_arg ) {
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_query_params(
+				array(
+					'per_page'     => 15,
+					'attribute_is' => $bad_arg,
+				)
+			);
+			$response        = $this->server->dispatch( $request );
+			$response_orders = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			// We expect all results since the attribute param is malformed.
+			$this->assertEquals( 12, count( $response_orders ) );
+		}
+
+		// Filter by the "size" attribute, with value "small".
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'attribute_is' => array(
+					array( $size_attr_id, $small_term->term_id ),
+				),
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_1->get_id() );
+
+		// Verify the opposite result set.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'attribute_is_not' => array(
+					array( $size_attr_id, $small_term->term_id ),
+				),
+				'per_page'         => 15,
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_2->get_id() );
+	}
 }
