@@ -13,7 +13,7 @@ import {
 	Tooltip,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { Card, H } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
@@ -22,7 +22,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import withSelect from '../../../wc-api/with-select';
 import './style.scss';
 import ThemeUploader from './uploader';
 import ThemePreview from './preview';

@@ -12,13 +12,12 @@ import moment from 'moment';
 import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { Card } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { NOTES_STORE_NAME } from '@woocommerce/data';
+import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULTS } from '../../wc-api/constants';
 import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 

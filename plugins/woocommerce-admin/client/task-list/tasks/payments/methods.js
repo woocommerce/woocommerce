@@ -11,11 +11,7 @@ import {
 	WC_ASSET_URL as wcAssetUrl,
 } from '@woocommerce/wc-admin-settings';
 import { Link } from '@woocommerce/components';
-
-/**
- * Internal dependencies
- */
-import { WC_ADMIN_NAMESPACE } from '../../../wc-api/constants';
+import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies

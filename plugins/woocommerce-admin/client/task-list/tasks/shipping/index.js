@@ -52,7 +52,7 @@ class Shipping extends Component {
 		const { countryCode, countryName } = this.props;
 
 		// @todo The following fetches for shipping information should be moved into
-		// the wc-api to make these methods and states more readily available.
+		// @woocommerce/data to make these methods and states more readily available.
 		const shippingZones = [];
 		const zones = await apiFetch( { path: '/wc/v3/shipping/zones' } );
 		let hasCountryZone = false;

@@ -10,7 +10,7 @@ import {
 	useEffect,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { NOTES_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -24,7 +24,6 @@ import './style.scss';
 import '../dashboard/style.scss';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../header/activity-panel/panels/inbox';
-import withWCApiSelect from '../wc-api/with-select';
 import { WelcomeModal } from './welcome-modal';
 
 const TaskList = lazy( () =>
@@ -161,7 +160,7 @@ Layout.propTypes = {
 };
 
 export default compose(
-	withWCApiSelect( ( select ) => {
+	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 

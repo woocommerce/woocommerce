@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
+import { withSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
@@ -19,7 +20,7 @@ import {
 	Section,
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { REVIEWS_STORE_NAME } from '@woocommerce/data';
+import { REVIEWS_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -27,9 +28,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
-import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import sanitizeHTML from '../../../lib/sanitize-html';
-import withSelect from '../../../wc-api/with-select';
 
 class ReviewsPanel extends Component {
 	constructor() {

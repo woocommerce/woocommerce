@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, createElement, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { identity, pick } from 'lodash';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import {
 	getHistory,
 	getNewPath,
@@ -17,6 +17,7 @@ import {
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
+	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -28,10 +29,8 @@ import BusinessDetails from './steps/business-details';
 import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
-import { QUERY_DEFAULTS } from '../wc-api/constants';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
-import withSelect from '../wc-api/with-select';
 import './style.scss';
 
 class ProfileWizard extends Component {

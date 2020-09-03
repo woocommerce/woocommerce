@@ -4,6 +4,7 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
+import { withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { get } from 'lodash';
 import { Date, Link } from '@woocommerce/components';
@@ -13,6 +14,7 @@ import {
 	getReportTableQuery,
 	REPORTS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import {
 	appendTimestamp,
@@ -23,9 +25,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULTS } from '../../../wc-api/constants';
 import ReportTable from '../../components/report-table';
-import withSelect from '../../../wc-api/with-select';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 class RevenueReportTable extends Component {

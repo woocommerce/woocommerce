@@ -6,7 +6,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { Fragment, useRef, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { focus } from '@wordpress/dom';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
@@ -29,6 +29,7 @@ import {
 	EXPORT_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	useUserPreferences,
+	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -37,8 +38,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
-import { QUERY_DEFAULTS } from '../../../wc-api/constants';
-import withSelect from '../../../wc-api/with-select';
 import { extendTableData } from './utils';
 import './style.scss';
 
@@ -476,7 +475,7 @@ ReportTable.propTypes = {
 	 */
 	endpoint: PropTypes.string,
 	/**
-	 * Name of the methods available via `select( 'wc-api' )` that will be used to
+	 * Name of the methods available via `select` that will be used to
 	 * load more data for table items. If omitted, no call will be made and only
 	 * the data returned by the reports endpoint will be used.
 	 */
@@ -485,6 +484,10 @@ ReportTable.propTypes = {
 		isRequesting: PropTypes.string,
 		load: PropTypes.string,
 	} ),
+	/**
+	 * Name of store on which extendItemsMethodNames can be found.
+	 */
+	extendedItemsStoreName: PropTypes.string,
 	/**
 	 * A function that returns the headers object to build the table.
 	 */

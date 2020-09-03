@@ -9,7 +9,7 @@ import interpolateComponents from 'interpolate-components';
 import PropTypes from 'prop-types';
 import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -18,7 +18,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import '../style.scss';
 import DismissModal from '../dismiss-modal';
-import withSelect from '../../../wc-api/with-select';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
 

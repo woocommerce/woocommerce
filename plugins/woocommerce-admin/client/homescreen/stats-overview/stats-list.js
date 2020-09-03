@@ -3,8 +3,8 @@
  */
 import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { withSelect } from '@wordpress/data';
 import classnames from 'classnames';
-
 import {
 	SummaryNumber,
 	SummaryNumberPlaceholder,
@@ -15,7 +15,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import withSelect from '../../wc-api/with-select';
 import { CurrencyContext } from '../../lib/currency-context';
 import {
 	getIndicatorData,

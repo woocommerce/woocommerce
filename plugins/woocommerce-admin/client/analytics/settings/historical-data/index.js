@@ -8,10 +8,10 @@ import {
 	IMPORT_STORE_NAME,
 	NOTES_STORE_NAME,
 	QUERY_DEFAULTS,
+	SECOND,
 } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { withSpokenMessages } from '@wordpress/components';
-import { SECOND } from '@fresh-data/framework';
 
 /**
  * Internal dependencies

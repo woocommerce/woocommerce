@@ -3,13 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { getRequestByIdString } from '../../../lib/async-requests';
 import { getTaxCode } from './utils';
-import { NAMESPACE } from '../../../wc-api/constants';
 
 const TAXES_REPORT_CHARTS_FILTER = 'woocommerce_admin_taxes_report_charts';
 const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';

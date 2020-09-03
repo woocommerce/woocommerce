@@ -13,7 +13,6 @@ import {
  */
 import './stylesheets/_index.scss';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
-import './wc-api/wp-data-store';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase

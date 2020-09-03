@@ -5,7 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { Fragment, useEffect } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { EmptyContent, Section } from '@woocommerce/components';
-import { NOTES_STORE_NAME, useUserPreferences } from '@woocommerce/data';
+import {
+	NOTES_STORE_NAME,
+	useUserPreferences,
+	QUERY_DEFAULTS,
+} from '@woocommerce/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,8 +19,6 @@ import { ActivityCard } from '../../activity-card';
 import InboxNotePlaceholder from './placeholder';
 import ActivityHeader from '../../activity-header';
 import InboxNoteCard from './card';
-import { QUERY_DEFAULTS } from '../../../../wc-api/constants';
-import withSelect from '../../../../wc-api/with-select';
 import { getUnreadNotesCount, hasValidNotes } from './utils';
 
 const renderEmptyCard = () => (

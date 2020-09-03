@@ -6,6 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { withSelect } from '@wordpress/data';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
 	EllipsisMenu,
@@ -22,7 +23,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import withSelect from '../../wc-api/with-select';
 import './style.scss';
 import { CurrencyContext } from '../../lib/currency-context';
 import { getIndicatorData, getIndicatorValues } from './utils';

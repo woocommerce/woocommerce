@@ -11,12 +11,11 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { isEmail } from '@wordpress/url';
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getQuery } from '@woocommerce/navigation';
-import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { WC_ADMIN_NAMESPACE } from '../../../wc-api/constants';
+import {
+	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	WC_ADMIN_NAMESPACE,
+} from '@woocommerce/data';
 
 export class PayPal extends Component {
 	constructor( props ) {

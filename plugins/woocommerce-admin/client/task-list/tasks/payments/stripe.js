@@ -11,12 +11,11 @@ import { Button } from '@wordpress/components';
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { getQuery } from '@woocommerce/navigation';
-import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { WCS_NAMESPACE } from '../../../wc-api/constants';
+import {
+	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	WCS_NAMESPACE,
+} from '@woocommerce/data';
 
 class Stripe extends Component {
 	constructor( props ) {

@@ -10,12 +10,7 @@ import { getQuery } from '@woocommerce/navigation';
 import { compose } from '@wordpress/compose';
 import { Stepper } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { WC_ADMIN_NAMESPACE } from '../../../wc-api/constants';
+import { OPTIONS_STORE_NAME, WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 
 class Square extends Component {
 	constructor( props ) {

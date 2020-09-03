@@ -16,14 +16,16 @@ import {
 	ImageUpload,
 } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+	WC_ADMIN_NAMESPACE,
+} from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { WC_ADMIN_NAMESPACE } from '../../wc-api/constants';
-
 class Appearance extends Component {
 	constructor( props ) {
 		super( props );

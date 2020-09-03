@@ -6,13 +6,12 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { SnackbarList } from '@wordpress/components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import withSelect from '../../wc-api/with-select';
 
 class TransientNotices extends Component {
 	render() {

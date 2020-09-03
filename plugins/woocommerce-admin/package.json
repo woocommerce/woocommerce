@@ -94,7 +94,6 @@
 		]
 	},
 	"dependencies": {
-		"@fresh-data/framework": "0.6.1",
 		"@wordpress/api-fetch": "2.2.8",
 		"@wordpress/base-styles": "2.0.0",
 		"@wordpress/components": "10.0.0",

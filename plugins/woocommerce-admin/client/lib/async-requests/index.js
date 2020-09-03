@@ -5,12 +5,12 @@ import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { identity } from 'lodash';
 import { getIdsFromQuery } from '@woocommerce/navigation';
+import { NAMESPACE } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { getTaxCode } from '../../analytics/report/taxes/utils';
-import { NAMESPACE } from '../../wc-api/constants';
 
 /**
  * Get a function that accepts ids as they are found in url parameter and

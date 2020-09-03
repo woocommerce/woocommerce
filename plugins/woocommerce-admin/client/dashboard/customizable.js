@@ -8,6 +8,7 @@ import { partial } from 'lodash';
 import { Dropdown, Button, Icon } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
 import { Icon as WPIcon, plusCircleFilled } from '@wordpress/icons';
+import { withSelect } from '@wordpress/data';
 import { H, Spinner } from '@woocommerce/components';
 import {
 	SETTINGS_STORE_NAME,
@@ -28,7 +29,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import './style.scss';
 import defaultSections from './default-sections';
 import Section from './section';
-import withSelect from '../wc-api/with-select';
 import ReportFilters from '../analytics/components/report-filters';
 import {
 	CurrencyContext,
