@@ -10,6 +10,7 @@ use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding_Profiler;
 use \Automattic\WooCommerce\Admin\PluginsHelper;
 use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
+use \Automattic\WooCommerce\Admin\Features\OnboardingAutomateTaxes;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -71,6 +72,7 @@ class Onboarding {
 
 		// Hook up dependent classes.
 		new OnboardingSetUpShipping();
+		new OnboardingAutomateTaxes();
 	}
 
 	/**
