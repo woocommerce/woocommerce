@@ -93,7 +93,7 @@ const completeOnboardingWizard = async () => {
 	expect( industryCheckboxes ).toHaveLength( 9 );
 
 	// Select all industries including "Other"
-	for ( let i = 0; i < 10; i++ ) {
+	for ( let i = 0; i < 9; i++ ) {
 		await industryCheckboxes[i].click();
 	}
 
