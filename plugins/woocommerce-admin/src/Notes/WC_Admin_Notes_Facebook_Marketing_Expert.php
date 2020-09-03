@@ -62,7 +62,7 @@ class WC_Admin_Notes_Facebook_Marketing_Expert {
 	 */
 	public static function get_note() {
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'Create and optimise your Facebook ads with the help of a Facebook Marketing Expert', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Create and optimize your Facebook ads with the help of a Facebook Marketing Expert', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Get 1:1 business support from a Facebook Marketing Expert who will work with you and your business to create and optimize your Facebook ads. Discover new strategies used by similar businesses in your market and industry. Check whether you are eligible to make use of this offer.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
