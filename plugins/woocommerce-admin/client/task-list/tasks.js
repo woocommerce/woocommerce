@@ -143,7 +143,12 @@ export function getAllTasks( {
 			title: __( 'Set up WooCommerce Payments', 'woocommerce-admin' ),
 			container: <Fragment />,
 			completed: wcPayIsConnected,
-			onClick: async () => {
+			onClick: async ( e ) => {
+				if ( e.target.nodeName === 'A' ) {
+					// This is a nested link, so don't activate the task.
+					return false;
+				}
+
 				await new Promise( ( resolve, reject ) => {
 					// This task doesn't have a view, so the recordEvent call
 					// in TaskDashboard.recordTaskView() is never called. So
@@ -169,6 +174,10 @@ export function getAllTasks( {
 				window.wcAdminFeatures.wcpay &&
 				woocommercePaymentsInstalled &&
 				countryCode === 'US',
+			additionalInfo: __(
+				'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
+				'woocommerce-admin'
+			),
 			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{

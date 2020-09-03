@@ -32,6 +32,7 @@ import './style.scss';
 import CartModal from '../dashboard/components/cart-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
+import sanitizeHTML from '../lib/sanitize-html';
 
 class TaskDashboard extends Component {
 	constructor( props ) {
@@ -281,10 +282,18 @@ class TaskDashboard extends Component {
 					variant={ task.completed ? 'body.small' : 'button' }
 				>
 					{ task.title }
+					{ task.additionalInfo && (
+						<div
+							className="woocommerce-task__additional-info"
+							dangerouslySetInnerHTML={ sanitizeHTML(
+								task.additionalInfo
+							) }
+						></div>
+					) }
 					{ task.time && ! task.completed && (
-						<span className="woocommerce-task__estimated-time">
+						<div className="woocommerce-task__estimated-time">
 							{ task.time }
-						</span>
+						</div>
 					) }
 				</Text>
 			);
@@ -306,7 +315,14 @@ class TaskDashboard extends Component {
 			}
 
 			if ( ! task.onClick ) {
-				task.onClick = () => updateQueryString( { task: task.key } );
+				task.onClick = ( e ) => {
+					if ( e.target.nodeName === 'A' ) {
+						// This is a nested link, so don't activate this task.
+						return false;
+					}
+
+					updateQueryString( { task: task.key } );
+				};
 			}
 
 			return task;
