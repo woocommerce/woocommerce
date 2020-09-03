@@ -72,7 +72,7 @@ class ReportFilters extends Component {
 				);
 				recordEvent( 'analytics_filters_filter', {
 					report,
-					snakeCaseData,
+					...snakeCaseData,
 				} );
 				break;
 			case 'clear_all':
