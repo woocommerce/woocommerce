@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -27,10 +28,14 @@ const CountryInput = ( {
 		'woo-gutenberg-products-block'
 	),
 } ) => {
-	const options = Object.keys( countries ).map( ( key ) => ( {
-		key,
-		name: decodeEntities( countries[ key ] ),
-	} ) );
+	const options = useMemo(
+		() =>
+			Object.keys( countries ).map( ( key ) => ( {
+				key,
+				name: decodeEntities( countries[ key ] ),
+			} ) ),
+		[ countries ]
+	);
 
 	return (
 		<div
