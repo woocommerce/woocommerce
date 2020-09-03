@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import classnames from 'classnames';
 
 /**
@@ -26,12 +26,16 @@ const StateInput = ( {
 	required = false,
 } ) => {
 	const countryStates = states[ country ];
-	const options = countryStates
-		? Object.keys( countryStates ).map( ( key ) => ( {
-				key,
-				name: decodeEntities( countryStates[ key ] ),
-		  } ) )
-		: [];
+	const options = useMemo(
+		() =>
+			countryStates
+				? Object.keys( countryStates ).map( ( key ) => ( {
+						key,
+						name: decodeEntities( countryStates[ key ] ),
+				  } ) )
+				: [],
+		[ countryStates ]
+	);
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
