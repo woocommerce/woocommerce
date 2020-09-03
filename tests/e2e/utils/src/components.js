@@ -150,7 +150,7 @@ const completeOnboardingWizard = async () => {
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
 	// Disable business extension downloads
-	const pluginToggle = await page.$( '.woocommerce-business-extensions .components-checkbox-control__input-container' );
+	const pluginToggle = await page.$( '#woocommerce-business-extensions__checkbox' );
 	pluginToggle.click();
 
 	// Wait for "Continue" button to become active
