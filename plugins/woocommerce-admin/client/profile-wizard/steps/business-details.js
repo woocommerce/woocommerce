@@ -17,6 +17,7 @@ import { keys, get, pickBy } from 'lodash';
 import {
 	H,
 	Card,
+	Link,
 	SelectControl,
 	Form,
 	TextControl,
@@ -361,18 +362,39 @@ class BusinessDetails extends Component {
 			  )
 			: '';
 		return (
-			<Text variant="caption" as="p">
-				{ sprintf(
-					_n(
-						'The following plugin will be installed for free: %s. %s',
-						'The following plugins will be installed for free: %s. %s',
-						extensions.length,
-						'woocommerce-admin'
-					),
-					extensionsList,
-					accountRequiredText
+			<div className="woocommerce-profile-wizard__footnote">
+				<Text variant="caption" as="p">
+					{ sprintf(
+						_n(
+							'The following plugin will be installed for free: %s. %s',
+							'The following plugins will be installed for free: %s. %s',
+							extensions.length,
+							'woocommerce-admin'
+						),
+						extensionsList,
+						accountRequiredText
+					) }
+				</Text>
+				{ this.bundleInstall && (
+					<Text variant="caption" as="p">
+						{ interpolateComponents( {
+							mixedString: __(
+								'By installing Jetpack and WooCommerce Services plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
+								'woocommerce-admin'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://wordpress.com/tos/"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
+					</Text>
 				) }
-			</Text>
+			</div>
 		);
 	}
 
