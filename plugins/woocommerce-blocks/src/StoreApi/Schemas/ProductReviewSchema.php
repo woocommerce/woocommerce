@@ -51,7 +51,8 @@ class ProductReviewSchema extends AbstractSchema {
 			],
 			'date_created'           => [
 				'description' => __( "The date the review was created, in the site's timezone.", 'woo-gutenberg-products-block' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
+				'format'      => 'date-time',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -63,7 +64,8 @@ class ProductReviewSchema extends AbstractSchema {
 			],
 			'date_created_gmt'       => [
 				'description' => __( 'The date the review was created, as GMT.', 'woo-gutenberg-products-block' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
+				'format'      => 'date-time',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
