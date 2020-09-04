@@ -281,6 +281,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$this
 		);
 
+		$args = $this->set_zero_cost_if_negative( $args );
+
 		// ID and label are required.
 		if ( ! $args['id'] || ! $args['label'] ) {
 			return;
@@ -325,6 +327,23 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_method_add_rate', $rate, $args, $this );
 	}
+
+	/**
+	 * Set zero cost if negative.
+	 *
+	 * @param array $args Arguments (default: array()).
+	 *
+	 * @return array
+	 */
+	private function set_zero_cost_if_negative( $args = array() ) {
+		if ( isset( $args['cost'] ) && 0.0 > (float) $args['cost'] ) {
+			$args['cost'] = 0.0;
+			$args['taxes'] = '';
+		}
+
+		return $args;
+	}
+
 
 	/**
 	 * Calc taxes per item being shipping in costs array.
