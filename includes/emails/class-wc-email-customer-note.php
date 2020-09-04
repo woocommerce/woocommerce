@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_Note
 	 * @version     3.5.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Note extends WC_Email {

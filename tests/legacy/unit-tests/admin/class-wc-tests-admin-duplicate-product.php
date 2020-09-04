@@ -66,20 +66,20 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 			array(
 				'dummy-variable-product-small-2',
 				'dummy-variable-product-large-2',
-				'dummy-variable-product-3',
-				'dummy-variable-product-4',
-			),
-			array(
-				'dummy-variable-product-small-3',
-				'dummy-variable-product-large-3',
 				'dummy-variable-product-5',
 				'dummy-variable-product-6',
 			),
 			array(
+				'dummy-variable-product-small-3',
+				'dummy-variable-product-large-3',
+				'dummy-variable-product-9',
+				'dummy-variable-product-10',
+			),
+			array(
 				'dummy-variable-product-small-4',
 				'dummy-variable-product-large-4',
-				'dummy-variable-product-7',
-				'dummy-variable-product-8',
+				'dummy-variable-product-13',
+				'dummy-variable-product-14',
 			),
 		);
 
@@ -88,7 +88,7 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 
 			$duplicate_children = $duplicate->get_children();
 
-			$this->assertEquals( 4, count( $duplicate_children ) );
+			$this->assertEquals( 6, count( $duplicate_children ) );
 			foreach ( $slug_match as $key => $slug ) {
 				$child = wc_get_product( $duplicate_children[ $key ] );
 				$this->assertEquals( $slug, $child->get_slug() );

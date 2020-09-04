@@ -169,25 +169,6 @@ a.button {
 	z-index: 1;
 }
 
-.wc-block-grid__products {
-
-	.wc-block-grid__product-onsale {
-		position: absolute;
-		top: 0;
-		display: inline-block;
-		background: $highlights-color;
-		color: #fff;
-		font-family: $headings;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		line-height: 1.2;
-		text-transform: uppercase;
-		z-index: 1;
-		font-size: 1.5rem;
-		padding: 1rem;
-	}
-}
-
 .price {
 	font-family: $headings;
 
@@ -198,6 +179,7 @@ a.button {
 
 	ins {
 		display: inline-block;
+		text-decoration: none;
 	}
 }
 
@@ -206,15 +188,24 @@ a.button {
 .woocommerce-info {
 	margin-bottom: 5rem;
 	margin-left: 0;
-	padding: 1.5rem 3rem;
 	background: #eee;
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+}
+
+.woocommerce-message,
+.woocommerce-error li,
+.woocommerce-info {
+	padding: 1.5rem 3rem;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+
+	.button {
+		order: 2;
+	}
 }
 
 .woocommerce-message {
@@ -236,6 +227,10 @@ a.button {
 		&.button {
 			background: #111;
 		}
+	}
+
+	> li {
+		margin: 0;
 	}
 }
 
@@ -1646,7 +1641,6 @@ a.reset_variations {
 .woocommerce-checkout {
 
 	ul.woocommerce-error {
-		margin-left: 0;
 		flex-direction: column;
 		align-items: flex-start;
 
@@ -2107,45 +2101,6 @@ a.reset_variations {
 	}
 }
 
-ul.wc-block-grid__products {
-	display: flex;
-	align-items: stretch;
-	flex-direction: row;
-	flex-wrap: wrap;
-
-	li.wc-block-grid__product {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 5em;
-	}
-}
-
-.wc-block-grid__product {
-
-	.wc-block-grid__product-title {
-		font-family: $headings;
-		color: #000;
-		font-size: 2.5rem;
-	}
-
-	.wc-block-grid__product-price {
-
-		.woocommerce-Price-amount {
-
-			font-size: 1.8rem;
-		}
-	}
-
-	.wc-block-grid__product-rating {
-
-		.star-rating {
-			font-size: 0.7em;
-		}
-	}
-}
-
 @media only screen and (max-width: 600px) {
 
 	.woocommerce {
@@ -2435,14 +2390,6 @@ ul.wc-block-grid__products {
 		}
 	}
 
-	.wc-block-grid__products {
-
-		.wc-block-grid__product-onsale {
-			font-size: 1.5rem;
-			padding: 1rem;
-		}
-	}
-
 	/**
 	* Shop page
 	*/
@@ -2591,14 +2538,6 @@ ul.wc-block-grid__products {
 		}
 
 		.onsale {
-			font-size: 1.7rem;
-			padding: 1.5rem;
-		}
-	}
-
-	.wc-block-grid__products {
-
-		.wc-block-grid__product-onsale {
 			font-size: 1.7rem;
 			padding: 1.5rem;
 		}

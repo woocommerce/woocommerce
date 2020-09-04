@@ -6,11 +6,12 @@
  * @package WooCommerce Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-use Composer\Autoload\ClassLoader;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -35,7 +36,11 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-		$this->tests_dir = dirname( __FILE__ );
+		$this->tests_dir  = dirname( __FILE__ );
+		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+
+		$this->register_autoloader_for_testing_tools();
+
 		$this->initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
@@ -67,20 +72,34 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
+	 */
+	protected static function register_autoloader_for_testing_tools() {
+		return spl_autoload_register(
+			function ( $class ) {
+				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
+				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$len      = strlen( $prefix );
+				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+					// no, move to the next registered autoloader.
+					return;
+				}
+				$relative_class = substr( $class, $len );
+				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				if ( ! file_exists( $file ) ) {
+					throw new \Exception( 'Autoloader for unit tests: file not found: ' . $file );
+				}
+				require $file;
+			}
+		);
+	}
+
+	/**
 	 * Initialize the code hacker.
 	 *
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
 	private function initialize_code_hacker() {
-		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
-
-		$hacking_base = $this->plugin_dir . '/tests/Tools/CodeHacking';
-		require_once $hacking_base . '/CodeHacker.php';
-		require_once $hacking_base . '/Hacks/CodeHack.php';
-		require_once $hacking_base . '/Hacks/StaticMockerHack.php';
-		require_once $hacking_base . '/Hacks/FunctionsMockerHack.php';
-		require_once $hacking_base . '/Hacks/BypassFinalsHack.php';
-
 		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
@@ -171,6 +190,9 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
+
+		// Traits.
+		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 	}
 
 	/**

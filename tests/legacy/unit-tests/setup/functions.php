@@ -19,8 +19,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		$setup_wizard = new WC_Admin_Setup_Wizard();
 
 		// non-admin user.
-		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		wp_set_current_user( $this->user_id );
+		$this->user_id = $this->login_as_role( 'shop_manager' );
 		$this->assertEquals(
 			array(
 				'paypal' => false,
@@ -29,8 +28,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		);
 
 		// set admin user.
-		$this->user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->user_id );
+		$this->user_id = $this->login_as_administrator();
 
 		update_option( 'woocommerce_default_country', 'US' );
 		$this->assertEquals(

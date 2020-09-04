@@ -55,11 +55,11 @@ class WC_Admin_Menus {
 	public function admin_menu() {
 		global $menu;
 
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( current_user_can( 'edit_others_shop_orders' ) ) {
 			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // WPCS: override ok.
 		}
 
-		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'edit_others_shop_orders', 'woocommerce', null, null, '55.5' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
@@ -68,7 +68,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function reports_menu() {
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( current_user_can( 'edit_others_shop_orders' ) ) {
 			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
@@ -183,7 +183,7 @@ class WC_Admin_Menus {
 			unset( $submenu['woocommerce'][0] );
 
 			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) ) {
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
 				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
 				if ( $order_count ) {
@@ -239,7 +239,7 @@ class WC_Admin_Menus {
 	 * @return bool
 	 */
 	public function custom_menu_order( $enabled ) {
-		return $enabled || current_user_can( 'manage_woocommerce' );
+		return $enabled || current_user_can( 'edit_others_shop_orders' );
 	}
 
 	/**

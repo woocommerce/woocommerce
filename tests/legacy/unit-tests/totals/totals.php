@@ -88,7 +88,15 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 2 );
 		$variations = $product3->get_available_variations();
 		$variation  = array_shift( $variations );
-		WC()->cart->add_to_cart( $product3->get_id(), 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) );
+		WC()->cart->add_to_cart(
+			$product3->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_colour' => 'red', // Set a value since this is an 'any' attribute.
+				'attribute_pa_number' => '2', // Set a value since this is an 'any' attribute.
+			)
+		);
 
 		WC()->cart->add_discount( $coupon->get_code() );
 

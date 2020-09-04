@@ -2,11 +2,12 @@
 /**
  * Installation related functions and actions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -147,6 +148,14 @@ class WC_Install {
 			'wc_update_400_increase_size_of_column',
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
+		),
+		'4.4.0' => array(
+			'wc_update_440_insert_attribute_terms_for_variable_products',
+			'wc_update_440_db_version',
+		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
 		),
 	);
 
@@ -744,21 +753,14 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row(
-				"SELECT COUNT(*) AS fk_count
-				FROM information_schema.TABLE_CONSTRAINTS
-				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
-				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-			); // WPCS: unprepared SQL ok.
-			if ( 0 === (int) $fk_result->fk_count ) {
+			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" ); // WPCS: unprepared SQL ok.
+			if ( false === strpos( $fk_result->{'Create Table'}, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				); // WPCS: unprepared SQL ok.
+				);
 			}
 		}
 
@@ -1175,7 +1177,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 *
 	 * @return array
 	 */
-	private static function get_core_capabilities() {
+	public static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
@@ -1365,17 +1367,21 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 * @return array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME === $file ) {
-			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>',
-			);
-
-			return array_merge( $links, $row_meta );
+		if ( WC_PLUGIN_BASENAME !== $file ) {
+			return $links;
 		}
 
-		return (array) $links;
+		$row_meta = array(
+			'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_community_support_url', 'https://wordpress.org/support/plugin/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'Visit community forums', 'woocommerce' ) . '">' . esc_html__( 'Community support', 'woocommerce' ) . '</a>',
+		);
+
+		if ( WCConnectionHelper::is_connected() ) {
+			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
+		}
+
+		return array_merge( $links, $row_meta );
 	}
 
 	/**

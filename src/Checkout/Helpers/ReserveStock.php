@@ -1,8 +1,6 @@
 <?php
 /**
  * Handle product stock reservation during checkout.
- *
- * @package Automattic/WooCommerce
  */
 
 namespace Automattic\WooCommerce\Checkout\Helpers;
@@ -46,7 +44,7 @@ final class ReserveStock {
 	 *
 	 * @return integer Amount of stock already reserved.
 	 */
-	public function get_reserved_stock( \WC_Product $product, $exclude_order_id = 0 ) {
+	public function get_reserved_stock( $product, $exclude_order_id = 0 ) {
 		global $wpdb;
 
 		if ( ! $this->is_enabled() ) {
@@ -65,7 +63,7 @@ final class ReserveStock {
 	 * @param \WC_Order $order Order object.
 	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
-	public function reserve_stock_for_order( \WC_Order $order, $minutes = 0 ) {
+	public function reserve_stock_for_order( $order, $minutes = 0 ) {
 		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
 
 		if ( ! $minutes || ! $this->is_enabled() ) {
@@ -101,8 +99,18 @@ final class ReserveStock {
 					continue;
 				}
 
-				$managed_by_id          = $product->get_stock_managed_by_id();
-				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item->get_quantity() : $item->get_quantity();
+				$managed_by_id = $product->get_stock_managed_by_id();
+
+				/**
+				 * Filter order item quantity.
+				 *
+				 * @param int|float             $quantity Quantity.
+				 * @param WC_Order              $order    Order data.
+				 * @param WC_Order_Item_Product $item Order item data.
+				 */
+				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
+
+				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
 			}
 
 			if ( ! empty( $rows ) ) {
@@ -121,7 +129,7 @@ final class ReserveStock {
 	 *
 	 * @param \WC_Order $order Order object.
 	 */
-	public function release_stock_for_order( \WC_Order $order ) {
+	public function release_stock_for_order( $order ) {
 		global $wpdb;
 
 		if ( ! $this->is_enabled() ) {
@@ -146,7 +154,7 @@ final class ReserveStock {
 	 * @param \WC_Order $order Order object which contains the product.
 	 * @param int       $minutes How long to reserve stock in minutes.
 	 */
-	private function reserve_stock_for_product( $product_id, $stock_quantity, \WC_Order $order, $minutes ) {
+	private function reserve_stock_for_product( $product_id, $stock_quantity, $order, $minutes ) {
 		global $wpdb;
 
 		$product_data_store       = \WC_Data_Store::load( 'product' );
@@ -194,7 +202,7 @@ final class ReserveStock {
 	 */
 	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
 		global $wpdb;
-		return $wpdb->prepare(
+		$query = $wpdb->prepare(
 			"
 			SELECT COALESCE( SUM( stock_table.`stock_quantity` ), 0 ) FROM $wpdb->wc_reserved_stock stock_table
 			LEFT JOIN $wpdb->posts posts ON stock_table.`order_id` = posts.ID
@@ -206,5 +214,16 @@ final class ReserveStock {
 			$product_id,
 			$exclude_order_id
 		);
+
+		/**
+		 * Filter: woocommerce_query_for_reserved_stock
+		 * Allows to filter the query for getting reserved stock of a product.
+		 *
+		 * @since 4.5.0
+		 * @param string $query            The query for getting reserved stock of a product.
+		 * @param int    $product_id       Product ID.
+		 * @param int    $exclude_order_id Order to exclude from the results.
+		 */
+		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_order_id );
 	}
 }

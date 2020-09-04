@@ -123,7 +123,8 @@ jQuery( function ( $ ) {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
 				'fadeOut': 50,
-				'delay': 200
+				'delay': 200,
+				'keepAlive': true
 			});
 		},
 
@@ -1314,6 +1315,7 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+				$( 'ul.order_notes .no-items' ).remove();
 				$( 'ul.order_notes' ).prepend( response );
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );

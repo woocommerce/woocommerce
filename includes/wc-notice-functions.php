@@ -4,7 +4,7 @@
  *
  * Functions for error/message handling and display.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.1.0
  */
 
@@ -88,7 +88,7 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 
 	if ( ! empty( $message ) ) {
 		$notices[ $notice_type ][] = array(
-			'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
+			'notice' => $message,
 			'data'   => $data,
 		);
 	}

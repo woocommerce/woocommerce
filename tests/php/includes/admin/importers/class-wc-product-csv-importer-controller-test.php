@@ -1,13 +1,9 @@
 <?php
-/**
- * Class WC_Product_CSV_Importer_Controller_Test
- * @package WooCommerce\Tests\Admin
- *
- * Tests to ensure that the CSV product importer works as expected.
- */
 
 /**
  * Class WC_Product_CSV_Importer_Controller_Test
+ *
+ * Tests to ensure that the CSV product importer works as expected.
  */
 class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 

@@ -1,9 +1,4 @@
 <?php
-/**
- * Class WC_Tests_WC_Helper file.
- *
- * @package WooCommerce|Tests|WC_Helper.
- */
 
 /**
  * Class WC_Tests_WC_Helper.

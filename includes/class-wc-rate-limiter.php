@@ -19,7 +19,7 @@
  *     add_notice( 'Sorry, too soon!' );
  * }
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.9.0
  * @since   3.9.0
  */

@@ -5,9 +5,9 @@
  * @since 2.3
  */
 
- /**
-  * WC_Tests_Product_Functions class.
-  */
+/**
+ * WC_Tests_Product_Functions class.
+ */
 class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 	/**
@@ -70,7 +70,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'type'   => 'variation',
 			)
 		);
-		$this->assertCount( 4, $products );
+		$this->assertCount( 6, $products );
 
 		// Test parent.
 		$products = wc_get_products(
@@ -80,7 +80,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent' => $variation->get_id(),
 			)
 		);
-		$this->assertCount( 4, $products );
+		$this->assertCount( 6, $products );
 
 		// Test parent_exclude.
 		$products = wc_get_products(

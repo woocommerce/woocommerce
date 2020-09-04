@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce/API
+ * @package  WooCommerce\API
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Legacy Coupons controller class.
  *
- * @package WooCommerce/API
+ * @package WooCommerce\API
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {

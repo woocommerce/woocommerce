@@ -2,7 +2,7 @@
 /**
  * List tables: coupons.
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.3.0
  */
 
