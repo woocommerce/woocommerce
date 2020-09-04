@@ -4,67 +4,82 @@ language: php
 
 dist: trusty
 
-matrix:
-  include:
-  - name: "PHP 7.3 unit tests, PHP Coding standards check and JS tests"
-    php: 7.3
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_PHPCS=1 RUN_JS=1 COMPOSER_DEV=1
-  - name: "PHP 7.3 unit tests, run in random order"
-    php: 7.3
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1
-  - name: "PHP 7.2 unit tests"
-    php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress COMPOSER_DEV=1
-  - name: "PHP 7.1 unit tests"
-    php: 7.1
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress COMPOSER_DEV=1
-  - name: "PHP 7.0 unit tests"
-    php: 7.0
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
-  - name: "PHP 5.6 unit tests"
-    php: 5.6
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress WC_VERSION=3.8.1
-  allow_failures:
-    php: 7.3
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1
+services:
+    - xvfb
+    - mysql
+    - docker
 
+matrix:
+    include:
+        - name: 'PHP 7.3 unit tests, PHP Coding standards check and JS tests'
+          php: 7.3
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_PHPCS=1 RUN_JS=1 COMPOSER_DEV=1
+        - name: 'PHP 7.3 E2E tests'
+          php: 7.3
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_E2E=1
+          script:
+              - composer require wp-cli/i18n-command
+              - npm run build
+              - npm install jest --global
+              - npm run docker:up
+              - npm run test:e2e
+          after_script:
+              - npm run docker:down
+        - name: 'PHP 7.3 unit tests, run in random order'
+          php: 7.3
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1
+        - name: 'PHP 7.2 unit tests'
+          php: 7.2
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress COMPOSER_DEV=1
+        - name: 'PHP 7.1 unit tests'
+          php: 7.1
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress COMPOSER_DEV=1
+        - name: 'PHP 7.0 unit tests'
+          php: 7.0
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+        - name: 'PHP 5.6 unit tests'
+          php: 5.6
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress WC_VERSION=3.8.1
+    allow_failures:
+        php: 7.3
+        env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1
 
 before_install:
-  - nvm install 'lts/*'
+    - nvm install 'lts/*'
 
 before_script:
-  - phpenv config-rm xdebug.ini
-  - export PATH="$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/vendor/bin:$PATH"
-  - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
-  - bash bin/travis.sh before
-  - node --version
-  - npm --version
-  - timedatectl
+    - phpenv config-rm xdebug.ini
+    - export PATH="$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/vendor/bin:$PATH"
+    - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
+    - bash bin/travis.sh before
+    - node --version
+    - npm --version
+    - timedatectl
 
 script:
-  - bash bin/js_lint_test.sh
-  - bash bin/phpunit.sh
-  - bash bin/phpcs.sh
+    - bash bin/js_lint_test.sh
+    - bash bin/phpunit.sh
+    - bash bin/phpcs.sh
 
 branches:
-  only:
-    - main
+    only:
+        - main
 
 before_deploy:
-  # Remove our unneeded symlink.
-  - rm docs/components/packages
-  # Copy each component README to the docs folder.
-  - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)README\.md/docs\/components\/packages\/\2/g' | xargs mkdir -p
-  - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)\(README\.md\)/\1\2\3 docs\/components\/packages\/\2/g' | xargs -n2 cp
+    # Remove our unneeded symlink.
+    - rm docs/components/packages
+    # Copy each component README to the docs folder.
+    - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)README\.md/docs\/components\/packages\/\2/g' | xargs mkdir -p
+    - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)\(README\.md\)/\1\2\3 docs\/components\/packages\/\2/g' | xargs -n2 cp
 
 deploy:
-  local_dir: docs
-  provider: pages
-  skip_cleanup: true
-  github_token: $GH_PAGES_TOKEN
-  keep_history: true
-  on:
-    condition: $RUN_JS == 1 # only deploy on the PHP 7.2/JS build
-    branch: main
-  target_branch: gh-pages
-  verbose: true
+    local_dir: docs
+    provider: pages
+    skip_cleanup: true
+    github_token: $GH_PAGES_TOKEN
+    keep_history: true
+    on:
+        condition: $RUN_JS == 1 # only deploy on the PHP 7.2/JS build
+        branch: main
+    target_branch: gh-pages
+    verbose: true

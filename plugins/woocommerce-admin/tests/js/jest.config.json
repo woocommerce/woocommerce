@@ -29,7 +29,8 @@
 	"testPathIgnorePatterns": [
 		"/node_modules/",
 		"<rootDir>/.*/build/",
-		"<rootDir>/.*/build-module/"
+		"<rootDir>/.*/build-module/",
+		"<rootDir>/tests/e2e/"
 	],
 	"testEnvironment": "jest-environment-jsdom-sixteen",
 	"timers": "modern",

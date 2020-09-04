@@ -26,6 +26,26 @@ For more helper scripts [see here](./CONTRIBUTING.md#helper-scripts)
 
 For some debugging tools/help [see here](./CONTRIBUTING.md#debugging)
 
+### Testing
+#### End-to-end tests
+Tests live in `./tests/e2e`. E2E tests have their own Docker container to run the WordPress server. Start
+the server using:
+```
+npm run docker:up
+```
+Run tests using:
+```
+npm run test:e2e-dev
+```
+or in headless mode:
+```
+npm run test:e2e
+```
+Run a single test by adding the file name:
+```
+npm run test:e2e-dev complete-onboarding-wizard.test.js
+```
+
 ## Privacy
 
 If you have enabled WooCommerce usage tracking ( option `woocommerce_allow_tracking` ) then, in addition to the tracking described in https://woocommerce.com/usage-tracking/, this plugin also sends information about the actions that site administrators perform to Automattic - see https://automattic.com/privacy/#information-we-collect-automatically for more information.

@@ -1,0 +1,14 @@
+version: '3.3'
+
+services:
+
+  wordpress-www:
+    volumes:
+      # This path is relative to the first config file
+      # which is in tests/e2e/env or node_modules/@woocommerce/e2e-environment
+      - "../../../:/var/www/html/wp-content/plugins/woocommerce-admin"
+
+  wordpress-cli:
+    volumes:
+      - "../../../:/var/www/html/wp-content/plugins/woocommerce-admin"
+

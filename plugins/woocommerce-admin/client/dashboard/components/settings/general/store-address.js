@@ -137,7 +137,7 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 		) {
 			setValue( 'countryState', filteredOptions[ 0 ].key );
 		}
-	}, [ autofillCountry, autofillState ] );
+	}, [ autofillCountry, autofillState, countryState, options, setValue ] );
 
 	return (
 		<Fragment>
