@@ -237,7 +237,7 @@ jQuery( function( $ ) {
 				}
 
 				if ( validate_phone ) {
-					pattern = new RegExp(/[\s\#0-9_\-\+\/\(\)\.]/g);
+					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
 					if ( 0 < $this.val().replace( pattern, '' ).length ) {
 						$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-phone' );
