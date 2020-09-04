@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { AxiosOAuthInterceptor } from './axios-oauth-interceptor';
+import { AxiosOAuthInterceptor } from '../axios-oauth-interceptor';
 
 describe( 'AxiosOAuthInterceptor', () => {
 	let apiAuthInterceptor: AxiosOAuthInterceptor;

@@ -2,7 +2,7 @@ import { Adapter } from './adapter';
 import { Model } from './model';
 import { ModelFactory } from './model-factory';
 
-type Registry<T> = { [key: string ]: T };
+type Registry< T > = { [key: string ]: T };
 
 /**
  * The types of adapters that can be stored in the registry.
@@ -20,8 +20,8 @@ export enum AdapterTypes {
  * A registry that allows for us to easily manage all of our factories and related state.
  */
 export class ModelRegistry {
-	private readonly factories: Registry<ModelFactory<any>> = {};
-	private readonly adapters: { [key in AdapterTypes]: Registry<Adapter<any>> } = {
+	private readonly factories: Registry< ModelFactory< any >> = {};
+	private readonly adapters: { [key in AdapterTypes]: Registry< Adapter< any >> } = {
 		api: {},
 		custom: {},
 	};
@@ -32,7 +32,7 @@ export class ModelRegistry {
 	 * @param {Function}     modelClass The class of model we're registering the factory for.
 	 * @param {ModelFactory} factory The factory that we're registering.
 	 */
-	public registerFactory<T extends Model>( modelClass: new () => T, factory: ModelFactory<T> ): void {
+	public registerFactory< T extends Model >( modelClass: new () => T, factory: ModelFactory< T > ): void {
 		if ( this.factories.hasOwnProperty( modelClass.name ) ) {
 			throw new Error( 'A factory of this type has already been registered for the model class.' );
 		}
@@ -45,7 +45,7 @@ export class ModelRegistry {
 	 *
 	 * @param {Function} modelClass The class of model for the factory we're fetching.
 	 */
-	public getFactory<T extends Model>( modelClass: new () => T ): ModelFactory<T> | null {
+	public getFactory< T extends Model >( modelClass: new () => T ): ModelFactory< T > | null {
 		if ( this.factories.hasOwnProperty( modelClass.name ) ) {
 			return this.factories[ modelClass.name ];
 		}
@@ -60,7 +60,7 @@ export class ModelRegistry {
 	 * @param {AdapterTypes} type The type of adapter that we're registering.
 	 * @param {Adapter}      adapter The adapter that we're registering.
 	 */
-	public registerAdapter<T extends Model>( modelClass: new () => T, type: AdapterTypes, adapter: Adapter<T> ): void {
+	public registerAdapter< T extends Model >( modelClass: new () => T, type: AdapterTypes, adapter: Adapter< T > ): void {
 		if ( this.adapters[ type ].hasOwnProperty( modelClass.name ) ) {
 			throw new Error( 'An adapter of this type has already been registered for the model class.' );
 		}
@@ -74,7 +74,7 @@ export class ModelRegistry {
 	 * @param {Function}     modelClass The class of the model for the adapter we're fetching.
 	 * @param {AdapterTypes} type The type of adapter we're fetching.
 	 */
-	public getAdapter<T extends Model>( modelClass: new () => T, type: AdapterTypes ): Adapter<T> | null {
+	public getAdapter< T extends Model >( modelClass: new () => T, type: AdapterTypes ): Adapter< T > | null {
 		if ( this.adapters[ type ].hasOwnProperty( modelClass.name ) ) {
 			return this.adapters[ type ][ modelClass.name ];
 		}
@@ -87,7 +87,7 @@ export class ModelRegistry {
 	 *
 	 * @param {AdapterTypes} type The type of adapters to fetch.
 	 */
-	public getAdapters( type: AdapterTypes ): Adapter<any>[] {
+	public getAdapters( type: AdapterTypes ): Adapter< any >[] {
 		return Object.values( this.adapters[ type ] );
 	}
 
@@ -97,7 +97,7 @@ export class ModelRegistry {
 	 * @param {Function} modelClass The class of the model factory we're changing.
 	 * @param {AdapterTypes} type The type of adapter to set.
 	 */
-	public changeFactoryAdapter<T extends Model>( modelClass: new () => T, type: AdapterTypes ): void {
+	public changeFactoryAdapter< T extends Model >( modelClass: new () => T, type: AdapterTypes ): void {
 		const factory = this.getFactory( modelClass );
 		if ( ! factory ) {
 			throw new Error( 'No factory defined for this model class.' );

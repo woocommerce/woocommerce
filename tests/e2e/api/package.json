@@ -18,18 +18,18 @@
   "files": [
     "/dist/",
     "!*.tsbuildinfo",
-    "!*.spec.js",
-    "!*.spec.d.ts",
-    "!*.test.js",
-    "!*.test.d.ts"
+    "!__tests__/",
+    "!__mocks__/",
+    "!__snapshops__/"
   ],
   "sideEffects": false,
   "scripts": {
-    "test": "jest",
     "clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
     "compile": "tsc -b",
     "build": "npm run clean && npm run compile",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "lint": "eslint src",
+    "test": "jest"
   },
   "dependencies": {
     "axios": "0.19.2",

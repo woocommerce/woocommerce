@@ -16,7 +16,7 @@ export function initializeUsingOAuth(
 	consumerKey: string,
 	consumerSecret: string,
 ): void {
-	const adapters = registry.getAdapters( AdapterTypes.API ) as APIAdapter<any>[];
+	const adapters = registry.getAdapters( AdapterTypes.API ) as APIAdapter< any >[];
 	if ( ! adapters.length ) {
 		return;
 	}
@@ -43,7 +43,7 @@ export function initializeUsingBasicAuth(
 	username: string,
 	password: string,
 ): void {
-	const adapters = registry.getAdapters( AdapterTypes.API ) as APIAdapter<any>[];
+	const adapters = registry.getAdapters( AdapterTypes.API ) as APIAdapter< any >[];
 	if ( ! adapters.length ) {
 		return;
 	}

@@ -6,7 +6,7 @@ import { APIAdapter } from '../framework/api/api-adapter';
 import faker from 'faker/locale/en';
 
 export class SimpleProduct extends Product {
-	public constructor( partial: DeepPartial<SimpleProduct> = {} ) {
+	public constructor( partial: DeepPartial< SimpleProduct > = {} ) {
 		super( partial );
 		Object.assign( this, partial );
 	}
@@ -22,7 +22,7 @@ export function registerSimpleProduct( registry: ModelRegistry ): void {
 		return;
 	}
 
-	const factory = ModelFactory.define<SimpleProduct, any, ModelFactory<SimpleProduct>>(
+	const factory = ModelFactory.define< SimpleProduct, any, ModelFactory< SimpleProduct >>(
 		( { params } ) => {
 			return new SimpleProduct(
 				{
@@ -34,7 +34,7 @@ export function registerSimpleProduct( registry: ModelRegistry ): void {
 	);
 	registry.registerFactory( SimpleProduct, factory );
 
-	const apiAdapter = new APIAdapter<SimpleProduct>(
+	const apiAdapter = new APIAdapter< SimpleProduct >(
 		'/wc/v3/products',
 		( model ) => {
 			return {

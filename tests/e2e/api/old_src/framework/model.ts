@@ -6,7 +6,7 @@ import { DeepPartial } from 'fishery';
 export abstract class Model {
 	private _id: number = 0;
 
-	protected constructor( partial: DeepPartial<any> = {} ) {
+	protected constructor( partial: DeepPartial< any > = {} ) {
 		Object.assign( this, partial );
 	}
 

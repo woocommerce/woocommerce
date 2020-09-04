@@ -9,17 +9,17 @@ import { Adapter } from '../adapter';
  * @param {Model} model The model that we want to transform.
  * @return {*} The structured request data for the API.
  */
-export type APITransformerFn<T extends Model> = ( model: T ) => any;
+export type APITransformerFn< T extends Model > = ( model: T ) => any;
 
 /**
  * A class used for creating data models using a supplied API endpoint.
  */
-export class APIAdapter<T extends Model> implements Adapter<T> {
+export class APIAdapter< T extends Model > implements Adapter< T > {
 	private readonly endpoint: string;
-	private readonly transformer: APITransformerFn<T>;
+	private readonly transformer: APITransformerFn< T >;
 	private apiService: APIService | null;
 
-	public constructor( endpoint: string, transformer: APITransformerFn<T> ) {
+	public constructor( endpoint: string, transformer: APITransformerFn< T > ) {
 		this.endpoint = endpoint;
 		this.transformer = transformer;
 		this.apiService = null;
@@ -40,9 +40,9 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 	 * @param {Model|Model[]} model The model or array of models to create.
 	 * @return {Promise} Resolves to the created input model or array of models.
 	 */
-	public create( model: T ): Promise<T>;
-	public create( model: T[] ): Promise<T[]>;
-	public create( model: T | T[] ): Promise<T> | Promise<T[]> {
+	public create( model: T ): Promise< T >;
+	public create( model: T[] ): Promise< T[]>;
+	public create( model: T | T[] ): Promise< T > | Promise< T[]> {
 		if ( ! this.apiService ) {
 			throw new Error( 'An API service must be registered for the adapter to work.' );
 		}
@@ -60,7 +60,7 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 	 * @param {Model} model The model to create.
 	 * @return {Promise} Resolves to the created input model.
 	 */
-	private async createSingle( model: T ): Promise<T> {
+	private async createSingle( model: T ): Promise< T > {
 		return this.apiService!.post(
 			this.endpoint,
 			this.transformer( model ),
@@ -76,8 +76,8 @@ export class APIAdapter<T extends Model> implements Adapter<T> {
 	 * @param {Model[]} models The array of models to create.
 	 * @return {Promise} Resolves to the array of created input models.
 	 */
-	private async createList( models: T[] ): Promise<T[]> {
-		const promises: Promise<T>[] = [];
+	private async createList( models: T[] ): Promise< T[]> {
+		const promises: Promise< T >[] = [];
 		for ( const model of models ) {
 			promises.push( this.createSingle( model ) );
 		}

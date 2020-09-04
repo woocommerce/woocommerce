@@ -1,7 +1,7 @@
 /**
  * A structured response from the API.
  */
-export class APIResponse<T = any> {
+export class APIResponse< T = any > {
 	public readonly status: number;
 	public readonly headers: any;
 	public readonly data: T;
@@ -33,7 +33,7 @@ export class APIError {
  *
  * @param {APIResponse} response The response to evaluate.
  */
-export function isAPIError( response: APIResponse ): response is APIResponse<APIError> {
+export function isAPIError( response: APIResponse ): response is APIResponse< APIError > {
 	return response.status < 200 || response.status >= 400;
 }
 
@@ -48,10 +48,10 @@ export interface APIService {
 	 * @param {*}      params Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
-	get<T>(
+	get< T >(
 		endpoint: string,
 		params?: any
-	): Promise<APIResponse<T>>;
+	): Promise< APIResponse< T >>;
 
 	/**
 	 * Performs a POST request against the WordPress API.
@@ -60,10 +60,10 @@ export interface APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
-	post<T>(
+	post< T >(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T>>;
+	): Promise< APIResponse< T >>;
 
 	/**
 	 * Performs a PUT request against the WordPress API.
@@ -72,7 +72,7 @@ export interface APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
-	put<T>( endpoint: string, data?: any ): Promise<APIResponse<T>>;
+	put< T >( endpoint: string, data?: any ): Promise< APIResponse< T >>;
 
 	/**
 	 * Performs a PATCH request against the WordPress API.
@@ -81,10 +81,10 @@ export interface APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
-	patch<T>(
+	patch< T >(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T>>;
+	): Promise< APIResponse< T >>;
 
 	/**
 	 * Performs a DELETE request against the WordPress API.
@@ -93,8 +93,8 @@ export interface APIService {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an APIResponse and throws an APIResponse containing an APIError.
 	 */
-	delete<T>(
+	delete< T >(
 		endpoint: string,
 		data?: any
-	): Promise<APIResponse<T>>;
+	): Promise< APIResponse< T >>;
 }

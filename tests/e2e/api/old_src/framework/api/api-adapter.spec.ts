@@ -12,7 +12,7 @@ class MockAPI implements APIService {
 }
 
 describe( 'APIModelCreator', () => {
-	let adapter: APIAdapter<Model>;
+	let adapter: APIAdapter< Model >;
 	let mockService: MockAPI;
 
 	beforeEach( () => {

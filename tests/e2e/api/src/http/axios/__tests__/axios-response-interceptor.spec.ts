@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import moxios from 'moxios';
-import { APIResponse, APIError } from '../api-service';
-import { AxiosResponseInterceptor } from './axios-response-interceptor';
+import { AxiosResponseInterceptor } from '../axios-response-interceptor';
 
 describe( 'AxiosResponseInterceptor', () => {
 	let apiResponseInterceptor: AxiosResponseInterceptor;
@@ -19,7 +18,7 @@ describe( 'AxiosResponseInterceptor', () => {
 		moxios.uninstall();
 	} );
 
-	it( 'should transform responses into APIResponse', async () => {
+	it( 'should transform responses into an HTTPResponse', async () => {
 		moxios.stubOnce( 'GET', 'http://test.test', {
 			status: 200,
 			headers: {
@@ -41,21 +40,34 @@ describe( 'AxiosResponseInterceptor', () => {
 		} );
 	} );
 
-	it( 'should transform response errors into APIError', async () => {
+	it( 'should transform error responses into an HTTPResponse', async () => {
 		moxios.stubOnce( 'GET', 'http://test.test', {
 			status: 404,
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			responseText: JSON.stringify( { code: 'error_code', message: 'value', data: null } ),
+			responseText: JSON.stringify( { code: 'error_code', message: 'value' } ),
 		} );
 
+		const response = await axiosInstance.get( 'http://test.test' );
+
+		expect( response ).toMatchObject( {
+			status: 404,
+			headers: {
+				'content-type': 'application/json',
+			},
+			data: {
+				code: 'error_code',
+				message: 'value',
+			},
+		} );
+	} );
+
+	it( 'should bubble non-response errors', async () => {
+		moxios.stubTimeout( 'http://test.test' );
+
 		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject(
-			new APIResponse(
-				404,
-				{ 'content-type': 'application/json' },
-				new APIError( 'error_code', 'value', null ),
-			),
+			new Error( 'timeout of 0ms exceeded' ),
 		);
 	} );
 } );

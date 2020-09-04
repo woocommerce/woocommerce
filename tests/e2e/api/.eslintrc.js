@@ -16,9 +16,6 @@ module.exports = {
 	],
 	overrides: [
 		{
-			'files': [ '**/*.ts' ]
-		},
-		{
 			'files': [
 				'**/*.spec.ts',
 				'**/*.test.ts'

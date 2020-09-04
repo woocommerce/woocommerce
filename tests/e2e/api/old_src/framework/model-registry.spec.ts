@@ -12,7 +12,7 @@ describe( 'ModelRegistry', () => {
 	} );
 
 	it( 'should register factories once', () => {
-		const factory = ModelFactory.define<Product, any, ModelFactory<Product>>( ( { params } ) => {
+		const factory = ModelFactory.define< Product, any, ModelFactory< Product >>( ( { params } ) => {
 			return new SimpleProduct( params );
 		} );
 
@@ -29,7 +29,7 @@ describe( 'ModelRegistry', () => {
 	} );
 
 	it( 'should register adapters once', () => {
-		const adapter = new APIAdapter<Product>( '', ( model ) => model );
+		const adapter = new APIAdapter< Product >( '', ( model ) => model );
 
 		expect( factoryRegistry.getAdapter( SimpleProduct, AdapterTypes.API ) ).toBeNull();
 
