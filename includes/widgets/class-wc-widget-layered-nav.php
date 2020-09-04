@@ -417,17 +417,16 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// This one will return products having "Any..." as the value of the attribute.
 
 		$query_sql_for_attributes_with_any_value = "
-			SELECT {$wpdb->posts}.post_parent AS product_id, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
-			LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id AND {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
-			JOIN {$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.post_parent
+			SELECT {$wpdb->posts}.ID AS product_id, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
+		 	JOIN {$wpdb->posts} variations ON variations.post_parent = {$wpdb->posts}.ID
+			LEFT JOIN {$wpdb->postmeta} ON variations.ID = {$wpdb->postmeta}.post_id AND {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
+			JOIN {$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.ID
 			WHERE ( {$wpdb->postmeta}.meta_key IS NULL OR {$wpdb->postmeta}.meta_value = '')
-			AND {$wpdb->posts}.post_type = 'product_variation'
+			AND {$wpdb->posts}.post_type = 'product'
 			AND {$wpdb->posts}.post_status = 'publish'
+			AND variations.post_status = 'publish'
+			AND variations.post_type = 'product_variation'
 			AND {$wpdb->term_relationships}.term_taxonomy_id in $term_ids_sql
-			AND NOT EXISTS (
-		        SELECT ID FROM {$wpdb->posts} AS parent
-		        WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status NOT IN ('publish')
-		    )
 			{$main_tax_query_sql['where']}";
 
 		// We have two queries - let's see if cached results of this query already exist.
