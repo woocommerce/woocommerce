@@ -149,9 +149,14 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Disable business extension downloads
-	const pluginToggle = await page.$( '#woocommerce-business-extensions__checkbox' );
-	pluginToggle.click();
+	// Query for the extensions toggles
+	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
+	expect( extensionsToggles ).toHaveLength( 3 );
+
+	// Disable download of the 3 extensions
+	for ( let i = 0; i < 3; i++ ) {
+		await extensionsToggles[i].click();
+	}
 
 	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
