@@ -78,7 +78,7 @@
     "lint-staged": "9.5.0",
     "mocha": "7.2.0",
     "node-sass": "4.13.0",
-    "prettier": "npm:wp-prettier@^2.0.5",
+    "prettier": "npm:wp-prettier@2.0.5",
     "puppeteer": "2.0.0",
     "puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "stylelint": "12.0.1",
@@ -86,7 +86,7 @@
     "typescript": "3.9.5",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11",
-    "wp-textdomain": "^1.0.1"
+    "wp-textdomain": "1.0.1"
   },
   "engines": {
     "node": ">=10.15.0",
