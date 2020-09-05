@@ -11,7 +11,12 @@
 		 */
 		init: function() {
 			$( document.body )
-				.on( 'keyup change', 'form.register #reg_password, form.checkout #account_password, form.edit-account #password_1, form.lost_reset_password #password_1', this.strengthMeter );
+				.on(
+					'keyup change',
+					'form.register #reg_password, form.checkout #account_password, ' +
+					'form.edit-account #password_1, form.lost_reset_password #password_1',
+					this.strengthMeter
+				);
 			$( 'form.checkout #createaccount' ).change();
 		},
 
@@ -19,17 +24,28 @@
 		 * Strength Meter.
 		 */
 		strengthMeter: function() {
-			var wrapper    = $( 'form.register, form.checkout, form.edit-account, form.lost_reset_password' ),
-				submit     = $( 'button[type="submit"]', wrapper ),
-				field      = $( '#reg_password, #account_password, #password_1', wrapper ),
-				strength   = 1,
-				fieldValue = field.val();
+			var wrapper       = $( 'form.register, form.checkout, form.edit-account, form.lost_reset_password' ),
+				submit        = $( 'button[type="submit"]', wrapper ),
+				field         = $( '#reg_password, #account_password, #password_1', wrapper ),
+				strength      = 1,
+				fieldValue    = field.val(),
+				stop_checkout = ! wrapper.is( 'form.checkout' ); // By default is disabled on checkout.
 
 			wc_password_strength_meter.includeMeter( wrapper, field );
 
 			strength = wc_password_strength_meter.checkPasswordStrength( wrapper, field );
 
-			if ( fieldValue.length > 0 && strength < wc_password_strength_meter_params.min_password_strength && ! wrapper.is( 'form.checkout' ) && -1 !== strength ) {
+			// Allow password strength meter stop checkout.
+			if ( wc_password_strength_meter_params.stop_checkout ) {
+				stop_checkout = true;
+			}
+
+			if (
+				fieldValue.length > 0 &&
+				strength < wc_password_strength_meter_params.min_password_strength &&
+				-1 !== strength &&
+				stop_checkout
+			) {
 				submit.attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 			} else {
 				submit.removeAttr( 'disabled', 'disabled' ).removeClass( 'disabled' );

@@ -3,7 +3,7 @@
  * Log handling functionality.
  *
  * @class WC_Log_Handler
- * @package WooCommerce/Abstracts
+ * @package WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Abstract WC Log Handler Class
  *
  * @version        1.0.0
- * @package        WooCommerce/Abstracts
+ * @package        WooCommerce\Abstracts
  */
 abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 
@@ -39,15 +39,19 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 	 * @return string Formatted log entry.
 	 */
 	protected static function format_entry( $timestamp, $level, $message, $context ) {
-		$time_string = self::format_time( $timestamp );
+		$time_string  = self::format_time( $timestamp );
 		$level_string = strtoupper( $level );
-		$entry = "{$time_string} {$level_string} {$message}";
+		$entry        = "{$time_string} {$level_string} {$message}";
 
-		return apply_filters( 'woocommerce_format_log_entry', $entry, array(
-			'timestamp' => $timestamp,
-			'level' => $level,
-			'message' => $message,
-			'context' => $context,
-		) );
+		return apply_filters(
+			'woocommerce_format_log_entry',
+			$entry,
+			array(
+				'timestamp' => $timestamp,
+				'level'     => $level,
+				'message'   => $message,
+				'context'   => $context,
+			)
+		);
 	}
 }

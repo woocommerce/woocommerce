@@ -10,6 +10,8 @@
  * @version  3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -43,7 +45,7 @@ function wc_do_deprecated_action( $tag, $args, $version, $replacement = null, $m
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
 		$log_string .= $replacement ? " Replace with {$replacement}." : '';
@@ -65,7 +67,7 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  */
 function wc_deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
 
 		$message    = empty( $message ) ? '' : ' ' . $message;
@@ -98,7 +100,7 @@ function wc_caught_exception( $exception_object, $function = '', $args = array()
 }
 
 /**
- * Wrapper for wc_doing_it_wrong.
+ * Wrapper for _doing_it_wrong().
  *
  * @since  3.0.0
  * @param string $function Function used.
@@ -109,7 +111,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
 	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
 
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
@@ -127,7 +129,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  * @param  string $replacement
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
@@ -883,8 +885,7 @@ function woocommerce_track_product_view() {
 }
 
 /**
- * @since 2.3
- * @deprecated has no replacement
+ * @deprecated 2.3 has no replacement
  */
 function woocommerce_compile_less_styles() {
 	wc_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
@@ -893,11 +894,11 @@ function woocommerce_compile_less_styles() {
 /**
  * woocommerce_calc_shipping was an option used to determine if shipping was enabled prior to version 2.6.0. This has since been replaced with wc_shipping_enabled() function and
  * the woocommerce_ship_to_countries setting.
- * @since 2.6.0
+ * @deprecated 2.6.0
  * @return string
  */
 function woocommerce_calc_shipping_backwards_compatibility( $value ) {
-	if ( defined( 'WC_UPDATING' ) ) {
+	if ( Constants::is_defined( 'WC_UPDATING' ) ) {
 		return $value;
 	}
 	return 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ? 'no' : 'yes';
@@ -1011,6 +1012,32 @@ function wc_get_customer_avatar_url( $email ) {
 function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+}
+
+/**
+ * Get min/max price meta query args.
+ *
+ * @deprecated 3.6.0
+ * @since 3.0.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
+
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $current_min_price, $current_max_price ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
 }
 
 /**

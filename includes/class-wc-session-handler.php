@@ -7,8 +7,10 @@
  *
  * @class    WC_Session_Handler
  * @version  2.5.0
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -67,7 +69,6 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function init() {
 		$this->init_session_cookie();
-		$this->_data = $this->get_session_data();
 
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
@@ -91,6 +92,16 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
+			$this->_data               = $this->get_session_data();
+
+			// If the user logs in, update session.
+			if ( is_user_logged_in() && strval( get_current_user_id() ) !== $this->_customer_id ) {
+				$guest_session_id   = $this->_customer_id;
+				$this->_customer_id = strval( get_current_user_id() );
+				$this->_dirty       = true;
+				$this->save_data( $guest_session_id );
+				$this->set_customer_session_cookie( true );
+			}
 
 			// Update session if its close to expiring.
 			if ( time() > $this->_session_expiring ) {
@@ -100,6 +111,7 @@ class WC_Session_Handler extends WC_Session {
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 		}
 	}
 
@@ -120,9 +132,19 @@ class WC_Session_Handler extends WC_Session {
 			$this->_has_cookie = true;
 
 			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
-				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
 			}
 		}
+	}
+
+	/**
+	 * Should the session cookie be secure?
+	 *
+	 * @since 3.6.0
+	 * @return bool
+	 */
+	protected function use_secure_cookie() {
+		return apply_filters( 'wc_session_use_secure_cookie', wc_site_is_https() && is_ssl() );
 	}
 
 	/**
@@ -153,7 +175,7 @@ class WC_Session_Handler extends WC_Session {
 		$customer_id = '';
 
 		if ( is_user_logged_in() ) {
-			$customer_id = get_current_user_id();
+			$customer_id = strval( get_current_user_id() );
 		}
 
 		if ( empty( $customer_id ) ) {
@@ -215,9 +237,11 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Save data.
+	 * Save data and delete guest session.
+	 *
+	 * @param int $old_session_key session ID before user logs in.
 	 */
-	public function save_data() {
+	public function save_data( $old_session_key = 0 ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
@@ -234,6 +258,9 @@ class WC_Session_Handler extends WC_Session {
 
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 			$this->_dirty = false;
+			if ( get_current_user_id() != $old_session_key && ! is_object( get_user_by( 'id', $old_session_key ) ) ) {
+				$this->delete_session( $old_session_key );
+			}
 		}
 	}
 
@@ -249,7 +276,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Forget all session data without destroying it.
 	 */
 	public function forget_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
 		wc_empty_cart();
 
@@ -277,7 +304,7 @@ class WC_Session_Handler extends WC_Session {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) ); // @codingStandardsIgnoreLine.
 
 		if ( class_exists( 'WC_Cache_Helper' ) ) {
-			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
+			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
 
@@ -291,7 +318,7 @@ class WC_Session_Handler extends WC_Session {
 	public function get_session( $customer_id, $default = false ) {
 		global $wpdb;
 
-		if ( defined( 'WP_SETUP_CONFIG' ) ) {
+		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
 			return false;
 		}
 
@@ -305,7 +332,10 @@ class WC_Session_Handler extends WC_Session {
 				$value = $default;
 			}
 
-			wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+			$cache_duration = $this->_session_expiration - time();
+			if ( 0 < $cache_duration ) {
+				wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
+			}
 		}
 
 		return maybe_unserialize( $value );

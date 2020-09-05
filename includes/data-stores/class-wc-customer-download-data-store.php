@@ -26,7 +26,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		// Always set a access granted date.
 		if ( is_null( $download->get_access_granted( 'edit' ) ) ) {
-			$download->set_access_granted( current_time( 'timestamp', true ) );
+			$download->set_access_granted( time() );
 		}
 
 		$data = array(

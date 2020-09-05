@@ -4,7 +4,7 @@
  *
  * Functions for formatting data.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.1.0
  */
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string );
+	return is_bool( $string ) ? $string : ( 'yes' === strtolower( $string ) || 1 === $string || 'true' === strtolower( $string ) || '1' === $string );
 }
 
 /**
@@ -292,7 +292,9 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
-		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
+
+		// Convert multiple dots to just one.
+		$number = preg_replace( '/\.(?![^.]+$)|[^0-9.-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
@@ -360,6 +362,20 @@ function wc_format_localized_decimal( $value ) {
  */
 function wc_format_coupon_code( $value ) {
 	return apply_filters( 'woocommerce_coupon_code', $value );
+}
+
+/**
+ * Sanitize a coupon code.
+ *
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
+ *
+ * @since  3.6.0
+ * @param  string $value Coupon code to format.
+ * @return string
+ */
+function wc_sanitize_coupon_code( $value ) {
+	return wp_filter_kses( sanitize_post_field( 'post_title', $value, 0, 'db' ) );
 }
 
 /**
@@ -566,7 +582,7 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
-	$return          = '<span class="woocommerce-Price-amount amount">' . $formatted_price . '</span>';
+	$return          = '<span class="woocommerce-Price-amount amount"><bdi>' . $formatted_price . '</bdi></span>';
 
 	if ( $args['ex_tax_label'] && wc_tax_enabled() ) {
 		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -592,10 +608,8 @@ function wc_price( $price, $args = array() ) {
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$l    = substr( $size, -1 );
-	$ret  = substr( $size, 0, -1 );
-	$byte = 1024;
-
+	$l   = substr( $size, -1 );
+	$ret = (int) substr( $size, 0, -1 );
 	switch ( strtoupper( $l ) ) {
 		case 'P':
 			$ret *= 1024;
@@ -699,6 +713,11 @@ function wc_string_to_datetime( $time_string ) {
  * @return string PHP timezone string for the site
  */
 function wc_timezone_string() {
+	// Added in WordPress 5.3 Ref https://developer.wordpress.org/reference/functions/wp_timezone_string/.
+	if ( function_exists( 'wp_timezone_string' ) ) {
+		return wp_timezone_string();
+	}
+
 	// If site timezone string exists, return it.
 	$timezone = get_option( 'timezone_string' );
 	if ( $timezone ) {
@@ -706,13 +725,13 @@ function wc_timezone_string() {
 	}
 
 	// Get UTC offset, if it isn't set then return UTC.
-	$utc_offset = intval( get_option( 'gmt_offset', 0 ) );
-	if ( 0 === $utc_offset ) {
+	$utc_offset = floatval( get_option( 'gmt_offset', 0 ) );
+	if ( ! is_numeric( $utc_offset ) || 0.0 === $utc_offset ) {
 		return 'UTC';
 	}
 
 	// Adjust UTC offset from hours to seconds.
-	$utc_offset *= 3600;
+	$utc_offset = (int) ( $utc_offset * 3600 );
 
 	// Attempt to guess the timezone string from the UTC offset.
 	$timezone = timezone_name_from_abbr( '', $utc_offset );
@@ -723,7 +742,8 @@ function wc_timezone_string() {
 	// Last try, guess timezone string manually.
 	foreach ( timezone_abbreviations_list() as $abbr ) {
 		foreach ( $abbr as $city ) {
-			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) {
+			// WordPress restrict the use of date(), since it's affected by timezone settings, but in this case is just what we need to guess the correct timezone.
+			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) { // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				return $city['timezone_id'];
 			}
 		}
@@ -776,9 +796,9 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
 
 		$rgb      = array();
-		$rgb['R'] = hexdec( $color{0} . $color{1} );
-		$rgb['G'] = hexdec( $color{2} . $color{3} );
-		$rgb['B'] = hexdec( $color{4} . $color{5} );
+		$rgb['R'] = hexdec( $color[0] . $color[1] );
+		$rgb['G'] = hexdec( $color[2] . $color[3] );
+		$rgb['B'] = hexdec( $color[4] . $color[5] );
 
 		return $rgb;
 	}
@@ -845,7 +865,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wc_is_light' ) ) {
+if ( ! function_exists( 'wc_hex_is_light' ) ) {
 
 	/**
 	 * Determine whether a hex color is light.
@@ -915,10 +935,10 @@ function wc_format_postcode( $postcode, $country ) {
 	switch ( $country ) {
 		case 'CA':
 		case 'GB':
-			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', -3, 0 );
 			break;
 		case 'IE':
-			$postcode = trim( substr_replace( $postcode, ' ', 3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', 3, 0 );
 			break;
 		case 'BR':
 		case 'PL':
@@ -938,7 +958,7 @@ function wc_format_postcode( $postcode, $country ) {
 			break;
 	}
 
-	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
+	return apply_filters( 'woocommerce_format_postcode', trim( $postcode ), $country );
 }
 
 /**
@@ -964,7 +984,7 @@ function wc_format_phone_number( $phone ) {
 	if ( ! WC_Validation::is_phone( $phone ) ) {
 		return '';
 	}
-	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
 }
 
 /**
@@ -1120,7 +1140,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( wp_strip_all_tags( $term ) ) );
+	return trim( wp_strip_all_tags( wp_unslash( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {

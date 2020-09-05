@@ -2,8 +2,10 @@
 /**
  * Abstract_WC_Order_Data_Store_CPT class file.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,12 +56,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
-		$order->set_version( WC_VERSION );
-		$order->set_date_created( current_time( 'timestamp', true ) );
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
-
-		$raw_status = $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' );
-		$status     = wc_is_order_status( 'wc-' . $raw_status ) ? 'wc-' . $raw_status : $raw_status;
+		if ( ! $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( time() );
+		}
 
 		$id = wp_insert_post(
 			apply_filters(
@@ -68,11 +69,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 					'post_type'     => $order->get_type( 'edit' ),
-					'post_status'   => $status,
+					'post_status'   => $this->get_post_status( $order ),
 					'ping_status'   => 'closed',
 					'post_author'   => 1,
 					'post_title'    => $this->get_post_title(),
-					'post_password' => wc_generate_order_key(),
+					'post_password' => $this->get_order_key( $order ),
 					'post_parent'   => $order->get_parent_id( 'edit' ),
 					'post_excerpt'  => $this->get_post_excerpt( $order ),
 				)
@@ -134,22 +135,20 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function update( &$order ) {
 		$order->save_meta_data();
-		$order->set_version( WC_VERSION );
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
 		if ( null === $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( current_time( 'timestamp', true ) );
+			$order->set_date_created( time() );
 		}
 
 		$changes = $order->get_changes();
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
-			$raw_status = $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' );
-			$status     = wc_is_order_status( 'wc-' . $raw_status ) ? 'wc-' . $raw_status : $raw_status;
 			$post_data = array(
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				'post_status'       => $status,
+				'post_status'       => $this->get_post_status( $order ),
 				'post_parent'       => $order->get_parent_id(),
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
@@ -216,6 +215,36 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	*/
 
 	/**
+	 * Get the status to save to the post object.
+	 *
+	 * Plugins extending the order classes can override this to change the stored status/add prefixes etc.
+	 *
+	 * @since 3.6.0
+	 * @param  WC_order $order Order object.
+	 * @return string
+	 */
+	protected function get_post_status( $order ) {
+		$order_status = $order->get_status( 'edit' );
+
+		if ( ! $order_status ) {
+			$order_status = apply_filters( 'woocommerce_default_order_status', 'pending' );
+		}
+
+		$post_status    = $order_status;
+		$valid_statuses = get_post_stati();
+
+		// Add a wc- prefix to the status, but exclude some core statuses which should not be prefixed.
+		// @todo In the future this should only happen based on `wc_is_order_status`, but in order to
+		// preserve back-compatibility this happens to all statuses except a select few. A doing_it_wrong
+		// Notice will be needed here, followed by future removal.
+		if ( ! in_array( $post_status, array( 'auto-draft', 'draft', 'trash' ), true ) && in_array( 'wc-' . $post_status, $valid_statuses, true ) ) {
+			$post_status = 'wc-' . $post_status;
+		}
+
+		return $post_status;
+	}
+
+	/**
 	 * Excerpt for post.
 	 *
 	 * @param  WC_order $order Order object.
@@ -235,6 +264,17 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		/* translators: %s: Order date */
 		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
 		// @codingStandardsIgnoreEnd
+	}
+
+	/**
+	 * Get order key.
+	 *
+	 * @since 4.3.0
+	 * @param WC_order $order Order object.
+	 * @return string
+	 */
+	protected function get_order_key( $order ) {
+		return wc_generate_order_key();
 	}
 
 	/**

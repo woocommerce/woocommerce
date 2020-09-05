@@ -4,7 +4,7 @@
  *
  * All functionality pertaining to regenerating product images in realtime.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.5.0
  * @since   3.3.0
  */
@@ -203,19 +203,19 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		// Use a whitelist of sizes we want to resize. Ignore others.
+		// List of sizes we want to resize. Ignore others.
 		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $image;
 		}
 
-		$target_size  = wc_get_image_size( $size );
-		$image_width  = $image[1];
-		$image_height = $image[2];
-		$ratio_match  = false;
-		$uncropped    = '' === $target_size['width'] || '' === $target_size['height'];
+		$target_size      = wc_get_image_size( $size );
+		$image_width      = $image[1];
+		$image_height     = $image[2];
+		$ratio_match      = false;
+		$target_uncropped = '' === $target_size['width'] || '' === $target_size['height'] || ! $target_size['crop'];
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
-		if ( $uncropped ) {
+		if ( $target_uncropped ) {
 			$full_size = self::get_full_size_image_dimensions( $attachment_id );
 
 			if ( ! $full_size || ! $full_size['width'] || ! $full_size['height'] ) {

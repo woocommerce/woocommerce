@@ -25,15 +25,18 @@ jQuery( function( $ ) {
 	}
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
+	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
+		event.preventDefault();
 	});
 
 	// Make form field descriptions toggle on focus.
-	$( document.body ).on( 'click', function() {
-		$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
-	} );
+	if ( $( '.woocommerce-input-wrapper span.description' ).length ) {
+		$( document.body ).on( 'click', function() {
+			$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
+		} );
+	}
 
 	$( '.woocommerce-input-wrapper' ).on( 'click', function( event ) {
 		event.stopPropagation();
@@ -75,4 +78,21 @@ jQuery( function( $ ) {
 			}, 1000 );
 		}
 	};
+
+	// Show password visiblity hover icon on woocommerce forms
+	$( '.woocommerce form .woocommerce-Input[type="password"]' ).wrap( '<span class="password-input"></span>' );
+	// Add 'password-input' class to the password wrapper in checkout page.
+	$( '.woocommerce form input' ).filter(':password').parent('span').addClass('password-input');
+	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
+
+	$( '.show-password-input' ).click(
+		function() {
+			$( this ).toggleClass( 'display-password' );
+			if ( $( this ).hasClass( 'display-password' ) ) {
+				$( this ).siblings( ['input[type="password"]'] ).prop( 'type', 'text' );
+			} else {
+				$( this ).siblings( 'input[type="text"]' ).prop( 'type', 'password' );
+			}
+		}
+	);
 });

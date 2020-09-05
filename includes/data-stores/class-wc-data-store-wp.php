@@ -6,7 +6,7 @@
  * your own meta handling functions.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +18,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
@@ -85,7 +85,7 @@ class WC_Data_Store_WP {
 		$db_info       = $this->get_db_info();
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
 				FROM {$db_info['table']}
 				WHERE {$db_info['object_id_field']} = %d
@@ -120,7 +120,7 @@ class WC_Data_Store_WP {
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
+		return add_metadata( $this->meta_type, $object->get_id(), wp_slash( $meta->key ), is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
 	}
 
 	/**
@@ -547,5 +547,87 @@ class WC_Data_Store_WP {
 		);
 
 		return apply_filters( 'wp_search_stopwords', $stopwords );
+	}
+
+	/**
+	 * Get data to save to a lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 * @return array
+	 */
+	protected function get_data_for_lookup_table( $id, $table ) {
+		return array();
+	}
+
+	/**
+	 * Get primary key name for lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param string $table Lookup table name.
+	 * @return string
+	 */
+	protected function get_primary_key_for_lookup_table( $table ) {
+		return '';
+	}
+
+	/**
+	 * Update a lookup table for an object.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 *
+	 * @return NULL
+	 */
+	protected function update_lookup_table( $id, $table ) {
+		global $wpdb;
+
+		$id    = absint( $id );
+		$table = sanitize_key( $table );
+
+		if ( empty( $id ) || empty( $table ) ) {
+			return false;
+		}
+
+		$existing_data = wp_cache_get( 'lookup_table', 'object_' . $id );
+		$update_data   = $this->get_data_for_lookup_table( $id, $table );
+
+		if ( ! empty( $update_data ) && $update_data !== $existing_data ) {
+			$wpdb->replace(
+				$wpdb->$table,
+				$update_data
+			);
+			wp_cache_set( 'lookup_table', $update_data, 'object_' . $id );
+		}
+	}
+
+	/**
+	 * Delete lookup table data for an ID.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 */
+	public function delete_from_lookup_table( $id, $table ) {
+		global $wpdb;
+
+		$id    = absint( $id );
+		$table = sanitize_key( $table );
+
+		if ( empty( $id ) || empty( $table ) ) {
+			return false;
+		}
+
+		$pk = $this->get_primary_key_for_lookup_table( $table );
+
+		$wpdb->delete(
+			$wpdb->$table,
+			array(
+				$pk => $id,
+			)
+		);
+		wp_cache_delete( 'lookup_table', 'object_' . $id );
 	}
 }

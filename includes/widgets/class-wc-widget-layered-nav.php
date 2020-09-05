@@ -2,7 +2,7 @@
 /**
  * Layered nav widget
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.6.0
  */
 
@@ -344,49 +344,94 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
 		global $wpdb;
 
-		$tax_query  = WC_Query::get_main_tax_query();
-		$meta_query = WC_Query::get_main_meta_query();
+		$main_tax_query = $this->get_main_tax_query();
+		$meta_query     = $this->get_main_meta_query();
 
-		if ( 'or' === $query_type ) {
-			foreach ( $tax_query as $key => $query ) {
-				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
-					unset( $tax_query[ $key ] );
+		$non_variable_tax_query_sql = array( 'where' => '' );
+		$is_and_query               = 'and' === $query_type;
+
+		foreach ( $main_tax_query as $key => $query ) {
+			if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
+				if ( $is_and_query ) {
+					$non_variable_tax_query_sql = $this->convert_tax_query_to_sql( array( $query ) );
 				}
+				unset( $main_tax_query[ $key ] );
 			}
 		}
 
-		$meta_query     = new WP_Meta_Query( $meta_query );
-		$tax_query      = new WP_Tax_Query( $tax_query );
-		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
-		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$exclude_variable_products_tax_query_sql = $this->get_extra_tax_query_sql( 'product_type', array( 'variable' ), 'NOT IN' );
 
-		// Generate query.
+		$meta_query_sql     = ( new WP_Meta_Query( $meta_query ) )->get_sql( 'post', $wpdb->posts, 'ID' );
+		$main_tax_query_sql = $this->convert_tax_query_to_sql( $main_tax_query );
+		$term_ids_sql       = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+
+		// Generate the first part of the query.
+		// This one will return non-variable products and variable products with concrete values for the attributes.
 		$query           = array();
-		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
+		$query['select'] = "SELECT IF({$wpdb->posts}.post_type='variable_product', {$wpdb->posts}.post_parent, {$wpdb->posts}.ID) AS product_id, terms.term_id AS term_count_id";
 		$query['from']   = "FROM {$wpdb->posts}";
 		$query['join']   = "
-			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON {$wpdb->posts}.ID = term_relationships.object_id
+			INNER JOIN {$wpdb->term_relationships} AS tr ON {$wpdb->posts}.ID = tr.object_id
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			" . $tax_query_sql['join'] . $meta_query_sql['join'];
+			{$main_tax_query_sql['join']} {$meta_query_sql['join']}"; // Not an omission, really no more JOINs required.
+
+		$variable_where_part = "
+			OR ({$wpdb->posts}.post_type = 'product_variation'
+		    AND NOT EXISTS (
+		        SELECT ID FROM {$wpdb->posts} AS parent
+		        WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status NOT IN ('publish')
+		    ))
+		";
+
+		$search_sql = '';
+		$search     = $this->get_main_search_query_sql();
+		if ( $search ) {
+			$search_sql = ' AND ' . $search;
+		}
 
 		$query['where'] = "
-			WHERE {$wpdb->posts}.post_type IN ( 'product' )
-			AND {$wpdb->posts}.post_status = 'publish'"
-			. $tax_query_sql['where'] . $meta_query_sql['where'] .
-			'AND terms.term_id IN (' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+			WHERE
+			{$wpdb->posts}.post_status = 'publish'
+			{$main_tax_query_sql['where']} {$meta_query_sql['where']}
+			AND (
+				(
+					{$wpdb->posts}.post_type = 'product'
+					{$exclude_variable_products_tax_query_sql['where']}
+					{$non_variable_tax_query_sql['where']}
+				)
+				{$variable_where_part}
+			)
+			AND terms.term_id IN {$term_ids_sql}
+			{$search_sql}";
 
-		$search = WC_Query::get_main_search_query_sql();
+		$search = $this->get_main_search_query_sql();
 		if ( $search ) {
 			$query['where'] .= ' AND ' . $search;
 		}
 
-		$query['group_by'] = 'GROUP BY terms.term_id';
-		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
-		$query             = implode( ' ', $query );
+		$query          = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
+		$main_query_sql = implode( ' ', $query );
 
-		// We have a query - let's see if cached results of this query already exist.
-		$query_hash = md5( $query );
+		// Generate the second part of the query.
+		// This one will return products having "Any..." as the value of the attribute.
+
+		$query_sql_for_attributes_with_any_value = "
+			SELECT {$wpdb->posts}.post_parent AS product_id, {$wpdb->term_relationships}.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
+			LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id AND {$wpdb->postmeta}.meta_key = 'attribute_$taxonomy'
+			JOIN {$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.post_parent
+			WHERE ( {$wpdb->postmeta}.meta_key IS NULL OR {$wpdb->postmeta}.meta_value = '')
+			AND {$wpdb->posts}.post_type = 'product_variation'
+			AND {$wpdb->posts}.post_status = 'publish'
+			AND {$wpdb->term_relationships}.term_taxonomy_id in $term_ids_sql
+			AND NOT EXISTS (
+		        SELECT ID FROM {$wpdb->posts} AS parent
+		        WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status NOT IN ('publish')
+		    )
+			{$main_tax_query_sql['where']}";
+
+		// We have two queries - let's see if cached results of this query already exist.
+		$query_hash = md5( $main_query_sql . $query_sql_for_attributes_with_any_value );
 
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
@@ -397,8 +442,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
-			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
-			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+			$counts                       = $this->get_term_product_counts_from_queries( $main_query_sql, $query_sql_for_attributes_with_any_value );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
@@ -406,6 +450,112 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 
 		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
+	}
+
+	/**
+	 * Get the count of terms for products, using a set of SQL queries that are return pairs of product id - term id.
+	 *
+	 * @param string ...$queries SQL queries to use, each must return a "product_id" column and a "terms_count_id" column.
+	 *
+	 * @return array An array where the keys are term ids, and the values are term counts.
+	 */
+	private function get_term_product_counts_from_queries( ...$queries ) {
+		global $wpdb;
+
+		$total_counts = null;
+
+		foreach ( $queries as $query ) {
+			$query = "
+				SELECT COUNT(DISTINCT(product_id)) AS term_count, term_count_id FROM (
+					{$query}
+				) AS x GROUP BY term_count_id";
+
+			$results = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$counts  = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+
+			if ( is_null( $total_counts ) ) {
+				$total_counts = $counts;
+			} else {
+				foreach ( $counts as $term_id => $term_count ) {
+					if ( array_key_exists( $term_id, $total_counts ) ) {
+						$total_counts[ $term_id ] += $term_count;
+					} else {
+						$total_counts[ $term_id ] = $term_count;
+					}
+				}
+			}
+		}
+
+		return $total_counts;
+	}
+
+	/**
+	 * Wrapper for WC_Query::get_main_tax_query() to ease unit testing.
+	 *
+	 * @since 4.4.0
+	 * @return array
+	 */
+	protected function get_main_tax_query() {
+		return WC_Query::get_main_tax_query();
+	}
+
+	/**
+	 * Wrapper for WC_Query::get_main_search_query_sql() to ease unit testing.
+	 *
+	 * @since 4.4.0
+	 * @return string
+	 */
+	protected function get_main_search_query_sql() {
+		return WC_Query::get_main_search_query_sql();
+	}
+
+	/**
+	 * Wrapper for WC_Query::get_main_search_queryget_main_meta_query to ease unit testing.
+	 *
+	 * @since 4.4.0
+	 * @return array
+	 */
+	protected function get_main_meta_query() {
+		return WC_Query::get_main_meta_query();
+	}
+
+	/**
+	 * Get a tax query SQL for a given set of taxonomy, terms and operator.
+	 * Uses an intermediate WP_Tax_Query object.
+	 *
+	 * @since 4.4.0
+	 * @param string $taxonomy Taxonomy name.
+	 * @param array  $terms Terms to include in the query.
+	 * @param string $operator Query operator, as supported by WP_Tax_Query; e.g. "NOT IN".
+	 *
+	 * @return array
+	 */
+	private function get_extra_tax_query_sql( $taxonomy, $terms, $operator ) {
+		$query = array(
+			array(
+				'taxonomy'         => $taxonomy,
+				'field'            => 'slug',
+				'terms'            => $terms,
+				'operator'         => $operator,
+				'include_children' => false,
+			),
+		);
+
+		return $this->convert_tax_query_to_sql( $query );
+	}
+
+	/**
+	 * Convert a tax query array to SQL using an intermediate WP_Tax_Query object.
+	 *
+	 * @since 4.4.0
+	 * @param array $query Query array in the same format accepted by WP_Tax_Query constructor.
+	 *
+	 * @return array Query SQL as returned by WP_Tax_Query->get_sql.
+	 */
+	private function convert_tax_query_to_sql( $query ) {
+		global $wpdb;
+
+		return ( new WP_Tax_Query( $query ) )->get_sql( $wpdb->posts, 'ID' );
 	}
 
 	/**
@@ -442,8 +592,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				continue;
 			}
 
-			$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
-			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
+			$filter_name = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array();
 			$current_filter = array_map( 'sanitize_title', $current_filter );
 
 			if ( ! in_array( $term->slug, $current_filter, true ) ) {
@@ -487,7 +638,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$term_html .= ' ' . apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
 			echo '<li class="woocommerce-widget-layered-nav-list__item wc-layered-nav-term ' . ( $option_is_set ? 'woocommerce-widget-layered-nav-list__item--chosen chosen' : '' ) . '">';
-			echo apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count ); // WPCS: XSS ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count );
 			echo '</li>';
 		}
 

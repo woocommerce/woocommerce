@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails
- * @version 3.3.0
+ * @package WooCommerce\Templates\Emails
+ * @version 4.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,6 +38,7 @@ $body_darker_10  = wc_hex_darker( $body, 10 );
 $base_lighter_20 = wc_hex_lighter( $base, 20 );
 $base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
+$text_lighter_40 = wc_hex_lighter( $text, 40 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 // body{padding: 0;} ensures proper scale/positioning of the email in the iOS native email app.
@@ -75,6 +76,12 @@ body {
 #template_header h1,
 #template_header h1 a {
 	color: <?php echo esc_attr( $base_text ); ?>;
+	background-color: inherit;
+}
+
+#template_header_image img {
+	margin-left: 0;
+	margin-right: 0;
 }
 
 #template_footer td {
@@ -84,12 +91,16 @@ body {
 
 #template_footer #credit {
 	border: 0;
-	color: <?php echo esc_attr( $base_lighter_40 ); ?>;
+	color: <?php echo esc_attr( $text_lighter_40 ); ?>;
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 	font-size: 12px;
-	line-height: 125%;
+	line-height: 150%;
 	text-align: center;
-	padding: 0 48px 48px 48px;
+	padding: 24px 0;
+}
+
+#template_footer #credit p {
+	margin: 0 0 16px;
 }
 
 #body_content {
@@ -97,7 +108,7 @@ body {
 }
 
 #body_content table td {
-	padding: 48px 48px 0;
+	padding: 48px 48px 32px;
 }
 
 #body_content table td td {
@@ -154,7 +165,7 @@ body {
 }
 
 .link {
-	color: <?php echo esc_attr( $base ); ?>;
+	color: <?php echo esc_attr( $link_color ); ?>;
 }
 
 #header_wrapper {
@@ -212,5 +223,7 @@ img {
 	text-transform: capitalize;
 	vertical-align: middle;
 	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 10px;
+	max-width: 100%;
+	height: auto;
 }
 <?php

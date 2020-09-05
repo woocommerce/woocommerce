@@ -44,6 +44,9 @@ class WC_Admin_Menus {
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
 		}
+
+		// Handle saving settings earlier than load-{page} hook to avoid race conditions in conditional menus.
+		add_action( 'wp_loaded', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -52,11 +55,11 @@ class WC_Admin_Menus {
 	public function admin_menu() {
 		global $menu;
 
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( current_user_can( 'edit_others_shop_orders' ) ) {
 			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // WPCS: override ok.
 		}
 
-		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'edit_others_shop_orders', 'woocommerce', null, null, '55.5' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
@@ -65,7 +68,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function reports_menu() {
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( current_user_can( 'edit_others_shop_orders' ) ) {
 			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
@@ -85,10 +88,36 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
-		global $current_tab, $current_section;
-
 		WC()->payment_gateways();
 		WC()->shipping();
+
+		// Include settings pages.
+		WC_Admin_Settings::get_settings_pages();
+
+		// Add any posted messages.
+		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		do_action( 'woocommerce_settings_page_init' );
+	}
+
+	/**
+	 * Handle saving of settings.
+	 *
+	 * @return void
+	 */
+	public function save_settings() {
+		global $current_tab, $current_section;
+
+		// We should only save on the settings page.
+		if ( ! is_admin() || ! isset( $_GET['page'] ) || 'wc-settings' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
 
 		// Include settings pages.
 		WC_Admin_Settings::get_settings_pages();
@@ -103,17 +132,6 @@ class WC_Admin_Menus {
 		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
-
-		// Add any posted messages.
-		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		do_action( 'woocommerce_settings_page_init' );
 	}
 
 	/**
@@ -164,14 +182,16 @@ class WC_Admin_Menus {
 			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
 
-			$order_count = wc_processing_order_count();
-
 			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && $order_count ) {
-				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
-						break;
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
+
+				if ( $order_count ) {
+					foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+						if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+							$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+							break;
+						}
 					}
 				}
 			}
@@ -219,7 +239,7 @@ class WC_Admin_Menus {
 	 * @return bool
 	 */
 	public function custom_menu_order( $enabled ) {
-		return $enabled || current_user_can( 'manage_woocommerce' );
+		return $enabled || current_user_can( 'edit_others_shop_orders' );
 	}
 
 	/**
@@ -311,7 +331,7 @@ class WC_Admin_Menus {
 								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $value ); ?>
 							</label>
 							<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
-							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $value ); ?>" />
+							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_attr( $value ); ?>" />
 							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_account_endpoint_url( $key ) ); ?>" />
 							<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
 						</li>

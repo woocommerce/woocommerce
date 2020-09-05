@@ -3,7 +3,8 @@
  * Background Updater
  *
  * @version 2.6.0
- * @package WooCommerce/Classes
+ * @deprecated 3.6.0 Replaced with queue.
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;

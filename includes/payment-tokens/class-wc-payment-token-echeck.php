@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Payment_Token_ECheck
  * @version     3.0.0
  * @since       2.6.0
- * @package     WooCommerce/PaymentTokens
+ * @package     WooCommerce\PaymentTokens
  */
 class WC_Payment_Token_ECheck extends WC_Payment_Token {
 
@@ -46,7 +46,7 @@ class WC_Payment_Token_ECheck extends WC_Payment_Token {
 	 */
 	public function get_display_name( $deprecated = '' ) {
 		$display = sprintf(
-			/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
+			/* translators: 1: last 4 digits */
 			__( 'eCheck ending in %1$s', 'woocommerce' ),
 			$this->get_last4()
 		);

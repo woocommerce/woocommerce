@@ -91,6 +91,7 @@ jQuery( function( $ ) {
 									action       : $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 									security     : wc_enhanced_select_params.search_products_nonce,
 									exclude      : $( this ).data( 'exclude' ),
+									exclude_type : $( this ).data( 'exclude_type' ),
 									include      : $( this ).data( 'include' ),
 									limit        : $( this ).data( 'limit' ),
 									display_stock: $( this ).data( 'display_stock' )
@@ -260,14 +261,16 @@ jQuery( function( $ ) {
 
 			// WooCommerce Backbone Modal
 			.on( 'wc_backbone_modal_before_remove', function() {
-				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).selectWoo( 'close' );
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' )
+					.selectWoo( 'close' );
 			})
 
 			.trigger( 'wc-enhanced-select-init' );
 
 		$( 'html' ).on( 'click', function( event ) {
 			if ( this === event.target ) {
-				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' ).selectWoo( 'close' );
+				$( '.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).filter( '.select2-hidden-accessible' )
+					.selectWoo( 'close' );
 			}
 		} );
 	} catch( err ) {

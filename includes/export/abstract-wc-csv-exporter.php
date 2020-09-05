@@ -2,7 +2,7 @@
 /**
  * Handles CSV export.
  *
- * @package  WooCommerce/Export
+ * @package  WooCommerce\Export
  * @version  3.1.0
  */
 
@@ -72,6 +72,13 @@ abstract class WC_CSV_Exporter {
 	protected $columns_to_export = array();
 
 	/**
+	 * The delimiter parameter sets the field delimiter (one character only).
+	 *
+	 * @var string
+	 */
+	protected $delimiter = ',';
+
+	/**
 	 * Prepare data that will be exported.
 	 */
 	abstract public function prepare_data_to_export();
@@ -108,6 +115,16 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function get_columns_to_export() {
 		return $this->columns_to_export;
+	}
+
+	/**
+	 * Return the delimiter to use in CSV file
+	 *
+	 * @since 3.9.0
+	 * @return string
+	 */
+	public function get_delimiter() {
+		return apply_filters( "woocommerce_{$this->export_type}_export_delimiter", $this->delimiter );
 	}
 
 	/**
@@ -468,20 +485,23 @@ abstract class WC_CSV_Exporter {
 	 * @see https://bugs.php.net/bug.php?id=50686
 	 * @see https://github.com/woocommerce/woocommerce/issues/19514
 	 * @since 3.4.0
+	 * @see https://github.com/woocommerce/woocommerce/issues/24579
+	 * @since 3.9.0
 	 * @param resource $buffer Resource we are writing to.
 	 * @param array    $export_row Row to export.
 	 */
 	protected function fputcsv( $buffer, $export_row ) {
+
 		if ( version_compare( PHP_VERSION, '5.5.4', '<' ) ) {
 			ob_start();
 			$temp = fopen( 'php://output', 'w' ); // @codingStandardsIgnoreLine
-    		fputcsv( $temp, $export_row, ",", '"' ); // @codingStandardsIgnoreLine
+    		fputcsv( $temp, $export_row, $this->get_delimiter(), '"' ); // @codingStandardsIgnoreLine
 			fclose( $temp ); // @codingStandardsIgnoreLine
 			$row = ob_get_clean();
 			$row = str_replace( '\\"', '\\""', $row );
 			fwrite( $buffer, $row ); // @codingStandardsIgnoreLine
 		} else {
-			fputcsv( $buffer, $export_row, ",", '"', "\0" ); // @codingStandardsIgnoreLine
+			fputcsv( $buffer, $export_row, $this->get_delimiter(), '"', "\0" ); // @codingStandardsIgnoreLine
 		}
 	}
 }

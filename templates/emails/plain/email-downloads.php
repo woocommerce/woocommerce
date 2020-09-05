@@ -11,13 +11,13 @@
  * the readme will list any important changes.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  * @version 3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-echo esc_html( wc_strtoupper( __( 'Downloads', 'woocommerce' ) ) ) . "\n\n";
+echo esc_html( wc_strtoupper( esc_html__( 'Downloads', 'woocommerce' ) ) ) . "\n\n";
 
 foreach ( $downloads as $download ) {
 	foreach ( $columns as $column_id => $column_name ) {

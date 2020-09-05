@@ -2,9 +2,11 @@
 /**
  * Admin Dashboard
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -36,6 +38,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			// Reviews Widget.
 			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 			}
@@ -78,7 +81,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
-			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) );
+			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		/**
@@ -201,46 +204,73 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		private function status_widget_stock_rows() {
 			global $wpdb;
 
-			// Get products using a query - this is too advanced for get_posts.
-			$stock          = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-			$nostock        = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-			$transient_name = 'wc_low_stock_count';
-
-			$lowinstock_count = get_transient( $transient_name );
-			if ( false === $lowinstock_count ) {
-				$query_from       = apply_filters(
-					'woocommerce_report_low_in_stock_query_from',
-					"FROM {$wpdb->posts} as posts
-					INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-					INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-					WHERE 1=1
-					AND posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status = 'publish'
-					AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'"
-				);
-				$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
-				set_transient( $transient_name, $lowinstock_count, DAY_IN_SECONDS * 30 );
+			// Requires lookup table added in 3.6.
+			if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+				return;
 			}
 
-			$transient_name = 'wc_outofstock_count';
+			$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+			$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
+			$transient_name   = 'wc_low_stock_count';
+			$lowinstock_count = get_transient( $transient_name );
+
+			if ( false === $lowinstock_count ) {
+				/**
+				 * Status widget low in stock count pre query.
+				 *
+				 * @since 4.3.0
+				 * @param null|string $low_in_stock_count Low in stock count, by default null.
+				 * @param int         $stock              Low stock amount.
+				 * @param int         $nostock            No stock amount
+				 */
+				$lowinstock_count = apply_filters( 'woocommerce_status_widget_low_in_stock_count_pre_query', null, $stock, $nostock );
+
+				if ( is_null( $lowinstock_count ) ) {
+					$lowinstock_count = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT( product_id )
+							FROM {$wpdb->wc_product_meta_lookup} AS lookup
+							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+							WHERE stock_quantity <= %d
+							AND stock_quantity > %d
+							AND posts.post_status = 'publish'",
+							$stock,
+							$nostock
+						)
+					);
+				}
+
+				set_transient( $transient_name, (int) $lowinstock_count, DAY_IN_SECONDS * 30 );
+			}
+
+			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
+
 			if ( false === $outofstock_count ) {
-				$query_from       = apply_filters(
-					'woocommerce_report_out_of_stock_query_from',
-					"FROM {$wpdb->posts} as posts
-					INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-					INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-					WHERE 1=1
-					AND posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status = 'publish'
-					AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'"
-				);
-				$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
-				set_transient( $transient_name, $outofstock_count, DAY_IN_SECONDS * 30 );
+				/**
+				 * Status widget out of stock count pre query.
+				 *
+				 * @since 4.3.0
+				 * @param null|string $outofstock_count Out of stock count, by default null.
+				 * @param int         $nostock          No stock amount
+				 */
+				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
+
+				if ( is_null( $outofstock_count ) ) {
+					$outofstock_count = (int) $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT( product_id )
+							FROM {$wpdb->wc_product_meta_lookup} AS lookup
+							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+							WHERE stock_quantity <= %d
+							AND posts.post_status = 'publish'",
+							$nostock
+						)
+					);
+				}
+
+				set_transient( $transient_name, (int) $outofstock_count, DAY_IN_SECONDS * 30 );
 			}
 			?>
 			<li class="low-in-stock">
@@ -288,7 +318,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};"
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			);
 
 			if ( $comments ) {
@@ -302,10 +332,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 					/* translators: %s: rating */
-					echo '<div class="star-rating"><span style="width:' . esc_html( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
+					echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
 					/* translators: %s: review author */
-					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_html( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 					echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
 				}
@@ -319,11 +349,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Network orders widget.
 		 */
 		public function network_orders() {
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
 
-			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), WC_VERSION );
+			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), $version );
 
-			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
+			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), $version, true );
 
 			$user     = wp_get_current_user();
 			$blogs    = get_blogs_of_user( $user->ID );
@@ -385,7 +416,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		</div>
 			<?php
 		}
-
 	}
 
 endif;

@@ -2,7 +2,7 @@
 /**
  * Template Loader
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -127,7 +127,16 @@ class WC_Template_Loader {
 		$templates[] = 'woocommerce.php';
 
 		if ( is_page_template() ) {
-			$templates[] = get_page_template_slug();
+			$page_template = get_page_template_slug();
+
+			if ( $page_template ) {
+				$validated_file = validate_file( $page_template );
+				if ( 0 === $validated_file ) {
+					$templates[] = $page_template;
+				} else {
+					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." );
+				}
+			}
 		}
 
 		if ( is_singular( 'product' ) ) {
@@ -454,7 +463,8 @@ class WC_Template_Loader {
 						'cache'    => false,
 					)
 				),
-			'products' );
+				'products'
+			);
 
 			// Allow queries to run e.g. layered nav.
 			add_action( 'pre_get_posts', array( WC()->query, 'product_query' ) );

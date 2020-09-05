@@ -2,7 +2,7 @@
 /**
  * Cart session handling class.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.2.0
  */
 
@@ -50,16 +50,17 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
-		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
+
+		// Persistent cart stored to usermeta.
+		add_action( 'woocommerce_add_to_cart', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_set_quantity', array( $this, 'persistent_cart_update' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
-		if ( function_exists( 'header_register_callback' ) ) {
-			header_register_callback( array( $this, 'maybe_set_cart_cookies' ) ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.header_register_callbackFound
-		} else {
-			add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
-			add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
-			add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
-		}
+		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
+		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
+		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
 	}
 
 	/**
@@ -130,7 +131,16 @@ final class WC_Cart_Session {
 			} elseif ( ! $product->is_purchasable() ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
-				wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
+				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );
+				/**
+				 * Filter message about item removed from the cart.
+				 *
+				 * @since 3.8.0
+				 * @param string     $message Message.
+				 * @param WC_Product $product Product data.
+				 */
+				$message = apply_filters( 'woocommerce_cart_item_removed_message', $message, $product );
+				wc_add_notice( $message, 'error' );
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
@@ -169,7 +179,7 @@ final class WC_Cart_Session {
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
 		if ( $order_again ) {
-			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+			wp_safe_redirect( wc_get_cart_url() );
 			exit;
 		}
 	}
@@ -253,7 +263,7 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		if ( get_current_user_id() ) {
+		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
 	}

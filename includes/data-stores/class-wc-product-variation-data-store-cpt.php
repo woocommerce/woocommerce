@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -36,7 +38,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object. $product Product object.
+	 * @param WC_Product_Variation $product Product object.
+	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status (via read_product_data), or when passing an invalid ID.
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -47,20 +50,25 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$post_object = get_post( $product->get_id() );
 
-		if ( ! $post_object || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ), true ) ) {
+		if ( ! $post_object ) {
 			return;
+		}
+
+		if ( 'product_variation' !== $post_object->post_type ) {
+			throw new WC_Data_Exception( 'variation_invalid_id', __( 'Invalid product type: passed ID does not correspond to a product variation.', 'woocommerce' ) );
 		}
 
 		$product->set_props(
 			array(
-				'name'            => $post_object->post_title,
-				'slug'            => $post_object->post_name,
-				'date_created'    => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'   => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
-				'status'          => $post_object->post_status,
-				'menu_order'      => $post_object->menu_order,
-				'reviews_allowed' => 'open' === $post_object->comment_status,
-				'parent_id'       => $post_object->post_parent,
+				'name'              => $post_object->post_title,
+				'slug'              => $post_object->post_name,
+				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'status'            => $post_object->post_status,
+				'menu_order'        => $post_object->menu_order,
+				'reviews_allowed'   => 'open' === $post_object->comment_status,
+				'parent_id'         => $post_object->post_parent,
+				'attribute_summary' => $post_object->post_excerpt,
 			)
 		);
 
@@ -74,6 +82,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
+		$updates = array();
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
@@ -81,7 +90,23 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
+			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+		}
+
+		/**
+		 * If the attribute summary is not in sync, update here. Used when searching for variations by attribute values.
+		 * This is meant to also cover the case when global attribute name or value is updated, then the attribute summary is updated
+		 * for respective products when they're read.
+		 */
+		$new_attribute_summary = $this->generate_attribute_summary( $product );
+
+		if ( $new_attribute_summary !== $post_object->post_excerpt ) {
+			$product->set_attribute_summary( $new_attribute_summary );
+			$updates = array_merge( $updates, array( 'post_excerpt' => $new_attribute_summary ) );
+		}
+
+		if ( ! empty( $updates ) ) {
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $updates, array( 'ID' => $product->get_id() ) );
 			clean_post_cache( $product->get_id() );
 		}
 
@@ -93,11 +118,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Create a new product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );
@@ -105,6 +130,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		if ( $product->get_name( 'edit' ) !== $new_title ) {
 			$product->set_name( $new_title );
 		}
+
+		$attribute_summary = $this->generate_attribute_summary( $product );
+		$product->set_attribute_summary( $attribute_summary );
 
 		// The post parent is not a valid variable product so we should prevent this.
 		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
@@ -119,6 +147,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name( 'edit' ),
+					'post_excerpt'   => $product->get_attribute_summary( 'edit' ),
 					'post_content'   => '',
 					'post_parent'    => $product->get_parent_id(),
 					'comment_status' => 'closed',
@@ -149,7 +178,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->clear_caches( $product );
 
-			do_action( 'woocommerce_new_product_variation', $id );
+			do_action( 'woocommerce_new_product_variation', $id, $product );
 		}
 	}
 
@@ -157,13 +186,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Updates an existing product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
 
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );
@@ -179,10 +208,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$changes = $product->get_changes();
 
+		if ( array_intersect( array( 'attributes' ), array_keys( $changes ) ) ) {
+			$product->set_attribute_summary( $this->generate_attribute_summary( $product ) );
+		}
+
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified', 'attributes' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_title'        => $product->get_name( 'edit' ),
+				'post_excerpt'      => $product->get_attribute_summary( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
@@ -237,7 +271,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$this->clear_caches( $product );
 
-		do_action( 'woocommerce_update_product_variation', $product->get_id() );
+		do_action( 'woocommerce_update_product_variation', $product->get_id(), $product );
 	}
 
 	/*
@@ -280,6 +314,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
+	 * Generates attribute summary for the variation.
+	 *
+	 * Attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @since 3.6.0
+	 * @param WC_Product_Variation $product Product variation to generate the attribute summary for.
+	 *
+	 * @return string
+	 */
+	protected function generate_attribute_summary( $product ) {
+		return wc_get_formatted_variation( $product, true, true );
+	}
+
+	/**
 	 * Make sure we store the product version (to track data changes).
 	 *
 	 * @param WC_Product $product Product object.
@@ -287,14 +335,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function update_version_and_type( &$product ) {
 		wp_set_object_terms( $product->get_id(), '', 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 	}
 
 	/**
 	 * Read post data.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status.
 	 */
 	protected function read_product_data( &$product ) {
@@ -425,10 +473,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $force || array_key_exists( 'attributes', $changes ) ) {
 			global $wpdb;
+
+			$product_id             = $product->get_id();
 			$attributes             = $product->get_attributes();
 			$updated_attribute_keys = array();
 			foreach ( $attributes as $key => $value ) {
-				update_post_meta( $product->get_id(), 'attribute_' . $key, wp_slash( $value ) );
+				update_post_meta( $product_id, 'attribute_' . $key, wp_slash( $value ) );
 				$updated_attribute_keys[] = 'attribute_' . $key;
 			}
 
@@ -438,13 +488,28 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
 					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d",
 					$wpdb->esc_like( 'attribute_' ) . '%',
-					$product->get_id()
+					$product_id
 				)
 			);
 
 			foreach ( $delete_attribute_keys as $key ) {
-				delete_post_meta( $product->get_id(), $key );
+				delete_post_meta( $product_id, $key );
 			}
+
+			// Set the attributes as regular taxonomy terms too...
+			$variation_attributes = array_keys( $product->get_variation_attributes( false ) );
+			foreach ( $attributes as $name => $value ) {
+				$value = strval( $value );
+				if ( '' !== $value && in_array( $name, $variation_attributes, true ) && term_exists( $value, $name ) ) {
+					wp_set_post_terms( $product_id, array( $value ), $name );
+				} elseif ( taxonomy_exists( $name ) ) {
+					wp_delete_object_term_relationships( $product_id, $name );
+				}
+			}
+
+			// ...and remove old taxonomy terms.
+			$attributes_to_delete = array_diff( wc_get_attribute_taxonomy_names(), array_keys( $attributes ) );
+			wp_delete_object_term_relationships( $product_id, $attributes_to_delete );
 		}
 	}
 

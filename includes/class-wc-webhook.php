@@ -7,9 +7,11 @@
  * Webhooks are enqueued to their associated actions, delivered, and logged.
  *
  * @version  3.2.0
- * @package  WooCommerce/Webhooks
+ * @package  WooCommerce\Webhooks
  * @since    2.2.0
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,6 +21,14 @@ require_once 'legacy/class-wc-legacy-webhook.php';
  * Webhook class.
  */
 class WC_Webhook extends WC_Legacy_Webhook {
+
+	/**
+	 * Store which object IDs this webhook has processed (ie scheduled to be delivered)
+	 * within the current page request.
+	 *
+	 * @var array
+	 */
+	protected $processed = array();
 
 	/**
 	 * Stores webhook data.
@@ -38,7 +48,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		'event'            => '',
 		'failure_count'    => 0,
 		'user_id'          => 0,
-		'api_version'      => 2,
+		'api_version'      => 3,
 		'pending_delivery' => false,
 	);
 
@@ -103,6 +113,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return;
 		}
 
+		// Mark this $arg as processed to ensure it doesn't get processed again within the current request.
+		$this->processed[] = $arg;
+
 		/**
 		 * Process webhook delivery.
 		 *
@@ -123,7 +136,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
-		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg );
+		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg ) && ! $this->is_already_processed( $arg );
 
 		/**
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
@@ -271,8 +284,26 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			if ( 'order' === $resource && 'draft' === $status ) {
 				return false;
 			}
+
+			// Check registered order types for order types args.
+			if ( 'order' === $resource && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ), true ) ) {
+				return false;
+			}
 		}
 		return true;
+	}
+
+	/**
+	 * Checks if the specified resource has already been queued for delivery within the current request.
+	 *
+	 * Helps avoid duplication of data being sent for topics that have more than one hook defined.
+	 *
+	 * @param mixed $arg First hook argument.
+	 *
+	 * @return bool
+	 */
+	protected function is_already_processed( $arg ) {
+		return false !== array_search( $arg, $this->processed, true );
 	}
 
 	/**
@@ -292,7 +323,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'redirection' => 0,
 			'httpversion' => '1.0',
 			'blocking'    => true,
-			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'        => trim( wp_json_encode( $payload ) ),
 			'headers'     => array(
 				'Content-Type' => 'application/json',
@@ -383,31 +414,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
-		$rest_api_versions = wc_get_webhook_rest_api_versions();
-		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
-
-		// Load REST API endpoints to generate payload.
-		if ( ! did_action( 'rest_api_init' ) ) {
-			WC()->api->rest_api_includes();
-		}
-
 		switch ( $resource ) {
 			case 'coupon':
 			case 'customer':
 			case 'order':
 			case 'product':
-				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
-				$request    = new WP_REST_Request( 'GET' );
-				$controller = new $class();
-
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
 					$resource_id = $resource_id->get_id();
 				}
 
-				$request->set_param( 'id', $resource_id );
-				$result  = $controller->get_item( $request );
-				$payload = isset( $result->data ) ? $result->data : array();
+				$version = str_replace( 'wp_api_', '', $this->get_api_version() );
+				$payload = wc()->api->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 				break;
 
 			// Custom topics include the first hook argument.
@@ -539,7 +557,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'Body'    => $response_body,
 		);
 
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {
 			$message['Webhook Delivery']['Body']             = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
@@ -618,7 +636,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	public function deliver_ping() {
 		$args = array(
-			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
 		);
 
@@ -676,7 +694,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Get webhopk created date.
+	 * Get webhook created date.
 	 *
 	 * @since  3.2.0
 	 * @param  string $context  What the value is for.
@@ -688,7 +706,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Get webhopk modified date.
+	 * Get webhook modified date.
 	 *
 	 * @since  3.2.0
 	 * @param  string $context  What the value is for.

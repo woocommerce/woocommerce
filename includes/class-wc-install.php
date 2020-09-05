@@ -2,9 +2,12 @@
 /**
  * Installation related functions and actions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
+
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -125,25 +128,45 @@ class WC_Install {
 			'wc_update_354_db_version',
 		),
 		'3.6.0' => array(
+			'wc_update_360_product_lookup_tables',
 			'wc_update_360_term_meta',
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
+		'3.7.0' => array(
+			'wc_update_370_tax_rate_classes',
+			'wc_update_370_mro_std_currency',
+			'wc_update_370_db_version',
+		),
+		'3.9.0' => array(
+			'wc_update_390_move_maxmind_database',
+			'wc_update_390_change_geolocation_database_update_cron',
+			'wc_update_390_db_version',
+		),
+		'4.0.0' => array(
+			'wc_update_product_lookup_tables',
+			'wc_update_400_increase_size_of_column',
+			'wc_update_400_reset_action_scheduler_migration_status',
+			'wc_update_400_db_version',
+		),
+		'4.4.0' => array(
+			'wc_update_440_insert_attribute_terms_for_variable_products',
+			'wc_update_440_db_version',
+		),
+		'4.5.0' => array(
+			'wc_update_450_sanitize_coupons_code',
+			'wc_update_450_db_version',
+		),
 	);
-
-	/**
-	 * Background update class.
-	 *
-	 * @var object
-	 */
-	private static $background_updater;
 
 	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
-		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
+		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
+		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
@@ -152,22 +175,91 @@ class WC_Install {
 	}
 
 	/**
-	 * Init background updates
-	 */
-	public static function init_background_updater() {
-		include_once dirname( __FILE__ ) . '/class-wc-background-updater.php';
-		self::$background_updater = new WC_Background_Updater();
-	}
-
-	/**
 	 * Check WooCommerce version and run the updater is required.
 	 *
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
+		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
+		}
+	}
+
+	/**
+	 * Performan manual database update when triggered by WooCommerce System Tools.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function manual_database_update() {
+		$blog_id = get_current_blog_id();
+
+		add_action( 'wp_' . $blog_id . '_wc_updater_cron', array( __CLASS__, 'run_manual_database_update' ) );
+	}
+
+	/**
+	 * Add WC Admin based db update notice.
+	 *
+	 * @since 4.0.0
+	 */
+	public static function wc_admin_db_update_notice() {
+		if (
+			WC()->is_wc_admin_active() &&
+			false !== get_option( 'woocommerce_admin_install_timestamp' )
+		) {
+			new WC_Notes_Run_Db_Update();
+		}
+	}
+
+	/**
+	 * Run manual database update.
+	 */
+	public static function run_manual_database_update() {
+		self::update();
+	}
+
+	/**
+	 * Run an update callback when triggered by ActionScheduler.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	public static function run_update_callback( $callback ) {
+		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
+
+		if ( is_callable( $callback ) ) {
+			self::run_update_callback_start( $callback );
+			$result = (bool) call_user_func( $callback );
+			self::run_update_callback_end( $callback, $result );
+		}
+	}
+
+	/**
+	 * Triggered when a callback will run.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	protected static function run_update_callback_start( $callback ) {
+		wc_maybe_define_constant( 'WC_UPDATING', true );
+	}
+
+	/**
+	 * Triggered when a callback has ran.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 * @param bool   $result Return value from callback. Non-false need to run again.
+	 */
+	protected static function run_update_callback_end( $callback, $result ) {
+		if ( $result ) {
+			WC()->queue()->add(
+				'woocommerce_run_update_callback',
+				array(
+					'update_callback' => $callback,
+				),
+				'woocommerce-db-updates'
+			);
 		}
 	}
 
@@ -180,18 +272,7 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update' );
-		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok.
-			check_admin_referer( 'wc_force_db_update', 'wc_force_db_update_nonce' );
-			$blog_id = get_current_blog_id();
-
-			// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
-			// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
-			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
-
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
-			exit;
+			WC_Admin_Notices::add_notice( 'update', true );
 		}
 	}
 
@@ -212,9 +293,11 @@ class WC_Install {
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
+		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
-		self::create_options();
 		self::create_tables();
+		self::verify_base_tables();
+		self::create_options();
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
@@ -223,11 +306,60 @@ class WC_Install {
 		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_enable_homescreen();
 
 		delete_transient( 'wc_installing' );
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Check if all the base tables are present.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return array List of querues.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		if ( $execute ) {
+			self::create_tables();
+		}
+		$queries        = dbDelta( self::get_schema(), false );
+		$missing_tables = array();
+		foreach ( $queries as $table_name => $result ) {
+			if ( "Created table $table_name" === $result ) {
+				$missing_tables[] = $table_name;
+			}
+		}
+
+		if ( 0 < count( $missing_tables ) ) {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::add_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
+		} else {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_version', WC()->db_version );
+			delete_option( 'woocommerce_schema_missing_tables' );
+		}
+		return $missing_tables;
+	}
+
+	/**
+	 * Check if the homepage should be enabled and set the appropriate option if thats the case.
+	 *
+	 * @since 4.3.0
+	 */
+	private static function maybe_enable_homescreen() {
+		if ( self::is_new_install() && ! get_option( 'woocommerce_homescreen_enabled' ) ) {
+			add_option( 'woocommerce_homescreen_enabled', 'yes' );
+		}
 	}
 
 	/**
@@ -257,11 +389,15 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
+	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 *
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) ) && is_null( get_option( 'woocommerce_db_version', null ) );
+	public static function is_new_install() {
+		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
+
+		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
 	}
 
 	/**
@@ -270,11 +406,13 @@ class WC_Install {
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function needs_db_update() {
+	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
+		$update_versions    = array_keys( $updates );
+		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( $updates ) ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
 	}
 
 	/**
@@ -283,8 +421,8 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function maybe_enable_setup_wizard() {
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', self::is_new_install() ) ) {
-			WC_Admin_Notices::add_notice( 'install' );
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
+			WC_Admin_Notices::add_notice( 'install', true );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
 	}
@@ -297,10 +435,9 @@ class WC_Install {
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
-				self::init_background_updater();
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update' );
+				WC_Admin_Notices::add_notice( 'update', true );
 			}
 		} else {
 			self::update_db_version();
@@ -330,24 +467,22 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$logger             = wc_get_logger();
-		$update_queued      = false;
+		$loop               = 0;
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					$logger->info(
-						sprintf( 'Queuing %s - %s', $version, $update_callback ),
-						array( 'source' => 'wc_db_updates' )
+					WC()->queue()->schedule_single(
+						time() + $loop,
+						'woocommerce_run_update_callback',
+						array(
+							'update_callback' => $update_callback,
+						),
+						'woocommerce-db-updates'
 					);
-					self::$background_updater->push_to_queue( $update_callback );
-					$update_queued = true;
+					$loop++;
 				}
 			}
-		}
-
-		if ( $update_queued ) {
-			self::$background_updater->save()->dispatch();
 		}
 	}
 
@@ -369,9 +504,13 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
-		$schedules['monthly'] = array(
+		$schedules['monthly']     = array(
 			'interval' => 2635200,
 			'display'  => __( 'Monthly', 'woocommerce' ),
+		);
+		$schedules['fifteendays'] = array(
+			'interval' => 1296000,
+			'display'  => __( 'Every 15 Days', 'woocommerce' ),
 		);
 		return $schedules;
 	}
@@ -398,14 +537,15 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
-		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
+		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
+		// so it doesn't occur in the same request. WooCommerce Admin also schedules
+		// a daily cron that gets lost due to a race condition. WC_Privacy's background
+		// processing instance updates the cron schedule from within a cron job.
+		wp_schedule_event( time() + 10, 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
-		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
-
-		// Trigger GeoLite2 database download after 5 minutes.
-		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 5 ), 'woocommerce_geoip_updater' );
 	}
 
 	/**
@@ -477,6 +617,10 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+
+		// Define initial tax classes.
+		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
 	}
 
 	/**
@@ -536,6 +680,11 @@ class WC_Install {
 
 	/**
 	 * Set up the database tables which the plugin needs to function.
+	 * WARNING: If you are modifying this method, make sure that its safe to call regardless of the state of database.
+	 *
+	 * This is called from `install` method and is executed in-sync when WC is installed or updated. This can also be called optionally from `verify_base_tables`.
+	 *
+	 * TODO: Add all crucial tables that we have created from workers in the past.
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
@@ -604,23 +753,19 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row(
-				"SELECT COUNT(*) AS fk_count
-				FROM information_schema.TABLE_CONSTRAINTS
-				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
-				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-			); // WPCS: unprepared SQL ok.
-			if ( 0 === (int) $fk_result->fk_count ) {
+			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" ); // WPCS: unprepared SQL ok.
+			if ( false === strpos( $fk_result->{'Create Table'}, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				); // WPCS: unprepared SQL ok.
+				);
 			}
 		}
+
+		// Clear table caches.
+		delete_transient( 'wc_attribute_taxonomies' );
 	}
 
 	/**
@@ -647,6 +792,13 @@ class WC_Install {
 		if ( $wpdb->has_cap( 'collation' ) ) {
 			$collate = $wpdb->get_charset_collate();
 		}
+
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 */
+		$max_index_length = 191;
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
@@ -818,9 +970,47 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   permission_id BIGINT UNSIGNED NOT NULL,
   user_id BIGINT UNSIGNED NULL,
   user_ip_address VARCHAR(100) NULL DEFAULT '',
-  PRIMARY KEY (download_log_id),
+  PRIMARY KEY  (download_log_id),
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
+  `product_id` bigint(20) NOT NULL,
+  `sku` varchar(100) NULL default '',
+  `virtual` tinyint(1) NULL default 0,
+  `downloadable` tinyint(1) NULL default 0,
+  `min_price` decimal(19,4) NULL default NULL,
+  `max_price` decimal(19,4) NULL default NULL,
+  `onsale` tinyint(1) NULL default 0,
+  `stock_quantity` double NULL default NULL,
+  `stock_status` varchar(100) NULL default 'instock',
+  `rating_count` bigint(20) NULL default 0,
+  `average_rating` decimal(3,2) NULL default 0.00,
+  `total_sales` bigint(20) NULL default 0,
+  `tax_status` varchar(100) NULL default 'taxable',
+  `tax_class` varchar(100) NULL default '',
+  PRIMARY KEY  (`product_id`),
+  KEY `virtual` (`virtual`),
+  KEY `downloadable` (`downloadable`),
+  KEY `stock_status` (`stock_status`),
+  KEY `stock_quantity` (`stock_quantity`),
+  KEY `onsale` (`onsale`),
+  KEY min_max_price (`min_price`, `max_price`)
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
+  tax_rate_class_id BIGINT UNSIGNED NOT NULL auto_increment,
+  name varchar(200) NOT NULL DEFAULT '',
+  slug varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY  (tax_rate_class_id),
+  UNIQUE KEY slug (slug($max_index_length))
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
+	`order_id` bigint(20) NOT NULL,
+	`product_id` bigint(20) NOT NULL,
+	`stock_quantity` double NOT NULL DEFAULT 0,
+	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY  (`order_id`, `product_id`)
 ) $collate;
 		";
 
@@ -838,6 +1028,8 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_meta_lookup",
+			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
@@ -853,6 +1045,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
+			"{$wpdb->prefix}wc_reserved_stock",
 		);
 
 		/**
@@ -878,7 +1071,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -984,7 +1177,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 	 *
 	 * @return array
 	 */
-	private static function get_core_capabilities() {
+	public static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
@@ -1060,7 +1253,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 		}
 
 		// Install files and folders for uploading files and prevent hotlinking.
-		$upload_dir      = wp_upload_dir();
+		$upload_dir      = wp_get_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
@@ -1079,19 +1272,16 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 				'file'    => 'index.html',
 				'content' => '',
 			),
-		);
-
-		if ( 'redirect' !== $download_method ) {
-			$files[] = array(
+			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			);
-		}
+				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',
+			),
+		);
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
@@ -1177,17 +1367,21 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 	 * @return array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME === $file ) {
-			$row_meta = array(
-				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
-				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>',
-			);
-
-			return array_merge( $links, $row_meta );
+		if ( WC_PLUGIN_BASENAME !== $file ) {
+			return $links;
 		}
 
-		return (array) $links;
+		$row_meta = array(
+			'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
+			'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_community_support_url', 'https://wordpress.org/support/plugin/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'Visit community forums', 'woocommerce' ) . '">' . esc_html__( 'Community support', 'woocommerce' ) . '</a>',
+		);
+
+		if ( WCConnectionHelper::is_connected() ) {
+			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
+		}
+
+		return array_merge( $links, $row_meta );
 	}
 
 	/**
@@ -1231,10 +1425,10 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 			if ( empty( $installed_plugins ) ) {
 				$installed_plugins = array();
 			}
-			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
-			$installed         = false;
-			$activate          = false;
+			$plugin_slug = $plugin_to_install['repo-slug'];
+			$plugin_file = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
+			$installed   = false;
+			$activate    = false;
 
 			// See if the plugin is installed already.
 			if ( isset( $installed_plugins[ $plugin_file ] ) ) {

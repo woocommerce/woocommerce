@@ -2,7 +2,7 @@
 /**
  * Sales By Product Reporting
  *
- * @package WooCommerce/Admin/Reporting
+ * @package WooCommerce\Admin\Reporting
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Product
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
@@ -78,8 +78,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
-						'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-						'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+						'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 						'operator'   => 'IN',
 					),
 				),
@@ -104,8 +104,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),
@@ -150,7 +150,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'item_count'   => '#d4d9dc',
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ), true ) ) {
 			$current_range = '7day';
@@ -299,8 +299,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'where_meta'   => array(
 							array(
 								'type'       => 'order_item_meta',
-								'meta_key'   => '_line_subtotal', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-								'meta_value' => '0', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+								'meta_key'   => '_line_subtotal', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+								'meta_value' => '0', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 								'operator'   => '=',
 							),
 						),
@@ -400,7 +400,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<a
 			href="#"
@@ -454,8 +454,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),
@@ -492,8 +492,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),

@@ -2,7 +2,7 @@
 /**
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
@@ -35,10 +35,10 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',
-			'state'      => '',
+			'city'       => '',			
 			'postcode'   => '',
 			'country'    => '',
+			'state'      => '',
 			'email'      => '',
 			'phone'      => '',
 		),
@@ -48,10 +48,10 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',
-			'state'      => '',
+			'city'       => '',			
 			'postcode'   => '',
 			'country'    => '',
+			'state'      => '',
 		),
 		'is_paying_customer' => false,
 	);

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @deprecated  2.6.0
  * @version     2.4.0
- * @package     WooCommerce/Classes/Shipping
+ * @package     WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
@@ -78,7 +78,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$this->tax_status   = $this->get_option( 'tax_status' );
 		$this->cost         = $this->get_option( 'cost' );
 		$this->type         = $this->get_option( 'type', 'class' );
-		$this->options      = $this->get_option( 'options', false ); // @deprecated in 2.4.0
+		$this->options      = $this->get_option( 'options', false ); // @deprecated 2.4.0
 	}
 
 	/**
@@ -146,7 +146,9 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			array(
 				'percent' => '',
 				'min_fee' => '',
-			), $atts, 'fee'
+			),
+			$atts,
+			'fee'
 		);
 
 		$calculated_fee = 0;
@@ -182,7 +184,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost(
-				$cost, array(
+				$cost,
+				array(
 					'qty'  => $this->get_package_item_qty( $package ),
 					'cost' => $package['contents_cost'],
 				)
@@ -204,7 +207,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 			$has_costs  = true;
 			$class_cost = $this->evaluate_cost(
-				$class_cost_string, array(
+				$class_cost_string,
+				array(
 					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
 					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 				)

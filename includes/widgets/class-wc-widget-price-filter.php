@@ -4,9 +4,11 @@
  *
  * Generates a range slider to filter products by price.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.3.0
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,10 +32,11 @@ class WC_Widget_Price_Filter extends WC_Widget {
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 		);
-		$suffix                   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version                  = Constants::get_constant( 'WC_VERSION' );
 		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
-		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
-		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
+		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), $version, true );
+		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), $version, true );
 		wp_localize_script(
 			'wc-price-slider',
 			'woocommerce_price_slider_params',
@@ -63,6 +66,11 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		global $wp;
+
+		// Requires lookup table added in 3.6.
+		if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+			return;
+		}
 
 		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
@@ -115,21 +123,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		echo '<form method="get" action="' . esc_url( $form_action ) . '">
-			<div class="price_slider_wrapper">
-				<div class="price_slider" style="display:none;"></div>
-				<div class="price_slider_amount" data-step="' . esc_attr( $step ) . '">
-					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $current_min_price ) . '" data-min="' . esc_attr( $min_price ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
-					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $current_max_price ) . '" data-max="' . esc_attr( $max_price ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
-					<button type="submit" class="button">' . esc_html__( 'Filter', 'woocommerce' ) . '</button>
-					<div class="price_label" style="display:none;">
-						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
-					</div>
-					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price', 'paged' ), '', true ) . '
-					<div class="clear"></div>
-				</div>
-			</div>
-		</form>'; // WPCS: XSS ok.
+		wc_get_template(
+			'content-widget-price-filter.php',
+			array(
+				'form_action'       => $form_action,
+				'step'              => $step,
+				'min_price'         => $min_price,
+				'max_price'         => $max_price,
+				'current_min_price' => $current_min_price,
+				'current_max_price' => $current_max_price,
+			)
+		);
 
 		$this->widget_end( $args );
 	}
@@ -147,11 +151,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
 		if ( ! is_post_type_archive( 'product' ) && ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
-			$tax_query[] = array(
-				'taxonomy' => $args['taxonomy'],
-				'terms'    => array( $args['term'] ),
-				'field'    => 'slug',
-			);
+			$tax_query[] = WC()->query->get_main_tax_query();
 		}
 
 		foreach ( $meta_query + $tax_query as $key => $query ) {
@@ -162,22 +162,22 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$meta_query = new WP_Meta_Query( $meta_query );
 		$tax_query  = new WP_Tax_Query( $tax_query );
+		$search     = WC_Query::get_main_search_query_sql();
 
-		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
-		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$meta_query_sql   = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql    = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$search_query_sql = $search ? ' AND ' . $search : '';
 
-		$sql  = "SELECT min( FLOOR( price_meta.meta_value ) ) as min_price, max( CEILING( price_meta.meta_value ) ) as max_price FROM {$wpdb->posts} ";
-		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
-		$sql .= " 	WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
-			AND {$wpdb->posts}.post_status = 'publish'
-			AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-			AND price_meta.meta_value > '' ";
-		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
-
-		$search = WC_Query::get_main_search_query_sql();
-		if ( $search ) {
-			$sql .= ' AND ' . $search;
-		}
+		$sql = "
+			SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
+			FROM {$wpdb->wc_product_meta_lookup}
+			WHERE product_id IN (
+				SELECT ID FROM {$wpdb->posts}
+				" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
+				WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
+				AND {$wpdb->posts}.post_status = 'publish'
+				" . $tax_query_sql['where'] . $meta_query_sql['where'] . $search_query_sql . '
+			)';
 
 		$sql = apply_filters( 'woocommerce_price_filter_sql', $sql, $meta_query_sql, $tax_query_sql );
 
