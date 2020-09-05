@@ -614,7 +614,7 @@ class WC_Query {
 	 * @since 3.6.0
 	 *
 	 * @param array    $args Query args.
-	 * @param WC_Query $wp_query WC_Query object.
+	 * @param WP_Query $wp_query WP_Query object.
 	 *
 	 * @return array
 	 */
@@ -806,7 +806,7 @@ class WC_Query {
 	/**
 	 * Get the main query which product queries ran against.
 	 *
-	 * @return array
+	 * @return WP_Query
 	 */
 	public static function get_main_query() {
 		return self::$product_query;
