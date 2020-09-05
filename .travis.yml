@@ -1,7 +1,6 @@
 version: ~> 1.0
 
 language: php
-dist: xenial
 
 cache:
   directories:
@@ -14,12 +13,20 @@ services:
   - docker
 
 # Test main supported versions of PHP against latest WP.
-php:
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-  - 7.4
+matrix:
+  include:
+    - php: 7.0
+      dist: xenial
+    - php: 7.1
+      dist: bionic
+    - php: 7.2
+      dist: bionic
+    - php: 7.3
+      dist: bionic
+    - php: 7.4
+      dist: bionic
+    - php: nightly
+      dist: bionic
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -52,6 +59,9 @@ jobs:
   - name: "WP Latest - 2"
     php: 7.2
     env: WP_VERSION=5.2 WP_MULTISITE=0
+  - name: "Nightly"
+    php: nightly
+    env: WP_VERSION=latest WP_MULTISITE=0
   - name: "Code Standards"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
@@ -59,6 +69,7 @@ jobs:
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
+  - php: nightly
   - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
