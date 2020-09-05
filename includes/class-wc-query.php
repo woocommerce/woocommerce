@@ -23,7 +23,7 @@ class WC_Query {
 	/**
 	 * Reference to the main product query on the page.
 	 *
-	 * @var array
+	 * @var WP_Query
 	 */
 	private static $product_query;
 
