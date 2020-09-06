@@ -101,6 +101,9 @@ class Onboarding {
 			2
 		);
 
+		// Always hook into Jetpack connection even if outside of admin.
+		add_action( 'jetpack_site_registered', array( $this, 'set_woocommerce_setup_jetpack_opted_in' ) );
+
 		if ( ! is_admin() ) {
 			return;
 		}
@@ -113,6 +116,13 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
+	}
+
+	/**
+	 * Sets the woocommerce_setup_jetpack_opted_in to true when Jetpack connects to WPCOM.
+	 */
+	public function set_woocommerce_setup_jetpack_opted_in() {
+		update_option( 'woocommerce_setup_jetpack_opted_in', true );
 	}
 
 	/**
