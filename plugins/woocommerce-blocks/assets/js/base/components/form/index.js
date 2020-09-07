@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
-const CheckoutForm = ( {
+const Form = ( {
 	className,
 	children,
 	onSubmit = ( event ) => void event,
@@ -24,10 +24,10 @@ const CheckoutForm = ( {
 	);
 };
 
-CheckoutForm.propTypes = {
+Form.propTypes = {
 	className: PropTypes.string,
 	children: PropTypes.node,
 	onSubmit: PropTypes.func,
 };
 
-export default CheckoutForm;
+export default Form;
