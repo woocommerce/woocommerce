@@ -6,8 +6,9 @@ expect.extend( {
 		if ( gutenbergNotFoundError !== null ) {
 			return {
 				message: () =>
-					`the ${ block.name ||
-						'block' } is not registered and not loading in the editor.`,
+					`the ${
+						block.name || 'block'
+					} is not registered and not loading in the editor.`,
 				pass: false,
 			};
 		}
@@ -18,8 +19,9 @@ expect.extend( {
 		if ( gutenbergValidationError !== null ) {
 			return {
 				message: () =>
-					`the ${ block.name ||
-						'block' } had a validation error while trying to render.`,
+					`the ${
+						block.name || 'block'
+					} had a validation error while trying to render.`,
 				pass: false,
 			};
 		}
@@ -30,8 +32,9 @@ expect.extend( {
 		if ( errorBoundary !== null ) {
 			return {
 				message: () =>
-					`the ${ block.name ||
-						'block' } had a js error that was caught by our errorBoundary.`,
+					`the ${
+						block.name || 'block'
+					} had a js error that was caught by our errorBoundary.`,
 				pass: false,
 			};
 		}

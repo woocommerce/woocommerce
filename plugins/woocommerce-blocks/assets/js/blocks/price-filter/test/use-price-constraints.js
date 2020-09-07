@@ -22,7 +22,9 @@ describe( 'usePriceConstraints', () => {
 	};
 
 	it( 'max price constraint should be updated when new price is set', () => {
-		const renderer = TestRenderer.create( <TestComponent price={ 1000 } /> );
+		const renderer = TestRenderer.create(
+			<TestComponent price={ 1000 } />
+		);
 		const container = renderer.root.findByType( 'div' );
 
 		expect( container.props.maxPriceConstraint ).toBe( 1000 );
@@ -33,7 +35,9 @@ describe( 'usePriceConstraints', () => {
 	} );
 
 	it( 'min price constraint should be updated when new price is set', () => {
-		const renderer = TestRenderer.create( <TestComponent price={ 1000 } /> );
+		const renderer = TestRenderer.create(
+			<TestComponent price={ 1000 } />
+		);
 		const container = renderer.root.findByType( 'div' );
 
 		expect( container.props.minPriceConstraint ).toBe( 1000 );
@@ -70,9 +74,7 @@ describe( 'usePriceConstraints', () => {
 	} );
 
 	it( 'min price constraint should be lower if the price is decimal', () => {
-		const renderer = TestRenderer.create(
-			<TestComponent price={ 999 } />
-		);
+		const renderer = TestRenderer.create( <TestComponent price={ 999 } /> );
 		const container = renderer.root.findByType( 'div' );
 
 		expect( container.props.minPriceConstraint ).toBe( 0 );

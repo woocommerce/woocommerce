@@ -6,14 +6,14 @@
 	"composer": {
 		"enabled": false
 	},
-	"labels": ["type: dependencies", "skip-changelog"],
+	"labels": [ "type: dependencies", "skip-changelog" ],
 	"packageRules": [
 		{
 			"packageNames": [ "automattic/jetpack-autoloader" ],
 			"rangeStrategy": "bump"
 		},
 		{
-			"updateTypes": ["minor", "patch", "pin", "digest"],
+			"updateTypes": [ "minor", "patch", "pin", "digest" ],
 			"automerge": true
 		}
 	]

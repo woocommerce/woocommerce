@@ -13,7 +13,7 @@ export const getShippingRatesPackageCount = ( shippingRates ) => {
  * @param {Array} shippingRates Shipping rates and packages array.
  */
 export const getShippingRatesRateCount = ( shippingRates ) => {
-	return shippingRates.reduce( function( count, shippingPackage ) {
+	return shippingRates.reduce( function ( count, shippingPackage ) {
 		return count + shippingPackage.shipping_rates.length;
 	}, 0 );
 };

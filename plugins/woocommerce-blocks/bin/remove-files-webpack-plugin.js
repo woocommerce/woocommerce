@@ -11,7 +11,7 @@ function RemoveFilesPlugin( filePath = '' ) {
 	this.filePath = filePath;
 }
 
-RemoveFilesPlugin.prototype.apply = function( compiler ) {
+RemoveFilesPlugin.prototype.apply = function ( compiler ) {
 	compiler.hooks.afterEmit.tap( 'afterEmit', () => {
 		const files = glob.sync( this.filePath );
 		files.forEach( ( f ) => {

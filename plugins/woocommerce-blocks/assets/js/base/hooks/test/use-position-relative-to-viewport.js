@@ -53,11 +53,11 @@ describe( 'usePositionRelativeToViewport', () => {
 	} );
 
 	it.each`
-		position     | isIntersecting | top
-		${'visible'} | ${true}        | ${0}
-		${'below'}   | ${false}       | ${10}
-		${'above'}   | ${false}       | ${0}
-		${'above'}   | ${false}       | ${-10}
+		position       | isIntersecting | top
+		${ 'visible' } | ${ true }      | ${ 0 }
+		${ 'below' }   | ${ false }     | ${ 10 }
+		${ 'above' }   | ${ false }     | ${ 0 }
+		${ 'above' }   | ${ false }     | ${ -10 }
 	`(
 		"position relative to viewport is '$position' with isIntersecting=$isIntersecting and top=$top",
 		( { position, isIntersecting, top } ) => {
