@@ -104,4 +104,24 @@ trait NoteTraits {
 			}
 		}
 	}
+
+	/**
+	 * Get if the note has been actioned.
+	 *
+	 * @return bool
+	 */
+	public static function has_note_been_actioned() {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			$note = WC_Admin_Notes::get_note( $note_ids[0] );
+
+			if ( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

@@ -34,13 +34,8 @@ class WC_Admin_Notes_Real_Time_Order_Alerts {
 		}
 
 		// Check that the previous mobile app note was not actioned.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( WC_Admin_Notes_Mobile_App::NOTE_NAME );
-		if ( ! empty( $note_ids ) ) {
-			$note = WC_Admin_Notes::get_note( $note_ids[0] );
-			if ( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
-				return;
-			}
+		if ( WC_Admin_Notes_Mobile_App::has_note_been_actioned() ) {
+			return;
 		}
 
 		$content = __( 'Get notifications about store activity, including new orders and product reviews directly on your mobile devices with the Woo app.', 'woocommerce-admin' );
