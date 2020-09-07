@@ -6,7 +6,7 @@ import {
 	AddressForm,
 	FormStep,
 } from '@woocommerce/base-components/cart-checkout';
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { DebouncedValidatedTextInput } from '@woocommerce/base-components/text-input';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import PropTypes from 'prop-types';
@@ -44,7 +44,7 @@ const ShippingFieldsStep = ( {
 				fieldConfig={ addressFieldsConfig }
 			/>
 			{ showPhoneField && (
-				<ValidatedTextInput
+				<DebouncedValidatedTextInput
 					id="phone"
 					type="tel"
 					label={

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { DebouncedValidatedTextInput } from '@woocommerce/base-components/text-input';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,
@@ -172,7 +172,7 @@ const AddressForm = ( {
 				}
 
 				return (
-					<ValidatedTextInput
+					<DebouncedValidatedTextInput
 						key={ field.key }
 						id={ `${ id }-${ field.key }` }
 						className={ `wc-block-components-address-form__${ field.key }` }
