@@ -1,14 +1,10 @@
 <?php
-/**
- * Returns information about the package and handles init.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Domain;
 
 /**
  * Main package class.
+ *
+ * Returns information about the package and handles init.
  *
  * @since 2.5.0
  */

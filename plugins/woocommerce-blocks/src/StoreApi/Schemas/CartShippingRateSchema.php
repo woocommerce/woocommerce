@@ -1,18 +1,12 @@
 <?php
-/**
- * Cart shipping rate schema.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
-
-defined( 'ABSPATH' ) || exit;
 
 use WC_Shipping_Rate as ShippingRate;
 
 /**
  * CartShippingRateSchema class.
+ *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartShippingRateSchema extends AbstractSchema {
 	/**

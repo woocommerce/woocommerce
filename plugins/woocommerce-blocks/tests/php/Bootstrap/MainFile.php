@@ -2,8 +2,6 @@
 /**
  *  Contains Tests for the main file (woocommerce-gutenberg-products-blocks.php)
  *  bootstrap.
- *
- *  @package WooCommerce\Blocks\Tests
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\Bootstrap;

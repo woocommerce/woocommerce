@@ -1,13 +1,5 @@
 <?php
-/**
- * Class for product grid functionality
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
-
-defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
 

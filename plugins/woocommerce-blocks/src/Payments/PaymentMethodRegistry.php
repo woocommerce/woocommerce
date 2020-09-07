@@ -1,10 +1,4 @@
 <?php
-/**
- * Holds data about registered payment methods.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Payments;
 
 /**

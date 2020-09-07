@@ -1,16 +1,10 @@
 <?php
-/**
- * Image Attachment Schema.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * ImageAttachmentSchema class.
+ *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class ImageAttachmentSchema extends AbstractSchema {
 	/**

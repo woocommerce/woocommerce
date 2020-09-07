@@ -1,8 +1,6 @@
 <?php
 /**
  * Controller Tests.
- *
- * @package WooCommerce\Blocks\Tests
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Controllers;

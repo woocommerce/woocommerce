@@ -1,13 +1,5 @@
 <?php
-/**
- * Featured products block.
- *
- * @package WooCommerce\Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * FeaturedProduct class.

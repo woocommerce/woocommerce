@@ -1,17 +1,10 @@
 <?php
-/**
- * Pagination helper.
- *
- * @package Automattic/WooCommerce/RestApi
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * Pagination class.
  *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @since 2.5.0
  */
 class Pagination {

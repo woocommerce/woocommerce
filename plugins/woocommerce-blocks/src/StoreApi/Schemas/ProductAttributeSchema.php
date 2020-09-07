@@ -1,17 +1,10 @@
 <?php
-/**
- * Product Attribute Schema.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * ProductAttributeSchema class.
  *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @since 2.5.0
  */
 class ProductAttributeSchema extends AbstractSchema {

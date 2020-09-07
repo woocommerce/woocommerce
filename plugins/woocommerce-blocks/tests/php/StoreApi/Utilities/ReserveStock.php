@@ -1,8 +1,6 @@
 <?php
 /**
  * Utility Tests.
- *
- * @package WooCommerce\Blocks\Tests
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;

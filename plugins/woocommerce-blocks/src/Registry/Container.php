@@ -1,10 +1,4 @@
 <?php
-/**
- * Contains the Container class.
- *
- * @package WooCommerce\Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Registry;
 
 use Closure;
@@ -30,7 +24,7 @@ class Container {
 	 * Public api for adding a factory to the container.
 	 *
 	 * Factory dependencies will have the instantiation callback invoked
-	 * everytime the dependency is requested.
+	 * every time the dependency is requested.
 	 *
 	 * Typical Usage:
 	 *
@@ -58,7 +52,7 @@ class Container {
 	 * that it will be a single instance shared among any other classes having
 	 * that dependency.
 	 *
-	 * If you want a new instance everytime it's required, then wrap the value
+	 * If you want a new instance every time it's required, then wrap the value
 	 * in a call to the factory method (@see Container::factory for example)
 	 *
 	 * Note: Currently if the provided id already is registered in the container,
