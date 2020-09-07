@@ -660,10 +660,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get weight of items in the cart.
 	 *
 	 * @since 2.5.0
-	 * @return int
+	 * @return float
 	 */
 	public function get_cart_contents_weight() {
-		$weight = 0;
+		$weight = 0.0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			if ( $values['data']->has_weight() ) {
@@ -671,7 +671,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		return apply_filters( 'woocommerce_cart_contents_weight', $weight );
+		return (float) apply_filters( 'woocommerce_cart_contents_weight', $weight );
 	}
 
 	/**
