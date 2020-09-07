@@ -14,7 +14,7 @@ export class HTTPResponse< T = any > {
 }
 
 /**
- * An interface for implementing clients for making HTTP requests..
+ * An interface for clients that make HTTP requests.
  */
 export interface HTTPClient {
 	/**

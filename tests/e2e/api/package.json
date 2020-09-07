@@ -45,6 +45,7 @@
     "@types/moxios": "0.4.9",
     "@types/node": "13.13.5",
     "jest": "25.5.4",
+    "jest-mock-extended": "^1.0.10",
     "moxios": "0.4.0",
     "ts-jest": "25.5.0",
     "typescript": "3.8.3"

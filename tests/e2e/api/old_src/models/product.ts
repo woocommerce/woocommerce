@@ -1,4 +1,4 @@
-import { Model } from '../framework/model';
+import { Model } from './model';
 import { DeepPartial } from 'fishery';
 
 /**
