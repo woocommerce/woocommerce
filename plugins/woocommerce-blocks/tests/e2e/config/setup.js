@@ -24,22 +24,25 @@ module.exports = async ( globalConfig ) => {
 	await setupPuppeteer( globalConfig );
 
 	try {
+		// do setupSettings separately which hopefully gives a chance for WooCommerce
+		// to be configured before the others are executed.
+		await setupSettings();
+		const pages = await createBlockPages();
+
 		/**
 		 * Promise.all will return an array of all promises resolved values.
 		 * Some functions like setupSettings and enablePaymentGateways resolve
 		 * to server data so we ignore the values here.
 		 */
 		const results = await Promise.all( [
-			setupSettings(),
 			createTaxes(),
 			createCoupons(),
 			createCategories(),
 			createShippingZones(),
-			createBlockPages(),
 			enablePaymentGateways(),
 			setupPageSettings(),
 		] );
-		const [ , taxes, coupons, categories, shippingZones, pages ] = results;
+		const [ taxes, coupons, categories, shippingZones ] = results;
 
 		// Create products after categories.
 		const products = await createProducts( categories );

@@ -16,12 +16,12 @@ describe( 'assertValidContextValue', () => {
 		},
 	};
 	it.each`
-		testValue                                       | expectedMessage   | expectError
-		${{}}                                           | ${'expected'}     | ${true}
-		${10}                                           | ${'expected'}     | ${true}
-		${{ amountKetchup: 20 }}                        | ${'not expected'} | ${false}
-		${{ amountKetchup: '10' }}                      | ${'expected'}     | ${true}
-		${{ cheeseburger: 'fries', amountKetchup: 20 }} | ${'not expected'} | ${false}
+		testValue                                         | expectedMessage     | expectError
+		${ {} }                                           | ${ 'expected' }     | ${ true }
+		${ 10 }                                           | ${ 'expected' }     | ${ true }
+		${ { amountKetchup: 20 } }                        | ${ 'not expected' } | ${ false }
+		${ { amountKetchup: '10' } }                      | ${ 'expected' }     | ${ true }
+		${ { cheeseburger: 'fries', amountKetchup: 20 } } | ${ 'not expected' } | ${ false }
 	`(
 		'The value of $testValue is $expectedMessage to trigger an Error',
 		( { testValue, expectError } ) => {

@@ -63,10 +63,10 @@ describe( 'getCollection', () => {
 	} );
 	describe( 'returns expected values for items existing in state', () => {
 		test.each`
-			resourceName                   | ids           | query                | expected
-			${'products'}                  | ${[]}         | ${{ someQuery: 2 }}  | ${[ 'foo' ]}
-			${'products/attributes'}       | ${[ 10 ]}     | ${{ someQuery: 2 }}  | ${[ 'bar' ]}
-			${'products/attributes/terms'} | ${[ 10, 20 ]} | ${{ someQuery: 10 }} | ${[ 42 ]}
+			resourceName                     | ids             | query                  | expected
+			${ 'products' }                  | ${ [] }         | ${ { someQuery: 2 } }  | ${ [ 'foo' ] }
+			${ 'products/attributes' }       | ${ [ 10 ] }     | ${ { someQuery: 2 } }  | ${ [ 'bar' ] }
+			${ 'products/attributes/terms' } | ${ [ 10, 20 ] } | ${ { someQuery: 10 } } | ${ [ 42 ] }
 		`(
 			'for "$resourceName", "$ids", and "$query"',
 			( { resourceName, ids, query, expected } ) => {

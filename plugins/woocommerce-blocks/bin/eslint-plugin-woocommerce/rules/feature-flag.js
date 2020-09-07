@@ -199,8 +199,8 @@ function testIsUsedInIfOrTernary( node, context ) {
 		conditionalParent &&
 		binaryParent &&
 		conditionalParent.test &&
-		conditionalParent.test.start === binaryParent.start &&
-		conditionalParent.test.end === binaryParent.end
+		conditionalParent.test.range[ 0 ] === binaryParent.range[ 0 ] &&
+		conditionalParent.test.range[ 1 ] === binaryParent.range[ 1 ]
 	) {
 		return;
 	}

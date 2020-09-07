@@ -123,7 +123,7 @@ const Price = isFeaturePluginBuild()
 				icon: BLOCK_ICON,
 				label: BLOCK_TITLE,
 				description: __(
-					"Choose a product to display its price.",
+					'Choose a product to display its price.',
 					'woo-gutenberg-products-block'
 				),
 			} ),

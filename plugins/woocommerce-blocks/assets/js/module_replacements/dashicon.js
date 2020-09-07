@@ -12,7 +12,7 @@ import { cloneElement } from '@wordpress/element';
 // as a replacement for the `@wordpress/component/dashicon` component via
 // the Webpack NormalModuleReplacementPlugin plugin.
 
-export default function( props ) {
+export default function ( props ) {
 	let Icon;
 	switch ( props.icon ) {
 		case 'arrow-down-alt2':

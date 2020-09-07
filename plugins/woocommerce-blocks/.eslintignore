@@ -6,3 +6,4 @@ languages
 node_modules
 vendor
 legacy
+tests/e2e/specs

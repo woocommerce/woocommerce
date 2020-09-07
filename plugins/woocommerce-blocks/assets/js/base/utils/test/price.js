@@ -5,15 +5,15 @@ import { formatPrice, getCurrency } from '../price';
 
 describe( 'formatPrice', () => {
 	test.each`
-		value        | prefix | suffix | expected
-		${1000}      | ${'€'} | ${''}  | ${'€10'}
-		${1000}      | ${''}  | ${'€'} | ${'10€'}
-		${1000}      | ${''}  | ${'$'} | ${'10$'}
-		${'1000'}    | ${'€'} | ${''}  | ${'€10'}
-		${0}         | ${'€'} | ${''}  | ${'€0'}
-		${''}        | ${'€'} | ${''}  | ${''}
-		${null}      | ${'€'} | ${''}  | ${''}
-		${undefined} | ${'€'} | ${''}  | ${''}
+		value          | prefix   | suffix   | expected
+		${ 1000 }      | ${ '€' } | ${ '' }  | ${ '€10' }
+		${ 1000 }      | ${ '' }  | ${ '€' } | ${ '10€' }
+		${ 1000 }      | ${ '' }  | ${ '$' } | ${ '10$' }
+		${ '1000' }    | ${ '€' } | ${ '' }  | ${ '€10' }
+		${ 0 }         | ${ '€' } | ${ '' }  | ${ '€0' }
+		${ '' }        | ${ '€' } | ${ '' }  | ${ '' }
+		${ null }      | ${ '€' } | ${ '' }  | ${ '' }
+		${ undefined } | ${ '€' } | ${ '' }  | ${ '' }
 	`(
 		'correctly formats price given "$value", "$prefix" prefix, and "$suffix" suffix',
 		( { value, prefix, suffix, expected } ) => {

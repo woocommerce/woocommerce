@@ -35,7 +35,7 @@ global.jQuery = () => ( {
 	off: () => void null,
 } );
 
-global.IntersectionObserver = function() {
+global.IntersectionObserver = function () {
 	return {
 		observe: () => void null,
 		unobserve: () => void null,

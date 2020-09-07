@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce-blocks",
 	"description": "WooCommerce blocks for the Gutenberg editor.",
 	"homepage": "https://woocommerce.com/",
-	"type":"wordpress-plugin",
+	"type": "wordpress-plugin",
 	"keywords": [
 		"gutenberg",
 		"woocommerce",

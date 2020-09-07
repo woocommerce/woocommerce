@@ -22,4 +22,3 @@ if ( getStripeServerData().allowPaymentRequest ) {
 		( Config ) => new Config( PaymentRequestPaymentMethod )
 	);
 }
-

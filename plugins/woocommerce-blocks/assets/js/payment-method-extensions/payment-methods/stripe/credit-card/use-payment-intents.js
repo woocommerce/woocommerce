@@ -33,7 +33,7 @@ const openIntentModal = ( stripe, paymentDetails, emitResponse ) => {
 	return stripe[ isSetupIntent ? 'confirmCardSetup' : 'confirmCardPayment' ](
 		intentSecret
 	)
-		.then( function( response ) {
+		.then( function ( response ) {
 			if ( response.error ) {
 				throw response.error;
 			}
@@ -48,7 +48,7 @@ const openIntentModal = ( stripe, paymentDetails, emitResponse ) => {
 			checkoutResponse.redirectUrl = verificationUrl;
 			return checkoutResponse;
 		} )
-		.catch( function( error ) {
+		.catch( function ( error ) {
 			checkoutResponse.type = emitResponse.responseTypes.ERROR;
 			checkoutResponse.message = error.message;
 			checkoutResponse.retry = true;

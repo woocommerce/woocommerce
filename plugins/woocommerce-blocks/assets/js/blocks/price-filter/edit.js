@@ -24,7 +24,7 @@ import { Icon, bill, external } from '@woocommerce/icons';
 import Block from './block.js';
 import './editor.scss';
 
-export default function( { attributes, setAttributes } ) {
+export default function ( { attributes, setAttributes } ) {
 	const {
 		className,
 		heading,

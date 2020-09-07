@@ -114,18 +114,8 @@ const getBillingData = ( paymentResponse ) => {
 	const payerEmail = paymentResponse.payerEmail || '';
 	const payerPhone = paymentResponse.payerPhone || '';
 	return {
-		first_name: name
-			? name
-					.split( ' ' )
-					.slice( 0, 1 )
-					.join( ' ' )
-			: '',
-		last_name: name
-			? name
-					.split( ' ' )
-					.slice( 1 )
-					.join( ' ' )
-			: '',
+		first_name: name ? name.split( ' ' ).slice( 0, 1 ).join( ' ' ) : '',
+		last_name: name ? name.split( ' ' ).slice( 1 ).join( ' ' ) : '',
 		email: ( source && source.owner.email ) || payerEmail,
 		phone:
 			( source && source.owner.phone ) ||

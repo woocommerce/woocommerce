@@ -55,7 +55,7 @@ export const ContainerWidthContextProvider = ( {
 				{ children }
 			</div>
 		</ContainerWidthContext.Provider>
-	 );
+	);
 };
 
 ContainerWidthContextProvider.propTypes = {

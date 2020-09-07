@@ -62,10 +62,10 @@ describe( 'getRoute', () => {
 	describe( 'with no throwing of errors if resolution has not finished', () => {
 		beforeEach( () => mockHasFinishedResolution.mockReturnValue( false ) );
 		it.each`
-			description                                                                                | args
-			${'is no route for the given namespace'}                                                   | ${[ 'invalid' ]}
-			${'are no routes for the given namespace, but no route for the given resource'}            | ${[ 'wc/blocks', 'invalid' ]}
-			${'are routes for the given namespace and resource name, but no routes for the given ids'} | ${[ 'wc/blocks', 'products/attributes', [ 10 ] ]}
+			description                                                                                  | args
+			${ 'is no route for the given namespace' }                                                   | ${ [ 'invalid' ] }
+			${ 'are no routes for the given namespace, but no route for the given resource' }            | ${ [ 'wc/blocks', 'invalid' ] }
+			${ 'are routes for the given namespace and resource name, but no routes for the given ids' } | ${ [ 'wc/blocks', 'products/attributes', [ 10 ] ] }
 		`( 'does not throw an error if there $description', ( { args } ) => {
 			expect( invokeTest( ...args ) ).not.toThrowError();
 		} );
