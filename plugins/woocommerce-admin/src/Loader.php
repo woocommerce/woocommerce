@@ -91,6 +91,9 @@ class Loader {
 		* Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+
+		// Combine JSON translation files (from chunks) when language packs are updated.
+		add_action( 'upgrader_process_complete', array( __CLASS__, 'combine_translation_chunk_files' ), 10, 2 );
 	}
 
 	/**
@@ -473,8 +476,7 @@ class Loader {
 	 * @return string Filename.
 	 */
 	public static function get_combined_translation_filename( $domain, $locale ) {
-		$version  = self::get_file_version( 'js' );
-		$filename = implode( '-', array( $domain, $locale, WC_ADMIN_APP, $version ) ) . '.json';
+		$filename = implode( '-', array( $domain, $locale, WC_ADMIN_APP ) ) . '.json';
 
 		return $filename;
 	}
@@ -490,11 +492,17 @@ class Loader {
 	 * @return array Combined translation chunk data.
 	 */
 	public static function get_translation_chunk_data( $lang_dir, $domain, $locale ) {
+		// So long as this function is called during the 'upgrader_process_complete' action,
+		// the filesystem object should be hooked up.
 		global $wp_filesystem;
 
 		// Grab all JSON files in the current language pack.
 		$json_i18n_filenames       = glob( $lang_dir . $domain . '-' . $locale . '-*.json' );
 		$combined_translation_data = array();
+
+		if ( false === $json_i18n_filenames ) {
+			return $combined_translation_data;
+		}
 
 		foreach ( $json_i18n_filenames as $json_filename ) {
 			if ( ! $wp_filesystem->is_readable( $json_filename ) ) {
@@ -541,62 +549,85 @@ class Loader {
 	}
 
 	/**
-	 * Load translation strings from language packs for dynamic imports.
+	 * Combine translation chunks when files are updated.
 	 *
 	 * This function combines JSON translation data auto-extracted by GlotPress
 	 * from Webpack-generated JS chunks into a single file that can be used in
 	 * subsequent requests. This is necessary since the JS chunks are not known
 	 * to WordPress via wp_register_script() and wp_set_script_translations().
 	 *
-	 * @param string $original_translations JSON encoded translations object.
+	 * @param Language_Pack_Upgrader $instance Upgrader instance.
+	 * @param array                  $hook_extra Info about the upgraded language packs.
+	 */
+	public static function combine_translation_chunk_files( $instance, $hook_extra ) {
+		// So long as this function is hooked to the 'upgrader_process_complete' action,
+		// the filesystem object should be hooked up.
+		global $wp_filesystem;
+
+		if (
+			! is_a( $instance, 'Language_Pack_Upgrader' ) ||
+			! isset( $hook_extra['translations'] ) ||
+			! is_array( $hook_extra['translations'] )
+		) {
+			return;
+		}
+
+		// Make sure we're handing the correct domain (could be woocommerce or woocommerce-admin).
+		$plugin_domain = explode( '/', plugin_basename( __FILE__ ) )[0];
+		$locales       = array();
+		$language_dir  = WP_LANG_DIR . '/plugins/';
+
+		// Gather the locales that were updated in this operation.
+		foreach ( $hook_extra['translations'] as $translation ) {
+			if (
+				'plugin' === $translation['type'] &&
+				$plugin_domain === $translation['slug']
+			) {
+				$locales[] = $translation['language'];
+			}
+		}
+
+		// Build combined translation files for all updated locales.
+		foreach ( $locales as $locale ) {
+			$translations_from_chunks = self::get_translation_chunk_data( $language_dir, $plugin_domain, $locale );
+
+			if ( empty( $translations_from_chunks ) ) {
+				continue;
+			}
+
+			$cache_filename          = self::get_combined_translation_filename( $plugin_domain, $locale );
+			$chunk_translations_json = wp_json_encode( $translations_from_chunks );
+
+			// Cache combined translations strings to a file.
+			$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+		}
+	}
+
+	/**
+	 * Load translation strings from language packs for dynamic imports.
+	 *
 	 * @param string $file File location for the script being translated.
 	 * @param string $handle Script handle.
 	 * @param string $domain Text domain.
 	 *
-	 * @return string JSON encoded translations object.
+	 * @return string New file location for the script being translated.
 	 */
-	public static function load_script_translations( $original_translations, $file, $handle, $domain ) {
+	public static function load_script_translation_file( $file, $handle, $domain ) {
 		// Make sure the main app script is being loaded.
 		if ( WC_ADMIN_APP !== $handle ) {
-			return $original_translations;
+			return $file;
 		}
 
 		// Make sure we're handing the correct domain (could be woocommerce or woocommerce-admin).
 		$plugin_domain = explode( '/', plugin_basename( __FILE__ ) )[0];
 		if ( $plugin_domain !== $domain ) {
-			return $original_translations;
+			return $file;
 		}
 
 		$locale         = determine_locale();
 		$cache_filename = self::get_combined_translation_filename( $domain, $locale );
-		$lang_dir       = WP_LANG_DIR . '/plugins/';
 
-		// Allow us to easily interact with the filesystem.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		\WP_Filesystem();
-		global $wp_filesystem;
-
-		// First attempt to get a previously generated combined translation file.
-		if (
-			$wp_filesystem->is_file( $lang_dir . $cache_filename ) &&
-			$wp_filesystem->is_readable( $lang_dir . $cache_filename )
-		) {
-			return $wp_filesystem->get_contents( $lang_dir . $cache_filename );
-		}
-
-		// Get all translation chunk data combined into a single object.
-		$translations_from_chunks = self::get_translation_chunk_data( $lang_dir, $domain, $locale );
-
-		if ( empty( $translations_from_chunks ) ) {
-			return $original_translations;
-		}
-
-		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
-
-		// Cache combined translations strings to a file.
-		$wp_filesystem->put_contents( $lang_dir . $cache_filename, $chunk_translations_json );
-
-		return $chunk_translations_json;
+		return WP_LANG_DIR . '/plugins/' . $cache_filename;
 	}
 
 	/**
@@ -612,7 +643,7 @@ class Loader {
 		}
 
 		// Grab translation strings from Webpack-generated chunks.
-		add_filter( 'pre_load_script_translations', array( __CLASS__, 'load_script_translations' ), 10, 4 );
+		add_filter( 'load_script_translation_file', array( __CLASS__, 'load_script_translation_file' ), 10, 3 );
 
 		$features         = self::get_features();
 		$enabled_features = array();
