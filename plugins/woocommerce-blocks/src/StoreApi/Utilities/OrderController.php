@@ -1,18 +1,13 @@
 <?php
-/**
- * Helper class which creates and syncs orders with the cart.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
-
-defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
 
 /**
  * OrderController class.
+ * Helper class which creates and syncs orders with the cart.
+ *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class OrderController {
 

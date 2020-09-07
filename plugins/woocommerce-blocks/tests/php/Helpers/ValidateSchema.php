@@ -1,8 +1,6 @@
 <?php
 /**
  * Helper used to validate schema differences.
- *
- * @package WooCommerce\Blocks\Tests
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\Helpers;

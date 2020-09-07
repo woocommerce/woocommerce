@@ -1,18 +1,12 @@
 <?php
-/**
- * Cart update shipping route.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
-
-defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 
 /**
  * CartUpdateShipping class.
+ *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartUpdateShipping extends AbstractCartRoute {
 	/**

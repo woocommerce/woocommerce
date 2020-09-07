@@ -1,13 +1,4 @@
 <?php
-/**
- * Temporary integration of the stripe payment method for the new cart and
- * checkout blocks. Once the api is demonstrated to be stable, this integration
- * will be moved to the Stripe extension
- *
- * @package WooCommerce/Blocks
- * @since 2.6.0
- */
-
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use Exception;
@@ -19,6 +10,10 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 
 /**
  * Stripe payment method integration
+ *
+ * Temporary integration of the stripe payment method for the new cart and
+ * checkout blocks. Once the api is demonstrated to be stable, this integration
+ * will be moved to the Stripe extension
  *
  * @since 2.6.0
  */

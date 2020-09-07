@@ -1,11 +1,4 @@
 <?php
-/**
- * Bank Transfer (BACS) (core) gateway implementation.
- *
- * @package WooCommerce/Blocks
- * @since 3.0.0
- */
-
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;

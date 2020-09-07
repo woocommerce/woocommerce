@@ -1,8 +1,6 @@
 <?php
 /**
  * Ensures the helper works.
- *
- * @package WooCommerce\Blocks\Tests
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\Helpers;

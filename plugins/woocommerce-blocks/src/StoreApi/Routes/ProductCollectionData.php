@@ -1,21 +1,15 @@
 <?php
-/**
- * Products collection data route. Get aggregate data from a collection of products.
- *
- * Supports the same parameters as /products, but returns a different response.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
-
-defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQueryFilters;
 
 /**
  * ProductCollectionData route.
+ * Get aggregate data from a collection of products.
+ *
+ * Supports the same parameters as /products, but returns a different response.
+ *
+ * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class ProductCollectionData extends AbstractRoute {
 	/**

@@ -1,20 +1,13 @@
 <?php
-/**
- * Wrapper for WP Query with additonal helper methods.
- *
- * Allows query args to be set and parsed without doing running it, so that a cache can be used.
- *
- * @package Automattic/WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use WP_Query;
 
-defined( 'ABSPATH' ) || exit;
-
 /**
  * BlocksWpQuery query.
+ *
+ * Wrapper for WP Query with additonal helper methods.
+ * Allows query args to be set and parsed without doing running it, so that a cache can be used.
  *
  * @deprecated 2.5.0
  */

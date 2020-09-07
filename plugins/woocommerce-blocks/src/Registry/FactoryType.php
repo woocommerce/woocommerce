@@ -1,10 +1,4 @@
 <?php
-/**
- * Holds the FactoryType class
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Registry;
 
 /**

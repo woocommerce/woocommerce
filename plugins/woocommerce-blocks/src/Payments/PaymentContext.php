@@ -1,13 +1,5 @@
 <?php
-/**
- * Payment context.
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Payments;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * PaymentContext class.

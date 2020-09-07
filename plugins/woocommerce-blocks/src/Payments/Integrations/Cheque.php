@@ -1,11 +1,4 @@
 <?php
-/**
- * Cheque (core) gateway implementation.
- *
- * @package WooCommerce/Blocks
- * @since 2.6.0
- */
-
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use Exception;

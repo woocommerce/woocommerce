@@ -1,16 +1,12 @@
 <?php
-/**
- * Contains asset api methods
- *
- * @package WooCommerce/Blocks
- */
-
 namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 
 /**
  * The Api class provides an interface to various asset registration helpers.
+ *
+ * Contains asset api methods
  *
  * @since 2.5.0
  */
