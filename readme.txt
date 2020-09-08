@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.3
 Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.4.1
+Stable tag: 4.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -185,6 +185,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Declare `WC_Post_Types::updated_term_messages` as a static method to remove PHP deprecation warning. #27436
 * Fix - Allow HTML to be entered in product title for formatting purposes. #27465
 * Fix - Filter by attribute widget not working properly for variations having attribute values of "Any...". #27508
+* Fix - Fixed the layout of the variations and attributes sections in the product page in the admin when running WP >= 5.5. #27590
 * Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
 * Dev - Changed text domain to `woocommerce` for REST API files. #27248
 * Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
