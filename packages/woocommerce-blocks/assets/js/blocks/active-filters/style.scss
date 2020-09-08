@@ -1,0 +1,107 @@
+.wc-block-active-filters {
+	margin-bottom: $gap-large;
+	overflow: hidden;
+
+	.wc-block-active-filters__clear-all {
+		@include font-size(regular);
+		float: right;
+		border: none;
+		padding: 0;
+		text-decoration: underline;
+		cursor: pointer;
+
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			background: transparent;
+			color: inherit;
+		}
+	}
+
+	.wc-block-active-filters__list {
+		margin: 0 0 $gap-smallest;
+		list-style: none outside;
+		clear: both;
+
+		li {
+			margin: 0;
+			padding: 0;
+			list-style: none outside;
+			clear: both;
+
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style: none outside;
+			}
+
+			&:first-child {
+				.wc-block-active-filters__list-item-type {
+					margin: 0;
+				}
+			}
+		}
+	}
+
+	.wc-block-active-filters__list-item-type {
+		@include font-size(smaller);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin: $gap 0 0;
+		display: block;
+	}
+
+	.wc-block-active-filters__list-item-operator {
+		font-weight: normal;
+		font-style: italic;
+	}
+
+	.wc-block-active-filters__list-item-name {
+		font-weight: bold;
+		display: block;
+		position: relative;
+		padding: 0 16px 0 0;
+	}
+
+	.wc-block-active-filters__list-item-remove {
+		background: transparent;
+		border: 0;
+		appearance: none;
+		height: 0;
+		padding: 16px 0 0 0;
+		width: 16px;
+		overflow: hidden;
+		position: absolute;
+		right: 0;
+		top: 50%;
+		margin: -8px 0 0 0;
+
+		&::before {
+			width: 16px;
+			height: 16px;
+			background: transparent url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='9' fill='%2324292d'/%3E%3Crect x='4.5' y='6.8866' width='3.375' height='9.9466' transform='rotate(-45 4.5 6.8866)' fill='white'/%3E%3Crect x='11.5334' y='4.5' width='3.375' height='9.9466' transform='rotate(45 11.5334 4.5)' fill='white'/%3E%3C/svg%3E%0A") center center no-repeat; /* stylelint-disable-line */
+			display: block;
+			content: "";
+			position: absolute;
+			top: 0;
+		}
+	}
+
+	.wc-block-active-filters__list--chips {
+		ul,
+		li {
+			display: inline;
+		}
+
+		.wc-block-active-filters__list-item-type {
+			display: none;
+		}
+
+		.wc-block-components-chip {
+			@include font-size(small);
+			margin-top: em($gap-small/4);
+			margin-bottom: em($gap-small/4);
+		}
+	}
+}
