@@ -422,7 +422,7 @@ return array(
 		'TO' => __( 'Toledo', 'woocommerce' ),
 		'V'  => __( 'Valencia', 'woocommerce' ),
 		'VA' => __( 'Valladolid', 'woocommerce' ),
-		'BI' => __( 'Bizkaia', 'woocommerce' ),
+		'BI' => __( 'Biscay', 'woocommerce' ),
 		'ZA' => __( 'Zamora', 'woocommerce' ),
 		'Z'  => __( 'Zaragoza', 'woocommerce' ),
 	),
