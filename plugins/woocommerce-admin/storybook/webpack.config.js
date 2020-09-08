@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-rtl' );
 const path = require( 'path' );
 
 /**
