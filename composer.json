@@ -24,6 +24,9 @@
     "wp-cli/i18n-command": "2.2.5"
   },
   "config": {
+    "platform": {
+      "php": "7.1"
+    },
     "preferred-install": {
         "woocommerce/action-scheduler": "dist",
         "woocommerce/woocommerce-rest-api": "dist",
