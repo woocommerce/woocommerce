@@ -5,7 +5,7 @@ if [[ $1 ]]; then
 # Set environment variables for Docker
 #
 	if ! [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
-		WP_VERSION=$(git ls-remote --tags https://github.com/wordpress/wordpress.git | cut -f3 -d/ | grep -E '^\d+\.\d+(.\d+)*$' | tail -n 1)
+		WP_VERSION=$(docker image ls wordpress | grep -E '\s\d+\.\d+(?:\.\d+)?\s' | head -n 1 | awk '{print $2}')
 	fi
 	if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		export WORDPRESS_VERSION=$WP_VERSION
@@ -14,8 +14,7 @@ if [[ $1 ]]; then
 	fi
 
 	if ! [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
-		PVER=$(git ls-remote --tags https://github.com/php/php-src.git | cut -f3 -d/ | grep -E '^php-\d+\.\d+(.\d+)*$' | tail -n 1)
-		TRAVIS_PHP_VERSION=${PVER/php-/}
+		TRAVIS_PHP_VERSION=$(docker image ls php | grep -E '\s\d+\.\d+(?:\.\d+)?\s' | head -n 1 | awk '{print $2}')
 	fi
 	if [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		export DC_PHP_VERSION=$TRAVIS_PHP_VERSION
@@ -24,8 +23,7 @@ if [[ $1 ]]; then
 	fi
 
 	if ! [[ $TRAVIS_MARIADB_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
-		MVER=$(git ls-remote --tags https://github.com/mariadb/server.git | cut -f3 -d/ | grep -E '^mariadb-\d\d\.\d+(.\d+)*$' | tail -n 1)
-		TRAVIS_MARIADB_VERSION=${MVER/mariadb-/}
+		TRAVIS_MARIADB_VERSION=$(docker image ls mariadb | grep -E '\s\d+\.\d+(?:\.\d+)?\s' | head -n 1 | awk '{print $2}')
 	fi
 	if [[ $TRAVIS_MARIADB_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		export DC_MARIADB_VERSION=$TRAVIS_MARIADB_VERSION

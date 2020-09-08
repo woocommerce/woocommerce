@@ -872,7 +872,7 @@
 * Tweak - Remove the left and right margin from the logo in emails. #23360
 * Tweak - Use the high res version of the WP spinner in the coupon Block UI. #23364
 * Tweak - Improve user registration validation messages. #23468
-* Tweak - Auto generate a new username when a username is blacklisted by WordPress. #23672
+* Tweak - Auto generate a new username when a username is blocked by WordPress. #23672
 * Tweak - Guest cart sessions now gets deleted when a user logs in, preventing duplicate cart sessions. #23687
 * Tweak - Include the store's base postcode and city when calculating order taxes. #23695
 * Tweak - Update the generate username setting description label to reflect how the username is actually generated. #23911
@@ -3968,7 +3968,7 @@
 * Fix - Fix bulk editing variation sale price.
 * Fix - Remove comment exclusion in order notes meta box.
 * Fix - Sync min and max prices for regular and sale prices so prices are displayed correctly when sale price is lower than a regular price of another variation.
-* Fix - Expanding line item_meta causes conflicts if attributes are named with things like 'name', 'type' or 'qty'. Added blacklist to exclude unsafe values.
+* Fix - Expanding line item_meta causes conflicts if attributes are named with things like 'name', 'type' or 'qty'. Added blocklist to exclude unsafe values.
 * Fix - Added support for clearing report transients when using object caching.
 * Fix - encoding issues with attribute values.
 * Fix - Escape the contents of the changelog when displayed.

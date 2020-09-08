@@ -13,6 +13,7 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
+    "install": "lerna bootstrap",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && npm run makepot",
     "build:dev": "npm run build:core && npm run build:packages",
@@ -33,7 +34,7 @@
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.4",
-    "@babel/polyfill": "^7.8.3",
+    "@babel/polyfill": "^7.11.5",
     "@babel/preset-env": "^7.11.0",
     "@babel/register": "^7.10.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
@@ -42,6 +43,7 @@
     "@woocommerce/e2e-utils": "file:tests/e2e/utils",
     "@woocommerce/model-factories": "file:tests/e2e/factories",
     "@wordpress/babel-preset-default": "3.0.2",
+    "@wordpress/e2e-test-utils": "4.6.0",
     "@wordpress/eslint-plugin": "7.1.0",
     "autoprefixer": "9.8.6",
     "babel-eslint": "10.1.0",
