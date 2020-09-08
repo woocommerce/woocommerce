@@ -7,10 +7,10 @@ if [[ ${RUN_PHPCS} == 1 ]]; then
 	if [ "$CHANGED_FILES" != "" ]; then
 		if [ ! -f "./vendor/bin/phpcs" ]; then
 			# Install wpcs globally
-			composer require woocommerce/woocommerce-sniffs --update-with-all-dependencies
+			composer global require woocommerce/woocommerce-sniffs --update-with-all-dependencies
 		fi
 
 		echo "Running Code Sniffer."
-		./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
+		phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
 	fi
 fi
