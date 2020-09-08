@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce Admin Edit products on the move note.
+ * WooCommerce Admin Performance on mobile note.
  *
- * Adds a note to download the mobile app.
+ * Adds a note to download the mobile app, performance on mobile.
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;
@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Admin\Notes;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Admin_Notes_Edit_Products_On_The_Move
+ * WC_Admin_Notes_Performance_On_Mobile
  */
-class WC_Admin_Notes_Edit_Products_On_The_Move {
+class WC_Admin_Notes_Performance_On_Mobile {
 	/**
 	 * Note traits.
 	 */
@@ -21,15 +21,15 @@ class WC_Admin_Notes_Edit_Products_On_The_Move {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-edit-products-on-the-move';
+	const NOTE_NAME = 'wc-admin-performance-on-mobile';
 
 	/**
 	 * Get the note.
 	 */
 	public static function get_note() {
-		// Only add this note if this store is at least a year old.
-		$year_in_seconds = 365 * DAY_IN_SECONDS;
-		if ( ! self::wc_admin_active_for( $year_in_seconds ) ) {
+		// Only add this note if this store is at least 9 months old.
+		$nine_months_in_seconds = MONTH_IN_SECONDS * 9;
+		if ( ! self::wc_admin_active_for( $nine_months_in_seconds ) ) {
 			return;
 		}
 
@@ -42,14 +42,10 @@ class WC_Admin_Notes_Edit_Products_On_The_Move {
 			return;
 		}
 
-		if ( WC_Admin_Notes_Performance_On_Mobile::has_note_been_actioned() ) {
-			return;
-		}
-
 		$note = new WC_Admin_Note();
 
-		$note->set_title( __( 'Edit products on the move', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Edit and create new products from your mobile devices with the Woo app', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Track your store performance on mobile', 'woocommerce-admin' ) );
+		$note->set_content( __( 'Monitor your sales and high performing products with the Woo app.', 'woocommerce-admin' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );

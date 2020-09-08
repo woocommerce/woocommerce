@@ -37,6 +37,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Customize_Store_With_Bloc
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Facebook_Marketing_Expert;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Test_Checkout;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Edit_Products_On_The_Move;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Performance_On_Mobile;
 
 /**
  * WC_Admin_Events Class.
@@ -107,6 +108,7 @@ class Events {
 		WC_Admin_Notes_Facebook_Marketing_Expert::possibly_add_note();
 		WC_Admin_Notes_Test_Checkout::possibly_add_note();
 		WC_Admin_Notes_Edit_Products_On_The_Move::possibly_add_note();
+		WC_Admin_Notes_Performance_On_Mobile::possibly_add_note();
 
 		if ( Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
 			DataSourcePoller::read_specs_from_data_sources();
