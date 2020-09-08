@@ -5,6 +5,7 @@ A reusable and extendable E2E testing environment for WooCommerce extensions.
 ## Installation
 
 ```bash
+npm install puppeteer@2.1.1 --save
 npm install @woocommerce/e2e-environment --save
 npm install jest --global
 ```
