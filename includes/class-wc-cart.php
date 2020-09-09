@@ -1032,7 +1032,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Gather posted attributes.
 				$posted_attributes = array();
-
 				foreach ( $parent_data->get_attributes() as $attribute ) {
 					if ( ! $attribute['is_variation'] ) {
 						continue;
@@ -1048,7 +1047,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						}
 
 						// Don't include if it's empty.
-						if ( ! empty( $value ) ) {
+						if ( ! empty( $value ) || '0' === $value ) {
 							$posted_attributes[ $attribute_key ] = $value;
 						}
 					}

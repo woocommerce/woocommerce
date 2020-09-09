@@ -2248,7 +2248,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Attempt adding variation with add_to_cart_action, without specifying attribute_pa_colour.
 		$_REQUEST['add-to-cart']         = $variation['variation_id'];
-		$_REQUEST['attribute_pa_number'] = '0';
+		$_REQUEST['attribute_pa_number'] = '';
 		WC_Form_Handler::add_to_cart_action( false );
 		$notices = WC()->session->get( 'wc_notices', array() );
 
