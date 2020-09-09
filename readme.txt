@@ -205,7 +205,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Display modal with more info about the new homescreen. #4890
 * Dev - Task list - add a shortcut back to store setup. #4853
 * Dev - Update the colors of the illustrations in the welcome modal. #4945
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
 == Upgrade Notice ==
