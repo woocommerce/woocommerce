@@ -84,8 +84,8 @@
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
     "typescript": "3.9.5",
-    "webpack": "4.41.6",
-    "webpack-cli": "3.3.11",
+    "webpack": "4.44.1",
+    "webpack-cli": "3.3.12",
     "wp-textdomain": "1.0.1"
   },
   "engines": {
