@@ -33,7 +33,7 @@ jobs:
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     script:
-      - npm run build:assets
+      - grunt assets
       - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
