@@ -98,7 +98,7 @@
 		]
 	},
 	"dependencies": {
-		"@woocommerce/e2e-environment": "^0.1.5",
+		"@woocommerce/e2e-environment": "0.1.5",
 		"@wordpress/api-fetch": "2.2.8",
 		"@wordpress/base-styles": "2.0.0",
 		"@wordpress/components": "10.0.0",
@@ -214,7 +214,7 @@
 		"prettier": "npm:wp-prettier@2.0.5",
 		"promptly": "3.0.3",
 		"prop-types": "15.7.2",
-		"puppeteer": "^5.2.1",
+		"puppeteer": "5.2.1",
 		"raw-loader": "4.0.1",
 		"react-docgen": "5.3.0",
 		"readline-sync": "1.4.10",
