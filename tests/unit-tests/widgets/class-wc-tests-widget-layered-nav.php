@@ -519,7 +519,6 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 		$variation_objects = array();
 		foreach ( $existing_styles as $style ) {
 			$variation_attributes = array(
-				'pa_color' => '',
 				'pa_style' => $style,
 			);
 			$variation_object     = WC_Helper_Product::create_product_variation_object(
@@ -547,6 +546,7 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 		}
 
 		$main_product->set_children( $variation_objects );
+		$main_product->save();
 
 		return $main_product;
 	}
