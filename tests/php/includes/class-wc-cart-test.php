@@ -99,4 +99,37 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->get_customer()->set_shipping_state( '' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
+
+	/**
+	 * Test show_shipping for countries with various state/postcode requirement.
+	 */
+	public function test_show_shipping_for_countries_different_shipping_requirements() {
+		$default_shipping_cost_requires_address = get_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		WC()->cart->empty_cart();
+		$this->assertFalse( WC()->cart->show_shipping() );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Country that does not require state.
+		WC()->cart->get_customer()->set_shipping_country( 'LB' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		// Country that does not require postcode.
+		WC()->cart->get_customer()->set_shipping_country( 'NG' );
+		WC()->cart->get_customer()->set_shipping_state( 'AB' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		// Reset.
+		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
+		$product->delete( true );
+		WC()->cart->get_customer()->set_shipping_country( 'GB' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+	}
 }
