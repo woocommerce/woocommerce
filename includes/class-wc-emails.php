@@ -637,7 +637,7 @@ class WC_Emails {
 		if ( 'no' === get_option( 'woocommerce_notify_no_stock', 'yes' ) ) {
 			return;
 		}
-		
+
 		/**
 		 * Determine if the current product should trigger a no stock notification
 		 *
