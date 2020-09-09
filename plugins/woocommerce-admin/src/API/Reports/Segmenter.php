@@ -380,9 +380,13 @@ class Segmenter {
 			$segment_objects = wc_get_products( $args );
 
 			foreach ( $segment_objects as $segment ) {
-				$id                    = $segment->get_id();
-				$segments[]            = $id;
-				$segment_labels[ $id ] = $segment->get_name();
+				$id           = $segment->get_id();
+				$segments[]   = $id;
+				$product_name = $segment->get_name();
+				$separator    = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $segment );
+				$attributes   = wc_get_formatted_variation( $segment, true, false );
+
+				$segment_labels[ $id ] = $product_name . $separator . $attributes;
 			}
 
 			// If no variations were specified, add a segment for the parent product (variation = 0).

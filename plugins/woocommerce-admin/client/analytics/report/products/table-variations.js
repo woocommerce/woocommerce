@@ -19,6 +19,13 @@ import { CurrencyContext } from '../../../lib/currency-context';
 const manageStock = getSetting( 'manageStock', 'no' );
 const stockStatuses = getSetting( 'stockStatuses', {} );
 
+const getFullVariationName = ( rowData ) =>
+	get( rowData, [ 'extended_info', 'name' ], '' ) +
+	' - ' +
+	get( rowData, [ 'extended_info', 'attributes' ], [] )
+		.map( ( { option } ) => option )
+		.join( ', ' );
+
 class VariationsReportTable extends Component {
 	constructor() {
 		super();
@@ -103,7 +110,7 @@ class VariationsReportTable extends Component {
 				low_stock_amount: lowStockAmount,
 				sku,
 			} = extendedInfo;
-			const name = get( row, [ 'extended_info', 'name' ], '' );
+			const name = getFullVariationName( row );
 			const ordersLink = getNewPath(
 				persistedQuery,
 				'/analytics/orders',

@@ -30,11 +30,64 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['search'] = array(
-			'description'       => __( 'Search by similar product name or sku.', 'woocommerce-admin' ),
+			'description'       => __( 'Search by similar product name, sku, or attribute value.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
+	}
+
+	/**
+	 * Add in conditional search filters for variations.
+	 *
+	 * @param string $where Where clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_filter( $where, $wp_query ) {
+		global $wpdb;
+
+		$search = $wp_query->get( 'search' );
+		if ( $search ) {
+			$like       = '%' . $wpdb->esc_like( $search ) . '%';
+			$conditions = array(
+				$wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", $like ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->prepare( 'attr_search_meta.meta_value LIKE %s', $like ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			);
+
+			if ( wc_product_sku_enabled() ) {
+				$conditions[] = $wpdb->prepare( 'wc_product_meta_lookup.sku LIKE %s', $like );
+			}
+
+			$where .= ' AND (' . implode( ' OR ', $conditions ) . ')';
+		}
+
+		return $where;
+	}
+
+	/**
+	 * Join posts meta tables when variation search query is present.
+	 *
+	 * @param string $join Join clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_join( $join, $wp_query ) {
+		global $wpdb;
+
+		$search = $wp_query->get( 'search' );
+		if ( $search ) {
+			$join .= " LEFT JOIN {$wpdb->postmeta} AS attr_search_meta
+						ON {$wpdb->posts}.ID = attr_search_meta.post_id
+						AND attr_search_meta.meta_key LIKE 'attribute_pa_%' ";
+		}
+
+		if ( wc_product_sku_enabled() && ! strstr( $join, 'wc_product_meta_lookup' ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
+						ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+
+		return $join;
 	}
 
 	/**
@@ -61,12 +114,12 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		add_filter( 'posts_where', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_filter' ), 10, 2 );
-		add_filter( 'posts_join', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		add_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10, 2 );
 		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_join', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 		remove_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10 );
 		return $response;
 	}
