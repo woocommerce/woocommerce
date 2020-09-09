@@ -1,9 +1,7 @@
-import { RepositoryData } from '../framework/repository';
-
 /**
  * A base class for all models.
  */
-export class Model implements RepositoryData {
+export abstract class Model {
 	private _id: number | null = null;
 
 	public get id(): number | null {

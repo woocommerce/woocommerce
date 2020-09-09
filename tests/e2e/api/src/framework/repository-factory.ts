@@ -1,11 +1,12 @@
 import { DeepPartial, Factory as BaseFactory, BuildOptions } from 'fishery';
-import { Repository, RepositoryData } from './repository';
+import { Repository } from './repository';
 import { GeneratorFnOptions } from 'fishery/dist/types';
+import { Model } from '../models/model';
 
 /**
  * A factory that can be used to create models using an adapter.
  */
-export class RepositoryFactory< T extends RepositoryData, I = any > extends BaseFactory< T, I > {
+export class RepositoryFactory< T extends Model, I = any > extends BaseFactory< T, I > {
 	private repository: Repository< T > | null = null;
 
 	public constructor( generator: ( opts: GeneratorFnOptions< T, I > ) => T ) {

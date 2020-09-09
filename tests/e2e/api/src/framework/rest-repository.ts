@@ -1,5 +1,7 @@
-import { Repository, RepositoryData, TransformFn } from './repository';
+import { Repository } from './repository';
 import { HTTPClient, HTTPResponse } from '../http';
+import { Model } from '../models/model';
+import { ModelTransformer } from './model-transformer';
 
 /**
  * An interface for describing the endpoints available to the repository.
@@ -14,13 +16,13 @@ export interface Endpoints {
 /**
  * A repository for interacting with models via the REST API.
  */
-export class RESTRepository< T extends RepositoryData > implements Repository< T > {
+export class RESTRepository< T extends Model > implements Repository< T > {
 	private httpClient: HTTPClient | null = null;
-	private readonly transformer: TransformFn< T >;
+	private readonly transformer: ModelTransformer< T >;
 	private readonly endpoints: Endpoints;
 
 	public constructor(
-		transformer: TransformFn< T >,
+		transformer: ModelTransformer< T >,
 		endpoints: Endpoints,
 	) {
 		this.transformer = transformer;
@@ -51,7 +53,7 @@ export class RESTRepository< T extends RepositoryData > implements Repository< T
 		}
 
 		const endpoint = this.endpoints.create.replace( /{[a-z]+}/i, this.replaceEndpointTokens( data ) );
-		const transformed = this.transformer( data );
+		const transformed = this.transformer.toServer( data );
 
 		return this.httpClient.post( endpoint, transformed )
 			.then( ( response: HTTPResponse ) => {
