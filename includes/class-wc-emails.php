@@ -637,6 +637,18 @@ class WC_Emails {
 		if ( 'no' === get_option( 'woocommerce_notify_no_stock', 'yes' ) ) {
 			return;
 		}
+		
+		/**
+		 * Determine if the current product should trigger a no stock notification
+		 *
+		 * @param WC_Product $product - The out of stock product object
+		 *
+		 * @since 4.4.0
+		 */
+		$should_notify = apply_filters( 'woocommerce_should_send_no_stock_notification', true, $product );
+		if ( false === $should_notify ) {
+			return;
+		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
