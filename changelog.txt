@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 4.5.1 - 2020-09-09 =
+* Fix - Check for state and postcode fields only if required in `show_shipping`. #27628
+
 = 4.5.0 - 2020-09-08 =
 
 **WooCommerce**
