@@ -165,7 +165,7 @@ class WC_Shipping {
 			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
 
 			// Debug output.
-			if ( $debug_mode && ! Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) && ! Constants::is_defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+			if ( $debug_mode && ! wc_has_notice( $matched_zone_notice ) ) {
 				wc_add_notice( $matched_zone_notice );
 			}
 		} else {

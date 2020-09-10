@@ -3685,14 +3685,37 @@ function wc_get_cart_undo_url( $cart_item_key ) {
 }
 
 /**
+ * Outputs notices wrapper.
+ *
+ * @since 4.6.0
+ */
+function woocommerce_output_notices_wrapper() {
+	echo '<div class="woocommerce-notices-wrapper">';
+	echo '</div>';
+}
+
+/**
  * Outputs all queued notices on WC pages.
+ *
+ * @param bool $return true to return rather than echo. @since 4.6.0.
+ * @return string
  *
  * @since 3.5.0
  */
-function woocommerce_output_all_notices() {
+function woocommerce_output_all_notices( $return = false ) {
+	ob_start();
+
 	echo '<div class="woocommerce-notices-wrapper">';
 	wc_print_notices();
 	echo '</div>';
+
+	$notices_with_wrapper = wc_kses_notice( ob_get_clean() );
+
+	if ( $return ) {
+		return $notices_with_wrapper;
+	}
+
+	echo $notices_with_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**

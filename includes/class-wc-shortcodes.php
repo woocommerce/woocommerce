@@ -622,10 +622,10 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function shop_messages() {
-		if ( ! function_exists( 'wc_print_notices' ) ) {
+		if ( ! function_exists( 'woocommerce_output_all_notices' ) ) {
 			return '';
 		}
-		return '<div class="woocommerce">' . wc_print_notices( true ) . '</div>';
+		return '<div class="woocommerce">' . woocommerce_output_all_notices( true ) . '</div>';
 	}
 
 	/**
