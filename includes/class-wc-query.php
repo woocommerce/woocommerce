@@ -382,6 +382,20 @@ class WC_Query {
 		return $posts;
 	}
 
+	/**
+	 * This function used to be hooked to found_posts and adjust the posts count when the filtering by attribute
+	 * widget was used and variable products were present. Now it isn't hooked anymore and does nothing but return
+	 * the input unchanged, since the pull request in which it was introduced has been reverted.
+	 *
+	 * @since 4.4.0
+	 * @param int      $count Original posts count, as supplied by the found_posts filter.
+	 * @param WP_Query $query The current WP_Query object.
+	 *
+	 * @return int Adjusted posts count.
+	 */
+	public function adjust_posts_count( $count, $query ) {
+		return $count;
+	}
 
 	/**
 	 * Instance version of get_layered_nav_chosen_attributes, needed for unit tests.
