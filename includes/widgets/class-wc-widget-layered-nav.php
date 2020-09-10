@@ -361,8 +361,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 		$term_ids_sql   = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
 
-		// Generate the first part of the query.
-		// This one will return non-variable products and variable products with concrete values for the attributes.
+		// Generate query.
 		$query           = array();
 		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) AS term_count, terms.term_id AS term_count_id";
 		$query['from']   = "FROM {$wpdb->posts}";
