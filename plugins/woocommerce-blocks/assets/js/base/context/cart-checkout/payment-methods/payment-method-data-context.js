@@ -341,22 +341,19 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 			return;
 		}
 
-		// If there's no active payment method, or the active payment method has
-		// been removed (e.g. COD vs shipping methods), set one as active.
-		if (
-			! activePaymentMethod ||
-			! paymentMethodKeys.includes( activePaymentMethod )
-		) {
-			setActivePaymentMethod(
-				Object.keys( paymentData.paymentMethods )[ 0 ]
-			);
-		}
-	}, [
-		activePaymentMethod,
-		paymentMethodsInitialized,
-		paymentData.paymentMethods,
-		setActivePaymentMethod,
-	] );
+		setActive( ( currentActivePaymentMethod ) => {
+			// If there's no active payment method, or the active payment method has
+			// been removed (e.g. COD vs shipping methods), set one as active.
+			if (
+				! currentActivePaymentMethod ||
+				! paymentMethodKeys.includes( currentActivePaymentMethod )
+			) {
+				dispatch( statusOnly( PRISTINE ) );
+				return Object.keys( paymentData.paymentMethods )[ 0 ];
+			}
+			return currentActivePaymentMethod;
+		} );
+	}, [ paymentMethodsInitialized, paymentData.paymentMethods, setActive ] );
 
 	// emit events.
 	useEffect( () => {
