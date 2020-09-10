@@ -38,7 +38,8 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 			'AX' => 'Åland Islands',
 		);
 
-		$sorted_values = wc_asort_by_locale( $unsorted_values );
+		$sorted_values = $unsorted_values;
+		wc_asort_by_locale( $sorted_values );
 
 		$this->assertSame( array( 'Afghanistan', 'Åland Islands', 'Espagne', 'Éthiopie' ), array_values( $sorted_values ) );
 	}

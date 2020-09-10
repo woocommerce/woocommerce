@@ -1773,7 +1773,7 @@ function wc_ascii_uasort_comparison( $a, $b ) {
  * @param string $locale Locale.
  * @return array
  */
-function wc_asort_by_locale( $data, $locale = '' ) {
+function wc_asort_by_locale( &$data, $locale = '' ) {
 	// Use Collator if PHP Internationalization Functions (php-intl) is available.
 	if ( class_exists( 'Collator' ) ) {
 		$locale   = $locale ? $locale : get_locale();
