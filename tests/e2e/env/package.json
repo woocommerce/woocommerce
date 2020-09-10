@@ -36,7 +36,8 @@
     "@babel/polyfill": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@wordpress/eslint-plugin": "^4.0.0",
-    "ndb": "^1.1.5"
+    "ndb": "^1.1.5",
+    "semver": "^7.3.2"
   },
   "publishConfig": {
     "access": "public"
