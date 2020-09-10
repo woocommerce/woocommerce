@@ -127,10 +127,7 @@ class WC_Post_Data {
 	 * @param string     $to      New type.
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		apply_filters( 'woocommerce_from_product_type_changed', $from );
-		apply_filters( 'woocommerce_to_product_type_changed', $to );
-
-		if ( 'variable' === $from && 'variable' !== $to ) {
+		if ( apply_filters( 'woocommerce_delete_variations_on_product_type_change', 'variable' === $from && 'variable' !== $to, $product, $from, $to ) ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $product->get_id(), true );
