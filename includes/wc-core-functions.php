@@ -1032,7 +1032,15 @@ function wc_print_js() {
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
+		setcookie(
+			$name,
+			$value,
+			$expire,
+			COOKIEPATH ? COOKIEPATH : '/',
+			COOKIE_DOMAIN,
+			apply_filters( 'woocommerce_cookie_secure', $secure, $name, $value, $expire, $httponly ),
+			apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure )
+		);
 	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
