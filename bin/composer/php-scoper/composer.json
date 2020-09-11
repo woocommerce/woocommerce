@@ -1,7 +1,13 @@
 {
   "minimum-stability": "dev",
-  "prefer-stable": true,
+  "prefer-stable": false,
   "require-dev": {
-    "humbug/php-scoper": "^0.13.3"
-  }
+    "humbug/php-scoper": "dev-with-improvements"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/woocommerce/php-scoper"
+    }
+  ]
 }

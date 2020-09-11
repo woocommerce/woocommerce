@@ -57,6 +57,7 @@
   "scripts": {
     "post-install-cmd": [
       "@composer bin all install --ansi",
+      "sh ./bin/scope-vendor-files.sh",
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
