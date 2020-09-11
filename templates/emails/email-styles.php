@@ -76,6 +76,7 @@ body {
 #template_header h1,
 #template_header h1 a {
 	color: <?php echo esc_attr( $base_text ); ?>;
+	background-color: inherit;
 }
 
 #template_header_image img {
