@@ -1,4 +1,4 @@
-# 5.1.0 (unreleased)
+# 5.1.0
 
 -   Fix default value for `<Table />` component `onQueryChange` prop.
 -   Deprecate our bespoke component `useFilters` in favor of using the WordPress variety `withFilters`.
