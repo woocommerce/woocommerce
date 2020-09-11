@@ -1693,7 +1693,9 @@ function wc_nocache_headers() {
  * @return int
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	return wc_uasort_comparison( $a['position'], $b['position'] );
+	$a_position = is_null( $a ) ? null : $a['position'];
+	$b_position = is_null( $b ) ? null : $b['position'];
+	return wc_uasort_comparison( $a_position, $b_position );
 }
 
 /**

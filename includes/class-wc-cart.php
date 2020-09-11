@@ -776,7 +776,15 @@ class WC_Cart extends WC_Legacy_Cart {
 			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
-			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
+			/**
+			 * Allows filter if product have enough stock to get added to the cart.
+			 *
+			 * @since 4.6.0
+			 * @param bool       $has_stock If have enough stock.
+			 * @param WC_Product $product   Product instance.
+			 * @param array      $values    Cart item values.
+			 */
+			if ( apply_filters( 'woocommerce_cart_item_required_stock_is_not_enough', $product->get_stock_quantity() < ( $held_stock + $required_stock ), $product, $values ) ) {
 				/* translators: 1: product name 2: quantity in stock */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
 				return $error;
@@ -1032,7 +1040,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Gather posted attributes.
 				$posted_attributes = array();
-
 				foreach ( $parent_data->get_attributes() as $attribute ) {
 					if ( ! $attribute['is_variation'] ) {
 						continue;
@@ -1048,7 +1055,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						}
 
 						// Don't include if it's empty.
-						if ( ! empty( $value ) ) {
+						if ( ! empty( $value ) || '0' === $value ) {
 							$posted_attributes[ $attribute_key ] = $value;
 						}
 					}
@@ -1520,7 +1527,15 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! $this->get_customer()->get_shipping_country() || ! $this->get_customer()->get_shipping_state() || ! $this->get_customer()->get_shipping_postcode() ) {
+			$country = $this->get_customer()->get_shipping_country();
+			if ( ! $country ) {
+				return false;
+			}
+			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
+			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+				return false;
+			}
+			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}
