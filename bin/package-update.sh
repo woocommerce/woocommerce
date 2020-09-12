@@ -25,6 +25,13 @@ output 3 "Updating autoloader classmaps..."
 composer dump-autoload
 output 2 "Done"
 
+# Clean extra files
+output 3 "Removing WooCommerce Blocks source files..."
+rm -rf ./packages/woocommerce-blocks/storybook
+rm -rf ./packages/woocommerce-blocks/assets/css
+rm -rf ./packages/woocommerce-blocks/assets/js
+output 2 "Done"
+
 # Convert textdomains
 output 3 "Updating package PHP textdomains..."
 
