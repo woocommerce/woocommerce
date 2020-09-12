@@ -475,7 +475,7 @@ return array(
 		'BA' => __( 'Baranya', 'woocommerce' ),
 		'BZ' => __( 'Borsod-Abaúj-Zemplén', 'woocommerce' ),
 		'BU' => __( 'Budapest', 'woocommerce' ),
-		'CS' => __( 'Csongrád', 'woocommerce' ),
+		'CS' => __( 'Csongrád-Csanád', 'woocommerce' ),
 		'FE' => __( 'Fejér', 'woocommerce' ),
 		'GS' => __( 'Győr-Moson-Sopron', 'woocommerce' ),
 		'HB' => __( 'Hajdú-Bihar', 'woocommerce' ),
