@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * Converts a string (e.g. 'yes' or 'no') to a bool.
  *
  * @since 3.0.0
- * @param string $string String to convert.
+ * @param string|bool $string String to convert. If a bool is passed it will be returned as-is.
  * @return bool
  */
 function wc_string_to_bool( $string ) {
@@ -25,7 +25,7 @@ function wc_string_to_bool( $string ) {
  * Converts a bool to a 'yes' or 'no'.
  *
  * @since 3.0.0
- * @param bool $bool String to convert.
+ * @param bool|string $bool Bool to convert. If a string is passed it will first be converted to a bool.
  * @return string
  */
 function wc_bool_to_string( $bool ) {
