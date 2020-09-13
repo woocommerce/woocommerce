@@ -53,6 +53,17 @@ describe( 'Rendering', () => {
 		expect( buttons.at( 0 ).text() ).toBe( 'Install & enable' );
 		expect( buttons.at( 1 ).text() ).toBe( 'No thanks' );
 	} );
+
+	it( 'should render an abort button when the abort handler is provided', async () => {
+		const pluginsWrapper = shallow(
+			<Plugins pluginSlugs={ [ 'jetpack' ] } onAbort={ () => {} } />
+		);
+
+		const buttons = pluginsWrapper.find( Button );
+
+		expect( buttons.length ).toBe( 3 );
+		expect( buttons.at( 2 ).text() ).toBe( 'Abort' );
+	} );
 } );
 
 describe( 'Installing and activating', () => {

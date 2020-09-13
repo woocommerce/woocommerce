@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
-class Connect extends Component {
+export class Connect extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -58,7 +58,14 @@ class Connect extends Component {
 	}
 
 	render() {
-		const { hasErrors, isRequesting, onSkip, skipText } = this.props;
+		const {
+			hasErrors,
+			isRequesting,
+			onSkip,
+			skipText,
+			onAbort,
+			abortText,
+		} = this.props;
 
 		return (
 			<Fragment>
@@ -82,6 +89,11 @@ class Connect extends Component {
 				{ onSkip && (
 					<Button onClick={ onSkip }>
 						{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
+					</Button>
+				) }
+				{ onAbort && (
+					<Button onClick={ onAbort }>
+						{ abortText || __( 'Abort', 'woocommerce-admin' ) }
 					</Button>
 				) }
 			</Fragment>
@@ -134,6 +146,14 @@ Connect.propTypes = {
 	 * Control the `isPending` logic of the parent containing the Stepper.
 	 */
 	setIsPending: PropTypes.func,
+	/**
+	 * Called when the plugin connection is aborted.
+	 */
+	onAbort: PropTypes.func,
+	/**
+	 * Text used for the abort connection button.
+	 */
+	abortText: PropTypes.string,
 };
 
 Connect.defaultProps = {

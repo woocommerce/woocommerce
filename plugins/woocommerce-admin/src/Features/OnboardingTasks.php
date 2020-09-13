@@ -217,7 +217,9 @@ class OnboardingTasks {
 				$completed = $post && 'publish' === $post->post_status;
 				return $completed;
 			case 'tax':
-				return 'yes' === get_option( 'wc_connect_taxes_enabled' ) || count( DataStore::get_taxes( array() ) ) > 0;
+				return 'yes' === get_option( 'wc_connect_taxes_enabled' ) ||
+					count( DataStore::get_taxes( array() ) ) > 0 ||
+					false !== get_option( 'woocommerce_no_sales_tax' );
 		}
 		return false;
 	}

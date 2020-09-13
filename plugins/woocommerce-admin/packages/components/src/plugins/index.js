@@ -73,7 +73,14 @@ export class Plugins extends Component {
 	}
 
 	render() {
-		const { isRequesting, skipText, autoInstall, pluginSlugs } = this.props;
+		const {
+			isRequesting,
+			skipText,
+			autoInstall,
+			pluginSlugs,
+			onAbort,
+			abortText,
+		} = this.props;
 		const { hasErrors } = this.state;
 
 		if ( hasErrors ) {
@@ -126,6 +133,11 @@ export class Plugins extends Component {
 				<Button onClick={ this.skipInstaller }>
 					{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
 				</Button>
+				{ onAbort && (
+					<Button onClick={ onAbort }>
+						{ abortText || __( 'Abort', 'woocommerce-admin' ) }
+					</Button>
+				) }
 			</Fragment>
 		);
 	}
@@ -156,6 +168,14 @@ Plugins.propTypes = {
 	 * An array of plugin slugs to install.
 	 */
 	pluginSlugs: PropTypes.arrayOf( PropTypes.string ),
+	/**
+	 * Called when the plugin connection is aborted.
+	 */
+	onAbort: PropTypes.func,
+	/**
+	 * Text used for the abort connection button.
+	 */
+	abortText: PropTypes.string,
 };
 
 Plugins.defaultProps = {

@@ -167,6 +167,22 @@ class Tax extends Component {
 		);
 	}
 
+	doNotChargeSalesTax() {
+		const { updateOptions } = this.props;
+
+		queueRecordEvent( 'tasklist_tax_connect_store', {
+			connect: false,
+			no_tax: true,
+		} );
+
+		updateOptions( {
+			woocommerce_no_sales_tax: true,
+			woocommerce_calc_taxes: 'no',
+		} ).then( () => {
+			window.location = getAdminLink( 'admin.php?page=wc-admin' );
+		} );
+	}
+
 	getSteps() {
 		const {
 			generalSettings,
@@ -245,6 +261,11 @@ class Tax extends Component {
 								'Set up tax rates manually',
 								'woocommerce-admin'
 							) }
+							onAbort={ () => this.doNotChargeSalesTax() }
+							abortText={ __(
+								"My business doesn't charge sales tax",
+								'woocommerce-admin'
+							) }
 						/>
 						{ ! tosAccepted && (
 							<Text
@@ -289,16 +310,23 @@ class Tax extends Component {
 						onConnect={ () => {
 							recordEvent( 'tasklist_tax_connect_store', {
 								connect: true,
+								no_tax: false,
 							} );
 						} }
 						onSkip={ () => {
 							queueRecordEvent( 'tasklist_tax_connect_store', {
 								connect: false,
+								no_tax: false,
 							} );
 							this.manuallyConfigureTaxRates();
 						} }
 						skipText={ __(
 							'Set up tax rates manually',
+							'woocommerce-admin'
+						) }
+						onAbort={ () => this.doNotChargeSalesTax() }
+						abortText={ __(
+							"My business doesn't charge sales tax",
 							'woocommerce-admin'
 						) }
 					/>
@@ -355,6 +383,75 @@ class Tax extends Component {
 		return filter( steps, ( step ) => step.visible );
 	}
 
+	renderSuccessScreen() {
+		const { isPending } = this.props;
+
+		return (
+			<div className="woocommerce-task-tax__success">
+				<span
+					className="woocommerce-task-tax__success-icon"
+					role="img"
+					aria-labelledby="woocommerce-task-tax__success-message"
+				>
+					🎊
+				</span>
+				<H id="woocommerce-task-tax__success-message">
+					{ __( 'Good news!', 'woocommerce-admin' ) }
+				</H>
+				<p>
+					{ interpolateComponents( {
+						mixedString: __(
+							'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Services{{/strong}} ' +
+								'can automate your sales tax calculations for you.',
+							'woocommerce-admin'
+						),
+						components: {
+							strong: <strong />,
+						},
+					} ) }
+				</p>
+				<Button
+					disabled={ isPending }
+					isPrimary
+					isBusy={ isPending }
+					onClick={ () => {
+						recordEvent( 'tasklist_tax_setup_automated_proceed', {
+							setup_automatically: true,
+						} );
+						this.updateAutomatedTax( true );
+					} }
+				>
+					{ __( 'Yes please', 'woocommerce-admin' ) }
+				</Button>
+				<Button
+					disabled={ isPending }
+					isBusy={ isPending }
+					onClick={ () => {
+						recordEvent( 'tasklist_tax_setup_automated_proceed', {
+							setup_automatically: false,
+						} );
+						this.updateAutomatedTax( false );
+					} }
+				>
+					{ __(
+						"No thanks, I'll configure taxes manually",
+						'woocommerce-admin'
+					) }
+				</Button>
+				<Button
+					disabled={ isPending }
+					isBusy={ isPending }
+					onClick={ () => this.doNotChargeSalesTax() }
+				>
+					{ __(
+						"My business doesn't charge sales tax",
+						'woocommerce-admin'
+					) }
+				</Button>
+			</div>
+		);
+	}
+
 	render() {
 		const { stepIndex } = this.state;
 		const { isPending, isResolving } = this.props;
@@ -364,64 +461,7 @@ class Tax extends Component {
 			<div className="woocommerce-task-tax">
 				<Card className="is-narrow">
 					{ this.shouldShowSuccessScreen() ? (
-						<div className="woocommerce-task-tax__success">
-							<span
-								className="woocommerce-task-tax__success-icon"
-								role="img"
-								aria-labelledby="woocommerce-task-tax__success-message"
-							>
-								🎊
-							</span>
-							<H id="woocommerce-task-tax__success-message">
-								{ __( 'Good news!', 'woocommerce-admin' ) }
-							</H>
-							<p>
-								{ interpolateComponents( {
-									mixedString: __(
-										'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Services{{/strong}} ' +
-											'can automate your sales tax calculations for you.',
-										'woocommerce-admin'
-									),
-									components: {
-										strong: <strong />,
-									},
-								} ) }
-							</p>
-							<Button
-								disabled={ isPending }
-								isPrimary
-								isBusy={ isPending }
-								onClick={ () => {
-									recordEvent(
-										'tasklist_tax_setup_automated_proceed',
-										{
-											setup_automatically: true,
-										}
-									);
-									this.updateAutomatedTax( true );
-								} }
-							>
-								{ __( 'Yes please', 'woocommerce-admin' ) }
-							</Button>
-							<Button
-								disabled={ isPending }
-								isBusy={ isPending }
-								onClick={ () => {
-									recordEvent(
-										'tasklist_tax_setup_automated_proceed',
-										{
-											setup_automatically: false,
-										}
-									);
-									this.updateAutomatedTax( false );
-								} }
-							>
-								{ __(
-									"No thanks, I'll configure taxes manually",
-									'woocommerce-admin'
-								) }
-							</Button>
-						</div>
+						this.renderSuccessScreen()
 					) : (
 						<Stepper
 							isPending={ isPending || isResolving }
