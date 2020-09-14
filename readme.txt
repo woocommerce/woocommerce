@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.3
 Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.5.1
+Stable tag: 4.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,10 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 4.5.2 - 2020-09-14 =
+* Fix - Revert the changes in filtering by attribute that were introduced in WooCommerce 4.4. #27625
+* Fix - Adjusted validation to allow for variations with "0" as an attribute value. #27633
 
 = 4.5.1 - 2020-09-09 =
 
