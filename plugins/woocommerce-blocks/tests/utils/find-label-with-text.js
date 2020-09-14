@@ -5,9 +5,9 @@
  *
  * @return {?ElementHandle} Object that represents an in-page DOM element.
  */
-export async function findToggleWithLabel( label ) {
+export async function findLabelWithText( label ) {
 	const [ toggle ] = await page.$x(
-		`//div[contains(@class,"components-toggle-control")]//label[contains(text(), '${ label }')]`
+		`//div[contains(@class,"components-base-control")]//label[contains(text(), '${ label }')]`
 	);
 	return toggle;
 }
