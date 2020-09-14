@@ -207,13 +207,23 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		if ( $current_section ) {
 			foreach ( $email_templates as $email_key => $email ) {
 				if ( strtolower( $email_key ) === $current_section ) {
-					$email->admin_options();
+					$this->run_email_admin_options( $email );
 					break;
 				}
 			}
 		}
 
 		parent::output();
+	}
+
+	/**
+	 * Run the 'admin_options' method on a given email.
+	 * This method exists to easy unit testing.
+	 *
+	 * @param object $email The email object to run the method on.
+	 */
+	protected function run_email_admin_options( $email ) {
+		$email->admin_options();
 	}
 
 	/**
