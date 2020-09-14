@@ -165,10 +165,6 @@ class Loader {
 	 * @return bool Returns true if the feature is enabled.
 	 */
 	public static function is_feature_enabled( $feature ) {
-		if ( 'homescreen' === $feature && 'yes' !== get_option( 'woocommerce_homescreen_enabled', 'no' ) ) {
-			return false;
-		}
-
 		$features = self::get_features();
 		return in_array( $feature, $features, true );
 	}
@@ -247,24 +243,11 @@ class Loader {
 	}
 
 	/**
-	 * Registers a basic page handler for the app entry point.
+	 * Connects existing WooCommerce pages.
 	 *
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public static function register_page_handler() {
-		$id = self::is_feature_enabled( 'homescreen' ) ? 'woocommerce-home' : 'woocommerce-dashboard';
-
-		wc_admin_register_page(
-			array(
-				'id'         => $id, // Expected to be overridden if dashboard is enabled.
-				'parent'     => 'woocommerce',
-				'title'      => null,
-				'path'       => self::APP_ENTRY_POINT,
-				'capability' => static::get_analytics_capability(),
-			)
-		);
-
-		// Connect existing WooCommerce pages.
 		require_once WC_ADMIN_ABSPATH . 'includes/connect-existing-pages.php';
 	}
 

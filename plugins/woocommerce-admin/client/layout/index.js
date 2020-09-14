@@ -91,11 +91,9 @@ class _Layout extends Component {
 		// Remove leading slash, and camel case remaining pathname
 		let path = pathname.substring( 1 ).replace( /\//g, '_' );
 
-		// When pathname is `/` we are on the dashboard
+		// When pathname is `/` we are on the home screen.
 		if ( path.length === 0 ) {
-			path = window.wcAdminFeatures.homescreen
-				? 'home_screen'
-				: 'dashboard';
+			path = 'home_screen';
 		}
 
 		recordPageView( path, {

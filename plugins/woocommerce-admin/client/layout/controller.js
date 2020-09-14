@@ -75,53 +75,30 @@ export const getPages = () => {
 		} );
 	}
 
-	if (
-		window.wcAdminFeatures[ 'analytics-dashboard' ] &&
-		! window.wcAdminFeatures.homescreen
-	) {
-		pages.push( {
-			container: Dashboard,
-			path: '/',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Dashboard', 'woocommerce-admin' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-		} );
-	}
-
-	if ( window.wcAdminFeatures.homescreen ) {
-		pages.push( {
-			container: Homescreen,
-			path: '/',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Home', 'woocommerce-admin' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-		} );
-	}
+	pages.push( {
+		container: Homescreen,
+		path: '/',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Home', 'woocommerce-admin' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+	} );
 
 	if ( window.wcAdminFeatures.analytics ) {
-		if ( window.wcAdminFeatures.homescreen ) {
-			pages.push( {
-				container: Dashboard,
-				path: '/analytics/overview',
-				breadcrumbs: [
-					...initialBreadcrumbs,
-					[
-						'/analytics/overview',
-						__( 'Analytics', 'woocommerce-admin' ),
-					],
-					__( 'Overview', 'woocommerce-admin' ),
+		pages.push( {
+			container: Dashboard,
+			path: '/analytics/overview',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				[
+					'/analytics/overview',
+					__( 'Analytics', 'woocommerce-admin' ),
 				],
-				wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
-			} );
-		}
-		const ReportWpOpenMenu = `toplevel_page_wc-admin-path--analytics-${
-			window.wcAdminFeatures.homescreen ? 'overview' : 'revenue'
-		}`;
-
+				__( 'Overview', 'woocommerce-admin' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
+		} );
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
@@ -133,7 +110,7 @@ export const getPages = () => {
 				],
 				__( 'Settings', 'woocommerce-admin' ),
 			],
-			wpOpenMenu: ReportWpOpenMenu,
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
@@ -163,7 +140,7 @@ export const getPages = () => {
 					report.title,
 				];
 			},
-			wpOpenMenu: ReportWpOpenMenu,
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 		} );
 	}
 
@@ -256,10 +233,7 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin( item.href ) ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
-		const defaultPath = window.wcAdminFeatures.homescreen
-			? 'homescreen'
-			: 'dashboard';
-		const path = query.path || defaultPath;
+		const path = query.path || 'homescreen';
 		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
 
 		const isExcludedScreen = excludedScreens.includes( screen );

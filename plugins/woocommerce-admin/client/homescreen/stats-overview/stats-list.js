@@ -46,13 +46,9 @@ export const StatsList = ( {
 		>
 			{ stats.map( ( item ) => {
 				if ( primaryRequesting || secondaryRequesting ) {
-					return (
-						<SummaryNumberPlaceholder
-							className="is-homescreen"
-							key={ item.stat }
-						/>
-					);
+					return <SummaryNumberPlaceholder key={ item.stat } />;
 				}
+
 				const {
 					primaryValue,
 					secondaryValue,

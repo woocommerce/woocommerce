@@ -199,7 +199,7 @@ $border: $gray-200;
 .woocommerce-summary__item-container {
 	margin-bottom: 0;
 
-	&:not(.is-homescreen):last-of-type .woocommerce-summary__item {
+	&:last-of-type .woocommerce-summary__item {
 		// Make sure the last item always uses the outer-border color.
 		border-bottom-color: $border !important;
 	}

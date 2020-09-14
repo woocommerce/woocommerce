@@ -11,7 +11,6 @@ import {
 	withOnboardingHydration,
 } from '@woocommerce/data';
 import { Spinner } from '@woocommerce/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,16 +23,7 @@ const CustomizableDashboard = lazy( () =>
 
 class Dashboard extends Component {
 	render() {
-		const { path, profileItems, query } = this.props;
-		const { completed: profileCompleted, skipped: profileSkipped } =
-			profileItems || {};
-		if (
-			! profileCompleted &&
-			! profileSkipped &&
-			! window.wcAdminFeatures.homescreen
-		) {
-			getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
-		}
+		const { path, query } = this.props;
 
 		if ( window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
 			return (
@@ -50,11 +40,8 @@ class Dashboard extends Component {
 const onboardingData = getSetting( 'onboarding', {} );
 
 export default compose(
-	onboardingData.profile || onboardingData.tasksStatus
-		? withOnboardingHydration( {
-				profileItems: onboardingData.profile,
-				tasksStatus: onboardingData.tasksStatus,
-		  } )
+	!! onboardingData.tasksStatus
+		? withOnboardingHydration( { tasksStatus: onboardingData.tasksStatus } )
 		: identity,
 	withSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
