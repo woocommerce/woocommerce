@@ -71,7 +71,7 @@ install:
       echo "xdebug.ini does not exist"
     fi
   - nvm install
-  - npm ci
+  - npm install
   - composer install --no-dev
   - |
     # Install WP Test suite, install PHPUnit globally:
