@@ -1,22 +1,24 @@
-This is the release pull request for WooCommerce Blocks plugin {{version}}.
+This is the release pull request for WooCommerce Blocks plugin `{{version}}`.
 
 ## Changelog
 
 ---
 
+```
 {{changelog}}
+```
 
 ---
 
 ## Communication
 
->  This section is for any notes related to communicating the release Please include any extra details with each item as needed.
+>  This section is for any notes related to communicating the release. Please include any extra details with each item as needed.
 
 
 This release introduces:
 
 
-> In this section document an overview/summary of what this release includes. You can refer to the changelog for more information
+> In this section document a summary of what's in the release. Keep this brief, and link to the changelog for more detail.
 
 ### Prepared Updates
 
@@ -38,8 +40,8 @@ The following documentation, blog posts, and changelog updates are prepared for 
 **Relevant developer documentation:**
 _Link(s) to any developer documentation related to the release_
 
-**Happiness Engineer:**
-_Link to any special instructions or helpful notes for HE related to this release_
+**Happiness Engineering or Happiness / Support:**
+_Link to any special instructions or important support notes for this release._
 
 
 ## Quality
