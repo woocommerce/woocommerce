@@ -63,7 +63,11 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	 * @return array Array of shipping methods (string ids) that allow COD. (If empty, all support COD.)
 	 */
 	private function get_enable_for_methods() {
-		return $this->get_setting( 'enable_for_methods', [] );
+		$enable_for_methods = $this->get_setting( 'enable_for_methods', [] );
+		if ( '' === $enable_for_methods ) {
+			return [];
+		}
+		return $enable_for_methods;
 	}
 
 
