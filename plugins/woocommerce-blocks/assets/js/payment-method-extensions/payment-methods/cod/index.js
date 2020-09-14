@@ -49,7 +49,7 @@ const canMakePayment = ( { cartNeedsShipping, selectedShippingMethods } ) => {
 		return false;
 	}
 
-	if ( ! settings.enableForShippingMethods ) {
+	if ( ! settings.enableForShippingMethods.length ) {
 		// Store does not limit COD to specific shipping methods.
 		return true;
 	}
