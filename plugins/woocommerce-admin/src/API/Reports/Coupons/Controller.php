@@ -295,13 +295,24 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'code'         => __( 'Coupon Code', 'woocommerce-admin' ),
 			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
 			'amount'       => __( 'Amount Discounted', 'woocommerce-admin' ),
 			'created'      => __( 'Created', 'woocommerce-admin' ),
 			'expires'      => __( 'Expires', 'woocommerce-admin' ),
 			'type'         => __( 'Type', 'woocommerce-admin' ),
+		);
+
+		/**
+		 * Filter to add or remove column names from the coupons report for
+		 * export.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_coupons_export_columns',
+			$export_columns
 		);
 	}
 
@@ -316,13 +327,25 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			? __( 'N/A', 'woocommerce-admin' )
 			: $item['extended_info']['date_expires'];
 
-		return array(
+		$export_item = array(
 			'code'         => $item['extended_info']['code'],
 			'orders_count' => $item['orders_count'],
 			'amount'       => $item['amount'],
 			'created'      => $item['extended_info']['date_created'],
 			'expires'      => $date_expires,
 			'type'         => $item['extended_info']['discount_type'],
+		);
+
+		/**
+		 * Filter to prepare extra columns in the export item for the coupons
+		 * report.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_coupons_prepare_export_item',
+			$export_item,
+			$item
 		);
 	}
 }

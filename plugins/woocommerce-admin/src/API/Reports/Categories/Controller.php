@@ -325,12 +325,23 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'category'       => __( 'Category', 'woocommerce-admin' ),
 			'items_sold'     => __( 'Items Sold', 'woocommerce-admin' ),
 			'net_revenue'    => __( 'Net Revenue', 'woocommerce-admin' ),
 			'products_count' => __( 'Products', 'woocommerce-admin' ),
 			'orders_count'   => __( 'Orders', 'woocommerce-admin' ),
+		);
+
+		/**
+		 * Filter to add or remove column names from the categories report for
+		 * export.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_categories_export_columns',
+			$export_columns
 		);
 	}
 
@@ -341,12 +352,24 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
-		return array(
+		$export_item = array(
 			'category'       => $item['extended_info']['name'],
 			'items_sold'     => $item['items_sold'],
 			'net_revenue'    => $item['net_revenue'],
 			'products_count' => $item['products_count'],
 			'orders_count'   => $item['orders_count'],
+		);
+
+		/**
+		 * Filter to prepare extra columns in the export item for the
+		 * categories export.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_categories_prepare_export_item',
+			$export_item,
+			$item
 		);
 	}
 }

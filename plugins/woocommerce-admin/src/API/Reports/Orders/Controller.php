@@ -490,7 +490,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'date_created'   => __( 'Date', 'woocommerce-admin' ),
 			'order_number'   => __( 'Order #', 'woocommerce-admin' ),
 			'status'         => __( 'Status', 'woocommerce-admin' ),
@@ -499,6 +499,17 @@ class Controller extends ReportsController implements ExportableInterface {
 			'num_items_sold' => __( 'Items Sold', 'woocommerce-admin' ),
 			'coupons'        => __( 'Coupon(s)', 'woocommerce-admin' ),
 			'net_total'      => __( 'N. Revenue', 'woocommerce-admin' ),
+		);
+
+		/**
+		 * Filter to add or remove column names from the orders report for
+		 * export.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_orders_export_columns',
+			$export_columns
 		);
 	}
 
@@ -509,7 +520,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
-		return array(
+		$export_item = array(
 			'date_created'   => $item['date_created'],
 			'order_number'   => $item['order_number'],
 			'status'         => $item['status'],
@@ -518,6 +529,18 @@ class Controller extends ReportsController implements ExportableInterface {
 			'num_items_sold' => $item['num_items_sold'],
 			'coupons'        => isset( $item['extended_info']['coupons'] ) ? $this->_get_coupons( $item['extended_info']['coupons'] ) : null,
 			'net_total'      => $item['net_total'],
+		);
+
+		/**
+		 * Filter to prepare extra columns in the export item for the orders
+		 * report.
+		 *
+		 * @since 1.6.0
+		 */
+		return apply_filters(
+			'woocommerce_report_orders_prepare_export_item',
+			$export_item,
+			$item
 		);
 	}
 }
