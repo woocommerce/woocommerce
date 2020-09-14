@@ -671,7 +671,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		return (float) apply_filters( 'woocommerce_cart_contents_weight', $weight );
+		return apply_filters( 'woocommerce_cart_contents_weight', $weight );
 	}
 
 	/**
