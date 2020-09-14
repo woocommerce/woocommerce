@@ -4,13 +4,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { getCurrency } from '@woocommerce/base-utils';
 import Label from '@woocommerce/base-components/label';
+import ProductPrice from '@woocommerce/base-components/product-price';
 import {
 	ProductBackorderBadge,
 	ProductImage,
 	ProductLowStockBadge,
 	ProductMetadata,
 	ProductName,
-	ProductPrice,
 } from '@woocommerce/base-components/cart-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
@@ -57,9 +57,9 @@ const OrderSummaryItem = ( { cartItem } ) => {
 				<div className="wc-block-components-order-summary-item__header">
 					<ProductName permalink={ permalink } name={ name } />
 					<ProductPrice
-						className="wc-block-components-order-summary-item__total-price"
 						currency={ currency }
-						value={ linePrice }
+						price={ linePrice }
+						priceClassName="wc-block-components-order-summary-item__total-price"
 					/>
 				</div>
 				{ showBackorderBadge ? (
