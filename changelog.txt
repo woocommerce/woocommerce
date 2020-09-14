@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 4.5.2 - 2020-09-14 =
+* Fix - Revert the changes in filtering by attribute that were introduced in WooCommerce 4.4. #27625
+* Fix - Adjusted validation to allow for variations with "0" as an attribute value. #27633
+
 = 4.5.1 - 2020-09-09 =
 * Fix - Check for state and postcode fields only if required in `show_shipping`. #27628
 
