@@ -39,7 +39,7 @@ abstract class WC_Settings_Unit_Test_Case extends WC_Unit_Test_Case {
 	public function get_ids_and_types( $settings ) {
 		$settings_ids_and_types = array();
 		foreach ( $settings as $setting ) {
-			$id   = $setting['id'];
+			$id   = array_key_exists( 'id', $setting ) ? $setting['id'] : null;
 			$type = $setting['type'];
 			if ( ! array_key_exists( $id, $settings_ids_and_types ) ) {
 				$settings_ids_and_types[ $id ] = $type;

@@ -84,7 +84,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							$gateway->settings['enabled'] = wc_string_to_bool( $enabled ) ? 'no' : 'yes';
 						}
 					}
-					$gateway->admin_options();
+					$this->run_gateway_admin_options( $gateway );
 					break;
 				}
 			}
@@ -92,6 +92,16 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		parent::output();
 		//phpcs:enable
+	}
+
+	/**
+	 * Run the 'admin_options' method on a given gateway.
+	 * This method exists to easy unit testing.
+	 *
+	 * @param object $gateway The gateway object to run the method on.
+	 */
+	protected function run_gateway_admin_options( $gateway ) {
+		$gateway->admin_options();
 	}
 
 	/**
