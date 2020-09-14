@@ -41,8 +41,8 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 
 			$sections = array();
 
-			if ( ! Constants::is_defined( 'WC_INSTALLING' ) ) {
-				$integrations = WC()->integrations->get_integrations();
+			if ( ! $this->wc_is_installing() ) {
+				$integrations = $this->get_integrations();
 
 				if ( ! $current_section && ! empty( $integrations ) ) {
 					$current_section = current( $integrations )->id;
@@ -60,12 +60,32 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 		}
 
 		/**
+		 * Is WC_INSTALLING constant defined?
+		 * This method exists to ease unit testing.
+		 *
+		 * @return bool True is the WC_INSTALLING constant is defined.
+		 */
+		protected function wc_is_installing() {
+			return Constants::is_defined( 'WC_INSTALLING' );
+		}
+
+		/**
+		 * Get the currently available integrations.
+		 * This method exists to ease unit testing.
+		 *
+		 * @return array Currently available integrations.
+		 */
+		protected function get_integrations() {
+			return WC()->integrations->get_integrations();
+		}
+
+		/**
 		 * Output the settings.
 		 */
 		public function output() {
 			global $current_section;
 
-			$integrations = WC()->integrations->get_integrations();
+			$integrations = $this->get_integrations();
 
 			if ( isset( $integrations[ $current_section ] ) ) {
 				$integrations[ $current_section ]->admin_options();
