@@ -761,7 +761,7 @@ class WC_Tax {
 	 * @since 3.7.0
 	 * @return array Array of tax class objects consisting of tax_rate_class_id, name, and slug.
 	 */
-	protected static function get_tax_rate_classes() {
+	public static function get_tax_rate_classes() {
 		global $wpdb;
 
 		$cache_key        = 'tax-rate-classes';
