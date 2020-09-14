@@ -11,8 +11,7 @@
   "main": "build/index.js",
   "module": "build-module/index.js",
   "dependencies": {
-    "@wordpress/e2e-test-utils": "4.6.0",
-    "@woocommerce/model-factories": "file:../factories"
+    "@wordpress/e2e-test-utils": "4.6.0"
   },
   "publishConfig": {
     "access": "public"
