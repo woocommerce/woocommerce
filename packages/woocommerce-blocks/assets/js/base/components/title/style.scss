@@ -1,0 +1,13 @@
+// Extra class for specificity to overwrite editor styles.
+.wc-block-components-title.wc-block-components-title {
+	@include reset-box();
+	@include font-size(large);
+}
+
+// For Twenty Twenty we need to increase specificity a bit more.
+.theme-twentytwenty {
+	.wc-block-components-title.wc-block-components-title {
+		@include reset-box();
+		@include font-size(large);
+	}
+}
