@@ -914,7 +914,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'limit'  => - 1,
 				)
 			);
-			$cache_hydration->add_to_collection( $refunds, 'refunds', 'parent' );
+			$cache_hydration->add_to_collection( $refunds, 'refunds', 'get_parent_id' );
 			$refunds_by_order_id = $cache_hydration->get_collection( 'refunds' );
 			foreach ( $order_ids as $order_id ) {
 				if ( ! isset( $refunds_by_order_id[ $order_id ] ) ) {

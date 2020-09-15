@@ -93,16 +93,20 @@ class CacheHydration {
 	/**
 	 * Adds rows to a collection.
 	 *
-	 * @param array  $data      Actual collection data. Should be an array of std objects.
-	 * @param string $key       Name to identify collection.
-	 * @param string $index_key Name of the index key.
+	 * @param array  $data Actual collection data. Should be an array of std objects.
+	 * @param string $key Name to identify collection.
+	 * @param string $index_function Name of the index key.
 	 * */
-	public function add_to_collection( $data, $key, $index_key ) {
+	public function add_to_collection( $data, $key, $index_function ) {
 		if ( ! isset( $this->collection_hydration[ $key ] ) ) {
 			$this->collection_hydration[ $key ] = array();
 		}
 		foreach ( $data as $row ) {
-			$index = $row->$index_key;
+			if ( method_exists( $row, $index_function ) ) {
+				$index = $row->$index_function();
+			} else {
+				$index = $row->$index_function;
+			}
 			$this->append_collection_for_object( $key, $index, $row );
 		}
 	}
