@@ -6,7 +6,7 @@ The release pull request has been created! This checklist is a guide to follow f
 
 The below only needs done if this patch release is the **_latest_** release of the plugin.
 
-* [ ] Copy the changelog from the pull request description into the `readme.txt` file to the top of the changelog section. Create a new section here for this release, eg.g. `= {{version}} - 2020-01-20 =`.
+* [ ] Copy the changelog from the pull request description into the `readme.txt` file to the top of the changelog section. Create a new section here for this release, eg. `= {{version}} - 2020-01-20 =`.
 * [ ] Make any other changes to plugin metadata as necessary (no version changes needed, that's handled by script later in the process).
   * [ ] `readme.txt` - support versions changing, reference new blocks if necessary.
   * [ ] `woocommerce-gutenberg-products-block.php` - requirements/tested up to versions etc.
@@ -26,7 +26,7 @@ When creating testing notes, please write them from the perspective of a "user" 
   * At least one other person should test the built zip - ask a teammate to help out.
   * Test in a clean environment, e.g. Jurassic.Ninja site.
   * Test existing WooCommerce Blocks content works correctly after update (no block validation errors).
-  * Test to confirm blocks are available and work correctly in oldest supported WordPress version (e.g. 5.0).
+  * Test to confirm blocks are available and work correctly in oldest supported WordPress version (e.g. 5.3).
   * Confidence check - check blocks are available and function.
   * Test to confirm new features/fixes are working correctly.
   * Smoke test – test a cross section of core functionality.
