@@ -51,9 +51,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'classes' => __( 'Shipping classes', 'woocommerce' ),
 		);
 
-		if ( ! Constants::is_defined( 'WC_INSTALLING' ) ) {
+		if ( ! $this->wc_is_installing() ) {
 			// Load shipping methods so we can show any global options they may have.
-			$shipping_methods = WC()->shipping()->load_shipping_methods();
+			$shipping_methods = $this->get_shipping_methods();
 
 			foreach ( $shipping_methods as $method ) {
 				if ( ! $method->has_settings() ) {
@@ -65,6 +65,26 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		return $sections;
+	}
+
+	/**
+	 * Is WC_INSTALLING constant defined?
+	 * This method exists to ease unit testing.
+	 *
+	 * @return bool True is the WC_INSTALLING constant is defined.
+	 */
+	protected function wc_is_installing() {
+		return Constants::is_defined( 'WC_INSTALLING' );
+	}
+
+	/**
+	 * Get the currently available shipping methods.
+	 * This method exists to ease unit testing.
+	 *
+	 * @return array Currently available shipping methods.
+	 */
+	protected function get_shipping_methods() {
+		return WC()->shipping()->get_shipping_methods();
 	}
 
 	/**
@@ -156,7 +176,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		global $current_section, $hide_save_button;
 
 		// Load shipping methods so we can show any global options they may have.
-		$shipping_methods = WC()->shipping()->load_shipping_methods();
+		$shipping_methods = $this->get_shipping_methods();
 
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();
@@ -197,10 +217,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			case '':
 				break;
 			default:
-				$wc_shipping        = WC_Shipping::instance();
 				$is_shipping_method = false;
 
-				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+				foreach ( $this->get_shipping_methods() as $method_id => $method ) {
 					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
 						$is_shipping_method = true;
 						$this->do_update_options_action( $method->id );
