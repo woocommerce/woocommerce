@@ -77,6 +77,8 @@ wpAdminScripts.forEach( ( name ) => {
 
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
 
+const suffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
@@ -87,10 +89,10 @@ const webpackConfig = {
 	output: {
 		filename: ( data ) => {
 			return wpAdminScripts.includes( data.chunk.name )
-				? `wp-admin-scripts/[name].min.js`
-				: `[name]/index.min.js`;
+				? `wp-admin-scripts/[name]${ suffix }.js`
+				: `[name]/index${ suffix }.js`;
 		},
-		chunkFilename: `chunks/[id].[chunkhash].min.js`,
+		chunkFilename: `chunks/[id].[chunkhash]${ suffix }.js`,
 		path: path.join( __dirname, 'dist' ),
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',

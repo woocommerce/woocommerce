@@ -11,7 +11,7 @@
 		"remote-inbox-notifications": true,
 		"shipping-label-banner": true,
 		"store-alerts": true,
-		"unminified-js": true,
+		"minified-js": true,
 		"wcpay": true,
 		"mobile-app-banner": true
 	}

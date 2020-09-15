@@ -176,9 +176,9 @@ class Loader {
 	 * @return boolean If js asset should use minified version.
 	 */
 	public static function should_use_minified_js_file( $script_debug ) {
-		// un-minified files are only shipped in non-core versions of wc-admin, return true if unminified files are not available.
-		if ( ! self::is_feature_enabled( 'unminified-js' ) ) {
-			return true;
+		// minified files are only shipped in non-core versions of wc-admin, return false if minified files are not available.
+		if ( ! self::is_feature_enabled( 'minified-js' ) ) {
+			return false;
 		}
 
 		// Otherwise we will serve un-minified files if SCRIPT_DEBUG is on, or if anything truthy is passed in-lieu of SCRIPT_DEBUG.
