@@ -13,4 +13,5 @@ return array(
 	'WC_Admin_Webhooks',
 	'WC_Emails',
 	'WC_Payment_Gateways',
+	'WC_Tax',
 );
