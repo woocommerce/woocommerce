@@ -10,3 +10,4 @@ Every release includes specific testing instructions for features and bug fixes 
 - [3.1.0](./310.md)
 - [3.2.0](./320.md)
 - [3.3.0](./330.md)
+- [3.4.0](./340.md)
