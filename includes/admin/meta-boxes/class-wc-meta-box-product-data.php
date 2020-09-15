@@ -371,7 +371,7 @@ class WC_Meta_Box_Product_Data {
 				'featured'           => isset( $_POST['_featured'] ),
 				'catalog_visibility' => isset( $_POST['_visibility'] ) ? wc_clean( wp_unslash( $_POST['_visibility'] ) ) : null,
 				'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( wp_unslash( $_POST['_tax_status'] ) ) : null,
-				'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( wp_unslash( $_POST['_tax_class'] ) ) : null,
+				'tax_class'          => isset( $_POST['_tax_class'] ) ? sanitize_title( wp_unslash( $_POST['_tax_class'] ) ) : null,
 				'weight'             => isset( $_POST['_weight'] ) ? wc_clean( wp_unslash( $_POST['_weight'] ) ) : null,
 				'length'             => isset( $_POST['_length'] ) ? wc_clean( wp_unslash( $_POST['_length'] ) ) : null,
 				'width'              => isset( $_POST['_width'] ) ? wc_clean( wp_unslash( $_POST['_width'] ) ) : null,

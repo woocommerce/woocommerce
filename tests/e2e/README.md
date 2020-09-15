@@ -9,7 +9,7 @@ Automated end-to-end tests for WooCommerce.
   - [Install Docker](#install-docker)
 - [Configuration](#configuration)
   - [Test Environment](#test-environment)
-  - [Environment Variables](#environment-variables)
+  - [Test Variables](#test-variables)
   - [Jest test sequencer](#jest-test-sequencer)      
 - [Running tests](#running-tests)
   - [Prep work for running tests](#prep-work-for-running-tests)
@@ -52,9 +52,9 @@ This section explains how e2e tests are working behind the scenes. These are not
 
 We recommend using Docker for running tests locally in order for the test environment to match the setup on Travis CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is being copied to the `plugins` folder of that newly built test site. No WooCommerce Docker image is being built or needed.
 
-### Environment Variables
+### Test Variables
 
-During the process of Docker building a container with test site for running tests, site URL is being set. Admin and customer users are also being created in advance with details specified in the `docker-compose.yaml` file. As a result, there is `./tests/e2e/config/default.json` file that contains pre-set variables needed to run the test:
+The jest test sequencer uses the following test variables:
 
 ```
 {
@@ -72,7 +72,7 @@ During the process of Docker building a container with test site for running tes
 }
 ```
 
-If you changed either site URL or one of the users details in the  `docker-compose.yaml` file, you'd need to copy the content of the `default.json`, paste it to `test-e2e.json` and edit it further there to match your own setup. 
+If you need to modify the port for your local test environment (eg. port is already in use), copy `tests/e2e/env/config/default.json` to `tests/e2e/config/default.json` and edit that copy. Only edit this file while your test container is `down`.
 
 ### Jest test sequencer
 
@@ -184,7 +184,7 @@ You can also use `.skip` in the same fashion. For example:
 it.skip( 'Can start Setup Wizard', async () => {}
 ```
 
-Finally, you can aply both `.only` and `.skip` to `describe` part of the test:
+Finally, you can apply both `.only` and `.skip` to `describe` part of the test:
 
 ```
 describe.skip( 'Store owner can go through store Setup Wizard', () => {}
@@ -200,10 +200,10 @@ We use the following tools to write e2e tests:
 
 Tests are kept in `tests/e2e/specs` folder.
 
-The following packages are being used to write tests:
+The following packages are used to write tests:
 
-- `e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils);
-- `puppeteer-utils` - Utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils). 
+- `@wordpress/e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils);
+- `@automattic/puppeteer-utils` - Utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
 
 ## Debugging tests 
 

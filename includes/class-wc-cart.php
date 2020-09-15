@@ -1040,7 +1040,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Gather posted attributes.
 				$posted_attributes = array();
-
 				foreach ( $parent_data->get_attributes() as $attribute ) {
 					if ( ! $attribute['is_variation'] ) {
 						continue;
@@ -1056,7 +1055,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						}
 
 						// Don't include if it's empty.
-						if ( ! empty( $value ) ) {
+						if ( ! empty( $value ) || '0' === $value ) {
 							$posted_attributes[ $attribute_key ] = $value;
 						}
 					}
@@ -1528,7 +1527,15 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! $this->get_customer()->get_shipping_country() || ! $this->get_customer()->get_shipping_state() || ! $this->get_customer()->get_shipping_postcode() ) {
+			$country = $this->get_customer()->get_shipping_country();
+			if ( ! $country ) {
+				return false;
+			}
+			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
+			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+				return false;
+			}
+			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}

@@ -2,8 +2,8 @@ import {
 	AdapterTypes,
 	initializeUsingBasicAuth,
 	ModelRegistry,
-	registerSimpleProduct
-} from '@woocommerce/api';
+	registerSimpleProduct,
+} from '@woocommerce/model-factories';
 
 const config = require( 'config' );
 

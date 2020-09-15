@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36a21abbc68f5f21a48aaf6a57eb0a07",
+    "content-hash": "11ae24e5fa6a835a12e6e4f853825392",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -468,16 +468,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.5.0-rc.4",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "386ccd8c3fbe99fc0d6c8ae5016eefbf98e63fd4"
+                "reference": "b788329894265b4698c5ea997ce73a9f506d3e4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/386ccd8c3fbe99fc0d6c8ae5016eefbf98e63fd4",
-                "reference": "386ccd8c3fbe99fc0d6c8ae5016eefbf98e63fd4",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/b788329894265b4698c5ea997ce73a9f506d3e4c",
+                "reference": "b788329894265b4698c5ea997ce73a9f506d3e4c",
                 "shasum": ""
             },
             "require": {
@@ -511,7 +511,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-09-02T04:26:29+00:00"
+            "time": "2020-09-07T02:36:13+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
