@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
 /**
- * Unit tests for the WC_Settings_Checkout class.
+ * Unit tests for the WC_Settings_Shipping class.
  */
 class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 
