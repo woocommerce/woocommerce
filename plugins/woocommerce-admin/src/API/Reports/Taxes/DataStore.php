@@ -287,7 +287,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'tax_rate_id'  => $tax_item->get_rate_id(),
 					'shipping_tax' => $tax_item->get_shipping_tax_total(),
 					'order_tax'    => $tax_item->get_tax_total(),
-					'total_tax'    => $tax_item->get_tax_total() + $tax_item->get_shipping_tax_total(),
+					'total_tax'    => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
 				),
 				array(
 					'%d',
