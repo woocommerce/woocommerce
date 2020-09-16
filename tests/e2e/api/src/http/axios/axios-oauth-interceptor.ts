@@ -1,6 +1,6 @@
-import { AxiosRequestConfig } from 'axios';
-import createHmac from 'create-hmac';
-import OAuth from 'oauth-1.0a';
+import type { AxiosRequestConfig } from 'axios';
+import * as createHmac from 'create-hmac';
+import * as OAuth from 'oauth-1.0a';
 import { AxiosInterceptor } from './axios-interceptor';
 
 /**

@@ -1,4 +1,5 @@
-export { HTTPClient, HTTPResponse } from './http-client';
+export { HTTPResponse } from './http-client';
+export type { HTTPClient } from './http-client';
 
 export { AxiosClient } from './axios/axios-client';
 export { AxiosInterceptor } from './axios/axios-interceptor';

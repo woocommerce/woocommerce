@@ -12,7 +12,7 @@
   "module": "build-module/index.js",
   "dependencies": {
     "@wordpress/e2e-test-utils": "4.6.0",
-    "@woocommerce/model-factories": "file:../factories"
+    "@woocommerce/api": "file:../api"
   },
   "publishConfig": {
     "access": "public"

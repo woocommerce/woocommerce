@@ -1,20 +1,32 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "incremental": true,
     "allowJs": true,
     "checkJs": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "jsx": "preserve",
+    "target": "es6",
+    "module": "commonjs",
+    "incremental": true,
     "declaration": true,
+    "declarationMap": true,
     "composite": true,
+    "emitDeclarationOnly": true,
+    "isolatedModules": true,
+
+    /* Strict Type-Checking Options */
     "strict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
+
+    /* Additional Checks */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+
+    /* This needs to be false so our types are possible to consume without setting this */
+    "esModuleInterop": false,
+    "resolveJsonModule": true
   }
 }

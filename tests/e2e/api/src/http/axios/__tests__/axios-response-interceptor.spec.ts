@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import moxios from 'moxios';
+import * as moxios from 'moxios';
 import { AxiosResponseInterceptor } from '../axios-response-interceptor';
 
 describe( 'AxiosResponseInterceptor', () => {

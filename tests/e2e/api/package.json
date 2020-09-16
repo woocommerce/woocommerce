@@ -42,7 +42,7 @@
     "@types/create-hmac": "1.1.0",
     "@types/faker": "4.1.12",
     "@types/jest": "25.2.1",
-    "@types/moxios": "0.4.9",
+    "@types/moxios": "^0.4.9",
     "@types/node": "13.13.5",
     "jest": "25.5.4",
     "jest-mock-extended": "^1.0.10",

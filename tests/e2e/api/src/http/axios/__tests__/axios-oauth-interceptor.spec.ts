@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import moxios from 'moxios';
+import * as moxios from 'moxios';
 import { AxiosOAuthInterceptor } from '../axios-oauth-interceptor';
 
 describe( 'AxiosOAuthInterceptor', () => {
@@ -22,7 +22,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 	} );
 
 	it( 'should not run unless started', async () => {
-		moxios.stubOnce( 'GET', 'https://api.test', { status: 200 } );
+		moxios.stubRequest( 'https://api.test', { status: 200 } );
 
 		apiAuthInterceptor.stop( axiosInstance );
 		await axiosInstance.get( 'https://api.test' );
@@ -38,7 +38,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 	} );
 
 	it( 'should use basic auth for HTTPS', async () => {
-		moxios.stubOnce( 'GET', 'https://api.test', { status: 200 } );
+		moxios.stubRequest( 'https://api.test', { status: 200 } );
 		await axiosInstance.get( 'https://api.test' );
 
 		const request = moxios.requests.mostRecent();
@@ -51,7 +51,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 	} );
 
 	it( 'should use OAuth 1.0a for HTTP', async () => {
-		moxios.stubOnce( 'GET', 'http://api.test', { status: 200 } );
+		moxios.stubRequest( 'http://api.test', { status: 200 } );
 		await axiosInstance.get( 'http://api.test' );
 
 		const request = moxios.requests.mostRecent();
@@ -65,7 +65,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 	} );
 
 	it( 'should work with base URL', async () => {
-		moxios.stubOnce( 'GET', '/test', { status: 200 } );
+		moxios.stubRequest( '/test', { status: 200 } );
 		await axiosInstance.request( {
 			method: 'GET',
 			baseURL: 'https://api.test/',

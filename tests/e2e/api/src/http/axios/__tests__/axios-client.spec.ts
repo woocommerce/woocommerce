@@ -1,4 +1,4 @@
-import moxios from 'moxios';
+import * as moxios from 'moxios';
 import { AxiosClient } from '../axios-client';
 import { AxiosResponseInterceptor } from '../axios-response-interceptor';
 import { HTTPResponse } from '../../http-client';

@@ -6,8 +6,6 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import modelRegistry from './factories';
-import { SimpleProduct } from '@woocommerce/model-factories';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 
 const config = require( 'config' );
@@ -359,11 +357,11 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
+	/*const product = await modelRegistry.getFactory( SimpleProduct ).create( {
 		name: simpleProductName,
 		regularPrice: '9.99'
 	} );
-	return product.id;
+	return product.id;*/
 } ;
 
 /**
