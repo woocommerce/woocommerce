@@ -246,7 +246,7 @@ function getTaxItems( props ) {
 		},
 		showWCS && {
 			title: __(
-				'Automated Tax calculation using WooCommerce Services',
+				'Automated Tax calculation using WooCommerce Tax',
 				'woocommerce-admin'
 			),
 			link:

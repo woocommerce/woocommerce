@@ -27,7 +27,7 @@ class ShippingLabelBannerDisplayRules {
 	private $jetpack_connected;
 
 	/**
-	 * Holds the installed WooCommerce Services version.
+	 * Holds the installed WooCommerce Shipping & Tax version.
 	 *
 	 * @var string
 	 */
@@ -41,7 +41,7 @@ class ShippingLabelBannerDisplayRules {
 	private $no_incompatible_plugins_installed;
 
 	/**
-	 * Whether or not the WooCommerce Services ToS has been accepted.
+	 * Whether or not the WooCommerce Shipping & Tax ToS has been accepted.
 	 *
 	 * @var bool
 	 */
@@ -55,7 +55,7 @@ class ShippingLabelBannerDisplayRules {
 	private $min_jetpack_version = '4.4';
 
 	/**
-	 * Minimum supported WooCommerce Services version.
+	 * Minimum supported WooCommerce Shipping & Tax version.
 	 *
 	 * @var string
 	 */
@@ -81,8 +81,8 @@ class ShippingLabelBannerDisplayRules {
 	 *
 	 * @param string $jetpack_version Installed Jetpack version to check.
 	 * @param bool   $jetpack_connected Is Jetpack connected?.
-	 * @param string $wcs_version Installed WooCommerce Services version to check.
-	 * @param bool   $wcs_tos_accepted WooCommerce Services Terms of Service accepted?.
+	 * @param string $wcs_version Installed WooCommerce Shipping & Tax version to check.
+	 * @param bool   $wcs_tos_accepted WooCommerce Shipping & Tax Terms of Service accepted?.
 	 * @param bool   $incompatible_plugins_installed Are there any incompatible plugins installed?.
 	 */
 	public function __construct( $jetpack_version, $jetpack_connected, $wcs_version, $wcs_tos_accepted, $incompatible_plugins_installed ) {
@@ -191,7 +191,7 @@ class ShippingLabelBannerDisplayRules {
 	}
 
 	/**
-	 * Checks if WooCommerce Services is not installed.
+	 * Checks if WooCommerce Shipping & Tax is not installed.
 	 *
 	 * @return bool
 	 */
@@ -200,7 +200,7 @@ class ShippingLabelBannerDisplayRules {
 	}
 
 	/**
-	 * Checks if WooCommerce Services is up to date.
+	 * Checks if WooCommerce Shipping & Tax is up to date.
 	 */
 	private function wcs_up_to_date() {
 		return $this->wcs_version && version_compare( $this->wcs_version, $this->min_wcs_version, '>=' );

@@ -245,7 +245,7 @@ class Shipping extends Component {
 							},
 					  } )
 					: __(
-							'With WooCommerce Services and Jetpack you can save time at the ' +
+							'With WooCommerce Shipping and Jetpack you can save time at the ' +
 								'Post Office by printing your shipping labels at home',
 							'woocommerce-admin'
 					  ),

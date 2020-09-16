@@ -222,11 +222,11 @@ class Tax extends Component {
 			{
 				key: 'plugins',
 				label: __(
-					'Install Jetpack and WooCommerce Services',
+					'Install Jetpack and WooCommerce Tax',
 					'woocommerce-admin'
 				),
 				description: __(
-					'Jetpack and WooCommerce Services allow you to automate sales tax calculations',
+					'Jetpack and WooCommerce Tax allow you to automate sales tax calculations',
 					'woocommerce-admin'
 				),
 				content: (
@@ -274,7 +274,7 @@ class Tax extends Component {
 							>
 								{ interpolateComponents( {
 									mixedString: __(
-										'By installing Jetpack and WooCommerce Services you agree to the {{link}}Terms of Service{{/link}}.',
+										'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
 										'woocommerce-admin'
 									),
 									components: {
@@ -401,7 +401,7 @@ class Tax extends Component {
 				<p>
 					{ interpolateComponents( {
 						mixedString: __(
-							'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Services{{/strong}} ' +
+							'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Tax{{/strong}} ' +
 								'can automate your sales tax calculations for you.',
 							'woocommerce-admin'
 						),

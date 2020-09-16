@@ -200,7 +200,7 @@ class WC_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test if the banner is hidden when the WooCommerce Services Terms of Service has been already accepted.
+	 * Test if the banner is hidden when the WooCommerce Shipping & Tax Terms of Service has been already accepted.
 	 */
 	public function test_if_banner_hidden_when_wcs_tos_accepted() {
 		$this->with_order(
@@ -213,7 +213,7 @@ class WC_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test if the banner is hidden when WooCommerce Services is installed but not up to date.
+	 * Test if the banner is hidden when WooCommerce Shipping & Tax is installed but not up to date.
 	 */
 	public function test_if_banner_hidden_when_wcs_not_installed() {
 		$this->with_order(

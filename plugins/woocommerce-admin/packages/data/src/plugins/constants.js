@@ -39,7 +39,10 @@ export const pluginNames = {
 		'woocommerce-admin'
 	),
 	'woocommerce-payments': __( 'WooCommerce Payments', 'woocommerce-admin' ),
-	'woocommerce-services': __( 'WooCommerce Services', 'woocommerce-admin' ),
+	'woocommerce-services': __(
+		'WooCommerce Shipping & Tax',
+		'woocommerce-admin'
+	),
 	'woocommerce-shipstation-integration': __(
 		'WooCommerce ShipStation Gateway',
 		'woocommerce-admin'

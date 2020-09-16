@@ -379,7 +379,7 @@ class BusinessDetails extends Component {
 					<Text variant="caption" as="p">
 						{ interpolateComponents( {
 							mixedString: __(
-								'By installing Jetpack and WooCommerce Services plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
+								'By installing Jetpack and WooCommerce Shipping plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
 								'woocommerce-admin'
 							),
 							components: {
