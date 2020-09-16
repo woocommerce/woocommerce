@@ -544,8 +544,34 @@ abstract class WC_Data {
 			wc_doing_it_wrong( 'get_meta_cache_key', 'ID needs to be set before fetching a cache key.', '4.4.0' );
 			return false;
 		}
-		return WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+		return self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
 	}
+
+	/**
+	 * Generate cache key from id and group.
+	 *
+	 * @param int|string $id          Object ID.
+	 * @param string     $cache_group Group name use to store cache. Whole group cache can be invalidated in one go.
+	 *
+	 * @return string Meta cache key.
+	 */
+	public static function generate_meta_cache_key( $id, $cache_group ) {
+		return WC_Cache_Helper::get_cache_prefix( $cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $id ) . 'object_meta_' . $id;
+	}
+
+	/**
+	 * Prime caches for raw meta data. This includes meta_id column as well, which is not included by default in WP meta data.
+	 *
+	 * @param array  $raw_meta_data_collection Array of objects of { object_id => array( meta_row_1, meta_row_2, ... }.
+	 * @param string $cache_group              Name of cache group.
+	 */
+	public static function prime_raw_meta_data_cache( $raw_meta_data_collection, $cache_group ) {
+		foreach ( $raw_meta_data_collection as $object_id => $raw_meta_data_array ) {
+			$cache_key = self::generate_meta_cache_key( $object_id, $cache_group );
+			wp_cache_set( $cache_key, $raw_meta_data_array, $cache_group );
+		}
+	}
+
 	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * Uses it's own caches because get_metadata does not provide meta_ids.
@@ -578,6 +604,10 @@ abstract class WC_Data {
 		}
 
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
+		if ( $cache_loaded ) {
+			// Filter the raw meta data again, in case we cached in an earlier version where filter conditions were different.
+			$raw_meta_data = $this->data_store->filter_raw_data( $this, $raw_meta_data );
+		}
 
 		if ( $raw_meta_data ) {
 			$this->set_from_raw_meta_data( $raw_meta_data );
