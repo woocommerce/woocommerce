@@ -10,8 +10,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Models\CacheHydration;
-
 /**
  * Standard way of retrieving orders based on certain parameters.
  *
@@ -73,18 +71,14 @@ function wc_get_orders( $args ) {
  *
  * @since  2.2
  *
- * @param mixed          $the_order       Post object or post ID of the order.
- * @param CacheHydration $cache_hydration Optional, cache_hydration to initialize cache data from if available.
+ * @param mixed $the_order       Post object or post ID of the order.
  *
  * @return bool|WC_Order|WC_Order_Refund
  */
-function wc_get_order( $the_order = false, $cache_hydration = null ) {
+function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, 'wc_get_order should not be called before post types are registered (woocommerce_after_register_post_type action)', '2.5' );
 		return false;
-	}
-	if ( is_a( $cache_hydration, CacheHydration::class ) ) {
-		return WC()->order_factory->get_order_from_hydration( $the_order, $cache_hydration );
 	}
 	return WC()->order_factory->get_order( $the_order );
 }
