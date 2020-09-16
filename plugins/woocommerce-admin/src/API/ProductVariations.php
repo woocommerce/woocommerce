@@ -79,7 +79,7 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 		if ( $search ) {
 			$join .= " LEFT JOIN {$wpdb->postmeta} AS attr_search_meta
 						ON {$wpdb->posts}.ID = attr_search_meta.post_id
-						AND attr_search_meta.meta_key LIKE 'attribute_pa_%' ";
+						AND attr_search_meta.meta_key LIKE 'attribute_%' ";
 		}
 
 		if ( wc_product_sku_enabled() && ! strstr( $join, 'wc_product_meta_lookup' ) ) {
