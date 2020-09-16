@@ -100,6 +100,8 @@ class WC_Data_Store_WP {
 	/**
 	 * Helper method to filter internal meta keys from all meta data rows for the object.
 	 *
+	 * @since 4.7.0
+	 *
 	 * @param WC_Data $object        WC_Data object.
 	 * @param array   $raw_meta_data Array of std object of meta data to be filtered.
 	 *

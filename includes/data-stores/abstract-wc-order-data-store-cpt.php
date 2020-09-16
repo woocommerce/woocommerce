@@ -100,29 +100,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read( &$order ) {
 		$order->set_defaults();
 		$post_object = get_post( $order->get_id() );
-		$this->read_from_post( $order, $post_object );
-		$order->read_meta_data();
-		$order->set_object_read( true );
-
-		/**
-		 * In older versions, discounts may have been stored differently.
-		 * Update them now so if the object is saved, the correct values are
-		 * stored. @todo When meta is flattened, handle this during migration.
-		 */
-		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
-			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
-		}
-	}
-
-	/**
-	 * Helper function to read data from post_object.
-	 *
-	 * @param WC_Order $order       Order object.
-	 * @param WP_Post  $post_object Post object.
-	 *
-	 * @throws Exception When passed order object is invalid.
-	 */
-	private function read_from_post( $order, $post_object ) {
 		if ( ! $order->get_id() || ! $post_object || ! in_array( $post_object->post_type, wc_get_order_types(), true ) ) {
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
@@ -137,6 +114,17 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		$this->read_order_data( $order, $post_object );
+		$order->read_meta_data();
+		$order->set_object_read( true );
+
+		/**
+		 * In older versions, discounts may have been stored differently.
+		 * Update them now so if the object is saved, the correct values are
+		 * stored. @todo When meta is flattened, handle this during migration.
+		 */
+		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
+			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
 	}
 
 	/**

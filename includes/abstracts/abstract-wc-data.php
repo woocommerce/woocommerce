@@ -393,19 +393,6 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Helper function to create and set WC_Meta_data object from std objects. Automatically ignores internal keys.
-	 *
-	 * @param array $raw_data Array of objects of raw data to set.
-	 */
-	public function set_meta_data_from_raw_data( $raw_data ) {
-		if ( null === $this->meta_data ) {
-			$this->meta_data = array();
-		}
-		$meta_data = $this->data_store->filter_raw_data( $this, $raw_data );
-		$this->set_from_raw_meta_data( $meta_data );
-	}
-
-	/**
 	 * Add meta data.
 	 *
 	 * @since 2.6.0
@@ -535,7 +522,7 @@ abstract class WC_Data {
 	/**
 	 * Helper method to compute meta cache key. Different from WP Meta cache key.
 	 *
-	 * @since 4.4.0
+	 * @since 4.7.0
 	 *
 	 * @return string
 	 */
@@ -550,6 +537,8 @@ abstract class WC_Data {
 	/**
 	 * Generate cache key from id and group.
 	 *
+	 * @since 4.7.0
+	 *
 	 * @param int|string $id          Object ID.
 	 * @param string     $cache_group Group name use to store cache. Whole group cache can be invalidated in one go.
 	 *
@@ -561,6 +550,8 @@ abstract class WC_Data {
 
 	/**
 	 * Prime caches for raw meta data. This includes meta_id column as well, which is not included by default in WP meta data.
+	 *
+	 * @since 4.7.0
 	 *
 	 * @param array  $raw_meta_data_collection Array of objects of { object_id => array( meta_row_1, meta_row_2, ... }.
 	 * @param string $cache_group              Name of cache group.
@@ -610,31 +601,19 @@ abstract class WC_Data {
 		}
 
 		if ( $raw_meta_data ) {
-			$this->set_from_raw_meta_data( $raw_meta_data );
+			foreach ( $raw_meta_data as $meta ) {
+				$this->meta_data[] = new WC_Meta_Data(
+					array(
+						'id'    => (int) $meta->meta_id,
+						'key'   => $meta->meta_key,
+						'value' => maybe_unserialize( $meta->meta_value ),
+					)
+				);
+			}
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
 				wp_cache_set( $cache_key, $raw_meta_data, $this->cache_group );
 			}
-		}
-	}
-
-	/**
-	 * Helper function to create WC_Meta_data object from std objects.
-	 *
-	 * @param array $raw_meta_data Array of object of raw meta data.
-	 */
-	private function set_from_raw_meta_data( $raw_meta_data ) {
-		if ( ! is_array( $raw_meta_data ) ) {
-			return;
-		}
-		foreach ( $raw_meta_data as $meta ) {
-			$this->meta_data[] = new WC_Meta_Data(
-				array(
-					'id'    => (int) $meta->meta_id,
-					'key'   => $meta->meta_key,
-					'value' => maybe_unserialize( $meta->meta_value ),
-				)
-			);
 		}
 	}
 
