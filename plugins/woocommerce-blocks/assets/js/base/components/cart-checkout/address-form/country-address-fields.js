@@ -198,9 +198,9 @@ const countryAddressFields = {
 	ES: {
 		...postcodeBeforeCity,
 		state: {
-			label: __( 'State', 'woo-gutenberg-products-block' ),
+			label: __( 'Province', 'woo-gutenberg-products-block' ),
 			optionalLabel: __(
-				'State (optional)',
+				'Province (optional)',
 				'woo-gutenberg-products-block'
 			),
 		},
