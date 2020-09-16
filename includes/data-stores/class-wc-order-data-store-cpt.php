@@ -925,10 +925,25 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( isset( $query_vars['fields'] ) && is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'] ) ) {
 			return;
 		}
+		$cache_keys_mapping = array();
+		foreach ( $order_ids as $order_id ) {
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+		}
+		$non_cached_ids = array();
+		$cache_values = wp_cache_get_multiple( array_keys( $cache_keys_mapping ), 'orders' );
+		foreach ( $order_ids as $order_id ) {
+			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
+				$non_cached_ids[] = $order_id;
+			}
+		}
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
 		$refunds = wc_get_orders(
 			array(
 				'type'   => 'shop_order_refund',
-				'post_parent__in' => $order_ids,
+				'post_parent__in' => $non_cached_ids,
 				'limit'  => - 1,
 			)
 		);
@@ -943,13 +958,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			},
 			array()
 		);
-		foreach ( $order_ids as $order_id ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+		foreach ( $non_cached_ids as $order_id ) {
 			$refunds = array();
 			if ( isset( $order_refunds[ $order_id ] ) ) {
 				$refunds = $order_refunds[ $order_id ];
 			}
-			wp_cache_set( $cache_key, $refunds, 'orders' );
+			wp_cache_set( $cache_keys_mapping[ $order_id ], $refunds, 'orders' );
 		}
 	}
 
@@ -975,15 +989,34 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				return;
 			}
 		}
-		$order_ids       = esc_sql( $order_ids );
-		$order_id_string = implode( ',', $order_ids );
+
+		$cache_keys = array_map(
+			function ( $order_id ) {
+				return 'order-items-' . $order_id;
+			},
+			$order_ids
+		);
+		$cache_values = wp_cache_get_multiple( $cache_keys, 'orders' );
+		$non_cached_ids = array();
+		foreach ( $order_ids as $order_id ) {
+			if ( false === $cache_values[ 'order-items-' . $order_id ] ) {
+				$non_cached_ids[] = $order_id;
+			}
+		}
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
+		$non_cached_ids       = esc_sql( $non_cached_ids );
+		$non_cached_ids_string = implode( ',', $non_cached_ids );
 		$order_items = $wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id in ( $order_id_string ) ORDER BY order_item_id;"
+			"SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id in ( $non_cached_ids_string ) ORDER BY order_item_id;"
 		);
-		foreach ( $order_items as $item ) {
-			wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
+		if ( empty( $order_items ) ) {
+			return;
 		}
+
 		$order_items_for_all_orders = array_reduce(
 			$order_items,
 			function ( $order_items_collection, $order_item ) {
@@ -997,6 +1030,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		foreach ( $order_items_for_all_orders as $order_id => $items ) {
 			wp_cache_set( 'order-items-' . $order_id, $items, 'orders' );
 		}
+		foreach ( $order_items as $item ) {
+			wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
+		}
 		$order_item_ids = wp_list_pluck( $order_items, 'order_item_id' );
 		update_meta_cache( 'order_item', $order_item_ids );
 	}
@@ -1009,7 +1045,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function prime_raw_meta_cache_for_orders( $order_ids, $query_vars ) {
 		global $wpdb;
-		$order_ids     = esc_sql( $order_ids );
+		$cache_keys_mapping = array();
+		foreach ( $order_ids as $order_id ) {
+			$cache_keys_mapping[ $order_id ] = WC_Order::generate_meta_cache_key( $order_id, 'orders' );
+		}
+		$cache_values = wp_cache_get_multiple( $cache_keys_mapping, 'orders' );
+		$non_cached_ids = array();
+		foreach ( $order_ids as $order_id ) {
+			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
+				$non_cached_ids[] = $order_id;
+			}
+		}
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+		$order_ids     = esc_sql( $non_cached_ids );
 		$order_ids_in  = "'" . implode( $order_ids, "', '" ) . "'";
 		$raw_meta_data_array = $wpdb->get_results(
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
