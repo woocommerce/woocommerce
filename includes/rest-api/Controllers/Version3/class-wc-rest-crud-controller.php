@@ -283,6 +283,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$args['post_parent__in']     = $request['parent'];
 		$args['post_parent__not_in'] = $request['parent_exclude'];
 		$args['s']                   = $request['search'];
+		$args['fields']              = $this->get_fields_for_response( $request );
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
