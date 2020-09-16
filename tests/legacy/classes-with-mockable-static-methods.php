@@ -8,5 +8,10 @@
  */
 
 return array(
-	// 'WC_Admin_Settings'
+	'WC_Admin_API_Keys',
+	'WC_Admin_Settings',
+	'WC_Admin_Webhooks',
+	'WC_Emails',
+	'WC_Payment_Gateways',
+	'WC_Tax',
 );
