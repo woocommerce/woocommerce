@@ -4,7 +4,7 @@
  *
  * Handles requests to the /data/currencies endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Data Currencies controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  */
 class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 

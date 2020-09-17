@@ -14,7 +14,7 @@
  * - Routes
  * - Collection params/queries
  *
- * @package Automattic/WooCommerce/RestApi/Tests
+ * @package WooCommerce\RestApi/Tests
  */
 
 namespace Automattic\WooCommerce\RestApi\UnitTests;

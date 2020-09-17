@@ -7,7 +7,7 @@
  * - Legacy REST API - Deprecated in 2.6.0. @see class-wc-legacy-api.php
  * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
  *
- * @package WooCommerce\API
+ * @package WooCommerce\RestApi
  * @since   2.0.0
  */
 

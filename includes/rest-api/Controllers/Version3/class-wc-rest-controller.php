@@ -12,7 +12,7 @@
  * If necessary extend this class and create new abstract classes like `WC_REST_CRUD_Controller` or `WC_REST_Terms_Controller`.
  *
  * @class   WC_REST_Controller
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
  */
 
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract Rest Controller Class
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends  WP_REST_Controller
  * @version  2.6.0
  */
