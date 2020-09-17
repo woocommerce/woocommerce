@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'class-wc-integration-maxmind-database-service.php';
+require_once __DIR__ . '/class-wc-integration-maxmind-database-service.php';
 
 /**
  * WC Integration MaxMind Geolocation
