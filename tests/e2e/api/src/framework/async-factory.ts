@@ -1,25 +1,18 @@
-import { DeepPartial, Factory as BaseFactory, BuildOptions } from 'fishery';
-import { Repository } from './repository';
+import { BuildOptions, DeepPartial, Factory } from 'fishery';
 import { GeneratorFnOptions } from 'fishery/dist/types';
-import { Model } from '../models/model';
 
-/**
- * A factory that can be used to create models using an adapter.
- */
-export class RepositoryFactory< T extends Model, I = any > extends BaseFactory< T, I > {
-	private repository: Repository< T > | null = null;
-
-	public constructor( generator: ( opts: GeneratorFnOptions< T, I > ) => T ) {
-		super( generator );
-	}
+export class AsyncFactory< T, I = any > extends Factory< T, I > {
+	private readonly creator: ( model: T ) => Promise< T >;
 
 	/**
-	 * Sets the repository that the factory should use when creating data.
+	 * Creates a new factory instance.
 	 *
-	 * @param {Repository|null} repository The repository to set.
+	 * @param {Function} generator The factory's generator function.
+	 * @param {Function} creator The factory's creation function.
 	 */
-	public setRepository( repository: Repository< T > | null ): void {
-		this.repository = repository;
+	public constructor( generator: ( opts: GeneratorFnOptions< T, I > ) => T, creator: ( model: T ) => Promise< T > ) {
+		super( generator );
+		this.creator = creator;
 	}
 
 	/**
@@ -30,12 +23,8 @@ export class RepositoryFactory< T extends Model, I = any > extends BaseFactory< 
 	 * @return {Promise} Resolves to the created model.
 	 */
 	public create( params?: DeepPartial< T >, options?: BuildOptions< T, I > ): Promise< T > {
-		if ( ! this.repository ) {
-			throw new Error( 'The factory has no repository to create using.' );
-		}
-
 		const model = this.build( params, options );
-		return this.repository.create( model );
+		return this.creator( model );
 	}
 
 	/**
@@ -47,14 +36,10 @@ export class RepositoryFactory< T extends Model, I = any > extends BaseFactory< 
 	 * @return {Promise} Resolves to the created models.
 	 */
 	public createList( number: number, params?: DeepPartial< T >, options?: BuildOptions< T, I > ): Promise< T[] > {
-		if ( ! this.repository ) {
-			throw new Error( 'The factory has no repository to create using.' );
-		}
-
 		const models = this.buildList( number, params, options );
 		const promises: Promise< T >[] = [];
 		for ( const model of models ) {
-			promises.push( this.repository.create( model ) );
+			promises.push( this.create( model ) );
 		}
 
 		return Promise.all( promises );

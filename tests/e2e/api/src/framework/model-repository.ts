@@ -9,7 +9,7 @@ type DeleteFn< T > = ( model: T ) => Promise< boolean >;
  * The standard parameters for reading a model.
  */
 interface DefaultReadParams {
-	id: string;
+	id: number;
 }
 
 /**

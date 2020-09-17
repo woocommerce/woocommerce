@@ -30,7 +30,7 @@ export class AxiosClient implements HTTPClient {
 	 * @param {*}      params Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	public get< T >(
+	public get< T = any >(
 		path: string,
 		params?: any,
 	): Promise< HTTPResponse< T >> {
@@ -44,7 +44,7 @@ export class AxiosClient implements HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	public post< T >(
+	public post< T = any >(
 		path: string,
 		data?: any,
 	): Promise< HTTPResponse< T >> {
@@ -58,7 +58,7 @@ export class AxiosClient implements HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	public put< T >(
+	public put< T = any >(
 		path: string,
 		data?: any,
 	): Promise< HTTPResponse< T >> {
@@ -72,7 +72,7 @@ export class AxiosClient implements HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	public patch< T >(
+	public patch< T = any >(
 		path: string,
 		data?: any,
 	): Promise< HTTPResponse< T >> {
@@ -86,7 +86,7 @@ export class AxiosClient implements HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	public delete< T >(
+	public delete< T = any >(
 		path: string,
 		data?: any,
 	): Promise< HTTPResponse< T >> {

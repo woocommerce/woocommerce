@@ -31,7 +31,7 @@ export interface HTTPClient {
 	 * @param {*}      params Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	get< T >( path: string, params?: any ): Promise< HTTPResponse< T > >;
+	get< T = any >( path: string, params?: any ): Promise< HTTPResponse< T > >;
 
 	/**
 	 * Performs a POST request.
@@ -40,7 +40,7 @@ export interface HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	post< T >( path: string, data?: any ): Promise< HTTPResponse< T > >;
+	post< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
 
 	/**
 	 * Performs a PUT request.
@@ -49,7 +49,7 @@ export interface HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	put< T >( path: string, data?: any ): Promise< HTTPResponse< T > >;
+	put< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
 
 	/**
 	 * Performs a PATCH request.
@@ -58,7 +58,7 @@ export interface HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	patch< T >( path: string, data?: any ): Promise< HTTPResponse< T > >;
+	patch< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
 
 	/**
 	 * Performs a DELETE request.
@@ -67,5 +67,5 @@ export interface HTTPClient {
 	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise} Resolves to an HTTPResponse.
 	 */
-	delete< T >( path: string, data?: any ): Promise< HTTPResponse< T > >;
+	delete< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
 }

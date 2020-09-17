@@ -4,11 +4,6 @@ import Mock = jest.Mock;
 
 class DummyModel extends Model {
 	public name: string = '';
-
-	public onCreated( data: any ): void {
-		super.onCreated( data );
-		this.name = data.name;
-	}
 }
 
 describe( 'ModelRepository', () => {
@@ -24,28 +19,28 @@ describe( 'ModelRepository', () => {
 	} );
 
 	it( 'should create', async () => {
-		mockCallback.mockReturnValue( Promise.resolve( dummyModel ) );
+		mockCallback.mockResolvedValue( dummyModel );
 
 		await repository.create( dummyModel );
 		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
 	} );
 
 	it( 'should read', async () => {
-		mockCallback.mockReturnValue( Promise.resolve( dummyModel ) );
+		mockCallback.mockResolvedValue( dummyModel );
 
-		await repository.read( { id: 'test' } );
-		expect( mockCallback ).toHaveBeenCalledWith( { id: 'test' } );
+		await repository.read( { id: 1 } );
+		expect( mockCallback ).toHaveBeenCalledWith( { id: 1 } );
 	} );
 
 	it( 'should update', async () => {
-		mockCallback.mockReturnValue( Promise.resolve( dummyModel ) );
+		mockCallback.mockResolvedValue( dummyModel );
 
 		await repository.update( dummyModel );
 		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
 	} );
 
 	it( 'should delete', async () => {
-		mockCallback.mockReturnValue( Promise.resolve( true ) );
+		mockCallback.mockResolvedValue( true );
 
 		await repository.delete( dummyModel );
 		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
