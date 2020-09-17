@@ -4,7 +4,7 @@
  *
  * Handles requests to the /shipping/zones/<id>/locations endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.0.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Shipping Zone Locations class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Shipping_Zones_Controller_Base
  */
 class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zones_Controller_Base {

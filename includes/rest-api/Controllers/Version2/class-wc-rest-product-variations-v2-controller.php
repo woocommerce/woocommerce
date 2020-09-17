@@ -4,7 +4,7 @@
  *
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.0.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API variations controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Products_V2_Controller
  */
 class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Controller {

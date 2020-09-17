@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Report Top Sellers controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Report_Sales_V1_Controller
  */
 class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_Controller {
