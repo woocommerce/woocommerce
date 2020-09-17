@@ -1,3 +1,7 @@
+# 5.1.1
+
+-   Update dependencies.
+
 # 5.1.0
 
 -   Fix default value for `<Table />` component `onQueryChange` prop.
