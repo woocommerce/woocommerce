@@ -1,6 +1,6 @@
 ---
 name: "\U0001F47D External issues"
-about: Please report WooCommerce Admin or WooCommerce Gutenberg Products Blocks issues directly to their respective repositories.
+about: Please report WooCommerce Admin, WooCommerce Gutenberg Products Blocks or Action Scheduler issues directly to their respective repositories.
 title: ''
 labels: ''
 assignees: ''
