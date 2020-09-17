@@ -2,12 +2,19 @@
  * A structured response from the HTTP client.
  */
 export class HTTPResponse< T = any > {
-	public readonly status: number;
+	public readonly statusCode: number;
 	public readonly headers: any;
 	public readonly data: T;
 
-	public constructor( status: number, headers: any, data: T ) {
-		this.status = status;
+	/**
+	 * Creates a new HTTP response instance.
+	 *
+	 * @param {number} statusCode The status code from the HTTP response.
+	 * @param {*}      headers The headers from the HTTP response.
+	 * @param {*}      data The data from the HTTP response.
+	 */
+	public constructor( statusCode: number, headers: any, data: T ) {
+		this.statusCode = statusCode;
 		this.headers = headers;
 		this.data = data;
 	}

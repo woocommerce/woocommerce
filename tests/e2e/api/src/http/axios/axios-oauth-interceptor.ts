@@ -9,6 +9,12 @@ import { AxiosInterceptor } from './axios-interceptor';
 export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	private oauth: OAuth;
 
+	/**
+	 * Creates a new interceptor.
+	 *
+	 * @param {string} consumerKey The consumer key of the API key.
+	 * @param {string} consumerSecret The consumer secret of the API key.
+	 */
 	public constructor( consumerKey: string, consumerSecret: string ) {
 		super();
 

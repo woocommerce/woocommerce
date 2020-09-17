@@ -9,6 +9,12 @@ export class AxiosClient implements HTTPClient {
 	private readonly client: AxiosInstance;
 	private readonly interceptors: AxiosInterceptor[];
 
+	/**
+	 * Creates a new axios client.
+	 *
+	 * @param {AxiosRequestConfig} config The request configuration.
+	 * @param {AxiosInterceptor[]} interceptors An array of interceptors to apply to the client.
+	 */
 	public constructor( config: AxiosRequestConfig, interceptors: AxiosInterceptor[] = [] ) {
 		this.client = axios.create( config );
 		this.interceptors = interceptors;

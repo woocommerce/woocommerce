@@ -19,7 +19,7 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should transform responses into an HTTPResponse', async () => {
-		moxios.stubOnce( 'GET', 'http://test.test', {
+		moxios.stubRequest( 'http://test.test', {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ describe( 'AxiosResponseInterceptor', () => {
 		const response = await axiosInstance.get( 'http://test.test' );
 
 		expect( response ).toMatchObject( {
-			status: 200,
+			statusCode: 200,
 			headers: {
 				'content-type': 'application/json',
 			},
@@ -41,7 +41,7 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should transform error responses into an HTTPResponse', async () => {
-		moxios.stubOnce( 'GET', 'http://test.test', {
+		moxios.stubRequest( 'http://test.test', {
 			status: 404,
 			headers: {
 				'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ describe( 'AxiosResponseInterceptor', () => {
 		const response = await axiosInstance.get( 'http://test.test' );
 
 		expect( response ).toMatchObject( {
-			status: 404,
+			statusCode: 404,
 			headers: {
 				'content-type': 'application/json',
 			},

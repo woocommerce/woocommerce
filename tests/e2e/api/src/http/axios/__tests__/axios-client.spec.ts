@@ -20,7 +20,7 @@ describe( 'AxiosClient', () => {
 			[ new AxiosResponseInterceptor() ],
 		);
 
-		moxios.stubOnce( 'GET', '/test', {
+		moxios.stubRequest( '/test', {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/json',
