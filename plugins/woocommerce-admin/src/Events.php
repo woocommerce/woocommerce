@@ -34,7 +34,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Learn_More_About_Product_
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Online_Clothing_Store;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_First_Product;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Customize_Store_With_Blocks;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Facebook_Marketing_Expert;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Google_Ads_And_Marketing;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Test_Checkout;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Edit_Products_On_The_Move;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Performance_On_Mobile;
@@ -105,7 +105,7 @@ class Events {
 		WC_Admin_Notes_Choose_Niche::possibly_add_note();
 		WC_Admin_Notes_Real_Time_Order_Alerts::possibly_add_note();
 		WC_Admin_Notes_Customize_Store_With_Blocks::possibly_add_note();
-		WC_Admin_Notes_Facebook_Marketing_Expert::possibly_add_note();
+		WC_Admin_Notes_Google_Ads_And_Marketing::possibly_add_note();
 		WC_Admin_Notes_Test_Checkout::possibly_add_note();
 		WC_Admin_Notes_Edit_Products_On_The_Move::possibly_add_note();
 		WC_Admin_Notes_Performance_On_Mobile::possibly_add_note();
