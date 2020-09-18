@@ -1,4 +1,4 @@
-import { CustomerFlow, StoreOwnerFlow } from './src/flows';
+import { CustomerFlow, StoreOwnerFlow } from './flows';
 
 import {
 	completeOnboardingWizard,
@@ -6,7 +6,7 @@ import {
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,
-} from './src/components';
+} from './components';
 
 import {
 	clearAndFillInput,
@@ -20,7 +20,7 @@ import {
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
 	verifyValueOfInputField,
-} from './src/page-utils';
+} from './page-utils';
 
 module.exports = {
 	CustomerFlow,

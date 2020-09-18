@@ -188,15 +188,24 @@ a.button {
 .woocommerce-info {
 	margin-bottom: 5rem;
 	margin-left: 0;
-	padding: 1.5rem 3rem;
 	background: #eee;
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+}
+
+.woocommerce-message,
+.woocommerce-error li,
+.woocommerce-info {
+	padding: 1.5rem 3rem;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+
+	.button {
+		order: 2;
+	}
 }
 
 .woocommerce-message {
@@ -218,6 +227,10 @@ a.button {
 		&.button {
 			background: #111;
 		}
+	}
+
+	> li {
+		margin: 0;
 	}
 }
 
@@ -1628,7 +1641,6 @@ a.reset_variations {
 .woocommerce-checkout {
 
 	ul.woocommerce-error {
-		margin-left: 0;
 		flex-direction: column;
 		align-items: flex-start;
 

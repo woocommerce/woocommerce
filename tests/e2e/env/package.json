@@ -21,6 +21,8 @@
   "main": "index.js",
   "module": "build-module/index.js",
   "dependencies": {
+    "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
+    "@jest/test-sequencer": "^25.5.4",
     "@wordpress/e2e-test-utils": "^4.6.0",
     "@wordpress/jest-preset-default": "^6.2.0",
     "app-root-path": "^3.0.0",
@@ -34,8 +36,7 @@
     "@babel/polyfill": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@wordpress/eslint-plugin": "^4.0.0",
-    "ndb": "^1.1.5",
-    "woocommerce": "git+https://github.com/woocommerce/woocommerce.git"
+    "ndb": "^1.1.5"
   },
   "publishConfig": {
     "access": "public"
@@ -45,8 +46,8 @@
     "compile": "node ./../bin/build.js",
     "build": "npm run clean && npm run compile",
     "prepare": "npm run build",
-    "docker:up": "./bin/docker-compose.js up",
-    "docker:down": "./bin/docker-compose.js down",
+    "docker:up": "./bin/docker-compose.sh up",
+    "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it woocommerce_wordpress-www /bin/bash",
     "install-wp-tests": "./bin/install-wp-tests.sh",

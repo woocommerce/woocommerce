@@ -82,7 +82,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$settings = array();
 
 		if ( '' === $current_section ) {
-			$settings = include 'views/settings-tax.php';
+			$settings = include __DIR__ . '/views/settings-tax.php';
 		}
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
@@ -237,7 +237,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-settings-tax' );
 
-		include 'views/html-settings-tax.php';
+		include __DIR__ . '/views/html-settings-tax.php';
 	}
 
 	/**

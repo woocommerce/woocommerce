@@ -1165,7 +1165,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 *
 	 * @return array
 	 */
-	private static function get_core_capabilities() {
+	public static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(

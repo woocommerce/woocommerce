@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
-Requires at least: 5.2
+Requires at least: 5.3
 Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.4.1
+Stable tag: 4.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,15 +158,16 @@ If you encounter issues with the shop/category pages after an update, flush the 
 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
-== Contributors & Developers ==
-“WooCommerce” has been translated into 55 locales. Thank you to [the translators](https://translate.wordpress.org/projects/wp-plugins/woocommerce/contributors) for their contributions. [Translate “WooCommerce” into your language](https://translate.wordpress.org/projects/wp-plugins/woocommerce?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
-
-INTERESTED IN DEVELOPMENT?
-[Browse the code](https://plugins.trac.wordpress.org/browser/woocommerce/), check out the [SVN repository](https://plugins.svn.wordpress.org/woocommerce/), or subscribe to the [development log](https://plugins.trac.wordpress.org/log/woocommerce/) by [RSS](https://plugins.trac.wordpress.org/log/woocommerce/?limit=100&mode=stop_on_copy&format=rss).
-
 == Changelog ==
 
+= 4.5.2 - 2020-09-14 =
+* Fix - Revert the changes in filtering by attribute that were introduced in WooCommerce 4.4. #27625
+* Fix - Adjusted validation to allow for variations with "0" as an attribute value. #27633
 
+= 4.5.1 - 2020-09-09 =
+
+**WooCommerce**
+* Fix - Check for state and postcode fields only if required in `show_shipping`. #27628
 
 = 4.5.0 - 2020-09-08 =
 
@@ -190,6 +191,8 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Switch to site locale before translating refund reason. #27323
 * Fix - Declare `WC_Post_Types::updated_term_messages` as a static method to remove PHP deprecation warning. #27436
 * Fix - Allow HTML to be entered in product title for formatting purposes. #27465
+* Fix - Filter by attribute widget not working properly for variations having attribute values of "Any...". #27508
+* Fix - Fixed the layout of the variations and attributes sections in the product page in the admin when running WP >= 5.5. #27590
 * Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
 * Dev - Changed text domain to `woocommerce` for REST API files. #27248
 * Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
@@ -198,6 +201,7 @@ INTERESTED IN DEVELOPMENT?
 **WooCommerce Admin 1.5.0**
 * Enhancement - Add eWAY to Payment Setup for AU/NZ Stores. #4947
 * Fix - Use clipRule and fillRule props. #4889, part of #4864
+* Fix - Admin order page shipping label prompt compatibility with WCS 1.24. #5025
 * Dev - New notification: Don't forget to test your checkout. #4805
 * Dev - Enable tax calculation before redirecting to standard tax rates page. #4878
 * Dev - Added event recording to Orders, Stock, and Reviews panels. #4861

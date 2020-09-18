@@ -294,7 +294,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = include 'includes/settings-paypal.php';
+		$this->form_fields = include __DIR__ . '/includes/settings-paypal.php';
 	}
 
 	/**

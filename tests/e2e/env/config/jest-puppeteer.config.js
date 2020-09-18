@@ -1,4 +1,5 @@
 /** @format */
+const { jestPuppeteerConfig } = require( '@automattic/puppeteer-utils' );
 
 let puppeteerConfig;
 
@@ -12,8 +13,7 @@ if ( 'no' == global.process.env.node_config_dev ) {
 } else {
 	puppeteerConfig = {
 		launch: {
-			slowMo: process.env.PUPPETEER_SLOWMO ? false : 50,
-			headless: process.env.PUPPETEER_HEADLESS || false,
+			...jestPuppeteerConfig.launch,
 			ignoreHTTPSErrors: true,
 			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
 			devtools: true,
@@ -21,8 +21,6 @@ if ( 'no' == global.process.env.node_config_dev ) {
 				width: 1280,
 				height: 800,
 			},
-			// Required for the logged out and logged in tests so they don't share app state/token.
-			browserContext: 'incognito',
 		},
 	};
 }

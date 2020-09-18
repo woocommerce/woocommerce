@@ -4,7 +4,7 @@
  *
  * Handles requests to the products/categories endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   2.6.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Product Categories controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Categories_V2_Controller
  */
 class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V2_Controller {
