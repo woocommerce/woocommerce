@@ -303,7 +303,7 @@ class WC_Install {
 		self::create_terms();
 		self::create_cron_jobs();
 		self::create_files();
-		self::create_pages();
+		self::maybe_create_pages();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 		self::maybe_enable_homescreen();
@@ -536,6 +536,14 @@ class WC_Install {
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
 	}
 
+	/**
+	 * Create pages on installation.
+	 */
+	public static function maybe_create_pages() {
+		if ( empty( get_option( 'woocommerce_db_version' ) ) ) {
+			self::create_pages();
+		}
+	}
 	/**
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
