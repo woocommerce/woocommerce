@@ -125,6 +125,8 @@ PW: password
 
 - Run `npm run docker:down` when you are done with running e2e tests or when making any changes to test suite.
 
+Note that running `npm run docker:down` and then `npm run docker:up` re-initializes the test container.
+
 ### How to run tests in headless mode
 
 To run e2e tests in headless mode use the following command:
