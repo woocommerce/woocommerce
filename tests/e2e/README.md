@@ -91,11 +91,11 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 - Run `npm install`
 
-- Run `npm install jest --global`
-
 - Run `composer install --no-dev`
 
-- Run `npm run build:core`
+- Run `npm run build:assets`
+
+- Run `npm install jest --global`
 
 - Run `npm run docker:up` - it will build the test site using Docker.  
 
