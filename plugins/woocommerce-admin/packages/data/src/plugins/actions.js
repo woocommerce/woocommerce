@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { apiFetch, dispatch, select } from '@wordpress/data-controls';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -130,7 +129,7 @@ export const createErrorNotice = ( errorMessage ) => {
 	return dispatch( 'core/notices', 'createNotice', errorMessage );
 };
 
-export function* connectToJetpack() {
+export function* connectToJetpack( getAdminLink ) {
 	const url = yield select( STORE_NAME, 'getJetpackConnectUrl', {
 		redirect_url: getAdminLink( 'admin.php?page=wc-admin' ),
 	} );
@@ -147,12 +146,16 @@ export function* connectToJetpack() {
 	}
 }
 
-export function* installJetpackAndConnect( errorAction ) {
+export function* installJetpackAndConnect( errorAction, getAdminLink ) {
 	try {
 		yield dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
 		yield dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
 
-		const url = yield dispatch( STORE_NAME, 'connectToJetpack' );
+		const url = yield dispatch(
+			STORE_NAME,
+			'connectToJetpack',
+			getAdminLink
+		);
 		window.location = url;
 	} catch ( error ) {
 		yield errorAction( error.message );
@@ -161,10 +164,15 @@ export function* installJetpackAndConnect( errorAction ) {
 
 export function* connectToJetpackWithFailureRedirect(
 	failureRedirect,
-	errorAction
+	errorAction,
+	getAdminLink
 ) {
 	try {
-		const url = yield dispatch( STORE_NAME, 'connectToJetpack' );
+		const url = yield dispatch(
+			STORE_NAME,
+			'connectToJetpack',
+			getAdminLink
+		);
 		window.location = url;
 	} catch ( error ) {
 		yield errorAction( error.message );

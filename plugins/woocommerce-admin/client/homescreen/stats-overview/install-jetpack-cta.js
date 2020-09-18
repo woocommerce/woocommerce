@@ -7,6 +7,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { PLUGINS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -96,7 +97,7 @@ export const InstallJetpackCTA = () => {
 	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
 
 	const onClickInstall = () => {
-		installJetpackAndConnect( createErrorNotice );
+		installJetpackAndConnect( createErrorNotice, getAdminLink );
 	};
 
 	return (

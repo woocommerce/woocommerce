@@ -2,6 +2,11 @@
  * @jest-environment node
  */
 
+/**
+ * External dependencies
+ */
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
+
 jest.mock( '@wordpress/data-controls', () => ( {
 	dispatch: jest.fn(),
 	select: jest.fn(),
@@ -31,7 +36,7 @@ describe( 'installJetPackAndConnect', () => {
 	} );
 
 	it( 'installs jetpack, then activates it', () => {
-		const installer = installJetpackAndConnect( () => {} );
+		const installer = installJetpackAndConnect( () => {}, getAdminLink );
 
 		// Run to first yield
 		installer.next();
@@ -55,7 +60,10 @@ describe( 'installJetPackAndConnect', () => {
 
 	it( 'calls the passed error handler if an exception is thrown into the generator', () => {
 		const errorHandler = jest.fn();
-		const installer = installJetpackAndConnect( errorHandler );
+		const installer = installJetpackAndConnect(
+			errorHandler,
+			getAdminLink
+		);
 
 		// Run to first yield
 		installer.next();
@@ -67,7 +75,7 @@ describe( 'installJetPackAndConnect', () => {
 	} );
 
 	it( 'redirects to the connect url if there are no errors', () => {
-		const installer = installJetpackAndConnect();
+		const installer = installJetpackAndConnect( undefined, getAdminLink );
 
 		// Run to yield any errors from getJetpackConnectUrl
 		installer.next();
@@ -84,7 +92,8 @@ describe( 'connectToJetpack', () => {
 	it( 'redirects to the failure url if there is an error', () => {
 		const connect = connectToJetpackWithFailureRedirect(
 			'https://example.com/failure',
-			() => {}
+			() => {},
+			getAdminLink
 		);
 
 		connect.next();
@@ -97,7 +106,8 @@ describe( 'connectToJetpack', () => {
 	it( 'redirects to the jetpack url if there is no error', () => {
 		const connect = connectToJetpackWithFailureRedirect(
 			'https://example.com/failure',
-			() => {}
+			() => {},
+			getAdminLink
 		);
 
 		connect.next();
@@ -110,7 +120,11 @@ describe( 'connectToJetpack', () => {
 
 	it( 'calls the passed error handler if an exception is thrown into the generator', () => {
 		const errorHandler = jest.fn();
-		const connect = connectToJetpackWithFailureRedirect( '', errorHandler );
+		const connect = connectToJetpackWithFailureRedirect(
+			'',
+			errorHandler,
+			getAdminLink
+		);
 
 		// Run to first yield
 		connect.next();

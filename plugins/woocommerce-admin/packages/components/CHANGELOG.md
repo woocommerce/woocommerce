@@ -1,3 +1,7 @@
+# 5.1.2
+
+-   Update dependencies.
+
 # 5.1.1
 
 -   Update dependencies.

@@ -20,6 +20,7 @@ import {
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -346,7 +347,8 @@ export default compose(
 		const connectToJetpack = ( failureRedirect ) => {
 			connectToJetpackWithFailureRedirect(
 				failureRedirect,
-				createErrorNotice
+				createErrorNotice,
+				getAdminLink
 			);
 		};
 
