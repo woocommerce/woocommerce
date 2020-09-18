@@ -18,7 +18,7 @@ Automated end-to-end tests for WooCommerce.
   - [How to run tests in non-headless mode](#how-to-run-tests-in-non-headless-mode)
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
-  - [How to run tests using custom WordPress, PHP and MariaDV versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadv-versions)
+  - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
 - [Writing tests](#writing-tests) 
 - [Debugging tests](#debugging-tests)
 
@@ -110,7 +110,7 @@ c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago  
 
 Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used. 
 
-See [How to run tests using custom WordPress, PHP and MariaDV versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadv-versions) if you'd like to use different versions.  
+See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
 
 - Navigate to `http://localhost:8084/`
 
@@ -197,9 +197,9 @@ Finally, you can apply both `.only` and `.skip` to `describe` part of the test:
 describe.skip( 'Store owner can go through store Setup Wizard', () => {}
 ```
 
-### How to run tests using custom WordPress, PHP and MariaDV versions
+### How to run tests using custom WordPress, PHP and MariaDB versions
 
-The following variables can be used to specify the versions of WordPress, PHP and Maria DB that you'd like to use to built your test site with Docker:
+The following variables can be used to specify the versions of WordPress, PHP and MariaDB that you'd like to use to built your test site with Docker:
 
 - `WP_VERSION`
 - `TRAVIS_PHP_VERSION`
