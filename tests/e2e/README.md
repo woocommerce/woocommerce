@@ -17,6 +17,7 @@ Automated end-to-end tests for WooCommerce.
   - [How to run tests in non-headless mode](#how-to-run-tests-in-non-headless-mode)
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
+  - [How to run tests using custom WordPress, PHP and MariaDV versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadv-versions)
 - [Writing tests](#writing-tests) 
 - [Debugging tests](#debugging-tests)
 
@@ -106,6 +107,10 @@ c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago  
 4c1e3f2a49db        mariadb:10.5.5      "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds        3306/tcp               woocommerce_db
 ```
 
+Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used. 
+
+See [How to run tests using custom WordPress, PHP and MariaDV versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadv-versions) if you'd like to use different versions.  
+
 - Navigate to `http://localhost:8084/`
 
 If everything went well, you should be able to access the site. If you changed the port to something other than `8084`, use the appropriate port to access your site. 
@@ -189,6 +194,20 @@ Finally, you can apply both `.only` and `.skip` to `describe` part of the test:
 
 ```
 describe.skip( 'Store owner can go through store Setup Wizard', () => {}
+```
+
+### How to run tests using custom WordPress, PHP and MariaDV versions
+
+The following variables can be used to specify the versions of WordPress, PHP and Maria DB that you'd like to use to built your test site with Docker:
+
+- `WP_VERSION`
+- `TRAVIS_PHP_VERSION`
+- `TRAVIS_MARIADB_VERSION`  
+
+The full command to build the site will look as follows:
+
+```
+TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 npm run docker:up
 ```
 
 ## Writing tests
