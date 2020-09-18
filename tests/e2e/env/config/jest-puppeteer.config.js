@@ -17,6 +17,7 @@ if ( 'no' == global.process.env.node_config_dev ) {
 			ignoreHTTPSErrors: true,
 			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
 			devtools: true,
+			headless: false,
 			defaultViewport: {
 				width: 1280,
 				height: 800,
