@@ -6,6 +6,7 @@ Automated end-to-end tests for WooCommerce.
 
 - [Pre-requisites](#pre-requisites)
   - [Install Node.js](#install-node.js)
+  - [Install NVM](#install-nvm)
   - [Install Docker](#install-docker)
 - [Configuration](#configuration)
   - [Test Environment](#test-environment)
