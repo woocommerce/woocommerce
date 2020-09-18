@@ -1,39 +1,32 @@
 import { Model } from '../models/model';
 
-type CreateFn< T > = ( model: T ) => Promise< T >;
-type ReadFn< T, P > = ( params: P ) => Promise< T >;
-type UpdateFn< T > = ( model: T ) => Promise< T >;
-type DeleteFn< T > = ( model: T ) => Promise< boolean >;
-
-/**
- * The standard parameters for reading a model.
- */
-interface DefaultReadParams {
-	id: number;
-}
+export type CreateFn< T > = ( properties: Partial< T > ) => Promise< T >;
+export type ReadFn< IDParam, T > = ( id: IDParam ) => Promise< T >;
+export type UpdateFn< IDParam, T > = ( id: IDParam, properties: Partial< T > ) => Promise< T >;
+export type DeleteFn< IDParam > = ( id: IDParam ) => Promise< boolean >;
 
 /**
  * An interface for repositories that perform CRUD actions.
  */
-export class ModelRepository< T extends Model, ReadParams = DefaultReadParams > {
-	private readonly createHook: CreateFn< T >;
-	private readonly readHook: ReadFn< T, ReadParams >;
-	private readonly updateHook: UpdateFn< T >;
-	private readonly deleteHook: DeleteFn< T >;
+export class ModelRepository< T extends Model, IDParam = number > {
+	private readonly createHook: CreateFn< T > | null;
+	private readonly readHook: ReadFn< IDParam, T > | null;
+	private readonly updateHook: UpdateFn< IDParam, T > | null;
+	private readonly deleteHook: DeleteFn< IDParam > | null;
 
 	/**
 	 * Creates a new repository instance.
 	 *
-	 * @param {Function} createHook The hook for model creation.
-	 * @param {Function} readHook The hook for model reading.
-	 * @param {Function} updateHook The hook for model updating.
-	 * @param {Function} deleteHook The hook for model deletion.
+	 * @param {Function|null} createHook The hook for model creation.
+	 * @param {Function|null} readHook The hook for model reading.
+	 * @param {Function|null} updateHook The hook for model updating.
+	 * @param {Function|null} deleteHook The hook for model deletion.
 	 */
 	public constructor(
-		createHook: CreateFn< T >,
-		readHook: ReadFn< T, ReadParams >,
-		updateHook: UpdateFn< T >,
-		deleteHook: DeleteFn< T >,
+		createHook: CreateFn< T > | null,
+		readHook: ReadFn< IDParam, T > | null,
+		updateHook: UpdateFn< IDParam, T > | null,
+		deleteHook: DeleteFn< IDParam > | null,
 	) {
 		this.createHook = createHook;
 		this.readHook = readHook;
@@ -44,40 +37,57 @@ export class ModelRepository< T extends Model, ReadParams = DefaultReadParams > 
 	/**
 	 * Creates the given model.
 	 *
-	 * @param {*} model The model that we would like to create.
+	 * @param {*} properties The properties for the model we'd like to create.
 	 * @return {Promise} A promise that resolves to the model after creation.
 	 */
-	public create( model: T ): Promise< T > {
-		return this.createHook( model );
+	public create( properties: Partial< T > ): Promise< T > {
+		if ( ! this.createHook ) {
+			throw new Error( 'The \'create\' hook is not defined.' );
+		}
+
+		return this.createHook( properties );
 	}
 
 	/**
 	 * Reads the given model.
 	 *
-	 * @param {Object} params The parameters to help with reading the model.
+	 * @param {Object} id The identifier for the model to read.
 	 * @return {Promise} A promise that resolves to the model.
 	 */
-	public read( params: ReadParams ): Promise< T > {
-		return this.readHook( params );
+	public read( id: IDParam ): Promise< T > {
+		if ( ! this.readHook ) {
+			throw new Error( 'The \'read\' hook is not defined.' );
+		}
+
+		return this.readHook( id );
 	}
 
 	/**
 	 * Updates the given model.
 	 *
-	 * @param {*} model The model we want to update.
+	 * @param {*} id The identifier for the model to create.
+	 * @param {*} properties The model properties that we'd like to update.
 	 * @return {Promise} A promise that resolves to the model after updating.
 	 */
-	public update( model: T ): Promise< T > {
-		return this.updateHook( model );
+	public update( id: IDParam, properties: Partial< T > ): Promise< T > {
+		if ( ! this.updateHook ) {
+			throw new Error( 'The \'update\' hook is not defined.' );
+		}
+
+		return this.updateHook( id, properties );
 	}
 
 	/**
 	 * Deletes the given model.
 	 *
-	 * @param {*} model The model we want to delete.
+	 * @param {*} id The identifier for the model to delete.
 	 * @return {Promise} A promise that resolves to "true" on success.
 	 */
-	public delete( model: T ): Promise< boolean > {
-		return this.deleteHook( model );
+	public delete( id: IDParam ): Promise< boolean > {
+		if ( ! this.deleteHook ) {
+			throw new Error( 'The \'delete\' hook is not defined.' );
+		}
+
+		return this.deleteHook( id );
 	}
 }

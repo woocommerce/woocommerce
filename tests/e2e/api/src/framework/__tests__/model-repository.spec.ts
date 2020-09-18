@@ -1,48 +1,76 @@
 import { Model } from '../../models/model';
 import { ModelRepository } from '../model-repository';
-import Mock = jest.Mock;
 
 class DummyModel extends Model {
 	public name: string = '';
+
+	public constructor( partial?: Partial< DummyModel > ) {
+		super();
+		Object.assign( this, partial );
+	}
 }
 
 describe( 'ModelRepository', () => {
-	let dummyModel: DummyModel;
-	let mockCallback: Mock;
-	let repository: ModelRepository< DummyModel >;
+	it( 'should create', async () => {
+		const model = new DummyModel();
+		const callback = jest.fn().mockResolvedValue( model );
+		const repository = new ModelRepository< DummyModel >( callback, null, null, null );
 
-	beforeEach( () => {
-		dummyModel = new DummyModel();
-		dummyModel.name = 'test';
-		mockCallback = jest.fn();
-		repository = new ModelRepository< DummyModel >( mockCallback, mockCallback, mockCallback, mockCallback );
+		const created = await repository.create( { name: 'test' } );
+		expect( created ).toBe( model );
+		expect( callback ).toHaveBeenCalledWith( { name: 'test' } );
 	} );
 
-	it( 'should create', async () => {
-		mockCallback.mockResolvedValue( dummyModel );
+	it( 'should throw error on create without callback', () => {
+		const repository = new ModelRepository< DummyModel >( null, null, null, null );
 
-		await repository.create( dummyModel );
-		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
+		expect( () => repository.create( { name: 'test' } ) ).toThrowError( /not defined/i );
 	} );
 
 	it( 'should read', async () => {
-		mockCallback.mockResolvedValue( dummyModel );
+		const model = new DummyModel();
+		const callback = jest.fn().mockResolvedValue( model );
+		const repository = new ModelRepository< DummyModel >( null, callback, null, null );
 
-		await repository.read( { id: 1 } );
-		expect( mockCallback ).toHaveBeenCalledWith( { id: 1 } );
+		const created = await repository.read( 1 );
+		expect( created ).toBe( model );
+		expect( callback ).toHaveBeenCalledWith( 1 );
+	} );
+
+	it( 'should throw error on read without callback', () => {
+		const repository = new ModelRepository< DummyModel >( null, null, null, null );
+
+		expect( () => repository.read( 1 ) ).toThrowError( /not defined/i );
 	} );
 
 	it( 'should update', async () => {
-		mockCallback.mockResolvedValue( dummyModel );
+		const model = new DummyModel();
+		const callback = jest.fn().mockResolvedValue( model );
+		const repository = new ModelRepository< DummyModel >( null, null, callback, null );
 
-		await repository.update( dummyModel );
-		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
+		const updated = await repository.update( 1, { name: 'new-name' } );
+		expect( updated ).toBe( model );
+		expect( callback ).toHaveBeenCalledWith( 1, { name: 'new-name' } );
+	} );
+
+	it( 'should throw error on update without callback', () => {
+		const repository = new ModelRepository< DummyModel >( null, null, null, null );
+
+		expect( () => repository.update( 1, { name: 'new-name' } ) ).toThrowError( /not defined/i );
 	} );
 
 	it( 'should delete', async () => {
-		mockCallback.mockResolvedValue( true );
+		const callback = jest.fn().mockResolvedValue( true );
+		const repository = new ModelRepository< DummyModel >( null, null, null, callback );
 
-		await repository.delete( dummyModel );
-		expect( mockCallback ).toHaveBeenCalledWith( dummyModel );
+		const success = await repository.delete( 1 );
+		expect( success ).toBe( true );
+		expect( callback ).toHaveBeenCalledWith( 1 );
+	} );
+
+	it( 'should throw error on delete without callback', () => {
+		const repository = new ModelRepository< DummyModel >( null, null, null, null );
+
+		expect( () => repository.delete( 1 ) ).toThrowError( /not defined/i );
 	} );
 } );
