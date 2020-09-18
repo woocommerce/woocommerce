@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -89,8 +89,8 @@
     "wp-textdomain": "1.0.1"
   },
   "engines": {
-    "node": ">=10.15.0",
-    "npm": ">=6.4.1"
+    "node": "^10.22.0",
+    "npm": "^6.14.6"
   },
   "husky": {
     "hooks": {

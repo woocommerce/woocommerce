@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Webhook Deliveries controller class.
  *
  * @deprecated 3.3.0 Webhooks deliveries logs now uses logging system.
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Webhook_Deliveries_V1_Controller extends WC_REST_Controller {

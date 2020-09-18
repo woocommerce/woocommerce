@@ -1,9 +1,8 @@
 <?php
 /**
- * WooCommerce Admin
+ * WooCommerce Admin Helper
  *
- * @class    WC_Helper
- * @package  WooCommerce\Admin
+ * @package WooCommerce\Admin\Helper
  */
 
 use Automattic\Jetpack\Constants;

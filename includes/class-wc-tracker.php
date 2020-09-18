@@ -202,11 +202,19 @@ class WC_Tracker {
 			$memory        = max( $memory, $system_memory );
 		}
 
+		// WordPress 5.5+ environment type specification.
+		// 'production' is the default in WP, thus using it as a default here, too.
+		$environment_type = 'production';
+		if ( function_exists( 'wp_get_environment_type' ) ) {
+			$environment_type = wp_get_environment_type();
+		}
+
 		$wp_data['memory_limit'] = size_format( $memory );
 		$wp_data['debug_mode']   = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'Yes' : 'No';
 		$wp_data['locale']       = get_locale();
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
+		$wp_data['env_type']     = $environment_type;
 
 		return $wp_data;
 	}

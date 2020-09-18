@@ -41,7 +41,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 		<input type="hidden" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" value="<?php echo esc_attr( $item->get_tax_class() ); ?>" />
 
 		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, $product ); ?>
-		<?php require 'html-order-item-meta.php'; ?>
+		<?php require __DIR__ . '/html-order-item-meta.php'; ?>
 		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, $product ); ?>
 	</td>
 
