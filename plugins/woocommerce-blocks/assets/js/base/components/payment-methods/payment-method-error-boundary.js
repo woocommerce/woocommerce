@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from 'react';
-import { Notice } from 'wordpress-components';
+import { StoreNoticesContainer } from '@woocommerce/base-components/store-notices-container';
 import PropTypes from 'prop-types';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 
@@ -36,11 +36,15 @@ class PaymentMethodErrorBoundary extends Component {
 					);
 				}
 			}
-			return (
-				<Notice isDismissible={ false } status="error">
-					{ errorText }
-				</Notice>
-			);
+			const notices = [
+				{
+					id: '0',
+					content: errorText,
+					isDismissible: false,
+					status: 'error',
+				},
+			];
+			return <StoreNoticesContainer notices={ notices } />;
 		}
 
 		return this.props.children;

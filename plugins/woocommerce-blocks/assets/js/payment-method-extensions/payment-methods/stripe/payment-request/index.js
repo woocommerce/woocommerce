@@ -32,6 +32,9 @@ function paymentRequestAvailable( currencyCode ) {
 			isStripeInitialized = true;
 			return canPay;
 		}
+		if ( stripe.error && stripe.error instanceof Error ) {
+			throw stripe.error;
+		}
 		// Do a test payment to confirm if payment method is available.
 		const paymentRequest = stripe.paymentRequest( {
 			total: {

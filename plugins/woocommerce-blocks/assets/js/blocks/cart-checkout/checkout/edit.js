@@ -21,7 +21,11 @@ import {
 import { getAdminLink } from '@woocommerce/settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
-import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
+import {
+	EditorProvider,
+	useEditorContext,
+	StoreNoticesProvider,
+} from '@woocommerce/base-context';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import {
 	previewCart,
@@ -320,9 +324,11 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 						'woo-gutenberg-products-block'
 					) }
 				>
-					<Disabled>
-						<Block attributes={ attributes } />
-					</Disabled>
+					<StoreNoticesProvider context="wc/checkout">
+						<Disabled>
+							<Block attributes={ attributes } />
+						</Disabled>
+					</StoreNoticesProvider>
 				</BlockErrorBoundary>
 			</div>
 		</EditorProvider>
