@@ -110,9 +110,29 @@ class Events {
 		WC_Admin_Notes_Edit_Products_On_The_Move::possibly_add_note();
 		WC_Admin_Notes_Performance_On_Mobile::possibly_add_note();
 
-		if ( Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
+		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::read_specs_from_data_sources();
 			RemoteInboxNotificationsEngine::run();
 		}
+	}
+
+	/**
+	 * Checks if remote inbox notifications are enabled.
+	 *
+	 * @return bool Whether remote inbox notifications are enabled.
+	 */
+	protected function is_remote_inbox_notifications_enabled() {
+		// Check if the feature flag is disabled.
+		if ( ! Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
+			return false;
+		}
+
+		// Check if the site has opted out of marketplace suggestions.
+		if ( 'yes' !== get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return false;
+		}
+
+		// All checks have passed.
+		return true;
 	}
 }
