@@ -330,7 +330,7 @@
  * @property {string}                                context              The current context
  *                                                                        identifier for the notice
  *                                                                        provider
- * @property {function(boolean):void}                setSuppressed        Consumers can use this
+ * @property {function(boolean):void}                setIsSuppressed      Consumers can use this
  *                                                                        setter to suppress
  */
 
