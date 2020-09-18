@@ -643,7 +643,7 @@ class WC_Emails {
 		 *
 		 * @param int $product_id - The out of stock product id
 		 *
-		 * @since 4.4.0
+		 * @since 4.6.0
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_no_stock_notification', true, $product->get_id() ) ) {
 			return;
