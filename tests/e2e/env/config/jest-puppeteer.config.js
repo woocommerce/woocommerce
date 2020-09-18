@@ -14,10 +14,11 @@ if ( 'no' == global.process.env.node_config_dev ) {
 	puppeteerConfig = {
 		launch: {
 			...jestPuppeteerConfig.launch,
+			slowMo: process.env.PUPPETEER_SLOWMO ? false : 50,
+			headless: process.env.PUPPETEER_HEADLESS || false,
 			ignoreHTTPSErrors: true,
 			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
 			devtools: true,
-			headless: false,
 			defaultViewport: {
 				width: 1280,
 				height: 800,
