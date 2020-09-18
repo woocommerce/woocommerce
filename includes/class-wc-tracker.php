@@ -204,7 +204,7 @@ class WC_Tracker {
 
 		// WordPress 5.5+ environment type specification.
 		// 'production' is the default in WP, thus using it as a default here, too.
-		$environment_type = 	'production';
+		$environment_type = 'production';
 		if ( function_exists( 'wp_get_environment_type' ) ) {
 			$environment_type = wp_get_environment_type();
 		}
