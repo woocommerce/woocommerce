@@ -85,7 +85,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Initialise Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = include 'includes/settings-flat-rate.php';
+		$this->form_fields = include __DIR__ . '/includes/settings-flat-rate.php';
 	}
 
 	/**

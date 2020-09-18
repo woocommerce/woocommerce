@@ -3,7 +3,7 @@
  * The update helper for WooCommerce.com plugins.
  *
  * @class WC_Helper_Updater
- * @package WooCommerce\Admin.
+ * @package WooCommerce\Admin\Helper
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
