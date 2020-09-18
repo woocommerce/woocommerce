@@ -114,7 +114,7 @@ See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-
 
 - Navigate to `http://localhost:8084/`
 
-If everything went well, you should be able to access the site. If you changed the port to something other than `8084`, use the appropriate port to access your site. 
+If everything went well, you should be able to access the site. If you changed the port to something other than `8084` as per [Test Variables](#test-variables) section, use the appropriate port to access your site. 
 
 As noted in [Test Variables](#test-variables) section, use the following Admin user details to login:
 
