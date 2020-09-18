@@ -303,7 +303,7 @@ class WC_Install {
 		self::create_terms();
 		self::create_cron_jobs();
 		self::create_files();
-		self::maybe_enable_setup_wizard();
+		self::maybe_create_pages();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 		self::maybe_enable_homescreen();
@@ -413,18 +413,6 @@ class WC_Install {
 		usort( $update_versions, 'version_compare' );
 
 		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
-	}
-
-	/**
-	 * See if we need the wizard or not.
-	 *
-	 * @since 3.2.0
-	 */
-	private static function maybe_enable_setup_wizard() {
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
-			WC_Admin_Notices::add_notice( 'install', true );
-			set_transient( '_wc_activation_redirect', 1, 30 );
-		}
 	}
 
 	/**
@@ -546,6 +534,15 @@ class WC_Install {
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
+	}
+
+	/**
+	 * Create pages on installation.
+	 */
+	public static function maybe_create_pages() {
+		if ( empty( get_option( 'woocommerce_db_version' ) ) ) {
+			self::create_pages();
+		}
 	}
 
 	/**

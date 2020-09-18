@@ -28,7 +28,6 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
-		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 
 		// Disable WXR export of schedule action posts.
@@ -72,15 +71,6 @@ class WC_Admin {
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once __DIR__ . '/class-wc-admin-help.php';
-		}
-
-		// Setup/welcome.
-		if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			switch ( $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				case 'wc-setup':
-					include_once __DIR__ . '/class-wc-admin-setup-wizard.php';
-					break;
-			}
 		}
 
 		// Helper.
@@ -127,7 +117,7 @@ class WC_Admin {
 	/**
 	 * Handle redirects to setup/welcome page after install and updates.
 	 *
-	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
+	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
 		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
@@ -152,28 +142,6 @@ class WC_Admin {
 			exit;
 		}
 
-		// Setup wizard redirect.
-		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
-			$do_redirect  = true;
-			$current_page = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false;
-
-			// On these pages, or during these events, postpone the redirect.
-			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
-				$do_redirect = false;
-			}
-
-			// On these pages, or during these events, disable the redirect.
-			if ( 'wc-setup' === $current_page || ! WC_Admin_Notices::has_notice( 'install' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) || isset( $_GET['activate-multi'] ) ) {
-				delete_transient( '_wc_activation_redirect' );
-				$do_redirect = false;
-			}
-
-			if ( $do_redirect ) {
-				delete_transient( '_wc_activation_redirect' );
-				wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
-				exit;
-			}
-		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
