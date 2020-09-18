@@ -544,6 +544,7 @@ class WC_Install {
 			self::create_pages();
 		}
 	}
+
 	/**
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
