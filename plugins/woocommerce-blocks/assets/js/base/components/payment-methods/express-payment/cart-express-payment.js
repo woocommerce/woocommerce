@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useExpressPaymentMethods } from '@woocommerce/base-hooks';
+import {
+	useEmitResponse,
+	useExpressPaymentMethods,
+} from '@woocommerce/base-hooks';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
 
 /**
@@ -13,6 +16,7 @@ import './style.scss';
 
 const CartExpressPayment = () => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
+	const { noticeContexts } = useEmitResponse();
 
 	if (
 		! isInitialized ||
@@ -25,7 +29,9 @@ const CartExpressPayment = () => {
 		<>
 			<div className="wc-block-components-express-payment wc-block-components-express-payment--cart">
 				<div className="wc-block-components-express-payment__content">
-					<StoreNoticesProvider context="wc/express-payment-area">
+					<StoreNoticesProvider
+						context={ noticeContexts.EXPRESS_PAYMENTS }
+					>
 						<ExpressPaymentMethods />
 					</StoreNoticesProvider>
 				</div>

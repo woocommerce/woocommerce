@@ -7,13 +7,18 @@ import {
 	useCheckoutContext,
 	StoreNoticesProvider,
 } from '@woocommerce/base-context';
-import { usePaymentMethods, useStoreCart } from '@woocommerce/base-hooks';
+import {
+	useEmitResponse,
+	usePaymentMethods,
+	useStoreCart,
+} from '@woocommerce/base-hooks';
 import { PaymentMethods } from '@woocommerce/base-components/payment-methods';
 
 const PaymentMethodStep = () => {
 	const { isProcessing: checkoutIsProcessing } = useCheckoutContext();
 	const { cartNeedsPayment } = useStoreCart();
 	const { paymentMethods } = usePaymentMethods();
+	const { noticeContexts } = useEmitResponse();
 
 	if ( ! cartNeedsPayment ) {
 		return null;
@@ -34,7 +39,7 @@ const PaymentMethodStep = () => {
 					: ''
 			}
 		>
-			<StoreNoticesProvider context="wc/payment-area">
+			<StoreNoticesProvider context={ noticeContexts.PAYMENTS }>
 				<PaymentMethods />
 			</StoreNoticesProvider>
 		</FormStep>

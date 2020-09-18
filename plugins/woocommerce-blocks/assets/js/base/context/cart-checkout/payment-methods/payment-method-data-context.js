@@ -195,17 +195,17 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		( message ) => {
 			if ( message ) {
 				addErrorNotice( message, {
-					context: 'wc/express-payment-area',
+					context: noticeContexts.EXPRESS_PAYMENTS,
 					id: 'wc-express-payment-error',
 				} );
 			} else {
 				removeNotice(
 					'wc-express-payment-error',
-					'wc/express-payment-area'
+					noticeContexts.EXPRESS_PAYMENTS
 				);
 			}
 		},
-		[ addErrorNotice, removeNotice ]
+		[ addErrorNotice, noticeContexts.EXPRESS_PAYMENTS, removeNotice ]
 	);
 	// ensure observers are always current.
 	useEffect( () => {
