@@ -143,7 +143,20 @@ Tests are being run headless by default. However, sometimes it's useful to obser
 npm run test:e2e-dev
 ```
 
-The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by copying `/tests/e2e/env/config/jest.puppetee.config.js` to `/tests/e2e/config` and editing the value in that file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
+The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. 
+
+By default, SlowMo mode is set to slow down running of tests by 50 milliseconds. If you'd like to override it and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below: 
+
+```
+PUPPETEER_SLOWMO=10 npm run test:e2e-dev
+```
+
+The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
+
+For example:
+
+- `PUPPETEER_SLOWMO=10` - will run tests faster
+- `PUPPETEER_SLOWMO=70` - will run tests slower
 
 ### How to run an individual test
 
