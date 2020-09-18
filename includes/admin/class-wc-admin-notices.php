@@ -260,10 +260,10 @@ class WC_Admin_Notices {
 	/**
 	 * If we have just installed, show a message with the install pages button.
 	 *
-	 * @deprecated 4.4.0
+	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.5.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
