@@ -28,7 +28,6 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
-		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 
 		// Disable WXR export of schedule action posts.
@@ -118,7 +117,7 @@ class WC_Admin {
 	/**
 	 * Handle redirects to setup/welcome page after install and updates.
 	 *
-	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
+	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
 		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
