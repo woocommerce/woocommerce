@@ -1,6 +1,7 @@
 import { HTTPClient, HTTPResponse } from '../http-client';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { AxiosInterceptor } from './axios-interceptor';
+import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
 /**
  * An HTTPClient implementation that uses Axios to make requests.
@@ -13,11 +14,17 @@ export class AxiosClient implements HTTPClient {
 	 * Creates a new axios client.
 	 *
 	 * @param {AxiosRequestConfig} config The request configuration.
-	 * @param {AxiosInterceptor[]} interceptors An array of interceptors to apply to the client.
+	 * @param {AxiosInterceptor[]} extraInterceptors An array of additional interceptors to apply to the client.
 	 */
-	public constructor( config: AxiosRequestConfig, interceptors: AxiosInterceptor[] = [] ) {
+	public constructor( config: AxiosRequestConfig, extraInterceptors: AxiosInterceptor[] = [] ) {
 		this.client = axios.create( config );
-		this.interceptors = interceptors;
+
+		this.interceptors = extraInterceptors;
+
+		// The response interceptor needs to be last to prevent the other interceptors from
+		// receiving the transformed HTTPResponse type instead of an AxiosResponse.
+		this.interceptors.push( new AxiosResponseInterceptor() );
+
 		for ( const interceptor of this.interceptors ) {
 			interceptor.start( this.client );
 		}
