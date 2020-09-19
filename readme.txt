@@ -160,57 +160,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 4.5.2 - 2020-09-14 =
-* Fix - Revert the changes in filtering by attribute that were introduced in WooCommerce 4.4. #27625
-* Fix - Adjusted validation to allow for variations with "0" as an attribute value. #27633
-
-= 4.5.1 - 2020-09-09 =
-
-**WooCommerce**
-* Fix - Check for state and postcode fields only if required in `show_shipping`. #27628
-
-= 4.5.0 - 2020-09-08 =
-
-**WooCommerce**
-* Localization - Added postcode validation for Bosnia and Herzegovina. #27048
-* Localization - Added the postcode validation for Liechtenstein. #27059
-* Localization - Add i18n locale information for Liechtenstein, Switzerland and Austria. #27193
-* Tweak - Increase priority of `admin_body_class` filter to avoid comflict with plugins that incorrectly remove all body classes from WP. #27426
-* Tweak - Rename built-in PayPal payment method to PayPal Standard. #27468
-* Fix - Remove whitespace within a link. #26897
-* Fix - `get_review_count_for_product` return all comments count not only 'review' types #26928
-* Fix - Hidden field type is now supported by `woocommerce_form_field`. #27023
-* Fix - Remove state for country liechtenstein. #27057
-* Fix - Fixed validation of variation attributes while adding products to the cart. #27115
-* Fix - Coupon code inconsistent between admins and shop owners. #27140
-* Fix - Fixed the logic behind "Hide shipping costs until an address is entered". #27143
-* Fix - Searches for variations now will fallback to parent SKU if one is not entered. #27171
-* Fix - Release coupon holds for cancelled orders previously in pending status. #27179
-* Fix - Fixes Japan zip code format issue (dash is now optional). #27244
-* Fix - Restore backward compatibility with WC 4.x and forward compatibility with WC 5.5. #27318
-* Fix - Switch to site locale before translating refund reason. #27323
-* Fix - Declare `WC_Post_Types::updated_term_messages` as a static method to remove PHP deprecation warning. #27436
-* Fix - Allow HTML to be entered in product title for formatting purposes. #27465
-* Fix - Filter by attribute widget not working properly for variations having attribute values of "Any...". #27508
-* Fix - Fixed the layout of the variations and attributes sections in the product page in the admin when running WP >= 5.5. #27590
-* Dev - Added additional stock-based cart filters including `woocommerce_cart_product_cannot_add_another_message`, `woocommerce_cart_product_out_of_stock_message`, and `woocommerce_cart_product_not_enough_stock_message`. #26439
-* Dev - Changed text domain to `woocommerce` for REST API files. #27248
-* Dev - Added file path to the `woocommerce_file_download_method` filter. #27152
-* Dev - Merge API Package into core. #27100
-
-**WooCommerce Admin 1.5.0**
-* Enhancement - Add eWAY to Payment Setup for AU/NZ Stores. #4947
-* Fix - Use clipRule and fillRule props. #4889, part of #4864
-* Fix - Admin order page shipping label prompt compatibility with WCS 1.24. #5025
-* Dev - New notification: Don't forget to test your checkout. #4805
-* Dev - Enable tax calculation before redirecting to standard tax rates page. #4878
-* Dev - Added event recording to Orders, Stock, and Reviews panels. #4861
-* Dev - Added personalization to purchase extension task. #4849
-* Dev - Display modal with more info about the new homescreen. #4890
-* Dev - Task list - add a shortcut back to store setup. #4853
-* Dev - Update the colors of the illustrations in the welcome modal. #4945
-[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
-
 == Upgrade Notice ==
 
 = 4.0 =
