@@ -1,3 +1,5 @@
+/** @typedef {import('window').IntersectionObserverCallback} IntersectionObserverCallback */
+
 /**
  * Util that returns an IntersectionObserver if supported by the browser. If
  * it's not supported, it returns a shim object with the methods to prevent JS
@@ -6,8 +8,8 @@
  *
  * @param {IntersectionObserverCallback} callback Callback function for the
  *                                                Intersection Observer.
- * @param {object}                       options  Intersection Observer options.
- * @return {object|IntersectionObserver} Intersection Observer if available,
+ * @param {Object}                       options  Intersection Observer options.
+ * @return {Object|IntersectionObserver} Intersection Observer if available,
  *                                       otherwise a shim object.
  *
  * @todo Remove IntersectionObserver shim when we drop IE11 support.

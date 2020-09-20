@@ -30,7 +30,6 @@ import './style.scss';
  * @param {string}  [props.customColor]    Custom title color value.
  * @param {string}  [props.fontSize]       Title font size name.
  * @param {number } [props.customFontSize] Custom font size value.
- * @param {Object}  [props.product]        Optional product object. Product from context
  * will be used if this is not provided.
  * @return {*} The component.
  */

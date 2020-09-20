@@ -10,8 +10,17 @@ import classNames from 'classnames';
  */
 import './style.scss';
 
+/** @typedef {import('react')} React */
+
 /**
- * Component that visually renders a button but semantically might be `<button>` or `<a>` depending on the props.
+ * Component that visually renders a button but semantically might be `<button>` or `<a>` depending
+ * on the props.
+ *
+ * @param {Object}              props             Incoming props for the component.
+ * @param {string}              props.className   CSS classname used.
+ * @param {boolean}             props.showSpinner Whether to show spinner or not.
+ * @param {React.ReactChildren} props.children    Child components passed in.
+ * @param {Object}              props.props       Rest of incoming props.
  */
 const Button = ( { className, showSpinner = false, children, ...props } ) => {
 	const buttonClassName = classNames(

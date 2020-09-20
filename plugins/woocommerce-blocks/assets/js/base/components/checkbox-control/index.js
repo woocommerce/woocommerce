@@ -12,6 +12,14 @@ import './style.scss';
 
 /**
  * Component used to show a checkbox control with styles.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.className CSS class used.
+ * @param {string} props.label Label for component.
+ * @param {string} props.id Id for component.
+ * @param {string} props.instanceId Unique id for instance of component.
+ * @param {function():any} props.onChange Function called when input changes.
+ * @param {Object} props.rest Rest of properties spread.
  */
 const CheckboxControl = ( {
 	className,

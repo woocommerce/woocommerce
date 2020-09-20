@@ -7,6 +7,9 @@ import PropTypes from 'prop-types';
 
 /**
  * Formats and returns an image element.
+ *
+ * @param {Object} props       Incoming props for the component.
+ * @param {Object} props.image Image properties.
  */
 const ProductImage = ( { image = {} } ) => {
 	const imageProps = {

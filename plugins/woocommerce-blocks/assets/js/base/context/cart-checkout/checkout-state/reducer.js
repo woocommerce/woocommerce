@@ -64,6 +64,11 @@ export const prepareResponseData = ( data ) => {
  *
  * @param {Object} state  Current state.
  * @param {Object} action Incoming action object.
+ * @param {string} action.url URL passed in.
+ * @param {string} action.type Type of action.
+ * @param {string} action.orderId Order ID.
+ * @param {Array} action.orderNotes Order notes.
+ * @param {Object} action.data Other action payload.
  */
 export const reducer = (
 	state = DEFAULT_STATE,

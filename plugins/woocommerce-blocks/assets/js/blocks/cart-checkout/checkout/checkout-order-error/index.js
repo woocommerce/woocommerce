@@ -63,7 +63,8 @@ const CheckoutOrderError = () => {
 /**
  * Get the error message to display.
  *
- * @param {Object} errorData Object containing code and message.
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorTitle = ( { errorData } ) => {
 	let heading = __( 'Checkout error', 'woo-gutenberg-products-block' );
@@ -83,7 +84,8 @@ const ErrorTitle = ( { errorData } ) => {
 /**
  * Get the error message to display.
  *
- * @param {Object} errorData Object containing code and message.
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorMessage = ( { errorData } ) => {
 	let message = errorData.message;
@@ -104,7 +106,8 @@ const ErrorMessage = ( { errorData } ) => {
 /**
  * Get the CTA button to display.
  *
- * @param {Object} errorData Object containing code and message.
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorButton = ( { errorData } ) => {
 	let buttonText = __( 'Retry', 'woo-gutenberg-products-block' );

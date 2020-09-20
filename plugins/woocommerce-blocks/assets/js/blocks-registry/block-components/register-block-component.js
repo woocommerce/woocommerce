@@ -17,7 +17,6 @@ import { registeredBlockComponents } from './registered-block-components-init';
  * Registering a Block Component allows you to define which React Component should be used in place
  * of a registered Block. The Component, when rendered, will be passed all Block Attributes.
  *
- * @export
  * @param {Object}   options           Options to use when registering the block.
  * @param {Function} options.component React component that will be rendered, or the return value from  React.lazy if
  *                                     dynamically imported.
@@ -87,7 +86,6 @@ const assertOption = ( options, optionName, expectedType ) => {
 /**
  * Alias of registerBlockComponent kept for backwards compatibility.
  *
- * @export
  * @param {Object}   options           Options to use when registering the block.
  * @param {string}   options.main      Name of the parent block.
  * @param {string}   options.blockName Name of the child block being registered.

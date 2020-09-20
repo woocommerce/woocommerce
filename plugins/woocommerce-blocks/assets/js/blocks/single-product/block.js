@@ -13,8 +13,15 @@ import { StoreNoticesProvider } from '@woocommerce/base-context';
  */
 import { BLOCK_NAME } from './constants';
 
+/** @typedef {import('react')} React */
+
 /**
  * The Single Product Block.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {boolean} props.isLoading
+ * @param {Object} props.product
+ * @param {React.ReactChildren} props.children
  */
 const Block = ( { isLoading, product, children } ) => {
 	const className = 'wc-block-single-product wc-block-layout';

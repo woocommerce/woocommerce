@@ -32,6 +32,11 @@ export const actions = {
  *
  * @param {Object} state  Current state.
  * @param {Object} action Incoming action object
+ * @param {string} action.type The type of action.
+ * @param {string} action.eventType What type of event is emitted.
+ * @param {string} action.id The id for the event.
+ * @param {function(any):any} action.callback The registered callback for the event.
+ * @param {number} action.priority The priority for the event.
  */
 export const reducer = (
 	state = {},

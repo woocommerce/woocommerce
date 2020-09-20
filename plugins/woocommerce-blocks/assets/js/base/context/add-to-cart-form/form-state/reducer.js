@@ -31,6 +31,9 @@ const {
  *
  * @param {Object} state  Current state.
  * @param {Object} action Incoming action object.
+ * @param {number} action.quantity Incoming quantity.
+ * @param {string} action.type Type of action.
+ * @param {Object} action.data Incoming payload for action.
  */
 export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 	let newState;

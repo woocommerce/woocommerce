@@ -52,6 +52,15 @@ const validateShippingCountry = (
 
 /**
  * Checkout address form.
+ *
+ * @param {Object} props Incoming props for component.
+ * @param {string} props.id Id for component.
+ * @param {Array}  props.fields Array of fields in form.
+ * @param {Object} props.fieldConfig Field configuration for fields in form.
+ * @param {string} props.instanceId Unique id for form.
+ * @param {function(any):any} props.onChange Function to all for an form onChange event.
+ * @param {string} props.type Type of form.
+ * @param {Object} props.values Values for fields.
  */
 const AddressForm = ( {
 	id,

@@ -21,6 +21,8 @@ import usePriceConstraints from './use-price-constraints.js';
  * Component displaying a price filter.
  *
  * @param {Object} props Component props.
+ * @param {Object} props.attributes Incoming block attributes.
+ * @param {boolean} props.isEditor Whether in editor context or not.
  */
 const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(

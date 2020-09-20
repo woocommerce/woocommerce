@@ -16,7 +16,6 @@ import { registeredBlockComponents } from './registered-block-components-init';
  *
  * This gets all registered Block Components so we know which Blocks map to which React Components.
  *
- * @export
  * @param {string} context Current context (a named parent Block). If Block Components were only
  *                         registered under a certain context, those Components will be returned,
  *                         as well as any Components registered under all contexts.
@@ -38,7 +37,6 @@ export function getRegisteredBlockComponents( context ) {
 /**
  * Alias of getRegisteredBlockComponents kept for backwards compatibility.
  *
- * @export
  * @param {string} main Name of the parent block to retrieve children of.
  * @return {Object} List of registered inner blocks.
  */

@@ -194,6 +194,8 @@ const Settings = () => [
 /**
  * Page settings fixture data, using the update batch endpoint.
  *
+ * @param {Array} pages
+ *
  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-setting-options|Batch update setting options}
  */
 const PageSettings = ( pages = [] ) => {

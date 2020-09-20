@@ -7,6 +7,10 @@ import { getAttributes, getVariationAttributes } from './utils';
 
 /**
  * VariationAttributes component.
+ *
+ * @param {Object} props             Incoming props
+ * @param {Object} props.product     Product
+ * @param {Object} props.dispatchers An object where values are dispatching functions.
  */
 const VariationAttributes = ( { product, dispatchers } ) => {
 	const attributes = getAttributes( product.attributes );

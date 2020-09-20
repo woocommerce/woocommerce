@@ -45,9 +45,7 @@ registerBlockType( 'woocommerce/active-filters', {
 		},
 	},
 	edit,
-	/**
-	 * Save the props to post content.
-	 */
+	// Save the props to post content.
 	save( { attributes } ) {
 		const { className, displayStyle, heading, headingLevel } = attributes;
 		const data = {

@@ -1,9 +1,11 @@
+/** @typedef {import('react')} React */
+
 /**
  * Finds the label of a toggle control.
  *
  * @param {string} label The label associated with a toggle control.
  *
- * @return {?ElementHandle} Object that represents an in-page DOM element.
+ * @return {?React.ReactElementHandle} Object that represents an in-page DOM element.
  */
 export async function findLabelWithText( label ) {
 	const [ toggle ] = await page.$x(

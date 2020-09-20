@@ -11,6 +11,9 @@ import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Shows a formatted shipping location.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.address Incoming address information.
  */
 const ShippingLocation = ( { address } ) => {
 	// we bail early if we don't have an address.

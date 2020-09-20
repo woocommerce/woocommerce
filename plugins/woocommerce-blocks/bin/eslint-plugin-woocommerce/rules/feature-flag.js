@@ -35,7 +35,7 @@ function findParent( sourceNode, predicate ) {
  *
  * @param {Object} node    The WOOCOMMERCE_BLOCKS_PHASE identifier node.
  * @param {Object} context The eslint context object.
- * @todo: update this rule to match the new flags.
+ * @todo update this rule to match the new flags.
  */
 function testIsAccessedViaProcessEnv( node, context ) {
 	let parent = node.parent;

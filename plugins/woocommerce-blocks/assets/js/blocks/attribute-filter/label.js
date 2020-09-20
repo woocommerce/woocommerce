@@ -7,6 +7,10 @@ import Label from '@woocommerce/base-components/label';
 
 /**
  * The label for an attribute term filter.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.name The name for the label.
+ * @param {number} props.count The count of products this attribute is attached to.
  */
 const AttributeFilterLabel = ( { name, count } ) => {
 	return (
