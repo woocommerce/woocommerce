@@ -28,6 +28,9 @@ const getIconsFromPaymentMethods = ( paymentMethods ) => {
 
 /**
  * Checkout button rendered in the full cart page.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.link What the button is linked to.
  */
 const CheckoutButton = ( { link } ) => {
 	const { isCalculating } = useCheckoutContext();

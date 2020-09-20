@@ -6,7 +6,7 @@ import { autop } from '@wordpress/autop';
 
 /**
  * Generates the summary text from a string of text.
- *a
+ *
  * @param {string} source Source text.
  * @param {number} maxLength Limit number of countType returned if text has multiple paragraphs.
  * @param {string} countType What is being counted. One of words, characters_excluding_spaces, or characters_including_spaces.

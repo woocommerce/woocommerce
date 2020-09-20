@@ -38,9 +38,7 @@ const settings = {
 	attributes: blockAttributes,
 	edit,
 
-	/**
-	 * Save the props to post content.
-	 */
+	// Save the props to post content.
 	save( { attributes } ) {
 		return (
 			<div className={ classnames( 'is-loading', attributes.className ) }>

@@ -12,6 +12,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * @typedef { import('@woocommerce/type-defs/contexts').ValidationContext } ValidationContext
+ * @typedef {import('react')} React
  */
 
 const ValidationContext = createContext( {
@@ -38,6 +39,9 @@ export const useValidationContext = () => {
  *
  * Any children of this context will be exposed to validation state and helpers
  * for tracking validation.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {React.ReactChildren} props.children What react elements are wrapped by this component.
  */
 export const ValidationContextProvider = ( { children } ) => {
 	const [ validationErrors, updateValidationErrors ] = useState( {} );

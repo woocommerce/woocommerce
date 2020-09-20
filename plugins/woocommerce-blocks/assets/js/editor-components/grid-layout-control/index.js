@@ -15,6 +15,12 @@ import {
 
 /**
  * A combination of range controls for product grid layout settings.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {number} props.columns
+ * @param {number} props.rows
+ * @param {function(any):any} props.setAttributes Setter for block attributes.
+ * @param {string} props.alignButtons
  */
 const GridLayoutControl = ( {
 	columns,

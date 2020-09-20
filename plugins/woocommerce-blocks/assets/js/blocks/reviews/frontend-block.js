@@ -14,6 +14,13 @@ import withReviews from '@woocommerce/base-hocs/with-reviews';
 
 /**
  * Block rendered in the frontend.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.attributes Incoming block attributes.
+ * @param {function(any):any} props.onAppendReviews Function called when appending review.
+ * @param {function(any):any} props.onChangeOrderby
+ * @param {Array} props.reviews
+ * @param {number} props.totalReviews
  */
 const FrontendBlock = ( {
 	attributes,

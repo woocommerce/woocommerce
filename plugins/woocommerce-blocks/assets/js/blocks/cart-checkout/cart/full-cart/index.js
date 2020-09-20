@@ -46,6 +46,9 @@ import './style.scss';
 
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.attributes Incoming attributes for block.
  */
 const Cart = ( { attributes } ) => {
 	const {

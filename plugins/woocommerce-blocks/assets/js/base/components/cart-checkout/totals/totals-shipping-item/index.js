@@ -21,6 +21,13 @@ import './style.scss';
 
 /**
  * Renders the shipping totals row, rates, and calculator if enabled.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.currency Currency information.
+ * @param {Object} props.values Values in use.
+ * @param {boolean} props.isCheckout Whether in checkout or not.
+ * @param {boolean} props.showCalculator Whether to show shipping calculator or not.
+ * @param {boolean} props.showRatesWithoutAddress Whether to show rates without address or not.
  */
 const TotalsShippingItem = ( {
 	currency,

@@ -19,6 +19,17 @@ import './style.scss';
 
 /**
  * Component used to show an input box with a dropdown with suggestions.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.attributeLabel Label for the attributes.
+ * @param {string} props.className CSS class used.
+ * @param {Array} props.checked Which items are checked.
+ * @param {string} props.inputLabel Label used for the input.
+ * @param {boolean} props.isDisabled Whether the input is disabled or not.
+ * @param {boolean} props.isLoading Whether the input is loading.
+ * @param {boolean} props.multiple Whether multi-select is allowed.
+ * @param {function():any} props.onChange Function to be called when onChange event fires.
+ * @param {Array} props.options The option values to show in the select.
  */
 const DropdownSelector = ( {
 	attributeLabel = '',

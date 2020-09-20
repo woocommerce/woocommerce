@@ -53,7 +53,8 @@ const Block = ( props ) => {
  * Main Checkout Component.
  *
  * @param {Object} props Component props.
- * @return {*} The component.
+ * @param {Object} props.attributes Incoming block attributes.
+ * @param {function(any):any} props.scrollToTop Function for scrolling to top.
  */
 const Checkout = ( { attributes, scrollToTop } ) => {
 	const { isEditor } = useEditorContext();

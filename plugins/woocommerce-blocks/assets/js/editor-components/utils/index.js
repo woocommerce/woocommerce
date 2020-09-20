@@ -10,7 +10,7 @@ import { IS_LARGE_CATALOG, LIMIT_TAGS } from '@woocommerce/block-settings';
  * Get product query requests for the Store API.
  *
  * @param {Object} request A query object with the list of selected products and search term.
- * @param {string} request.selected Currently selected products.
+ * @param {Array} request.selected Currently selected products.
  * @param {string} request.search Search string.
  * @param {Array} request.queryArgs Query args to pass in.
  */
@@ -47,7 +47,7 @@ const getProductsRequests = ( {
  * Get a promise that resolves to a list of products from the Store API.
  *
  * @param {Object} request A query object with the list of selected products and search term.
- * @param {string} request.selected Currently selected products.
+ * @param {Array} request.selected Currently selected products.
  * @param {string} request.search Search string.
  * @param {Array} request.queryArgs Query args to pass in.
  */
@@ -107,7 +107,7 @@ export const getTerms = ( attribute ) => {
  * Get product tag query requests for the Store API.
  *
  * @param {Object} request A query object with the list of selected products and search term.
- * @param {string} request.selected Currently selected tags.
+ * @param {Array} request.selected Currently selected tags.
  * @param {string} request.search Search string.
  */
 const getProductTagsRequests = ( { selected = [], search } ) => {
@@ -135,7 +135,9 @@ const getProductTagsRequests = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a list of tags from the Store API.
  *
- * @param {Object} - A query object with the list of selected products and search term.
+ * @param {Object} props A query object with the list of selected products and search term.
+ * @param {Array} props.selected
+ * @param {string} props.search
  */
 export const getProductTags = ( { selected = [], search } ) => {
 	const requests = getProductTagsRequests( { selected, search } );

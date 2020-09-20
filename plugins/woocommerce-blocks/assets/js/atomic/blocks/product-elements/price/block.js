@@ -27,7 +27,6 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
  * @param {string} [props.customColor]            Normal Price custom text color.
  * @param {string} [props.saleColor]              Original Price text color.
  * @param {string} [props.customSaleColor]        Original Price custom text color.
- * @param {Object} [props.product]                Optional product object. Product from
  * context will be used if this is not provided.
  * @return {*} The component.
  */

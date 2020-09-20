@@ -161,6 +161,11 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
  *       if the user saves the page without having triggered the 'Empty Cart'
  *       view, inner blocks would not be saved and they wouldn't be visible
  *       in the frontend.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.className CSS class used.
+ * @param {Object} props.attributes Attributes available.
+ * @param {function(any):any} props.setAttributes Setter for attributes.
  */
 const CartEditor = ( { className, attributes, setAttributes } ) => {
 	return (

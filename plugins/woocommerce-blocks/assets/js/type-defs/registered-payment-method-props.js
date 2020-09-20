@@ -17,12 +17,12 @@
  *
  * @typedef {Object} PaymentStatusActions
  *
- * @property {Function} started
- * @property {Function} processing
- * @property {Function} completed
- * @property {Function} error
- * @property {Function} failed
- * @property {Function} success
+ * @property {Function} started    Set started status.
+ * @property {Function} processing Set processing status.
+ * @property {Function} completed  Set completed status.
+ * @property {Function} error      Set error status.
+ * @property {Function} failed     Set failed status.
+ * @property {Function} success    Set success status.
  */
 
 /**

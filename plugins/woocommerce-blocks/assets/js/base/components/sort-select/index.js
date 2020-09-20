@@ -14,6 +14,17 @@ import './style.scss';
 /**
  * Component used for 'Order by' selectors, which renders a label
  * and a <select> with the options provided in the props.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {string} props.className CSS class used.
+ * @param {string} props.instanceId Unique id for component instance.
+ * @param {string} props.defaultValue Default value for the select.
+ * @param {string} props.label Label for the select.
+ * @param {function():any} props.onChange Function to call on the change event.
+ * @param {Array} props.options Option values for the select.
+ * @param {string} props.screenReaderLabel Screen reader label.
+ * @param {boolean} props.readOnly Whether the select is read only or not.
+ * @param {string} props.value The selected value.
  */
 const SortSelect = ( {
 	className,

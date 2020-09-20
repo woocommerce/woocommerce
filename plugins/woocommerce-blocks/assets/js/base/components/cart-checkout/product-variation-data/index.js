@@ -7,6 +7,10 @@ import classNames from 'classnames';
 
 /**
  * Returns a formatted element containing variation details.
+ *
+ * @param {Object}        props           Incoming props for the component.
+ * @param {string}        props.className CSS class used.
+ * @param {Array<Object>} props.variation Variations in use.
  */
 const ProductVariationData = ( { className, variation = [] } ) => {
 	if ( ! variation || variation.length === 0 ) {

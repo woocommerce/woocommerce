@@ -49,9 +49,7 @@ registerBlockType( 'woocommerce/price-filter', {
 
 	edit,
 
-	/**
-	 * Save the props to post content.
-	 */
+	// Save the props to post content.
 	save( { attributes } ) {
 		const {
 			className,

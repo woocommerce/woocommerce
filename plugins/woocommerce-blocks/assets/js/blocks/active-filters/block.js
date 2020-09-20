@@ -18,6 +18,10 @@ import ActiveAttributeFilters from './active-attribute-filters';
 
 /**
  * Component displaying active filters.
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.attributes Incoming attributes for the block.
+ * @param {boolean} props.isEditor Whether or not in the editor context.
  */
 const ActiveFiltersBlock = ( {
 	attributes: blockAttributes,

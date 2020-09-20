@@ -9,6 +9,11 @@ const getIconClassName = ( id ) => {
 
 /**
  * Return an element for an icon.
+ *
+ * @param {Object}      props     Incoming props for component.
+ * @param {string}      props.id  Id for component.
+ * @param {string|null} props.src Optional src value for icon.
+ * @param {string}      props.alt Optional alt value for icon.
  */
 const PaymentMethodIcon = ( { id, src = null, alt = '' } ) => {
 	if ( ! src ) {

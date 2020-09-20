@@ -20,6 +20,10 @@ import {
 
 /**
  * Component to handle edit mode of "All Reviews".
+ *
+ * @param {Object} props Incoming props for the component.
+ * @param {Object} props.attributes Incoming block attributes.
+ * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
 const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 	const getInspectorControls = () => {
