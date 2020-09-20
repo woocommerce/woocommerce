@@ -159,7 +159,7 @@ return array(
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
 		'num_decimals'   => 2,
-		'weight_unit'    => 'lb',
+		'weight_unit'    => 'lbs',
 		'dimension_unit' => 'in',
 	),
 	'JP' => array(
