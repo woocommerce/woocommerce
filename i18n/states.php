@@ -752,6 +752,22 @@ return array(
 	),
 	'IL' => array(),
 	'IM' => array(),
+	'JM' => array( // Jamaica's Parishes. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:JM
+        'JM-01' => __( 'Kingston', 'woocommerce' ),
+        'JM-02' => __( 'Saint Andrew', 'woocommerce' ),
+        'JM-03' => __( 'Saint Thomas', 'woocommerce' ),
+        'JM-04' => __( 'Portland', 'woocommerce' ),
+        'JM-05' => __( 'Saint Mary', 'woocommerce' ),
+        'JM-06' => __( 'Saint Ann', 'woocommerce' ),
+        'JM-07' => __( 'Trelawny', 'woocommerce' ),
+        'JM-08' => __( 'Saint James', 'woocommerce' ),
+        'JM-09' => __( 'Hanover', 'woocommerce' ),
+        'JM-10' => __( 'Westmoreland', 'woocommerce' ),
+        'JM-11' => __( 'Saint Elizabeth', 'woocommerce' ),
+        'JM-12' => __( 'Manchester', 'woocommerce' ),
+        'JM-13' => __( 'Clarendon', 'woocommerce' ),
+        'JM-14' => __( 'Saint Catherine', 'woocommerce' )
+    ),
 
 	/**
 	 * Japan States.
