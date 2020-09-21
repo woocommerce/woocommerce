@@ -16,7 +16,7 @@ export class AsyncFactory extends Factory {
 	 * @param {*} options The options to be used in the builder.
 	 * @return {Promise} Resolves to the created model.
 	 */
-	create( params, options ) {
+	create( params = null, options = null ) {
 		const model = this.build( params, options );
 		return this.creator( model );
 	}
@@ -29,7 +29,7 @@ export class AsyncFactory extends Factory {
 	 * @param {*}      options The options to be used in the builder.
 	 * @return {Promise} Resolves to the created models.
 	 */
-	createList( number, params, options ) {
+	createList( number, params = null, options = null ) {
 		const models = this.buildList( number, params, options );
 		const promises = [];
 		for ( const model of models ) {

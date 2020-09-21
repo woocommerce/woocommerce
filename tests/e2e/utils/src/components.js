@@ -357,18 +357,11 @@ const completeOldSetupWizard = async () => {
 /**
  * Create simple product.
  */
-const createSimpleProduct = async () => {
-	try {
-		const product = await factories.products.simple.create( {
-			name: simpleProductName,
-			regularPrice: '9.99'
-		} );
-
-		return product.id;
-	} catch ( error ) {
-		console.log( 'Create Error ', error );
-	}
-	return null;
+const createSimpleProduct = () => {
+	return factories.products.simple.create( {
+		name: simpleProductName,
+		regularPrice: '9.99'
+	} ).then( product => product.id );
 } ;
 
 /**
