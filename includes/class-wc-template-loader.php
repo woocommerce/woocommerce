@@ -84,7 +84,7 @@ class WC_Template_Loader {
 
 			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
 				if ( false !== strpos( $default_file, 'product_cat' ) || false !== strpos( $default_file, 'product_tag' ) ) {
-					$cs_template = str_replace('_', '-', $default_file );
+					$cs_template = str_replace( '_', '-', $default_file );
 					$template    = WC()->plugin_path() . '/templates/' . $cs_template;
 				} else {
 					$template = WC()->plugin_path() . '/templates/' . $default_file;
@@ -156,8 +156,8 @@ class WC_Template_Loader {
 		if ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$cs_taxonomy = str_replace('_', '-', $object->taxonomy );
-				$cs_default  = str_replace('_', '-', $default_file );
+				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
+				$cs_default  = str_replace( '_', '-', $default_file );
 				$templates[] = 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
 				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
