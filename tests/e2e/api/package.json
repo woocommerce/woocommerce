@@ -17,10 +17,11 @@
   "types": "dist/index.d.ts",
   "files": [
     "/dist/",
+    "!*.ts.map",
     "!*.tsbuildinfo",
-    "!__tests__/",
-    "!__mocks__/",
-    "!__snapshops__/"
+    "!/dist/**/__tests__/",
+    "!/dist/**/__mocks__/",
+    "!/dist/**/__snapshops__/"
   ],
   "sideEffects": false,
   "scripts": {
