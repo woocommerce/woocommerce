@@ -11,13 +11,13 @@ import {
 	useEditorContext,
 } from '@woocommerce/base-context';
 import Title from '@woocommerce/base-components/title';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import ExpressPaymentMethods from '../express-payment-methods';
 import './style.scss';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 
 const CheckoutExpressPayment = () => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();

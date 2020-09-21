@@ -15,6 +15,10 @@ import {
 	useEditorContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
+
+/**
+ * Internal dependencies
+ */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 
 const ExpressPaymentMethods = () => {
