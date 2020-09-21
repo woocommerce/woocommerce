@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [ "node", "jest", "faker", "axios", "moxios", "create-hmac" ],
     "rootDir": "src", 
-    "outDir": "dist"
+    "outDir": "dist",
+    "target": "es5"
   },
   "include": [ "src/" ]
 }

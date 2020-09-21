@@ -10,7 +10,7 @@
     "declaration": true,
     "declarationMap": true,
     "composite": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "isolatedModules": true,
 
     /* Strict Type-Checking Options */

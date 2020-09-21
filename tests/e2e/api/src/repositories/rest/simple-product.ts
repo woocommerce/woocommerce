@@ -14,12 +14,14 @@ function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProduct > {
 			'/wc/v3/products',
 			{
 				name: properties.name,
+				regular_price: properties.regularPrice,
 			},
 		);
 
 		return Promise.resolve( new SimpleProduct( {
 			id: response.data.id,
 			name: response.data.name,
+			regularPrice: response.data.regular_price,
 		} ) );
 	};
 }

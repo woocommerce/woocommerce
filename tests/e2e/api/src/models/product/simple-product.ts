@@ -31,6 +31,6 @@ export class SimpleProduct extends AbstractProduct {
 	 * @return {AsyncFactory} The new factory instance.
 	 */
 	public static factory( repository: ModelRepository< SimpleProduct > ): AsyncFactory< SimpleProduct > {
-		return simpleProductFactory( repository.create );
+		return simpleProductFactory( ( data ) => repository.create( data ) );
 	}
 }
