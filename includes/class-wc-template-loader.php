@@ -158,10 +158,8 @@ class WC_Template_Loader {
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
 				$cs_default  = str_replace( '_', '-', $default_file );
-				$templates[] = 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
 				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
-				$templates[] = 'taxonomy-' . $cs_taxonomy . '.php';
 				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
 				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
 				$templates[] = $cs_default;
@@ -176,9 +174,8 @@ class WC_Template_Loader {
 		$templates[] = $default_file;
 		if ( isset( $cs_default ) ) {
 			$templates[] = WC()->template_path() . $cs_default;
-		} else {
-			$templates[] = WC()->template_path() . $default_file;
 		}
+		$templates[] = WC()->template_path() . $default_file;
 
 		return array_unique( $templates );
 	}
