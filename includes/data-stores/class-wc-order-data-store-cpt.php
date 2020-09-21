@@ -971,7 +971,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Prime following caches:
 	 *  1. item-$order_item_id   For individual items.
 	 *  2. order-items-$order-id For fetching items associated with an order.
-	 *  3. (Optionally) order-item meta.
+	 *  3. order-item meta.
 	 *
 	 * @param array $order_ids  Order Ids to prime cache for.
 	 * @param array $query_vars Query vars for the query.
@@ -1038,7 +1038,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Prime cache for raw meta data for orders in bulk. Difference between this and WP build in metadata is that this method also fetches `meta_id` field which we use and cache it.
+	 * Prime cache for raw meta data for orders in bulk. Difference between this and WP built-in metadata is that this method also fetches `meta_id` field which we use and cache it.
 	 *
 	 * @param array $order_ids  Order Ids to prime cache for.
 	 * @param array $query_vars Query vars for the query.
