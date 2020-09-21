@@ -1060,7 +1060,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			return;
 		}
 		$order_ids     = esc_sql( $non_cached_ids );
-		$order_ids_in  = "'" . implode( $order_ids, "', '" ) . "'";
+		$order_ids_in  = "'" . implode( "', '", $order_ids ) . "'";
 		$raw_meta_data_array = $wpdb->get_results(
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT post_id as object_id, meta_id, meta_key, meta_value
