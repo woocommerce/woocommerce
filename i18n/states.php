@@ -752,7 +752,7 @@ return array(
 	),
 	'IL' => array(),
 	'IM' => array(),
-	'JM' => array( // Jamaica's Parishes. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:JM
+	'JM' => array( // Jamaica's Parishes. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:JM.
 		'JM-01' => __( 'Kingston', 'woocommerce' ),
 		'JM-02' => __( 'Saint Andrew', 'woocommerce' ),
 		'JM-03' => __( 'Saint Thomas', 'woocommerce' ),
@@ -766,7 +766,7 @@ return array(
 		'JM-11' => __( 'Saint Elizabeth', 'woocommerce' ),
 		'JM-12' => __( 'Manchester', 'woocommerce' ),
 		'JM-13' => __( 'Clarendon', 'woocommerce' ),
-		'JM-14' => __( 'Saint Catherine', 'woocommerce' )
+		'JM-14' => __( 'Saint Catherine', 'woocommerce' ),
 	),
 
 	/**
