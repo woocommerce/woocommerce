@@ -7,6 +7,7 @@
  */
 import { StoreOwnerFlow } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -357,11 +358,17 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	/*const product = await modelRegistry.getFactory( SimpleProduct ).create( {
-		name: simpleProductName,
-		regularPrice: '9.99'
-	} );
-	return product.id;*/
+	try {
+		const product = await factories.products.simple.create( {
+			name: simpleProductName,
+			regularPrice: '9.99'
+		} );
+
+		return product.id;
+	} catch ( error ) {
+		console.log( 'Create Error ', error );
+	}
+	return null;
 } ;
 
 /**
