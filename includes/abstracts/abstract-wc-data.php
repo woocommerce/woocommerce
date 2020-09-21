@@ -520,7 +520,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Helper method to compute meta cache key. Different from WP Meta cache key.
+	 * Helper method to compute meta cache key. Different from WP Meta cache key in that meta data cached using this key also contains meta_id column.
 	 *
 	 * @since 4.7.0
 	 *
@@ -528,7 +528,7 @@ abstract class WC_Data {
 	 */
 	public function get_meta_cache_key() {
 		if ( ! $this->get_id() ) {
-			wc_doing_it_wrong( 'get_meta_cache_key', 'ID needs to be set before fetching a cache key.', '4.4.0' );
+			wc_doing_it_wrong( 'get_meta_cache_key', 'ID needs to be set before fetching a cache key.', '4.7.0' );
 			return false;
 		}
 		return self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
