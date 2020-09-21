@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Products controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Posts_Controller
  */
 class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {

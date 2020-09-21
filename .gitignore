@@ -45,6 +45,8 @@ tests/cli/vendor
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
+/tests/e2e/config/default.json
+/tests/e2e/env/config/default.json
 /tests/e2e/docker
 /tests/e2e/env/docker/wp-cli/initialize.sh
 /tests/e2e/env/build/

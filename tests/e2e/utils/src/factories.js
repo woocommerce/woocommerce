@@ -2,7 +2,7 @@ import {
 	AdapterTypes,
 	initializeUsingBasicAuth,
 	ModelRegistry,
-	registerSimpleProduct
+	registerSimpleProduct,
 } from '@woocommerce/model-factories';
 
 const config = require( 'config' );

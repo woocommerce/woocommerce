@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Product Attribute Terms controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Terms_Controller
  */
 class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Controller {

@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, null ); ?>
-		<?php require 'html-order-item-meta.php'; ?>
+		<?php require __DIR__ . '/html-order-item-meta.php'; ?>
 		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, null ); ?>
 	</td>
 

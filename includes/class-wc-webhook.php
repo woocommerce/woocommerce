@@ -15,7 +15,7 @@ use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'legacy/class-wc-legacy-webhook.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-webhook.php';
 
 /**
  * Webhook class.

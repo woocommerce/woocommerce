@@ -15,7 +15,7 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_instance() {
-		require_once 'class-dummy-widget.php';
+		require_once __DIR__ . '/class-dummy-widget.php';
 		$dummy_widget = new Dummy_Widget();
 		$this->assertTrue( property_exists( $dummy_widget, 'widget_id' ) );
 	}
@@ -27,7 +27,7 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 	 */
 	public function test_caching() {
 		global $wp_widget_factory;
-		require_once 'class-dummy-widget.php';
+		require_once __DIR__ . '/class-dummy-widget.php';
 		register_widget( 'Dummy_Widget' );
 
 		$dummy_widget = $wp_widget_factory->widgets['Dummy_Widget'];
@@ -59,7 +59,7 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 	 */
 	public function test_form() {
 		global $wp_widget_factory;
-		require_once 'class-dummy-widget.php';
+		require_once __DIR__ . '/class-dummy-widget.php';
 		register_widget( 'Dummy_Widget' );
 		$dummy_widget = $wp_widget_factory->widgets['Dummy_Widget'];
 		$this->assertEmpty( $dummy_widget->form( array( 'widget_id' => $dummy_widget->widget_id ) ) );
