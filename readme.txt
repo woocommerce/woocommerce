@@ -162,5 +162,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Upgrade Notice ==
 
+= 4.7.0 - 2020-11-xx =
+
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
+
 = 4.0 =
 4.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
