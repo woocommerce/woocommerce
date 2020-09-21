@@ -196,7 +196,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce Admin - 1.6.0**
 
-Pending an update from Isotope
+
 
 **WooCommerce Blocks - 3.2.0, 3.3.0 and 3.4.0**
 
