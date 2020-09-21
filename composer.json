@@ -16,7 +16,8 @@
     "psr/container": "1.0.0",
     "woocommerce/action-scheduler": "3.1.6",
     "woocommerce/woocommerce-admin": "1.6.0-rc.3",
-    "woocommerce/woocommerce-blocks": "3.4.0"
+    "woocommerce/woocommerce-blocks": "3.4.0",
+    "league/container": "3.3.1"
   },
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
@@ -43,7 +44,8 @@
       "includes/rest-api"
     ],
     "psr-4": {
-      "Automattic\\WooCommerce\\": "src/"
+      "Automattic\\WooCommerce\\": "src/",
+      "Automattic\\WooCommerce\\Vendor\\League\\Container\\": "vendor/league/container/"
     }
   },
   "autoload-dev": {
@@ -57,9 +59,11 @@
   },
   "scripts": {
     "post-install-cmd": [
+      "sh ./bin/prefix-vendor-namespaces.sh",
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
+      "sh ./bin/prefix-vendor-namespaces.sh",
       "sh ./bin/package-update.sh"
     ],
     "test": [
