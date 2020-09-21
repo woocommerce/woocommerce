@@ -1,8 +1,6 @@
 import { AbstractProduct } from './abstract-product';
 import { HTTPClient } from '../../http';
 import { ModelRepository } from '../../framework/model-repository';
-import { AsyncFactory } from '../../framework/async-factory';
-import { simpleProductFactory } from '../../factories/simple-product';
 import { simpleProductRESTRepository } from '../../repositories/rest/simple-product';
 
 /**
@@ -22,15 +20,5 @@ export class SimpleProduct extends AbstractProduct {
 	 */
 	public static restRepository( httpClient: HTTPClient ): ModelRepository< SimpleProduct > {
 		return simpleProductRESTRepository( httpClient );
-	}
-
-	/**
-	 * Creates a new factory instance.
-	 *
-	 * @param {ModelRepository} repository The repository to use for creation.
-	 * @return {AsyncFactory} The new factory instance.
-	 */
-	public static factory( repository: ModelRepository< SimpleProduct > ): AsyncFactory< SimpleProduct > {
-		return simpleProductFactory( ( data ) => repository.create( data ) );
 	}
 }

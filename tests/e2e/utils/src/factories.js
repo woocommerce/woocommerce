@@ -1,6 +1,5 @@
+import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
-
-import { HTTPClientFactory, SimpleProduct } from '@woocommerce/api';
 
 const httpClient = HTTPClientFactory.withBasicAuth(
 	config.get( 'url' ) + '/wp-json',
@@ -8,9 +7,11 @@ const httpClient = HTTPClientFactory.withBasicAuth(
 	config.get( 'users.admin.password' ),
 );
 
+import { simpleProductFactory } from './factories/simple-product';
+
 const factories = {
 	products: {
-		simple: SimpleProduct.factory( SimpleProduct.restRepository( httpClient ) ),
+		simple: simpleProductFactory( httpClient ),
 	},
 };
 
