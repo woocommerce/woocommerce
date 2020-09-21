@@ -1,58 +1,77 @@
-# API
+# WooCommerce API Client
 
-A simple interface for interacting with a WooCommerce installation.
+An isometric API client for interacting with WooCommerce installations. Here are the current and planned
+features:
 
-## Installation
-
-``bash
-npm install @woocommerce/api --save-dev
-``
+- [x] TypeScript Definitions
+- [x] Axios API Client with support for OAuth & basic auth
+- [x] Repositories to simplify interaction with basic data types
+- [ ] Service classes for common activities such as changing settings
 
 ## Usage
 
-Consumers of this package should rely on an instance of `ModelRegistry` to access the factories.
-Here is an example of how to initialize and use the package to generate a simple product:
-
-```javascript
-import { 
-    AdapterTypes,
-    initializeUsingBasicAuth,
-    ModelRegistry,
-    registerSimpleProduct,
-    SimpleProduct
-} from 'e2e/api';
-
-// The ModelRegistry instance is where all of the factories and adapters are stored in an easy-to-access way.
-const modelRegistry = new ModelRegistry()
-
-// Call the register functions to add a kind of factory to the model registry.
-// This will also add any adapters we've created for the factory, allowing it
-// to be created on the server.
-registerSimpleProduct( modelRegistry );
-
-// Before you can use the included API adapter you need to initialize it using one of the utility methods.
-// If you do not initialize the API adapters they will not be able to make requests to the API.
-// Note that these utility functions only set up adapters that have been registered already
-// and so further calls to `registeryXXX` functions will have adapters that aren't ready.
-initializeUsingBasicAuth( modelRegistry, 'https://test.test/wp-json', 'admin', 'password' );
-initializeUsingOAuth( modelRegistry, 'https://test.test/wp-json', 'consumer_key', 'consumer_secret' );
-
-// In order to actually create the models on the server, each registered factory must have an adapter set.
-// You can do this on a per-factory basis using
-modelRegistry.changeFactoryAdapter( SimpleProduct, AdapterTypes.API );
-// You can do this to all factories registered using
-modelRegistry.changeAllFactoryAdapters( AdapterTypes.API );
-
-// Once all of the initialization has been taken care of you can create models!
-// Any fields that are not defined will be filled out by random data.
-const product = await modelRegistry.getFactory( SimpleProduct ).create( { name: 'Test Product' } );
-// You can now access the ID of the created model using `product.id`!
-
-// You can also create models in bulk!
-const poducts = await modelRegistry.getFactory( SimpleProduct ).createList( 5 );
-// You now have an array of products to work with!
+```bash
+npm install @woocommerce/api --save-dev
 ```
 
-## Custom Models
+Depending on what you're intending to get out of the API client there are a few different ways of using it.
 
-## Custom Adapters
+### REST API
+
+The simplest way to use the client is directly:
+
+```javascript
+import { HTTPClientFactory } from '@woocommerce/api';
+
+// You can create an API client using the client factory with pre-configured middleware for convenience.
+let httpClient = HTTPClientFactory.withBasicAuth(
+    // The base URL of your REST API.
+    'https://example.com/wp-json/',
+    // The username for your WordPress user.
+    'username',
+    // The password for your WordPress user.
+    'password',
+);
+
+// You can also create an API client configured for requests using OAuth.
+httpClient = HTTPClientFactory.withOAuth(
+    // The base URL of your REST API.
+    'https://example.com/wp-json/',
+    // The OAuth API Key's consumer secret.
+    'consumer_secret',
+    // The OAuth API Key's consumer password.
+    'consumer_pasword',
+);
+
+// You can then use the client to make API requests.
+httpClient.get( '/wc/v3/products' ).then( ( response ) => {
+  // Access the status code from the response.
+  response.statusCode;
+  // Access the headers from the response.
+  response.headers;
+  // Access the data from the response, in this case, the products.
+  response.data;
+} );
+```
+
+### Repositories
+
+As a convenience utility we've created repositories for core data types that can simplify interacting with the API.
+These repositories provide CRUD methods for ease-of-use:
+
+```javascript
+import { SimpleProduct } from '@woocommerce/api';
+
+// Prepare the HTTP client that will be consumed by the repository.
+// This is necessary so that it can make requests to the REST API.
+const httpClient = HTTPClientFactory.withBasicAuth( 'https://example.com/wp-json/','username','password' );
+
+const repository = SimpleProduct.restRepository( httpClient );
+
+// The repository can now be used to create models.
+const product = repository.create( { name: 'Simple Product', regularPrice: '9.99' } );
+
+// The response will be one of the models with structured properties and TypeScript support.
+product.id;
+
+```
