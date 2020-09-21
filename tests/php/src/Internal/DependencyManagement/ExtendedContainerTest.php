@@ -33,7 +33,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	 * @testdox 'add' should throw an exception when trying to register a class not in the WooCommerce root namespace.
 	 */
 	public function test_add_throws_when_trying_to_register_class_in_forbidden_namespace() {
-		$external_class = \League\Container\Container::class;
+		$external_class = \WooCommerce::class; // \Automattic\WooCommerce\Vendor\League\Container\Container::class;
 
 		$this->expectException( ContainerException::class );
 		$this->expectExceptionMessage( "You cannot add '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
@@ -45,7 +45,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	 * @testdox 'add' should throw an exception when trying to register a concrete class not in the WooCommerce root namespace.
 	 */
 	public function test_add_throws_when_trying_to_register_concrete_class_in_forbidden_namespace() {
-		$external_class = \League\Container\Container::class;
+		$external_class = \WooCommerce::class;
 
 		$this->expectException( ContainerException::class );
 		$this->expectExceptionMessage( "You cannot add concrete '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
@@ -81,7 +81,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 		$instance = new DependencyClass();
 		$this->sut->add( DependencyClass::class, $instance, true );
 
-		$external_class = \League\Container\Container::class;
+		$external_class = \WooCommerce::class;
 
 		$this->expectException( ContainerException::class );
 		$this->expectExceptionMessage( "You cannot use concrete '$external_class', only classes in the Automattic\WooCommerce\ namespace are allowed." );
