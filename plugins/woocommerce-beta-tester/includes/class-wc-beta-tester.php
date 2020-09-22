@@ -86,7 +86,7 @@ class WC_Beta_Tester {
 		);
 
 		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
-		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
+		add_filter( 'auto_update_plugin', array( $this, 'auto_update_woocommerce' ), 100, 2 );
 
 		if ( 'stable' !== $this->get_settings()->channel ) {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
