@@ -44,7 +44,7 @@ describe( 'Non-US store does not get the install recommended features checkbox',
 		} );
 	} );
 	it( 'can complete the industry section', async () => {
-		await completeIndustrySection( 8 );
+		await completeIndustrySection( 7 );
 	} );
 	it( 'can complete the product types section', completeProductTypesSection );
 	it( 'does not have the install recommended features checkbox', async () => {

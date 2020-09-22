@@ -315,11 +315,6 @@ class Onboarding {
 					'use_description'   => false,
 					'description_label' => '',
 				),
-				'art-music-photography'           => array(
-					'label'             => __( 'Art, music, and photography', 'woocommerce-admin' ),
-					'use_description'   => false,
-					'description_label' => '',
-				),
 				'electronics-computers'           => array(
 					'label'             => __( 'Electronics and computers', 'woocommerce-admin' ),
 					'use_description'   => false,

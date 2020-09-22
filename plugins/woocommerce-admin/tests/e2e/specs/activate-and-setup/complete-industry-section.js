@@ -9,7 +9,7 @@ import { clickContinue, setCheckboxToChecked, getText } from './utils';
 import { waitForElementCount } from '../../utils/lib';
 const config = require( 'config' );
 
-export async function completeIndustrySection( expectedIndustryCount = 9 ) {
+export async function completeIndustrySection( expectedIndustryCount = 8 ) {
 	// Query for the industries checkboxes
 	await waitForElementCount(
 		page,
