@@ -187,6 +187,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Allow public access to core capabilities for other plugins. #26976
 * Dev - Add `woocommerce_should_send_no_stock_notification` filter. #27634
 * Dev - New action 'woocommerce_after_order_details' added in a order-details.php template. #26327
+* Dev - Fix and improve documentation of wc_string_to_bool and wc_bool_to_string. #27662
 * Localization - Remove duplicated entry for Cyprus when listing countries by continent. #27636
 * Localization - Add Egypt regions. #27495
 * Localization - Updated name for the Hungarian county called Csongrád-Csanád. #27075
