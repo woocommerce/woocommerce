@@ -102,6 +102,10 @@ class WC_REST_Authentication {
 	 * @return WP_Error|null|bool
 	 */
 	public function authentication_fallback( $error ) {
+		if ( ! empty( $error ) ) {
+			// Another plugin has already declared a failure.
+			return $error;
+		}
 		if ( empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) && 0 === get_current_user_id() ) {
 			// Authentication hasn't occurred during `determine_current_user`, so check auth.
 			$user_id = $this->authenticate( false );
