@@ -2134,39 +2134,15 @@ function wc_update_400_db_version() {
 /**
  * Register attributes as terms for variable products, in increments of 100 products.
  *
- * @return bool true if there are more products to process.
+ * This migration was added to support a new mechanism to improve the filtering of
+ * variable products by attribute (https://github.com/woocommerce/woocommerce/pull/26260),
+ * however that mechanism was later reverted (https://github.com/woocommerce/woocommerce/pull/27625)
+ * due to numerous issues found. Thus the migration is no longer needed.
+ *
+ * @return bool true if the migration needs to be run again.
  */
 function wc_update_440_insert_attribute_terms_for_variable_products() {
-	$state_option_name = 'woocommerce_' . __FUNCTION__ . '_state';
-
-	$page     = intval( get_option( $state_option_name, 1 ) );
-	$products = wc_get_products(
-		array(
-			'type'  => 'variable',
-			'limit' => 100,
-			'page'  => $page,
-		)
-	);
-	if ( empty( $products ) ) {
-		delete_option( $state_option_name );
-		return false;
-	}
-
-	$attribute_taxonomy_names = wc_get_attribute_taxonomy_names();
-	foreach ( $products as $product ) {
-		$variation_ids = $product->get_children();
-		foreach ( $variation_ids as $variation_id ) {
-			$variation            = wc_get_product( $variation_id );
-			$variation_attributes = $variation->get_attributes();
-			foreach ( $variation_attributes as $attr_name => $attr_value ) {
-				wp_set_post_terms( $variation_id, array( $attr_value ), $attr_name );
-			}
-			$attributes_to_delete = array_diff( $attribute_taxonomy_names, array_keys( $variation_attributes ) );
-			wp_delete_object_term_relationships( $variation_id, $attributes_to_delete );
-		}
-	}
-
-	return update_option( $state_option_name, $page + 1 );
+	return false;
 }
 
 /**
@@ -2241,4 +2217,54 @@ function wc_update_450_sanitize_coupons_code() {
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
 	return false;
+}
+
+/**
+ * Remove the product attribute related terms for variation products.
+ * Those are no longer created, and no longer needed after the new mechanism to improve the filtering of
+ * variable products by attribute was reverted (https://github.com/woocommerce/woocommerce/pull/27625).
+ *
+ * @return bool True if the script needs to be run again.
+ */
+function wc_update_470_remove_term_relationships_for_variations() {
+	global $wpdb;
+
+	$state_option_name       = 'woocommerce_' . __FUNCTION__ . '_state';
+	$last_id_previously_used = intval( get_option( $state_option_name, 0 ) );
+
+	$query = "
+		SELECT tr.object_id, tt.term_id, tt.taxonomy FROM {$wpdb->term_relationships} tr
+		JOIN {$wpdb->posts} p ON tr.object_id = p.ID
+		JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+		WHERE p.post_type = 'product_variation' AND tr.object_id >= %d
+		AND tt.taxonomy LIKE 'pa_%'
+		ORDER BY tr.object_id
+		LIMIT 10";
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+
+	$query = $wpdb->prepare( $query, $last_id_previously_used );
+
+	$results = $wpdb->get_results( $query );
+
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( empty( $results ) ) {
+		delete_option( $state_option_name );
+		return false;
+	}
+
+	foreach ( $results as $result ) {
+		wp_remove_object_terms( (int) $result->object_id, (int) $result->term_id, $result->taxonomy );
+	}
+
+	$last_id_previously_used = max(
+		array_map(
+			function( $item ) {
+				return $item->object_id;
+			},
+			$results
+		)
+	);
+	return update_option( $state_option_name, $last_id_previously_used );
 }
