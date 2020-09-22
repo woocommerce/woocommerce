@@ -598,7 +598,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			return false;
 		}
 
-		wp_delete_object_term_relationships( $variation_id, wc_get_attribute_taxonomy_names() );
 		return true;
 	}
 }
