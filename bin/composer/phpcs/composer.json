@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "woocommerce/woocommerce-sniffs": "^0.1.0"
+    }
+}
