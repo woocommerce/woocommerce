@@ -152,16 +152,20 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	 * @return string
 	 */
 	protected function construct_ssr() {
+		if ( version_compare( WC()->version, '3.6', '<' ) ) {
+			return '';
+		}
+
 		$transient_name = 'wc-beta-tester-ssr';
 		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
 			// When running WC 3.6 or greater it is necessary to manually load the REST API classes.
-			if ( version_compare( WC()->version, '3.6', '>=' ) && ! did_action( 'rest_api_init' ) ) {
+			if ( ! did_action( 'rest_api_init' ) ) {
 				WC()->api->rest_api_includes();
 			}
 
-			if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+			if ( ! class_exists( 'WC_REST_System_Status_Controller' ) ) {
 				return '';
 			}
 
@@ -184,10 +188,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			$ssr = '';
 			foreach ( $response['environment'] as $key => $value ) {
 				$index = $key;
-				// @todo remove this hack after fix schema in WooCommerce, and Claudio never let you folks forget that need to write schema first, and review after every change, schema is the most important part of the REST API.
-				if ( 'version' === $index ) {
-					$index = 'wc_version';
-				} elseif ( 'external_object_cache' === $index ) {
+				if ( 'external_object_cache' === $index ) {
 					$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
 					continue;
 				}
