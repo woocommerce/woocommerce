@@ -17,9 +17,7 @@ jobs:
           ref: ${{ matrix.build }}
       - name: Build
         id: build
-        uses: woocommerce/action-build@master
-        with:
-          generate-zip: true
+        uses: woocommerce/action-build@v2
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.0.3
         env:

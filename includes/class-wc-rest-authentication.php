@@ -2,7 +2,7 @@
 /**
  * REST API Authentication
  *
- * @package  WooCommerce/API
+ * @package  WooCommerce\API
  * @since    2.6.0
  */
 

@@ -2,7 +2,7 @@
 /**
  * WooCommerce Admin Functions
  *
- * @package  WooCommerce/Admin/Functions
+ * @package  WooCommerce\Admin\Functions
  * @version  2.4.0
  */
 

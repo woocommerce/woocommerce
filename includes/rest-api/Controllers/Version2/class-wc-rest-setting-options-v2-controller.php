@@ -530,18 +530,12 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				),
 				'value'       => array(
 					'description' => __( 'Setting value.', 'woocommerce' ),
-					'type'        => array( 'string', 'array', 'null' ),
-					'items'       => array(
-						'type' => array( 'string', 'null' ),
-					),
+					'type'        => 'mixed',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'default'     => array(
 					'description' => __( 'Default value for the setting.', 'woocommerce' ),
-					'type'        => array( 'string', 'array', 'null' ),
-					'items'       => array(
-						'type' => array( 'string', 'null' ),
-					),
+					'type'        => 'mixed',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

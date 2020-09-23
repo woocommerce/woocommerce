@@ -11,7 +11,7 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  * @version 3.6.0
  */
 
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 global $product;
 
 // Ensure visibility.
-if ( empty( $product ) || false === wc_get_loop_product_visibility( $product->get_id() ) || ! $product->is_visible() ) {
+if ( empty( $product ) || ! $product->is_visible() ) {
 	return;
 }
 ?>

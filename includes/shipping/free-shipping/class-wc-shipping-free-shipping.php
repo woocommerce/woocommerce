@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Shipping_Free_Shipping
  * @version 2.6.0
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 

@@ -2,7 +2,7 @@
 /**
  * Order helpers.
  *
- * @package WooCommerce/Tests
+ * @package WooCommerce\Tests
  */
 
 /**

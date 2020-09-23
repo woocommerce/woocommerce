@@ -4,7 +4,7 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.3.0
  */
 

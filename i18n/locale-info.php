@@ -2,7 +2,7 @@
 /**
  * Locales information
  *
- * @package WooCommerce/i18n
+ * @package WooCommerce\i18n
  * @version 3.5.0
  */
 
@@ -23,6 +23,15 @@ return array(
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'BA' => array(
+		'currency_code'  => 'BAM',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
@@ -147,6 +156,15 @@ return array(
 	'JP' => array(
 		'currency_code'  => 'JPY',
 		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'KR' => array(
+		'currency_code'  => 'KRW',
+		'currency_pos'   => 'right',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
 		'num_decimals'   => 0,

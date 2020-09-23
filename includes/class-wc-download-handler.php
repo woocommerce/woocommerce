@@ -4,7 +4,7 @@
  *
  * Handle digital downloads.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 2.2.0
  */
 
@@ -215,10 +215,12 @@ class WC_Download_Handler {
 			$filename = current( explode( '?', $filename ) );
 		}
 
-		$filename             = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+		$filename = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+
 		/**
 		 * Filter download method.
-		 * 
+		 *
+		 * @since 4.5.0
 		 * @param string $method     Download method.
 		 * @param int    $product_id Product ID.
 		 * @param string $file_path  URL to file.
