@@ -25,8 +25,8 @@ function replace_version( $filename, $package_json ) {
 		if ( stripos( $line, 'Stable tag: ' ) !== false ) {
 			$line = "Stable tag: {$package_json->version}\n";
 		}
-		if ( stripos( $line, '"name": "woocommerce/woocommerce-admin",' ) !== false ) {
-			$line .= "\t\"version\": \"{$package_json->version}\",\n";
+		if ( stripos( $line, '"version":' ) !== false ) {
+			$line = "\t\"version\": \"{$package_json->version}\",\n";
 		}
 		$lines[] = $line;
 	}
