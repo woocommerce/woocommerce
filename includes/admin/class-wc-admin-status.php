@@ -19,14 +19,14 @@ class WC_Admin_Status {
 	 * Handles output of the reports page in admin.
 	 */
 	public static function output() {
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-status.php';
+		include_once __DIR__ . '/views/html-admin-page-status.php';
 	}
 
 	/**
 	 * Handles output of report.
 	 */
 	public static function status_report() {
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-status-report.php';
+		include_once __DIR__ . '/views/html-admin-page-status-report.php';
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_Admin_Status {
 			echo '<div class="updated inline"><p>' . esc_html__( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-status-tools.php';
+		include_once __DIR__ . '/views/html-admin-page-status-tools.php';
 	}
 
 	/**
@@ -124,7 +124,7 @@ class WC_Admin_Status {
 			self::remove_log();
 		}
 
-		include_once 'views/html-admin-page-status-logs.php';
+		include_once __DIR__ . '/views/html-admin-page-status-logs.php';
 	}
 
 	/**
@@ -142,7 +142,7 @@ class WC_Admin_Status {
 		$log_table_list = new WC_Admin_Log_Table_List();
 		$log_table_list->prepare_items();
 
-		include_once 'views/html-admin-page-status-logs-db.php';
+		include_once __DIR__ . '/views/html-admin-page-status-logs-db.php';
 	}
 
 	/**

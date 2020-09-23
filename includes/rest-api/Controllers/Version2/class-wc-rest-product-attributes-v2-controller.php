@@ -4,7 +4,7 @@
  *
  * Handles requests to the products/attributes endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   2.6.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Product Attributes controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Attributes_V1_Controller
  */
 class WC_REST_Product_Attributes_V2_Controller extends WC_REST_Product_Attributes_V1_Controller {

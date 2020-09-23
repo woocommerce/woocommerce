@@ -324,7 +324,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function return_valid_logger_instance() {
 		if ( ! class_exists( 'Dummy_WC_Logger' ) ) {
-			include_once 'dummy-wc-logger.php';
+			include_once __DIR__ . '/dummy-wc-logger.php';
 		}
 		return new Dummy_WC_Logger();
 	}
