@@ -220,7 +220,7 @@
 		"readline-sync": "1.4.10",
 		"recast": "0.20.3",
 		"replace": "1.1.5",
-		"request-promise": "4.2.5",
+		"request-promise": "4.2.6",
 		"rimraf": "3.0.2",
 		"rtlcss": "2.5.0",
 		"sass-loader": "8.0.2",
