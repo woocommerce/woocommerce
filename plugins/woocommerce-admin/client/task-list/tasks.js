@@ -191,7 +191,7 @@ export function getAllTasks( {
 				} );
 				updateQueryString( { task: 'payments' } );
 			},
-			visible: ! woocommercePaymentsInstalled,
+			visible: ! woocommercePaymentsInstalled || countryCode !== 'US',
 			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{
