@@ -108,7 +108,7 @@ final class ReserveStock {
 	 * Put a temporary hold on stock for a customer using their ID.
 	 *
 	 * @throws ReserveStockException If stock cannot be reserved.
-
+	 *
 	 * @param string $customer_id can be set on the manually, fallback to current customer session.
 	 * @param int    $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
