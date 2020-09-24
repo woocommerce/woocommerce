@@ -32,6 +32,16 @@ export const registerExpressPaymentMethod = ( expressPaymentMethodCreator ) => {
 	}
 };
 
+export const __experimentalDeRegisterPaymentMethod = ( paymentMethodName ) => {
+	delete paymentMethods[ paymentMethodName ];
+};
+
+export const __experimentalDeRegisterExpressPaymentMethod = (
+	paymentMethodName
+) => {
+	delete expressPaymentMethods[ paymentMethodName ];
+};
+
 export const getPaymentMethods = () => {
 	return paymentMethods;
 };
