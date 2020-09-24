@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "types": [ "node", "jest", "faker", "axios", "moxios", "create-hmac" ],
+    "types": [ "node", "jest", "axios", "moxios", "create-hmac" ],
     "rootDir": "src", 
     "outDir": "dist",
     "target": "es5"

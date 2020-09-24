@@ -24,7 +24,7 @@ describe( 'ModelRepository', () => {
 	it( 'should throw error on create without callback', () => {
 		const repository = new ModelRepository< DummyModel >( null, null, null, null );
 
-		expect( () => repository.create( { name: 'test' } ) ).toThrowError( /not defined/i );
+		expect( () => repository.create( { name: 'test' } ) ).toThrowError( /not supported/i );
 	} );
 
 	it( 'should read', async () => {
@@ -40,7 +40,7 @@ describe( 'ModelRepository', () => {
 	it( 'should throw error on read without callback', () => {
 		const repository = new ModelRepository< DummyModel >( null, null, null, null );
 
-		expect( () => repository.read( 1 ) ).toThrowError( /not defined/i );
+		expect( () => repository.read( 1 ) ).toThrowError( /not supported/i );
 	} );
 
 	it( 'should update', async () => {
@@ -56,7 +56,7 @@ describe( 'ModelRepository', () => {
 	it( 'should throw error on update without callback', () => {
 		const repository = new ModelRepository< DummyModel >( null, null, null, null );
 
-		expect( () => repository.update( 1, { name: 'new-name' } ) ).toThrowError( /not defined/i );
+		expect( () => repository.update( 1, { name: 'new-name' } ) ).toThrowError( /not supported/i );
 	} );
 
 	it( 'should delete', async () => {
@@ -71,6 +71,6 @@ describe( 'ModelRepository', () => {
 	it( 'should throw error on delete without callback', () => {
 		const repository = new ModelRepository< DummyModel >( null, null, null, null );
 
-		expect( () => repository.delete( 1 ) ).toThrowError( /not defined/i );
+		expect( () => repository.delete( 1 ) ).toThrowError( /not supported/i );
 	} );
 } );
