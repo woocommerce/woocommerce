@@ -72,7 +72,7 @@ install:
     fi
   - nvm install
   - npm install
-  - composer install --no-dev
+  - composer install
   - |
     # Install WP Test suite, install PHPUnit globally:
     if [[ ! -z "$WP_VERSION" ]]; then
