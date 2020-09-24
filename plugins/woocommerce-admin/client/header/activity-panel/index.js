@@ -128,79 +128,80 @@ export class ActivityPanel extends Component {
 			query,
 		} = this.props;
 
-		// Don't show the inbox on the Home screen.
-		const { location } = this.props.getHistory();
-		const showInbox = isEmbedded || location.pathname !== '/';
 		const isPerformingSetupTask =
 			query.task &&
 			! query.path &&
 			( requestingTaskListOptions === true ||
 				( taskListHidden === false && taskListComplete === false ) );
 
-		if ( ! taskListComplete && showInbox ) {
-			return [
-				{
+		// Don't show the inbox on the Home screen.
+		const { location } = this.props.getHistory();
+
+		const showInbox =
+			( isEmbedded || location.pathname !== '/' ) &&
+			! isPerformingSetupTask;
+
+		const inbox = showInbox
+			? {
 					name: 'inbox',
 					title: __( 'Inbox', 'woocommerce-admin' ),
 					icon: <i className="material-icons-outlined">inbox</i>,
 					unread: hasUnreadNotes,
-				},
-				{
-					name: 'setup',
-					title: __( 'Store Setup', 'woocommerce-admin' ),
-					icon: <SetupProgress />,
-				},
-				isPerformingSetupTask && {
+			  }
+			: null;
+
+		const setup =
+			! taskListComplete && ! isPerformingSetupTask
+				? {
+						name: 'setup',
+						title: __( 'Store Setup', 'woocommerce-admin' ),
+						icon: <SetupProgress />,
+				  }
+				: null;
+
+		const ordersStockAndReviews =
+			taskListComplete && ! isPerformingSetupTask
+				? [
+						{
+							name: 'orders',
+							title: __( 'Orders', 'woocommerce-admin' ),
+							icon: <PagesIcon />,
+							unread: hasUnreadOrders,
+						},
+						manageStock === 'yes' && {
+							name: 'stock',
+							title: __( 'Stock', 'woocommerce-admin' ),
+							icon: (
+								<i className="material-icons-outlined">
+									widgets
+								</i>
+							),
+							unread: hasUnreadStock,
+						},
+						reviewsEnabled === 'yes' && {
+							name: 'reviews',
+							title: __( 'Reviews', 'woocommerce-admin' ),
+							icon: (
+								<i className="material-icons-outlined">
+									star_border
+								</i>
+							),
+							unread: hasUnapprovedReviews,
+						},
+				  ].filter( Boolean )
+				: [];
+
+		const help = isPerformingSetupTask
+			? {
 					name: 'help',
 					title: __( 'Help', 'woocommerce-admin' ),
-					icon: <i className="material-icons-outlined">support</i>,
-				},
-			].filter( Boolean );
-		}
+					icon: <Icon icon={ lifesaver } />,
+			  }
+			: null;
 
-		return [
-			! isPerformingSetupTask && showInbox
-				? {
-						name: 'inbox',
-						title: __( 'Inbox', 'woocommerce-admin' ),
-						icon: <i className="material-icons-outlined">inbox</i>,
-						unread: hasUnreadNotes,
-				  }
-				: null,
-			! isPerformingSetupTask && {
-				name: 'orders',
-				title: __( 'Orders', 'woocommerce-admin' ),
-				icon: <PagesIcon />,
-				unread: hasUnreadOrders,
-			},
-			! isPerformingSetupTask && manageStock === 'yes'
-				? {
-						name: 'stock',
-						title: __( 'Stock', 'woocommerce-admin' ),
-						icon: (
-							<i className="material-icons-outlined">widgets</i>
-						),
-						unread: hasUnreadStock,
-				  }
-				: null,
-			! isPerformingSetupTask && reviewsEnabled === 'yes'
-				? {
-						name: 'reviews',
-						title: __( 'Reviews', 'woocommerce-admin' ),
-						icon: (
-							<i className="material-icons-outlined">
-								star_border
-							</i>
-						),
-						unread: hasUnapprovedReviews,
-				  }
-				: null,
-			isPerformingSetupTask && {
-				name: 'help',
-				title: __( 'Help', 'woocommerce-admin' ),
-				icon: <Icon icon={ lifesaver } />,
-			},
-		].filter( Boolean );
+		return [ inbox, ...ordersStockAndReviews, setup, help ].filter(
+			Boolean
+		);
 	}
 
 	getPanelContent( tab ) {

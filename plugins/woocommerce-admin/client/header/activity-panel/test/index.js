@@ -120,4 +120,32 @@ describe( 'Activity Panel', () => {
 		// Expect that "Help" tab is absent.
 		expect( screen.queryByText( 'Help' ) ).toBeNull();
 	} );
+
+	it( 'should only render the store setup link when TaskList is not complete', () => {
+		const { queryByText, rerender } = render(
+			<ActivityPanel
+				requestingTaskListOptions={ false }
+				taskListComplete={ false }
+				taskListHidden={ false }
+				query={ {
+					task: 'products',
+				} }
+			/>
+		);
+
+		expect( queryByText( 'Store Setup' ) ).toBeDefined();
+
+		rerender(
+			<ActivityPanel
+				requestingTaskListOptions={ false }
+				taskListComplete
+				taskListHidden={ false }
+				query={ {
+					task: 'products',
+				} }
+			/>
+		);
+
+		expect( queryByText( 'Store Setup' ) ).toBeNull();
+	} );
 } );
