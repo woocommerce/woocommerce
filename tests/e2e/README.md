@@ -158,6 +158,14 @@ For example:
 - `PUPPETEER_SLOWMO=10` - will run tests faster
 - `PUPPETEER_SLOWMO=70` - will run tests slower
 
+By default, the automatic fresh download of Chromium is disabled. To enable this
+
+```
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm run test:e2e-dev
+```
+
+**Note** This won't prevent Puppeteer downloading Chromium if Chromium isn't installed.
+
 ### How to run an individual test
 
 To run an individual test, use the direct path to the spec. For example:

@@ -5,7 +5,7 @@ const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { getAppRoot } = require( '../utils' );
-const { JEST_PUPPETEER_CONFIG } = process.env;
+const { JEST_PUPPETEER_CONFIG, PUPPETEER_SKIP_CHROMIUM_DOWNLOAD } = process.env;
 
 program
 	.usage( '<file ...> [options]' )
@@ -29,6 +29,7 @@ let testEnvVars = {
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 	node_config_dev: program.dev ? 'yes' : 'no',
 	jest_test_timeout: program.dev ? 120000 : 30000,
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: typeof PUPPETEER_SKIP_CHROMIUM_DOWNLOAD == 'undefined' ? true : PUPPETEER_SKIP_CHROMIUM_DOWNLOAD,
 };
 
 if ( ! JEST_PUPPETEER_CONFIG ) {
