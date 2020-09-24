@@ -98,7 +98,7 @@
 		"@wordpress/html-entities": "2.5.0",
 		"@wordpress/i18n": "3.8.0",
 		"@wordpress/is-shallow-equal": "1.7.0",
-		"@wordpress/scripts": "12.0.0",
+		"@wordpress/scripts": "12.1.0",
 		"autoprefixer": "9.8.6",
 		"axios": "0.19.2",
 		"babel-plugin-transform-async-generator-functions": "6.24.1",
