@@ -250,10 +250,11 @@ final class ReserveStock {
 	 * Returns query statement for getting reserved stock of a product.
 	 *
 	 * @param  int     $product_id Product ID.
-	 * @param  integer $exclude_customer_id Optional customer_id to exclude from the results.
+	 * @param  integer $exclude_order_id Optional order_id to exclude from the results.
+	 * @param  string  $exclude_customer_id Optional customer_id to exclude from the results.
 	 * @return string|void Query statement.
 	 */
-	private function get_query_for_reserved_stock( $product_id, $exclude_customer_id = 0 ) {
+	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0, $exclude_customer_id = 0 ) {
 		global $wpdb;
 
 		$query = $wpdb->prepare(
@@ -261,9 +262,11 @@ final class ReserveStock {
 			SELECT COALESCE( SUM( stock_table.`stock_quantity` ), 0 ) FROM $wpdb->wc_reserved_stock stock_table
 			WHERE stock_table.`product_id` = %d
 			AND stock_table.`expires` > NOW()
+			AND stock_table.`order_id` != %s
 			AND stock_table.`customer_id` != %s
 			",
 			$product_id,
+			$exclude_order_id,
 			$exclude_customer_id
 		);
 
@@ -274,8 +277,9 @@ final class ReserveStock {
 		 * @since 4.5.0
 		 * @param string $query            The query for getting reserved stock of a product.
 		 * @param int    $product_id       Product ID.
-		 * @param int    $exclude_customer_id customer_id to exclude from the results.
+		 * @param int    $exclude_order_id order_id to exclude from the results.
+		 * @param string $exclude_customer_id customer_id to exclude from the results.
 		 */
-		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_customer_id );
+		return apply_filters( 'woocommerce_query_for_reserved_stock', $query, $product_id, $exclude_order_id, $exclude_customer_id );
 	}
 }
