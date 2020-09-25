@@ -344,11 +344,12 @@ const completeOldSetupWizard = async () => {
 /**
  * Create simple product.
  */
-const createSimpleProduct = () => {
-	return factories.products.simple.create( {
+const createSimpleProduct = async () => {
+	const product = await factories.products.simple.create( {
 		name: simpleProductName,
 		regularPrice: '9.99'
-	} ).then( product => product.id );
+	} );
+	return product.id;
 } ;
 
 /**

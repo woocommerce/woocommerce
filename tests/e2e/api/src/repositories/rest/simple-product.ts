@@ -13,6 +13,7 @@ function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProduct > {
 		const response = await httpClient.post(
 			'/wc/v3/products',
 			{
+				type: 'simple',
 				name: properties.name,
 				regular_price: properties.regularPrice,
 			},

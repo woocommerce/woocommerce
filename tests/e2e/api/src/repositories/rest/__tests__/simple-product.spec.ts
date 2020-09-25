@@ -24,6 +24,6 @@ describe( 'simpleProductRESTRepository', () => {
 
 		expect( created ).toBeInstanceOf( SimpleProduct );
 		expect( created ).toMatchObject( { id: 123 } );
-		expect( httpClient.post ).toHaveBeenCalledWith( '/wc/v3/products', { name: 'Test Product' } );
+		expect( httpClient.post ).toHaveBeenCalledWith( '/wc/v3/products', { type: 'simple', name: 'Test Product' } );
 	} );
 } );
