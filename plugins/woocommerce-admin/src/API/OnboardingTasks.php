@@ -498,6 +498,15 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
+				'stripeSupportedCountries'       => array(
+					'type'        => 'array',
+					'description' => __( 'Country codes that are supported by Stripe.', 'woocommerce-admin' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 				'taxJarActivated'                => array(
 					'type'        => 'boolean',
 					'description' => __( 'If the store has the TaxJar extension active.', 'woocommerce-admin' ),

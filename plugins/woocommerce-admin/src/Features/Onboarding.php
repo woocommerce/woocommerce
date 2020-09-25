@@ -600,13 +600,12 @@ class Onboarding {
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
-			$settings['onboarding']['activeTheme']              = get_option( 'stylesheet' );
-			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
-			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
-			$current_user                                       = wp_get_current_user();
-			$settings['onboarding']['userEmail']                = esc_html( $current_user->user_email );
-			$settings['onboarding']['productTypes']             = self::get_allowed_product_types();
-			$settings['onboarding']['themes']                   = self::get_themes();
+			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
+			$settings['onboarding']['euCountries']  = WC()->countries->get_european_union_countries();
+			$current_user                           = wp_get_current_user();
+			$settings['onboarding']['userEmail']    = esc_html( $current_user->user_email );
+			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
+			$settings['onboarding']['themes']       = self::get_themes();
 		}
 
 		return $settings;
@@ -659,57 +658,6 @@ class Onboarding {
 		$options[] = 'general';
 
 		return $options;
-	}
-
-	/**
-	 * Returns a list of Stripe supported countries. This method can be removed once merged to core.
-	 *
-	 * @return array
-	 */
-	private static function get_stripe_supported_countries() {
-		// https://stripe.com/global.
-		return array(
-			'AU',
-			'AT',
-			'BE',
-			'BG',
-			// 'BR', // Preview, requires invite.
-			'CA',
-			'CY',
-			'CZ',
-			'DK',
-			'EE',
-			'FI',
-			'FR',
-			'DE',
-			'GR',
-			'HK',
-			'IN', // Preview.
-			'IE',
-			'IT',
-			'JP',
-			'LV',
-			'LT',
-			'LU',
-			'MY',
-			'MT',
-			'MX',
-			'NL',
-			'NZ',
-			'NO',
-			'PL',
-			'PT',
-			'RO',
-			'SG',
-			'SK',
-			'SI',
-			'ES',
-			'SE',
-			'CH',
-			'GB',
-			'US',
-			'PR',
-		);
 	}
 
 	/**
