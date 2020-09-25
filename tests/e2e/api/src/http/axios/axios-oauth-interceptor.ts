@@ -7,6 +7,12 @@ import { AxiosInterceptor } from './axios-interceptor';
  * A utility class for managing the lifecycle of an authentication interceptor.
  */
 export class AxiosOAuthInterceptor extends AxiosInterceptor {
+	/**
+	 * The OAuth class for signing the request.
+	 *
+	 * @type {Object}
+	 * @private
+	 */
 	private oauth: OAuth;
 
 	/**

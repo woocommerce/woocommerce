@@ -1,5 +1,13 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
+/**
+ * An object containing the IDs for an interceptor currently applied to a client.
+ *
+ * @typedef ActiveInterceptor
+ * @property {AxiosInstance} client The client the interceptor is tied to.
+ * @property {number} requestInterceptorID The ID of the request interceptor callbacks.
+ * @property {number} responseInterceptorID The ID of the response interceptor callbacks.
+ */
 type ActiveInterceptor = {
 	client: AxiosInstance;
 	requestInterceptorID: number;
@@ -10,6 +18,12 @@ type ActiveInterceptor = {
  * A base class for encapsulating the start and stop functionality required by all axios interceptors.
  */
 export abstract class AxiosInterceptor {
+	/**
+	 * An array of the active interceptor records for all of the clients this interceptor is attached to.
+	 *
+	 * @type {ActiveInterceptor[]}
+	 * @private
+	 */
 	private readonly activeInterceptors: ActiveInterceptor[] = [];
 
 	/**

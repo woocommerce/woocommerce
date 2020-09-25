@@ -4,8 +4,8 @@ import { Model } from '../models/model';
  * A callback for creating a model using a data source.
  *
  * @callback CreateFn
- * @param {*} properties The properties of the model to create.
- * @return {Promise} Resolves to the created model.
+ * @param {Object} properties The properties of the model to create.
+ * @return {Promise.<Model>} Resolves to the created model.
  */
 export type CreateFn< T > = ( properties: Partial< T > ) => Promise< T >;
 
@@ -14,7 +14,7 @@ export type CreateFn< T > = ( properties: Partial< T > ) => Promise< T >;
  *
  * @callback ReadFn
  * @param {number|Object} id The ID or object used to find the model.
- * @return {Promise} Resolves to the read model.
+ * @return {Promise.<Model>} Resolves to the read model.
  */
 export type ReadFn< IDParam, T > = ( id: IDParam ) => Promise< T >;
 
@@ -23,7 +23,7 @@ export type ReadFn< IDParam, T > = ( id: IDParam ) => Promise< T >;
  *
  * @callback UpdateFn
  * @param {number|Object} id The ID or object used to find the model.
- * @return {Promise} Resolves to the updated model.
+ * @return {Promise.<Model>} Resolves to the updated model.
  */
 export type UpdateFn< IDParam, T > = ( id: IDParam, properties: Partial< T > ) => Promise< T >;
 
@@ -32,11 +32,13 @@ export type UpdateFn< IDParam, T > = ( id: IDParam, properties: Partial< T > ) =
  *
  * @callback DeleteFn
  * @param {number|Object} id The ID or object used to find the model.
- * @return {Promise} Resolves to true once the model has been deleted.
+ * @return {Promise.<boolean>} Resolves to true once the model has been deleted.
  */
 export type DeleteFn< IDParam > = ( id: IDParam ) => Promise< boolean >;
 
 /**
+ * An interface for repositories that can create models.
+ *
  * @typedef CreatesModels
  * @property {CreateFn} create Creates a model using the repository.
  */
@@ -45,6 +47,8 @@ export interface CreatesModels< T extends Model > {
 }
 
 /**
+ * An interface for repositories that can read models.
+ *
  * @typedef ReadsModels
  * @property {ReadFn} read Reads a model using the repository.
  */
@@ -53,6 +57,8 @@ export interface ReadsModels< T extends Model, IDParam = number > {
 }
 
 /**
+ * An interface for repositories that can update models.
+ *
  * @typedef UpdatesModels
  * @property {UpdateFn} update Updates a model using the repository.
  */
@@ -61,6 +67,8 @@ export interface UpdatesModels< T extends Model, IDParam = number > {
 }
 
 /**
+ * An interface for repositories that can delete models.
+ *
  * @typedef DeletesModels
  * @property {DeleteFn} delete Deletes a model using the repository.
  */
@@ -78,9 +86,36 @@ export class ModelRepository< T extends Model, IDParam = number > implements
 	ReadsModels< T, IDParam >,
 	UpdatesModels< T, IDParam >,
 	DeletesModels< IDParam > {
+	/**
+	 * The hook used to create models
+	 *
+	 * @type {CreateFn}
+	 * @private
+	 */
 	private readonly createHook: CreateFn< T > | null;
+
+	/**
+	 * The hook used to read models.
+	 *
+	 * @type {ReadFn}
+	 * @private
+	 */
 	private readonly readHook: ReadFn< IDParam, T > | null;
+
+	/**
+	 * The hook used to update models.
+	 *
+	 * @type {UpdateFn}
+	 * @private
+	 */
 	private readonly updateHook: UpdateFn< IDParam, T > | null;
+
+	/**
+	 * The hook used to delete models.
+	 *
+	 * @type {DeleteFn}
+	 * @private
+	 */
 	private readonly deleteHook: DeleteFn< IDParam > | null;
 
 	/**
@@ -106,8 +141,8 @@ export class ModelRepository< T extends Model, IDParam = number > implements
 	/**
 	 * Creates the given model.
 	 *
-	 * @param {*} properties The properties for the model we'd like to create.
-	 * @return {Promise} A promise that resolves to the model after creation.
+	 * @param {Object} properties The properties for the model we'd like to create.
+	 * @return {Promise.<Model>} A promise that resolves to the model after creation.
 	 */
 	public create( properties: Partial< T > ): Promise< T > {
 		if ( ! this.createHook ) {
@@ -121,7 +156,7 @@ export class ModelRepository< T extends Model, IDParam = number > implements
 	 * Reads the given model.
 	 *
 	 * @param {number|Object} id The identifier for the model to read.
-	 * @return {Promise} A promise that resolves to the model.
+	 * @return {Promise.<Model>} A promise that resolves to the model.
 	 */
 	public read( id: IDParam ): Promise< T > {
 		if ( ! this.readHook ) {
@@ -135,8 +170,8 @@ export class ModelRepository< T extends Model, IDParam = number > implements
 	 * Updates the given model.
 	 *
 	 * @param {number|Object} id The identifier for the model to create.
-	 * @param {*} properties The model properties that we'd like to update.
-	 * @return {Promise} A promise that resolves to the model after updating.
+	 * @param {Object} properties The model properties that we'd like to update.
+	 * @return {Promise.<Model>} A promise that resolves to the model after updating.
 	 */
 	public update( id: IDParam, properties: Partial< T > ): Promise< T > {
 		if ( ! this.updateHook ) {
@@ -150,7 +185,7 @@ export class ModelRepository< T extends Model, IDParam = number > implements
 	 * Deletes the given model.
 	 *
 	 * @param {number|Object} id The identifier for the model to delete.
-	 * @return {Promise} A promise that resolves to "true" on success.
+	 * @return {Promise.<boolean>} A promise that resolves to "true" on success.
 	 */
 	public delete( id: IDParam ): Promise< boolean > {
 		if ( ! this.deleteHook ) {

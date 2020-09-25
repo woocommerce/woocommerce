@@ -7,7 +7,20 @@ import { AxiosResponseInterceptor } from './axios-response-interceptor';
  * An HTTPClient implementation that uses Axios to make requests.
  */
 export class AxiosClient implements HTTPClient {
+	/**
+	 * An instance of the axios client for making HTTP requests.
+	 *
+	 * @type {AxiosInstance}
+	 * @private
+	 */
 	private readonly client: AxiosInstance;
+
+	/**
+	 * An array of interceptors that should be applied to the client.
+	 *
+	 * @type {AxiosInterceptor[]}
+	 * @private
+	 */
 	private readonly interceptors: AxiosInterceptor[];
 
 	/**
@@ -34,12 +47,12 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a GET request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*}      params Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an HTTPResponse.
+	 * @param {Object} params Any parameters that should be passed in the request.
+	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public get< T = any >(
 		path: string,
-		params?: any,
+		params?: object,
 	): Promise< HTTPResponse< T >> {
 		return this.client.get( path, { params } );
 	}
@@ -48,12 +61,12 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a POST request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an HTTPResponse.
+	 * @param {Object} data Any parameters that should be passed in the request.
+	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public post< T = any >(
 		path: string,
-		data?: any,
+		data?: object,
 	): Promise< HTTPResponse< T >> {
 		return this.client.post( path, data );
 	}
@@ -62,12 +75,12 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a PUT request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an HTTPResponse.
+	 * @param {Object}      data Any parameters that should be passed in the request.
+	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public put< T = any >(
 		path: string,
-		data?: any,
+		data?: object,
 	): Promise< HTTPResponse< T >> {
 		return this.client.put( path, data );
 	}
@@ -77,11 +90,11 @@ export class AxiosClient implements HTTPClient {
 	 *
 	 * @param {string} path The path we should query.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an HTTPResponse.
+	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public patch< T = any >(
 		path: string,
-		data?: any,
+		data?: object,
 	): Promise< HTTPResponse< T >> {
 		return this.client.patch( path, data );
 	}
@@ -91,11 +104,11 @@ export class AxiosClient implements HTTPClient {
 	 *
 	 * @param {string} path The path we should send the request to.
 	 * @param {*}      data Any parameters that should be passed in the request.
-	 * @return {Promise} Resolves to an HTTPResponse.
+	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public delete< T = any >(
 		path: string,
-		data?: any,
+		data?: object,
 	): Promise< HTTPResponse< T >> {
 		return this.client.delete( path, { data } );
 	}

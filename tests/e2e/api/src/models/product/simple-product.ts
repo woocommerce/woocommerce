@@ -4,12 +4,17 @@ import { CreatesModels } from '../../framework/model-repository';
 import { simpleProductRESTRepository } from '../../repositories/rest/simple-product';
 
 /**
- * The simple product class.
+ * A simple product object.
  */
 export class SimpleProduct extends AbstractProduct {
-	public constructor( partial: Partial< SimpleProduct > = {} ) {
+	/**
+	 * Creates a new simple product instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties: Partial< SimpleProduct > = {} ) {
 		super();
-		Object.assign( this, partial );
+		Object.assign( this, properties );
 	}
 
 	/**
