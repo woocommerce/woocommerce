@@ -1,7 +1,7 @@
 import { AbstractProduct } from './abstract-product';
 import { HTTPClient } from '../../http';
 import { CreatesModels } from '../../framework/model-repository';
-import { simpleProductRESTRepository } from '../../repositories/rest/simple-product';
+import { simpleProductRESTRepository } from '../../repositories/rest/products/simple-product';
 
 /**
  * A simple product object.

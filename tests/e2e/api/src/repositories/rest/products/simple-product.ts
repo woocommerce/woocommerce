@@ -1,6 +1,6 @@
-import { HTTPClient } from '../../http';
-import { CreateFn, CreatesModels, ModelRepository } from '../../framework/model-repository';
-import { SimpleProduct } from '../../models';
+import { HTTPClient } from '../../../http';
+import { CreateFn, CreatesModels, ModelRepository } from '../../../framework/model-repository';
+import { SimpleProduct } from '../../../models';
 
 /**
  * Creates a callback for REST model creation.
