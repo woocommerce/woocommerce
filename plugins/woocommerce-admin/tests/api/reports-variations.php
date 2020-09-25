@@ -117,7 +117,6 @@ class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'product_includes' => $variation->get_parent_id(),
-				'products'         => $variation->get_parent_id(),
 				'variations'       => $variation->get_id() . ',' . $variation_2->get_id(),
 			)
 		);

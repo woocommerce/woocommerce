@@ -12,6 +12,7 @@ import {
 	getCouponLabels,
 	getProductLabels,
 	getTaxRateLabels,
+	getVariationLabels,
 } from '../../../lib/async-requests';
 
 const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
@@ -154,6 +155,51 @@ export const advancedFilters = applyFilters(
 					component: 'Search',
 					type: 'products',
 					getLabels: getProductLabels,
+				},
+			},
+			variation: {
+				labels: {
+					add: __( 'Variations', 'woocommerce-admin' ),
+					placeholder: __( 'Search variations', 'woocommerce-admin' ),
+					remove: __(
+						'Remove variations filter',
+						'woocommerce-admin'
+					),
+					rule: __(
+						'Select a variation filter match',
+						'woocommerce-admin'
+					),
+					/* translators: A sentence describing a Variation filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
+					title: __(
+						'{{title}}Variation{{/title}} {{rule /}} {{filter /}}',
+						'woocommerce-admin'
+					),
+					filter: __( 'Select variation', 'woocommerce-admin' ),
+				},
+				rules: [
+					{
+						value: 'includes',
+						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given variation(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x(
+							'Includes',
+							'variations',
+							'woocommerce-admin'
+						),
+					},
+					{
+						value: 'excludes',
+						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given variation(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x(
+							'Excludes',
+							'variations',
+							'woocommerce-admin'
+						),
+					},
+				],
+				input: {
+					component: 'Search',
+					type: 'variations',
+					getLabels: getVariationLabels,
 				},
 			},
 			coupon: {

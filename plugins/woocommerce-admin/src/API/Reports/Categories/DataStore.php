@@ -107,12 +107,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_order_by_params( $query_args, 'inner', "{$wpdb->wc_category_lookup}.category_tree_id" );
 		}
 
-		// @todo Only products in the category C or orders with products from category C (and, possibly others?).
-		$included_products = $this->get_included_products( $query_args );
-		if ( $included_products ) {
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
-		}
-
 		$this->add_order_status_clause( $query_args, $order_product_lookup_table, $this->subquery );
 		$this->subquery->add_sql_clause( 'where', "AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL" );
 	}
@@ -167,8 +161,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function get_included_categories_array( $query_args ) {
-		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
-			return $query_args['categories'];
+		if ( isset( $query_args['category_includes'] ) && is_array( $query_args['category_includes'] ) && count( $query_args['category_includes'] ) > 0 ) {
+			return $query_args['category_includes'];
 		}
 		return array();
 	}
@@ -215,15 +209,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'      => get_option( 'posts_per_page' ),
-			'page'          => 1,
-			'order'         => 'DESC',
-			'orderby'       => 'date',
-			'before'        => TimeInterval::default_before(),
-			'after'         => TimeInterval::default_after(),
-			'fields'        => '*',
-			'categories'    => array(),
-			'extended_info' => false,
+			'per_page'          => get_option( 'posts_per_page' ),
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date',
+			'before'            => TimeInterval::default_before(),
+			'after'             => TimeInterval::default_after(),
+			'fields'            => '*',
+			'category_includes' => array(),
+			'extended_info'     => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );

@@ -23,6 +23,28 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	protected $namespace = 'wc-analytics';
 
 	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		// Add a route for listing variations without specifying the parent product ID.
+		register_rest_route(
+			$this->namespace,
+			'/variations',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
+
+	/**
 	 * Get the query params for collections.
 	 *
 	 * @return array
@@ -102,6 +124,11 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 		if ( ! empty( $request['search'] ) ) {
 			$args['search'] = $request['search'];
 			unset( $args['s'] );
+		}
+
+		// Retreive variations without specifying a parent product.
+		if ( "/{$this->namespace}/variations" === $request->get_route() ) {
+			unset( $args['post_parent'] );
 		}
 
 		return $args;

@@ -29,15 +29,16 @@ class ReportCSVEmail extends \WC_Email {
 		$this->template_html  = 'html-admin-report-export-download.php';
 		$this->template_plain = 'plain-admin-report-export-download.php';
 		$this->report_labels  = array(
-			'revenue'    => __( 'Revenue', 'woocommerce-admin' ),
-			'orders'     => __( 'Orders', 'woocommerce-admin' ),
-			'products'   => __( 'Products', 'woocommerce-admin' ),
 			'categories' => __( 'Categories', 'woocommerce-admin' ),
 			'coupons'    => __( 'Coupons', 'woocommerce-admin' ),
-			'taxes'      => __( 'Taxes', 'woocommerce-admin' ),
-			'downloads'  => __( 'Downloads', 'woocommerce-admin' ),
-			'stock'      => __( 'Stock', 'woocommerce-admin' ),
 			'customers'  => __( 'Customers', 'woocommerce-admin' ),
+			'downloads'  => __( 'Downloads', 'woocommerce-admin' ),
+			'orders'     => __( 'Orders', 'woocommerce-admin' ),
+			'products'   => __( 'Products', 'woocommerce-admin' ),
+			'revenue'    => __( 'Revenue', 'woocommerce-admin' ),
+			'stock'      => __( 'Stock', 'woocommerce-admin' ),
+			'taxes'      => __( 'Taxes', 'woocommerce-admin' ),
+			'variations' => __( 'Variations', 'woocommerce-admin' ),
 		);
 
 		// Call parent constructor.

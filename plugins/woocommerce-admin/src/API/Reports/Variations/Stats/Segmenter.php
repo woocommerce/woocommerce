@@ -3,7 +3,7 @@
  * Class for adding segmenting support without cluttering the data stores.
  */
 
-namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
+namespace Automattic\WooCommerce\Admin\API\Reports\Variations\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,7 +28,6 @@ class Segmenter extends ReportsSegmenter {
 			'items_sold'       => "SUM($products_table.product_qty) as items_sold",
 			'net_revenue'      => "SUM($products_table.product_net_revenue ) AS net_revenue",
 			'orders_count'     => "COUNT( DISTINCT $products_table.order_id ) AS orders_count",
-			'products_count'   => "COUNT( DISTINCT $products_table.product_id ) AS products_count",
 			'variations_count' => "COUNT( DISTINCT $products_table.variation_id ) AS variations_count",
 		);
 
@@ -153,52 +152,20 @@ class Segmenter extends ReportsSegmenter {
 		// Product, variation, and category are bound to product, so here product segmenting table is required,
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
-		if ( 'product' === $this->query_args['segmentby'] ) {
+		if ( 'variation' === $this->query_args['segmentby'] ) {
 			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$segmenting_selections     = array(
 				'product_level' => $this->prepare_selections( $product_level_columns ),
 			);
 			$this->report_columns      = $product_level_columns;
 			$segmenting_from           = '';
-			$segmenting_groupby        = $product_segmenting_table . '.product_id';
-			$segmenting_dimension_name = 'product_id';
-
-			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
-			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
-				throw new ParameterException( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce-admin' ) );
-			}
-
-			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
-			$segmenting_selections     = array(
-				'product_level' => $this->prepare_selections( $product_level_columns ),
-			);
-			$this->report_columns      = $product_level_columns;
-			$segmenting_from           = '';
-			$segmenting_where          = "AND $product_segmenting_table.product_id = {$this->query_args['product_includes'][0]}";
 			$segmenting_groupby        = $product_segmenting_table . '.variation_id';
 			$segmenting_dimension_name = 'variation_id';
 
-			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'category' === $this->query_args['segmentby'] ) {
-			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
-			$segmenting_selections     = array(
-				'product_level' => $this->prepare_selections( $product_level_columns ),
-			);
-			$this->report_columns      = $product_level_columns;
-			$segmenting_from           = "
-			LEFT JOIN {$wpdb->term_relationships} ON {$product_segmenting_table}.product_id = {$wpdb->term_relationships}.object_id
-			JOIN {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
-			LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->wc_category_lookup}.category_id
-			";
-			$segmenting_where          = " AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL";
-			$segmenting_groupby        = "{$wpdb->wc_category_lookup}.category_tree_id";
-			$segmenting_dimension_name = 'category_id';
-
-			// Restrict our search space for category comparisons.
-			if ( isset( $this->query_args['category_includes'] ) ) {
-				$category_ids      = implode( ',', $this->get_all_segments() );
-				$segmenting_where .= " AND {$wpdb->wc_category_lookup}.category_id IN ( $category_ids )";
+			// Restrict our search space for variation comparisons.
+			if ( isset( $this->query_args['variation_includes'] ) ) {
+				$variation_ids    = implode( ',', $this->get_all_segments() );
+				$segmenting_where = " AND $product_segmenting_table.variation_id IN ( $variation_ids )";
 			}
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );

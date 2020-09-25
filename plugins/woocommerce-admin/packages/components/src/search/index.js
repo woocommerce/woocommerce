@@ -21,6 +21,7 @@ import {
 	productCategory,
 	taxes,
 	usernames,
+	variableProduct,
 	variations,
 } from './autocompleters';
 
@@ -61,6 +62,8 @@ export class Search extends Component {
 				return taxes;
 			case 'usernames':
 				return usernames;
+			case 'variableProducts':
+				return variableProduct;
 			case 'variations':
 				return variations;
 			case 'custom':
@@ -209,6 +212,7 @@ Search.propTypes = {
 		'products',
 		'taxes',
 		'usernames',
+		'variableProducts',
 		'variations',
 		'custom',
 	] ).isRequired,

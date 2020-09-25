@@ -59,6 +59,7 @@ const ReportTable = ( props ) => {
 		// eslint-disable-next-line no-unused-vars
 		tableQuery,
 		compareBy,
+		compareParam,
 		searchBy,
 		labels = {},
 		...tableProps
@@ -69,7 +70,7 @@ const ReportTable = ( props ) => {
 
 	const { items, query: reportQuery } = tableData;
 
-	const initialSelectedRows = query.filter
+	const initialSelectedRows = query[ compareParam ]
 		? getIdsFromQuery( query[ compareBy ] )
 		: [];
 	const [ selectedRows, setSelectedRows ] = useState( initialSelectedRows );
@@ -211,7 +212,6 @@ const ReportTable = ( props ) => {
 	};
 
 	const onCompare = () => {
-		const { compareParam } = props;
 		if ( compareBy ) {
 			onQueryChange( 'compare' )(
 				compareBy,
@@ -222,7 +222,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const onSearchChange = ( values ) => {
-		const { baseSearchQuery, compareParam } = props;
+		const { baseSearchQuery } = props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const searchTerms = values.map( ( v ) =>
@@ -583,12 +583,8 @@ export default compose(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
-		// Variations and Category charts are powered by the /reports/products/stats endpoint.
-		const chartEndpoint = [ 'variations', 'categories' ].includes(
-			endpoint
-		)
-			? 'products'
-			: endpoint;
+		// Category charts are powered by the /reports/products/stats endpoint.
+		const chartEndpoint = endpoint === 'categories' ? 'products' : endpoint;
 		const primaryData = getSummary
 			? getReportChartData( {
 					endpoint: chartEndpoint,

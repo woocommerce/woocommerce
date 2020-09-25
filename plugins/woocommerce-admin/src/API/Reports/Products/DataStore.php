@@ -266,16 +266,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'         => get_option( 'posts_per_page' ),
-			'page'             => 1,
-			'order'            => 'DESC',
-			'orderby'          => 'date',
-			'before'           => TimeInterval::default_before(),
-			'after'            => TimeInterval::default_after(),
-			'fields'           => '*',
-			'categories'       => array(),
-			'product_includes' => array(),
-			'extended_info'    => false,
+			'per_page'          => get_option( 'posts_per_page' ),
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date',
+			'before'            => TimeInterval::default_before(),
+			'after'             => TimeInterval::default_after(),
+			'fields'            => '*',
+			'category_includes' => array(),
+			'product_includes'  => array(),
+			'extended_info'     => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );

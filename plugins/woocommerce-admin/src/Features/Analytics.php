@@ -146,6 +146,12 @@ class Analytics {
 				'path'   => '/analytics/products',
 			),
 			array(
+				'id'     => 'woocommerce-analytics-variations',
+				'title'  => __( 'Variations', 'woocommerce-admin' ),
+				'parent' => 'woocommerce-analytics',
+				'path'   => '/analytics/variations',
+			),
+			array(
 				'id'     => 'woocommerce-analytics-categories',
 				'title'  => __( 'Categories', 'woocommerce-admin' ),
 				'parent' => 'woocommerce-analytics',

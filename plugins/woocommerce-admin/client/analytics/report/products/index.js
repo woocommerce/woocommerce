@@ -17,7 +17,7 @@ import ProductsReportTable from './table';
 import ReportChart from '../../components/report-chart';
 import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
-import VariationsReportTable from './table-variations';
+import VariationsReportTable from '../variations/table';
 import ReportFilters from '../../components/report-filters';
 
 class ProductsReport extends Component {

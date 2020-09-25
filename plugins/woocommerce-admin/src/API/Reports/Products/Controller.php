@@ -38,7 +38,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @var array
 	 */
 	protected $param_mapping = array(
-		'products' => 'product_includes',
+		'categories' => 'category_includes',
+		'products'   => 'product_includes',
+		'variations' => 'variation_includes',
 	);
 
 	/**

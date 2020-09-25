@@ -3,14 +3,11 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Fragment } from '@wordpress/element';
-import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { computeSuggestionMatch } from './utils';
-import ProductImage from '../../product-image';
+import productsAutocompleter from './product';
 
 /**
  * A raw completer option.
@@ -87,118 +84,26 @@ import ProductImage from '../../product-image';
  * @property {?FnAllowContext} allowContext filter the context under which the autocomplete activates.
  * @property {FnGetOptionCompletion} getOptionCompletion get the completion associated with a given option.
  */
-
 /**
- * Create a variation name by concatenating each of the variation's
- * attribute option strings.
- *
- * @param {Object} variation - variation returned by the api
- * @param {Array} variation.attributes - attribute objects, with option property.
- * @param {string} variation.name - name of variation.
- * @return {string} - formatted variation name
- */
-function getVariationName( { attributes, name } ) {
-	const separator =
-		window.wcSettings.variationTitleAttributesSeparator || ' - ';
-
-	if ( name.indexOf( separator ) > -1 ) {
-		return name;
-	}
-
-	const attributeList = attributes
-		.map( ( { option } ) => option )
-		.join( ', ' );
-
-	return attributeList ? name + separator + attributeList : name;
-}
-
-/**
- * A variations completer.
+ * A variable products completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
  *
  * @type {WPCompleter}
  */
 export default {
-	name: 'variations',
-	className: 'woocommerce-search__product-result',
+	...productsAutocompleter,
+	name: 'products',
 	options( search ) {
 		const query = search
 			? {
 					search,
-					per_page: 30,
-					_fields: [
-						'attributes',
-						'description',
-						'id',
-						'name',
-						'sku',
-					],
+					per_page: 10,
+					orderby: 'popularity',
+					type: 'variable',
 			  }
 			: {};
-		const product = getQuery().products;
-
-		// Product was specified, search only its variations.
-		if ( product ) {
-			if ( product.includes( ',' ) ) {
-				// eslint-disable-next-line no-console
-				console.warn(
-					'Invalid product id supplied to Variations autocompleter'
-				);
-			}
-			return apiFetch( {
-				path: addQueryArgs(
-					`/wc-analytics/products/${ product }/variations`,
-					query
-				),
-			} );
-		}
-
-		// Product was not specified, search all variations.
 		return apiFetch( {
-			path: addQueryArgs( '/wc-analytics/variations', query ),
+			path: addQueryArgs( '/wc-analytics/products', query ),
 		} );
-	},
-	isDebounced: true,
-	getOptionIdentifier( variation ) {
-		return variation.id;
-	},
-	getOptionKeywords( variation ) {
-		return [ getVariationName( variation ), variation.sku ];
-	},
-	getOptionLabel( variation, query ) {
-		const match =
-			computeSuggestionMatch( getVariationName( variation ), query ) ||
-			{};
-		return (
-			<Fragment>
-				<ProductImage
-					key="thumbnail"
-					className="woocommerce-search__result-thumbnail"
-					product={ variation }
-					width={ 18 }
-					height={ 18 }
-					alt=""
-				/>
-				<span
-					key="name"
-					className="woocommerce-search__result-name"
-					aria-label={ variation.description }
-				>
-					{ match.suggestionBeforeMatch }
-					<strong className="components-form-token-field__suggestion-match">
-						{ match.suggestionMatch }
-					</strong>
-					{ match.suggestionAfterMatch }
-				</span>
-			</Fragment>
-		);
-	},
-	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
-	// of replace/insertion, so we can just return the value.
-	getOptionCompletion( variation ) {
-		return {
-			key: variation.id,
-			label: getVariationName( variation ),
-		};
 	},
 };

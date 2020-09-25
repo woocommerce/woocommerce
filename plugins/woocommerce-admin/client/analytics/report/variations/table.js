@@ -3,7 +3,7 @@
  */
 import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { map, get } from 'lodash';
+import { map } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
@@ -13,18 +13,15 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
-import { isLowStock } from './utils';
+import { isLowStock } from '../products/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getVariationName } from '../../../lib/async-requests';
 
 const manageStock = getSetting( 'manageStock', 'no' );
 const stockStatuses = getSetting( 'stockStatuses', {} );
 
 const getFullVariationName = ( rowData ) =>
-	get( rowData, [ 'extended_info', 'name' ], '' ) +
-	' - ' +
-	get( rowData, [ 'extended_info', 'attributes' ], [] )
-		.map( ( { option } ) => option )
-		.join( ', ' );
+	getVariationName( rowData.extended_info || {} );
 
 class VariationsReportTable extends Component {
 	constructor() {
@@ -102,6 +99,7 @@ class VariationsReportTable extends Component {
 				net_revenue: netRevenue,
 				orders_count: ordersCount,
 				product_id: productId,
+				variation_id: variationId,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const {
@@ -116,7 +114,7 @@ class VariationsReportTable extends Component {
 				'/analytics/orders',
 				{
 					filter: 'advanced',
-					product_includes: query.products,
+					variation_includes: variationId,
 				}
 			);
 			const editPostLink = getAdminLink(
@@ -253,8 +251,8 @@ class VariationsReportTable extends Component {
 		return (
 			<ReportTable
 				baseSearchQuery={ baseSearchQuery }
-				compareBy={ 'variations' }
-				compareParam={ 'filter-variations' }
+				compareBy="variations"
+				compareParam="filter-variations"
 				endpoint="variations"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
@@ -269,7 +267,6 @@ class VariationsReportTable extends Component {
 					'net_revenue',
 					'orders_count',
 				] }
-				searchBy="variations"
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',

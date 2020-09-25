@@ -1048,6 +1048,8 @@ class Loader {
 		// We may have synced orders with a now-unregistered status.
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
+		// The separator used for attributes found in Variation titles.
+		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )

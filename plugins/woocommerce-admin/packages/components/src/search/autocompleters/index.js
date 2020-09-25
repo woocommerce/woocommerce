@@ -11,4 +11,5 @@ export { default as orders } from './orders';
 export { default as product } from './product';
 export { default as taxes } from './taxes';
 export { default as usernames } from './usernames';
+export { default as variableProduct } from './variable-product';
 export { default as variations } from './variations';

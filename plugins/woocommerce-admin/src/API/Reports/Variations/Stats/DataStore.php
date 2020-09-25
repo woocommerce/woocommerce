@@ -3,19 +3,19 @@
  * API\Reports\Products\Stats\DataStore class file.
  */
 
-namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
+namespace Automattic\WooCommerce\Admin\API\Reports\Variations\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
- * API\Reports\Products\Stats\DataStore.
+ * API\Reports\Variations\Stats\DataStore.
  */
-class DataStore extends ProductsDataStore implements DataStoreInterface {
+class DataStore extends VariationsDataStore implements DataStoreInterface {
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -23,13 +23,9 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'       => 'strval',
-		'date_end'         => 'strval',
-		'product_id'       => 'intval',
 		'items_sold'       => 'intval',
 		'net_revenue'      => 'floatval',
 		'orders_count'     => 'intval',
-		'products_count'   => 'intval',
 		'variations_count' => 'intval',
 	);
 
@@ -38,7 +34,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'products_stats';
+	protected $context = 'variatons_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
@@ -49,7 +45,6 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			'items_sold'       => 'SUM(product_qty) as items_sold',
 			'net_revenue'      => 'SUM(product_net_revenue) AS net_revenue',
 			'orders_count'     => "COUNT( DISTINCT ( CASE WHEN product_gross_revenue >= 0 THEN {$table_name}.order_id END ) ) as orders_count",
-			'products_count'   => 'COUNT(DISTINCT product_id) as products_count',
 			'variations_count' => 'COUNT(DISTINCT variation_id) as variations_count',
 		);
 	}
@@ -64,6 +59,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 
 		$products_where_clause      = '';
 		$products_from_clause       = '';
+		$where_subquery             = array();
 		$order_product_lookup_table = self::get_db_table_name();
 
 		$included_products = $this->get_included_products( $query_args );
@@ -71,15 +67,41 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
+		$excluded_products = $this->get_excluded_products( $query_args );
+		if ( $excluded_products ) {
+			$products_where_clause .= "AND {$order_product_lookup_table}.product_id NOT IN ({$excluded_products})";
+		}
+
 		$included_variations = $this->get_included_variations( $query_args );
 		if ( $included_variations ) {
 			$products_where_clause .= " AND {$order_product_lookup_table}.variation_id IN ({$included_variations})";
+		} else {
+			$products_where_clause .= " AND {$order_product_lookup_table}.variation_id != 0";
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
 			$products_from_clause  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$products_where_clause .= " AND ( {$order_status_filter} )";
+		}
+
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
+		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
+			// JOIN on product lookup if we haven't already.
+			if ( ! $order_status_filter ) {
+				$products_from_clause .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+			}
+			// Add JOINs for matching attributes.
+			foreach ( $attribute_subqueries['join'] as $attribute_join ) {
+				$products_from_clause .= ' ' . $attribute_join;
+			}
+			// Add WHEREs for matching attributes.
+			$where_subquery = array_merge( $where_subquery, $attribute_subqueries['where'] );
+		}
+
+		if ( 0 < count( $where_subquery ) ) {
+			$operator               = $this->get_match_operator( $query_args );
+			$products_where_clause .= 'AND (' . implode( " {$operator} ", $where_subquery ) . ')';
 		}
 
 		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
@@ -106,16 +128,17 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'          => get_option( 'posts_per_page' ),
-			'page'              => 1,
-			'order'             => 'DESC',
-			'orderby'           => 'date',
-			'before'            => TimeInterval::default_before(),
-			'after'             => TimeInterval::default_after(),
-			'fields'            => '*',
-			'category_includes' => array(),
-			'interval'          => 'week',
-			'product_includes'  => array(),
+			'per_page'           => get_option( 'posts_per_page' ),
+			'page'               => 1,
+			'order'              => 'DESC',
+			'orderby'            => 'date',
+			'before'             => TimeInterval::default_before(),
+			'after'              => TimeInterval::default_after(),
+			'fields'             => '*',
+			'category_includes'  => array(),
+			'interval'           => 'week',
+			'product_includes'   => array(),
+			'variation_includes' => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
@@ -176,7 +199,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
@@ -192,7 +215,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

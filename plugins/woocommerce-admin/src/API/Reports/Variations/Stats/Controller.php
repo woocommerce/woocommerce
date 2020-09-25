@@ -1,18 +1,18 @@
 <?php
 /**
- * REST API Reports products stats controller
+ * REST API Reports variations stats controller
  *
- * Handles requests to the /reports/products/stats endpoint.
+ * Handles requests to the /reports/variations/stats endpoint.
  */
 
-namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
+namespace Automattic\WooCommerce\Admin\API\Reports\Variations\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
- * REST API Reports products stats controller class.
+ * REST API Reports variations stats controller class.
  *
  * @extends WC_REST_Reports_Controller
  */
@@ -30,7 +30,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/products/stats';
+	protected $rest_base = 'reports/variations/stats';
 
 	/**
 	 * Mapping between external parameter name and name used in query class.
@@ -38,8 +38,6 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @var array
 	 */
 	protected $param_mapping = array(
-		'categories' => 'category_includes',
-		'products'   => 'product_includes',
 		'variations' => 'variation_includes',
 	);
 
@@ -47,7 +45,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_analytics_products_stats_select_query', array( $this, 'set_default_report_data' ) );
+		add_filter( 'woocommerce_analytics_variations_stats_select_query', array( $this, 'set_default_report_data' ) );
 	}
 
 	/**
@@ -62,7 +60,6 @@ class Controller extends \WC_REST_Reports_Controller {
 				'items_sold',
 				'net_revenue',
 				'orders_count',
-				'products_count',
 				'variations_count',
 			),
 		);
@@ -145,7 +142,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_products_stats', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_variations_stats', $response, $report, $request );
 	}
 
 	/**
@@ -216,7 +213,7 @@ class Controller extends \WC_REST_Reports_Controller {
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_products_stats',
+			'title'      => 'report_variations_stats',
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
@@ -308,9 +305,9 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params               = array();
-		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']       = array(
+		$params                      = array();
+		$params['context']           = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']              = array(
 			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -318,7 +315,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']   = array(
+		$params['per_page']          = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -327,26 +324,36 @@ class Controller extends \WC_REST_Reports_Controller {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']      = array(
+		$params['after']             = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']     = array(
+		$params['before']            = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']      = array(
+		$params['match']             = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['order']             = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']    = array(
+		$params['orderby']           = array(
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -363,7 +370,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']   = array(
+		$params['interval']          = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -377,7 +384,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['categories'] = array(
+		$params['category_includes'] = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -386,8 +393,8 @@ class Controller extends \WC_REST_Reports_Controller {
 				'type' => 'integer',
 			),
 		);
-		$params['products']   = array(
-			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce-admin' ),
+		$params['category_excludes'] = array(
+			'description'       => __( 'Limit result set to variations not in the specified categories.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -395,7 +402,27 @@ class Controller extends \WC_REST_Reports_Controller {
 				'type' => 'integer',
 			),
 		);
-		$params['variations'] = array(
+		$params['product_includes']  = array(
+			'description'       => __( 'Limit result set to items that have the specified parent product(s).', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['product_excludes']  = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified parent product(s).', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['variations']        = array(
 			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -404,7 +431,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby']  = array(
+		$params['segmentby']         = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'enum'              => array(
@@ -414,7 +441,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['fields']     = array(
+		$params['fields']            = array(
 			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -422,6 +449,24 @@ class Controller extends \WC_REST_Reports_Controller {
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['attribute_is']      = array(
+			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute_is_not']  = array(
+			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'array',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

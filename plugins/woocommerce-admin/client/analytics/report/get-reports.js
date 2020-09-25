@@ -22,6 +22,11 @@ const RevenueReport = lazy( () =>
 const ProductsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-products" */ './products' )
 );
+const VariationsReport = lazy( () =>
+	import(
+		/* webpackChunkName: "analytics-report-variations" */ './variations'
+	)
+);
 const OrdersReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-orders" */ './orders' )
 );
@@ -57,6 +62,11 @@ export default () => {
 			report: 'products',
 			title: __( 'Products', 'woocommerce-admin' ),
 			component: ProductsReport,
+		},
+		{
+			report: 'variations',
+			title: __( 'Variations', 'woocommerce-admin' ),
+			component: VariationsReport,
 		},
 		{
 			report: 'orders',
