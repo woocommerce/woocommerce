@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# See output.sh for an explanation of the available color codes.
 . $(dirname "$0")/output.sh
 
 if [ ! -d "packages/" ]; then

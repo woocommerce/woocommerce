@@ -1,6 +1,11 @@
 #!/bin/sh
 
-# Output colorized strings
+# Output colorized strings.
+#
+# Usage:
+#
+# . $(dirname "$0")/output.sh
+# output <color> "Foobar"
 #
 # Color codes:
 # 0 - black
