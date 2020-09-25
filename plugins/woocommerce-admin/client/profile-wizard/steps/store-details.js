@@ -284,7 +284,10 @@ class StoreDetails extends Component {
 							return false;
 						} }
 					>
-						{ __( 'Skip setup wizard', 'woocommerce-admin' ) }
+						{ __(
+							'Skip setup store details',
+							'woocommerce-admin'
+						) }
 					</Button>
 					<Tooltip text={ skipSetupText }>
 						<span
