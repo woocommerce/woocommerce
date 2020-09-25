@@ -171,7 +171,7 @@ const completeOnboardingWizard = async () => {
 	// Benefits section
 
 	// Wait for Benefits section to appear
-	await page.waitForSelector( '.woocommerce-profile-wizard__step-header' );
+	await page.waitForSelector( '.woocommerce-profile-wizard__benefits' );
 
 	// Wait for "No thanks" button to become active
 	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
