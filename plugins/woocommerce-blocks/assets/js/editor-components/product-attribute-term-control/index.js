@@ -60,6 +60,7 @@ const ProductAttributeTermControl = ( {
 					disabled={ item.count === '0' }
 					aria-expanded={ expandedAttribute === item.id }
 					aria-label={ sprintf(
+						// Translators: %s is the item name, %d is the count of terms for the item.
 						_n(
 							'%s, has %d term',
 							'%s, has %d terms',
@@ -113,6 +114,7 @@ const ProductAttributeTermControl = ( {
 		),
 		selected: ( n ) =>
 			sprintf(
+				// Translators: %d is the count of attributes selected.
 				_n(
 					'%d attribute selected',
 					'%d attributes selected',

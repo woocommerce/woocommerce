@@ -48,6 +48,7 @@ const ReviewsByProductEditor = ( {
 			<SearchListItem
 				{ ...args }
 				countLabel={ sprintf(
+					// Translators: %d is the review count.
 					_n(
 						'%d Review',
 						'%d Reviews',
@@ -58,6 +59,7 @@ const ReviewsByProductEditor = ( {
 				) }
 				showCount
 				aria-label={ sprintf(
+					// Translators: %s is the item name, and %d is the number of reviews for the item.
 					_n(
 						'%s, has %d review',
 						'%s, has %d reviews',

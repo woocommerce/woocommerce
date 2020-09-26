@@ -132,6 +132,7 @@ function getReviewRating( review ) {
 			>
 				<span style={ starStyle }>
 					{ sprintf(
+						/* Translators: %f to the average rating for the review. */
 						__(
 							'Rated %f out of 5',
 							'woo-gutenberg-products-block'
