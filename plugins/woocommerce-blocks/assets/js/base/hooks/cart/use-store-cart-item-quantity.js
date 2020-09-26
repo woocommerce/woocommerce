@@ -23,7 +23,7 @@ import { useStoreCart } from './use-store-cart';
  * This is a custom hook for loading the Store API /cart/ endpoint and
  * actions for removing or changing item quantity.
  *
- * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/src/RestApi/StoreApi
+ * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  *
  * @param {CartItem} cartItem      The cartItem to get quantity info from and
  *                                 will have quantity updated on.

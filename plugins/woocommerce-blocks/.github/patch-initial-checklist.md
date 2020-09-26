@@ -53,9 +53,9 @@ When creating testing notes, please write them from the perspective of a "user" 
 ## After Deploy
 
 * [ ] Merge this branch back into the base branch.
-  * If the base branch was `main`, and this release was deployed to WordPress.org, then merge the branch into `main`.
-  * If the base branch is the release branch this patch release is for, then merge branch into release branch and then merge the release branch back to `main` if the patch release is the latest released version. Otherwise just merge back into the release branch.
-* [ ] If you merged the branch to `main`, then update version on the `main` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
+  * If the base branch was `trunk`, and this release was deployed to WordPress.org, then merge the branch into `trunk`.
+  * If the base branch is the release branch this patch release is for, then merge branch into release branch and then merge the release branch back to `trunk` if the patch release is the latest released version. Otherwise just merge back into the release branch.
+* [ ] If you merged the branch to `trunk`, then update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
 * [ ] Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 * [ ] Clean up the release milestone.
   * [ ] Edit the GitHub milestone and add the current date as the due date (this is used to track ship date as well).

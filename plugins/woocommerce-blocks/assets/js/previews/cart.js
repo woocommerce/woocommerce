@@ -15,7 +15,7 @@ import { previewShippingRates } from './shipping-rates';
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
-// https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/src/RestApi/StoreApi#cart-api
+// https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi#cart-api
 export const previewCart = {
 	coupons: [],
 	shipping_rates: SHIPPING_METHODS_EXIST ? previewShippingRates : [],

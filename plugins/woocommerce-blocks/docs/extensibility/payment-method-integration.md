@@ -100,7 +100,7 @@ The options you feed the configuration instance are the same as those for expres
 
 ### Props Fed to Payment Method Nodes
 
-A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/assets/js/type-defs/registered-payment-method-props.js).
+A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/type-defs/registered-payment-method-props.js).
 
 -   `checkoutStatus`: This is an object with the following checkout status properties - `isCalculating`, `isComplete`, `isIdle`, and `isProcessing`.
 -   `paymentStatus`: This is an object with the [following payment status properties](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/308e968c700028180cab391f2223eb0a43dd2d4d/assets/js/type-defs/contexts.js#L91-L113) - `isPristine`, `isStarted`, `isProcessing`, `isFinished`, `hasError`, `hasFailed`, `isSuccessful`. Note, your payment method does not have to handle setting this status client side. Checkout will handle this via the responses your payment method gives from observers registered to [checkout event emitters](./checkout-flow-and-events.md).
@@ -138,11 +138,11 @@ There is also a [hook you can implement to hook into the server side processing 
 
 This hook is the required place to hook in your payment processing and if you set a status on the provided `PaymentResult` object, then the legacy processing will be ignored for your payment method. Hook callbacks will receive:
 
-[`Automattic\WooCommerce\Blocks\Payments\PaymentContext`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/src/Payments/PaymentContext.php)
+[`Automattic\WooCommerce\Blocks\Payments\PaymentContext`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Payments/PaymentContext.php)
 
 This contains various details about the payment extracted from the checkout processing request. Notably is the `payment_data` property that will contain an associative array of data your payment method client side provided to checkout. It also contains a string value for `payment_method` which contains the `paymentMethodId` value for the active payment method used during checkout processing. So you can use this to determine whether your payment method processes this data or not.
 
-[`Automattic\WooCommerce\Blocks\Payments\PaymentResult`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/src/Payments/PaymentResult.php)
+[`Automattic\WooCommerce\Blocks\Payments\PaymentResult`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Payments/PaymentResult.php)
 
 This contains various details about the payment result returned to the client and exposed on the `onAfterCheckoutProcessingWithSucces/WithError` event. Server side, your payment method can use this to:
 

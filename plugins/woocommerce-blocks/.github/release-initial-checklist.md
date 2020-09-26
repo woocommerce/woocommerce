@@ -50,8 +50,8 @@ When creating testing notes, please write them from the perspective of a "user" 
   * [ ] Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated.
   * [ ] Download zip and smoke test.
   * [ ] Test updating plugin from previous version.
-* [ ] Merge this pull request back into `main`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
-* [ ] Update version on the `main` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
+* [ ] Merge this pull request back into `trunk`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
+* [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
 * [ ] Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 * [ ] Clean up the release milestone and Zenhub.
   * [ ] Edit the GitHub milestone and add the current date as the due date (this is used to track ship date as well).

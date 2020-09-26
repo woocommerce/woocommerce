@@ -18,7 +18,7 @@ import { useStoreNotices } from '../use-store-notices';
 /**
  * This is a custom hook for loading the Store API /cart/coupons endpoint and an
  * action for adding a coupon _to_ the cart.
- * See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/main/src/RestApi/StoreApi
+ * See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  *
  * @return {StoreCartCoupon} An object exposing data and actions from/for the
  * store api /cart/coupons endpoint.
