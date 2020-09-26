@@ -42,6 +42,7 @@ const ProductCategoryControl = ( {
 
 		const listItemAriaLabel = showReviewCount
 			? sprintf(
+					// Translators: %s is the item name, %d is the count of reviews for the item.
 					_n(
 						'%s, has %d review',
 						'%s, has %d reviews',
@@ -52,6 +53,7 @@ const ProductCategoryControl = ( {
 					item.review_count
 			  )
 			: sprintf(
+					// Translators: %s is the item name, %d is the count of products for the item.
 					_n(
 						'%s, has %d product',
 						'%s, has %d products',
@@ -64,6 +66,7 @@ const ProductCategoryControl = ( {
 
 		const listItemCountLabel = showReviewCount
 			? sprintf(
+					// Translators: %d is the count of reviews.
 					_n(
 						'%d Review',
 						'%d Reviews',
@@ -73,6 +76,7 @@ const ProductCategoryControl = ( {
 					item.review_count
 			  )
 			: sprintf(
+					// Translators: %d is the count of products.
 					_n(
 						'%d Product',
 						'%d Products',
@@ -108,6 +112,7 @@ const ProductCategoryControl = ( {
 		),
 		selected: ( n ) =>
 			sprintf(
+				// Translators: %d is the count of selected categories.
 				_n(
 					'%d category selected',
 					'%d categories selected',

@@ -31,6 +31,7 @@ const getCcOrEcheckPaymentMethodOption = (
 	return {
 		value: tokenId + '',
 		label: sprintf(
+			/* Translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 			__(
 				'%1$s ending in %2$s (expires %3$s)',
 				'woo-gutenberg-product-blocks'
@@ -69,6 +70,7 @@ const getDefaultPaymentMethodOptions = (
 	return {
 		value: tokenId + '',
 		label: sprintf(
+			// Translators: %s is the name of the payment method gateway.
 			__( 'Saved token for %s', 'woo-gutenberg-products-block' ),
 			method.gateway
 		),

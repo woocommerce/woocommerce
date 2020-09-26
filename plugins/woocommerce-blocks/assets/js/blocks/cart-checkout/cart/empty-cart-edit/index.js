@@ -49,6 +49,7 @@ const EmptyCartEdit = ( { hidden = false } ) => {
 						{
 							align: 'center',
 							content: sprintf(
+								// Translators: %s is the link to the store product directory.
 								__(
 									'<a href="%s">Browse store</a>.',
 									'woo-gutenberg-products-block'
