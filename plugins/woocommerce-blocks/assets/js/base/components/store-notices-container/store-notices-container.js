@@ -26,7 +26,6 @@ const getWooClassName = ( { status = 'default' } ) => {
 
 const StoreNoticesContainer = ( { className, notices } ) => {
 	const { removeNotice } = useStoreNoticesContext();
-	const wrapperClass = classnames( className, 'wc-block-components-notices' );
 	const regularNotices = notices.filter(
 		( notice ) => notice.type !== 'snackbar'
 	);
@@ -34,6 +33,8 @@ const StoreNoticesContainer = ( { className, notices } ) => {
 	if ( ! regularNotices.length ) {
 		return null;
 	}
+
+	const wrapperClass = classnames( className, 'wc-block-components-notices' );
 
 	return (
 		<div className={ wrapperClass }>
