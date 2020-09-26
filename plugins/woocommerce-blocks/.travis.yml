@@ -12,7 +12,7 @@ cache:
 
 branches:
     only:
-        - main
+        - trunk
 
 # Make sure NodeGit gets the correct C libs.
 addons:
@@ -137,7 +137,7 @@ jobs:
               - GUTENBERG_LATEST=true
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - stage: deploy
-          if: (NOT type IN (pull_request)) AND (branch = main)
+          if: (NOT type IN (pull_request)) AND (branch = trunk)
           name: Deploy Storybook
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=3
@@ -152,7 +152,7 @@ jobs:
               keep_history: true
               local_dir: storybook/dist
               on:
-                  branch: main
+                  branch: trunk
     # @TODO: Investigate why is WP 5.4 + GB e2e test failing and don't allow it to fail.
     allow_failures:
       - name: E2E Tests (WP 5.5 with Gutenberg plugin)

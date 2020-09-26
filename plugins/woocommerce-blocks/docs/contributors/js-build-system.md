@@ -1,6 +1,6 @@
 # JS build system
 
-WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/webpack.config.js#L148-L160), but this is a quick summary:
+WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js#L148-L160), but this is a quick summary:
 
 -   `CoreConfig`: config for shared libraries like settings, blocks data or some HOCs and context.
 -   `MainConfig`: config that builds the JS files used by blocks in the editor and is responsible for registering the blocks in Gutenberg.
@@ -8,7 +8,7 @@ WooCommerce Blocks uses Webpack to build the files that will be consumed by brow
 -   `PaymentsConfig`: config that builds the JS files used by payment methods in the Cart and Checkout blocks.
 -   `StylingConfig`: config that builds CSS files. You can read more about it in the page [CSS build system](css-build-system.md).
 
-Details on each config can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-configs.js). Entry points are declared in [`webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-entries.js).
+Details on each config can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js). Entry points are declared in [`webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js).
 
 ## Environment variables
 
@@ -18,7 +18,7 @@ Different builds are generated depending on the variable `NODE_ENV`. It can have
 
 Almost all our code is transpiled by Babel, this allows us to use the latest JavaScript technologies without having to worry about browser support. However, it's always a good practice to test the plugin in old browsers like IE11 to ensure nothing is broken.
 
-Some of the Babel plugins we use can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-configs.js).
+Some of the Babel plugins we use can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js).
 
 ## External scripts
 
@@ -35,7 +35,7 @@ There are several aliases for internal imports which make importing files across
 
 Aliases also ease refactors because imports no longer depend on the exact location of the file.
 
-All available aliases can be found in [`webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-helpers.js#L26-L84).
+All available aliases can be found in [`webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-helpers.js#L26-L84).
 
 ## Styling
 
@@ -51,7 +51,7 @@ There were legacy builds of the `MainConfig`, `FrontendConfig` and `StylingConfi
 
 Webpack config is split between several files:
 
--   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/webpack.config.js): Top level webpack config. Includes support for legacy and main build.
-    -   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
-        -   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
-    -   [`bin/webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/main/bin/webpack-helpers.js): Includes utils to load external code at run time, e.g. some dependencies from Woo and WordPress core.
+-   [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js): Top level webpack config. Includes support for legacy and main build.
+    -   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
+        -   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
+    -   [`bin/webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-helpers.js): Includes utils to load external code at run time, e.g. some dependencies from Woo and WordPress core.
