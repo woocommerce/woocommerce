@@ -62,10 +62,10 @@ const ReviewsByCategoryEditor = ( {
 				{ ...args }
 				showCount
 				aria-label={ sprintf(
-					// Translators: %s is the search term name, %d is the number of products returned for search query.
+					// Translators: %1$s is the search term name, %2$d is the number of products returned for search query.
 					_n(
-						'%s, has %d product',
-						'%s, has %d products',
+						'%1$s, has %2$d product',
+						'%1$s, has %2$d products',
 						item.count,
 						'woo-gutenberg-products-block'
 					),

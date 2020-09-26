@@ -41,7 +41,6 @@ module.exports = {
 		// - @worpdress/no-unused-vars-before-return
 		// - testing-library/no-await-sync-query
 		// - @woocommerce/dependency-group
-		'@wordpress/valid-sprintf': 'off',
 		'@wordpress/no-unused-vars-before-return': 'off',
 		'testing-library/no-await-sync-query': 'off',
 	},

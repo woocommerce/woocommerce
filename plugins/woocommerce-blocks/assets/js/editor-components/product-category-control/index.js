@@ -42,10 +42,10 @@ const ProductCategoryControl = ( {
 
 		const listItemAriaLabel = showReviewCount
 			? sprintf(
-					// Translators: %s is the item name, %d is the count of reviews for the item.
+					// Translators: %1$s is the item name, %2$d is the count of reviews for the item.
 					_n(
-						'%s, has %d review',
-						'%s, has %d reviews',
+						'%1$s, has %2$d review',
+						'%1$s, has %2$d reviews',
 						item.review_count,
 						'woo-gutenberg-products-block'
 					),
@@ -53,10 +53,10 @@ const ProductCategoryControl = ( {
 					item.review_count
 			  )
 			: sprintf(
-					// Translators: %s is the item name, %d is the count of products for the item.
+					// Translators: %1$s is the item name, %2$d is the count of products for the item.
 					_n(
-						'%s, has %d product',
-						'%s, has %d products',
+						'%1$s, has %2$d product',
+						'%1$s, has %2$d products',
 						item.count,
 						'woo-gutenberg-products-block'
 					),

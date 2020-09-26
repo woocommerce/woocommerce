@@ -256,9 +256,9 @@ const AttributeFilterBlock = ( {
 				if ( filterAddedName && filterRemovedName ) {
 					speak(
 						sprintf(
-							/* Translators: %s attribute terms (for example: 'red', 'blue', 'large'...). */
+							/* Translators: %1$s and %2$s are attribute terms (for example: 'red', 'blue', 'large'...). */
 							__(
-								'%s filter replaced with %s.',
+								'%1$s filter replaced with %2$s.',
 								'woo-gutenberg-products-block'
 							),
 							filterAddedName,
