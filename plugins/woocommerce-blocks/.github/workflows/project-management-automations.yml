@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: main
+          ref: trunk
       - uses: woocommerce/automations@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
