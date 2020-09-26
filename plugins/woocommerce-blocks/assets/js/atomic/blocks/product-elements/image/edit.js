@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
-import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import { createInterpolateElement } from 'wordpress-element';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -101,7 +101,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 							'Image Sizing',
 							'woo-gutenberg-products-block'
 						) }
-						help={ __experimentalCreateInterpolateElement(
+						help={ createInterpolateElement(
 							__(
 								'Product image cropping can be modified in the <a>Customizer</a>.',
 								'woo-gutenberg-products-block'

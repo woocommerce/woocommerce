@@ -21,7 +21,7 @@ import {
 	useEditorContext,
 	CartProvider,
 } from '@woocommerce/base-context';
-import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import { createInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
 import { getAdminLink } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
@@ -50,7 +50,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					isDismissible={ false }
 					status="warning"
 				>
-					{ __experimentalCreateInterpolateElement(
+					{ createInterpolateElement(
 						__(
 							'If you would like to use this block as your default cart you must update your <a>page settings in WooCommerce</a>.',
 							'woo-gutenberg-products-block'
