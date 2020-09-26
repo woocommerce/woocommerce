@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
-import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import { createInterpolateElement } from 'wordpress-element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
 
@@ -25,7 +25,7 @@ const TotalsFooterItem = ( { currency, values } ) => {
 			description={
 				DISPLAY_CART_PRICES_INCLUDING_TAX && (
 					<p className="wc-block-components-totals-footer-item-tax">
-						{ __experimentalCreateInterpolateElement(
+						{ createInterpolateElement(
 							__(
 								'Including <TaxAmount/> in taxes',
 								'woo-gutenberg-products-block'
