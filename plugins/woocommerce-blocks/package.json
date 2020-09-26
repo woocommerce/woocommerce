@@ -82,7 +82,7 @@
 		"@types/react": "16.9.49",
 		"@types/wordpress__data": "4.6.8",
 		"@types/wordpress__element": "2.4.1",
-		"@woocommerce/eslint-plugin": "^1.0.0-beta.0",
+		"@woocommerce/eslint-plugin": "1.0.0-beta.0",
 		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/babel-preset-default": "4.18.1",
 		"@wordpress/base-styles": "1.4.0",
