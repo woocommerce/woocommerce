@@ -63,7 +63,7 @@ export const getRoute = createRegistrySelector(
 			if ( hasResolved ) {
 				throw new Error(
 					sprintf(
-						'While there is a route for the given namespace (%s) and resource name (%s), there is no route utilizing the number of ids you included in the select arguments. The available routes are: (%s)',
+						'While there is a route for the given namespace (%1$s) and resource name (%2$s), there is no route utilizing the number of ids you included in the select arguments. The available routes are: (%3$s)',
 						namespace,
 						resourceName,
 						JSON.stringify( state[ namespace ][ resourceName ] )

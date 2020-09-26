@@ -49,10 +49,10 @@ const Package = ( {
 								<Label
 									label={ `${ name } ×${ quantity }` }
 									screenReaderLabel={ sprintf(
-										// translators: %s name of the product (ie: Sunglasses), %d number of units in the current cart package
+										// translators: %1$s name of the product (ie: Sunglasses), %2$d number of units in the current cart package
 										_n(
-											'%s (%d unit)',
-											'%s (%d units)',
+											'%1$s (%2$d unit)',
+											'%1$s (%2$d units)',
 											quantity,
 											'woo-gutenberg-products-block'
 										),

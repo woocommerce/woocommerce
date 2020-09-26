@@ -60,10 +60,10 @@ const ProductAttributeTermControl = ( {
 					disabled={ item.count === '0' }
 					aria-expanded={ expandedAttribute === item.id }
 					aria-label={ sprintf(
-						// Translators: %s is the item name, %d is the count of terms for the item.
+						// Translators: %1$s is the item name, %2$d is the count of terms for the item.
 						_n(
-							'%s, has %d term',
-							'%s, has %d terms',
+							'%1$s, has %2$d term',
+							'%1$s, has %2$d terms',
 							item.count,
 							'woo-gutenberg-products-block'
 						),

@@ -59,10 +59,10 @@ const ReviewsByProductEditor = ( {
 				) }
 				showCount
 				aria-label={ sprintf(
-					// Translators: %s is the item name, and %d is the number of reviews for the item.
+					// Translators: %1$s is the item name, and %2$d is the number of reviews for the item.
 					_n(
-						'%s, has %d review',
-						'%s, has %d reviews',
+						'%1$s, has %2$d review',
+						'%1$s, has %2$d reviews',
 						item.review_count,
 						'woo-gutenberg-products-block'
 					),
