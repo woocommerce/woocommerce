@@ -39,6 +39,7 @@ final class WC_Cart_Session {
 		}
 
 		$this->cart = $cart;
+		$this->cart_cookies_set = false;
 	}
 
 	/**
@@ -207,6 +208,11 @@ final class WC_Cart_Session {
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->cart->is_empty() ) {
+				// Avoid setting cart cookies multiple times, large product quantities would cause "ERR_RESPONSE_HEADERS_TOO_BIG"
+				if ( $this->cart_cookies_set ) {
+					return;
+				}
+
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
 				$this->set_cart_cookies( false );
@@ -284,6 +290,7 @@ final class WC_Cart_Session {
 					wc_setcookie( $name, $value );
 				}
 			}
+			$this->cart_cookies_set = true;
 		} else {
 			$unsetcookies = array(
 				'woocommerce_items_in_cart',
