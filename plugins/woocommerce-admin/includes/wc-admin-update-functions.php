@@ -8,8 +8,8 @@
  */
 
 use \Automattic\WooCommerce\Admin\Install as Installer;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Deactivate_Plugin;
+use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\Deactivate_Plugin;
 
 /**
  * Update order stats `status` index length.
@@ -68,8 +68,8 @@ function wc_admin_update_0230_db_version() {
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
-	as_unschedule_action( WC_Admin_Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' );
-	as_unschedule_action( WC_Admin_Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' );
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' );
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' );
 }
 
 /**
@@ -83,7 +83,7 @@ function wc_admin_update_0251_db_version() {
  * Remove Facebook Extension note.
  */
 function wc_admin_update_110_remove_facebook_note() {
-	WC_Admin_Notes::delete_notes_with_name( 'wc-admin-facebook-extension' );
+	Notes::delete_notes_with_name( 'wc-admin-facebook-extension' );
 }
 
 /**
@@ -115,7 +115,7 @@ function wc_admin_update_130_db_version() {
 function wc_admin_update_140_change_deactivate_plugin_note_type() {
 	global $wpdb;
 
-	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", WC_Admin_Notes_Deactivate_Plugin::NOTE_NAME ) );
+	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", Deactivate_Plugin::NOTE_NAME ) );
 }
 
 /**

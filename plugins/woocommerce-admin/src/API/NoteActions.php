@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use \Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
 
 /**
  * REST API Admin Note Action controller class.
@@ -55,7 +55,7 @@ class NoteActions extends Notes {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function trigger_note_action( $request ) {
-		$note = WC_Admin_Notes::get_note( $request->get_param( 'note_id' ) );
+		$note = NotesFactory::get_note( $request->get_param( 'note_id' ) );
 
 		if ( ! $note ) {
 			return new \WP_Error(
@@ -87,8 +87,8 @@ class NoteActions extends Notes {
 		/**
 		 * Fires when an admin note action is taken.
 		 *
-		 * @param string        $name The triggered action name.
-		 * @param WC_Admin_Note $note The corresponding Note.
+		 * @param string $name The triggered action name.
+		 * @param Note   $note The corresponding Note.
 		 */
 		do_action( 'woocommerce_note_action', $triggered_action->name, $note );
 
@@ -96,7 +96,7 @@ class NoteActions extends Notes {
 		 * Fires when an admin note action is taken.
 		 * For more specific targeting of note actions.
 		 *
-		 * @param WC_Admin_Note $note The corresponding Note.
+		 * @param Note $note The corresponding Note.
 		 */
 		do_action( 'woocommerce_note_action_' . $triggered_action->name, $note );
 

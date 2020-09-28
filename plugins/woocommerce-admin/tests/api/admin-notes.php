@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**
  * Class WC_Tests_API_Admin_Notes
@@ -64,14 +64,14 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 1, $note['id'] );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_NAME', $note['name'] );
-		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
+		$this->assertEquals( Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
 		$this->assertArrayHasKey( 'locale', $note );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_TITLE', $note['title'] );
 
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_CONTENT', $note['content'] );
 		$this->assertArrayHasKey( 'content_data', $note );
 		$this->assertEquals( 1.23, $note['content_data']->amount );
-		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED, $note['status'] );
+		$this->assertEquals( Note::E_WC_ADMIN_NOTE_UNACTIONED, $note['status'] );
 		$this->assertEquals( 'PHPUNIT_TEST', $note['source'] );
 
 		$this->assertArrayHasKey( 'date_created', $note );
@@ -230,7 +230,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_3_TITLE' );
 
 		// The test snoozed note's reminder date is an hour ago.
-		WC_Admin_Notes::unsnooze_notes();
+		Notes::unsnooze_notes();
 
 		$response = $this->server->dispatch( $request );
 		$notes    = $response->get_data();
@@ -273,10 +273,10 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$notes    = $response->get_data();
 
 		$this->assertEquals( 4, count( $notes ) );
-		$this->assertEquals( $notes[0]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
-		$this->assertEquals( $notes[1]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
-		$this->assertEquals( $notes[2]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED );
-		$this->assertEquals( $notes[3]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+		$this->assertEquals( $notes[0]['status'], Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$this->assertEquals( $notes[1]['status'], Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$this->assertEquals( $notes[2]['status'], Note::E_WC_ADMIN_NOTE_SNOOZED );
+		$this->assertEquals( $notes[3]['status'], Note::E_WC_ADMIN_NOTE_ACTIONED );
 	}
 
 	/**

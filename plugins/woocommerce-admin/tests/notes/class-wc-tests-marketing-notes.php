@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Payments;
+use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\Note;
+use \Automattic\WooCommerce\Admin\Notes\WooCommerce_Payments;
 
 /**
  * Class WC_Tests_Marketing_Notes
@@ -20,10 +20,10 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 	public function test_add_remove_marketing_note() {
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 
-		$note = new WC_Admin_Note();
+		$note = new Note();
 		$note->set_title( 'PHPUNIT_TEST_MARKETING_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_MARKETING_NOTE_CONTENT' );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( 'PHPUNIT_TEST_MARKETING_NOTE_NAME' );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );
@@ -32,7 +32,7 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		// Load all marketing notes and check that the note was successfully saved.
 		$notes = $data_store->get_notes(
 			array(
-				'type' => array( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING ),
+				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),
 			)
 		);
 
@@ -44,7 +44,7 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		// Reload all marketing notes to verify they have been removed.
 		$notes = $data_store->get_notes(
 			array(
-				'type' => array( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING ),
+				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),
 			)
 		);
 
@@ -61,13 +61,13 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		// Set user preferences to disallow marketing suggestions.
 		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
 
-		WC_Admin_Notes_WooCommerce_Payments::possibly_add_note();
+		WooCommerce_Payments::possibly_add_note();
 
 		// Load all marketing notes and check that the note was not added.
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$notes      = $data_store->get_notes(
 			array(
-				'type' => array( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING ),
+				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),
 			)
 		);
 

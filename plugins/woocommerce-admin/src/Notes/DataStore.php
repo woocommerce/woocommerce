@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Note_Data_Store class file.
+ * WC Admin Note Data_Store class file.
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;
@@ -14,7 +14,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Method to create a new note in the database.
 	 *
-	 * @param WC_Admin_Note $note Admin note.
+	 * @param Note $note Admin note.
 	 */
 	public function create( &$note ) {
 		$date_created = time();
@@ -58,7 +58,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Method to read a note.
 	 *
-	 * @param WC_Admin_Note $note Admin note.
+	 * @param Note $note Admin note.
 	 * @throws \Exception Throws exception when invalid data is found.
 	 */
 	public function read( &$note ) {
@@ -129,7 +129,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Updates a note in the database.
 	 *
-	 * @param WC_Admin_Note $note Admin note.
+	 * @param Note $note Admin note.
 	 */
 	public function update( &$note ) {
 		global $wpdb;
@@ -184,8 +184,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Deletes a note from the database.
 	 *
-	 * @param WC_Admin_Note $note Admin note.
-	 * @param array         $args Array of args to pass to the delete method (not used).
+	 * @param Note  $note Admin note.
+	 * @param array $args Array of args to pass to the delete method (not used).
 	 */
 	public function delete( &$note, $args = array() ) {
 		$note_id = $note->get_id();
@@ -207,7 +207,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Read actions from the database.
 	 *
-	 * @param WC_Admin_Note $note Admin note.
+	 * @param Note $note Admin note.
 	 */
 	private function read_actions( &$note ) {
 		global $wpdb;
@@ -244,7 +244,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 * Save actions to the database.
 	 * This function clears old actions, then re-inserts new if any changes are found.
 	 *
-	 * @param WC_Admin_Note $note Note object.
+	 * @param Note $note Note object.
 	 *
 	 * @return bool|void
 	 */
@@ -259,7 +259,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		// Process action removal. Actions are removed from
 		// the note if they aren't part of the changeset.
-		// See WC_Admin_Note::add_action().
+		// See Note::add_action().
 		$changed_actions = $note->get_actions( 'edit' );
 		$actions_to_keep = array();
 
@@ -380,7 +380,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 * @return string Where clauses for the query.
 	 */
 	public function get_notes_where_clauses( $args = array() ) {
-		$allowed_types    = WC_Admin_Note::get_allowed_types();
+		$allowed_types    = Note::get_allowed_types();
 		$where_type_array = array();
 		if ( isset( $args['type'] ) ) {
 			foreach ( $args['type'] as $args_type ) {
@@ -391,7 +391,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			}
 		}
 
-		$allowed_statuses   = WC_Admin_Note::get_allowed_statuses();
+		$allowed_statuses   = Note::get_allowed_statuses();
 		$where_status_array = array();
 		if ( isset( $args['status'] ) ) {
 			foreach ( $args['status'] as $args_status ) {

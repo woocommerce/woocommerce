@@ -7,20 +7,20 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Order_Milestones;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Woo_Subscriptions_Notes;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Tracking_Opt_In;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Payments;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Install_JP_And_WCS_Plugins;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Draw_Attention;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Coupon_Page_Moved;
+use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\Historical_Data;
+use \Automattic\WooCommerce\Admin\Notes\Order_Milestones;
+use \Automattic\WooCommerce\Admin\Notes\Woo_Subscriptions_Notes;
+use \Automattic\WooCommerce\Admin\Notes\Tracking_Opt_In;
+use \Automattic\WooCommerce\Admin\Notes\WooCommerce_Payments;
+use \Automattic\WooCommerce\Admin\Notes\Install_JP_And_WCS_Plugins;
+use \Automattic\WooCommerce\Admin\Notes\Draw_Attention;
+use \Automattic\WooCommerce\Admin\Notes\Coupon_Page_Moved;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Home_Screen_Feedback;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Set_Up_Additional_Payment_Types;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Test_Checkout;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Selling_Online_Courses;
+use \Automattic\WooCommerce\Admin\Notes\Home_Screen_Feedback;
+use \Automattic\WooCommerce\Admin\Notes\Set_Up_Additional_Payment_Types;
+use \Automattic\WooCommerce\Admin\Notes\Test_Checkout;
+use \Automattic\WooCommerce\Admin\Notes\Selling_Online_Courses;
 
 /**
  * Feature plugin main class.
@@ -118,7 +118,7 @@ class FeaturePlugin {
 
 		$this->includes();
 		ReportsSync::clear_queued_actions();
-		WC_Admin_Notes::clear_queued_actions();
+		Notes::clear_queued_actions();
 		wp_clear_scheduled_hook( 'wc_admin_daily' );
 		wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 	}
@@ -174,24 +174,24 @@ class FeaturePlugin {
 		ReportExporter::init();
 
 		// CRUD classes.
-		WC_Admin_Notes::init();
+		Notes::init();
 
 		// Initialize category lookup.
 		CategoryLookup::instance()->init();
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
-		new WC_Admin_Notes_Woo_Subscriptions_Notes();
-		new WC_Admin_Notes_Historical_Data();
-		new WC_Admin_Notes_Order_Milestones();
-		new WC_Admin_Notes_Tracking_Opt_In();
-		new WC_Admin_Notes_WooCommerce_Payments();
-		new WC_Admin_Notes_Install_JP_And_WCS_Plugins();
-		new WC_Admin_Notes_Draw_Attention();
-		new WC_Admin_Notes_Home_Screen_Feedback();
-		new WC_Admin_Notes_Set_Up_Additional_Payment_Types();
-		new WC_Admin_Notes_Test_Checkout();
-		new WC_Admin_Notes_Selling_Online_Courses();
+		new Woo_Subscriptions_Notes();
+		new Historical_Data();
+		new Order_Milestones();
+		new Tracking_Opt_In();
+		new WooCommerce_Payments();
+		new Install_JP_And_WCS_Plugins();
+		new Draw_Attention();
+		new Home_Screen_Feedback();
+		new Set_Up_Additional_Payment_Types();
+		new Test_Checkout();
+		new Selling_Online_Courses();
 
 		// Initialize RemoteInboxNotificationsEngine.
 		RemoteInboxNotificationsEngine::init();

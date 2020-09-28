@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Class WC_Tests_Notes_Data_Store
@@ -17,10 +17,10 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 	 * Tests that the read data store method works as expected.
 	 */
 	public function test_read() {
-		$note = new WC_Admin_Note();
+		$note = new Note();
 		$note->set_title( 'PHPUNIT_TEST_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );
@@ -35,7 +35,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$note->save();
 
 		// Load in a new instance of the note.
-		$read_note = new WC_Admin_Note();
+		$read_note = new Note();
 		$read_note->set_id( $note->get_id() );
 		WC_Data_Store::load( 'admin-note' )->read( $read_note );
 
@@ -58,7 +58,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		global $wpdb;
 		$data_store = WC_Data_Store::load( 'admin-note' );
 
-		$note = new WC_Admin_Note();
+		$note = new Note();
 		$note->set_title( 'PHPUNIT_TEST_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 		$note->save();
@@ -107,7 +107,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// Create notes.
 		foreach ( $note_names as $note_name ) {
 			for ( $i = 0; $i < 3; $i++ ) {
-				$note = new WC_Admin_Note();
+				$note = new Note();
 				$note->set_name( $note_name );
 				$note->set_title( 'PHPUNIT_TEST_NOTE' );
 				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
@@ -126,7 +126,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		);
 
 		// Delete the notes.
-		WC_Admin_Notes::delete_notes_with_name( $note_name_to_delete );
+		Notes::delete_notes_with_name( $note_name_to_delete );
 
 		// Make sure the notes were deleted.
 		$this->assertEquals(
@@ -158,7 +158,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// Create notes.
 		foreach ( $note_names as $note_name ) {
 			for ( $i = 0; $i < 3; $i++ ) {
-				$note = new WC_Admin_Note();
+				$note = new Note();
 				$note->set_name( $note_name );
 				$note->set_title( 'PHPUNIT_TEST_NOTE' );
 				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
@@ -181,7 +181,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		);
 
 		// Delete the notes.
-		WC_Admin_Notes::delete_notes_with_name(
+		Notes::delete_notes_with_name(
 			array(
 				$note_name_to_delete_1,
 				$note_name_to_delete_2,
@@ -208,7 +208,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 	 */
 	public function test_read_throws_exception() {
 		// Create a test note.
-		$note = new WC_Admin_Note();
+		$note = new Note();
 		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note->set_title( 'PHPUNIT_TEST_NOTE_TITLE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
@@ -232,7 +232,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin-note_data_store', $filter_datastore );
 
 		// Attempt to retrieve the test note.
-		$note = WC_Admin_Notes::get_note( $note_id );
+		$note = Notes::get_note( $note_id );
 
 		remove_filter( 'woocommerce_admin-note_data_store', $filter_datastore );
 

@@ -7,7 +7,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding_Profiler;
+use \Automattic\WooCommerce\Admin\Notes\Onboarding_Profiler;
 use \Automattic\WooCommerce\Admin\PluginsHelper;
 use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
 use \Automattic\WooCommerce\Admin\Features\OnboardingAutomateTaxes;
@@ -64,7 +64,7 @@ class Onboarding {
 		}
 
 		// Add onboarding notes.
-		new WC_Admin_Notes_Onboarding_Profiler();
+		new Onboarding_Profiler();
 
 		// Add actions and filters.
 		$this->add_actions();

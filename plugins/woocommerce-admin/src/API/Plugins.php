@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Install_JP_And_WCS_Plugins;
+use \Automattic\WooCommerce\Admin\Notes\Install_JP_And_WCS_Plugins;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -194,7 +194,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			return;
 		}
 
-		WC_Admin_Notes_Install_JP_And_WCS_Plugins::possibly_add_note();
+		Install_JP_And_WCS_Plugins::possibly_add_note();
 	}
 
 	/**

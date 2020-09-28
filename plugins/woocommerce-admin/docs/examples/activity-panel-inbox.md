@@ -67,7 +67,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 	 * Adds a note to the merchant' inbox.
 	 */
 	public static function add_activity_panel_inbox_welcome_note() {
-		if ( ! class_exists( 'WC_Admin_Notes' ) ) {
+		if ( ! class_exists( 'Notes' ) ) {
 			return;
 		}
 
@@ -80,7 +80,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		// First, see if we've already created this kind of note so we don't do it again.
 		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
 		foreach( (array) $note_ids as $note_id ) {
-			$note         = WC_Admin_Notes::get_note( $note_id );
+			$note         = Notes::get_note( $note_id );
 			$content_data = $note->get_content_data();
  			if ( property_exists( $content_data, 'getting_started' ) ) {
 				return;
@@ -90,7 +90,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		// Otherwise, add the note
 		$activated_time = current_time( 'timestamp', 0 );
 		$activated_time_formatted = date( 'F jS', $activated_time );
-		$note = new WC_Admin_Note();
+		$note = new Note();
 		$note->set_title( __( 'Getting Started', 'wapi-example-plugin-one' ) );
 		$note->set_content(
 			sprintf(
@@ -104,7 +104,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 			'activated'           => $activated_time,
 			'activated_formatted' => $activated_time_formatted,
 		) );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_layout('plain');
 		$note->set_image('');
 		$note->set_name( self::NOTE_NAME );
@@ -129,11 +129,11 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 	 * Removes any notes this plugin created.
 	 */
 	public static function remove_activity_panel_inbox_notes() {
-		if ( ! class_exists( 'WC_Admin_Notes' ) ) {
+		if ( ! class_exists( 'Notes' ) ) {
 			return;
 		}
 
-		WC_Admin_Notes::delete_notes_with_name( self::NOTE_NAME );
+		Notes::delete_notes_with_name( self::NOTE_NAME );
 	}
 }
 
@@ -171,7 +171,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 	 * Adds a note to the merchant' inbox.
 	 */
 	public static function add_or_update_activity_panel_inbox_note() {
-		if ( ! class_exists( 'WC_Admin_Notes' ) ) {
+		if ( ! class_exists( 'Notes' ) ) {
 			return;
 		}
 
@@ -184,10 +184,10 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 		// First, see if we've already created our note so we don't do it again.
 		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
 		if ( empty( $note_ids ) ) {
-			$note = new WC_Admin_Note();
+			$note = new Note();
 			$note->set_title( __( 'Domain Renewal Coming Up', 'wapi-example-plugin-two' ) );
 		} else {
-			$note = WC_Admin_Notes::get_note( $note_ids[0] );
+			$note = Notes::get_note( $note_ids[0] );
 		}
 
 		$expires_in_days = rand( 2, 365 );
@@ -202,7 +202,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 			'expires_in_days'     => $expires_in_days,
 		) );
 
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_layout('plain');
 		$note->set_image('');
 		$note->set_name( self::NOTE_NAME );
@@ -217,11 +217,11 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 	 * Removes any notes this plugin created.
 	 */
 	public static function remove_activity_panel_inbox_notes() {
-		if ( ! class_exists( 'WC_Admin_Notes' ) ) {
+		if ( ! class_exists( 'Notes' ) ) {
 			return;
 		}
 
-		WC_Admin_Notes::delete_notes_with_name( self::NOTE_NAME );
+		Notes::delete_notes_with_name( self::NOTE_NAME );
 	}
 }
 

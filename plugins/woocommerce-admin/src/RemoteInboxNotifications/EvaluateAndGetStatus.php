@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Evaluates the spec and returns a status.
@@ -33,10 +33,10 @@ class EvaluateAndGetStatus {
 
 		// Pending notes should be the spec status if the spec passes,
 		// left alone otherwise.
-		if ( WC_Admin_Note::E_WC_ADMIN_NOTE_PENDING === $current_status ) {
+		if ( Note::E_WC_ADMIN_NOTE_PENDING === $current_status ) {
 			return $evaluated_result
 				? $spec->status
-				: WC_Admin_Note::E_WC_ADMIN_NOTE_PENDING;
+				: Note::E_WC_ADMIN_NOTE_PENDING;
 		}
 
 		// When allow_redisplay isn't set, just leave the note alone.
@@ -46,7 +46,7 @@ class EvaluateAndGetStatus {
 
 		// allow_redisplay is set, unaction the note if eval to true.
 		return $evaluated_result
-			? WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED
+			? Note::E_WC_ADMIN_NOTE_UNACTIONED
 			: $current_status;
 	}
 }

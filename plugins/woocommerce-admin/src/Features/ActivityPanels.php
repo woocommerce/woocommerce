@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**
  * Contains backend logic for the activity panel feature.
@@ -109,7 +109,7 @@ class ActivityPanels {
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$settings['alertCount']  = WC_Admin_Notes::get_notes_count( array( 'error', 'update' ), array( 'unactioned' ) );
+		$settings['alertCount']  = Notes::get_notes_count( array( 'error', 'update' ), array( 'unactioned' ) );
 		$settings['hasLowStock'] = $this->has_low_stock_products();
 		return $settings;
 	}
