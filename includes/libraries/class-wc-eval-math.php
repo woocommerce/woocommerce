@@ -116,13 +116,13 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 			$output = array(); // postfix form of expression, to be passed to pfx()
 			$expr = trim( $expr );
 
-			$ops   = array( '+', '-', '*', '/', '^', '_' );
-			$ops_r = array( '+' => 0, '-' => 0, '*' => 0, '/' => 0, '^' => 1 ); // right-associative operator?
-			$ops_p = array( '+' => 0, '-' => 0, '*' => 1, '/' => 1, '_' => 1, '^' => 2 ); // operator precedence
+			$ops   = array( '+', '-', '*', '/', '%', '\\', '^', '_' );
+			$ops_r = array( '+' => 0, '-' => 0, '*' => 0, '/' => 0, '%' => 0, '\\' => 0, '^' => 1 ); // right-associative operator?
+			$ops_p = array( '+' => 0, '-' => 0, '*' => 1, '/' => 1, '%' => 1, '\\' => 1, '_' => 1, '^' => 2 ); // operator precedence
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
-			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", $expr, $matches ) ) { // make sure the characters are all good
+			if ( preg_match( "/[^\w\s+*\\/%\\\\^().,-]/", $expr, $matches ) ) { // make sure the characters are all good
 				return self::trigger( "illegal character '{$matches[0]}'" );
 			}
 
@@ -259,7 +259,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 
 			foreach ( $tokens as $token ) { // nice and easy
 				// if the token is a binary operator, pop two values off the stack, do the operation, and push the result back on
-				if ( in_array( $token, array( '+', '-', '*', '/', '^' ) ) ) {
+				if ( in_array( $token, array( '+', '-', '*', '/', '%', '\\', '^' ) ) ) {
 					if ( is_null( $op2 = $stack->pop() ) ) {
 						return self::trigger( "internal error" );
 					}
@@ -281,6 +281,18 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 								return self::trigger( 'division by zero' );
 							}
 							$stack->push( $op1 / $op2 );
+							break;
+						case '%':
+							if ( 0 == $op2 ) {
+								return self::trigger( 'division by zero' );
+							}
+							$stack->push( $op1 % $op2 );
+							break;
+						case '\\':
+							if ( 0 == $op2 ) {
+								return self::trigger( 'division by zero' );
+							}
+							$stack->push( intdiv( $op1, $op2 ) );
 							break;
 						case '^':
 							$stack->push( pow( $op1, $op2 ) );
