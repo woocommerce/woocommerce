@@ -36,22 +36,14 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 
 describe( 'Store owner can go through store Setup Wizard', () => {
 
-	it( 'can start Setup Wizard when visiting the site for the first time. Skip all other times.', async () => {
-		// Check if Setup Wizard Notice is visible on the screen.
-		// If yes - proceed with Setup Wizard, if not - skip Setup Wizard (already been completed).
-		const setupWizardNotice = await Promise.race( [
-			new Promise( resolve => setTimeout( () => resolve(), 1000 ) ), // resolves without value after 1s
-			page.waitForSelector('.updated.woocommerce-message.wc-connect', { visible: true } )
-		] );
-		if ( setupWizardNotice ) {
-			await StoreOwnerFlow.runSetupWizard();
-			await completeOnboardingWizard();
-		}
+	it( 'can start and complete Setup Wizard when visiting the site for the first time.', async () => {
+		await StoreOwnerFlow.runSetupWizard();
+		await completeOnboardingWizard();
 	} );
 } );
 
 describe( 'Store owner can go through setup Task List', () => {
-	it( 'can setup shipping', async () => {
+	it.skip( 'can setup shipping', async () => {
 		await page.evaluate( () => {
 			document.querySelector( '.woocommerce-list__item-title' ).scrollIntoView();
 		} );

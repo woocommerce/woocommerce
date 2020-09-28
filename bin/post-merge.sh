@@ -3,7 +3,10 @@
 changedFiles="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
 
 runOnChange() {
-	echo "$changedFiles" | grep -q "$1" && eval "$2"
+	if echo "$changedFiles" | grep -q "$1"
+	then
+		eval "$2"
+	fi
 }
 
 runOnChange "package-lock.json" "npm install"

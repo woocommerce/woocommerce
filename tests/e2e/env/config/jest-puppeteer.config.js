@@ -14,6 +14,8 @@ if ( 'no' == global.process.env.node_config_dev ) {
 	puppeteerConfig = {
 		launch: {
 			...jestPuppeteerConfig.launch,
+			slowMo: process.env.PUPPETEER_SLOWMO ? process.env.PUPPETEER_SLOWMO : 50,
+			headless: false,
 			ignoreHTTPSErrors: true,
 			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
 			devtools: true,

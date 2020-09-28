@@ -5,7 +5,8 @@ Automated end-to-end tests for WooCommerce.
 ## Table of contents
 
 - [Pre-requisites](#pre-requisites)
-  - [Install NodeJS](#install-nodejs)
+  - [Install Node.js](#install-node.js)
+  - [Install NVM](#install-nvm)
   - [Install Docker](#install-docker)
 - [Configuration](#configuration)
   - [Test Environment](#test-environment)
@@ -17,21 +18,19 @@ Automated end-to-end tests for WooCommerce.
   - [How to run tests in non-headless mode](#how-to-run-tests-in-non-headless-mode)
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
+  - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
 - [Writing tests](#writing-tests) 
 - [Debugging tests](#debugging-tests)
-- [Docker basics](#docker-basics)
-  - [How to stop and restart Docker](#how-to-stop-and-restart-docker)
-  - [How to stop Docker and do a clean restart](#how-to-stop-docker-and-do-a-clean-restart)
 
 ## Pre-requisites
 
-### Install NodeJS
+### Install Node.js
 
-Install NodeJS on Mac:
+Follow [instructions on the node.js site](https://nodejs.org/en/download/) to install Node.js. 
 
-```bash
-brew install node 
-```
+### Install NVM
+
+Follow instructions in the [NVM repository](https://github.com/nvm-sh/nvm) to install NVM. 
 
 ### Install Docker
 
@@ -88,35 +87,45 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 - `git checkout master` or checkout the branch where you need to run tests 
 
-- Run `npm install`
+- Run `nvm use`
 
-- Run `npm install jest --global`
+- Run `npm install`
 
 - Run `composer install --no-dev`
 
-- Run `npm run build:core`
+- Run `npm run build:assets`
 
-- Run the following command to build the test site using Docker: `npm run docker:up` and watch the site being built. Note that it may take a few minutes the first time you do that. The process is considered completed when the messages letting you know that WordPress was installed, WooCommerce was activated and users created will be displayed:
+- Run `npm install jest --global`
+
+- Run `npm run docker:up` - it will build the test site using Docker.  
+
+- Run `docker ps` - to confirm that the Docker containers were built and running. You should see the log that looks similar to below indicating that everything had been built as expected:
 
 ```
-wordpress-cli_1             | Success: WordPress installed successfully.
-wordpress-cli_1             | Plugin 'woocommerce' activated.
-wordpress-cli_1             | Success: Activated 1 of 1 plugins.
-wordpress-cli_1             | Success: Created user 2.
-woocommerce_wordpress-cli_1 exited with code 0
-woocommerce_wordpress-cli_1 exited with code 0
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago       Up 5 seconds                               woocommerce_wordpress-cli
+2ab8e8439e9f        wordpress:5.5.1     "docker-entrypoint.s…"   8 seconds ago       Up 7 seconds        0.0.0.0:8084->80/tcp   woocommerce_wordpress-www
+4c1e3f2a49db        mariadb:10.5.5      "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds        3306/tcp               woocommerce_db
 ```
 
-For more Docker commands, scroll down to [Docker basics](#docker-basics).
+Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used. 
 
-- Open new terminal window and `cd` to the current branch again.
+See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
 
-- Run the following command to make sure the containers were built and running: `docker ps`. You should see the 2 following containers: 
+- Navigate to `http://localhost:8084/`
 
-- `woocommerce_wordpress-woocommerce-dev`
-- `mariadb:10.4`
+If everything went well, you should be able to access the site. If you changed the port to something other than `8084` as per [Test Variables](#test-variables) section, use the appropriate port to access your site. 
 
-- Navigate to `http://localhost:8084/`. If everything went well, you should be able to access the site.  
+As noted in [Test Variables](#test-variables) section, use the following Admin user details to login:
+
+```
+Username: admin
+PW: password
+```
+
+- Run `npm run docker:down` when you are done with running e2e tests or when making any changes to test suite.
+
+Note that running `npm run docker:down` and then `npm run docker:up` re-initializes the test container.
 
 ### How to run tests in headless mode
 
@@ -134,7 +143,20 @@ Tests are being run headless by default. However, sometimes it's useful to obser
 npm run test:e2e-dev
 ```
 
-The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by copying `/tests/e2e/env/config/jest.puppetee.config.js` to `/tests/e2e/config` and editing the value in that file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
+The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. 
+
+By default, SlowMo mode is set to slow down running of tests by 50 milliseconds. If you'd like to override it and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below: 
+
+```
+PUPPETEER_SLOWMO=10 npm run test:e2e-dev
+```
+
+The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
+
+For example:
+
+- `PUPPETEER_SLOWMO=10` - will run tests faster
+- `PUPPETEER_SLOWMO=70` - will run tests slower
 
 ### How to run an individual test
 
@@ -190,6 +212,20 @@ Finally, you can apply both `.only` and `.skip` to `describe` part of the test:
 describe.skip( 'Store owner can go through store Setup Wizard', () => {}
 ```
 
+### How to run tests using custom WordPress, PHP and MariaDB versions
+
+The following variables can be used to specify the versions of WordPress, PHP and MariaDB that you'd like to use to built your test site with Docker:
+
+- `WP_VERSION`
+- `TRAVIS_PHP_VERSION`
+- `TRAVIS_MARIADB_VERSION`  
+
+The full command to build the site will look as follows:
+
+```
+TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 npm run docker:up
+```
+
 ## Writing tests
 
 We use the following tools to write e2e tests:
@@ -208,11 +244,3 @@ The following packages are used to write tests:
 ## Debugging tests 
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   
-
-## Docker basics
-
-### How to stop and restart Docker
-
-- Press `Ctrl+C` in the terminal window where the containers are running 
-- Stop the container(s) using the following command: `npm run docker:down`
-- Restart the containers using the following command: `npm run docker:up`
