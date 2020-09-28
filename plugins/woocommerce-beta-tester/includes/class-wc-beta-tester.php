@@ -426,6 +426,11 @@ class WC_Beta_Tester {
 		unset( $releases['trunk'] );
 
 		$releases = array_keys( $releases );
+		foreach ( $releases as $index => $version ) {
+			if ( version_compare( $version, '3.6', '<' ) ) {
+				unset( $releases[ $index ] );
+			}
+		}
 
 		if ( 'beta' === $channel ) {
 			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ) );
