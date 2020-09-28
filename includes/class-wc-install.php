@@ -157,9 +157,6 @@ class WC_Install {
 			'wc_update_450_sanitize_coupons_code',
 			'wc_update_450_db_version',
 		),
-		'4.7.0' => array(
-			'wc_update_470_remove_term_relationships_for_variations',
-		),
 	);
 
 	/**
