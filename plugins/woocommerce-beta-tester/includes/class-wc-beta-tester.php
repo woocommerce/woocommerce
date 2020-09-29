@@ -343,7 +343,7 @@ class WC_Beta_Tester {
 	 * @return bool
 	 */
 	public function auto_update_woocommerce( $update, $plugin ) {
-		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $item->slug ) {
+		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $plugin->slug ) {
 			return true;
 		} else {
 			return $update;
