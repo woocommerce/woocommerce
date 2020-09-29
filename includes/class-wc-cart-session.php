@@ -208,7 +208,7 @@ final class WC_Cart_Session {
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->cart->is_empty() ) {
-				// Avoid setting cart cookies multiple times, large product quantities would cause "ERR_RESPONSE_HEADERS_TOO_BIG"
+				// Avoid setting cart cookies multiple times, large product quantities would cause "ERR_RESPONSE_HEADERS_TOO_BIG".
 				if ( $this->cart_cookies_set ) {
 					return;
 				}
