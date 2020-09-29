@@ -24,6 +24,14 @@ class OnboardingAutomateTaxes {
 				'on_onboarding_profile_completed',
 			)
 		);
+
+		add_action(
+			'jetpack_authorize_ending_authorized',
+			array(
+				__CLASS__,
+				'on_onboarding_profile_completed',
+			)
+		);
 	}
 
 	/**
