@@ -292,7 +292,7 @@
 			margin-bottom: 0;
 			position: relative;
 			padding: $gap-small $gap-large;
-			min-height: 44px;
+			min-height: 46px;
 			border-bottom: 1px solid $gray-100;
 
 			.components-base-control {
@@ -304,6 +304,7 @@
 			}
 
 			label.components-checkbox-control__label {
+				font-size: $gap;
 				margin-left: 0;
 			}
 
