@@ -11,7 +11,6 @@ import {
 	cloneElement,
 	useRef,
 	useEffect,
-	useState,
 	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -56,6 +55,7 @@ const PaymentMethods = () => {
 	const { isEditor } = useEditorContext();
 	const {
 		customerPaymentMethods = {},
+		paymentMethodData,
 		setActivePaymentMethod,
 		shouldSavePayment,
 		setShouldSavePayment,
@@ -67,7 +67,6 @@ const PaymentMethods = () => {
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
 	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
-	const [ selectedToken, setSelectedToken ] = useState( '0' );
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useStoreNotices();
 	const { customerId } = useCheckoutContext();
@@ -158,9 +157,7 @@ const PaymentMethods = () => {
 		/>
 	);
 
-	const renderedSavedPaymentOptions = (
-		<SavedPaymentMethodOptions onSelect={ setSelectedToken } />
-	);
+	const renderedSavedPaymentOptions = <SavedPaymentMethodOptions />;
 
 	const renderedTabsAndSavedPaymentOptions = (
 		<>
@@ -170,7 +167,7 @@ const PaymentMethods = () => {
 	);
 
 	return Object.keys( customerPaymentMethods ).length > 0 &&
-		selectedToken !== '0'
+		paymentMethodData.isSavedToken
 		? renderedSavedPaymentOptions
 		: renderedTabsAndSavedPaymentOptions;
 };
