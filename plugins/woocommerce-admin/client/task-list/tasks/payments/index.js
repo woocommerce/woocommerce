@@ -309,9 +309,11 @@ export default compose(
 		const { createNotice } = dispatch( 'core/notices' );
 		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-		const { invalidateResolutionForStoreSelector } = dispatch(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			invalidateResolution,
+			invalidateResolutionForStoreSelector,
+		} = dispatch( ONBOARDING_STORE_NAME );
+		invalidateResolution( 'getProfileItems', [] );
 		return {
 			clearTaskStatusCache: () =>
 				invalidateResolutionForStoreSelector( 'getTasksStatus' ),
