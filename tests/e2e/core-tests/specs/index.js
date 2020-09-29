@@ -2,12 +2,9 @@
 /*
  * Internal dependencies
  */
-const {
-	runActivationTest,
-	runOnboardingFlowTest,
-	runTaskListTest,
-	runInitialStoreSettingsTest,
-} = require( './activate-and-setup/setup-wizard.test.js' );
+const runActivationTest = require( './activate-and-setup/activate.test.js' );
+const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setup/onboarding-tasklist.test.js' );
+const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test.js' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
