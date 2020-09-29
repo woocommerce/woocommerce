@@ -471,6 +471,7 @@ class Install {
 			'wc-admin-welcome-note',
 			'wc-admin-store-notice-setting-moved',
 			'wc-admin-store-notice-giving-feedback',
+			'wc-admin-learn-more-about-product-settings',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(

@@ -336,25 +336,6 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Learn_More_About_Product_Settings (deprecated, use Learn_More_About_Product_Settings instead).
- */
-class WC_Admin_Notes_Learn_More_About_Product_Settings extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Learn_More_About_Product_Settings';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.6.0';
-}
-
-/**
  * WC_Admin_Notes_Marketing (deprecated, use Marketing instead).
  */
 class WC_Admin_Notes_Marketing extends DeprecatedClassFacade {

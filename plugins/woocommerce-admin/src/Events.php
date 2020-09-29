@@ -30,7 +30,6 @@ use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\Insight_First_Sale;
 use \Automattic\WooCommerce\Admin\Notes\Home_Screen_Feedback;
 use \Automattic\WooCommerce\Admin\Notes\Need_Some_Inspiration;
-use \Automattic\WooCommerce\Admin\Notes\Learn_More_About_Product_Settings;
 use \Automattic\WooCommerce\Admin\Notes\Online_Clothing_Store;
 use \Automattic\WooCommerce\Admin\Notes\First_Product;
 use \Automattic\WooCommerce\Admin\Notes\Customize_Store_With_Blocks;
@@ -99,7 +98,6 @@ class Events {
 		Launch_Checklist::possibly_add_note();
 		Home_Screen_Feedback::possibly_add_note();
 		Need_Some_Inspiration::possibly_add_note();
-		Learn_More_About_Product_Settings::possibly_add_note();
 		Online_Clothing_Store::possibly_add_note();
 		First_Product::possibly_add_note();
 		Choose_Niche::possibly_add_note();
