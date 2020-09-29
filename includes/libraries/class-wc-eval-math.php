@@ -22,6 +22,13 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		public static $last_error = null;
 
 		/**
+		 * Suppress error.
+		 * 
+		 * @var boolean
+		 */
+		public static $suppress = false;
+
+		/**
 		 * Variables (and constants).
 		 *
 		 * @var array
@@ -43,11 +50,12 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		public static $vb = array( 'e', 'pi' );
 
 		/**
-		 * Built-in functions.
+		 * Built-in functions. (1 arg)
 		 *
 		 * @var array
 		 */
 		public static $fb = array();
+		// public static $fb = array( 'sin', 'cos', 'tan' );
 
 		/**
 		 * Evaluate maths string.
@@ -301,16 +309,37 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 					// if the token is a unary operator, pop one value off the stack, do the operation, and push it back on
 				} elseif ( '_' === $token ) {
 					$stack->push( -1 * $stack->pop() );
-					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
+					// if the token is a number, convert it and push
+					// if the token is a variable, push it's value
 				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
 					if ( is_numeric( $token ) ) {
-						$stack->push( $token );
+						$stack->push( $token + 0 );
 					} elseif ( array_key_exists( $token, self::$v ) ) {
 						$stack->push( self::$v[ $token ] );
 					} elseif ( array_key_exists( $token, $vars ) ) {
 						$stack->push( $vars[ $token ] );
 					} else {
 						return self::trigger( "undefined variable '$token'" );
+					}
+					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
+				} else {
+					$fnn = $matches[1];
+					if ( ( $fn = array_search( $fnn, self::$fb ) ) !== false ) {
+						if ( is_null( $arg = $stack->pop() ) ) {
+							return self::trigger( "internal error" );
+						}
+						$stack->push( call_user_func( self::$fb[ $fn ], $arg ) ); // built-ins only one arg
+					} elseif ( array_key_exists( $fnn, self::$f ) ) {
+						$args = array();
+						for ( $i = count( self::$f[ $fnn ]['args'] ) - 1; $i >= 0; $i-- ) { // pop args (backwards)
+							$arg = self::$f[ $fnn ]['args'][ $i ];
+							if ( is_null( $args[$arg] = $stack->pop() ) ) {
+								return self::trigger( "internal error" );
+							}
+						}
+						$stack->push( self::pfx( self::$f[ $fnn ]['func'], $args ) );
+					} else {
+						return self::trigger( "undefined function '$fnn'" );
 					}
 				}
 			}
@@ -330,7 +359,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 */
 		private static function trigger( $msg ) {
 			self::$last_error = $msg;
-			if ( ! Constants::is_true( 'DOING_AJAX' ) && Constants::is_true( 'WP_DEBUG' ) ) {
+			if ( ! self::$suppress && ! Constants::is_true( 'DOING_AJAX' ) && Constants::is_true( 'WP_DEBUG' ) ) {
 				echo "\nError found in:";
 				self::debugPrintCallingFunction();
 				trigger_error( $msg, E_USER_WARNING );
