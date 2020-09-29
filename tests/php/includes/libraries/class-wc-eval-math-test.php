@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Abstract_Order file.
+ * Class WC_Eval_Math file.
  *
  * @package WooCommerce\Tests\Libraries
  */
