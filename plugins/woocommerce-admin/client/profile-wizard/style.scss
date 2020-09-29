@@ -60,7 +60,7 @@
 	}
 
 	.woocommerce-profile-wizard__header {
-		height: 56px;
+		height: $header-height;
 		border-bottom: 1px solid $studio-gray-5;
 		display: flex;
 		align-items: center;

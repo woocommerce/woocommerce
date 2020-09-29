@@ -50,6 +50,7 @@
 	color: $studio-gray-60;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
+	margin-top: -32px;
 
 	#wpwrap {
 		top: 0;
@@ -73,7 +74,7 @@
 	}
 
 	#wpcontent {
-		margin-left: 0;
+		margin-left: 0 !important;
 
 		> #wpbody {
 			display: block;

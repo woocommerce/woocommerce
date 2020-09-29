@@ -1,7 +1,6 @@
 .woocommerce-layout__header {
 	background: $studio-white;
 	box-sizing: border-box;
-	border-bottom: 1px solid $studio-white;
 	padding: 0;
 	min-height: $header-height;
 	position: fixed;
@@ -40,6 +39,10 @@
 			margin: 0 2px 0 2px;
 		}
 	}
+}
+
+.has-woocommerce-navigation .woocommerce-layout__header {
+	top: 0;
 }
 
 .woocommerce-page {
