@@ -300,7 +300,7 @@ jQuery( function( $ ) {
 			eventTarget = $( e.target ),
 			clicked;
 
-		if ( eventTarget.is( '.woocommerce-product-gallery__trigger' ) || eventTarget.is( '.woocommerce-product-gallery__trigger img' ) ) {
+		if ( eventTarget.closest( '.woocommerce-product-gallery__trigger' ) !== null ) {
 			clicked = this.$target.find( '.flex-active-slide' );
 		} else {
 			clicked = eventTarget.closest( '.woocommerce-product-gallery__image' );
