@@ -394,7 +394,7 @@ export default compose(
 		const profileItems = getProfileItems();
 
 		const isTaskListComplete =
-			getOption( 'woocommerce_task_list_complete' ) || false;
+			getOption( 'woocommerce_task_list_complete' ) === 'yes';
 		const trackedCompletedTasks =
 			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
 		const dismissedTasks =
