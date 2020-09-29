@@ -308,6 +308,7 @@ class WC_Install {
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_installing' );
+		set_transient( '_wc_activation_redirect', 1, 30 );
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
