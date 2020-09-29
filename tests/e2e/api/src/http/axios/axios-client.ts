@@ -75,7 +75,7 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a PUT request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {Object}      data Any parameters that should be passed in the request.
+	 * @param {Object} data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public put< T = any >(
@@ -89,7 +89,7 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a PATCH request.
 	 *
 	 * @param {string} path The path we should query.
-	 * @param {*}      data Any parameters that should be passed in the request.
+	 * @param {*} data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public patch< T = any >(
@@ -103,7 +103,7 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a DELETE request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*}      data Any parameters that should be passed in the request.
+	 * @param {*} data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public delete< T = any >(
