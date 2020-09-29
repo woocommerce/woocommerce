@@ -7,6 +7,11 @@ const {
 	runTaskListTest,
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
+	runCartPageTest,
+	runCheckoutPageTest,
+	runMyAccountPageTest,
+	runSingleProductPageTest,
+	runFrontEndTests,
 } = require( './specs' );
 
 module.exports = {
@@ -15,4 +20,9 @@ module.exports = {
 	runTaskListTest,
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
+	runCartPageTest,
+	runCheckoutPageTest,
+	runMyAccountPageTest,
+	runSingleProductPageTest,
+	runFrontEndTests,
 };
