@@ -308,7 +308,7 @@ class WC_Install {
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_installing' );
-		set_transient( '_wc_activation_redirect', 1, 30 );
+		self::maybe_enable_setup_wizard();
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
@@ -402,6 +402,17 @@ class WC_Install {
 		usort( $update_versions, 'version_compare' );
 
 		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+	}
+
+	/**
+	 * See if we need the setup wizard or not.
+	 *
+	 * @since 4.6.0
+	 */
+	private static function maybe_enable_setup_wizard() {
+		if ( self::is_new_install() ) {
+			set_transient( '_wc_activation_redirect', 1, 30 );
+		}
 	}
 
 	/**
