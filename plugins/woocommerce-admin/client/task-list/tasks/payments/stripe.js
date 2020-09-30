@@ -140,6 +140,7 @@ class Stripe extends Component {
 				...stripeSettings,
 				publishable_key: values.publishable_key,
 				secret_key: values.secret_key,
+				testmode: 'no',
 				enabled: 'yes',
 			},
 		} );
