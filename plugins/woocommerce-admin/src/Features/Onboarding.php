@@ -108,6 +108,7 @@ class Onboarding {
 			return;
 		}
 
+		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
 		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
 		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
@@ -116,6 +117,49 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
+	}
+
+	/**
+	 * Handle redirects to setup/welcome page after install and updates.
+	 *
+	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
+	 */
+	public function admin_redirects() {
+		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
+		// That means OBW would never be shown.
+		if ( wc_is_running_from_async_action_scheduler() ) {
+			return;
+		}
+
+		// Setup wizard redirect.
+		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
+			$do_redirect                   = true;
+			$current_page                  = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
+			$is_onboarding_path            = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$is_legacy_onboarding_complete = class_exists( '\WC_Admin_Notices' ) && ! \WC_Admin_Notices::has_notice( 'install' );
+
+			// On these pages, or during these events, postpone the redirect.
+			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
+				$do_redirect = false;
+			}
+
+			// On these pages, or during these events, disable the redirect.
+			if (
+				( 'wc-admin' === $current_page && $is_onboarding_path ) ||
+				$is_legacy_onboarding_complete ||
+				apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ||
+				isset( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification
+			) {
+				delete_transient( '_wc_activation_redirect' );
+				$do_redirect = false;
+			}
+
+			if ( $do_redirect ) {
+				delete_transient( '_wc_activation_redirect' );
+				wp_safe_redirect( wc_admin_url() );
+				exit;
+			}
+		}
 	}
 
 	/**
