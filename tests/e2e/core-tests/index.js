@@ -11,7 +11,15 @@ const {
 	runCheckoutPageTest,
 	runMyAccountPageTest,
 	runSingleProductPageTest,
-	runFrontEndTests,
+	runShopperTests,
+	runCreateCouponTest,
+	runCreateOrderTest,
+	runAddSimpleProductTest,
+	runAddVariableProductTest,
+	runUpdateGeneralSettingsTest,
+	runProductSettingsTest,
+	runTaxSettingsTest,
+	runMerchantTests,
 } = require( './specs' );
 
 module.exports = {
@@ -24,5 +32,13 @@ module.exports = {
 	runCheckoutPageTest,
 	runMyAccountPageTest,
 	runSingleProductPageTest,
-	runFrontEndTests,
+	runShopperTests,
+	runCreateCouponTest,
+	runCreateOrderTest,
+	runAddSimpleProductTest,
+	runAddVariableProductTest,
+	runUpdateGeneralSettingsTest,
+	runProductSettingsTest,
+	runTaxSettingsTest,
+	runMerchantTests,
 };
