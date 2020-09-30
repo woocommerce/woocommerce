@@ -1,4 +1,6 @@
 import { Model, ModelID, ModelParentID } from '../model';
+import { HTTPClient } from '../../http';
+import { settingRESTRepository } from '../../repositories/rest/settings/setting';
 
 /**
  * The default types of settings that are available.
@@ -69,5 +71,14 @@ export class Setting extends Model {
 	public constructor( properties: Partial< Setting > = {} ) {
 		super();
 		Object.assign( this, properties );
+	}
+
+	/**
+	 * Returns the repository for interacting with this type of model.
+	 *
+	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
+	 */
+	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof settingRESTRepository > {
+		return settingRESTRepository( httpClient );
 	}
 }

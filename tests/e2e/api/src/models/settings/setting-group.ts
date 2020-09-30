@@ -1,4 +1,6 @@
 import { Model, ModelID } from '../model';
+import { HTTPClient } from '../../http';
+import { settingGroupRESTRepository } from '../../repositories/rest/settings/setting-group';
 
 /**
  * A settings group object.
@@ -33,5 +35,14 @@ export class SettingGroup extends Model {
 	public constructor( properties: Partial< SettingGroup > = {} ) {
 		super();
 		Object.assign( this, properties );
+	}
+
+	/**
+	 * Returns the repository for interacting with this type of model.
+	 *
+	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
+	 */
+	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof settingGroupRESTRepository > {
+		return settingGroupRESTRepository( httpClient );
 	}
 }

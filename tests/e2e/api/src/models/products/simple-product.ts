@@ -1,6 +1,5 @@
 import { AbstractProduct } from './abstract-product';
 import { HTTPClient } from '../../http';
-import { CreatesModels } from '../../framework/model-repository';
 import { simpleProductRESTRepository } from '../../repositories/rest/products/simple-product';
 
 /**
@@ -21,9 +20,8 @@ export class SimpleProduct extends AbstractProduct {
 	 * Creates a model repository configured for communicating via the REST API.
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
-	 * @return {CreatesModels} The created repository.
 	 */
-	public static restRepository( httpClient: HTTPClient ): CreatesModels< SimpleProduct > {
+	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof simpleProductRESTRepository > {
 		return simpleProductRESTRepository( httpClient );
 	}
 }
