@@ -1,3 +1,7 @@
+# 5.1.1
+
+-   Version bump to undeprecate the package.
+
 # 5.1.0
 
 -   Support multiple advanced filter instances in getActiveFiltersFromQuery() and getQueryFromActiveFilters().
