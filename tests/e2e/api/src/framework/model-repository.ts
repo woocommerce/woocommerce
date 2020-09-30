@@ -1,6 +1,48 @@
 import { Model, ModelID, ModelParentID } from '../models/model';
 
 /**
+ * The parameters for filtering.
+ *
+ * @typedef ListParams
+ * @property {string} [search] The string we want to search for.
+ * @property {number} [perPage] The number of models we should have on each page.
+ * @property {number} [page] The offset for the page we're requesting.
+ * @property {('asc'|'desc')} [order] The ordering direction.
+ * @property {string} [orderBy] The field we want to order using.
+ */
+export interface ListParams {
+	search?: string;
+	perPage?: number;
+	page?: number,
+	order?: 'asc' | 'desc';
+	orderBy?: string;
+}
+
+/**
+ * A callback for listing models using a data source.
+ *
+ * @callback ListFn
+ * @param {L} [params] The list parameters for the query.
+ * @return {Promise.<Array.<T>>} Resolves to an array of created models.
+ * @template {Model} T
+ * @template {ListParams} L
+ */
+export type ListFn< T extends Model, L extends ListParams > = ( params?: L ) => Promise< T[] >;
+
+/**
+ * A callback for listing child models using a data source.
+ *
+ * @callback ListChildFn
+ * @param {Partial.<T>} parent The parent identifier for the model.
+ * @param {L} [params] The list parameters for the query.
+ * @return {Promise.<Array.<T>>} Resolves to an array of created models.
+ * @template {Model} T
+ * @template {ListParams} L
+ * @template {ModelParentID} P
+ */
+export type ListChildFn< T extends Model, L extends ListParams, P extends ModelParentID > = ( parent: P, params?: L ) => Promise< T[] >;
+
+/**
  * A callback for creating a model using a data source.
  *
  * @callback CreateFn
@@ -79,6 +121,31 @@ export type DeleteFn = ( id: ModelID ) => Promise< boolean >;
  * @template {ModelParentID} P
  */
 export type DeleteChildFn< P extends ModelParentID > = ( parent: P, childID: ModelID ) => Promise< boolean >;
+
+/**
+ * An interface for repositories that can list models.
+ *
+ * @typedef ListsModels
+ * @property {ListFn.<T,L>} list Lists models using the repository.
+ * @template {Model} T
+ * @template {ListParams} L
+ */
+export interface ListsModels< T extends Model, L extends ListParams > {
+	list( params: L ): Promise< T[] >;
+}
+
+/**
+ * An interface for repositories that can list child models.
+ *
+ * @typedef ListsChildModels
+ * @property {ListChildFn.<T,L,P>} list Lists models using the repository.
+ * @template {Model} T
+ * @template {ListParams} L
+ * @template {ModelParentID} P
+ */
+export interface ListsChildModels< T extends Model, L extends ListParams, P extends ModelParentID > {
+	list( parent: P, params: L ): Promise< T[] >;
+}
 
 /**
  * An interface for repositories that can create models.
@@ -164,15 +231,26 @@ export interface DeletesChildModels< P extends ModelParentID > {
  * error when attempting to perform that action.
  *
  * @template {Model} T
+ * @template {ListParams} L
  * @template {ModelParentID|void} P
  */
-export class ModelRepository< T extends Model, P extends ModelParentID = never > implements
+export class ModelRepository< T extends Model, L extends ListParams = ListParams, P extends ModelParentID = never > implements
+	ListsModels< T, L >,
+	ListsChildModels< T, L, P >,
 	ReadsModels< T >,
 	ReadsChildModels< T, [ P ] extends [ ModelParentID ] ? P : never >,
 	UpdatesModels< T >,
 	UpdatesChildModels< T, [ P ] extends [ ModelParentID ] ? P : never >,
 	DeletesModels,
 	DeletesChildModels< [ P ] extends [ ModelParentID ] ? P : never > {
+	/**
+	 * The hook used to list models.
+	 *
+	 * @type {ListFn.<T>|ListChildFn<T>}
+	 * @private
+	 */
+	private readonly listHook: ( [ P ] extends [ ModelParentID ] ? ListChildFn< T, L, P > : ListFn< T, L > ) | null;
+
 	/**
 	 * The hook used to create models
 	 *
@@ -184,7 +262,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 	/**
 	 * The hook used to read models.
 	 *
-	 * @type {ReadFn.<T>}
+	 * @type {ReadFn.<T>|ReadChildFn.<T>}
 	 * @private
 	 */
 	private readonly readHook: ( [ P ] extends [ ModelParentID ] ? ReadChildFn< T, P > : ReadFn< T > ) | null;
@@ -192,7 +270,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 	/**
 	 * The hook used to update models.
 	 *
-	 * @type {UpdateFn.<T>}
+	 * @type {UpdateFn.<T>|UpdateChildFn.<T>}
 	 * @private
 	 */
 	private readonly updateHook: ( [ P ] extends [ ModelParentID ] ? UpdateChildFn< T, P > : UpdateFn< T > ) | null;
@@ -200,7 +278,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 	/**
 	 * The hook used to delete models.
 	 *
-	 * @type {DeleteFn}
+	 * @type {DeleteFn|DeleteChildFn.<T>}
 	 * @private
 	 */
 	private readonly deleteHook: ( [ P ] extends [ ModelParentID ] ? DeleteChildFn< P > : DeleteFn ) | null;
@@ -208,21 +286,48 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 	/**
 	 * Creates a new repository instance.
 	 *
+	 * @param {ListFn.<T>|ListChildFn<T>} listHook The hook for model listing.
 	 * @param {CreateFn.<T>|null} createHook The hook for model creation.
 	 * @param {ReadFn.<T>|ReadChildFn.<T,P>|null} readHook The hook for model reading.
 	 * @param {UpdateFn.<T>|UpdateChildFn.<T,P>|null} updateHook The hook for model updating.
 	 * @param {DeleteFn|DeleteChildFn.<P>|null} deleteHook The hook for model deletion.
 	 */
 	public constructor(
+		listHook: ( [ P ] extends [ ModelParentID ] ? ListChildFn< T, L, P > : ListFn< T, L > ) | null,
 		createHook: CreateFn< T > | null,
 		readHook: ( [ P ] extends [ ModelParentID ] ? ReadChildFn< T, P > : ReadFn< T > ) | null,
 		updateHook: ( [ P ] extends [ ModelParentID ] ? UpdateChildFn< T, P > : UpdateFn< T > ) | null,
 		deleteHook: ( [ P ] extends [ ModelParentID ] ? DeleteChildFn< P > : DeleteFn ) | null,
 	) {
+		this.listHook = listHook;
 		this.createHook = createHook;
 		this.readHook = readHook;
 		this.updateHook = updateHook;
 		this.deleteHook = deleteHook;
+	}
+
+	/**
+	 * Lists models using the repository.
+	 *
+	 * @param {P|L} [paramsOrParent] The params for the lookup or the parent to list if the model is a child.
+	 * @param {L} [params] The params when using the parent.
+	 * @return {Promise.<Array.<T>>} Resolves to the listed models.
+	 */
+	public list( paramsOrParent?: P | L, params?: L ): Promise< T[] > {
+		if ( ! this.listHook ) {
+			throw new Error( 'The \'create\' operation is not supported on this model.' );
+		}
+
+		if ( params === undefined ) {
+			return ( this.listHook as ListFn< T, L > )(
+				paramsOrParent as L,
+			);
+		}
+
+		return ( this.listHook as ListChildFn< T, L, P > )(
+			paramsOrParent as P,
+			params,
+		);
 	}
 
 	/**
@@ -261,7 +366,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 		}
 
 		return ( this.readHook as ReadChildFn< T, P > )(
-			idOrParent as any,
+			idOrParent as P,
 			childID,
 		);
 	}
@@ -291,7 +396,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 		}
 
 		return ( this.updateHook as UpdateChildFn< T, P > )(
-			idOrParent as any,
+			idOrParent as P,
 			propertiesOrChildID as ModelID,
 			properties,
 		);
@@ -316,7 +421,7 @@ export class ModelRepository< T extends Model, P extends ModelParentID = never >
 		}
 
 		return ( this.deleteHook as DeleteChildFn< P > )(
-			idOrParent as any,
+			idOrParent as P,
 			childID,
 		);
 	}

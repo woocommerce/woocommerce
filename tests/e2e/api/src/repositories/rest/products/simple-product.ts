@@ -35,6 +35,7 @@ function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProduct > {
  */
 export function simpleProductRESTRepository( httpClient: HTTPClient ): CreatesModels< SimpleProduct > {
 	return new ModelRepository(
+		null,
 		restCreate( httpClient ),
 		null,
 		null,
