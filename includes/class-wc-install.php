@@ -304,7 +304,7 @@ class WC_Install {
 		self::create_cron_jobs();
 		self::create_files();
 		self::maybe_create_pages();
-		self::maybe_enable_setup_wizard();
+		self::maybe_set_activation_transients();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 
@@ -405,11 +405,11 @@ class WC_Install {
 	}
 
 	/**
-	 * See if we need the setup wizard or not.
+	 * See if we need to set redirect transients for activation or not.
 	 *
 	 * @since 4.6.0
 	 */
-	private static function maybe_enable_setup_wizard() {
+	private static function maybe_set_activation_transients() {
 		if ( self::is_new_install() ) {
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
