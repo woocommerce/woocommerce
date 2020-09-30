@@ -12,7 +12,7 @@ export class HTTPResponse< T = any > {
 	/**
 	 * The headers from the response.
 	 *
-	 * @type {Object.<string, string|string[]>}
+	 * @type {Object.<string,string|string[]>}
 	 */
 	public readonly headers: any;
 
@@ -27,7 +27,7 @@ export class HTTPResponse< T = any > {
 	 * Creates a new HTTP response instance.
 	 *
 	 * @param {number} statusCode The status code from the HTTP response.
-	 * @param {Object.<string, string|string[]>} headers The headers from the HTTP response.
+	 * @param {Object.<string,string|string[]>} headers The headers from the HTTP response.
 	 * @param {Object} data The data from the HTTP response.
 	 */
 	public constructor( statusCode: number, headers: any, data: T ) {
