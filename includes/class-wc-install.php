@@ -304,11 +304,11 @@ class WC_Install {
 		self::create_cron_jobs();
 		self::create_files();
 		self::maybe_create_pages();
+		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_installing' );
-		self::maybe_enable_setup_wizard();
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
