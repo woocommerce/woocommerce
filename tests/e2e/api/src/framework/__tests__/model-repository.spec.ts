@@ -14,7 +14,7 @@ describe( 'ModelRepository', () => {
 	it( 'should list', async () => {
 		const model = new DummyModel();
 		const callback = jest.fn().mockResolvedValue( [ model ] );
-		const repository = new ModelRepository< DummyModel >( callback, null, null, null, null );
+		const repository = new ModelRepository< DummyModel, { search: string } >( callback, null, null, null, null );
 
 		const listed = await repository.list( { search: 'test' } );
 		expect( listed ).toContain( model );
@@ -62,7 +62,7 @@ describe( 'ModelRepository', () => {
 	it( 'should update', async () => {
 		const model = new DummyModel();
 		const callback = jest.fn().mockResolvedValue( model );
-		const repository = new ModelRepository< DummyModel >( null, null, null, callback, null );
+		const repository = new ModelRepository< DummyModel, void, 'name' >( null, null, null, callback, null );
 
 		const updated = await repository.update( 1, { name: 'new-name' } );
 		expect( updated ).toBe( model );
@@ -70,7 +70,7 @@ describe( 'ModelRepository', () => {
 	} );
 
 	it( 'should throw error on update without callback', () => {
-		const repository = new ModelRepository< DummyModel >( null, null, null, null, null );
+		const repository = new ModelRepository< DummyModel, void, 'name' >( null, null, null, null, null );
 
 		expect( () => repository.update( 1, { name: 'new-name' } ) ).toThrowError( /not supported/i );
 	} );
