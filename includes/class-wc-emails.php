@@ -610,7 +610,7 @@ class WC_Emails {
 		if ( 'no' === get_option( 'woocommerce_notify_low_stock', 'yes' ) ) {
 			return;
 		}
-		
+
 		/**
 		 * Determine if the current product should trigger a low stock notification
 		 *
