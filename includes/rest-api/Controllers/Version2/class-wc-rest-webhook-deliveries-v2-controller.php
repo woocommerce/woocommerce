@@ -4,7 +4,7 @@
  *
  * Handles requests to the /webhooks/<webhook_id>/deliveries endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   2.6.0
  */
 
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * REST API Webhook Deliveries controller class.
  *
  * @deprecated 3.3.0 Webhooks deliveries logs now uses logging system.
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Webhook_Deliveries_V1_Controller
  */
 class WC_REST_Webhook_Deliveries_V2_Controller extends WC_REST_Webhook_Deliveries_V1_Controller {

@@ -95,11 +95,11 @@ class WC_Site_Tracking {
 	 */
 	public static function add_enable_tracking_function() {
 		global $wp_scripts;
-		
+
 		if ( ! isset( $wp_scripts->registered['woo-tracks'] ) ) {
 			return;
 		}
-		
+
 		$woo_tracks_script = $wp_scripts->registered['woo-tracks']->src;
 
 		?>
@@ -163,7 +163,6 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupon-tracking.php';
 
 		$tracking_classes = array(
-			'WC_Admin_Setup_Wizard_Tracking',
 			'WC_Extensions_Tracking',
 			'WC_Importer_Tracking',
 			'WC_Products_Tracking',
