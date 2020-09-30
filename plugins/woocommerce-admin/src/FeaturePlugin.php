@@ -313,5 +313,7 @@ class FeaturePlugin {
 	/**
 	 * Prevent unserializing.
 	 */
-	private function __wakeup() {}
+	public function __wakeup() {
+		die();
+	}
 }
