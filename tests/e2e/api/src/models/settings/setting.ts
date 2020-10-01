@@ -81,7 +81,7 @@ export class Setting extends Model {
 	 *
 	 * @type {Object.<string, string>|null}
 	 */
-	public readonly options: { [key: string]: string } | null = null;
+	public readonly options: { [key: string]: string } | undefined;
 
 	/**
 	 * The default value for the setting.

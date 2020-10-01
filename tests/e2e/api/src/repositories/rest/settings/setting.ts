@@ -16,6 +16,9 @@ import {
 function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {
 	return async ( parent ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID );
+		if ( response.statusCode >= 400 ) {
+			throw response;
+		}
 
 		const list: Setting[] = [];
 		for ( const raw of response.data ) {
@@ -37,6 +40,9 @@ function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParam
 function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParams > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID + '/' + id );
+		if ( response.statusCode >= 400 ) {
+			throw response;
+		}
 
 		return Promise.resolve( new Setting( {
 			id: response.data.id,
@@ -56,6 +62,9 @@ function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryP
 			'/wc/v3/settings/' + parent.settingGroupID + '/' + id,
 			params,
 		);
+		if ( response.statusCode >= 400 ) {
+			throw response;
+		}
 
 		return Promise.resolve( new Setting( {
 			id: response.data.id,
