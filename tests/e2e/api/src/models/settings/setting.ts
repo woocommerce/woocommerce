@@ -26,7 +26,7 @@ export type SettingRepositoryParams = ModelRepositoryParams< Setting, SettingPar
  * An interface for listing settings using the repository.
  *
  * @typedef ListsSettings
- * @alias ListsModels.<Setting>
+ * @alias ListsChildModels.<Setting,SettingParentID>
  */
 export type ListsSettings = ListsChildModels< SettingRepositoryParams >;
 
@@ -34,7 +34,7 @@ export type ListsSettings = ListsChildModels< SettingRepositoryParams >;
  * An interface for reading settings using the repository.
  *
  * @typedef ReadsSettings
- * @alias ReadsModels.<Setting>
+ * @alias ReadsChildModels.<Setting,SettingParentID>
  */
 export type ReadsSettings = ReadsChildModels< SettingRepositoryParams >;
 
@@ -42,7 +42,7 @@ export type ReadsSettings = ReadsChildModels< SettingRepositoryParams >;
  * An interface for updating settings using the repository.
  *
  * @typedef UpdatesSettings
- * @alias UpdatesModels.<Setting>
+ * @alias UpdatesChildModels.<Setting,SettingParentID>
  */
 export type UpdatesSettings = UpdatesChildModels< SettingRepositoryParams >;
 
