@@ -71,18 +71,6 @@ class WC_Admin_Help {
 			)
 		);
 
-		$screen->add_help_tab(
-			array(
-				'id'      => 'woocommerce_onboard_tab',
-				'title'   => __( 'Setup wizard', 'woocommerce' ),
-				'content' =>
-					'<h2>' . __( 'Setup wizard', 'woocommerce' ) . '</h2>' .
-					'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
-					'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce' ) . '</a></p>',
-
-			)
-		);
-
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
 			'<p><a href="https://woocommerce.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .

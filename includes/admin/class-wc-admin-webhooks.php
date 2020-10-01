@@ -208,7 +208,7 @@ class WC_Admin_Webhooks {
 			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			include 'settings/views/html-webhooks-edit.php';
+			include __DIR__ .  '/settings/views/html-webhooks-edit.php';
 			return;
 		}
 

@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package  WooCommerce\API
+ * @package  WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Legacy Products controller class.
  *
- * @package WooCommerce\API
+ * @package WooCommerce\RestApi
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {

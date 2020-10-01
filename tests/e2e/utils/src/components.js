@@ -6,9 +6,8 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import modelRegistry from '../../utils/factories';
-import { SimpleProduct } from '@woocommerce/model-factories';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -29,19 +28,6 @@ const verifyAndPublish = async () => {
  * Complete onboarding wizard.
  */
 const completeOnboardingWizard = async () => {
-	// Wait for "Yes please" button to appear and click on it
-	await page.waitForSelector( 'button[name=save_step]' );
-	await expect( page ).toMatchElement(
-		'button[name=save_step]', { text: 'Yes please' }
-	);
-	await Promise.all( [
-		// Click on "Yes please" button to move to the next step
-		page.click( 'button[name=save_step]', { text: 'Yes please' } ),
-
-		// Wait for "Where is your store based?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
 	// Store Details section
 
 	// Fill store's address - first line
@@ -185,7 +171,7 @@ const completeOnboardingWizard = async () => {
 	// Benefits section
 
 	// Wait for Benefits section to appear
-	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
+	await page.waitForSelector( '.woocommerce-profile-wizard__benefits' );
 
 	// Wait for "No thanks" button to become active
 	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
@@ -359,7 +345,7 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
+	const product = await factories.products.simple.create( {
 		name: simpleProductName,
 		regularPrice: '9.99'
 	} );
