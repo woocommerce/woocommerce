@@ -5,6 +5,8 @@
  * @package WooCommerce\Shipping
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -159,7 +161,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				$total = $total - WC()->cart->get_discount_total();
 			}
 
-			$total = round( $total, wc_get_price_decimals() );
+			$total = NumberUtil::round( $total, wc_get_price_decimals() );
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;

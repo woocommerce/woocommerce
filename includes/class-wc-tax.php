@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -98,7 +100,7 @@ class WC_Tax {
 	 * @return float
 	 */
 	public static function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, wc_get_rounding_precision() ), $in );
+		return apply_filters( 'woocommerce_tax_round', NumberUtil::round( $in, wc_get_rounding_precision() ), $in );
 	}
 
 	/**

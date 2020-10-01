@@ -6,6 +6,8 @@
  * @since   3.4.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 /**
  * Class Tax.
  * @package WooCommerce\Tests\Tax
@@ -325,8 +327,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		 * Next tax would be calced on 100 - 7.8341 = 92.1659.
 		 * 92.1659 - ( 92.1659 / 1.05 ) = 4.38885.
 		 */
-		$this->assertEquals( round( $calced_tax[ $tax_rate_1_id ], 4 ), 4.3889 );
-		$this->assertEquals( round( $calced_tax[ $tax_rate_2_id ], 4 ), 7.8341 );
+		$this->assertEquals( NumberUtil::round( $calced_tax[ $tax_rate_1_id ], 4 ), 4.3889 );
+		$this->assertEquals( NumberUtil::round( $calced_tax[ $tax_rate_2_id ], 4 ), 7.8341 );
 	}
 
 	/**

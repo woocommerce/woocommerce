@@ -12,6 +12,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -346,7 +347,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// Webhook away!
 		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
-		$duration = round( microtime( true ) - $start_time, 5 );
+		$duration = NumberUtil::round( microtime( true ) - $start_time, 5 );
 
 		$this->log_delivery( $delivery_id, $http_args, $response, $duration );
 

@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -961,13 +962,13 @@ function wc_get_image_size( $image_size ) {
 			} elseif ( 'custom' === $cropping ) {
 				$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
 				$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
-				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['height'] = absint( NumberUtil::round( ( $size['width'] / $width ) * $height ) );
 				$size['crop']   = 1;
 			} else {
 				$cropping_split = explode( ':', $cropping );
 				$width          = max( 1, current( $cropping_split ) );
 				$height         = max( 1, end( $cropping_split ) );
-				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['height'] = absint( NumberUtil::round( ( $size['width'] / $width ) * $height ) );
 				$size['crop']   = 1;
 			}
 		}
@@ -1844,7 +1845,7 @@ function wc_get_rounding_precision() {
 function wc_add_number_precision( $value, $round = true ) {
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
-	return $round ? round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
+	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
 }
 
 /**
@@ -2396,14 +2397,14 @@ function wc_decimal_to_fraction( $decimal ) {
  */
 function wc_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
+		return NumberUtil::round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	}
 
 	if ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
 		return wc_legacy_round_half_down( $value, $precision );
 	}
 
-	return round( $value, $precision );
+	return NumberUtil::round( $value, $precision );
 }
 
 /**

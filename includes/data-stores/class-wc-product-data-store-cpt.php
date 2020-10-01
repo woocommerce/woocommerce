@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -706,7 +707,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$terms[] = 'outofstock';
 			}
 
-			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+			$rating = min( 5, NumberUtil::round( $product->get_average_rating(), 0 ) );
 
 			if ( $rating > 0 ) {
 				$terms[] = 'rated-' . $rating;

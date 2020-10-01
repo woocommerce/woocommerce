@@ -9,6 +9,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
@@ -877,7 +879,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
-					$tax += round( $shipping_taxes[ $key ], wc_get_price_decimals() );
+					$tax += NumberUtil::round( $shipping_taxes[ $key ], wc_get_price_decimals() );
 					unset( $shipping_taxes[ $key ] );
 				}
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
