@@ -3,13 +3,23 @@ import {
 	ListChildFn,
 	ListsChildModels,
 	ModelRepository,
+	ModelRepositoryParams,
 	ReadChildFn,
 	ReadsChildModels,
-	UpdateChildFn, UpdatesChildModels,
+	UpdateChildFn,
+	UpdatesChildModels,
 } from '../../../framework/model-repository';
-import { Setting, SettingParentID } from '../../../models/settings/setting';
+import { Setting } from '../../../models';
 
-function restList( httpClient: HTTPClient ): ListChildFn< Setting, SettingParentID, undefined > {
+/**
+ * @typedef SettingParentID
+ * @property {string} settingGroupID The ID of the setting group we're a child of.
+ */
+type SettingParentID = { settingGroupID: string };
+
+type SettingParams = ModelRepositoryParams< Setting, SettingParentID, never, 'value' >;
+
+function restList( httpClient: HTTPClient ): ListChildFn< SettingParams > {
 	return async ( parent ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID );
 
@@ -30,7 +40,7 @@ function restList( httpClient: HTTPClient ): ListChildFn< Setting, SettingParent
 	};
 }
 
-function restRead( httpClient: HTTPClient ): ReadChildFn< Setting, SettingParentID > {
+function restRead( httpClient: HTTPClient ): ReadChildFn< SettingParams > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID + '/' + id );
 
@@ -46,7 +56,7 @@ function restRead( httpClient: HTTPClient ): ReadChildFn< Setting, SettingParent
 	};
 }
 
-function restUpdate( httpClient: HTTPClient ): UpdateChildFn< Setting, SettingParentID, 'value' > {
+function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingParams > {
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
 			'/wc/v3/settings/' + parent.settingGroupID + '/' + id,
@@ -76,10 +86,10 @@ function restUpdate( httpClient: HTTPClient ): UpdateChildFn< Setting, SettingPa
  * } A repository for interacting with models via the REST API.
  */
 export function settingRESTRepository( httpClient: HTTPClient ):
-	ListsChildModels< Setting, SettingParentID > &
-	ReadsChildModels< Setting, SettingParentID > &
-	UpdatesChildModels< Setting, SettingParentID, 'value' > {
-	return new ModelRepository< Setting, undefined, 'value', SettingParentID >(
+	ListsChildModels< SettingParams > &
+	ReadsChildModels< SettingParams > &
+	UpdatesChildModels< SettingParams > {
+	return new ModelRepository< SettingParams >(
 		restList( httpClient ),
 		null,
 		restRead( httpClient ),

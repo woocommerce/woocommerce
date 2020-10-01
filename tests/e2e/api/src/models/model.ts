@@ -7,16 +7,6 @@
 export type ModelID = string | number;
 
 /**
- * An interface for describing the shape of parent identifiers.
- *
- * @typedef ModelParentID
- * @alias Object.<string,ModelID>
- */
-export interface ModelParentID {
-	[ key: number ]: ModelID
-}
-
-/**
  * The base class for all models.
  */
 export abstract class Model {

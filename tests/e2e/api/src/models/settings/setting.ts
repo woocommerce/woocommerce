@@ -1,4 +1,4 @@
-import { Model, ModelID, ModelParentID } from '../model';
+import { Model } from '../model';
 import { HTTPClient } from '../../http';
 import { settingRESTRepository } from '../../repositories/rest/settings/setting';
 
@@ -6,16 +6,6 @@ import { settingRESTRepository } from '../../repositories/rest/settings/setting'
  * The default types of settings that are available.
  */
 type SettingType = 'text' | 'select' | 'multiselect' | 'checkbox' | 'number';
-
-/**
- * An interface describing the shape of setting parent data.
- *
- * @typedef SettingParentID
- * @property {ModelID} settingGroupID The ID of the setting group for the setting.
- */
-export interface SettingParentID extends ModelParentID {
-	settingGroupID: ModelID;
-}
 
 /**
  * A setting object.
