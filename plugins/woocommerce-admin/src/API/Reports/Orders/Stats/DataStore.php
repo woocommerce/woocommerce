@@ -12,6 +12,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
@@ -576,13 +577,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return;
 		}
 
+		// Retrieve customer details before the order is deleted.
+		$order       = wc_get_order( $order_id );
+		$customer_id = absint( CustomersDataStore::get_existing_customer_id_from_order( $order ) );
+
+		// Delete the order.
 		$wpdb->delete( self::get_db_table_name(), array( 'order_id' => $order_id ) );
 		/**
 		 * Fires when orders stats are deleted.
 		 *
 		 * @param int $order_id Order ID.
+		 * @param int $customer_id Customer ID.
 		 */
-		do_action( 'woocommerce_analytics_delete_order_stats', $order_id );
+		do_action( 'woocommerce_analytics_delete_order_stats', $order_id, $customer_id );
 
 		ReportsCache::invalidate();
 	}
