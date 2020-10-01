@@ -72,7 +72,7 @@
     "grunt-sass": "3.1.0",
     "grunt-stylelint": "0.15.0",
     "gruntify-eslint": "5.0.0",
-    "husky": "4.2.5",
+    "husky": "4.3.0",
     "istanbul": "1.0.0-alpha.2",
     "jest": "25.1.0",
     "lerna": "3.22.1",
