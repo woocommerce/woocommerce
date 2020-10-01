@@ -1,4 +1,10 @@
 <?php
+/**
+ * Test tax funcitons.
+ *
+ * @package WooCommerce\Tests\Tax
+ * @since   3.4.0
+ */
 
 /**
  * Class Tax.
@@ -100,7 +106,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 					'compound' => 'no',
 				),
 			),
-			print_r( $tax_rates, true )
+			print_r( $tax_rates, true ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		);
 	}
 
@@ -300,7 +306,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			)
 		);
 
-		// prices exclusive of tax
+		// prices exclusive of tax.
 		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, false, false );
 		$this->assertEquals(
 			$calced_tax,
@@ -310,7 +316,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			)
 		);
 
-		// prices inclusive of tax
+		// prices inclusive of tax.
 		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, true, false );
 		/**
 		 * 100 is inclusive of all taxes.
@@ -476,7 +482,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test__insert_tax_rate() {
 		global $wpdb;
 
-		// Define a rate
+		// Define a rate.
 		$tax_rate = array(
 			'tax_rate_country'  => 'gb',
 			'tax_rate_state'    => '',
@@ -489,7 +495,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		// Run function
+		// Run function.
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$this->assertGreaterThan( 0, $tax_rate_id );
@@ -513,7 +519,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test__update_tax_rate() {
 		global $wpdb;
 
-		// Define a rate
+		// Define a rate.
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -526,15 +532,15 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		// Run function
+		// Run function.
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Update a rate
+		// Update a rate.
 		$tax_rate = array(
 			'tax_rate_country' => 'US',
 		);
 
-		// Run function
+		// Run function.
 		WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 
 		$this->assertNotFalse( $wpdb->last_result );
@@ -546,7 +552,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test__delete_tax_rate() {
 		global $wpdb;
 
-		// Define a rate
+		// Define a rate.
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -559,10 +565,10 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		// Run function
+		// Run function.
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Run function
+		// Run function.
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 
 		$this->assertNotFalse( $wpdb->last_result );
@@ -587,7 +593,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		// Run function
+		// Run function.
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $to_save );
@@ -616,7 +622,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		// Run function
+		// Run function.
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		WC_Tax::_update_tax_rate_cities( $tax_rate_id, $to_save );

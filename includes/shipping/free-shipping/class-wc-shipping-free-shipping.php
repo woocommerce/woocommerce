@@ -77,14 +77,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'title'      => array(
+			'title'            => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => $this->method_title,
 				'desc_tip'    => true,
 			),
-			'requires'   => array(
+			'requires'         => array(
 				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
@@ -97,7 +97,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 				),
 			),
-			'min_amount' => array(
+			'min_amount'       => array(
 				'title'       => __( 'Minimum order amount', 'woocommerce' ),
 				'type'        => 'price',
 				'placeholder' => wc_format_localized_price( 0 ),

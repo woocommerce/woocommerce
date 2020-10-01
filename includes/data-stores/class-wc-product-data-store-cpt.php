@@ -1376,11 +1376,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// Calculate new value for filter below. Set multiplier to subtract or add the meta_value.
 			switch ( $operation ) {
 				case 'increase':
-					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock + wc_stock_amount( $stock_quantity );
 					$multiplier = 1;
 					break;
 				default:
-					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock - wc_stock_amount( $stock_quantity );
 					$multiplier = -1;
 					break;
 			}

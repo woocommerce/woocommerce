@@ -201,6 +201,7 @@ class WC_Tracks_Client {
 					$binary .= chr( wp_rand( 0, 255 ) );
 				}
 
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				$anon_id = 'woo:' . base64_encode( $binary );
 			}
 		}
