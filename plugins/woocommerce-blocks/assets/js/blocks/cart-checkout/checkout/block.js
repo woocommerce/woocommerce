@@ -92,7 +92,12 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		return <CheckoutOrderError />;
 	}
 
-	if ( ! isEditor && ! customerId && ! CHECKOUT_ALLOWS_GUEST ) {
+	if (
+		! isEditor &&
+		! customerId &&
+		! CHECKOUT_ALLOWS_GUEST &&
+		! attributes.allowCreateAccount
+	) {
 		return (
 			<>
 				{ __(
@@ -108,7 +113,6 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 			</>
 		);
 	}
-
 	const checkoutClassName = classnames( 'wc-block-checkout', {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
@@ -124,6 +128,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						showPhoneField={ attributes.showPhoneField }
 						requireCompanyField={ attributes.requireCompanyField }
 						requirePhoneField={ attributes.requirePhoneField }
+						allowCreateAccount={ attributes.allowCreateAccount }
 					/>
 					<div className="wc-block-checkout__actions">
 						{ attributes.showReturnToCart && (

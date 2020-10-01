@@ -76,6 +76,7 @@ jobs:
               - WOOCOMMERCE_BLOCKS_PHASE=3
               - PHP_UNIT=1
           script:
+              - echo 'woocommerce_blocks_phase = 3' > blocks.ini
               - npm run phpunit
         - name: PHP 5.6/unit-tests/Latest WP
           php: 5.6
@@ -84,6 +85,7 @@ jobs:
               - WOOCOMMERCE_BLOCKS_PHASE=3
               - PHP_UNIT=1
           script:
+              - echo 'woocommerce_blocks_phase = 3' > blocks.ini
               - npm run phpunit
         - name: PHP Linting Check
           php: 7.3

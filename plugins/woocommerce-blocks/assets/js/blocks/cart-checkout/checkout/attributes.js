@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { HAS_DARK_EDITOR_STYLE_SUPPORT } from '@woocommerce/block-settings';
+import {
+	HAS_DARK_EDITOR_STYLE_SUPPORT,
+	CHECKOUT_ALLOWS_SIGNUP,
+} from '@woocommerce/block-settings';
 
 const blockAttributes = {
 	isPreview: {
@@ -16,6 +19,10 @@ const blockAttributes = {
 	requireCompanyField: {
 		type: 'boolean',
 		default: false,
+	},
+	allowCreateAccount: {
+		type: 'boolean',
+		default: CHECKOUT_ALLOWS_SIGNUP,
 	},
 	showApartmentField: {
 		type: 'boolean',

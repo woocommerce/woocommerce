@@ -18,6 +18,7 @@ const {
 	DECREMENT_CALCULATING,
 	SET_ORDER_ID,
 	SET_ORDER_NOTES,
+	SET_SHOULD_CREATE_ACCOUNT,
 } = TYPES;
 
 const {
@@ -68,11 +69,12 @@ export const prepareResponseData = ( data ) => {
  * @param {string} action.type Type of action.
  * @param {string} action.orderId Order ID.
  * @param {Array} action.orderNotes Order notes.
+ * @param {boolean} action.shouldCreateAccount True if shopper has requested a user account (signup checkbox).
  * @param {Object} action.data Other action payload.
  */
 export const reducer = (
 	state = DEFAULT_STATE,
-	{ url, type, orderId, orderNotes, data }
+	{ url, type, orderId, orderNotes, shouldCreateAccount, data }
 ) => {
 	let newState = state;
 	switch ( type ) {
@@ -189,6 +191,14 @@ export const reducer = (
 				...state,
 				orderId,
 			};
+			break;
+		case SET_SHOULD_CREATE_ACCOUNT:
+			if ( shouldCreateAccount !== state.shouldCreateAccount ) {
+				newState = {
+					...state,
+					shouldCreateAccount,
+				};
+			}
 			break;
 		case SET_ORDER_NOTES:
 			if ( state.orderNotes !== orderNotes ) {
