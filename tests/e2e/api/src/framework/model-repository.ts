@@ -345,7 +345,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		params?: ListParams< T >,
 	): Promise< ModelClass< T >[] > {
 		if ( ! this.listHook ) {
-			throw new Error( 'The \'create\' operation is not supported on this model.' );
+			throw new Error( 'The \'list\' operation is not supported on this model.' );
 		}
 
 		if ( params === undefined ) {
