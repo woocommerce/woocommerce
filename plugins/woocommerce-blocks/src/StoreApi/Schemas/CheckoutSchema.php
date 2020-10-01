@@ -94,6 +94,11 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
+			'create_account'   => [
+				'description' => __( 'Whether to create a new user account as part of order processing.', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+			],
 			'payment_result'   => [
 				'description' => __( 'Result of payment processing, or false if not yet processed.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
