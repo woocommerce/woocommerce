@@ -52,7 +52,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "commander": "4.1.1",
-    "config": "3.3.1",
+    "config": "3.3.2",
     "cross-env": "6.0.3",
     "deasync": "0.1.20",
     "eslint": "6.8.0",
