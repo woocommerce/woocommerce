@@ -210,6 +210,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Dev: Combine translation chunks when languages updated #5094
 - Dev: Add filters for columns in reports #5134
 - Dev: Don't include "min" suffix in build JS files for core build #5130
+- Dev: Store Profiler - Industry step: reduced padding and removed industry #5157
+- Dev: Remove product settings video note #5213
 - Enhancement: Add free local shipping zone on profile complete #4857
 - Enhancement: Add woocommerce/tracks pacakage #5107
 - Enhancement: Add filter to allow modification of report columns #4984
@@ -243,6 +245,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix: Card to connect to woocommerce.com #5129
 - Fix: Search all variation attribute values #5141
 - Fix: Force float before addition in taxes #5149
+- Fix: Enlarged store profiler text in two steps #5194
+- Fix: Bug where sometimes the task list would not vanish after being completed #5205
 
 **WooCommerce Blocks - 3.2.0, 3.3.0 and 3.4.0**
 
