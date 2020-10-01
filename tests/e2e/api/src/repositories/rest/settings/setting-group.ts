@@ -1,10 +1,9 @@
 import { HTTPClient } from '../../../http';
-import { ListFn, ListsModels, ModelRepository, ModelRepositoryParams } from '../../../framework/model-repository';
+import { ListFn, ModelRepository } from '../../../framework/model-repository';
 import { SettingGroup } from '../../../models';
+import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../models/settings/setting-group';
 
-type SettingGroupParams = ModelRepositoryParams< SettingGroup, never, never, never >;
-
-function restList( httpClient: HTTPClient ): ListFn< SettingGroupParams > {
+function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParams > {
 	return async () => {
 		const response = await httpClient.get( '/wc/v3/settings' );
 
@@ -26,10 +25,10 @@ function restList( httpClient: HTTPClient ): ListFn< SettingGroupParams > {
  * Creates a new ModelRepository instance for interacting with models via the REST API.
  *
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
- * @return {ListsModels.<SettingGroup>} A repository for interacting with models via the REST API.
+ * @return {ListsSettingGroups} The created repository.
  */
-export function settingGroupRESTRepository( httpClient: HTTPClient ): ListsModels< SettingGroupParams > {
-	return new ModelRepository< SettingGroupParams >(
+export function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSettingGroups {
+	return new ModelRepository(
 		restList( httpClient ),
 		null,
 		null,

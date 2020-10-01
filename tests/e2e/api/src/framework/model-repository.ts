@@ -15,13 +15,13 @@ interface ModelParentID {
  * for use in the repository to provide type-safety to repository actions.
  */
 export interface ModelRepositoryParams<
-	T extends Model = any,
+	T extends Model = never,
 	// @ts-ignore
-	ParentID extends ModelParentID | undefined = any,
+	ParentID extends ModelParentID | undefined = never,
 	// @ts-ignore
-	ListParams = any,
+	ListParams = never,
 	// @ts-ignore
-	UpdateParams extends keyof T = any,
+	UpdateParams extends keyof T = never,
 	> {
 	// Since TypeScript's type system is structural we need to add something to this type to prevent
 	// it from matching with everything else (since it is an empty interface).
@@ -205,7 +205,7 @@ export interface ReadsModels< T extends ModelRepositoryParams > {
  * @template {ModelParentID} P
  */
 export interface ReadsChildModels< T extends ModelRepositoryParams > {
-	read( parent: ParentID< ModelRepositoryParams >, childID: ModelID ): Promise< ModelClass< T > >;
+	read( parent: ParentID< T >, childID: ModelID ): Promise< ModelClass< T > >;
 }
 
 /**

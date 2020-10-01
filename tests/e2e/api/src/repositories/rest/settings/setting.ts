@@ -1,25 +1,19 @@
 import { HTTPClient } from '../../../http';
 import {
 	ListChildFn,
-	ListsChildModels,
 	ModelRepository,
-	ModelRepositoryParams,
 	ReadChildFn,
-	ReadsChildModels,
 	UpdateChildFn,
-	UpdatesChildModels,
 } from '../../../framework/model-repository';
 import { Setting } from '../../../models';
+import {
+	ListsSettings,
+	ReadsSettings,
+	SettingRepositoryParams,
+	UpdatesSettings,
+} from '../../../models/settings/setting';
 
-/**
- * @typedef SettingParentID
- * @property {string} settingGroupID The ID of the setting group we're a child of.
- */
-type SettingParentID = { settingGroupID: string };
-
-type SettingParams = ModelRepositoryParams< Setting, SettingParentID, never, 'value' >;
-
-function restList( httpClient: HTTPClient ): ListChildFn< SettingParams > {
+function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {
 	return async ( parent ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID );
 
@@ -40,7 +34,7 @@ function restList( httpClient: HTTPClient ): ListChildFn< SettingParams > {
 	};
 }
 
-function restRead( httpClient: HTTPClient ): ReadChildFn< SettingParams > {
+function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParams > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID + '/' + id );
 
@@ -56,7 +50,7 @@ function restRead( httpClient: HTTPClient ): ReadChildFn< SettingParams > {
 	};
 }
 
-function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingParams > {
+function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryParams > {
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
 			'/wc/v3/settings/' + parent.settingGroupID + '/' + id,
@@ -79,17 +73,10 @@ function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingParams > {
  * Creates a new ModelRepository instance for interacting with models via the REST API.
  *
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
- * @return {
- *	ListsChildModels.<Setting,SettingParentID>|
- *	ReadsChildModels.<Setting,SettingParentID>|
- *	UpdatesChildModels.<Setting,SettingParentID>
- * } A repository for interacting with models via the REST API.
+ * @return {ListsSettings|ReadsSettings|UpdatesSettings} The created repository.
  */
-export function settingRESTRepository( httpClient: HTTPClient ):
-	ListsChildModels< SettingParams > &
-	ReadsChildModels< SettingParams > &
-	UpdatesChildModels< SettingParams > {
-	return new ModelRepository< SettingParams >(
+export function settingRESTRepository( httpClient: HTTPClient ): ListsSettings & ReadsSettings & UpdatesSettings {
+	return new ModelRepository(
 		restList( httpClient ),
 		null,
 		restRead( httpClient ),

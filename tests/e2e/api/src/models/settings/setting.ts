@@ -1,6 +1,50 @@
 import { Model } from '../model';
 import { HTTPClient } from '../../http';
 import { settingRESTRepository } from '../../repositories/rest/settings/setting';
+import {
+	ModelRepositoryParams,
+	ListsChildModels,
+	ReadsChildModels,
+	UpdatesChildModels,
+} from '../../framework/model-repository';
+
+/**
+ * The parent identifier for settings.
+ *
+ * @typedef SettingParentID
+ * @property {string} settingGroupID The ID of the setting group we're a child of.
+ */
+type SettingParentID = { settingGroupID: string };
+
+/**
+ * The parameters embedded in this generic can be used in the ModelRepository in order to give
+ * type-safety in an incredibly granular way.
+ */
+export type SettingRepositoryParams = ModelRepositoryParams< Setting, SettingParentID, never, 'value' >;
+
+/**
+ * An interface for listing settings using the repository.
+ *
+ * @typedef ListsSettings
+ * @alias ListsModels.<Setting>
+ */
+export type ListsSettings = ListsChildModels< SettingRepositoryParams >;
+
+/**
+ * An interface for reading settings using the repository.
+ *
+ * @typedef ReadsSettings
+ * @alias ReadsModels.<Setting>
+ */
+export type ReadsSettings = ReadsChildModels< SettingRepositoryParams >;
+
+/**
+ * An interface for updating settings using the repository.
+ *
+ * @typedef UpdatesSettings
+ * @alias UpdatesModels.<Setting>
+ */
+export type UpdatesSettings = UpdatesChildModels< SettingRepositoryParams >;
 
 /**
  * The default types of settings that are available.

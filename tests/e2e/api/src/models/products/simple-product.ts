@@ -1,6 +1,21 @@
 import { AbstractProduct } from './abstract-product';
 import { HTTPClient } from '../../http';
 import { simpleProductRESTRepository } from '../../repositories/rest/products/simple-product';
+import { CreatesModels, ModelRepositoryParams } from '../../framework/model-repository';
+
+/**
+ * The parameters embedded in this generic can be used in the ModelRepository in order to give
+ * type-safety in an incredibly granular way.
+ */
+export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, never, 'regularPrice' >;
+
+/**
+ * An interface for creating simple products using the repository.
+ *
+ * @typedef CreatesSimpleProducts
+ * @alias CreatesModels.<SimpleProduct>
+ */
+export type CreatesSimpleProducts = CreatesModels< SimpleProductRepositoryParams >;
 
 /**
  * A simple product object.
