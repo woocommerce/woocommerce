@@ -136,7 +136,6 @@ class Onboarding {
 			$do_redirect                   = true;
 			$current_page                  = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
 			$is_onboarding_path            = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			$is_legacy_onboarding_complete = class_exists( '\WC_Admin_Notices' ) && ! \WC_Admin_Notices::has_notice( 'install' );
 
 			// On these pages, or during these events, postpone the redirect.
 			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
@@ -146,7 +145,6 @@ class Onboarding {
 			// On these pages, or during these events, disable the redirect.
 			if (
 				( 'wc-admin' === $current_page && $is_onboarding_path ) ||
-				$is_legacy_onboarding_complete ||
 				apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ||
 				isset( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification
 			) {
