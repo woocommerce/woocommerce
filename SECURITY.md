@@ -21,7 +21,7 @@ Our most critical targets are:
 
 For more targets, see the `In Scope` section on [HackerOne](https://hackerone.com/automattic).
 
-_Please note that the **WordPress software is a separate entity** from Automattic. Please report vulnerabilities for WordPress or the WordPress mobile apps through [the WordPress Foundation's HackerOne page](https://hackerone.com/wordpress)._
+_Please note that the **WordPress software is a separate entity** from Automattic. Please report vulnerabilities for WordPress through [the WordPress Foundation's HackerOne page](https://hackerone.com/wordpress)._
 
 ## Guidelines
 
