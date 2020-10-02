@@ -19,10 +19,16 @@
     "woocommerce/woocommerce-blocks": "3.4.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "7.5.20",
+    "phpunit/phpunit": "dev-add-compatibility-with-php8-to-phpunit-7",
     "woocommerce/woocommerce-sniffs": "0.1.0",
     "wp-cli/i18n-command": "2.2.5"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/woocommerce/phpunit"
+    }
+  ],
   "config": {
     "platform": {
       "php": "7.1"
