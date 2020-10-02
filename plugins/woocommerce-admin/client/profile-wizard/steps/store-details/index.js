@@ -9,11 +9,10 @@ import {
 	CardFooter,
 	CheckboxControl,
 	FlexItem,
-	Icon,
-	Tooltip,
 	__experimentalText as Text,
+	Popover,
 } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form } from '@woocommerce/components';
@@ -24,13 +23,14 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { getCountryCode, getCurrencyRegion } from '../../dashboard/utils';
+import { getCountryCode, getCurrencyRegion } from '../../../dashboard/utils';
 import {
 	StoreAddress,
 	validateStoreAddress,
-} from '../../dashboard/components/settings/general/store-address';
-import UsageModal from './usage-modal';
-import { CurrencyContext } from '../../lib/currency-context';
+} from '../../../dashboard/components/settings/general/store-address';
+import UsageModal from '../usage-modal';
+import { CurrencyContext } from '../../../lib/currency-context';
+import './style.scss';
 
 class StoreDetails extends Component {
 	constructor( props ) {
@@ -40,6 +40,8 @@ class StoreDetails extends Component {
 		this.state = {
 			showUsageModal: false,
 			skipping: false,
+			isStoreDetailsPopoverVisible: false,
+			isSkipSetupPopoverVisible: false,
 		};
 
 		// Check if a store address is set so that we don't default
@@ -164,7 +166,12 @@ class StoreDetails extends Component {
 	}
 
 	render() {
-		const { showUsageModal, skipping } = this.state;
+		const {
+			showUsageModal,
+			skipping,
+			isStoreDetailsPopoverVisible,
+			isSkipSetupPopoverVisible,
+		} = this.state;
 		const { skipProfiler } = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
@@ -180,7 +187,7 @@ class StoreDetails extends Component {
 		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
 		return (
-			<Fragment>
+			<div className="woocommerce-profile-wizard__store-details">
 				<div className="woocommerce-profile-wizard__step-header">
 					<Text variant="title.small" as="h2">
 						{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
@@ -191,15 +198,39 @@ class StoreDetails extends Component {
 							'woocommerce-admin'
 						) }
 
-						<Tooltip text={ configureCurrencyText }>
-							<span
-								aria-label={ configureCurrencyText }
-								className="woocommerce-profile-wizard__tooltip-icon"
+						<Button
+							isTertiary
+							label={ __(
+								'Learn more about store details',
+								'woocommerce-admin'
+							) }
+							onClick={ () =>
+								this.setState( {
+									isStoreDetailsPopoverVisible: true,
+								} )
+							}
+						>
+							<i
+								className="material-icons-outlined"
+								aria-hidden="true"
 							>
-								<Icon icon="info-outline" size={ 16 } />
-							</span>
-						</Tooltip>
+								info
+							</i>
+						</Button>
 					</Text>
+					{ isStoreDetailsPopoverVisible && (
+						<Popover
+							focusOnMount="container"
+							position="top center"
+							onClose={ () =>
+								this.setState( {
+									isStoreDetailsPopoverVisible: false,
+								} )
+							}
+						>
+							{ configureCurrencyText }
+						</Popover>
+					) }
 				</div>
 
 				<Form
@@ -289,16 +320,35 @@ class StoreDetails extends Component {
 							'woocommerce-admin'
 						) }
 					</Button>
-					<Tooltip text={ skipSetupText }>
-						<span
-							aria-label={ skipSetupText }
-							className="woocommerce-profile-wizard__tooltip-icon"
+					<Button
+						isTertiary
+						label={ skipSetupText }
+						onClick={ () =>
+							this.setState( { isSkipSetupPopoverVisible: true } )
+						}
+					>
+						<i
+							className="material-icons-outlined"
+							aria-hidden="true"
 						>
-							<Icon icon="info-outline" size={ 16 } />
-						</span>
-					</Tooltip>
+							info
+						</i>
+					</Button>
+					{ isSkipSetupPopoverVisible && (
+						<Popover
+							focusOnMount="container"
+							position="top center"
+							onClose={ () =>
+								this.setState( {
+									isSkipSetupPopoverVisible: false,
+								} )
+							}
+						>
+							{ skipSetupText }
+						</Popover>
+					) }
 				</div>
-			</Fragment>
+			</div>
 		);
 	}
 }
