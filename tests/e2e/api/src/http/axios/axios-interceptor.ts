@@ -70,7 +70,7 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling successful responses.
 	 *
-	 * @param {AxiosResponse} response The response from the axios client.
+	 * @param {*} response The response from the axios client.
 	 */
 	protected onResponseSuccess( response: AxiosResponse ): any {
 		return response;
@@ -79,9 +79,9 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling response failures.
 	 *
-	 * @param {*} error The error that occurred.
+	 * @param {Promise} error The error that occurred.
 	 */
 	protected onResponseRejected( error: any ): any {
-		return error;
+		throw error;
 	}
 }
