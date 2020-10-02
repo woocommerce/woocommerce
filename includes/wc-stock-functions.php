@@ -39,12 +39,12 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$data_store            = WC_Data_Store::load( 'product' );
 
 		// Fire actions to let 3rd parties know the stock is about to be changed.
-		if ($product_with_stock->is_type('variation')) {
-			do_action('woocommerce_variation_before_set_stock', $product_with_stock);
+		if ( $product_with_stock->is_type( 'variation' ) ) {
+			do_action( 'woocommerce_variation_before_set_stock', $product_with_stock );
 		} else {
-			do_action('woocommerce_product_before_set_stock', $product_with_stock);
+			do_action( 'woocommerce_product_before_set_stock', $product_with_stock );
 		}
-		
+
 		// Update the database.
 		$new_stock = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 
