@@ -8,13 +8,11 @@ Stable tag: 4.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-WooCommerce is the world’s most popular open-source eCommerce solution.
+WooCommerce is free, flexible, and amplified by a global community. The freedom of open-source means you retain full ownership of your store’s content and data forever.
 
 == Description ==
 
-WooCommerce is the world’s most popular open-source eCommerce solution. 
-
-Our core platform is free, flexible, and amplified by a global community. The freedom of open-source means you retain full ownership of your store’s content and data forever.
+WooCommerce is free, flexible, and amplified by a global community. The freedom of open-source means you retain full ownership of your store’s content and data forever.
 
 Whether you’re launching a business, taking brick-and-mortar retail online, or developing sites for clients, use WooCommerce for a store that powerfully blends content and commerce.
 
