@@ -212,7 +212,7 @@ describe( 'ModelRepository', () => {
 
 	it( 'should delete', async () => {
 		const callback = jest.fn().mockResolvedValue( true );
-		const repository: DeletesModels = new ModelRepository< DummyModelParams >(
+		const repository: DeletesModels< DummyModelParams > = new ModelRepository< DummyModelParams >(
 			null,
 			null,
 			null,
@@ -241,7 +241,7 @@ describe( 'ModelRepository', () => {
 	} );
 
 	it( 'should throw error on delete without callback', () => {
-		const repository: DeletesModels = new ModelRepository< DummyModelParams >(
+		const repository: DeletesModels< DummyModelParams > = new ModelRepository< DummyModelParams >(
 			null,
 			null,
 			null,

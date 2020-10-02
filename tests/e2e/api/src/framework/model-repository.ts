@@ -158,7 +158,7 @@ export type DeleteChildFn< T extends ModelRepositoryParams > = ( parent: ParentI
  * @template L
  */
 export interface ListsModels< T extends ModelRepositoryParams > {
-	list( params?: ListParams< T > ): Promise< ModelClass< T >[] >;
+	list( params?: HasParent< T, never, ListParams< T > > ): Promise< ModelClass< T >[] >;
 }
 
 /**
@@ -171,7 +171,10 @@ export interface ListsModels< T extends ModelRepositoryParams > {
  * @template L
  */
 export interface ListsChildModels< T extends ModelRepositoryParams > {
-	list( parent: ParentID< T >, params?: ListParams< T > ): Promise< ModelClass< T >[] >;
+	list(
+		parent: HasParent< T, ParentID< T >, never >,
+		params?: HasParent< T, ListParams< T >, never >,
+	): Promise< ModelClass< T >[] >;
 }
 
 /**
@@ -193,7 +196,7 @@ export interface CreatesModels< T extends ModelRepositoryParams > {
  * @template {Model} T
  */
 export interface ReadsModels< T extends ModelRepositoryParams > {
-	read( id: ModelID ): Promise< ModelClass< T > >;
+	read( id: HasParent< T, never, ModelID > ): Promise< ModelClass< T > >;
 }
 
 /**
@@ -205,7 +208,10 @@ export interface ReadsModels< T extends ModelRepositoryParams > {
  * @template {ModelParentID} P
  */
 export interface ReadsChildModels< T extends ModelRepositoryParams > {
-	read( parent: ParentID< T >, childID: ModelID ): Promise< ModelClass< T > >;
+	read(
+		parent: HasParent< T, ParentID< T >, never >,
+		childID: HasParent< T, ModelID, never >,
+	): Promise< ModelClass< T > >;
 }
 
 /**
@@ -216,7 +222,10 @@ export interface ReadsChildModels< T extends ModelRepositoryParams > {
  * @template {Model} T
  */
 export interface UpdatesModels< T extends ModelRepositoryParams > {
-	update( id: ModelID, properties: UpdateParams< T > ): Promise< ModelClass< T > >;
+	update(
+		id: HasParent< T, never, ModelID >,
+		properties: HasParent< T, never, UpdateParams< T > >,
+	): Promise< ModelClass< T > >;
 }
 
 /**
@@ -228,7 +237,11 @@ export interface UpdatesModels< T extends ModelRepositoryParams > {
  * @template {ModelParentID} P
  */
 export interface UpdatesChildModels< T extends ModelRepositoryParams > {
-	update( parent: ParentID< T >, childID: ModelID, properties: UpdateParams< T > ): Promise< ModelClass< T > >;
+	update(
+		parent: HasParent< T, ParentID< T >, never >,
+		childID: HasParent< T, ModelID, never >,
+		properties: HasParent< T, UpdateParams< T >, never >,
+	): Promise< ModelClass< T > >;
 }
 
 /**
@@ -237,8 +250,8 @@ export interface UpdatesChildModels< T extends ModelRepositoryParams > {
  * @typedef DeletesModels
  * @property {DeleteFn} delete Deletes a model using the repository.
  */
-export interface DeletesModels {
-	delete( id: ModelID ): Promise< boolean >;
+export interface DeletesModels< T extends ModelRepositoryParams > {
+	delete( id: HasParent< T, never, ModelID > ): Promise< boolean >;
 }
 
 /**
@@ -249,7 +262,10 @@ export interface DeletesModels {
  * @template {ModelParentID} P
  */
 export interface DeletesChildModels< T extends ModelRepositoryParams > {
-	delete( parent: ParentID< T >, childID: ModelID ): Promise< boolean >;
+	delete(
+		parent: HasParent< T, ParentID< T >, never >,
+		childID: HasParent< T, ModelID, never >,
+	): Promise< boolean >;
 }
 
 /**
@@ -268,7 +284,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	ReadsChildModels< T >,
 	UpdatesModels< T >,
 	UpdatesChildModels< T >,
-	DeletesModels,
+	DeletesModels< T >,
 	DeletesChildModels< T > {
 	/**
 	 * The hook used to list models.
@@ -341,8 +357,8 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 * @return {Promise.<Array.<T>>} Resolves to the listed models.
 	 */
 	public list(
-		paramsOrParent?: ListParams< T > | ParentID< T >,
-		params?: ListParams< T >,
+		paramsOrParent?: HasParent< T, ParentID< T >, ListParams< T > >,
+		params?: HasParent< T, ListParams< T >, never >,
 	): Promise< ModelClass< T >[] > {
 		if ( ! this.listHook ) {
 			throw new Error( 'The \'list\' operation is not supported on this model.' );
@@ -382,8 +398,8 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 * @return {Promise.<T>} Resolves to the loaded model.
 	 */
 	public read(
-		idOrParent: ModelID | ParentID< T >,
-		childID?: ModelID,
+		idOrParent: HasParent< T, ParentID< T >, ModelID >,
+		childID?: HasParent< T, ModelID, never >,
 	): Promise< ModelClass< T > > {
 		if ( ! this.readHook ) {
 			throw new Error( 'The \'read\' operation is not supported on this model.' );
@@ -410,9 +426,9 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 * @return {Promise.<T>} Resolves to the updated model.
 	 */
 	public update(
-		idOrParent: ModelID | ParentID< T >,
-		propertiesOrChildID: UpdateParams< T > | ModelID,
-		properties?: UpdateParams< T >,
+		idOrParent: HasParent< T, ParentID< T >, ModelID >,
+		propertiesOrChildID: HasParent< T, ModelID, UpdateParams< T > >,
+		properties?: HasParent< T, UpdateParams< T >, never >,
 	): Promise< ModelClass< T > > {
 		if ( ! this.updateHook ) {
 			throw new Error( 'The \'update\' operation is not supported on this model.' );
@@ -440,8 +456,8 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 * @return {Promise.<T>} Resolves to the loaded model.
 	 */
 	public delete(
-		idOrParent: ModelID | ParentID< T >,
-		childID?: ModelID,
+		idOrParent: HasParent< T, ParentID< T >, ModelID >,
+		childID?: HasParent< T, ModelID, never >,
 	): Promise< boolean > {
 		if ( ! this.deleteHook ) {
 			throw new Error( 'The \'delete\' operation is not supported on this model.' );
