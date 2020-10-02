@@ -8,7 +8,7 @@ import { AxiosResponseInterceptor } from './axios-response-interceptor';
  */
 export class AxiosClient implements HTTPClient {
 	/**
-	 * An instance of the axios client for making HTTP requests.
+	 * An instance of the Axios client for making HTTP requests.
 	 *
 	 * @type {AxiosInstance}
 	 * @private

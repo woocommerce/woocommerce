@@ -2,6 +2,7 @@ import type { AxiosRequestConfig } from 'axios';
 import * as createHmac from 'create-hmac';
 import * as OAuth from 'oauth-1.0a';
 import { AxiosInterceptor } from './axios-interceptor';
+import { buildURL } from './utils';
 
 /**
  * A utility class for managing the lifecycle of an authentication interceptor.
@@ -43,7 +44,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
 	protected handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
-		const url = ( request.baseURL || '' ) + ( request.url || '' );
+		const url = buildURL( request );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
 				username: this.oauth.consumer.key,
