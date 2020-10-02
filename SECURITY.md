@@ -10,7 +10,7 @@ Generally, *only the latest version of WooCommerce has continued support*. If a 
 
 [WooCommerce](https://wordpress.org/plugins/woocommerce) is an open-source plugin for WordPress. Our HackerOne program covers the plugin software, as well as a variety of related projects and infrastructure.
 
-**For responsible disclosure of security issues and to be eligible for our bug bounty program, please submit your report via the [HackerOne](https://hackerone.com/automattic) portal.**
+**For responsible disclosure of security issues and to be eligible for our bug bounty program, please submit your report based on instructions found on [automattic.com/security](https://automattic.com/security).**
 
 Our most critical targets are:
 
