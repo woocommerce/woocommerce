@@ -426,7 +426,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_base_data() {
 		return array_merge(
-			array( 'id'     => $this->get_id() ),
+			array( 'id' => $this->get_id() ),
 			$this->data,
 			array( 'number' => $this->get_order_number() )
 		);

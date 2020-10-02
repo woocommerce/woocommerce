@@ -36,7 +36,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -46,7 +48,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/current', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/current',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_current_item' ),
@@ -56,7 +60,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<currency>[\w-]{3})', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<currency>[\w-]{3})',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
