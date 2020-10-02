@@ -539,7 +539,7 @@ final class WC_Cart_Totals {
 	 * @param string $key Total name you want to set.
 	 * @param int    $total Total to set.
 	 */
-	protected function set_total( $key = 'total', $total ) {
+	protected function set_total( $key, $total ) {
 		$this->totals[ $key ] = $total;
 	}
 

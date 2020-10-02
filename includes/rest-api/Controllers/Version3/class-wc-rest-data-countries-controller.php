@@ -77,7 +77,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request      Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_country( $country_code = false, $request ) {
+	public function get_country( $country_code, $request ) {
 		$countries = WC()->countries->get_countries();
 		$states    = WC()->countries->get_states();
 		$data      = array();

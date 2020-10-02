@@ -86,7 +86,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_currency( $code = false, $request ) {
+	public function get_currency( $code, $request ) {
 		$currencies = get_woocommerce_currencies();
 		$data       = array();
 
