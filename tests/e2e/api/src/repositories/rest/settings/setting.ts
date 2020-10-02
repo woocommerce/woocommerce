@@ -15,7 +15,7 @@ import {
 
 function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {
 	return async ( parent ) => {
-		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID );
+		const response = await httpClient.get( '/wc/v3/settings/' + parent );
 		if ( response.statusCode >= 400 ) {
 			throw response;
 		}
@@ -39,7 +39,7 @@ function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParam
 
 function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParams > {
 	return async ( parent, id ) => {
-		const response = await httpClient.get( '/wc/v3/settings/' + parent.settingGroupID + '/' + id );
+		const response = await httpClient.get( '/wc/v3/settings/' + parent + '/' + id );
 		if ( response.statusCode >= 400 ) {
 			throw response;
 		}
@@ -59,7 +59,7 @@ function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParam
 function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryParams > {
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
-			'/wc/v3/settings/' + parent.settingGroupID + '/' + id,
+			'/wc/v3/settings/' + parent + '/' + id,
 			params,
 		);
 		if ( response.statusCode >= 400 ) {

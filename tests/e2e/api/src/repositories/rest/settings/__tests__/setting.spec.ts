@@ -27,7 +27,7 @@ describe( 'settingGroupRESTRepository', () => {
 			],
 		) );
 
-		const list = await repository.list( { settingGroupID: 'general' } );
+		const list = await repository.list( 'general' );
 
 		expect( list ).toHaveLength( 2 );
 		expect( list[ 0 ] ).toMatchObject( { id: 'setting_1', label: 'Test Setting 1' } );
@@ -45,7 +45,7 @@ describe( 'settingGroupRESTRepository', () => {
 			},
 		) );
 
-		const read = await repository.read( { settingGroupID: 'general' }, 'setting_1' );
+		const read = await repository.read( 'general', 'setting_1' );
 
 		expect( read ).toMatchObject( { id: 'setting_1', label: 'Test Setting' } );
 		expect( httpClient.get ).toHaveBeenCalledWith( '/wc/v3/settings/general/setting_1' );
@@ -62,11 +62,7 @@ describe( 'settingGroupRESTRepository', () => {
 			},
 		) );
 
-		const updated = await repository.update(
-			{ settingGroupID: 'general' },
-			'setting_1',
-			{ value: 'test-value' },
-		);
+		const updated = await repository.update( 'general', 'setting_1', { value: 'test-value' } );
 
 		expect( updated ).toMatchObject( { id: 'setting_1', value: 'updated-value' } );
 		expect( httpClient.patch ).toHaveBeenCalledWith(

@@ -1,4 +1,4 @@
-import { Model } from '../model';
+import { Model, ModelID } from '../model';
 import { HTTPClient } from '../../http';
 import { settingRESTRepository } from '../../repositories/rest/settings/setting';
 import {
@@ -9,18 +9,10 @@ import {
 } from '../../framework/model-repository';
 
 /**
- * The parent identifier for settings.
- *
- * @typedef SettingParentID
- * @property {string} settingGroupID The ID of the setting group we're a child of.
- */
-type SettingParentID = { settingGroupID: string };
-
-/**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SettingRepositoryParams = ModelRepositoryParams< Setting, SettingParentID, never, 'value' >;
+export type SettingRepositoryParams = ModelRepositoryParams< Setting, ModelID, never, 'value' >;
 
 /**
  * An interface for listing settings using the repository.

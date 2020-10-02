@@ -21,7 +21,7 @@ class DummyModel extends Model {
 		Object.assign( this, partial );
 	}
 }
-type DummyModelParams = ModelRepositoryParams< DummyModel, undefined, { search: string }, 'name' >
+type DummyModelParams = ModelRepositoryParams< DummyModel, never, { search: string }, 'name' >
 
 class DummyChildModel extends Model {
 	public childName: string = '';

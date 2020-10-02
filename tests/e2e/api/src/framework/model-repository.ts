@@ -17,7 +17,7 @@ interface ModelParentID {
 export interface ModelRepositoryParams<
 	T extends Model = never,
 	// @ts-ignore
-	ParentID extends ModelParentID | undefined = never,
+	ParentID extends ModelID | ModelParentID = never,
 	// @ts-ignore
 	ListParams = never,
 	// @ts-ignore
@@ -37,7 +37,7 @@ type ListParams< T extends ModelRepositoryParams > = [ T ] extends [ ModelReposi
 type UpdateParams< T extends ModelRepositoryParams > = [ T ] extends [ ModelRepositoryParams< infer C, any, any, infer X > ] ?
 	( [ X ] extends [ keyof C ] ? Pick< C, X > : never ) :
 	never;
-type HasParent< T extends ModelRepositoryParams, P, C > = [ ParentID< T > ] extends [ ModelParentID ] ? P : C;
+type HasParent< T extends ModelRepositoryParams, P, C > = [ ParentID< T > ] extends [ never ] ? C : P;
 
 /**
  * A callback for listing models using a data source.
