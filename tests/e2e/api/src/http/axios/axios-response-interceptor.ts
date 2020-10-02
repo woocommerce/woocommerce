@@ -21,14 +21,12 @@ export class AxiosResponseInterceptor extends AxiosInterceptor {
 	 * @param {*} error The error that was caught.
 	 * @return {Promise} A promise containing the HTTPResponse.
 	 */
-	protected onResponseRejected( error: any ): Promise< HTTPResponse > {
+	protected onResponseRejected( error: any ): Promise< any > {
 		// Convert HTTP response errors into a form that we can handle them with.
 		if ( error.response ) {
-			return Promise.resolve< HTTPResponse >(
-				new HTTPResponse( error.response.status, error.response.headers, error.response.data ),
-			);
+			return Promise.reject( new HTTPResponse( error.response.status, error.response.headers, error.response.data ) );
 		}
 
-		throw error;
+		return Promise.reject( error );
 	}
 }

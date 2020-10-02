@@ -13,9 +13,6 @@ function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProductRepository
 				regular_price: properties.regularPrice,
 			},
 		);
-		if ( response.statusCode >= 400 ) {
-			throw response;
-		}
 
 		return Promise.resolve( new SimpleProduct( {
 			id: response.data.id,

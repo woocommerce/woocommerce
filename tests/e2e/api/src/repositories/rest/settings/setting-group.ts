@@ -6,9 +6,6 @@ import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../model
 function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParams > {
 	return async () => {
 		const response = await httpClient.get( '/wc/v3/settings' );
-		if ( response.statusCode >= 400 ) {
-			throw response;
-		}
 
 		const list: SettingGroup[] = [];
 		for ( const raw of response.data ) {
