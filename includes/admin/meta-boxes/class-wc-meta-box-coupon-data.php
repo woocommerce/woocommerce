@@ -387,7 +387,9 @@ class WC_Meta_Box_Coupon_Data {
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 			)
 		);
-		$coupon->save();
+
 		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
+
+		$coupon->save();
 	}
 }
