@@ -150,7 +150,7 @@ class WC_Shipping {
 
 	/**
 	 * Loads all shipping methods which are hooked in.
-	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
+	 * If a $package is passed, some methods may add themselves conditionally and zones will be used.
 	 *
 	 * @param array $package Package information.
 	 * @return WC_Shipping_Method[]
