@@ -7,7 +7,6 @@
  */
 import {
 	StoreOwnerFlow,
-	completeOldSetupWizard,
 	completeOnboardingWizard,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,

@@ -2,7 +2,6 @@ import { CustomerFlow, StoreOwnerFlow } from './flows';
 
 import {
 	completeOnboardingWizard,
-	completeOldSetupWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,
@@ -26,7 +25,6 @@ module.exports = {
 	CustomerFlow,
 	StoreOwnerFlow,
 	completeOnboardingWizard,
-	completeOldSetupWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,
