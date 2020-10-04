@@ -78,6 +78,7 @@ class WC_Query {
 			'edit-address'               => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
 			'payment-methods'            => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
 			'lost-password'              => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'set-password'               => get_option( 'woocommerce_myaccount_set_password_endpoint', 'set-password' ),
 			'customer-logout'            => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
 			'add-payment-method'         => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
 			'delete-payment-method'      => get_option( 'woocommerce_myaccount_delete_payment_method_endpoint', 'delete-payment-method' ),
@@ -131,6 +132,9 @@ class WC_Query {
 				break;
 			case 'lost-password':
 				$title = __( 'Lost password', 'woocommerce' );
+				break;
+			case 'set-password':
+				$title = __( 'Set password', 'woocommerce' );
 				break;
 			default:
 				$title = '';

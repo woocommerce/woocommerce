@@ -51,7 +51,7 @@ class WC_Shortcode_My_Account {
 				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
 			}
 
-			if ( isset( $wp->query_vars['lost-password'] ) ) {
+			if ( isset( $wp->query_vars['lost-password'] ) || isset( $wp->query_vars['set-password'] ) ) {
 				self::lost_password();
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
