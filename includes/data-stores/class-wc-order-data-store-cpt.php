@@ -932,7 +932,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
 		}
 		$non_cached_ids = array();
-		$cache_values = wp_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
+		$cache_values = wc_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
 		foreach ( $order_ids as $order_id ) {
 			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
 				$non_cached_ids[] = $order_id;
@@ -998,7 +998,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			},
 			$order_ids
 		);
-		$cache_values = wp_cache_get_multiple( $cache_keys, 'orders' );
+		$cache_values = wc_cache_get_multiple( $cache_keys, 'orders' );
 		$non_cached_ids = array();
 		foreach ( $order_ids as $order_id ) {
 			if ( false === $cache_values[ 'order-items-' . $order_id ] ) {
@@ -1058,7 +1058,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		foreach ( $order_ids as $order_id ) {
 			$cache_keys_mapping[ $order_id ] = WC_Order::generate_meta_cache_key( $order_id, 'orders' );
 		}
-		$cache_values = wp_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
+		$cache_values = wc_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
 		$non_cached_ids = array();
 		foreach ( $order_ids as $order_id ) {
 			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
