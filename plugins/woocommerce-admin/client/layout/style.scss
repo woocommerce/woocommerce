@@ -1,4 +1,3 @@
-
 .woocommerce-layout {
 	margin: 0;
 	padding: 0;
@@ -92,6 +91,10 @@
 	.components-base-control.has-error {
 		margin-bottom: $gap * 2 !important;
 		border-color: $studio-red-50;
+
+		@include breakpoint( '<782px' ) {
+			margin-bottom: $gap-small + $gap * 2 !important;
+		}
 
 		.components-base-control__help {
 			top: 100%;
