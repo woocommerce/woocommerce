@@ -11,8 +11,10 @@
   "main": "build/index.js",
   "module": "build-module/index.js",
   "dependencies": {
+    "@woocommerce/api": "file:../api",
     "@wordpress/e2e-test-utils": "4.6.0",
-    "@woocommerce/model-factories": "file:../factories"
+    "faker": "^5.1.0",
+    "fishery": "^1.0.1"
   },
   "publishConfig": {
     "access": "public"
