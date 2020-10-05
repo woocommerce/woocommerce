@@ -922,8 +922,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! isset( $query_vars['type'] ) || ! ( 'shop_order' === $query_vars['type'] ) ) {
 			return;
 		}
-		if ( isset( $query_vars['fields'] ) && is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'] ) ) {
-			return;
+		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
+			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'] ) ) {
+				return;
+			}
 		}
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
@@ -978,18 +980,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function prime_order_item_caches_for_orders( $order_ids, $query_vars ) {
 		global $wpdb;
-		if ( isset( $query_vars['fields'] ) && is_array( $query_vars['fields'] ) ) {
+		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
 			$line_items = array(
 				'line_items',
 				'shipping_lines',
 				'fee_lines',
 				'coupon_lines',
 			);
-			if ( 0 > count( array_intersect( $line_items, $query_vars['fields'] ) ) ) {
+
+			if ( is_array( $query_vars['fields'] ) && 0 === count( array_intersect( $line_items, $query_vars['fields'] ) ) ) {
 				return;
 			}
 		}
-
 		$cache_keys = array_map(
 			function ( $order_id ) {
 				return 'order-items-' . $order_id;
@@ -1045,6 +1047,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function prime_raw_meta_cache_for_orders( $order_ids, $query_vars ) {
 		global $wpdb;
+
+		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
+			if ( is_array( $query_vars['fields'] ) && ! in_array( 'meta_data', $query_vars['fields'] ) ) {
+				return;
+			}
+		}
+
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
 			$cache_keys_mapping[ $order_id ] = WC_Order::generate_meta_cache_key( $order_id, 'orders' );
