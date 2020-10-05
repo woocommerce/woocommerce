@@ -199,7 +199,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Expand meta_data to include user-friendly values.
 		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
-		$data['meta_data'] = array_map(
+		$data['meta_data']   = array_map(
 			array( $this, 'clean_formatted_order_item_meta_data' ),
 			$formatted_meta_data,
 			array_keys( $formatted_meta_data )
@@ -219,10 +219,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	private function clean_formatted_order_item_meta_data( $meta_data, $meta_data_id ) {
 		return array(
-			'id' => $meta_data_id,
-			'key' => $meta_data->key,
-			'value' => $meta_data->value,
-			'display_key' => wc_clean( $meta_data->display_key ),
+			'id'            => $meta_data_id,
+			'key'           => $meta_data->key,
+			'value'         => $meta_data->value,
+			'display_key'   => wc_clean( $meta_data->display_key ),
 			'display_value' => wc_clean( $meta_data->display_value ),
 		);
 	}
@@ -1296,31 +1296,31 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
-										'id'    => array(
+										'id'            => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
-										'key'   => array(
+										'key'           => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 										),
-										'value' => array(
+										'value'         => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
-										'display_key' => array(
-											'description' => __( 'Meta key for UI display.', 'woocommerce-rest-api' ),
-											'type' => 'string',
-											'context' => array( 'view', 'edit' ),
+										'display_key'   => array(
+											'description' => __( 'Meta key for UI display.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
 										),
 										'display_value' => array(
-											'description' => __( 'Meta value for UI display.', 'woocommerce-rest-api' ),
-											'type' => 'string',
-											'context' => array( 'view', 'edit' ),
+											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
 										),
 									),
 								),
