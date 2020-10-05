@@ -1,6 +1,6 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
-const getAppRoot = require( './app-root' );
+const { getAppRoot } = require( './app-root' );
 
 // Copy local test configuration file if it exists.
 const appPath = getAppRoot();
