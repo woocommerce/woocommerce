@@ -7,7 +7,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { PAYMENT_METHOD_NAME } from './constants';
 import { getStripeServerData } from '../stripe-utils';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
 import { InlineCard, CardElements } from './elements';
@@ -83,11 +82,11 @@ const CreditCardComponent = ( {
 
 export const StripeCreditCard = ( props ) => {
 	const { locale } = getStripeServerData().button;
-	const { activePaymentMethod, stripe } = props;
+	const { stripe } = props;
 
-	return activePaymentMethod === PAYMENT_METHOD_NAME ? (
+	return (
 		<Elements stripe={ stripe } locale={ locale }>
 			<CreditCardComponent { ...props } />
 		</Elements>
-	) : null;
+	);
 };
