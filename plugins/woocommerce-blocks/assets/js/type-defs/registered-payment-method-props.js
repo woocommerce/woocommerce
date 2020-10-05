@@ -199,7 +199,7 @@
  *                                                                 observer response objects.
  * @property {Function}                   [onSubmit]               Used to trigger checkout
  *                                                                 processing.
- * @property {string}                     [activePaymentMethod]    Indicates what the active payment
+ * @property {string}                     activePaymentMethod      Indicates what the active payment
  *                                                                 method is.
  * @property {ComponentProps}             components               Components exposed to payment
  *                                                                 methods for use.
