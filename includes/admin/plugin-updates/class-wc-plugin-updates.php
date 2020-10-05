@@ -2,7 +2,7 @@
 /**
  * Class for displaying plugin warning notifications and determining 3rd party plugin compatibility.
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     3.2.0
  */
 
@@ -44,13 +44,6 @@ class WC_Plugin_Updates {
 	 * @var array
 	 */
 	protected $major_untested_plugins = array();
-
-	/**
-	 * Array of plugins lacking testing with the minor version.
-	 *
-	 * @var array
-	 */
-	protected $minor_untested_plugins = array();
 
 	/**
 	 * Common JS for initializing and managing thickbox-based modals.
@@ -104,29 +97,6 @@ class WC_Plugin_Updates {
 	*/
 
 	/**
-	 * Get the inline warning notice for minor version updates.
-	 *
-	 * @return string
-	 */
-	protected function get_extensions_inline_warning_minor() {
-		$upgrade_type  = 'minor';
-		$plugins       = ! empty( $this->major_untested_plugins ) ? array_diff_key( $this->minor_untested_plugins, $this->major_untested_plugins ) : $this->minor_untested_plugins;
-		$version_parts = explode( '.', $this->new_version );
-		$new_version   = $version_parts[0] . '.' . $version_parts[1];
-
-		if ( empty( $plugins ) ) {
-			return;
-		}
-
-		/* translators: %s: version number */
-		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with the latest version of WooCommerce (%s).", 'woocommerce' ), $new_version );
-
-		ob_start();
-		include 'views/html-notice-untested-extensions-inline.php';
-		return ob_get_clean();
-	}
-
-	/**
 	 * Get the inline warning notice for major version updates.
 	 *
 	 * @return string
@@ -145,7 +115,7 @@ class WC_Plugin_Updates {
 		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with WooCommerce %s. Please update them or confirm compatibility before updating WooCommerce, or you may experience issues:", 'woocommerce' ), $new_version );
 
 		ob_start();
-		include 'views/html-notice-untested-extensions-inline.php';
+		include __DIR__ . '/views/html-notice-untested-extensions-inline.php';
 		return ob_get_clean();
 	}
 
@@ -160,7 +130,7 @@ class WC_Plugin_Updates {
 		$plugins       = $this->major_untested_plugins;
 
 		ob_start();
-		include 'views/html-notice-untested-extensions-modal.php';
+		include __DIR__ . '/views/html-notice-untested-extensions-modal.php';
 		return ob_get_clean();
 	}
 

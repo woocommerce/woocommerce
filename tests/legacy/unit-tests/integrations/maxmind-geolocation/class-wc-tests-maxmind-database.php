@@ -57,7 +57,12 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 		$database_service  = new WC_Integration_MaxMind_Database_Service( '' );
 		$expected_database = sys_get_temp_dir() . '/GeoLite2-Country_20200100/GeoLite2-Country.mmdb';
 
+		self::disable_code_hacker();
 		$result = $database_service->download_database( 'testing_license' );
+		self::reenable_code_hacker();
+		if ( is_wp_error( $result ) ) {
+			$this->fail( $result->get_error_message() );
+		}
 
 		$this->assertEquals( $expected_database, $result );
 
@@ -126,7 +131,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 
 		if ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=testing_license&suffix=tar.gz' === $url ) {
 			// We need to copy the file to where the request is supposed to have streamed it.
-			copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/GeoLite2-Country.tar.gz', $request['filename'] );
+			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/GeoLite2-Country.tar.gz', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),

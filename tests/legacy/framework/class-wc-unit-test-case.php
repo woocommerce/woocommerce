@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+
 /**
  * WC Unit Test Case.
  *
@@ -21,6 +24,37 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @var WC_Unit_Test_Factory
 	 */
 	protected $factory;
+
+	/**
+	 * @var int Keeps the count of how many times disable_code_hacker has been invoked.
+	 */
+	private static $code_hacker_temporary_disables_requested = 0;
+
+	/**
+	 * Increase the count of Code Hacker disable requests, and effectively disable it if the count was zero.
+	 * Does nothing if the code hacker wasn't enabled when the test suite started running.
+	 */
+	protected static function disable_code_hacker() {
+		if ( CodeHacker::is_enabled() ) {
+			CodeHacker::disable();
+			self::$code_hacker_temporary_disables_requested = 1;
+		} elseif ( self::$code_hacker_temporary_disables_requested > 0 ) {
+			self::$code_hacker_temporary_disables_requested++;
+		}
+	}
+
+	/**
+	 * Decrease the count of Code Hacker disable requests, and effectively re-enable it if the count reaches zero.
+	 * Does nothing if the count is already zero.
+	 */
+	protected static function reenable_code_hacker() {
+		if ( self::$code_hacker_temporary_disables_requested > 0 ) {
+			self::$code_hacker_temporary_disables_requested--;
+			if ( 0 === self::$code_hacker_temporary_disables_requested ) {
+				CodeHacker::enable();
+			}
+		}
+	}
 
 	/**
 	 * Setup test case.
@@ -98,5 +132,113 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function throwAnException( $message = null, $code = null ) {
 		$message = $message ? $message : "We're all doomed!";
 		throw new Exception( $message, $code );
+	}
+
+	/**
+	 * Copies a file, temporarily disabling the code hacker.
+	 * Use this instead of "copy" in tests for compatibility with the code hacker.
+	 *
+	 * TODO: Investigate why invoking "copy" within a test with the code hacker active causes the test to fail.
+	 *
+	 * @param string $source Path to the source file.
+	 * @param string $dest The destination path.
+	 * @return bool true on success or false on failure.
+	 */
+	public static function file_copy( $source, $dest ) {
+		self::disable_code_hacker();
+		$result = copy( $source, $dest );
+		self::reenable_code_hacker();
+
+		return $result;
+	}
+
+	/**
+	 * Create a new user in a given role and set it as the current user.
+	 *
+	 * @param string $role The role for the user to be created.
+	 * @return int The id of the user created.
+	 */
+	public function login_as_role( $role ) {
+		$user_id = $this->factory->user->create( array( 'role' => $role ) );
+		wp_set_current_user( $user_id );
+		return $user_id;
+	}
+
+	/**
+	 * Create a new administrator user and set it as the current user.
+	 *
+	 * @return int The id of the user created.
+	 */
+	public function login_as_administrator() {
+		return $this->login_as_role( 'administrator' );
+	}
+
+	/**
+	 * Get an instance of a class that has been registered in the dependency injection container.
+	 * To get an instance of a legacy class (such as the ones in the 'íncludes' directory) use
+	 * 'get_legacy_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_instance_of( string $class_name ) {
+		return null;
+	}
+
+	/**
+	 * Get an instance of  legacy class (such as the ones in the 'íncludes' directory).
+	 * To get an instance of a class registered in the dependency injection container use 'get_instance_of' instead.
+	 *
+	 * @param string $class_name The class name to get an instance of.
+	 *
+	 * @return mixed The instance.
+	 */
+	public function get_legacy_instance_of( string $class_name ) {
+		return null;
+	}
+
+	/**
+	 * Reset all the cached resolutions in the dependency injection container, so any further "get"
+	 * for shared definitions will generate the instance again.
+	 * This may be needed when registering mocks for already resolved shared classes.
+	 */
+	public function reset_container_resolutions() {
+	}
+
+	/**
+	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
+	 */
+	public function reset_legacy_proxy_mocks() {
+	}
+
+	/**
+	 * Register the function mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are function names and values are function replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_function_mocks( array $mocks ) {
+	}
+
+	/**
+	 * Register the static method mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are associative arrays, in which keys are method names and values are method replacement callbacks.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_static_mocks( array $mocks ) {
+	}
+
+	/**
+	 * Register the class mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are class names and values are either factory callbacks (optionally with a $class_name argument) or objects.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_legacy_proxy_class_mocks( array $mocks ) {
 	}
 }

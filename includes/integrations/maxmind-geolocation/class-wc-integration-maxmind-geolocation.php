@@ -3,12 +3,12 @@
  * MaxMind Geolocation Integration
  *
  * @version 3.9.0
- * @package WooCommerce/Integrations
+ * @package WooCommerce\Integrations
  */
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'class-wc-integration-maxmind-database-service.php';
+require_once __DIR__ . '/class-wc-integration-maxmind-database-service.php';
 
 /**
  * WC Integration MaxMind Geolocation

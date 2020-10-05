@@ -4,7 +4,7 @@
  *
  * Standardises certain post data on save.
  *
- * @package WooCommerce/Classes/Data
+ * @package WooCommerce\Classes\Data
  * @version 2.2.0
  */
 
@@ -255,6 +255,9 @@ class WC_Post_Data {
 			}
 		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
+		} elseif ( 'shop_coupon' === $data['post_type'] ) {
+			// Coupons should never allow unfiltered HTML.
+			$data['post_title'] = wp_filter_kses( $data['post_title'] );
 		}
 
 		return $data;

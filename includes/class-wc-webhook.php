@@ -7,7 +7,7 @@
  * Webhooks are enqueued to their associated actions, delivered, and logged.
  *
  * @version  3.2.0
- * @package  WooCommerce/Webhooks
+ * @package  WooCommerce\Webhooks
  * @since    2.2.0
  */
 
@@ -15,7 +15,7 @@ use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'legacy/class-wc-legacy-webhook.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-webhook.php';
 
 /**
  * Webhook class.

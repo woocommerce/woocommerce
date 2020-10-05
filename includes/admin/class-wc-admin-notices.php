@@ -28,7 +28,6 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                          => 'install_notice',
 		'update'                           => 'update_notice',
 		'template_files'                   => 'template_file_check_notice',
 		'legacy_shipping'                  => 'legacy_shipping_notice',
@@ -40,6 +39,7 @@ class WC_Admin_Notices {
 		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
 		'redirect_download_method'         => 'redirect_download_method_notice',
 		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
+		'base_tables_missing'              => 'base_tables_missing_notice',
 	);
 
 	/**
@@ -259,9 +259,11 @@ class WC_Admin_Notices {
 
 	/**
 	 * If we have just installed, show a message with the install pages button.
+	 *
+	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-install.php';
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -507,6 +509,21 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Notice about base tables missing.
+	 */
+	public static function base_tables_missing_notice() {
+		$notice_dismissed = apply_filters(
+			'woocommerce_hide_base_tables_missing_nag',
+			get_user_meta( get_current_user_id(), 'dismissed_base_tables_missing_notice', true )
+		);
+		if ( $notice_dismissed ) {
+			self::remove_notice( 'base_tables_missing' );
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-base-table-missing.php';
+	}
+
+	/**
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
@@ -568,7 +585,12 @@ class WC_Admin_Notices {
 		$uploads = wp_get_upload_dir();
 
 		// Check for the "uploads/woocommerce_uploads" directory.
-		$response         = wp_safe_remote_get( esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads' ) );
+		$response         = wp_safe_remote_get(
+			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads/' ),
+			array(
+				'redirection' => 0,
+			)
+		);
 		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
 		$response_content = wp_remote_retrieve_body( $response );
 

@@ -37,7 +37,6 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 	/**
 	 * Test - install.
-	 */
 	public function test_install() {
 		// clean existing install first.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -52,6 +51,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ) );
 	}
+	 *
+	 **/
 
 	/**
 	 * Test - create pages.

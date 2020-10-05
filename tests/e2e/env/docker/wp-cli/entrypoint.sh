@@ -61,5 +61,16 @@ if ! [[ ${CURRENT_DOMAIN} == ${URL} ]]; then
     wp search-replace ${CURRENT_DOMAIN} ${URL}
 fi
 
+if $(wp post list --post_type=page --name=ready);
+then
+    echo "Ready page already exists..."
+else
+    wp post create \
+        --post_type=page \
+        --post_status=publish \
+        --post_title='Ready' \
+        --post_content='E2E-tests.'
+fi
+
 echo "Visit $(wp option get siteurl)"
 touch /var/www/html/.initialized

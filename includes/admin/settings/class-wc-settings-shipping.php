@@ -2,7 +2,7 @@
 /**
  * WooCommerce Shipping Settings
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.6.0
  */
 
@@ -286,7 +286,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show zones
 	 */
 	protected function zones_screen() {
-		$method_count = wc_get_shipping_method_count();
+		$method_count = wc_get_shipping_method_count( false, true );
 
 		wp_localize_script(
 			'wc-shipping-zones',

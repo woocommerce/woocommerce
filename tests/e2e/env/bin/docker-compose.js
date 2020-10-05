@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const getAppPath = require( '../utils/app-root' );
+const { getAppRoot, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
@@ -13,30 +13,23 @@ program
     .command( 'up', 'Start and build the Docker container' )
     .command( 'down', 'Stop the Docker container and remove volumes' )
     .action( ( cmd, options ) => {
-        if ( 'up' === options[ 0 ] ) {
+        arg = options.args ? options.args[ 0 ] : options[ 0 ];
+        if ( 'up' === arg ) {
             command = 'up';
             dockerArgs.push( 'up', '--build', '-d' );
         }
 
-        if ( 'down' === options[ 0 ] ) {
+        if ( 'down' === arg ) {
             command = 'down';
             dockerArgs.push( 'down', '-v' );
         }
     } )
     .parse( process.argv );
 
-const appPath = getAppPath();
+const appPath = getAppRoot();
 const envVars = {};
 
 if ( appPath ) {
-    // Look for a Docker compose file in the dependent app's path.
-	const appDockerComposefile = path.resolve( appPath, 'docker-compose.yaml' );
-
-    // Specify the app's Docker compose file in our command.
-	if ( fs.existsSync( appDockerComposefile ) ) {
-		dockerArgs.unshift( '-f', appDockerComposefile );
-    }
-
     if ( 'up' === command ) {
         // Look for an initialization script in the dependent app.
         const appInitFile = path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
@@ -53,6 +46,20 @@ if ( appPath ) {
 
     // Provide an "app name" to use in Docker container names.
     envVars.APP_NAME = path.basename( appPath );
+}
+
+// Load test configuration file into an object.
+const testConfig = getTestConfig();
+
+// Set some environment variables
+if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
+	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + envVars.APP_NAME;
+}
+if ( ! global.process.env.WORDPRESS_PORT ) {
+	global.process.env.WORDPRESS_PORT = testConfig.port;
+}
+if ( ! global.process.env.WORDPRESS_URL ) {
+	global.process.env.WORDPRESS_URL = testConfig.url;
 }
 
 // Ensure that the first Docker compose file loaded is from our local env.

@@ -198,56 +198,6 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Exec shell commands.
-		shell: {
-			options: {
-				stdout: true,
-				stderr: true
-			},
-			e2e_test: {
-				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
-			},
-			e2e_tests: {
-				command: 'npm run --silent test'
-			},
-			e2e_tests_grep: {
-				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
-			},
-			contributors: {
-				command: [
-					'echo "Generating contributor list since <%= fromDate %>"',
-					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
-					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
-					' --showlogin true --sha <%= sha %> --filter renovate-bot > contributors.md'
-				].join( '&&' )
-			}
-		},
-
-		prompt: {
-			contributors: {
-				options: {
-					questions: [
-						{
-							config: 'fromDate',
-							type: 'input',
-							message: 'What date (YYYY-MM-DD) should we get contributions since?'
-						},
-						{
-							config: 'sha',
-							type: 'input',
-							message: 'What branch should we get contributors from?'
-						},
-						{
-							config: 'authToken',
-							type: 'input',
-							message: '(optional) Provide a personal access token.' +
-							' This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
-						}
-					]
-				}
-			}
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -283,7 +233,6 @@ module.exports = function( grunt ) {
 
 	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
-	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
@@ -295,7 +244,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks( 'grunt-prompt' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
@@ -329,25 +277,8 @@ module.exports = function( grunt ) {
 		'css'
 	]);
 
-	grunt.registerTask( 'contributors', [
-		'prompt:contributors',
-		'shell:contributors'
-	]);
-
 	// Only an alias to 'default' task.
 	grunt.registerTask( 'dev', [
 		'default'
-	]);
-
-	grunt.registerTask( 'e2e-tests', [
-		'shell:e2e_tests'
-	]);
-
-	grunt.registerTask( 'e2e-tests-grep', [
-		'shell:e2e_tests_grep'
-	]);
-
-	grunt.registerTask( 'e2e-test', [
-		'shell:e2e_test'
 	]);
 };

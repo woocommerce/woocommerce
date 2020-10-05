@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_Invoice
 	 * @version     3.5.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Invoice extends WC_Email {

@@ -3,7 +3,7 @@
  * Log handling functionality.
  *
  * @class WC_Log_Handler
- * @package WooCommerce/Abstracts
+ * @package WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Abstract WC Log Handler Class
  *
  * @version        1.0.0
- * @package        WooCommerce/Abstracts
+ * @package        WooCommerce\Abstracts
  */
 abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 

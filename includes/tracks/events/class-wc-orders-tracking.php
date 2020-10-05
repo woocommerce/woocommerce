@@ -80,6 +80,7 @@ class WC_Orders_Tracking {
 			'previous_status' => $previous_status,
 			'date_created'    => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '',
 			'payment_method'  => $order->get_payment_method(),
+			'order_total'     => $order->get_total(),
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );

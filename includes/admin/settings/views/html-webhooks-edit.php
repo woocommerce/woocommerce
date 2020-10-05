@@ -2,7 +2,7 @@
 /**
  * Admin View: Edit Webhooks
  *
- * @package WooCommerce/Admin/Webhooks/Views
+ * @package WooCommerce\Admin\Webhooks\Views
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

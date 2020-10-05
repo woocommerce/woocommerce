@@ -28,6 +28,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_has_notice( 'test', 'error' ) );
 
 		// Clean up.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		unset( $_GET['wc_error'] );
 		wc_clear_notices();
 
@@ -182,6 +183,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * @group core-only
 	 */
 	public function test_get_catalog_ordering_args() {
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$data = array(
 			array(
 				'orderby'  => 'menu_order',
@@ -297,6 +299,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				),
 			),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		foreach ( $data as $test ) {
 			$result = WC()->query->get_catalog_ordering_args( $test['orderby'], $test['order'] );
@@ -310,11 +313,13 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	public function test_get_catalog_ordering_args_GET() {
 		$_GET['orderby'] = 'price-desc';
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$expected = array(
 			'orderby'  => 'price',
 			'order'    => 'DESC',
 			'meta_key' => '',
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		$this->assertEquals( $expected, WC()->query->get_catalog_ordering_args() );
 
@@ -341,9 +346,11 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'include_children' => true,
 		);
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$query_args = array(
 			'tax_query' => array( $tax_query ),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		WC()->query->product_query( new WP_Query( $query_args ) );
 		$tax_queries = WC_Query::get_main_tax_query();
@@ -360,9 +367,11 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'compare' => '=',
 		);
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$query_args = array(
 			'meta_query' => array( $meta_query ),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		WC()->query->product_query( new WP_Query( $query_args ) );
 		$meta_queries = WC_Query::get_main_meta_query();
@@ -375,5 +384,57 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	public function test_remove_add_to_cart_pagination() {
 		$url = 'http://example.com/shop/page/2/?add-to-cart=1';
 		$this->assertEquals( 'http://example.com/shop/page/2/', WC()->query->remove_add_to_cart_pagination( $url ) );
+	}
+
+	/**
+	 * Tests that the rating order by clause works correctly with different rating counts.
+	 */
+	public function test_catalog_order_by_rating() {
+		$worst_product = WC_Helper_Product::create_simple_product();
+		$worst_product->set_average_rating( 1 );
+		$worst_product->set_rating_counts( array( 1 => 5 ) );
+		$worst_product->save();
+		$no_reviews = WC_Helper_Product::create_simple_product();
+		$no_reviews->set_average_rating( 0 );
+		$no_reviews->set_rating_counts( array() );
+		$no_reviews->save();
+		$two_positive = WC_Helper_Product::create_simple_product();
+		$two_positive->set_average_rating( 5 );
+		$two_positive->set_rating_counts( array( 5 => 2 ) );
+		$two_positive->save();
+		$one_positive = WC_Helper_Product::create_simple_product();
+		$one_positive->set_average_rating( 5 );
+		$one_positive->set_rating_counts( array( 5 => 1 ) );
+		$one_positive->save();
+		$top_product = WC_Helper_Product::create_simple_product();
+		$top_product->set_average_rating( 5 );
+		$top_product->set_rating_counts( array( 5 => 3 ) );
+		$top_product->save();
+
+		$query = new WP_Query(
+			array_merge(
+				array(
+					'fields'      => 'ids',
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'orderby'     => 'rating',
+					'order'       => 'DESC',
+				),
+				WC()->query->get_catalog_ordering_args( 'rating' )
+			)
+		);
+
+		$this->assertEquals(
+			array(
+				$top_product->get_id(),
+				$two_positive->get_id(),
+				$one_positive->get_id(),
+				$worst_product->get_id(),
+				$no_reviews->get_id(),
+			),
+			wp_parse_id_list( $query->posts )
+		);
+
+		WC()->query->remove_ordering_args();
 	}
 }

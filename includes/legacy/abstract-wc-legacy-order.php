@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class will be removed in future versions.
  *
  * @version	 3.0.0
- * @package	 WooCommerce/Abstracts
+ * @package	 WooCommerce\Abstracts
  * @category	Abstract Class
  * @author	  WooThemes
  */
@@ -312,11 +312,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Get a product (either product or variation).
-	 * @deprecated Add deprecation notices in future release. Replaced with $item->get_product()
+	 * @deprecated 4.4.0
 	 * @param object $item
 	 * @return WC_Product|bool
 	 */
 	public function get_product_from_item( $item ) {
+		wc_deprecated_function( 'WC_Abstract_Legacy_Order::get_product_from_item', '4.4.0', '$item->get_product()' );
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$product = $item->get_product();
 		} else {
@@ -461,7 +462,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * has_meta function for order items. This is different to the WC_Data
 	 * version and should be removed in future versions.
 	 *
-	 * @deprecated
+	 * @deprecated 3.0
 	 *
 	 * @param int $order_item_id
 	 *

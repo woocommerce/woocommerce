@@ -62,10 +62,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
-		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+
+		WC_Helper_Shipping::force_customer_us_address();
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -177,9 +175,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// Create tax classes first.
 		WC_Tax::create_tax_class( '23percent' );
@@ -620,9 +616,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
 		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -767,9 +761,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
 		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -872,9 +864,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$full_coupon->set_amount( 100 );
 		$full_coupon->save();
 
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -941,7 +931,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_country( $country ) {
-		return 'US';
+		return WC_Helper_Shipping::force_customer_us_country( $country );
 	}
 
 	/**
@@ -952,7 +942,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_state( $state ) {
-		return 'NY';
+		return WC_Helper_Shipping::force_customer_us_state( $state );
 	}
 
 	/**
@@ -963,7 +953,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function force_customer_us_postcode( $postcode ) {
-		return '12345';
+		return WC_Helper_Shipping::force_customer_us_postcode( $postcode );
 	}
 
 	/**
@@ -989,9 +979,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// 19% tax.
 		$tax_rate = array(
@@ -1098,7 +1086,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>68,50</span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>68,50</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '12.36', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1107,7 +1095,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product4->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>112,00</span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>112,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '20.19', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1118,7 +1106,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product6->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>239,00</span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>239,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '43.09', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 	}
@@ -1311,7 +1299,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = array_shift( $variations );
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
-		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
+		$result = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_colour' => 'red', // Set a value since this is an 'any' attribute.
+				'attribute_pa_number' => '2', // Set a value since this is an 'any' attribute.
+			)
+		);
+		$this->assertNotFalse( $result );
 
 		// Check if the item is in the cart.
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
@@ -1549,9 +1546,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Set an address so that shipping can be calculated.
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
-		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
-		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+		WC_Helper_Shipping::force_customer_us_address();
 
 		// Set the flat_rate shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
@@ -1562,6 +1557,65 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 20.
 		$this->assertEquals( 20, WC()->cart->total );
+	}
+
+	/**
+	 * Test that shipping tax rounding does not round down when price are inclusive of taxes.
+	 */
+	public function test_calculate_totals_shipping_tax_rounded_26654() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '25.0000',
+			'tax_rate_name'     => 'Tax @ 25%',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'standard',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 242 );
+		$product->set_tax_class( 'product' );
+		$product->save();
+
+		WC_Helper_Shipping::create_simple_flat_rate( 75.10 );
+		WC_Helper_Shipping::force_customer_us_address();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( 18.775, WC()->cart->get_shipping_tax() );
+		$this->assertEquals( 335.88, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
+
+		$checkout = WC_Checkout::instance();
+		$order = new WC_Order();
+		$checkout->set_data_from_cart( $order );
+		$this->assertEquals( 67.18, $order->get_total_tax() );
+		$this->assertEquals( 335.88, $order->get_total() );
+		$this->assertEquals( 18.775, $order->get_shipping_tax() );
+
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( 18.78, WC()->cart->get_shipping_tax() );
+		$this->assertEquals( 335.88, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
+
+		$order = new WC_Order();
+		$checkout->set_data_from_cart( $order );
+		$this->assertEquals( 67.18, $order->get_total_tax() );
+		$this->assertEquals( 335.88, $order->get_total() );
+		$this->assertEquals( 18.78, $order->get_shipping_tax() );
 	}
 
 	/**
@@ -2022,7 +2076,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
 		WC()->cart->empty_cart();
-		$tax_rate    = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '10.0000',
@@ -2053,6 +2107,164 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_fee_1_5_to_cart' ) );
 
 		$this->assertEquals( 70.86, WC()->cart->get_total( 'edit' ) );
+	}
+
+	/**
+	 * Test that adding a variation with URL parameter increases the quantity appropriately
+	 * as described in issue 24000.
+	 */
+	public function test_add_variation_by_url() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = current(
+			array_filter(
+				$variations,
+				function( $variation ) {
+					return 'DUMMY SKU VARIABLE HUGE RED 2' === $variation['sku'];
+				}
+			)
+		);
+
+		// Add variation with add_to_cart_action.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check if the item is in the cart.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+
+		// Add variation using parent id.
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+	}
+
+	/**
+	 * Test that adding a variation via URL parameter fails when specifying a value for the attribute
+	 * that differs from a value belonging to that variant.
+	 */
+	public function test_add_variation_by_url_with_invalid_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_pop( $variations );
+
+		// Attempt adding variation with add_to_cart_action, specifying a different colour.
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
+		$_REQUEST['attribute_pa_colour'] = 'green';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_colour'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check that the notices contain an error message about an invalid colour.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertEquals( 'Invalid value posted for colour', $notices['error'][0]['notice'] );
+	}
+
+	/**
+	 * Test that adding a variation via URL parameter succeeds when some attributes belong to the
+	 * variation and others are specificed via URL parameter.
+	 */
+	public function test_add_variation_by_url_with_valid_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Attempt adding variation with add_to_cart_action, specifying attributes not defined in the variation.
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
+		$_REQUEST['attribute_pa_colour'] = 'red';
+		$_REQUEST['attribute_pa_number'] = '1';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_colour'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check if the item is in the cart.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+	}
+
+	/**
+	 * Test that adding a varition via URL parameter fails when an 'any' attribute is missing.
+	 */
+	public function test_add_variation_by_url_fails_with_missing_any_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Attempt adding variation with add_to_cart_action, without specifying attribute_pa_colour.
+		$_REQUEST['add-to-cart']         = $variation['variation_id'];
+		$_REQUEST['attribute_pa_number'] = '';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Verify that there is nothing in the cart.
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Check that the notices contain an error message about invalid colour and number.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertEquals( 'colour and number are required fields', $notices['error'][0]['notice'] );
 	}
 
 	/**
