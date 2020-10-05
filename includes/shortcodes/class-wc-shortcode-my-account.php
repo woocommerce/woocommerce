@@ -371,9 +371,7 @@ class WC_Shortcode_My_Account {
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
-		do_action( 'password_reset', $user, $new_pass );
-
-		wp_set_password( $new_pass, $user->ID );
+		reset_password( $user, $new_pass );
 		self::set_reset_password_cookie();
 
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
