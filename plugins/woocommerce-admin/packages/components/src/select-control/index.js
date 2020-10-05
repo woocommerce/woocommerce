@@ -220,7 +220,20 @@ export class SelectControl extends Component {
 	}
 
 	search( query ) {
-		this.setState( { query, isFocused: true } );
+		const searchOptions = this.searchOptions || [];
+		const filteredOptions =
+			query !== null && ! query.length && ! this.props.hideBeforeSearch
+				? searchOptions
+				: this.getFilteredOptions( searchOptions, query );
+
+		this.setState( {
+			query,
+			isFocused: true,
+			selectedIndex: 0,
+			filteredOptions,
+			isExpanded: Boolean( filteredOptions.length ),
+		} );
+
 		this.updateFilteredOptions( query );
 	}
 
@@ -235,6 +248,8 @@ export class SelectControl extends Component {
 				// or else we might end triggering a race condition updating the state.
 				return;
 			}
+
+			this.searchOptions = searchOptions;
 
 			// Get all options if `hideBeforeSearch` is enabled and query is not null.
 			const filteredOptions =
