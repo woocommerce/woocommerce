@@ -282,4 +282,23 @@ class Notes {
 			}
 		}
 	}
+
+	/**
+	 * Get the status of a given note by name.
+	 *
+	 * @param string $note_name Name of the note.
+	 * @return string|bool The note status.
+	 */
+	public static function get_note_status( $note_name ) {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( $note_name );
+
+		if ( empty( $note_ids ) ) {
+			return false;
+		}
+
+		$note = self::get_note( $note_ids[0] );
+
+		return $note->get_status();
+	}
 }

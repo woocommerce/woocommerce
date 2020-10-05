@@ -52,6 +52,8 @@ class GetRuleProcessor {
 				return new BaseLocationCountryRuleProcessor();
 			case 'base_location_state':
 				return new BaseLocationStateRuleProcessor();
+			case 'note_status':
+				return new NoteStatusRuleProcessor();
 		}
 
 		return new FailRuleProcessor();
