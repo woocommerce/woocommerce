@@ -105,7 +105,7 @@
 		"@wordpress/viewport": "2.15.1",
 		"classnames": "2.2.6",
 		"core-js": "3.6.5",
-		"debug": "4.1.1",
+		"debug": "4.2.0",
 		"dompurify": "2.1.1",
 		"gridicons": "3.3.1",
 		"interpolate-components": "1.1.1",
