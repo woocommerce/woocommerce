@@ -113,6 +113,14 @@
 			float: right;
 			width: 48%;
 			clear: none;
+
+			.woocommerce-review-link::before {
+				content: "(";
+			}
+
+			.woocommerce-review-link::after {
+				content: ")";
+			}
 		}
 
 		.woocommerce-tabs {
