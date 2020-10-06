@@ -420,7 +420,8 @@ class Loader {
 			WC_ADMIN_APP,
 			'wcAdminAssets',
 			array(
-				'path' => plugins_url( self::get_path( 'js' ), WC_ADMIN_PLUGIN_FILE ),
+				'path'    => plugins_url( self::get_path( 'js' ), WC_ADMIN_PLUGIN_FILE ),
+				'version' => $js_file_version,
 			)
 		);
 
