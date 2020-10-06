@@ -23,7 +23,7 @@ import StatsOverview from './stats-overview';
 import './style.scss';
 import '../dashboard/style.scss';
 import TaskListPlaceholder from '../task-list/placeholder';
-import InboxPanel from '../header/activity-panel/panels/inbox';
+import InboxPanel from '../inbox-panel';
 import { WelcomeModal } from './welcome-modal';
 
 const TaskList = lazy( () =>

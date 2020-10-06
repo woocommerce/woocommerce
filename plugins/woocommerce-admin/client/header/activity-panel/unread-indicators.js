@@ -15,7 +15,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../analytics/settings/config';
-import { getUnreadNotesCount } from './panels/inbox/utils';
+import { getUnreadNotesCount } from '../../inbox-panel/utils';
 
 export function getUnreadNotes( select ) {
 	const { getNotes, getNotesError, isResolving } = select( NOTES_STORE_NAME );

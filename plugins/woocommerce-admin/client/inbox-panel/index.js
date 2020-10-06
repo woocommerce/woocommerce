@@ -15,9 +15,9 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ActivityCard } from '../../activity-card';
+import { ActivityCard } from '../header/activity-panel/activity-card';
 import InboxNotePlaceholder from './placeholder';
-import ActivityHeader from '../../activity-header';
+import ActivityHeader from '../header/activity-panel/activity-header';
 import InboxNoteCard from './card';
 import { getUnreadNotesCount, hasValidNotes } from './utils';
 

@@ -17,9 +17,7 @@ jest.mock( 'homescreen/stats-overview', () =>
 jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
 
 // We aren't testing the <InboxPanel /> component here.
-jest.mock( 'header/activity-panel/panels/inbox', () =>
-	jest.fn().mockReturnValue( '[InboxPanel]' )
-);
+jest.mock( 'inbox-panel', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
 
 // We aren't testing the <QuickLinks /> component here.
 jest.mock( 'quick-links', () => jest.fn().mockReturnValue( '[QuickLinks]' ) );

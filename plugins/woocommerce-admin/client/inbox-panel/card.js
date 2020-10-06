@@ -15,9 +15,9 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import NoteAction from './action';
-import sanitizeHTML from '../../../../lib/sanitize-html';
+import sanitizeHTML from '../lib/sanitize-html';
 import './style.scss';
-import { getScreenName } from '../../../../utils';
+import { getScreenName } from '../utils';
 
 class InboxNoteCard extends Component {
 	constructor( props ) {
