@@ -16,6 +16,18 @@ use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
  * WC_Admin_Note (deprecated, use Note instead).
  */
 class WC_Admin_Note extends DeprecatedClassFacade {
+	// These constants must be redeclared as to not break plugins that use them.
+	const E_WC_ADMIN_NOTE_ERROR         = Note::E_WC_ADMIN_NOTE_ERROR;
+	const E_WC_ADMIN_NOTE_WARNING       = Note::E_WC_ADMIN_NOTE_WARNING;
+	const E_WC_ADMIN_NOTE_UPDATE        = Note::E_WC_ADMIN_NOTE_UPDATE;
+	const E_WC_ADMIN_NOTE_INFORMATIONAL = Note::E_WC_ADMIN_NOTE_INFORMATIONAL;
+	const E_WC_ADMIN_NOTE_MARKETING     = Note::E_WC_ADMIN_NOTE_MARKETING;
+	const E_WC_ADMIN_NOTE_SURVEY        = Note::E_WC_ADMIN_NOTE_SURVEY;
+	const E_WC_ADMIN_NOTE_PENDING       = Note::E_WC_ADMIN_NOTE_PENDING;
+	const E_WC_ADMIN_NOTE_UNACTIONED    = Note::E_WC_ADMIN_NOTE_UNACTIONED;
+	const E_WC_ADMIN_NOTE_ACTIONED      = Note::E_WC_ADMIN_NOTE_ACTIONED;
+	const E_WC_ADMIN_NOTE_SNOOZED       = Note::E_WC_ADMIN_NOTE_SNOOZED;
+
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -29,6 +41,15 @@ class WC_Admin_Note extends DeprecatedClassFacade {
 	 * @var string
 	 */
 	protected static $deprecated_in_version = '1.6.0';
+
+	/**
+	 * Note constructor. Loads note data.
+	 *
+	 * @param mixed $data Note data, object, or ID.
+	 */
+	public function __construct( $data = '' ) {
+		$this->instance = new static::$facade_over_classname( $data );
+	}
 }
 
 /**

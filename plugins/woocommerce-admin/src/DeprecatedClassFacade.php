@@ -30,7 +30,7 @@ class DeprecatedClassFacade {
 	 *
 	 * @var object
 	 */
-	private $instance;
+	protected $instance;
 
 	/**
 	 * Constructor.
@@ -50,7 +50,7 @@ class DeprecatedClassFacade {
 			static::$facade_over_classname . '::' . $name,
 			static::$deprecated_in_version
 		);
-		call_user_func_array(
+		return call_user_func_array(
 			array(
 				$this->instance,
 				$name,
@@ -70,7 +70,7 @@ class DeprecatedClassFacade {
 			static::$facade_over_classname . '::' . $name,
 			static::$deprecated_in_version
 		);
-		call_user_func_array(
+		return call_user_func_array(
 			array(
 				static::$facade_over_classname,
 				$name,
