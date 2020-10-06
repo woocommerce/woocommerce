@@ -775,19 +775,12 @@ class Loader {
 	 *
 	 * @param array $section Section to create breadcrumb from.
 	 */
-	private static function output_breadcrumbs( $section ) {
+	private static function output_heading( $section ) {
 		if ( ! static::user_can_analytics() ) {
 			return;
 		}
-		?>
-		<span>
-		<?php if ( is_array( $section ) ) : ?>
-			<a href="<?php echo esc_url( admin_url( $section[0] ) ); ?>"><?php echo esc_html( $section[1] ); ?></a>
-		<?php else : ?>
-			<?php echo esc_html( $section ); ?>
-		<?php endif; ?>
-		</span>
-		<?php
+
+		echo esc_html( $section );
 	}
 
 	/**
@@ -813,10 +806,8 @@ class Loader {
 		<div id="woocommerce-embedded-root" class="is-embed-loading">
 			<div class="woocommerce-layout">
 				<div class="woocommerce-layout__header is-embed-loading">
-					<h1 class="woocommerce-layout__header-breadcrumbs">
-						<?php foreach ( $sections as $section ) : ?>
-							<?php self::output_breadcrumbs( $section ); ?>
-						<?php endforeach; ?>
+					<h1 class="woocommerce-layout__header-heading">
+						<?php self::output_heading( end( $sections ) ); ?>
 					</h1>
 				</div>
 			</div>

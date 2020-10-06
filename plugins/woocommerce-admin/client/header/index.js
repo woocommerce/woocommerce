@@ -5,11 +5,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
-import { Link } from '@woocommerce/components';
 import { useUserPreferences } from '@woocommerce/data';
-import { getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
+import { __experimentalText as Text } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -18,23 +16,12 @@ import './style.scss';
 import ActivityPanel from './activity-panel';
 import { MobileAppBanner } from '../mobile-banner';
 
-const trackLinkClick = ( event ) => {
-	const target = event.target.closest( 'a' );
-	const href = target.getAttribute( 'href' );
-
-	if ( href ) {
-		recordEvent( 'navbar_breadcrumb_click', {
-			href,
-			text: target.innerText,
-		} );
-	}
-};
-
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
 	const rafHandle = useRef( null );
 	const threshold = useRef( null );
 	const siteTitle = getSetting( 'siteTitle', '' );
+	const pageTitle = sections.slice( -1 )[ 0 ];
 	const [ isScrolled, setIsScrolled ] = useState( false );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 
@@ -106,30 +93,14 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					onInstall={ dismissHandler }
 				/>
 			) }
-			<h1 className="woocommerce-layout__header-breadcrumbs">
-				{ sections.map( ( section, i ) => {
-					const sectionPiece = Array.isArray( section ) ? (
-						<Link
-							href={
-								isEmbedded
-									? getAdminLink( section[ 0 ] )
-									: getNewPath( {}, section[ 0 ], {} )
-							}
-							type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
-							onClick={ trackLinkClick }
-						>
-							{ section[ 1 ] }
-						</Link>
-					) : (
-						section
-					);
-					return (
-						<span key={ i }>
-							{ decodeEntities( sectionPiece ) }
-						</span>
-					);
-				} ) }
-			</h1>
+
+			<Text
+				className="woocommerce-layout__header-heading"
+				as="h1"
+				variant="subtitle.small"
+			>
+				{ decodeEntities( pageTitle ) }
+			</Text>
 			{ window.wcAdminFeatures[ 'activity-panels' ] && (
 				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
 			) }

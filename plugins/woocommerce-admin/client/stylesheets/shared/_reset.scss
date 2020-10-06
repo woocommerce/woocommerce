@@ -1,4 +1,3 @@
-
 // css resets some wp-admin specific rules so that the app fits better in the extension container
 .woocommerce-page {
 	.wrap {
@@ -75,7 +74,7 @@
 		}
 
 		// #wpwrap id added for specificity
-		#wpwrap .woocommerce-layout__header-breadcrumbs {
+		#wpwrap .woocommerce-layout__header-heading {
 			padding-left: 60px;
 		}
 

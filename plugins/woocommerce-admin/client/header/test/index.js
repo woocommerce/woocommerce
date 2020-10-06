@@ -23,7 +23,6 @@ jest.mock( '@woocommerce/data', () => ( {
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -81,19 +80,5 @@ describe( 'Header', () => {
 		expect( document.title ).toBe(
 			'Accounts & Privacy ‹ Settings ‹ Fake Site Title — WooCommerce'
 		);
-	} );
-
-	it( 'tracks link clicks with recordEvent', () => {
-		const { queryByRole } = render(
-			<Header sections={ encodedBreadcrumb } isEmbedded={ false } />
-		);
-
-		const firstLink = queryByRole( 'link' );
-		fireEvent.click( firstLink );
-
-		expect( recordEvent ).toBeCalledWith( 'navbar_breadcrumb_click', {
-			href: firstLink.getAttribute( 'href' ),
-			text: firstLink.innerText,
-		} );
 	} );
 } );
