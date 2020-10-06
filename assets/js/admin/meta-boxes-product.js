@@ -154,8 +154,15 @@ jQuery( function( $ ) {
 		if ( is_downloadable ) {
 			$( '.hide_if_downloadable' ).hide();
 		}
+
 		if ( is_virtual ) {
 			$( '.hide_if_virtual' ).hide();
+
+			var $shipping_tab = $( 'div#shipping_product_data' );
+
+			if ('block' === $( $shipping_tab ).css( 'display' )) {
+				$( 'a[href="#general_product_data"]' ).click();
+			}
 		}
 
 		$( '.hide_if_' + product_type ).hide();
