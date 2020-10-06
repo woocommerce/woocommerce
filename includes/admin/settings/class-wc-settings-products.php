@@ -286,6 +286,15 @@ class WC_Settings_Products extends WC_Settings_Page {
 			);
 
 		} else {
+			$draft_pages = get_posts(
+				array(
+					'post_type'       => 'page',
+					'post_status'     => 'draft',
+					'fields'          => 'ids',
+					'posts_per_page'  => -1,
+				)
+			);
+
 			$settings = apply_filters(
 				'woocommerce_product_settings',
 				apply_filters(
@@ -304,6 +313,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 							'id'       => 'woocommerce_shop_page_id',
 							'type'     => 'single_select_page',
 							'default'  => '',
+							'args'     => array( 'exclude' => $draft_pages ),
 							'class'    => 'wc-enhanced-select-nostd',
 							'css'      => 'min-width:300px;',
 							'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
