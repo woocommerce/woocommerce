@@ -1676,47 +1676,51 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         Clear all
       </button>
     </div>
-    <span
-      className="woocommerce-tag has-remove"
-    >
-      <span
-        className="woocommerce-tag__text"
-        id="woocommerce-tag__label-0"
-      >
+    <ul>
+      <li>
         <span
-          className="screen-reader-text"
+          className="woocommerce-tag has-remove"
         >
-          Clementine
+          <span
+            className="woocommerce-tag__text"
+            id="woocommerce-tag__label-0"
+          >
+            <span
+              className="screen-reader-text"
+            >
+              Clementine
+            </span>
+            <span
+              aria-hidden="true"
+            >
+              Clementine
+            </span>
+          </span>
+          <button
+            aria-describedby="woocommerce-tag__label-0"
+            aria-label="Remove Clementine"
+            className="components-button woocommerce-tag__remove"
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="dashicon dashicons-dismiss"
+              focusable={false}
+              height={20}
+              role="img"
+              viewBox="0 0 20 20"
+              width={20}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+              />
+            </svg>
+          </button>
         </span>
-        <span
-          aria-hidden="true"
-        >
-          Clementine
-        </span>
-      </span>
-      <button
-        aria-describedby="woocommerce-tag__label-0"
-        aria-label="Remove Clementine"
-        className="components-button woocommerce-tag__remove"
-        onClick={[Function]}
-        type="button"
-      >
-        <svg
-          aria-hidden={true}
-          className="dashicon dashicons-dismiss"
-          focusable={false}
-          height={20}
-          role="img"
-          viewBox="0 0 20 20"
-          width={20}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
-          />
-        </svg>
-      </button>
-    </span>
+      </li>
+    </ul>
   </div>
   <div
     className="woocommerce-search-list__search"
@@ -2011,88 +2015,94 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         Clear all
       </button>
     </div>
-    <span
-      className="woocommerce-tag has-remove"
-    >
-      <span
-        className="woocommerce-tag__text"
-        id="woocommerce-tag__label-1"
-      >
+    <ul>
+      <li>
         <span
-          className="screen-reader-text"
+          className="woocommerce-tag has-remove"
         >
-          Clementine
+          <span
+            className="woocommerce-tag__text"
+            id="woocommerce-tag__label-1"
+          >
+            <span
+              className="screen-reader-text"
+            >
+              Clementine
+            </span>
+            <span
+              aria-hidden="true"
+            >
+              Clementine
+            </span>
+          </span>
+          <button
+            aria-describedby="woocommerce-tag__label-1"
+            aria-label="Remove Clementine"
+            className="components-button woocommerce-tag__remove"
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="dashicon dashicons-dismiss"
+              focusable={false}
+              height={20}
+              role="img"
+              viewBox="0 0 20 20"
+              width={20}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+              />
+            </svg>
+          </button>
         </span>
+      </li>
+      <li>
         <span
-          aria-hidden="true"
+          className="woocommerce-tag has-remove"
         >
-          Clementine
+          <span
+            className="woocommerce-tag__text"
+            id="woocommerce-tag__label-2"
+          >
+            <span
+              className="screen-reader-text"
+            >
+              Guava
+            </span>
+            <span
+              aria-hidden="true"
+            >
+              Guava
+            </span>
+          </span>
+          <button
+            aria-describedby="woocommerce-tag__label-2"
+            aria-label="Remove Guava"
+            className="components-button woocommerce-tag__remove"
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="dashicon dashicons-dismiss"
+              focusable={false}
+              height={20}
+              role="img"
+              viewBox="0 0 20 20"
+              width={20}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+              />
+            </svg>
+          </button>
         </span>
-      </span>
-      <button
-        aria-describedby="woocommerce-tag__label-1"
-        aria-label="Remove Clementine"
-        className="components-button woocommerce-tag__remove"
-        onClick={[Function]}
-        type="button"
-      >
-        <svg
-          aria-hidden={true}
-          className="dashicon dashicons-dismiss"
-          focusable={false}
-          height={20}
-          role="img"
-          viewBox="0 0 20 20"
-          width={20}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
-          />
-        </svg>
-      </button>
-    </span>
-    <span
-      className="woocommerce-tag has-remove"
-    >
-      <span
-        className="woocommerce-tag__text"
-        id="woocommerce-tag__label-2"
-      >
-        <span
-          className="screen-reader-text"
-        >
-          Guava
-        </span>
-        <span
-          aria-hidden="true"
-        >
-          Guava
-        </span>
-      </span>
-      <button
-        aria-describedby="woocommerce-tag__label-2"
-        aria-label="Remove Guava"
-        className="components-button woocommerce-tag__remove"
-        onClick={[Function]}
-        type="button"
-      >
-        <svg
-          aria-hidden={true}
-          className="dashicon dashicons-dismiss"
-          focusable={false}
-          height={20}
-          role="img"
-          viewBox="0 0 20 20"
-          width={20}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
-          />
-        </svg>
-      </button>
-    </span>
+      </li>
+    </ul>
   </div>
   <div
     className="woocommerce-search-list__search"

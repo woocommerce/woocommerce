@@ -22,6 +22,14 @@
 	.woocommerce-tag__text {
 		max-width: 13em;
 	}
+
+	ul {
+		list-style: none;
+
+		li {
+			float: left;
+		}
+	}
 }
 
 .woocommerce-search-list__search {

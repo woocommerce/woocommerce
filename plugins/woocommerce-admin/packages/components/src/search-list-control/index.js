@@ -209,14 +209,19 @@ export class SearchListControl extends Component {
 						</Button>
 					) : null }
 				</div>
-				{ selected.map( ( item, i ) => (
-					<Tag
-						key={ i }
-						label={ item.name }
-						id={ item.id }
-						remove={ this.onRemove }
-					/>
-				) ) }
+				{ selectedCount > 0 ? (
+					<ul>
+						{ selected.map( ( item, i ) => (
+							<li key={ i }>
+								<Tag
+									label={ item.name }
+									id={ item.id }
+									remove={ this.onRemove }
+								/>
+							</li>
+						) ) }
+					</ul>
+				) : null }
 			</div>
 		);
 	}
