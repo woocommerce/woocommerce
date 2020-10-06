@@ -54,7 +54,7 @@ const PaymentMethodTab = ( { children, allowsSaving } ) => {
 };
 
 PaymentMethodTab.propTypes = {
-	allowsSaving: PropTypes.string,
+	allowsSaving: PropTypes.bool,
 	children: PropTypes.node,
 };
 
