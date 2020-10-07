@@ -88,9 +88,12 @@ class WC_Query {
 	/**
 	 * Get page title for an endpoint.
 	 *
-	 * @param  string $endpoint Endpoint key.
-	 * @param  string $action Action or variation within the endpoint @since 4.6.0.
-	 * @return string
+	 * @param string $endpoint Endpoint key.
+	 * @param string $action Optional action or variation within the endpoint.
+	 *
+	 * @since 2.3.0
+	 * @since 4.6.0 Added $action parameter.
+	 * @return string The page title.
 	 */
 	public function get_endpoint_title( $endpoint, $action = '' ) {
 		global $wp;
@@ -142,7 +145,18 @@ class WC_Query {
 				break;
 		}
 
-		// TBD - docs for filter.
+		/**
+		 * Filters the page title used for my-account endpoints.
+		 *
+		 * @since 2.6.0
+		 * @since 4.6.0 Added $action parameter.
+		 *
+		 * @see get_endpoint_title()
+		 *
+		 * @param string $title Default title.
+		 * @param string $endpoint Endpoint key.
+		 * @param string $action Optional action or variation within the endpoint.
+		 */
 		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint, $action );
 	}
 
