@@ -13,7 +13,9 @@ use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 // phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 
 /**
- * WC_Admin_Note (deprecated, use Note instead).
+ * WC_Admin_Note.
+ *
+ * @deprecated since 1.6.0, use Note
  */
 class WC_Admin_Note extends DeprecatedClassFacade {
 	// These constants must be redeclared as to not break plugins that use them.
@@ -53,7 +55,9 @@ class WC_Admin_Note extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes (deprecated, use Notes instead).
+ * WC_Admin_Notes.
+ *
+ * @deprecated since 1.6.0, use Notes
  */
 class WC_Admin_Notes extends DeprecatedClassFacade {
 	/**
@@ -72,7 +76,9 @@ class WC_Admin_Notes extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Choose_Niche (deprecated, use Choose_Niche instead).
+ * WC_Admin_Notes_Choose_Niche.
+ *
+ * @deprecated since 1.6.0, use Choose_Niche
  */
 class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
 	/**
@@ -91,7 +97,9 @@ class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Coupon_Page_Moved (deprecated, use Coupon_Page_Moved instead).
+ * WC_Admin_Notes_Coupon_Page_Moved.
+ *
+ * @deprecated since 1.6.0, use Coupon_Page_Moved
  */
 class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	/**
@@ -110,7 +118,9 @@ class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Customize_Store_With_Blocks (deprecated, use Customize_Store_With_Blocks instead).
+ * WC_Admin_Notes_Customize_Store_With_Blocks.
+ *
+ * @deprecated since 1.6.0, use Customize_Store_With_Blocks
  */
 class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	/**
@@ -129,7 +139,9 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Deactivate_Plugin (deprecated, use Deactivate_Plugin instead).
+ * WC_Admin_Notes_Deactivate_Plugin.
+ *
+ * @deprecated since 1.6.0, use Deactivate_Plugin
  */
 class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 	/**
@@ -148,7 +160,9 @@ class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Draw_Attention (deprecated, use Draw_Attention instead).
+ * WC_Admin_Notes_Draw_Attention.
+ *
+ * @deprecated since 1.6.0, use Draw_Attention
  */
 class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
 	/**
@@ -167,7 +181,9 @@ class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Edit_Products_On_The_Move (deprecated, use Edit_Products_On_The_Move instead).
+ * WC_Admin_Notes_Edit_Products_On_The_Move.
+ *
+ * @deprecated since 1.6.0, use Edit_Products_On_The_Move
  */
 class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	/**
@@ -186,7 +202,9 @@ class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_EU_VAT_Number (deprecated, use EU_VAT_Number instead).
+ * WC_Admin_Notes_EU_VAT_Number.
+ *
+ * @deprecated since 1.6.0, use EU_VAT_Number
  */
 class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	/**
@@ -205,7 +223,9 @@ class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Facebook_Marketing_Expert (deprecated, use Facebook_Marketing_Expert instead).
+ * WC_Admin_Notes_Facebook_Marketing_Expert.
+ *
+ * @deprecated since 1.6.0, use Facebook_Marketing_Expert
  */
 class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	/**
@@ -224,7 +244,9 @@ class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_First_Product (deprecated, use First_Product instead).
+ * WC_Admin_Notes_First_Product.
+ *
+ * @deprecated since 1.6.0, use First_Product
  */
 class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	/**
@@ -243,7 +265,9 @@ class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Giving_Feedback_Notes (deprecated, use Giving_Feedback_Notes instead).
+ * WC_Admin_Notes_Giving_Feedback_Notes.
+ *
+ * @deprecated since 1.6.0, use Giving_Feedback_Notes
  */
 class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	/**
@@ -262,7 +286,9 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Historical_Data (deprecated, use Historical_Data instead).
+ * WC_Admin_Notes_Historical_Data.
+ *
+ * @deprecated since 1.6.0, use Historical_Data
  */
 class WC_Admin_Notes_Historical_Data extends DeprecatedClassFacade {
 	/**
@@ -281,7 +307,9 @@ class WC_Admin_Notes_Historical_Data extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Home_Screen_Feedback (deprecated, use Home_Screen_Feedback instead).
+ * WC_Admin_Notes_Home_Screen_Feedback.
+ *
+ * @deprecated since 1.6.0, use Home_Screen_Feedback
  */
 class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
 	/**
@@ -300,7 +328,9 @@ class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Insight_First_Sale (deprecated, use Insight_First_Sale instead).
+ * WC_Admin_Notes_Insight_First_Sale.
+ *
+ * @deprecated since 1.6.0, use Insight_First_Sale
  */
 class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	/**
@@ -319,7 +349,9 @@ class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Install_JP_And_WCS_Plugins (deprecated, use Install_JP_And_WCS_Plugins instead).
+ * WC_Admin_Notes_Install_JP_And_WCS_Plugins.
+ *
+ * @deprecated since 1.6.0, use Install_JP_And_WCS_Plugins
  */
 class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	/**
@@ -338,7 +370,9 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Launch_Checklist (deprecated, use Launch_Checklist instead).
+ * WC_Admin_Notes_Launch_Checklist.
+ *
+ * @deprecated since 1.6.0, use Launch_Checklist
  */
 class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	/**
@@ -357,7 +391,9 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Marketing (deprecated, use Marketing instead).
+ * WC_Admin_Notes_Marketing.
+ *
+ * @deprecated since 1.6.0, use Marketing
  */
 class WC_Admin_Notes_Marketing extends DeprecatedClassFacade {
 	/**
@@ -376,7 +412,9 @@ class WC_Admin_Notes_Marketing extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Migrate_From_Shopify (deprecated, use Migrate_From_Shopify instead).
+ * WC_Admin_Notes_Migrate_From_Shopify.
+ *
+ * @deprecated since 1.6.0, use Migrate_From_Shopify
  */
 class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	/**
@@ -395,7 +433,9 @@ class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Mobile_App (deprecated, use Mobile_App instead).
+ * WC_Admin_Notes_Mobile_App.
+ *
+ * @deprecated since 1.6.0, use Mobile_App
  */
 class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	/**
@@ -414,7 +454,9 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Need_Some_Inspiration (deprecated, use Need_Some_Inspiration instead).
+ * WC_Admin_Notes_Need_Some_Inspiration.
+ *
+ * @deprecated since 1.6.0, use Need_Some_Inspiration
  */
 class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
 	/**
@@ -433,7 +475,9 @@ class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_New_Sales_Record (deprecated, use New_Sales_Record instead).
+ * WC_Admin_Notes_New_Sales_Record.
+ *
+ * @deprecated since 1.6.0, use New_Sales_Record
  */
 class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	/**
@@ -452,7 +496,9 @@ class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Onboarding_Email_Marketing (deprecated, use Onboarding_Email_Marketing instead).
+ * WC_Admin_Notes_Onboarding_Email_Marketing.
+ *
+ * @deprecated since 1.6.0, use Onboarding_Email_Marketing
  */
 class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	/**
@@ -471,7 +517,9 @@ class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Onboarding_Payments (deprecated, use Onboarding_Payments instead).
+ * WC_Admin_Notes_Onboarding_Payments.
+ *
+ * @deprecated since 1.6.0, use Onboarding_Payments
  */
 class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	/**
@@ -490,7 +538,9 @@ class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Onboarding_Profiler (deprecated, use Onboarding_Profiler instead).
+ * WC_Admin_Notes_Onboarding_Profiler.
+ *
+ * @deprecated since 1.6.0, use Onboarding_Profiler
  */
 class WC_Admin_Notes_Onboarding_Profiler extends DeprecatedClassFacade {
 	/**
@@ -509,7 +559,9 @@ class WC_Admin_Notes_Onboarding_Profiler extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Online_Clothing_Store (deprecated, use Online_Clothing_Store instead).
+ * WC_Admin_Notes_Online_Clothing_Store.
+ *
+ * @deprecated since 1.6.0, use Online_Clothing_Store
  */
 class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	/**
@@ -528,7 +580,9 @@ class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Order_Milestones (deprecated, use Order_Milestones instead).
+ * WC_Admin_Notes_Order_Milestones.
+ *
+ * @deprecated since 1.6.0, use Order_Milestones
  */
 class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	/**
@@ -547,7 +601,9 @@ class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Performance_On_Mobile (deprecated, use Performance_On_Mobile instead).
+ * WC_Admin_Notes_Performance_On_Mobile.
+ *
+ * @deprecated since 1.6.0, use Performance_On_Mobile
  */
 class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	/**
@@ -566,7 +622,9 @@ class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Personalize_Store (deprecated, use Personalize_Store instead).
+ * WC_Admin_Notes_Personalize_Store.
+ *
+ * @deprecated since 1.6.0, use Personalize_Store
  */
 class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	/**
@@ -585,7 +643,9 @@ class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Real_Time_Order_Alerts (deprecated, use Real_Time_Order_Alerts instead).
+ * WC_Admin_Notes_Real_Time_Order_Alerts.
+ *
+ * @deprecated since 1.6.0, use Real_Time_Order_Alerts
  */
 class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	/**
@@ -604,7 +664,9 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Review_Shipping_Settings (deprecated, use Review_Shipping_Settings instead).
+ * WC_Admin_Notes_Review_Shipping_Settings.
+ *
+ * @deprecated since 1.6.0, use Review_Shipping_Settings
  */
 class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
 	/**
@@ -623,7 +685,9 @@ class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Selling_Online_Courses (deprecated, use Selling_Online_Courses instead).
+ * WC_Admin_Notes_Selling_Online_Courses.
+ *
+ * @deprecated since 1.6.0, use Selling_Online_Courses
  */
 class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	/**
@@ -642,7 +706,9 @@ class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Set_Up_Additional_Payment_Types (deprecated, use Set_Up_Additional_Payment_Types instead).
+ * WC_Admin_Notes_Set_Up_Additional_Payment_Types.
+ *
+ * @deprecated since 1.6.0, use Set_Up_Additional_Payment_Types
  */
 class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFacade {
 	/**
@@ -661,7 +727,9 @@ class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFaca
 }
 
 /**
- * WC_Admin_Notes_Start_Dropshipping_Business (deprecated, use Start_Dropshipping_Business instead).
+ * WC_Admin_Notes_Start_Dropshipping_Business.
+ *
+ * @deprecated since 1.6.0, use Start_Dropshipping_Business
  */
 class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
 	/**
@@ -680,7 +748,9 @@ class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Test_Checkout (deprecated, use Test_Checkout instead).
+ * WC_Admin_Notes_Test_Checkout.
+ *
+ * @deprecated since 1.6.0, use Test_Checkout
  */
 class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	/**
@@ -699,7 +769,9 @@ class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Tracking_Opt_In (deprecated, use Tracking_Opt_In instead).
+ * WC_Admin_Notes_Tracking_Opt_In.
+ *
+ * @deprecated since 1.6.0, use Tracking_Opt_In
  */
 class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	/**
@@ -718,7 +790,9 @@ class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Woo_Subscriptions_Notes (deprecated, use Woo_Subscriptions_Notes instead).
+ * WC_Admin_Notes_Woo_Subscriptions_Notes.
+ *
+ * @deprecated since 1.6.0, use Woo_Subscriptions_Notes
  */
 class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	/**
@@ -737,7 +811,9 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_WooCommerce_Payments (deprecated, use WooCommerce_Payments instead).
+ * WC_Admin_Notes_WooCommerce_Payments.
+ *
+ * @deprecated since 1.6.0, use WooCommerce_Payments
  */
 class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	/**
@@ -756,7 +832,9 @@ class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_WooCommerce_Subscriptions (deprecated, use WooCommerce_Subscriptions instead).
+ * WC_Admin_Notes_WooCommerce_Subscriptions.
+ *
+ * @deprecated since 1.6.0, use WooCommerce_Subscriptions
  */
 class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	/**
