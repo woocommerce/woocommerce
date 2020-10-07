@@ -9,6 +9,7 @@ const files = [
 	'_webpack.config.js',
 	'_main.php',
 	'_package.json',
+	'._eslintrc',
 ];
 const maybeThrowError = ( error ) => {
 	if ( error ) throw error;
