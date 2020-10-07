@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAppRoot, getTestConfig } = require( '../utils' );
+const { getAppRoot, getAppName, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
@@ -45,7 +45,7 @@ if ( appPath ) {
     }
 
     // Provide an "app name" to use in Docker container names.
-    envVars.APP_NAME = path.basename( appPath );
+    envVars.APP_NAME = getAppName();
 }
 
 // Load test configuration file into an object.

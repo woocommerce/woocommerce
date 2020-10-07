@@ -16,4 +16,12 @@ const getAppRoot = () => {
     return appPath;
 };
 
-module.exports = getAppRoot;
+const getAppName = () => {
+	const appRoot = getAppRoot();
+	return path.basename( appRoot );
+};
+
+module.exports = {
+	getAppRoot,
+	getAppName,
+};
