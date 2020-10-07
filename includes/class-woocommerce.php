@@ -312,7 +312,7 @@ final class WooCommerce {
 	 * @param  string $type admin, ajax, cron or frontend.
 	 * @return bool
 	 */
-	private function is_request( $type ) {
+	public function is_request( $type ) {
 		switch ( $type ) {
 			case 'admin':
 				return is_admin();
