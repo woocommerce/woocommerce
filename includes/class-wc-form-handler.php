@@ -49,9 +49,18 @@ class WC_Form_Handler {
 				$user_id = absint( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 
-			$value = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
+			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+			$value   = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
-			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'show-reset-form' => 'true',
+						'action'          => $action,
+					),
+					wc_lostpassword_url()
+				)
+			);
 			exit;
 		}
 	}
