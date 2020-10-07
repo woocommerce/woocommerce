@@ -2,7 +2,7 @@
 /**
  * Helper to upload files via the REST API.
  *
- * @package Automattic/WooCommerce/Utilities
+ * @package WooCommerce\Utilities
  */
 
 namespace Automattic\WooCommerce\RestApi\Utilities;

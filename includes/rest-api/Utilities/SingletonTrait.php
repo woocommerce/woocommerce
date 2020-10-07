@@ -2,7 +2,7 @@
 /**
  * Singleton class trait.
  *
- * @package Automattic/WooCommerce/Utilities
+ * @package WooCommerce\Utilities
  */
 
 namespace Automattic\WooCommerce\RestApi\Utilities;

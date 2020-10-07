@@ -11,26 +11,23 @@ npm install jest --global
 
 ## Configuration
 
-The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it contains several files to serve as the base for a Docker container and Travis CI setup.
+The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it includes a hosting container for running tests and includes instructions for creating your Travis CI setup.
 
 ### Babel Config
 
 Make sure you `npm install @babel/preset-env --save` if you have not already done so. Afterwards, extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
-const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EBabelConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = function( api ) {
 	api.cache( true );
 
-	return {
-		...e2eBabelConfig,
+	return useE2EBabelConfig( {
 		presets: [
-			...e2eBabelConfig.presets,
 			'@wordpress/babel-preset-default',
 		],
-		....
-	};
+	} );
 };
 ```
 
@@ -39,34 +36,22 @@ module.exports = function( api ) {
 The E2E environment uses Puppeteer for headless browser testing, which uses certain globals variables. Avoid ES Lint errors by extending the config.
 
 ```js
-const { esLintConfig: baseConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EEsLintConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseConfig,
+module.exports = useE2EEsLintConfig( {
 	root: true,
-	parser: 'babel-eslint',
-	extends: [
-		...baseConfig.extends,
-		'wpcalypso/react',
-		'plugin:jsx-a11y/recommended',
-	],
-	plugins: [
-		...baseConfig.plugins,
-		'jsx-a11y',
-	],
 	env: {
-		...baseConfig.env,
 		browser: true,
-		node: true,
+		es6: true,
+		node: true
 	},
 	globals: {
-		...baseConfig.globals,
 		wp: true,
 		wpApiSettings: true,
 		wcSettings: true,
+		es6: true
 	},
-	....
-};
+} );
 ```
 
 ### Jest Config
@@ -75,20 +60,65 @@ The E2E environment uses Jest as a test runner. Extending the base config is nee
 
 ```js
 const path = require( 'path' );
-const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseE2Econfig,
-	// Specify the path of your project's E2E tests here.
+const jestConfig = useE2EJestConfig( {
 	roots: [ path.resolve( __dirname, '../specs' ) ],
-};
+} );
+
+module.exports = jestConfig;
 ```
 
-**NOTE:** Your project's Jest config file is expected to found at: `tests/e2e/config/jest.config.js`.
+**NOTE:** Your project's Jest config file is expected to be: `tests/e2e/config/jest.config.js`.
+
+### Jest Puppeteer Config
+
+The test sequencer uses the following default Puppeteer configuration:
+
+```js
+// headless
+	puppeteerConfig = {
+		launch: {
+			// Required for the logged out and logged in tests so they don't share app state/token.
+			browserContext: 'incognito',
+		},
+	};
+// dev mode
+	puppeteerConfig = {
+		launch: {
+			...jestPuppeteerConfig.launch, // @automattic/puppeteer-utils
+			ignoreHTTPSErrors: true,
+			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
+			devtools: true,
+			defaultViewport: {
+				width: 1280,
+				height: 800,
+			},
+		},
+	};
+```
+
+You can customize the configuration in `tests/e2e/config/jest-puppeteer.config.js`
+
+```js
+const { useE2EJestPuppeteerConfig } = require( '@woocommerce/e2e-environment' );
+
+const puppeteerConfig = useE2EJestPuppeteerConfig( {
+	launch: {
+		headless: false,
+	}
+} );
+
+module.exports = puppeteerConfig;
+```
+
+### Jest Setup
+
+Jest provides setup and teardown functions similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
 
 ### Webpack Config
 
-The E2E environment provides a `@woocommerce/e2e-tests` alias for easy use of the WooCommerce E2E test helpers.
+The E2E environment provides a `@woocommerce/e2e-utils` alias for easy use of the WooCommerce E2E test helpers.
 
 ```js
 const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-environment' );
@@ -104,93 +134,12 @@ module.exports = {
 };
 ```
 
-### Docker Setup
+### Container Setup
 
-The E2E environment will look for a `docker-compose.yaml` file in your project root. This will be combined with the base Docker config in the package. This is where you'll map your local project files into the Docker container(s).
+Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` container supports using either the built in container or an external container. See the the appropriate readme for  details:
 
-```yaml
-version: '3.3'
-
-services:
-
-  wordpress-www:
-    volumes:
-      # This path is relative to the first config file
-      # which is in node_modules/@woocommerce/e2e/env
-      - "../../../:/var/www/html/wp-content/plugins/your-project-here"
-
-  wordpress-cli:
-    volumes:
-      - "../../../:/var/www/html/wp-content/plugins/your-project-here"
-```
-
-#### Docker Container Initialization Script
-
-You can provide an initialization script that will run in the WP-CLI Docker container. Place an executable file at `tests/e2e/docker/initialize.sh` in your project and it will be copied into the container and executed. While you can run any commands you wish, the intent here is to use WP-CLI to set up your testing environment. E.g.:
-
-```
-#!/bin/bash
-
-echo "Initializing WooCommerce E2E"
-
-wp plugin install woocommerce --activate
-wp theme install twentynineteen --activate
-wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=customer --path=/var/www/html
-```
-
-### Additional Packages
-
-There are a few packages you may find useful in writing tests scripts. You can see these in use in the `tests/e2e/utils` and `tests/e2e/specs` folders.
-
-- `@wordpress/e2e-test-utils`
-- `config`
-
-### Travis CI
-
-Add the following to the appropriate sections of your `.travis.yml` config file.
-
-```yaml
-version: ~> 1.0
-
-  include:
-    - name: "Core E2E Tests"
-    php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
-
-....
-
-script:
-  - npm install jest --global
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
-
-....
-
-after_script:
-  - npm explore @woocommerce/e2e-environment -- npm run docker:down
-```
-
-Use `[[ ${RUN_E2E} == 1 ]]` in your bash scripts to test for the core e2e test run.
-
-## Usage
-
-Start Docker
-
-```bash
-npm explore @woocommerce/e2e-environment -- npm run docker:up
-```
-
-Run E2E Tests
-
-```bash
-npm explore @woocommerce/e2e-environment -- npm run test:e2e
-npm explore @woocommerce/e2e-environment -- npm run test:e2e-dev
-```
-
-Stop Docker
-
-```bash
-npm explore @woocommerce/e2e-environment -- npm run docker:down
-```
+- [Built In Container](./builtin.md)
+- [External Container](./external.md)
 
 ## Additional information
 

@@ -4,14 +4,15 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const getAppPath = require( '../utils/app-root' );
+const { getAppRoot } = require( '../utils' );
+const { JEST_PUPPETEER_CONFIG } = process.env;
 
 program
 	.usage( '<file ...> [options]' )
 	.option( '--dev', 'Development mode' )
 	.parse( process.argv );
 
-const appPath = getAppPath();
+const appPath = getAppRoot();
 
 const nodeConfigDirs = [
 	path.resolve( __dirname, '../config' ),
@@ -23,16 +24,21 @@ if ( appPath ) {
 	);
 }
 
-const testEnvVars = {
+let testEnvVars = {
 	NODE_ENV: 'test-e2e',
-	JEST_PUPPETEER_CONFIG: path.resolve(
-		__dirname,
-		'../config/jest-puppeteer.config.js'
-	),
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 	node_config_dev: program.dev ? 'yes' : 'no',
 	jest_test_timeout: program.dev ? 120000 : 30000,
 };
+
+if ( ! JEST_PUPPETEER_CONFIG ) {
+	// Use local Puppeteer config if there is one.
+	// Load test configuration file into an object.
+	const localJestConfigFile = path.resolve( appPath, 'tests/e2e/config/jest-puppeteer.config.js' );
+	const jestConfigFile = path.resolve( __dirname, '../config/jest-puppeteer.config.js' );
+
+	testEnvVars.JEST_PUPPETEER_CONFIG = fs.existsSync( localJestConfigFile ) ? localJestConfigFile : jestConfigFile;
+}
 
 let jestCommand = 'jest';
 const jestArgs = [

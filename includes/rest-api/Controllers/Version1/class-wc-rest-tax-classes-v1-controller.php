@@ -4,7 +4,9 @@
  *
  * Handles requests to the /taxes/classes endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @author   WooThemes
+ * @category API
+ * @package WooCommerce\RestApi
  * @since    3.0.0
  */
 
@@ -15,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Tax Classes controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {

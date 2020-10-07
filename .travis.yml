@@ -34,7 +34,6 @@ jobs:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     script:
       - npm run build:assets
-      - npm run build:packages
       - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
@@ -71,7 +70,7 @@ install:
     else
       echo "xdebug.ini does not exist"
     fi
-  - nvm install 10
+  - nvm install
   - npm install
   - composer install --no-dev
   - |

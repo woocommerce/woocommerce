@@ -50,7 +50,7 @@ class WC_Countries {
 		if ( empty( $this->countries ) ) {
 			$this->countries = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
 			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
-				uasort( $this->countries, 'wc_ascii_uasort_comparison' );
+				wc_asort_by_locale( $this->countries );
 			}
 		}
 

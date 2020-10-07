@@ -38,7 +38,7 @@ class WC_Meta_Box_Order_Items {
 		$order = $theorder;
 		$data  = get_post_meta( $post->ID );
 
-		include 'views/html-order-items.php';
+		include __DIR__ . '/views/html-order-items.php';
 	}
 
 	/**

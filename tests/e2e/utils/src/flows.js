@@ -18,7 +18,7 @@ const baseUrl = config.get( 'url' );
 const WP_ADMIN_LOGIN = baseUrl + 'wp-login.php';
 const WP_ADMIN_DASHBOARD = baseUrl + 'wp-admin';
 const WP_ADMIN_PLUGINS = baseUrl + 'wp-admin/plugins.php';
-const WP_ADMIN_SETUP_WIZARD = baseUrl + 'wp-admin/admin.php?page=wc-setup';
+const WP_ADMIN_SETUP_WIZARD = baseUrl + 'wp-admin/admin.php?page=wc-admin';
 const WP_ADMIN_ALL_ORDERS_VIEW = baseUrl + 'wp-admin/edit.php?post_type=shop_order';
 const WP_ADMIN_NEW_COUPON = baseUrl + 'wp-admin/post-new.php?post_type=shop_coupon';
 const WP_ADMIN_NEW_ORDER = baseUrl + 'wp-admin/post-new.php?post_type=shop_order';

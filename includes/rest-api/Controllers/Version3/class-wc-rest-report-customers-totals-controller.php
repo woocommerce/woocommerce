@@ -4,7 +4,7 @@
  *
  * Handles requests to the /reports/customers/count endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports Customers Totals controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Reports_Controller
  */
 class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Controller {
