@@ -16,10 +16,14 @@ if ( fs.existsSync( localTestConfigFile ) ) {
 const getTestConfig = () => {
 	const rawTestConfig = fs.readFileSync( testConfigFile );
 
-	let testConfig = JSON.parse(rawTestConfig);
-	testConfig.baseUrl = testConfig.url.substr(0, testConfig.url.length - 1);
-	let testPort = testConfig.url.match(/[0-9]+/);
-	testConfig.port = testPort[0] ? testPort[0] : '8084';
+	let testConfig = JSON.parse( rawTestConfig );
+	let testPort = testConfig.url.match( /[0-9]+/ );
+	testConfig.baseUrl = testConfig.url.substr( 0, testConfig.url.length - 1 );
+	if ( Array.isArray( testPort ) ) {
+		testConfig.port = testPort[0] ? testPort[0] : '8084';
+	} else {
+		testConfig.port = '';
+	}
 	return testConfig;
 };
 
