@@ -131,7 +131,7 @@ class WC_Query {
 				$title = __( 'Add payment method', 'woocommerce' );
 				break;
 			case 'lost-password':
-				if ( 'rp' === $action ) {
+				if ( in_array( $action, array( 'rp', 'resetpass', 'newaccount' ) ) ) {
 					$title = __( 'Set password', 'woocommerce' );
 				} else {
 					$title = __( 'Lost password', 'woocommerce' );
