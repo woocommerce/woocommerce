@@ -49,7 +49,7 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * @param WP_Error $response Response to assert.
 	 * @param string   $message optional message to render when assertion fails.
 	 */
-	public function assertHasAPIError( $code, $status = null, $response, $message = '' ) {
+	public function assertHasAPIError( $code, $status, $response, $message = '' ) {
 
 		$this->assertWPError( $response, $message );
 

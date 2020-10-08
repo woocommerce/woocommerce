@@ -18,19 +18,16 @@ The `@woocommerce/e2e-environment` package exports configuration objects that ca
 Make sure you `npm install @babel/preset-env --save` if you have not already done so. Afterwards, extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
-const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EBabelConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = function( api ) {
 	api.cache( true );
 
-	return {
-		...e2eBabelConfig,
+	return useE2EBabelConfig( {
 		presets: [
-			...e2eBabelConfig.presets,
 			'@wordpress/babel-preset-default',
 		],
-		....
-	};
+	} );
 };
 ```
 
@@ -39,34 +36,22 @@ module.exports = function( api ) {
 The E2E environment uses Puppeteer for headless browser testing, which uses certain globals variables. Avoid ES Lint errors by extending the config.
 
 ```js
-const { esLintConfig: baseConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EEsLintConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseConfig,
+module.exports = useE2EEsLintConfig( {
 	root: true,
-	parser: 'babel-eslint',
-	extends: [
-		...baseConfig.extends,
-		'wpcalypso/react',
-		'plugin:jsx-a11y/recommended',
-	],
-	plugins: [
-		...baseConfig.plugins,
-		'jsx-a11y',
-	],
 	env: {
-		...baseConfig.env,
 		browser: true,
-		node: true,
+		es6: true,
+		node: true
 	},
 	globals: {
-		...baseConfig.globals,
 		wp: true,
 		wpApiSettings: true,
 		wcSettings: true,
+		es6: true
 	},
-	....
-};
+} );
 ```
 
 ### Jest Config

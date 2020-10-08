@@ -1,8 +1,5 @@
 # WooCommerce `src` files
 
-## Important note
-
-The dependency injection container is disabled for now due to conflicts with plugins that use the same container package. Therefore all the content about registering and resolving classes, and interacting with legacy code, doesn't apply yet. It will be enabled at a later time.
 
 ## Table of contents
 

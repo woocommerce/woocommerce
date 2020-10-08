@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAppRoot, getTestConfig } = require( '../utils' );
+const { getAppRoot, getAppName, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
@@ -45,7 +45,7 @@ if ( appPath ) {
     }
 
     // Provide an "app name" to use in Docker container names.
-    envVars.APP_NAME = path.basename( appPath );
+    envVars.APP_NAME = getAppName();
 }
 
 // Load test configuration file into an object.
@@ -55,11 +55,11 @@ const testConfig = getTestConfig();
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
 	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + envVars.APP_NAME;
 }
-if ( ! global.process.env.WORDPRESS_PORT ) {
-	global.process.env.WORDPRESS_PORT = testConfig.port;
+if ( ! process.env.WORDPRESS_PORT ) {
+	process.env.WORDPRESS_PORT = testConfig.port;
 }
-if ( ! global.process.env.WORDPRESS_URL ) {
-	global.process.env.WORDPRESS_URL = testConfig.url;
+if ( ! process.env.WORDPRESS_URL ) {
+	process.env.WORDPRESS_URL = testConfig.url;
 }
 
 // Ensure that the first Docker compose file loaded is from our local env.
