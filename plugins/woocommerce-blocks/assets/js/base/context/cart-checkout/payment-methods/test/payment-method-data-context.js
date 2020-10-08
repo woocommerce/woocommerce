@@ -11,7 +11,10 @@ import {
 	__experimentalDeRegisterPaymentMethod,
 	__experimentalDeRegisterExpressPaymentMethod,
 } from '@woocommerce/blocks-registry';
-import { CheckoutExpressPayment } from '@woocommerce/base-components/payment-methods';
+import {
+	CheckoutExpressPayment,
+	SavedPaymentMethodOptions,
+} from '@woocommerce/base-components/payment-methods';
 /**
  * Internal dependencies
  */
@@ -20,6 +23,33 @@ import {
 	PaymentMethodDataProvider,
 } from '../payment-method-data-context';
 import { defaultCartState } from '../../../../../data/default-states';
+
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+	return {
+		// @ts-ignore We know @woocommerce/settings is an object.
+		...originalModule,
+		getSetting: ( setting, ...rest ) => {
+			if ( setting === 'customerPaymentMethods' ) {
+				return {
+					cc: [
+						{
+							method: {
+								gateway: 'stripe',
+								last4: '4242',
+								brand: 'Visa',
+							},
+							expires: '12/22',
+							is_default: true,
+							tokenId: 1,
+						},
+					],
+				};
+			}
+			return originalModule.getSetting( setting, ...rest );
+		},
+	};
+} );
 
 const registerMockPaymentMethods = () => {
 	[ 'cheque', 'bacs' ].forEach( ( name ) => {
@@ -32,6 +62,23 @@ const registerMockPaymentMethods = () => {
 					edit: <div>A payment method</div>,
 					icons: null,
 					canMakePayment: () => true,
+					ariaLabel: name,
+				} )
+		);
+	} );
+	[ 'stripe' ].forEach( ( name ) => {
+		registerPaymentMethod(
+			( Config ) =>
+				new Config( {
+					name,
+					label: name,
+					content: <div>A payment method</div>,
+					edit: <div>A payment method</div>,
+					icons: null,
+					canMakePayment: () => true,
+					supports: {
+						savePaymentInfo: true,
+					},
 					ariaLabel: name,
 				} )
 		);
@@ -65,7 +112,7 @@ const registerMockPaymentMethods = () => {
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'cheque', 'bacs' ].forEach( ( name ) => {
+	[ 'cheque', 'bacs', 'stripe' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
 	[ 'express-payment' ].forEach( ( name ) => {
@@ -133,6 +180,66 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 				/Active Payment Method: cheque/
 			);
 			expect( activePaymentMethod ).not.toBeNull();
+		} );
+	} );
+
+	it( 'resets saved payment method data after starting and closing an express payment method', async () => {
+		const TriggerActiveExpressPaymentMethod = () => {
+			const {
+				activePaymentMethod,
+				paymentMethodData,
+			} = usePaymentMethodDataContext();
+			return (
+				<>
+					<CheckoutExpressPayment />
+					<SavedPaymentMethodOptions />
+					{ 'Active Payment Method: ' + activePaymentMethod }
+					{ paymentMethodData[ 'wc-stripe-payment-token' ] && (
+						<span>Stripe token</span>
+					) }
+				</>
+			);
+		};
+		const TestComponent = () => {
+			return (
+				<PaymentMethodDataProvider>
+					<TriggerActiveExpressPaymentMethod />
+				</PaymentMethodDataProvider>
+			);
+		};
+		render( <TestComponent /> );
+		// Should initialize by default the default saved payment method.
+		await waitFor( () => {
+			const activePaymentMethod = screen.queryByText(
+				/Active Payment Method: stripe/
+			);
+			const stripeToken = screen.queryByText( /Stripe token/ );
+			expect( activePaymentMethod ).not.toBeNull();
+			expect( stripeToken ).not.toBeNull();
+		} );
+		// Express payment method clicked.
+		fireEvent.click(
+			screen.getByText( 'express-payment express payment method' )
+		);
+		await waitFor( () => {
+			const activePaymentMethod = screen.queryByText(
+				/Active Payment Method: express-payment/
+			);
+			const stripeToken = screen.queryByText( /Stripe token/ );
+			expect( activePaymentMethod ).not.toBeNull();
+			expect( stripeToken ).toBeNull();
+		} );
+		// Express payment method closed.
+		fireEvent.click(
+			screen.getByText( 'express-payment express payment method close' )
+		);
+		await waitFor( () => {
+			const activePaymentMethod = screen.queryByText(
+				/Active Payment Method: stripe/
+			);
+			const stripeToken = screen.queryByText( /Stripe token/ );
+			expect( activePaymentMethod ).not.toBeNull();
+			expect( stripeToken ).not.toBeNull();
 		} );
 	} );
 } );
