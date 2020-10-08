@@ -15,7 +15,7 @@ type ActiveInterceptor = {
 }
 
 /**
- * A base class for encapsulating the start and stop functionality required by all axios interceptors.
+ * A base class for encapsulating the start and stop functionality required by all Axios interceptors.
  */
 export abstract class AxiosInterceptor {
 	/**
@@ -61,7 +61,7 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling requests before they are made to the server.
 	 *
-	 * @param {AxiosRequestConfig} config The axios request options.
+	 * @param {AxiosRequestConfig} config The Axios request options.
 	 */
 	protected handleRequest( config: AxiosRequestConfig ): AxiosRequestConfig {
 		return config;
@@ -70,7 +70,7 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling successful responses.
 	 *
-	 * @param {AxiosResponse} response The response from the axios client.
+	 * @param {*} response The response from the Axios client.
 	 */
 	protected onResponseSuccess( response: AxiosResponse ): any {
 		return response;
@@ -79,9 +79,9 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling response failures.
 	 *
-	 * @param {*} error The error that occurred.
+	 * @param {Promise} error The error that occurred.
 	 */
 	protected onResponseRejected( error: any ): any {
-		return error;
+		throw error;
 	}
 }

@@ -14,7 +14,7 @@ module.exports = {
 		'no-useless-constructor': 'off',
 		'@typescript-eslint/no-useless-constructor': 2,
 	},
-	'plugins': [
+	plugins: [
 		'@typescript-eslint'
 	],
 	extends: [
@@ -22,17 +22,22 @@ module.exports = {
 	],
 	overrides: [
 		{
-			'files': [
+			files: [
 				'**/*.js',
 				'**/*.ts'
-			]
+			],
+			settings: {
+				jsdoc: {
+					mode: 'typescript',
+				},
+			},
 		},
 		{
-			'files': [
+			files: [
 				'**/*.spec.ts',
 				'**/*.test.ts'
 			],
-			'rules': {
+			rules: {
 				'no-console': 'off',
 			}
 		}

@@ -2,11 +2,10 @@ import { simpleProductRESTRepository } from '../simple-product';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { HTTPClient, HTTPResponse } from '../../../../http';
 import { SimpleProduct } from '../../../../models';
-import { CreatesModels } from '../../../../framework/model-repository';
 
 describe( 'simpleProductRESTRepository', () => {
 	let httpClient: MockProxy< HTTPClient >;
-	let repository: CreatesModels< SimpleProduct >;
+	let repository: ReturnType< typeof simpleProductRESTRepository >;
 
 	beforeEach( () => {
 		httpClient = mock< HTTPClient >();
