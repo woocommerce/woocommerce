@@ -26,23 +26,34 @@ const ExpressPaymentMethods = () => {
 	const {
 		setActivePaymentMethod,
 		activePaymentMethod,
+		paymentMethodData,
 		setPaymentStatus,
 	} = usePaymentMethodDataContext();
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const { paymentMethods } = useExpressPaymentMethods();
 	const previousActivePaymentMethod = useRef( activePaymentMethod );
+	const previousPaymentMethodData = useRef( paymentMethodData );
 
 	const onExpressPaymentClick = useCallback(
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
+			previousPaymentMethodData.current = paymentMethodData;
 			setPaymentStatus().started();
 			setActivePaymentMethod( paymentMethodId );
 		},
-		[ setActivePaymentMethod, setPaymentStatus, activePaymentMethod ]
+		[
+			activePaymentMethod,
+			paymentMethodData,
+			setActivePaymentMethod,
+			setPaymentStatus,
+		]
 	);
 	const onExpressPaymentClose = useCallback( () => {
 		setActivePaymentMethod( previousActivePaymentMethod.current );
-	}, [ setActivePaymentMethod ] );
+		if ( previousPaymentMethodData.current.isSavedToken ) {
+			setPaymentStatus().success( previousPaymentMethodData.current );
+		}
+	}, [ setActivePaymentMethod, setPaymentStatus ] );
 	const paymentMethodIds = Object.keys( paymentMethods );
 	const content =
 		paymentMethodIds.length > 0 ? (
