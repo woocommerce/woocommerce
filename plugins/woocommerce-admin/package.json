@@ -88,8 +88,8 @@
 	"dependencies": {
 		"@woocommerce/e2e-environment": "0.1.5",
 		"@wordpress/api-fetch": "2.2.8",
-		"@wordpress/base-styles": "2.0.0",
-		"@wordpress/components": "10.0.0",
+		"@wordpress/base-styles": "3.1.0",
+		"@wordpress/components": "11.0.0",
 		"@wordpress/data": "4.16.1",
 		"@wordpress/data-controls": "1.10.1",
 		"@wordpress/date": "3.9.0",
