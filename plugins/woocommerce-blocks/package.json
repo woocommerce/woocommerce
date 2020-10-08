@@ -123,7 +123,7 @@
 		"jest-fetch-mock": "3.0.3",
 		"lint-staged": "9.5.0",
 		"merge-config": "2.0.0",
-		"mini-css-extract-plugin": "0.11.2",
+		"mini-css-extract-plugin": "0.12.0",
 		"prettier": "npm:wp-prettier@2.0.5",
 		"progress-bar-webpack-plugin": "2.1.0",
 		"promptly": "3.0.3",
