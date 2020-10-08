@@ -912,4 +912,60 @@ final class WooCommerce {
 	public function is_wc_admin_active() {
 		return function_exists( 'wc_admin_url' );
 	}
+
+	/**
+	 * Call a user function. This should be used to execute any non-idempotent function, especially
+	 * those in the `includes` directory or provided by WordPress.
+	 *
+	 * This method can be useful for unit tests, since functions called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_function_mocks.
+	 *
+	 * @param string $function_name The function to execute.
+	 * @param mixed  ...$parameters The parameters to pass to the function.
+	 *
+	 * @return mixed The result from the function.
+	 *
+	 * @since 4.4
+	 */
+	public function call_function( $function_name, ...$parameters ) {
+		return wc_get_container()->get( LegacyProxy::class )->call_function( $function_name, ...$parameters );
+	}
+
+	/**
+	 * Call a static method in a class. This should be used to execute any non-idempotent method in classes
+	 * from the `includes` directory.
+	 *
+	 * This method can be useful for unit tests, since methods called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_static_mocks.
+	 *
+	 * @param string $class_name The name of the class containing the method.
+	 * @param string $method_name The name of the method.
+	 * @param mixed  ...$parameters The parameters to pass to the method.
+	 *
+	 * @return mixed The result from the method.
+	 *
+	 * @since 4.4
+	 */
+	public function call_static( $class_name, $method_name, ...$parameters ) {
+		return wc_get_container()->get( LegacyProxy::class )->call_static( $class_name, $method_name, ...$parameters );
+	}
+
+	/**
+	 * Gets an instance of a given legacy class.
+	 * This must not be used to get instances of classes in the `src` directory.
+	 *
+	 * This method can be useful for unit tests, since objects obtained using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_class_mocks.
+	 *
+	 * @param string $class_name The name of the class to get an instance for.
+	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
+	 *
+	 * @return object The instance of the class.
+	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
+	 *
+	 * @since 4.4
+	 */
+	public function get_instance_of( string $class_name, ...$args ) {
+		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name, ...$args );
+	}
 }
