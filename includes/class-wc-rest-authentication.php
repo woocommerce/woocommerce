@@ -111,6 +111,7 @@ class WC_REST_Authentication {
 			$user_id = $this->authenticate( false );
 			if ( $user_id ) {
 				wp_set_current_user( $user_id );
+				return true;
 			}
 		}
 		return $error;
