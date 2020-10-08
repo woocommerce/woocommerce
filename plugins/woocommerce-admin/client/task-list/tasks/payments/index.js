@@ -314,6 +314,7 @@ export default compose(
 			invalidateResolutionForStoreSelector,
 		} = dispatch( ONBOARDING_STORE_NAME );
 		invalidateResolution( 'getProfileItems', [] );
+		invalidateResolution( 'getTasksStatus', [] );
 		return {
 			clearTaskStatusCache: () =>
 				invalidateResolutionForStoreSelector( 'getTasksStatus' ),
