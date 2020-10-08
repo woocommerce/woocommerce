@@ -33,7 +33,7 @@ class Confirm_Tax_Settings {
 		$note = new Note();
 
 		$note->set_title( __( 'Confirm tax settings', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Automated tax calculations are enabled on your store through WooCommerce Services. Learn more about automated taxes <a href="https://docs.woocommerce.com/document/woocommerce-services/#section-12">here</a>.', 'woocommerce-admin' ) );
+		$note->set_content( __( 'Automated tax calculations are enabled on your store through WooCommerce Shipping & Tax. Learn more about automated taxes <a href="https://docs.woocommerce.com/document/woocommerce-services/#section-12">here</a>.', 'woocommerce-admin' ) );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'confirm-tax-settings_edit-tax-settings',
