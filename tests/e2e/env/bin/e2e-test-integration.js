@@ -40,6 +40,18 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 	testEnvVars.JEST_PUPPETEER_CONFIG = fs.existsSync( localJestConfigFile ) ? localJestConfigFile : jestConfigFile;
 }
 
+// Check for running a specific script
+if ( program.args.length == 1 ) {
+	// Check for both absolute and relative paths
+	const testSpecAbs = path.resolve( program.args[0] )
+	const testSpecRel = path.resolve( appPath, program.args[0] );
+	if ( fs.existsSync( testSpecAbs ) ) {
+		process.env.jest_test_spec = testSpecAbs;
+	} else if ( fs.existsSync( testSpecRel ) ) {
+			process.env.jest_test_spec = testSpecRel;
+	}
+}
+
 let jestCommand = 'jest';
 const jestArgs = [
 	'--maxWorkers=1',

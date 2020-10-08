@@ -20,7 +20,8 @@ const localJestSetupFile = path.resolve( appPath, 'tests/e2e/config/jest.setup.j
 if (fs.existsSync( localJestSetupFile ) ) {
 	setupFilesAfterEnv.push( localJestSetupFile );
 }
-module.exports = {
+
+let combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
 		'@woocommerce/e2e-tests/(.*)':
@@ -42,3 +43,11 @@ module.exports = {
 		'node_modules/(?!(woocommerce)/)'
 	],
 };
+
+if ( process.env.jest_test_spec ) {
+	combinedConfig.testMatch = [
+		process.env.jest_test_spec
+	];
+}
+
+module.exports = combinedConfig;
