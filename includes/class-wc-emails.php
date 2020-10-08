@@ -616,7 +616,7 @@ class WC_Emails {
 		 *
 		 * @param int $product_id - The low stock product id
 		 *
-		 * @since 4.6.0
+		 * @since 4.7.0
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_low_stock_notification', true, $product->get_id() ) ) {
 			return;
