@@ -1,17 +1,14 @@
 /** @format */
-const baseConfig = require( '@woocommerce/e2e-environment' ).esLintConfig;
+const { useE2EEsLintConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseConfig,
+module.exports = useE2EEsLintConfig( {
 	root: true,
 	env: {
-		...baseConfig.env,
 		browser: true,
 		es6: true,
 		node: true
 	},
 	globals: {
-		...baseConfig.globals,
 		wp: true,
 		wpApiSettings: true,
 		wcSettings: true,
@@ -32,4 +29,4 @@ module.exports = {
 			jsx: true
 		}
 	},
-};
+} );
