@@ -25,6 +25,14 @@ class OnboardingSetUpShipping {
 				'on_onboarding_profile_completed',
 			)
 		);
+
+		add_action(
+			'jetpack_authorize_ending_authorized',
+			array(
+				__CLASS__,
+				'on_onboarding_profile_completed',
+			)
+		);
 	}
 
 	/**
@@ -36,6 +44,31 @@ class OnboardingSetUpShipping {
 		}
 
 		if ( self::has_existing_shipping_zones() ) {
+			return;
+		}
+
+		$country_code = WC()->countries->get_base_country();
+
+		// Corrolary to the logic in /client/task-list/tasks.js.
+		// Skip for countries we don't recommend WCS for.
+		if ( in_array( $country_code, array( 'AU', 'CA', 'GB' ), true ) ) {
+			return;
+		}
+
+		if (
+			! class_exists( '\Jetpack_Data' ) ||
+			! class_exists( '\WC_Connect_Loader' ) ||
+			! class_exists( '\WC_Connect_Options' )
+		) {
+			return;
+		}
+
+		$user_token        = \Jetpack_Data::get_access_token( JETPACK_MASTER_USER );
+		$jetpack_connected = isset( $user_token->external_user_id );
+		$wcs_version       = \WC_Connect_Loader::get_wcs_version();
+		$wcs_tos_accepted  = \WC_Connect_Options::get_option( 'tos_accepted' );
+
+		if ( ! $jetpack_connected || ! $wcs_version || ! $wcs_tos_accepted ) {
 			return;
 		}
 
