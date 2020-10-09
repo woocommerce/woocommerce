@@ -83,6 +83,9 @@
     ],
     "makepot": [
       "@makepot-audit --skip-audit"
+    ],
+    "bin": [
+      "echo 'bin not installed'"
     ]
   },
   "extra": {
