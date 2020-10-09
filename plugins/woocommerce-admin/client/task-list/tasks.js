@@ -94,6 +94,12 @@ export function getAllTasks( {
 		purchaseAndInstallText = sprintf( purchaseAndInstallFormat, itemName );
 	}
 
+	const shippingCompleted =
+		shippingZonesCount > 0 &&
+		isJetpackConnected &&
+		activePlugins.includes( 'woocommerce-services' ) &&
+		! [ 'AU', 'NZ', 'UK' ].includes( countryCode );
+
 	const tasks = [
 		{
 			key: 'store_details',
@@ -218,7 +224,7 @@ export function getAllTasks( {
 				} );
 				updateQueryString( { task: 'shipping' } );
 			},
-			completed: shippingZonesCount > 0,
+			completed: shippingCompleted,
 			visible:
 				( productTypes && productTypes.includes( 'physical' ) ) ||
 				hasPhysicalProducts,
