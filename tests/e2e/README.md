@@ -16,6 +16,7 @@ Automated end-to-end tests for WooCommerce.
   - [Prep work for running tests](#prep-work-for-running-tests)
   - [How to run tests in headless mode](#how-to-run-tests-in-headless-mode) 
   - [How to run tests in non-headless mode](#how-to-run-tests-in-non-headless-mode)
+  - [How to run tests in debug mode](#how-to-run-tests-in-debug-mode)
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
   - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
@@ -137,8 +138,8 @@ npm run test:e2e
 
 ### How to run tests in non-headless mode
 
-Tests are being run headless by default. However, sometimes it's useful to observe the browser while running tests. To do so, you can run tests in a non-headless (dev) mode:
-                                    
+Tests are run headless by default. However, sometimes it's useful to observe the browser while running tests. To do so, you can run tests in a non-headless (dev) mode:
+
 ```bash
 npm run test:e2e-dev
 ```
@@ -157,6 +158,16 @@ For example:
 
 - `PUPPETEER_SLOWMO=10` - will run tests faster
 - `PUPPETEER_SLOWMO=70` - will run tests slower
+
+### How to run tests in debug mode
+
+Tests are run headless by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
+            
+```bash
+npm run test:e2e-debug
+```
+
+When all tests have been completed the debugger is left active. Control doesn't return to the command line until the debugger is closed. Otherwise, debug mode functions the same as non-headless mode.
 
 ### How to run an individual test
 
