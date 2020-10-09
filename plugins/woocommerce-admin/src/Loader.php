@@ -859,7 +859,7 @@ class Loader {
 	 * See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html
 	 */
 	public static function smart_app_banner() {
-		if ( self::is_admin_page() ) {
+		if ( self::is_admin_or_embed_page() ) {
 			echo "
 				<meta name='apple-itunes-app' content='app-id=1389130815'>
 			";
