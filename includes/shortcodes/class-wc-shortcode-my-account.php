@@ -39,7 +39,7 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
