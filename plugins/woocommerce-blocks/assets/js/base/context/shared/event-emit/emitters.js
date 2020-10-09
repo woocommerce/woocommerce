@@ -58,22 +58,18 @@ export const emitEvent = async ( observers, eventType, data ) => {
  */
 export const emitEventWithAbort = async ( observers, eventType, data ) => {
 	const observersByType = getObserversByPriority( observers, eventType );
-	let emitterResponse = true;
 	for ( const observer of observersByType ) {
 		try {
 			const response = await Promise.resolve( observer.callback( data ) );
-			if (
-				typeof response === 'object' &&
-				typeof response.type === 'undefined'
-			) {
+			if ( typeof response !== 'object' ) {
+				continue;
+			}
+			if ( typeof response.type === 'undefined' ) {
 				throw new Error(
 					'If you want to abort event emitter processing, your observer must return an object with a type property'
 				);
 			}
-			emitterResponse = typeof response === 'object' ? response : true;
-			if ( emitterResponse !== true ) {
-				return emitterResponse;
-			}
+			return response;
 		} catch ( e ) {
 			// We don't handle thrown errors but just console.log for troubleshooting.
 			// eslint-disable-next-line no-console
@@ -81,5 +77,5 @@ export const emitEventWithAbort = async ( observers, eventType, data ) => {
 			return { type: 'error' };
 		}
 	}
-	return emitterResponse;
+	return true;
 };
