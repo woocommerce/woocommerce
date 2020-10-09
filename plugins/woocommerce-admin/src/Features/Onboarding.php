@@ -318,6 +318,17 @@ class Onboarding {
 	 * @return bool
 	 */
 	public static function should_show_profiler() {
+		/* phpcs:disable WordPress.Security.NonceVerification */
+		$is_current_page = isset( $_GET['page'] ) &&
+			'wc-admin' === $_GET['page'] &&
+			isset( $_GET['path'] ) &&
+			'/setup-wizard' === $_GET['path'];
+		/* phpcs: enable */
+
+		if ( $is_current_page ) {
+			return true;
+		}
+
 		$onboarding_data = get_option( self::PROFILE_DATA_OPTION, array() );
 
 		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
@@ -629,26 +640,26 @@ class Onboarding {
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$profile = get_option( self::PROFILE_DATA_OPTION, array() );
+		$profile                = get_option( self::PROFILE_DATA_OPTION, array() );
+		$settings['onboarding'] = array(
+			'profile' => $profile,
+		);
+
+		// Only fetch if the onboarding wizard OR the task list is incomplete or currently shown.
+		if ( ! self::should_show_profiler() && ! self::should_show_tasks() ) {
+			return $settings;
+		}
 
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		$wccom_auth                 = \WC_Helper_Options::get( 'auth' );
 		$profile['wccom_connected'] = empty( $wccom_auth['access_token'] ) ? false : true;
 
-		$settings['onboarding'] = array(
-			'industries' => self::get_allowed_industries(),
-			'profile'    => $profile,
-		);
-
-		// Only fetch if the onboarding wizard OR the task list is incomplete.
-		if ( self::should_show_profiler() || self::should_show_tasks() ) {
-			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
-			$settings['onboarding']['euCountries']  = WC()->countries->get_european_union_countries();
-			$current_user                           = wp_get_current_user();
-			$settings['onboarding']['userEmail']    = esc_html( $current_user->user_email );
-			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
-			$settings['onboarding']['themes']       = self::get_themes();
-		}
+		$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
+		$settings['onboarding']['euCountries']  = WC()->countries->get_european_union_countries();
+		$settings['onboarding']['industries']   = self::get_allowed_industries();
+		$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
+		$settings['onboarding']['profile']      = $profile;
+		$settings['onboarding']['themes']       = self::get_themes();
 
 		return $settings;
 	}
@@ -761,18 +772,12 @@ class Onboarding {
 	 */
 	public function is_loading( $is_loading ) {
 		$show_profiler = self::should_show_profiler();
-		$is_dashboard  = ! isset( $_GET['path'] ); // phpcs:ignore csrf ok.
-		$is_profiler   = isset( $_GET['path'] ) && '/setup-wizard' === $_GET['path']; // phpcs:ignore csrf ok.
 
-		if ( $is_profiler ) {
+		if ( $show_profiler ) {
 			return true;
 		}
 
-		if ( ! $show_profiler || ! $is_dashboard ) {
-			return $is_loading;
-		}
-
-		return true;
+		return $is_loading;
 	}
 
 	/**
