@@ -533,7 +533,7 @@ class WC_Post_Types {
 						/* translators: %s: taxonomy label */
 						5 => sprintf( _x( '%s not updated', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						6 => sprintf( _x( '%s not deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
+						6 => sprintf( _x( '%s deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
 					);
 				}
 			}
