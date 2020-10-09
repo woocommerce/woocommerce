@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -956,7 +957,7 @@ class WC_Admin_Post_Types {
 				$regular_price = $product->get_regular_price();
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
-					$new_price = max( 0, $regular_price - ( round( $regular_price * $percent, wc_get_price_decimals() ) ) );
+					$new_price = max( 0, $regular_price - ( NumberUtil::round( $regular_price * $percent, wc_get_price_decimals() ) ) );
 				} else {
 					$new_price = max( 0, $regular_price - $price );
 				}
@@ -968,7 +969,7 @@ class WC_Admin_Post_Types {
 
 		if ( isset( $new_price ) && $new_price !== $old_price ) {
 			$price_changed = true;
-			$new_price     = round( $new_price, wc_get_price_decimals() );
+			$new_price     = NumberUtil::round( $new_price, wc_get_price_decimals() );
 			$product->{"set_{$price_type}_price"}( $new_price );
 		}
 

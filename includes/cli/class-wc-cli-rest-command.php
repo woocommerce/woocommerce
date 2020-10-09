@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -322,7 +323,7 @@ class WC_CLI_REST_Command {
 					$i++;
 					$bits                = explode( ', ', $query[2] );
 					$backtrace           = implode( ', ', array_slice( $bits, 13 ) );
-					$seconds             = round( $query[1], 6 );
+					$seconds             = NumberUtil::round( $query[1], 6 );
 					$slow_query_message .= <<<EOT
 {$i}:
 - {$seconds} seconds
@@ -334,7 +335,7 @@ EOT;
 			} elseif ( 'wc' !== WP_CLI::get_config( 'debug' ) ) {
 				$slow_query_message = '. Use --debug=wc to see all queries.';
 			}
-			$query_total_time = round( $query_total_time, 6 );
+			$query_total_time = NumberUtil::round( $query_total_time, 6 );
 			WP_CLI::debug( "wc command executed {$query_count} queries in {$query_total_time} seconds{$slow_query_message}", 'wc' );
 		}
 
