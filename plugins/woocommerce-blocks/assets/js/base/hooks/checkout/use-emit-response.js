@@ -37,6 +37,10 @@ const isFailResponse = ( response ) => {
 	return isResponseOf( response, responseTypes.FAIL );
 };
 
+const shouldRetry = ( response ) => {
+	return typeof response.retry === 'undefined' || response.retry === true;
+};
+
 /**
  * A custom hook exposing response utilities for emitters.
  *
@@ -47,6 +51,7 @@ export const useEmitResponse = () => {
 	return {
 		responseTypes,
 		noticeContexts,
+		shouldRetry,
 		isSuccessResponse,
 		isErrorResponse,
 		isFailResponse,

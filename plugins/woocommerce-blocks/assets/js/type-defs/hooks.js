@@ -148,6 +148,8 @@
  *                                                        be used in returned response objects.
  * @property {NoticeContexts}           noticeContexts    An object of various notice contexts that can
  *                                                        be used for targeting where a notice appears.
+ * @property {function(Object):boolean} shouldRetry       Returns whether the user is allowed to retry
+ *                                                        the payment after a failed one.
  * @property {function(Object):boolean} isSuccessResponse Returns whether the given response is of a
  *                                                        success response type.
  * @property {function(Object):boolean} isErrorResponse   Returns whether the given response is of an

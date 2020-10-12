@@ -174,6 +174,7 @@ const Component = () => {
 		isFailResponse,
 		noticeContexts,
 		responseTypes,
+		shouldRetry,
 	} = useEmitResponse;
 	return null;
 };
@@ -186,6 +187,7 @@ The properties of the object returned by this hook are:
     -   `PAYMENTS`: This is a reference to the notice area in the payment methods step.
     -   `EXPRESS_PAYMENTS`: This is a reference to the notice area in the express payment methods step.
 -   `responseTypes`: This is an object containing properties referencing the various response types that can be returned by observers for some event emitters. It makes it easier for autocompleting the types and avoiding typos due to human error. The types are `SUCCESS`, `FAIL`, `ERROR`. The values for these types also correspond to the [payment status types](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/src/Payments/PaymentResult.php#L21) from the [checkout endpoint response from the server](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/src/RestApi/StoreApi/Schemas/CheckoutSchema.php#L103-L113).
+-   `shouldRetry`: This is a function containing the logic whether the checkout flow should allow the user to retry the payment after a previous payment failed. It receives the `response` object and by default checks whether the `retry` property is true/undefined or false. Refer to the [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess) documentation for more details.
 
 Note: `noticeContexts` and `responseTypes` are exposed to payment methods via the `emitResponse` prop given to their component:
 
@@ -368,7 +370,7 @@ In all cases, if there are the following properties in the response, additional 
 
 -   `message`: This string will be added as an error notice.
 -   `messageContext`: If present, the notice will be configured to show in the designated notice area (otherwise it will just be a general notice for the checkout block).
--   `retry`: If this is `true`, then the checkout status will be set to `IDLE`. This basically means that the error is recoverable (for example try a different payment method) and so checkout will be reset to `IDLE` for another attempt by the shopper. If this is `false`, then the checkout status is set to `COMPLETE` and the checkout will redirect to whatever is currently set as the `redirectUrl`.
+-   `retry`: If this is `true` or not defined, then the checkout status will be set to `IDLE`. This basically means that the error is recoverable (for example try a different payment method) and so checkout will be reset to `IDLE` for another attempt by the shopper. If this is `false`, then the checkout status is set to `COMPLETE` and the checkout will redirect to whatever is currently set as the `redirectUrl`.
 -   `redirectUrl`: If this is present, then the checkout will redirect to this url when the status is `COMPLETE`.
 
 If all observers return `true`, then the checkout status will just be set to `COMPLETE`.
