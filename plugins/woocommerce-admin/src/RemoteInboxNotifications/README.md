@@ -381,3 +381,18 @@ actioned.
 	"operation": "!="
 }
 ```
+
+### Option
+This passes when the option value matches the value using the operation.
+
+```
+{
+	"type": "option",
+	"option_name": "woocommerce_currency",
+	"value": "USD",
+	"default": "USD",
+	"operation": "="
+}
+```
+
+`option_name`, `value`, and `operation` are all required. `default` is not required and allows a default value to be used if the option does not exist.

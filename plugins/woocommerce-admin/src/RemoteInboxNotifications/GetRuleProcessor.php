@@ -54,6 +54,8 @@ class GetRuleProcessor {
 				return new BaseLocationStateRuleProcessor();
 			case 'note_status':
 				return new NoteStatusRuleProcessor();
+			case 'option':
+				return new OptionRuleProcessor();
 		}
 
 		return new FailRuleProcessor();
