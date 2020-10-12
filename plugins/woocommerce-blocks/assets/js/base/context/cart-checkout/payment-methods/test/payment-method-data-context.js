@@ -192,7 +192,7 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			return (
 				<>
 					<CheckoutExpressPayment />
-					<SavedPaymentMethodOptions />
+					<SavedPaymentMethodOptions onChange={ () => void null } />
 					{ 'Active Payment Method: ' + activePaymentMethod }
 					{ paymentMethodData[ 'wc-stripe-payment-token' ] && (
 						<span>Stripe token</span>

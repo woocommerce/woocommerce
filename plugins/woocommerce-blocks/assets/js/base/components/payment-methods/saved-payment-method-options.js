@@ -9,6 +9,7 @@ import {
 } from '@woocommerce/base-context';
 import RadioControl from '@woocommerce/base-components/radio-control';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
+import PropTypes from 'prop-types';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
@@ -87,7 +88,7 @@ const getDefaultPaymentMethodOptions = (
 	};
 };
 
-const SavedPaymentMethodOptions = () => {
+const SavedPaymentMethodOptions = ( { onChange } ) => {
 	const { isEditor } = useEditorContext();
 	const {
 		setPaymentStatus,
@@ -102,6 +103,18 @@ const SavedPaymentMethodOptions = () => {
 	 * @property  {Array}  current  The current options on the type.
 	 */
 	const currentOptions = useRef( [] );
+
+	const updateToken = useCallback(
+		( token ) => {
+			if ( token === '0' ) {
+				setPaymentStatus().started();
+			}
+			setSelectedToken( token );
+			onChange( token );
+		},
+		[ onChange, setSelectedToken, setPaymentStatus ]
+	);
+
 	useEffect( () => {
 		const types = Object.keys( customerPaymentMethods );
 		const options = types
@@ -126,7 +139,7 @@ const SavedPaymentMethodOptions = () => {
 									setPaymentStatus
 							  );
 					if ( paymentMethod.is_default && selectedToken === '' ) {
-						setSelectedToken( paymentMethod.tokenId + '' );
+						updateToken( paymentMethod.tokenId + '' );
 						option.onChange( paymentMethod.tokenId );
 					}
 					return option;
@@ -136,26 +149,12 @@ const SavedPaymentMethodOptions = () => {
 		currentOptions.current = options;
 	}, [
 		customerPaymentMethods,
+		updateToken,
 		selectedToken,
 		setActivePaymentMethod,
 		setPaymentStatus,
 		standardMethods,
 	] );
-
-	const updateToken = useCallback(
-		( token ) => {
-			if ( token === '0' ) {
-				setPaymentStatus().started();
-			}
-			setSelectedToken( token );
-		},
-		[ setSelectedToken, setPaymentStatus ]
-	);
-	useEffect( () => {
-		if ( selectedToken && currentOptions.current.length > 0 ) {
-			updateToken( selectedToken );
-		}
-	}, [ selectedToken, updateToken ] );
 
 	// In the editor, show `Use a new payment method` option as selected.
 	const selectedOption = isEditor ? '0' : selectedToken + '';
@@ -172,6 +171,10 @@ const SavedPaymentMethodOptions = () => {
 			options={ [ ...currentOptions.current, newPaymentMethodOption ] }
 		/>
 	) : null;
+};
+
+SavedPaymentMethodOptions.propTypes = {
+	onChange: PropTypes.func.isRequired,
 };
 
 export default SavedPaymentMethodOptions;
