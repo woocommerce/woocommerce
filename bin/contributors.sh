@@ -25,8 +25,4 @@ echo "<h2>Action Scheduler</h2>" >> $output_file
 echo "Generating contributor list for Action Scheduler since $from_date"
 ./node_modules/.bin/githubcontrib --repo action-scheduler $common_arguments >> $output_file
 
-echo "<h2>REST API</h2>" >> $output_file
-echo "Generating contributor list for REST API since $from_date"
-./node_modules/.bin/githubcontrib --repo woocommerce-rest-api $common_arguments >> $output_file
-
 echo "Output generated to $output_file."
