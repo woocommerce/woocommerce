@@ -11,6 +11,10 @@ const {
 	verifyValueOfInputField
 } = require( '@woocommerce/e2e-utils' );
 
+const {
+	waitAndClick
+} = require( '@woocommerce/e2e-environment' );
+
 /**
  * External dependencies
  */
@@ -50,7 +54,7 @@ const runInitialStoreSettingsTest = () => {
 			await page.click('input[value="/%postname%/"]', {text: ' Post name'});
 
 			// Select "Custom base" in product permalinks section
-			await page.click('#woocommerce_custom_selection');
+			await waitAndClick( page, '#woocommerce_custom_selection' );
 
 			// Fill custom base slug to use
 			await expect(page).toFill('#woocommerce_permalink_structure', '/product/');
