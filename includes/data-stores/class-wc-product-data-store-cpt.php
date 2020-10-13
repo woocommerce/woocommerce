@@ -568,6 +568,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'date_on_sale_to':
 					$value = $value ? $value->getTimestamp() : '';
 					break;
+				case 'stock_quantity':
+					// Fire actions to let 3rd parties know the stock is about to be changed.
+					if ( $product->is_type('variation' ) ) {
+						do_action( 'woocommerce_variation_before_set_stock', $product );
+					} else {
+						do_action( 'woocommerce_product_before_set_stock', $product );
+					}
+					break;
 			}
 
 			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
