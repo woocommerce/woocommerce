@@ -96,7 +96,7 @@ const runCheckoutPageTest = () => {
 			await CustomerFlow.fillBillingDetails(config.get('addresses.customer.billing'));
 		});
 
-		it('allows customer to fill shipping details', async () => {
+		it.skip('allows customer to fill shipping details', async () => {
 			await CustomerFlow.goToShop();
 			await CustomerFlow.addToCartFromShopPage(simpleProductName);
 			await CustomerFlow.goToCheckout();
