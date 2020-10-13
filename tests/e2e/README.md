@@ -262,12 +262,12 @@ We use the following tools to write e2e tests:
 - [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer) – provides all required configuration to run tests using Puppeteer
 - [expect-puppeteer](https://github.com/smooth-code/jest-puppeteer/tree/master/packages/expect-puppeteer) – assertion library for Puppeteer
 
-Tests are kept in `tests/e2e/specs` folder.
+Tests are kept in `tests/e2e/core-tests/specs/` folder.
 
 The following packages are used to write tests:
 
-- `@wordpress/e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils);
-- `@automattic/puppeteer-utils` - Utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
+- `@automattic/puppeteer-utils` - utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
+- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/utils).
 
 ### Creating test structure
 
@@ -313,10 +313,25 @@ it( 'merchant can log in', async () => {
 	} );
 ```
 
-Moving to the next section where we need to actually create a product. You will find that we have a reusable function such as `createSimpleProduct()` in the `components.js` of `@woocommerce/e2e-utils` package. Note that this function should not be used for this test because the way simple product is being created in this function is by using WooCommerce REST API. Because this is not how the merchant would typically create a virtual product, we would need to test it by writing actual steps for creating a product in the test. 
+Moving to the next section where we need to actually create a product. You will find that we have a reusable function such as `createSimpleProduct()` in the `components.js` of `@woocommerce/e2e-utils` package. However, note that this function should not be used for this test because the way simple product is being created in this function is by using WooCommerce REST API. Because this is not how the merchant would typically create a virtual product, we would need to test it by writing actual steps for creating a product in the test. 
 
 `createSimpleProduct()` should be used in tests where you need to test something else than creating a simple product. In other words, this function exists in order to quickly fill the site with test data required for running tests. For example, if you want to write a test that will verify that shopper can place a product to the cart on the site, you can use `createSimpleProduct()` to create a product to test the cart. 
 
+Because `createSimpleProduct()` can't be used in the case of our example test, we'd need to navigate to the page where the user would usually create a product. To do that, there is `openNewProduct()` function of the `StoreOwnerFlow` object that we already used above. As a result, that part of the test will look as follows:
+
+```
+it( 'merchant can create virtual product', async () => {
+      await StoreOwnerFlow.openNewProduct();
+	} );
+```
+
+You would then continue writing the test using utilities where possible. 
+
+Make sure to utilize the functions of the `@automattic/puppeteer-utils` package where possible. For example, if you need to wait for certain element to be ready to be clicked on and then click on it, you can use `waitAndClick()` function:
+
+```
+await waitAndClick( page, '#selector' ); 
+```
 
 ### Best practices
 
