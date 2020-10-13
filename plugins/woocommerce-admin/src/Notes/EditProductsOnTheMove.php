@@ -39,11 +39,12 @@ class Edit_Products_On_The_Move {
 		if ( Mobile_App::has_note_been_actioned() ) {
 			return;
 		}
-
 		if ( Real_Time_Order_Alerts::has_note_been_actioned() ) {
 			return;
 		}
-
+		if ( Manage_Orders_On_The_Go::has_note_been_actioned() ) {
+			return;
+		}
 		if ( Performance_On_Mobile::has_note_been_actioned() ) {
 			return;
 		}
