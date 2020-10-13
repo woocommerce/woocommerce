@@ -242,7 +242,7 @@ class WC_Shortcode_My_Account {
 				$rp_login               = $userdata ? $userdata->user_login : '';
 				$user                   = self::check_password_reset_key( $rp_key, $rp_login );
 
-				// Only show reset form if logged-in user matches reset token or no user is logged in.
+				// Reset key / login is correct, display reset password form with hidden key / login values.
 				if ( is_object( $user ) ) {
 					return wc_get_template(
 						'myaccount/form-reset-password.php',
