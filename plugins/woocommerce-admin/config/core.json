@@ -13,6 +13,7 @@
 		"store-alerts": true,
 		"minified-js": false,
 		"wcpay": true,
-		"mobile-app-banner": true
+		"mobile-app-banner": true,
+		"navigation": false
 	}
 }

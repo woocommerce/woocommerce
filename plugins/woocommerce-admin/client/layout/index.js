@@ -222,15 +222,19 @@ export const PageLayout = compose(
 		: identity
 )( _PageLayout );
 
-export class EmbedLayout extends Component {
-	render() {
-		return (
-			<Layout
-				page={ {
-					breadcrumbs: getSetting( 'embedBreadcrumbs', [] ),
-				} }
-				isEmbedded
-			/>
-		);
-	}
-}
+const _EmbedLayout = () => (
+	<Layout
+		page={ {
+			breadcrumbs: getSetting( 'embedBreadcrumbs', [] ),
+		} }
+		isEmbedded
+	/>
+);
+
+export const EmbedLayout = compose(
+	window.wcSettings.preloadOptions
+		? withOptionsHydration( {
+				...window.wcSettings.preloadOptions,
+		  } )
+		: identity
+)( _EmbedLayout );
