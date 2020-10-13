@@ -43,7 +43,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 } );
 
 describe( 'Store owner can go through setup Task List', () => {
-	it.skip( 'can setup shipping', async () => {
+	it( 'can setup shipping', async () => {
 		await page.evaluate( () => {
 			document.querySelector( '.woocommerce-list__item-title' ).scrollIntoView();
 		} );
@@ -53,7 +53,7 @@ describe( 'Store owner can go through setup Task List', () => {
 
 		await Promise.all( [
 			// Click on "Set up shipping" task to move to the next step
-			taskListItems[4].click(),
+			taskListItems[3].click(),
 
 			// Wait for shipping setup section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
