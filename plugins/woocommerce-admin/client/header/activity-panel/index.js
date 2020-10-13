@@ -153,7 +153,7 @@ export class ActivityPanel extends Component {
 			: null;
 
 		const setup =
-			! taskListComplete && ! isPerformingSetupTask
+			! taskListComplete && ! isPerformingSetupTask && ! taskListHidden
 				? {
 						name: 'setup',
 						title: __( 'Store Setup', 'woocommerce-admin' ),
