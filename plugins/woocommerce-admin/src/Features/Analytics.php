@@ -119,7 +119,7 @@ class Analytics {
 			'icon'     => 'dashicons-chart-bar',
 			'position' => 56, // After WooCommerce & Product menu items.
 		);
-		if ( class_exists( '\Automattic\WooCommerce\Navigation\Menu' ) ) {
+		if ( Loader::is_feature_enabled( 'navigation' ) ) {
 			unset( $overview_page['path'] );
 		}
 

@@ -5,6 +5,11 @@ import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick, uniq } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
+import {
+	__experimentalNavigationItem as NavigationItem,
+	Slot,
+	Fill,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -164,3 +169,14 @@ export function updateQueryString(
 	const newPath = getNewPath( query, path, currentQuery );
 	getHistory().push( newPath );
 }
+
+export const WooNavigationItem = ( { children, item, ...passProps } ) => {
+	return (
+		<Fill name={ item }>
+			<NavigationItem item={ item } { ...passProps }>
+				{ children }
+			</NavigationItem>
+		</Fill>
+	);
+};
+WooNavigationItem.Slot = ( { name } ) => <Slot name={ name } />;

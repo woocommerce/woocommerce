@@ -101,6 +101,7 @@
 		"@wordpress/icons": "2.0.0",
 		"@wordpress/keycodes": "2.11.0",
 		"@wordpress/notices": "1.12.0",
+		"@wordpress/plugins": "^2.22.0",
 		"@wordpress/url": "2.13.0",
 		"@wordpress/viewport": "2.15.1",
 		"classnames": "2.2.6",

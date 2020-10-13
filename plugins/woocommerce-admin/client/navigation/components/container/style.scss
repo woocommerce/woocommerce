@@ -1,0 +1,24 @@
+.woocommerce-navigation {
+	h2 {
+		color: inherit; // This should be handled at component level.
+	}
+
+	.components-navigation {
+		height: 100%;
+		box-sizing: border-box;
+	}
+
+	.components-navigation__menu {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.components-navigation__group:nth-of-type(2) {
+		margin-top: auto;
+	}
+
+	.woocommerce-navigation__back-to-dashboard {
+		margin-top: 24px;
+	}
+}

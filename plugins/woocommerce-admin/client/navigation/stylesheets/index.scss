@@ -1,0 +1,59 @@
+@import 'node_modules/@wordpress/base-styles/colors';
+@import 'node_modules/@wordpress/base-styles/variables';
+@import 'node_modules/@wordpress/base-styles/mixins';
+@import 'node_modules/@wordpress/base-styles/breakpoints';
+@import 'node_modules/@wordpress/base-styles/animations';
+@import 'node_modules/@wordpress/base-styles/z-index';
+@import '_variables.scss';
+@import '../components/container/style';
+@import '../components/header/style';
+
+.has-woocommerce-navigation {
+	margin-top: -$admin-bar-height;
+
+	#wpadminbar,
+	#adminmenuwrap,
+	#adminmenuback {
+		display: none !important;
+	}
+
+	&:not(.is-folded) {
+		#wpcontent,
+		#wpfooter {
+			margin-left: $navigation-width;
+		}
+	}
+
+	&.is-folded {
+		#wpcontent,
+		#wpfooter {
+			margin-left: 60px;
+		}
+	}
+
+	#adminmenu
+	li.toplevel_page_woocommerce.wp-has-submenu.wp-not-current-submenu.opensub:hover::after {
+		display: none;
+	}
+
+	#woocommerce-embedded-navigation {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: $navigation-width;
+		height: 100%;
+		box-sizing: border-box;
+		// @todo This should be updated to G2.darkGray.primary when possible.
+		background-color: #1e1e1e;
+	}
+
+	body.is-folded #woocommerce-embedded-navigation {
+		height: 60px;
+		width: 60px;
+		overflow: hidden;
+	}
+
+	.toplevel_page_woocommerce ul.wp-submenu {
+		display: none;
+	}
+}

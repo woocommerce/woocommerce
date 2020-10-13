@@ -411,6 +411,7 @@ class Loader {
 				'wp-core-data',
 				'wc-components',
 				'wp-date',
+				'wp-plugins',
 				'wc-tracks',
 			),
 			$js_file_version,

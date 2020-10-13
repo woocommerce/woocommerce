@@ -32,11 +32,11 @@ class Navigation {
 		}
 	}
 
-	/**
-	 * Overwrites the allowed features array using a local `feature-config.php` file.
-	 *
-	 * @param array $features Array of feature slugs.
-	 */
+		/**
+		 * Overwrites the allowed features array using a local `feature-config.php` file.
+		 *
+		 * @param array $features Array of feature slugs.
+		 */
 	public function maybe_remove_nav_feature( $features ) {
 		if ( in_array( 'navigation', $features, true ) && 'yes' !== get_option( 'woocommerce_navigation_enabled', 'no' ) ) {
 			$features = array_diff( $features, array( 'navigation' ) );
