@@ -238,12 +238,15 @@ class WC_Shortcode_My_Account {
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
 				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
-				$userdata               = get_userdata( absint( $rp_id ) );
+				$rp_id                  = absint( $rp_id );
+				$userdata               = get_userdata( $rp_id );
 				$rp_login               = $userdata ? $userdata->user_login : '';
 				$user                   = self::check_password_reset_key( $rp_key, $rp_login );
+				$logged_in_user_id      = get_current_user_id();
 
 				// Reset key / login is correct, display reset password form with hidden key / login values.
-				if ( is_object( $user ) ) {
+				// Only show reset form if logged-in user matches reset token or no user is logged in.
+				if ( is_object( $user ) && ( ! $logged_in_user_id || $logged_in_user_id === $rp_id ) ) {
 					return wc_get_template(
 						'myaccount/form-reset-password.php',
 						array(
