@@ -1,5 +1,5 @@
 {
-  "url": "https://test.localhost/",
+  "url": "http://localhost:8084/",
   "users": {
     "admin": {
       "username": "admin",
