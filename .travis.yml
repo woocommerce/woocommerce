@@ -42,9 +42,6 @@ jobs:
   - name: "WP Nightly"
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
-  - name: "WP Latest"
-    php: 7.2
-    env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "WP Latest - 1"
     php: 7.2
     env: WP_VERSION=5.3 WP_MULTISITE=0
