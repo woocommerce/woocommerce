@@ -337,6 +337,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( $expected_meta_item->id, $actual_shipping_line_meta_data[ $index ]['id'] );
 			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['key'] );
 			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['value'] );
+			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['display_key'] );
+			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['display_value'] );
 		}
 	}
 
