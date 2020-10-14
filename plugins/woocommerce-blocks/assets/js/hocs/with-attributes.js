@@ -53,7 +53,7 @@ const withAttributes = ( OriginalComponent ) => {
 							? getAttributeData(
 									selected[ 0 ].attr_slug,
 									newAttributes,
-									'slug'
+									'taxonomy'
 							  )
 							: null;
 
