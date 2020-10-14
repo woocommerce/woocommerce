@@ -160,7 +160,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 4.6.0 - 2020-10-13 =
+= 4.6.0 - 2020-10-14 =
 
 **WooCommerce**
 
@@ -195,7 +195,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Localization - Add KR locale info. #27496
 * Localization - Fixed the name of the Spain state of `Biscay`. #27548
 
-**WooCommerce Admin - 1.6.0**
+**WooCommerce Admin - 1.6.1**
 
 - Dev: Reviews wp.data store #4941
 - Dev: Notes wp.data store #4943
