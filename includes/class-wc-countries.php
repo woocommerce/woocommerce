@@ -1207,9 +1207,15 @@ class WC_Countries {
 						),
 					),
 					'RS' => array(
-						'state' => array(
+						'city'     => array(
 							'required' => false,
-							'hidden'   => true,
+						),
+						'postcode' => array(
+							'required' => false,
+						),
+						'state'    => array(
+							'label' => __( 'District', 'woocommerce' ),
+							'required' => false,
 						),
 					),
 					'SG' => array(
