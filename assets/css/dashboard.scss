@@ -255,3 +255,18 @@ ul.woocommerce_stats {
 	font-family: "WooCommerce";
 	content: "\e01d";
 }
+
+#dashboard_activity {
+	#activity-widget {
+		#the-comment-list {
+			.review.comment-item {
+				.avatar {
+					margin-right: 12px;
+					position: relative;
+					top: 0;
+					float: left;
+				}
+			}
+		}
+	}
+}
