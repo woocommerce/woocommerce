@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Features\CouponsMovedTrait;
+use Automattic\WooCommerce\Admin\Loader;
 use stdClass;
 use WC_Data_Store;
 
@@ -51,6 +52,11 @@ class Coupon_Page_Moved {
 
 		// If we already have a notice, don't add a new one.
 		if ( self::has_unactioned_note() ) {
+			return false;
+		}
+
+		// If new navigation feature is enabled.
+		if ( Loader::is_feature_enabled( 'navigation' ) ) {
 			return false;
 		}
 
