@@ -1,0 +1,1 @@
+<?php return array('dependencies' => array('wp-deprecated', 'wp-element', 'wp-polyfill'), 'version' => '2e82a28a4dffe027a3591293c9d28204');
