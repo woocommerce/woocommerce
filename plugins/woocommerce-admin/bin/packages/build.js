@@ -17,12 +17,14 @@ const mkdirp = require( 'mkdirp' );
 const sass = require( 'node-sass' );
 const postcss = require( 'postcss' );
 const deasync = require( 'deasync' );
+const rimraf = require( 'rimraf' );
 
 /**
  * Internal dependencies
  */
 const getPackages = require( './get-packages' );
 const getBabelConfig = require( './get-babel-config' );
+const { exit } = require( 'process' );
 
 /**
  * Module Constants
@@ -223,12 +225,44 @@ function buildPackage( packagePath ) {
 	process.stdout.write( `${ DONE }\n` );
 }
 
+/**
+ * Build array of packages for consumption for Dependency Extraction
+ */
+function buildDependencyExtractionAssets() {
+	const packages = getPackages();
+	const packageNames = packages.map( ( packagePath ) => {
+		return `\n\t'@woocommerce/${ path.basename( packagePath ) }'`;
+	} );
+	const contents = `module.exports = [${ packageNames },\n];\n`;
+	const DEPENDENCY_EXTRACTION_ASSETS = path.join(
+		path.resolve(
+			__dirname,
+			'../../packages/dependency-extraction-webpack-plugin'
+		),
+		'assets'
+	);
+
+	try {
+		rimraf( DEPENDENCY_EXTRACTION_ASSETS, () => {
+			mkdirp.sync( DEPENDENCY_EXTRACTION_ASSETS );
+			fs.writeFileSync(
+				path.join( DEPENDENCY_EXTRACTION_ASSETS, 'packages.js' ),
+				contents
+			);
+		} );
+	} catch ( err ) {
+		console.log( err );
+		exit( 1 );
+	}
+}
+
 const files = process.argv.slice( 2 );
 
 if ( files.length ) {
 	buildFiles( files );
 } else {
 	process.stdout.write( chalk.inverse( '>> Building packages \n' ) );
+	buildDependencyExtractionAssets();
 	getPackages().forEach( buildPackage );
 	process.stdout.write( '\n' );
 }
