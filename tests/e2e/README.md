@@ -163,7 +163,7 @@ For example:
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test:e2e ./tests/e2e/specs/wp-admin/wp-admin-product-new.test.js
+npm run test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
 ``` 
 
 ### How to skip tests

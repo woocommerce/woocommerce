@@ -9,6 +9,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
@@ -858,8 +860,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_totals() {
 		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
-		$taxes = $this->get_taxes();
-		$tax_totals = array();
+		$taxes          = $this->get_taxes();
+		$tax_totals     = array();
 
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
@@ -877,7 +879,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
-					$tax += round( $shipping_taxes[ $key ], wc_get_price_decimals() );
+					$tax += NumberUtil::round( $shipping_taxes[ $key ], wc_get_price_decimals() );
 					unset( $shipping_taxes[ $key ] );
 				}
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
