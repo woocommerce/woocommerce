@@ -145,7 +145,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 
 		// Add line items.
 		foreach ( $refund->get_items() as $item_id => $item ) {
-			$product      = $refund->get_product_from_item( $item );
+			$product      = $item->get_product();
 			$product_id   = 0;
 			$variation_id = 0;
 			$product_sku  = null;
