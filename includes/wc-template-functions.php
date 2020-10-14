@@ -1477,6 +1477,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	function woocommerce_show_product_images() {
 		global $product;
 		$post_thumbnail_id = $product->get_image_id();
+		$gallery_image_ids = '';
 
 		if ( ! $post_thumbnail_id ) {
 			$gallery_image_ids = $product->get_gallery_image_ids();
