@@ -252,7 +252,6 @@ class WC_Admin_Notices {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';
 			}
 		} else {
-			WC_Install::update_db_version();
 			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
 		}
 	}
