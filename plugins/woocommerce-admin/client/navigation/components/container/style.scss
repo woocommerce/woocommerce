@@ -14,8 +14,12 @@
 		height: 100%;
 	}
 
-	.components-navigation__group:nth-of-type(2) {
-		margin-top: auto;
+	.components-navigation__group + .components-navigation__group {
+		margin-top: 24px;
+	}
+
+	.components-navigation__item {
+		margin-bottom: 0;
 	}
 
 	.woocommerce-navigation__back-to-dashboard {
