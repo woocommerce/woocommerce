@@ -145,13 +145,18 @@ class WC_CLI_REST_Command {
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
+		$object_id = isset( $body['id'] ) ? $body['id'] : '';
+		if ( ! $object_id && isset( $body['slug'] ) ) {
+			$object_id = $body['slug'];
+		}
+
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
-			WP_CLI::line( $body['id'] );
+			WP_CLI::line( $object_id );
 		} else {
 			if ( empty( $assoc_args['force'] ) ) {
-				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} {$body['id']}" );
+				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} {$object_id}" );
 			} else {
-				WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} {$body['id']}." );
+				WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} {$object_id}." );
 			}
 		}
 	}
@@ -405,7 +410,7 @@ EOT;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
 			if ( 'id' !== $id_name && strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
-				$route                = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
+				$route                = str_replace( array( '(?P<' . $id_name . '>[\d]+)', '(?P<' . $id_name . '>\w[\w\s\-]*)' ), $args[0], $route );
 				$supported_id_matched = true;
 			}
 		}
