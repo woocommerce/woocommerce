@@ -1485,7 +1485,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 			}
 		}
 		$args = compact( 'post_thumbnail_id', 'gallery_image_ids' );
-		wc_get_template( 'single-product/product-thumbnails.php', $args );
+		wc_get_template( 'single-product/product-image.php', $args );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
