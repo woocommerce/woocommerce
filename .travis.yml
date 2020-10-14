@@ -44,10 +44,10 @@ jobs:
     env: WP_VERSION=nightly WP_MULTISITE=0
   - name: "WP Latest - 1"
     php: 7.2
-    env: WP_VERSION=5.3 WP_MULTISITE=0
+    env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "WP Latest - 2"
     php: 7.2
-    env: WP_VERSION=5.2 WP_MULTISITE=0
+    env: WP_VERSION=5.3 WP_MULTISITE=0
   - name: "Code Standards"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
