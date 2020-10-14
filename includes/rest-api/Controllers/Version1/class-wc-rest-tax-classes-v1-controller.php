@@ -4,8 +4,6 @@
  *
  * Handles requests to the /taxes/classes endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce\RestApi
  * @since    3.0.0
  */
