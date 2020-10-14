@@ -313,7 +313,7 @@ class OnboardingTasks {
 			'AT',
 			'BE',
 			'BG',
-			// 'BR', // Preview, requires invite.
+			'BR',
 			'CA',
 			'CY',
 			'CZ',
@@ -324,7 +324,7 @@ class OnboardingTasks {
 			'DE',
 			'GR',
 			'HK',
-			'IN', // Preview.
+			'IN',
 			'IE',
 			'IT',
 			'JP',
