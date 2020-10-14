@@ -13,6 +13,8 @@
  * @version 3.2.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -280,7 +282,7 @@ final class WC_Cart_Totals {
 
 			// Negative fees should not make the order total go negative.
 			if ( 0 > $fee->total ) {
-				$max_discount = round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
+				$max_discount = NumberUtil::round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
 
 				if ( $fee->total < $max_discount ) {
 					$fee->total = $max_discount;
@@ -429,7 +431,7 @@ final class WC_Cart_Totals {
 			$taxes = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
 
 			// Now we have a new item price (excluding TAX).
-			$item->price              = round( $item->price - array_sum( $taxes ) );
+			$item->price              = NumberUtil::round( $item->price - array_sum( $taxes ) );
 			$item->price_includes_tax = false;
 		}
 		return $item;
@@ -539,7 +541,7 @@ final class WC_Cart_Totals {
 	 * @param string $key Total name you want to set.
 	 * @param int    $total Total to set.
 	 */
-	protected function set_total( $key = 'total', $total ) {
+	protected function set_total( $key, $total ) {
 		$this->totals[ $key ] = $total;
 	}
 
@@ -748,7 +750,7 @@ final class WC_Cart_Totals {
 
 		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
-		$this->set_total( 'items_subtotal', round( $items_subtotal ) );
+		$this->set_total( 'items_subtotal', NumberUtil::round( $items_subtotal ) );
 		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
@@ -859,7 +861,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
+		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.

@@ -51,6 +51,8 @@ httpClient.get( '/wc/v3/products' ).then( ( response ) => {
   response.headers;
   // Access the data from the response, in this case, the products.
   response.data;
+}, ( error ) => {
+  // Handle errors that may have come up.
 } );
 ```
 

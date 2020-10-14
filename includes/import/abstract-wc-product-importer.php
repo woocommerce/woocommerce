@@ -6,6 +6,8 @@
  * @version  3.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -158,7 +160,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return 0;
 		}
 
-		return absint( min( round( ( $this->file_position / $size ) * 100 ), 100 ) );
+		return absint( min( NumberUtil::round( ( $this->file_position / $size ) * 100 ), 100 ) );
 	}
 
 	/**

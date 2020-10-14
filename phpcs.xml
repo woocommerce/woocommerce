@@ -97,8 +97,4 @@
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
-
-	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
-		<exclude-pattern>src/</exclude-pattern>
-	</rule>
 </ruleset>

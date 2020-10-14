@@ -49,9 +49,7 @@ describe( 'AxiosResponseInterceptor', () => {
 			responseText: JSON.stringify( { code: 'error_code', message: 'value' } ),
 		} );
 
-		const response = await axiosInstance.get( 'http://test.test' );
-
-		expect( response ).toMatchObject( {
+		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject( {
 			statusCode: 404,
 			headers: {
 				'content-type': 'application/json',

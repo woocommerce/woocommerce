@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -98,7 +100,7 @@ class WC_Tax {
 	 * @return float
 	 */
 	public static function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, wc_get_rounding_precision() ), $in );
+		return apply_filters( 'woocommerce_tax_round', NumberUtil::round( $in, wc_get_rounding_precision() ), $in );
 	}
 
 	/**
@@ -403,7 +405,7 @@ class WC_Tax {
 
 		$criteria_string = implode( ' AND ', $criteria );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$found_rates = $wpdb->get_results(
 			"
 			SELECT tax_rates.*, COUNT( locations.location_id ) as postcode_count, COUNT( locations2.location_id ) as city_count
