@@ -120,6 +120,22 @@ class Onboarding {
 	}
 
 	/**
+	 * Test whether the context of execution comes from async action scheduler.
+	 * Note: this is a polyfill for wc_is_running_from_async_action_scheduler()
+	 *       which was introduced in WC 4.0.
+	 *
+	 * @return bool
+	 */
+	public static function is_running_from_async_action_scheduler() {
+		if ( function_exists( '\wc_is_running_from_async_action_scheduler' ) ) {
+			return \wc_is_running_from_async_action_scheduler();
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_REQUEST['action'] ) && 'as_async_request_queue_runner' === $_REQUEST['action'];
+	}
+
+	/**
 	 * Handle redirects to setup/welcome page after install and updates.
 	 *
 	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
@@ -127,15 +143,15 @@ class Onboarding {
 	public function admin_redirects() {
 		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
 		// That means OBW would never be shown.
-		if ( wc_is_running_from_async_action_scheduler() ) {
+		if ( self::is_running_from_async_action_scheduler() ) {
 			return;
 		}
 
 		// Setup wizard redirect.
 		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
-			$do_redirect                   = true;
-			$current_page                  = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
-			$is_onboarding_path            = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$do_redirect        = true;
+			$current_page       = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
+			$is_onboarding_path = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
 			// On these pages, or during these events, postpone the redirect.
 			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
