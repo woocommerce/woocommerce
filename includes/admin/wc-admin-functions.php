@@ -37,6 +37,7 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'profile',
 		'user-edit',
+		'user',
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
