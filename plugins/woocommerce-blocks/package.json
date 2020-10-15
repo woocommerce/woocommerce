@@ -155,7 +155,7 @@
 		"compare-versions": "3.6.0",
 		"config": "3.3.2",
 		"dinero.js": "1.8.1",
-		"downshift": "4.1.0",
+		"downshift": "6.0.6",
 		"html-react-parser": "0.14.0",
 		"react-number-format": "4.4.1",
 		"reakit": "1.2.5",
