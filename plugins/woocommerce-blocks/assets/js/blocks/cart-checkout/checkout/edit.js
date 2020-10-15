@@ -19,7 +19,7 @@ import {
 	CHECKOUT_PAGE_ID,
 	isExperimentalBuild,
 } from '@woocommerce/block-settings';
-import { getAdminLink } from '@woocommerce/settings';
+import { compareWithWooVersion, getAdminLink } from '@woocommerce/settings';
 import { createInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
 import {
@@ -55,6 +55,12 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 	} = attributes;
 	const { currentPostId } = useEditorContext();
 	const { current: savedCartPageId } = useRef( cartPageId );
+	// Checkout signup is feature gated to WooCommerce 4.7 and newer;
+	// uses updated my-account/lost-password screen from 4.7+ for
+	// setting initial password.
+	// Also currently gated to dev builds only.
+	const showCreateAccountOption =
+		isExperimentalBuild() && compareWithWooVersion( '4.7.0', '<=' );
 	return (
 		<InspectorControls>
 			{ currentPostId !== CHECKOUT_PAGE_ID && (
@@ -156,7 +162,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					/>
 				) }
 			</PanelBody>
-			{ isExperimentalBuild() && (
+			{ showCreateAccountOption && (
 				<PanelBody
 					title={ __(
 						'Account options',
