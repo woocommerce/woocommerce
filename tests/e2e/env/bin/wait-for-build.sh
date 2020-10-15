@@ -21,7 +21,7 @@ do
 
   if [[ $count -gt ${MAX_ATTEMPTS} ]]; then
   	echo "$(date) - Docker container couldn't be built"
-  	exit
+  	exit 1
   fi
 done
 
