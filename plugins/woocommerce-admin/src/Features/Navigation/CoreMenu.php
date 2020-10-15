@@ -129,6 +129,7 @@ class CoreMenu {
 				'id'           => 'settings',
 				'menuId'       => 'secondary',
 				'order'        => 10,
+				'url'          => 'admin.php?page=wc-settings',
 				'is_top_level' => true,
 			)
 		);

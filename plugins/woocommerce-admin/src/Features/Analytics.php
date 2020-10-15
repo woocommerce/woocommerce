@@ -113,15 +113,14 @@ class Analytics {
 	 */
 	public function register_pages() {
 		$overview_page = array(
-			'id'       => 'woocommerce-analytics',
-			'title'    => __( 'Analytics', 'woocommerce-admin' ),
-			'path'     => '/analytics/overview',
-			'icon'     => 'dashicons-chart-bar',
-			'position' => 56, // After WooCommerce & Product menu items.
+			'id'           => 'woocommerce-analytics',
+			'title'        => __( 'Analytics', 'woocommerce-admin' ),
+			'path'         => '/analytics/overview',
+			'icon'         => 'dashicons-chart-bar',
+			'position'     => 56, // After WooCommerce & Product menu items.
+			'is_category'  => true,
+			'is_top_level' => true,
 		);
-		if ( Loader::is_feature_enabled( 'navigation' ) ) {
-			unset( $overview_page['path'] );
-		}
 
 		$report_pages = array(
 			$overview_page,
@@ -186,10 +185,11 @@ class Analytics {
 				'path'   => '/analytics/stock',
 			) : null,
 			array(
-				'id'     => 'woocommerce-analytics-customers',
-				'title'  => __( 'Customers', 'woocommerce-admin' ),
-				'parent' => 'woocommerce',
-				'path'   => '/customers',
+				'id'           => 'woocommerce-analytics-customers',
+				'title'        => __( 'Customers', 'woocommerce-admin' ),
+				'parent'       => 'woocommerce',
+				'path'         => '/customers',
+				'is_top_level' => true,
 			),
 			array(
 				'id'     => 'woocommerce-analytics-settings',
