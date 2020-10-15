@@ -9,6 +9,7 @@ languages/*
 !languages/README.md
 woocommerce-admin.zip
 includes/feature-config.php
+storybook/wordpress
 storybook-static/
 packages/dependency-extraction-webpack-plugin/assets
 

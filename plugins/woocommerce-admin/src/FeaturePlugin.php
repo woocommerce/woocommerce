@@ -202,7 +202,6 @@ class FeaturePlugin {
 	 */
 	protected function hooks() {
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ), 0 );
-		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
 
 		Loader::get_instance();
 	}
@@ -276,21 +275,6 @@ class FeaturePlugin {
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;
-	}
-
-	/**
-	 * Adds a menu item for the wc-admin devdocs.
-	 */
-	public function register_devdocs_page() {
-		if ( Loader::is_dev() ) {
-			wc_admin_register_page(
-				array(
-					'title'  => 'DevDocs',
-					'parent' => 'woocommerce',
-					'path'   => '/devdocs',
-				)
-			);
-		}
 	}
 
 	/**

@@ -4,7 +4,7 @@
 import { updateLinkHref } from '../controller';
 
 describe( 'updateLinkHref', () => {
-	const timeExcludedScreens = [ 'devdocs', 'stock', 'settings', 'customers' ];
+	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
 
 	const REPORT_URL =
 		'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/orders';

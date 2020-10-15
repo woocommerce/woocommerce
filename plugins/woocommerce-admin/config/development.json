@@ -5,7 +5,6 @@
 		"analytics-dashboard": true,
 		"analytics-dashboard/customizable": true,
 		"coupons": true,
-		"devdocs": true,
 		"marketing": true,
 		"onboarding": true,
 		"remote-inbox-notifications": true,

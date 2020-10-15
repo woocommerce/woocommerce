@@ -16,7 +16,6 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { getUrlParams } from '../utils';
 import getReports from '../analytics/report/get-reports';
 import { isWCAdmin } from '../dashboard/utils';
 
@@ -31,9 +30,7 @@ const AnalyticsSettings = lazy( () =>
 const Dashboard = lazy( () =>
 	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
-const DevDocs = lazy( () =>
-	import( /* webpackChunkName: "devdocs" */ '../devdocs' )
-);
+
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
@@ -53,27 +50,6 @@ export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 export const getPages = () => {
 	const pages = [];
 	const initialBreadcrumbs = [ [ '', wcSettings.woocommerceTranslation ] ];
-
-	if ( window.wcAdminFeatures.devdocs ) {
-		pages.push( {
-			container: DevDocs,
-			path: '/devdocs',
-			breadcrumbs: ( { location } ) => {
-				const { component } = getUrlParams( location.search );
-
-				if ( component ) {
-					return [
-						...initialBreadcrumbs,
-						[ '/devdocs', 'Documentation' ],
-						component,
-					];
-				}
-
-				return [ ...initialBreadcrumbs, 'Documentation' ];
-			},
-			wpOpenMenu: 'toplevel_page_woocommerce',
-		} );
-	}
 
 	pages.push( {
 		container: Homescreen,
@@ -257,7 +233,6 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 // Update's wc-admin links in wp-admin menu
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
-		'devdocs',
 		'stock',
 		'settings',
 		'customers',
