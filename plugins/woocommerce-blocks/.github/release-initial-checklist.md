@@ -14,11 +14,11 @@ The release pull request has been created! This checklist is a guide to follow f
 
 When creating testing notes, please write them from the perspective of a "user" (merchant) familiar with WooCommerce. So you don't have to spell out exact steps for common setup scenarios (eg. "Create a product"), but do be specific about the thing being tested. Include screenshots demonstrating expectations where that will be helpful.
 
-* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. Add the notes to `docs/testing/releases` and update the `docs/testing/releases/README.md` index.
-  * Note, make sure to differentiate between things in the testing notes that only apply to the feature plugin and things that apply when included in WooCommerce core as there may be variations there.
 * [ ] Run `npm ci`
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
-* [ ] Copy a link to the release zip into the testing notes you created earlier. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
+* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. Add the notes to `docs/testing/releases` and update the `docs/testing/releases/README.md` index.
+  * Note, make sure to differentiate between things in the testing notes that only apply to the feature plugin and things that apply when included in WooCommerce core as there may be variations there.
+* [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
 * [ ] Commit and push the testing docs to the release branch.
 * [ ] Smoke test built release zip using the testing instructions you created:
   * At least one other person should test the built zip - ask a teammate to help out.
@@ -54,7 +54,7 @@ When creating testing notes, please write them from the perspective of a "user" 
 * [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
 * [ ] Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 * [ ] Clean up the release milestone and Zenhub.
-  * [ ] Edit the GitHub milestone and add the current date as the due date (this is used to track ship date as well).
+  * [ ] Edit the [GitHub milestone](https://github.com/woocommerce/woocommerce-gutenberg-products-block/milestones) and add the current date as the due date (this is used to track ship date as well).
   * [ ] Close the milestone.
   * [ ] Remove any unfinished issues from the Zenhub epics completed by this release and then close the epics.
 
