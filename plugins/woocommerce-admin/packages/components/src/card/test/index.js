@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import renderer from 'react-test-renderer';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -11,19 +10,19 @@ import Card from '../';
 
 describe( 'Card', () => {
 	test( 'it renders correctly', () => {
-		const tree = renderer
-			.create( <Card title="A Card Example" /> )
-			.toJSON();
-		expect( tree ).toMatchSnapshot();
-	} );
+		const { container, getByRole } = render(
+			<Card title="A Card Example" />
+		);
+		expect( container ).toMatchSnapshot();
 
-	test( 'should have correct title', () => {
-		const card = <Card title="A Card Example" />;
-		expect( card.props.title ).toBe( 'A Card Example' );
-	} );
+		// should have correct title
+		expect(
+			getByRole( 'heading', { name: 'A Card Example' } )
+		).toBeInTheDocument();
 
-	test( 'should have correct class', () => {
-		const card = shallow( <Card title="A Card Example" /> );
-		expect( card.hasClass( 'woocommerce-card' ) ).toBe( true );
+		// should have correct class
+		expect(
+			container.getElementsByClassName( 'woocommerce-card' )
+		).toHaveLength( 1 );
 	} );
 } );

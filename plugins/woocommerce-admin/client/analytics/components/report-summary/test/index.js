@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -37,7 +38,7 @@ describe( 'ReportSummary', () => {
 			isError,
 			isRequesting,
 		};
-		return mount(
+		return render(
 			<ReportSummary
 				charts={ charts }
 				endpoint={ endpoint }
@@ -49,86 +50,94 @@ describe( 'ReportSummary', () => {
 		);
 	}
 
-	test( 'should set the correct prop values for the SummaryNumber components', () => {
-		const reportChart = renderChart( 'number', 1000.5, 500.25 );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+	test( 'should set the correct prop values for the SummaryNumber components', async () => {
+		renderChart( 'number', 1000.5, 500.25 );
 
-		expect( summaryNumber.props().value ).toBe( '1,000.5' );
-		expect( summaryNumber.props().prevValue ).toBe( '500.25' );
-		expect( summaryNumber.props().delta ).toBe( 100 );
+		expect( screen.getByText( '1,000.5' ) ).toBeInTheDocument();
+
+		const delta = screen.getByText( '100%' );
+		expect( delta ).toBeInTheDocument();
+
+		userEvent.hover( delta );
+		const tooltip = await screen.findByText( 'Previous Year: 500.25' );
+		expect( tooltip ).toBeInTheDocument();
+
+		userEvent.unhover( delta );
+		expect( screen.queryByText( 'Previous Year: 500.25' ) ).toBeNull();
 	} );
 
-	test( 'should format currency numbers properly', () => {
-		const reportChart = renderChart( 'currency', 1000.5, 500.25 );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+	test( 'should format currency numbers properly', async () => {
+		renderChart( 'currency', 1000.5, 500.25 );
 
-		expect( summaryNumber.props().value ).toBe( '$1,000.50' );
-		expect( summaryNumber.props().prevValue ).toBe( '$500.25' );
-		expect( summaryNumber.props().delta ).toBe( 100 );
+		expect( screen.getByText( '$1,000.50' ) ).toBeInTheDocument();
+
+		const delta = screen.getByText( '100%' );
+		expect( delta ).toBeInTheDocument();
+
+		userEvent.hover( delta );
+		const tooltip = await screen.findByText( 'Previous Year: $500.25' );
+		expect( tooltip ).toBeInTheDocument();
+
+		userEvent.unhover( delta );
+		expect( screen.queryByText( 'Previous Year: $500.25' ) ).toBeNull();
 	} );
 
-	test( 'should format average numbers properly', () => {
-		const reportChart = renderChart( 'average', 1000.5, 500.25 );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+	test( 'should format average numbers properly', async () => {
+		renderChart( 'average', 1000.5, 500.25 );
 
-		expect( summaryNumber.props().value ).toBe( 1001 );
-		expect( summaryNumber.props().prevValue ).toBe( 500 );
-		expect( summaryNumber.props().delta ).toBe( 100 );
+		expect( screen.getByText( '1001' ) ).toBeInTheDocument();
+
+		const delta = screen.getByText( '100%' );
+		expect( delta ).toBeInTheDocument();
+
+		userEvent.hover( delta );
+		const tooltip = await screen.findByText( 'Previous Year: 500' );
+		expect( tooltip ).toBeInTheDocument();
+
+		userEvent.unhover( delta );
+		expect( screen.queryByText( 'Previous Year: 500' ) ).toBeNull();
 	} );
 
-	test( 'should not break if secondary value is 0', () => {
-		const reportChart = renderChart( 'number', 1000.5, 0 );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+	test( 'should not break if secondary value is 0', async () => {
+		renderChart( 'number', 1000.5, 0 );
 
-		expect( summaryNumber.props().value ).toBe( '1,000.5' );
-		expect( summaryNumber.props().prevValue ).toBe( '0' );
-		expect( summaryNumber.props().delta ).toBe( 0 );
+		expect( screen.getByText( '1,000.5' ) ).toBeInTheDocument();
+
+		const delta = screen.getByText( '0%' );
+		expect( delta ).toBeInTheDocument();
+
+		userEvent.hover( delta );
+		const tooltip = await screen.findByText( 'Previous Year: 0' );
+		expect( tooltip ).toBeInTheDocument();
+
+		userEvent.unhover( delta );
+		expect( screen.queryByText( 'Previous Year: 0' ) ).toBeNull();
 	} );
 
-	test( 'should not break with null or undefined values', () => {
-		const reportChart = renderChart( 'number', null, undefined );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+	test( 'should show 0s when displaying an empty search', async () => {
+		renderChart( 'number', null, undefined );
 
-		expect( summaryNumber.props().value ).toBe( null );
-		expect( summaryNumber.props().prevValue ).toBe( null );
-		expect( summaryNumber.props().delta ).toBe( null );
-	} );
+		expect( screen.getAllByText( 'N/A' ) ).not.toBeNull();
 
-	test( 'should show 0s when displaying an empty search', () => {
-		const reportChart = renderChart(
-			'number',
-			null,
-			undefined,
-			false,
-			false,
-			{
-				emptySearchResults: true,
-			}
-		);
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
-
-		expect( summaryNumber.props().value ).toBe( '0' );
-		expect( summaryNumber.props().prevValue ).toBe( '0' );
-		expect( summaryNumber.props().delta ).toBe( 0 );
+		const delta = screen.getByLabelText( 'No change from Previous Year:' );
+		expect( delta ).toBeInTheDocument();
 	} );
 
 	test( 'should display ReportError when isError is true', () => {
-		const reportChart = renderChart( 'number', null, null, true );
-		const reportError = reportChart.find( 'ReportError' );
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+		renderChart( 'number', null, null, true );
 
-		expect( reportError ).toHaveLength( 1 );
-		expect( summaryNumber ).toHaveLength( 0 );
+		expect(
+			screen.getByText(
+				'There was an error getting your stats. Please try again.'
+			)
+		).toBeInTheDocument();
 	} );
 
 	test( 'should display SummaryListPlaceholder when isRequesting is true', () => {
-		const reportChart = renderChart( 'number', null, null, false, true );
-		const summaryListPlaceholder = reportChart.find(
-			'SummaryListPlaceholder'
-		);
-		const summaryNumber = reportChart.find( 'SummaryNumber' );
+		const { container } = renderChart( 'number', null, null, false, true );
 
-		expect( summaryListPlaceholder ).toHaveLength( 1 );
-		expect( summaryNumber ).toHaveLength( 0 );
+		expect(
+			container.querySelector( '.woocommerce-summary.is-placeholder' )
+		).toBeInTheDocument();
 	} );
 } );

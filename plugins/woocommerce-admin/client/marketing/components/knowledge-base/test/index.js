@@ -1,16 +1,14 @@
 /**
  * External dependencies
  */
-import { shallow, mount } from 'enzyme';
-import { Spinner } from '@wordpress/components';
-import { Card, Pagination, EmptyContent } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
  */
 import { KnowledgeBase } from '../index.js';
-import Slider from '../../slider';
 
 jest.mock( '@woocommerce/tracks' );
 
@@ -42,7 +40,7 @@ describe( 'Posts and not loading', () => {
 	let knowledgeBaseWrapper;
 
 	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+		knowledgeBaseWrapper = render(
 			<KnowledgeBase
 				posts={ mockPosts }
 				isLoading={ false }
@@ -51,61 +49,82 @@ describe( 'Posts and not loading', () => {
 		);
 	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	it( 'should not display the spinner', () => {
-		const spinner = knowledgeBaseWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 0 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should display default title and description', () => {
-		const cardWrapper = knowledgeBaseWrapper.find( Card );
-		expect( cardWrapper.prop( 'title' ) ).toBe(
-			'WooCommerce knowledge base'
-		);
-		expect( cardWrapper.prop( 'description' ) ).toBe(
-			'Learn the ins and outs of successful marketing from the experts at WooCommerce.'
-		);
+		const { getByRole } = knowledgeBaseWrapper;
+
+		expect(
+			getByRole( 'heading', {
+				level: 2,
+				name: 'WooCommerce knowledge base',
+			} )
+		).toBeInTheDocument();
+
+		expect(
+			getByRole( 'heading', {
+				level: 2,
+				name:
+					'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
+			} )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should display posts wrapper', () => {
-		const postsContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__posts'
-		);
-		expect( postsContainer.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__posts'
+			)
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should display the slider', () => {
-		const sliderWrapper = knowledgeBaseWrapper.find( Slider );
-		expect( sliderWrapper.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'woocommerce-marketing-slider' )
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should display correct number of posts', () => {
-		const pageContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__page'
-		);
-		expect( pageContainer.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__page'
+			)
+		).toHaveLength( 1 );
 
-		const posts = knowledgeBaseWrapper.find(
-			'a.woocommerce-marketing-knowledgebase-card__post'
-		);
-		expect( posts.length ).toBe( 2 );
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__post'
+			)
+		).toHaveLength( 2 );
 	} );
 
 	it( 'should not display the empty content component', () => {
-		const emptyContentWrapper = knowledgeBaseWrapper.find( EmptyContent );
-		expect( emptyContentWrapper.length ).toBe( 0 );
+		const { queryByText } = knowledgeBaseWrapper;
+
+		expect(
+			queryByText(
+				'There was an error loading knowledge base posts. Please check again later.'
+			)
+		).toBeNull();
 	} );
 
 	it( 'should display the pagination', () => {
-		const pagerWrapper = knowledgeBaseWrapper.find( Pagination );
-		expect( pagerWrapper.length ).toBe( 1 );
-		const pagerButtons = pagerWrapper
-			.render()
-			.find( '.woocommerce-pagination__link' );
-		expect( pagerButtons.length ).toBe( 2 );
+		const { getByLabelText } = knowledgeBaseWrapper;
+
+		expect(
+			getByLabelText( 'Previous Page', { selector: 'button' } )
+		).toBeInTheDocument();
+		expect(
+			getByLabelText( 'Next Page', { selector: 'button' } )
+		).toBeInTheDocument();
 	} );
 } );
 
@@ -113,7 +132,7 @@ describe( 'No posts and loading', () => {
 	let knowledgeBaseWrapper;
 
 	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+		knowledgeBaseWrapper = render(
 			<KnowledgeBase
 				posts={ [] }
 				isLoading={ true }
@@ -122,30 +141,41 @@ describe( 'No posts and loading', () => {
 		);
 	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	it( 'should display spinner', () => {
-		const spinner = knowledgeBaseWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should not display posts wrapper', () => {
-		const postsContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__posts'
-		);
-		expect( postsContainer.length ).toBe( 0 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__posts'
+			)
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should not display the empty content component', () => {
-		const emptyContentWrapper = knowledgeBaseWrapper.find( EmptyContent );
-		expect( emptyContentWrapper.length ).toBe( 0 );
+		const { queryByText } = knowledgeBaseWrapper;
+
+		expect(
+			queryByText(
+				'There was an error loading knowledge base posts. Please check again later.'
+			)
+		).toBeNull();
 	} );
 
 	it( 'should not display the pagination', () => {
-		const pagerWrapper = knowledgeBaseWrapper.find( Pagination );
-		expect( pagerWrapper.length ).toBe( 0 );
+		const { queryByLabelText } = knowledgeBaseWrapper;
+
+		expect(
+			queryByLabelText( 'Previous Page', { selector: 'button' } )
+		).toBeNull();
+		expect(
+			queryByLabelText( 'Next Page', { selector: 'button' } )
+		).toBeNull();
 	} );
 } );
 
@@ -153,7 +183,7 @@ describe( 'No posts and not loading', () => {
 	let knowledgeBaseWrapper;
 
 	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+		knowledgeBaseWrapper = render(
 			<KnowledgeBase
 				posts={ [] }
 				isLoading={ false }
@@ -162,62 +192,58 @@ describe( 'No posts and not loading', () => {
 		);
 	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	it( 'should not display the spinner', () => {
-		const spinner = knowledgeBaseWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 0 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should not display posts wrapper', () => {
-		const postsContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__posts'
-		);
-		expect( postsContainer.length ).toBe( 0 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__posts'
+			)
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should display the empty content component', () => {
-		const emptyContentWrapper = knowledgeBaseWrapper.find( EmptyContent );
-		expect( emptyContentWrapper.length ).toBe( 1 );
+		const { getByText } = knowledgeBaseWrapper;
+
+		expect(
+			getByText(
+				'There was an error loading knowledge base posts. Please check again later.'
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'should not display the pagination', () => {
-		const pagerWrapper = knowledgeBaseWrapper.find( Pagination );
-		expect( pagerWrapper.length ).toBe( 0 );
+		const { queryByLabelText } = knowledgeBaseWrapper;
+
+		expect(
+			queryByLabelText( 'Previous Page', { selector: 'button' } )
+		).toBeNull();
+		expect(
+			queryByLabelText( 'Next Page', { selector: 'button' } )
+		).toBeNull();
 	} );
 } );
 
 describe( 'Clicking on a post', () => {
-	let knowledgeBaseWrapper;
+	afterAll( () => jest.clearAllMocks() );
 
-	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+	it( 'should record an event when clicked', () => {
+		const { getByRole } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
 				isLoading={ false }
 				category={ 'marketing' }
 			/>
 		);
-	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
+		userEvent.click( getByRole( 'link', { name: /Post 1/ } ) );
 
-	it( 'should record an event when clicked', () => {
-		const pageContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__page'
-		);
-		expect( pageContainer.length ).toBe( 1 );
-
-		const posts = knowledgeBaseWrapper.find(
-			'a.woocommerce-marketing-knowledgebase-card__post'
-		);
-		expect( posts.length ).toBe( 2 );
-
-		posts.at( 0 ).simulate( 'click' );
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_article',
@@ -226,7 +252,8 @@ describe( 'Clicking on a post', () => {
 			}
 		);
 
-		posts.at( 1 ).simulate( 'click' );
+		userEvent.click( getByRole( 'link', { name: /Post 2/ } ) );
+
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_article',
@@ -238,52 +265,29 @@ describe( 'Clicking on a post', () => {
 } );
 
 describe( 'Pagination', () => {
-	let knowledgeBaseWrapper;
+	afterAll( () => jest.clearAllMocks() );
 
-	beforeEach( () => {
-		knowledgeBaseWrapper = mount(
+	it( 'should be able to click forward and back', async () => {
+		const { container, getByLabelText } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
 				isLoading={ false }
 				category={ 'marketing' }
 			/>
 		);
-	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
-	it( 'should be able to click forward and back', () => {
-		const postsContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__posts'
+		userEvent.click(
+			getByLabelText( 'Next Page', { selector: 'button' } )
 		);
-		expect( postsContainer.length ).toBe( 1 );
 
-		const pageContainer = knowledgeBaseWrapper.find(
-			'div.woocommerce-marketing-knowledgebase-card__page'
+		await waitFor( () =>
+			expect(
+				container.getElementsByClassName(
+					'woocommerce-marketing-slider animate-left'
+				)
+			).toHaveLength( 1 )
 		);
-		expect( pageContainer.length ).toBe( 1 );
 
-		const pagerWrapper = knowledgeBaseWrapper.find( Pagination );
-		expect( pagerWrapper.length ).toBe( 1 );
-		expect( pagerWrapper.prop( 'page' ) ).toBe( 1 );
-
-		const pagerButtons = pagerWrapper.find(
-			'button.woocommerce-pagination__link'
-		);
-		expect( pagerButtons.length ).toBe( 2 );
-
-		pagerButtons.at( 1 ).simulate( 'click' ); // click forward
-		expect( knowledgeBaseWrapper.find( Pagination ).prop( 'page' ) ).toBe(
-			2
-		);
-		expect(
-			knowledgeBaseWrapper.find( Slider ).prop( 'animationKey' )
-		).toBe( 2 );
-		expect( knowledgeBaseWrapper.find( Slider ).prop( 'animate' ) ).toBe(
-			'left'
-		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_carousel',
@@ -293,16 +297,18 @@ describe( 'Pagination', () => {
 			}
 		);
 
-		pagerButtons.at( 0 ).simulate( 'click' ); // click back
-		expect( knowledgeBaseWrapper.find( Pagination ).prop( 'page' ) ).toBe(
-			1
+		userEvent.click(
+			getByLabelText( 'Previous Page', { selector: 'button' } )
 		);
-		expect(
-			knowledgeBaseWrapper.find( Slider ).prop( 'animationKey' )
-		).toBe( 1 );
-		expect( knowledgeBaseWrapper.find( Slider ).prop( 'animate' ) ).toBe(
-			'right'
+
+		await waitFor( () =>
+			expect(
+				container.getElementsByClassName(
+					'woocommerce-marketing-slider animate-right'
+				)
+			).toHaveLength( 1 )
 		);
+
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_carousel',
@@ -328,7 +334,7 @@ describe( 'Page with single post', () => {
 	];
 
 	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+		knowledgeBaseWrapper = render(
 			<KnowledgeBase
 				posts={ mockPost }
 				isLoading={ false }
@@ -337,30 +343,26 @@ describe( 'Page with single post', () => {
 		);
 	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	it( 'should display with correct class', () => {
-		const pageContainer = knowledgeBaseWrapper.find(
-			'div.page-with-single-post'
-		);
-		expect( pageContainer.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'page-with-single-post' )
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should display a single post', () => {
-		const posts = knowledgeBaseWrapper.find(
-			'a.woocommerce-marketing-knowledgebase-card__post'
-		);
-		expect( posts.length ).toBe( 1 );
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__post'
+			)
+		).toHaveLength( 1 );
 	} );
 } );
 
 describe( 'Custom title and description ', () => {
-	let knowledgeBaseWrapper;
-
-	beforeEach( () => {
-		knowledgeBaseWrapper = shallow(
+	it( 'should override defaults', () => {
+		const { getByRole } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
 				isLoading={ false }
@@ -369,17 +371,16 @@ describe( 'Custom title and description ', () => {
 				description={ 'Custom Description' }
 			/>
 		);
-	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
+		expect(
+			getByRole( 'heading', { level: 2, name: 'Custom Title' } )
+		).toBeInTheDocument();
 
-	it( 'should override defaults', () => {
-		const cardWrapper = knowledgeBaseWrapper.find( Card );
-		expect( cardWrapper.prop( 'title' ) ).toBe( 'Custom Title' );
-		expect( cardWrapper.prop( 'description' ) ).toBe(
-			'Custom Description'
-		);
+		expect(
+			getByRole( 'heading', {
+				level: 2,
+				name: 'Custom Description',
+			} )
+		).toBeInTheDocument();
 	} );
 } );

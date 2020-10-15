@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { mount } from 'enzyme';
-import { Button } from '@wordpress/components';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -10,7 +10,6 @@ import { Button } from '@wordpress/components';
 import { SelectControl } from '../index';
 
 describe( 'SelectControl', () => {
-	const optionClassname = 'woocommerce-select-control__option';
 	const query = 'lorem';
 	const options = [
 		{ key: '1', label: 'lorem 1', value: { id: '1' } },
@@ -19,43 +18,41 @@ describe( 'SelectControl', () => {
 	];
 
 	it( 'returns all elements', () => {
-		const selectControl = mount( <SelectControl options={ options } /> );
-		selectControl.setState( {
-			query,
-		} );
+		const { getByRole } = render( <SelectControl options={ options } /> );
 
-		selectControl.instance().search( query );
-		selectControl.update();
+		userEvent.click( getByRole( 'combobox' ) );
 
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 3 );
-		}, 0 );
+		expect(
+			getByRole( 'option', { name: 'lorem 1' } )
+		).toBeInTheDocument();
+		expect(
+			getByRole( 'option', { name: 'lorem 2' } )
+		).toBeInTheDocument();
+		expect( getByRole( 'option', { name: 'bar' } ) ).toBeInTheDocument();
 	} );
 
-	it( 'returns matching elements', () => {
-		const selectControl = mount(
+	it( 'returns matching elements', async () => {
+		const { getByRole, queryByRole } = render(
 			<SelectControl isSearchable options={ options } />
 		);
-		selectControl.setState( {
-			query,
-		} );
 
-		selectControl.instance().search( query );
-		selectControl.update();
+		userEvent.type( getByRole( 'combobox' ), query );
 
-		setTimeout( function () {
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
 			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 2 );
-		}, 0 );
+				getByRole( 'option', { name: 'lorem 1' } )
+			).toBeInTheDocument()
+		);
+
+		expect(
+			getByRole( 'option', { name: 'lorem 2' } )
+		).toBeInTheDocument();
+		expect( queryByRole( 'option', { name: 'bar' } ) ).toBeNull();
 	} );
 
-	it( "doesn't return matching excluded elements", () => {
-		const selectControl = mount(
+	it( "doesn't return matching excluded elements", async () => {
+		const { getByRole, queryByRole } = render(
 			<SelectControl
 				isSearchable
 				options={ options }
@@ -64,100 +61,92 @@ describe( 'SelectControl', () => {
 				multiple
 			/>
 		);
-		selectControl.setState( {
-			query,
-		} );
 
-		selectControl.instance().search( query );
-		selectControl.update();
+		userEvent.type( getByRole( 'combobox' ), query );
 
-		setTimeout( function () {
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
 			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 1 );
-		}, 0 );
-	} );
-
-	it( 'trims spaces from input', () => {
-		const selectControl = mount(
-			<SelectControl isSearchable options={ options } />
+				getByRole( 'option', { name: 'lorem 1' } )
+			).toBeInTheDocument()
 		);
-		selectControl.setState( {
-			query,
-		} );
 
-		selectControl.instance().search( '    ' + query + ' ' );
-		selectControl.update();
-
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 2 );
-		}, 0 );
+		expect( queryByRole( 'option', { name: 'lorem 2' } ) ).toBeNull();
+		expect( queryByRole( 'option', { name: 'bar' } ) ).toBeNull();
 	} );
 
-	it( 'limits results', () => {
-		const selectControl = mount(
-			<SelectControl isSearchable options={ options } maxResults={ 1 } />
-		);
-		selectControl.setState( {
-			query,
-		} );
-
-		selectControl.instance().search( query );
-		selectControl.update();
-
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 1 );
-		}, 0 );
-	} );
-
-	it( 'shows options initially', () => {
-		const selectControl = mount(
+	it( 'trims spaces from input', async () => {
+		const { getByRole, queryByRole } = render(
 			<SelectControl isSearchable options={ options } />
 		);
 
-		selectControl.instance().search( '' );
-		selectControl.update();
+		userEvent.type( getByRole( 'combobox' ), '    ' + query + ' ' );
 
-		setTimeout( function () {
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
 			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 3 );
-		}, 0 );
-	} );
-
-	it( 'shows options after query', () => {
-		const selectControl = mount(
-			<SelectControl isSearchable options={ options } hideBeforeSearch />
+				getByRole( 'option', { name: 'lorem 1' } )
+			).toBeInTheDocument()
 		);
-
-		selectControl.instance().search( '' );
-		selectControl.update();
 
 		expect(
-			selectControl.find( Button ).filter( '.' + optionClassname ).length
-		).toBe( 0 );
-
-		selectControl.instance().search( query );
-		selectControl.update();
-
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 2 );
-		}, 0 );
+			getByRole( 'option', { name: 'lorem 2' } )
+		).toBeInTheDocument();
+		expect( queryByRole( 'option', { name: 'bar' } ) ).toBeNull();
 	} );
 
-	it( 'appends an option after filtering', () => {
-		const selectControl = mount(
+	it( 'limits results', async () => {
+		const { getByRole, getAllByRole } = render(
+			<SelectControl isSearchable options={ options } maxResults={ 1 } />
+		);
+
+		userEvent.type( getByRole( 'combobox' ), query );
+
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
+			expect(
+				getByRole( 'option', { name: 'lorem 1' } )
+			).toBeInTheDocument()
+		);
+
+		expect( getAllByRole( 'option' ) ).toHaveLength( 1 );
+	} );
+
+	it( 'shows options initially', async () => {
+		const { getByRole, getAllByRole } = render(
+			<SelectControl isSearchable options={ options } />
+		);
+
+		userEvent.click( getByRole( 'combobox' ) );
+
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
+			expect( getAllByRole( 'option' ) ).toHaveLength( 3 )
+		);
+	} );
+
+	it( 'hides options before query', async () => {
+		const { getByRole, getAllByRole, queryAllByRole } = render(
+			<SelectControl hideBeforeSearch isSearchable options={ options } />
+		);
+
+		userEvent.click( getByRole( 'combobox' ) );
+
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
+			expect( queryAllByRole( 'option' ) ).toHaveLength( 0 )
+		);
+
+		userEvent.type( getByRole( 'combobox' ), query );
+
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
+			expect( getAllByRole( 'option' ) ).toHaveLength( 2 )
+		);
+	} );
+
+	it( 'appends an option after filtering', async () => {
+		const { getByRole, getAllByRole } = render(
 			<SelectControl
 				options={ options }
 				onFilter={ ( filteredOptions ) =>
@@ -168,28 +157,30 @@ describe( 'SelectControl', () => {
 			/>
 		);
 
-		selectControl.instance().search( query );
-		selectControl.update();
+		userEvent.type( getByRole( 'combobox' ), query );
 
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 3 );
-		}, 0 );
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
+			// TODO: check the actual options here - "bar" is shown, where I expected "new options". -Jeff
+			expect( getAllByRole( 'option' ) ).toHaveLength( 3 )
+		);
 	} );
 
-	it( 'changes the options on search', () => {
+	it( 'changes the options on search', async () => {
 		const queriedOptions = [];
-		const queryOptions = ( searchedQuery ) => {
+		// eslint-disable-next-line no-shadow
+		const queryOptions = ( options, searchedQuery ) => {
 			if ( searchedQuery === 'test' ) {
 				queriedOptions.push( {
 					key: 'test-option',
 					label: 'Test option',
+					value: { id: '4' },
 				} );
 			}
+			return queriedOptions;
 		};
-		const selectControl = mount(
+
+		const { getByRole, getAllByRole } = render(
 			<SelectControl
 				isSearchable
 				options={ queriedOptions }
@@ -198,43 +189,15 @@ describe( 'SelectControl', () => {
 			/>
 		);
 
-		selectControl.instance().search( '' );
-		selectControl.update();
+		userEvent.type( getByRole( 'combobox' ), 'test' );
 
-		setTimeout( function () {
+		// Wait for the search promise to resolve.
+		await waitFor( () =>
 			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 0 );
-		}, 0 );
-
-		selectControl.instance().search( 'test' );
-		selectControl.update();
-
-		setTimeout( function () {
-			expect(
-				selectControl.find( Button ).filter( '.' + optionClassname )
-					.length
-			).toBe( 1 );
-		}, 0 );
-	} );
-
-	it( "doesn't show options with an empty search", () => {
-		const optionsEmptyValue = [
-			{ key: '1', label: 'lorem 1', value: { id: '' } },
-		];
-		const optionControlClassname = 'woocommerce-select-control__listbox';
-		const selectControl = mount(
-			<SelectControl options={ optionsEmptyValue } />
+				getByRole( 'option', { name: 'Test option' } )
+			).toBeInTheDocument()
 		);
 
-		selectControl.instance().search( '' );
-		selectControl.update();
-
-		setTimeout( function () {
-			expect(
-				selectControl.find( '.' + optionControlClassname ).length
-			).toBe( 0 );
-		}, 0 );
+		expect( getAllByRole( 'option' ) ).toHaveLength( 1 );
 	} );
 } );

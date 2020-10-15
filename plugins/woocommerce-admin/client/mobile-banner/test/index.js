@@ -17,7 +17,6 @@ jest.mock( '../constants', () => ( {
  * External dependencies
  */
 import { fireEvent, render } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**

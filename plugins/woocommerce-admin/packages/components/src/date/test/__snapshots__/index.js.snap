@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Date should respect formats from props 1`] = `
+<div>
+  <time
+    datetime="2019-01-01"
+  >
+    <span
+      aria-hidden="true"
+    >
+      01/01/2019
+    </span>
+    <span
+      class="screen-reader-text"
+    >
+      2019
+    </span>
+  </time>
+</div>
+`;
+
+exports[`Date should use fallback formats 1`] = `
+<div>
+  <time
+    datetime="2019-01-01 00:00:00"
+  >
+    <span
+      aria-hidden="true"
+    >
+      2019-01-01
+    </span>
+    <span
+      class="screen-reader-text"
+    >
+      January 1, 2019
+    </span>
+  </time>
+</div>
+`;

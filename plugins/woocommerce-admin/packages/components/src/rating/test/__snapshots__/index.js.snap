@@ -1,420 +1,804 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ProductRating should render rating based on product object 1`] = `
-<Rating
-  rating={2.5}
-  size={18}
-  totalStars={5}
-/>
+<div>
+  <div
+    aria-label="2.5 out of 5 stars."
+    class="woocommerce-rating"
+  >
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <div
+      class="woocommerce-rating__star-outline"
+      style="width: 50%;"
+    >
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`Rating should render stars at a different size 1`] = `
-<div
-  aria-label="1 out of 5 stars."
-  className="woocommerce-rating"
->
-  <t
-    icon="star"
-    key="star-0"
-    size={24}
-    style={
-      Object {
-        "height": "36px",
-        "width": "36px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-1"
-    size={24}
-    style={
-      Object {
-        "height": "36px",
-        "width": "36px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-2"
-    size={24}
-    style={
-      Object {
-        "height": "36px",
-        "width": "36px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-3"
-    size={24}
-    style={
-      Object {
-        "height": "36px",
-        "width": "36px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-4"
-    size={24}
-    style={
-      Object {
-        "height": "36px",
-        "width": "36px",
-      }
-    }
-  />
+<div>
   <div
-    className="woocommerce-rating__star-outline"
-    style={
-      Object {
-        "width": "20%",
-      }
-    }
+    aria-label="1 out of 5 stars."
+    class="woocommerce-rating"
   >
-    <t
-      icon="star"
-      key="star-0"
-      size={24}
-      style={
-        Object {
-          "height": "36px",
-          "width": "36px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-1"
-      size={24}
-      style={
-        Object {
-          "height": "36px",
-          "width": "36px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-2"
-      size={24}
-      style={
-        Object {
-          "height": "36px",
-          "width": "36px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-3"
-      size={24}
-      style={
-        Object {
-          "height": "36px",
-          "width": "36px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-4"
-      size={24}
-      style={
-        Object {
-          "height": "36px",
-          "width": "36px",
-        }
-      }
-    />
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 36px; height: 36px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 36px; height: 36px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 36px; height: 36px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 36px; height: 36px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 36px; height: 36px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <div
+      class="woocommerce-rating__star-outline"
+      style="width: 20%;"
+    >
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 36px; height: 36px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 36px; height: 36px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 36px; height: 36px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 36px; height: 36px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 36px; height: 36px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Rating should render the correct amount of total stars 1`] = `
-<div
-  aria-label="4 out of 6 stars."
-  className="woocommerce-rating"
->
-  <t
-    icon="star"
-    key="star-0"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-1"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-2"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-3"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-4"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-5"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
+<div>
   <div
-    className="woocommerce-rating__star-outline"
-    style={
-      Object {
-        "width": "67%",
-      }
-    }
+    aria-label="4 out of 6 stars."
+    class="woocommerce-rating"
   >
-    <t
-      icon="star"
-      key="star-0"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-1"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-2"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-3"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-4"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-5"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <div
+      class="woocommerce-rating__star-outline"
+      style="width: 67%;"
+    >
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Rating should render the passed rating prop 1`] = `
-<div
-  aria-label="4 out of 5 stars."
-  className="woocommerce-rating"
->
-  <t
-    icon="star"
-    key="star-0"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-1"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-2"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-3"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
-  <t
-    icon="star"
-    key="star-4"
-    size={24}
-    style={
-      Object {
-        "height": "18px",
-        "width": "18px",
-      }
-    }
-  />
+<div>
   <div
-    className="woocommerce-rating__star-outline"
-    style={
-      Object {
-        "width": "80%",
-      }
-    }
+    aria-label="4 out of 5 stars."
+    class="woocommerce-rating"
   >
-    <t
-      icon="star"
-      key="star-0"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-1"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-2"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-3"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
-    <t
-      icon="star"
-      key="star-4"
-      size={24}
-      style={
-        Object {
-          "height": "18px",
-          "width": "18px",
-        }
-      }
-    />
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <div
+      class="woocommerce-rating__star-outline"
+      style="width: 80%;"
+    >
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+    </div>
   </div>
 </div>
 `;
 
 exports[`ReviewRating should render rating based on review object 1`] = `
-<Rating
-  rating={1.5}
-  size={18}
-  totalStars={5}
-/>
+<div>
+  <div
+    aria-label="1.5 out of 5 stars."
+    class="woocommerce-rating"
+  >
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <svg
+      class="gridicon gridicons-star"
+      height="24"
+      style="width: 18px; height: 18px;"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+        />
+      </g>
+    </svg>
+    <div
+      class="woocommerce-rating__star-outline"
+      style="width: 30%;"
+    >
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+      <svg
+        class="gridicon gridicons-star"
+        height="24"
+        style="width: 18px; height: 18px;"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 2l2.582 6.953L22 9.257l-5.822 4.602L18.18 21 12 16.89 5.82 21l2.002-7.14L2 9.256l7.418-.304"
+          />
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
 `;

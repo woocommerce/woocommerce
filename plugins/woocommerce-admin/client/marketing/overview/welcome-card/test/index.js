@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
-import { Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -14,23 +14,13 @@ jest.mock( '@woocommerce/tracks' );
 jest.mock( '@woocommerce/wc-admin-settings' );
 
 describe( 'WelcomeCard hide button', () => {
-	let welcomeCardWrapper;
-	let mockUpdateOptions;
-
-	beforeEach( () => {
-		mockUpdateOptions = jest.fn();
-		welcomeCardWrapper = shallow(
-			<WelcomeCard
-				isHidden={ false }
-				updateOptions={ mockUpdateOptions }
-			/>
-		);
-	} );
-
 	it( 'should record an event when clicked', () => {
-		const welcomeHideButton = welcomeCardWrapper.find( Button );
-		expect( welcomeHideButton.length ).toBe( 1 );
-		welcomeHideButton.simulate( 'click' );
+		const { getByRole } = render(
+			<WelcomeCard isHidden={ false } updateOptions={ jest.fn() } />
+		);
+
+		userEvent.click( getByRole( 'button', { name: 'Hide' } ) );
+
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_intro_close',
@@ -38,11 +28,20 @@ describe( 'WelcomeCard hide button', () => {
 		);
 	} );
 
-	it( 'should update option when clicked', () => {
-		const welcomeHideButton = welcomeCardWrapper.find( Button );
-		expect( welcomeHideButton.length ).toBe( 1 );
-		welcomeHideButton.simulate( 'click' );
-		expect( mockUpdateOptions ).toHaveBeenCalledTimes( 1 );
+	it( 'should update option when clicked', async () => {
+		const mockUpdateOptions = jest.fn();
+		const { getByRole } = render(
+			<WelcomeCard
+				isHidden={ false }
+				updateOptions={ mockUpdateOptions }
+			/>
+		);
+
+		userEvent.click( getByRole( 'button' ) );
+
+		await waitFor( () =>
+			expect( mockUpdateOptions ).toHaveBeenCalledTimes( 1 )
+		);
 		expect( mockUpdateOptions ).toHaveBeenCalledWith( {
 			woocommerce_marketing_overview_welcome_hidden: 'yes',
 		} );
@@ -50,29 +49,19 @@ describe( 'WelcomeCard hide button', () => {
 } );
 
 describe( 'Component visibility can be toggled', () => {
-	const mockUpdateOptions = jest.fn();
-
 	it( 'WelcomeCard should be visible if isHidden is false', () => {
-		const welcomeCardWrapper = shallow(
-			<WelcomeCard
-				isHidden={ false }
-				updateOptions={ mockUpdateOptions }
-			/>
+		const { getByRole } = render(
+			<WelcomeCard isHidden={ false } updateOptions={ jest.fn() } />
 		);
-		const welcomeCardButton = welcomeCardWrapper.find( Button );
-		expect( welcomeCardButton.length ).toBe( 1 );
-		expect( mockUpdateOptions ).toHaveBeenCalledTimes( 0 );
+
+		expect( getByRole( 'button' ) ).toBeInTheDocument();
 	} );
 
 	it( 'WelcomeCard should be hidden if isHidden is true', () => {
-		const welcomeCardWrapper = shallow(
-			<WelcomeCard
-				isHidden={ true }
-				updateOptions={ mockUpdateOptions }
-			/>
+		const { queryByRole } = render(
+			<WelcomeCard isHidden={ true } updateOptions={ jest.fn() } />
 		);
-		const welcomeCardButton = welcomeCardWrapper.find( Button );
-		expect( welcomeCardButton.length ).toBe( 0 );
-		expect( mockUpdateOptions ).toHaveBeenCalledTimes( 0 );
+
+		expect( queryByRole( 'button' ) ).toBeNull();
 	} );
 } );

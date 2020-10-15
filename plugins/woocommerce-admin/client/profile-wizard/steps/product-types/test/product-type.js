@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { shallow } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -20,17 +19,17 @@ const defaultProps = {
 
 describe( 'ProductType', () => {
 	test( 'should render the product type', () => {
-		const productType = shallow(
+		const { container } = render(
 			<ProductType { ...defaultProps } isMonthlyPricing={ false } />
 		);
-		expect( productType ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should render the product type with monthly prices', () => {
-		const productType = shallow(
+		const { container } = render(
 			<ProductType { ...defaultProps } isMonthlyPricing={ true } />
 		);
-		expect( productType ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should show Popover on click', () => {

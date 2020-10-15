@@ -1,248 +1,316 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ActivityCard should render a basic card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="notice-outline"
-      size={48}
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-</section>
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render a custom icon on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="customize"
-      size={24}
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-</section>
+      <svg
+        class="gridicon gridicons-customize"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M2 6c0-1.505.78-3.08 2-4 0 .845.69 2 2 2 1.657 0 3 1.343 3 3 0 .386-.08.752-.212 1.09.74.594 1.476 1.19 2.19 1.81L8.9 11.98c-.62-.716-1.214-1.454-1.807-2.192C6.753 9.92 6.387 10 6 10c-2.21 0-4-1.79-4-4zm12.152 6.848l1.34-1.34c.607.304 1.283.492 2.008.492 2.485 0 4.5-2.015 4.5-4.5 0-.725-.188-1.4-.493-2.007L18 9l-2-2 3.507-3.507C18.9 3.188 18.225 3 17.5 3 15.015 3 13 5.015 13 7.5c0 .725.188 1.4.493 2.007L3 20l2 2 6.848-6.848c1.885 1.928 3.874 3.753 5.977 5.45l1.425 1.148 1.5-1.5-1.15-1.425c-1.695-2.103-3.52-4.092-5.448-5.977z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render a gravatar on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <Gravatar
-      size={60}
-      user="admin@local.test"
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-</section>
+      <img
+        alt=""
+        class="woocommerce-gravatar"
+        height="60"
+        src="https://www.gravatar.com/avatar/ad5dd285560221a7302608c74c690035?s=60&d=mp"
+        width="60"
+      />
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render a timestamp on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="notice-outline"
-      size={48}
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
-    >
-      Inbox message
-    </H>
     <span
-      className="woocommerce-activity-card__date"
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      3 days ago
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
     </span>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-</section>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+      <span
+        class="woocommerce-activity-card__date"
+      >
+        3 days ago
+      </span>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render an action on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="notice-outline"
-      size={48}
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-  <footer
-    className="woocommerce-activity-card__actions"
-  >
-    <ForwardRef(Button)
-      isSecondary={true}
-      key="0"
-      onClick={[Function]}
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
     >
-      Action
-    </ForwardRef(Button)>
-  </footer>
-</section>
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+    <footer
+      class="woocommerce-activity-card__actions"
+    >
+      <button
+        class="components-button is-secondary"
+        type="button"
+      >
+        Action
+      </button>
+    </footer>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render an unread bubble on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    className="woocommerce-activity-card__unread"
-  />
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="notice-outline"
-      size={48}
+    <span
+      class="woocommerce-activity-card__unread"
     />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-</section>
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
 `;
 
 exports[`ActivityCard should render multiple actions on a card 1`] = `
-<section
-  className="woocommerce-activity-card"
->
-  <span
-    aria-hidden={true}
-    className="woocommerce-activity-card__icon"
+<div>
+  <section
+    class="woocommerce-activity-card"
   >
-    <t
-      icon="notice-outline"
-      size={48}
-    />
-  </span>
-  <header
-    className="woocommerce-activity-card__header"
-  >
-    <H
-      className="woocommerce-activity-card__title"
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
     >
-      Inbox message
-    </H>
-  </header>
-  <Section
-    className="woocommerce-activity-card__body"
-  >
-    This card has some content
-  </Section>
-  <footer
-    className="woocommerce-activity-card__actions"
-  >
-    <ForwardRef(Button)
-      isPrimary={true}
-      key="0"
-      onClick={[Function]}
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
     >
-      Action 1
-    </ForwardRef(Button)>
-    <ForwardRef(Button)
-      isSecondary={true}
-      key="1"
-      onClick={[Function]}
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
     >
-      Action 2
-    </ForwardRef(Button)>
-  </footer>
-</section>
+      This card has some content
+    </div>
+    <footer
+      class="woocommerce-activity-card__actions"
+    >
+      <button
+        class="components-button is-primary"
+        type="button"
+      >
+        Action 1
+      </button>
+      <button
+        class="components-button is-secondary"
+        type="button"
+      >
+        Action 2
+      </button>
+    </footer>
+  </section>
+</div>
 `;

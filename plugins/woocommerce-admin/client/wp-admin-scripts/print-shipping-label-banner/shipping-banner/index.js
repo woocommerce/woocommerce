@@ -436,7 +436,7 @@ export class ShippingBanner extends Component {
 						</p>
 						<SetupNotice
 							isSetupError={ this.isSetupError() }
-							errorReason={ this.setupErrorReason }
+							errorReason={ this.state.setupErrorReason }
 						/>
 					</div>
 					<Button

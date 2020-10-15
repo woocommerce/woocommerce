@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**

@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
-import { Spinner } from '@wordpress/components';
-import { Card } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -37,7 +36,7 @@ describe( 'Recommendations and not loading', () => {
 	let recommendedExtensionsWrapper;
 
 	beforeEach( () => {
-		recommendedExtensionsWrapper = shallow(
+		recommendedExtensionsWrapper = render(
 			<RecommendedExtensions
 				extensions={ mockExtensions }
 				isLoading={ false }
@@ -47,28 +46,41 @@ describe( 'Recommendations and not loading', () => {
 	} );
 
 	it( 'should not display the spinner', () => {
-		const spinner = recommendedExtensionsWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 0 );
+		const { container } = recommendedExtensionsWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should display default title and description', () => {
-		const cardWrapper = recommendedExtensionsWrapper.find( Card );
-		expect( cardWrapper.prop( 'title' ) ).toBe( 'Recommended extensions' );
-		expect( cardWrapper.prop( 'description' ) ).toBe(
-			'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.'
-		);
+		const { getByRole } = recommendedExtensionsWrapper;
+
+		expect(
+			getByRole( 'heading', { level: 2, name: 'Recommended extensions' } )
+		).toBeInTheDocument();
+
+		expect(
+			getByRole( 'heading', {
+				level: 2,
+				name:
+					'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
+			} )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should display correct number of recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find(
-			'div.woocommerce-marketing-recommended-extensions-card__items'
-		);
-		expect( itemsContainer.length ).toBe( 1 );
+		const { getByRole } = recommendedExtensionsWrapper;
 
-		const items = recommendedExtensionsWrapper.find(
-			RecommendedExtensionsItem
-		);
-		expect( items.length ).toBe( 2 );
+		expect(
+			getByRole( 'heading', { level: 4, name: 'AutomateWoo' } )
+		).toBeInTheDocument();
+
+		expect(
+			getByRole( 'heading', {
+				level: 4,
+				name: 'Mailchimp for WooCommerce',
+			} )
+		).toBeInTheDocument();
 	} );
 } );
 
@@ -76,7 +88,7 @@ describe( 'Recommendations and loading', () => {
 	let recommendedExtensionsWrapper;
 
 	beforeEach( () => {
-		recommendedExtensionsWrapper = shallow(
+		recommendedExtensionsWrapper = render(
 			<RecommendedExtensions
 				extensions={ mockExtensions }
 				isLoading={ true }
@@ -86,15 +98,25 @@ describe( 'Recommendations and loading', () => {
 	} );
 
 	it( 'should display spinner', () => {
-		const spinner = recommendedExtensionsWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 1 );
+		const { container } = recommendedExtensionsWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should not display recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find(
-			'div.woocommerce-marketing-recommended-extensions-card__items'
-		);
-		expect( itemsContainer.length ).toBe( 0 );
+		const { queryByRole } = recommendedExtensionsWrapper;
+
+		expect(
+			queryByRole( 'heading', { level: 4, name: 'AutomateWoo' } )
+		).toBeNull();
+
+		expect(
+			queryByRole( 'heading', {
+				level: 4,
+				name: 'Mailchimp for WooCommerce',
+			} )
+		).toBeNull();
 	} );
 } );
 
@@ -102,7 +124,7 @@ describe( 'No Recommendations and not loading', () => {
 	let recommendedExtensionsWrapper;
 
 	beforeEach( () => {
-		recommendedExtensionsWrapper = shallow(
+		recommendedExtensionsWrapper = render(
 			<RecommendedExtensions
 				extensions={ [] }
 				isLoading={ false }
@@ -112,23 +134,25 @@ describe( 'No Recommendations and not loading', () => {
 	} );
 
 	it( 'should not display spinner', () => {
-		const spinner = recommendedExtensionsWrapper.find( Spinner );
-		expect( spinner.length ).toBe( 0 );
+		const { container } = recommendedExtensionsWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 0 );
 	} );
 
 	it( 'should not display recommendations', () => {
-		const itemsContainer = recommendedExtensionsWrapper.find(
-			'div.woocommerce-marketing-recommended-extensions-card__items'
-		);
-		expect( itemsContainer.length ).toBe( 0 );
+		const { container } = recommendedExtensionsWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-recommended-extensions-card__items'
+			)
+		).toHaveLength( 0 );
 	} );
 } );
 
 describe( 'Click Recommendations', () => {
-	let recommendedExtensionItemWrapper;
-
-	beforeEach( () => {
-		recommendedExtensionItemWrapper = shallow(
+	it( 'should record an event when clicked', () => {
+		const { getByRole } = render(
 			<RecommendedExtensionsItem
 				title={ 'AutomateWoo' }
 				description={ 'Does things.' }
@@ -138,12 +162,9 @@ describe( 'Click Recommendations', () => {
 				category={ 'marketing' }
 			/>
 		);
-	} );
 
-	it( 'should record an event when clicked', () => {
-		const item = recommendedExtensionItemWrapper.find( 'a' );
-		expect( item.length ).toBe( 1 );
-		item.simulate( 'click' );
+		userEvent.click( getByRole( 'link' ) );
+
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_recommended_extension',
@@ -155,10 +176,8 @@ describe( 'Click Recommendations', () => {
 } );
 
 describe( 'Custom title and description ', () => {
-	let recommendedExtensionsWrapper;
-
-	beforeEach( () => {
-		recommendedExtensionsWrapper = shallow(
+	it( 'should override defaults', () => {
+		const { getByRole } = render(
 			<RecommendedExtensions
 				extensions={ mockExtensions }
 				isLoading={ false }
@@ -167,18 +186,16 @@ describe( 'Custom title and description ', () => {
 				category={ 'marketing' }
 			/>
 		);
-	} );
 
-	afterEach( () => {
-		jest.clearAllMocks();
-	} );
+		expect(
+			getByRole( 'heading', { level: 2, name: 'Custom Title' } )
+		).toBeInTheDocument();
 
-	it( 'should override defaults', () => {
-		const cardWrapper = recommendedExtensionsWrapper.find( Card );
-
-		expect( cardWrapper.prop( 'title' ) ).toBe( 'Custom Title' );
-		expect( cardWrapper.prop( 'description' ) ).toBe(
-			'Custom Description'
-		);
+		expect(
+			getByRole( 'heading', {
+				level: 2,
+				name: 'Custom Description',
+			} )
+		).toBeInTheDocument();
 	} );
 } );

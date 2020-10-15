@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -10,24 +11,15 @@ import { Search } from '../index';
 import { computeSuggestionMatch } from '../autocompleters/utils';
 
 describe( 'Search', () => {
-	it( 'shows the free text search option', () => {
-		const search = shallow(
+	it( 'shows the free text search option', async () => {
+		const { getByRole, queryAllByRole } = render(
 			<Search type="products" allowFreeTextSearch />
 		);
-		const options = search
-			.instance()
-			.appendFreeTextSearch( [], 'Product Query' );
+		userEvent.type( getByRole( 'combobox' ), 'Product Query' );
+		expect( queryAllByRole( 'option' ) ).toHaveLength( 1 );
 
-		expect( options.length ).toBe( 1 );
-	} );
-
-	it( "doesn't show options with an empty search", () => {
-		const search = shallow(
-			<Search type="products" allowFreeTextSearch />
-		);
-		const options = search.instance().appendFreeTextSearch( [], '' );
-
-		expect( options.length ).toBe( 0 );
+		userEvent.clear( getByRole( 'combobox' ) );
+		expect( queryAllByRole( 'option' ) ).toHaveLength( 0 );
 	} );
 
 	it( 'returns an object with decoded text', () => {

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -12,32 +12,38 @@ const colorScheme = jest.fn();
 const data = [
 	{
 		key: 'lorem',
+		label: 'Lorem',
 		visible: true,
 		total: 100,
 	},
 	{
 		key: 'ipsum',
+		label: 'Ipsum',
 		visible: true,
 		total: 100,
 	},
 ];
 
 describe( 'Legend', () => {
-	test( 'should not disable any button if more than one is active', () => {
-		const legend = mount(
+	test( 'renders toggles for each dataset', () => {
+		const { getByRole } = render(
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
-		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeFalsy();
-		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
+
+		expect( getByRole( 'button', { name: /Lorem/ } ) ).toBeEnabled();
+		expect( getByRole( 'button', { name: /Ipsum/ } ) ).toBeEnabled();
 	} );
 
-	test( 'should disable the last active button', () => {
-		data[ 1 ].visible = false;
+	test( 'should prevent toggling off of last active dataset', () => {
+		const dataset = { ...data };
+		// Leave only the first dataset active.
+		dataset[ 1 ].visible = false;
 
-		const legend = mount(
+		const { getByRole } = render(
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
-		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeTruthy();
-		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
+
+		expect( getByRole( 'button', { name: /Lorem/ } ) ).toBeDisabled();
+		expect( getByRole( 'button', { name: /Ipsum/ } ) ).toBeEnabled();
 	} );
 } );

@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
-import { Button } from '@wordpress/components';
+import { Fragment } from '@wordpress/element';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -12,47 +13,55 @@ import { DismissModal } from '../index.js';
 describe( 'Option Save events in DismissModal', () => {
 	const spyUpdateOptions = jest.fn();
 
-	let dismissModalWrapper;
+	test( 'Should save permanent dismissal', async () => {
+		const { getByRole } = render(
+			<Fragment>
+				<div id="woocommerce-admin-print-label" />
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ jest.fn() }
+					updateOptions={ spyUpdateOptions }
+				/>
+			</Fragment>
+		);
 
-	beforeEach( () => {
-		document.body.innerHTML =
-			document.body.innerHTML +
-			'<div id="woocommerce-admin-print-label">';
-		dismissModalWrapper = shallow(
-			<DismissModal
-				visible={ true }
-				onClose={ jest.fn() }
-				onCloseAll={ jest.fn() }
-				trackElementClicked={ jest.fn() }
-				updateOptions={ spyUpdateOptions }
-			/>
+		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+
+		await waitFor( () =>
+			expect( spyUpdateOptions ).toHaveBeenCalledWith( {
+				woocommerce_shipping_dismissed_timestamp: -1,
+			} )
 		);
 	} );
 
-	test( 'Should save permanent dismissal', () => {
-		const permanentDismissTimestamp = -1;
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const permanenttDismissButton = actionButtons.last();
-		permanenttDismissButton.simulate( 'click' );
-		expect( spyUpdateOptions ).toHaveBeenCalledWith( {
-			woocommerce_shipping_dismissed_timestamp: permanentDismissTimestamp,
-		} );
-	} );
-
-	test( 'Should save temporary dismissal', () => {
+	test( 'Should save temporary dismissal', async () => {
 		// Mock Date.now() so a known timestamp will be saved.
 		const mockDate = 123456;
 		const realDateNow = Date.now.bind( global.Date );
 		global.Date.now = jest.fn( () => mockDate );
 
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const remindMeLaterButton = actionButtons.first();
-		remindMeLaterButton.simulate( 'click' );
-		expect( spyUpdateOptions ).toHaveBeenCalledWith( {
-			woocommerce_shipping_dismissed_timestamp: mockDate,
-		} );
+		const { getByRole } = render(
+			<Fragment>
+				<div id="woocommerce-admin-print-label" />
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ jest.fn() }
+					updateOptions={ spyUpdateOptions }
+				/>
+			</Fragment>
+		);
+
+		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
+
+		await waitFor( () =>
+			expect( spyUpdateOptions ).toHaveBeenCalledWith( {
+				woocommerce_shipping_dismissed_timestamp: mockDate,
+			} )
+		);
 
 		// Restore Date.now().
 		global.Date.now = realDateNow;
@@ -62,80 +71,99 @@ describe( 'Option Save events in DismissModal', () => {
 describe( 'Tracking events in DismissModal', () => {
 	const trackElementClicked = jest.fn();
 
-	let dismissModalWrapper;
+	it( 'should record an event when user clicks "I don\'t need this"', async () => {
+		const { getByRole } = render(
+			<Fragment>
+				<div id="woocommerce-admin-print-label" />
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ trackElementClicked }
+					updateOptions={ jest.fn() }
+				/>
+			</Fragment>
+		);
 
-	beforeEach( () => {
-		dismissModalWrapper = shallow(
-			<DismissModal
-				visible={ true }
-				onClose={ jest.fn() }
-				onCloseAll={ jest.fn() }
-				trackElementClicked={ trackElementClicked }
-				updateOptions={ jest.fn() }
-			/>
+		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+
+		await waitFor( () =>
+			expect( trackElementClicked ).toHaveBeenCalledWith(
+				'shipping_banner_dismiss_modal_close_forever'
+			)
 		);
 	} );
 
-	it( 'should record an event when user clicks "I don\'t need this"', () => {
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const iDoNotNeedThisButton = actionButtons.last();
-		iDoNotNeedThisButton.simulate( 'click' );
-		expect( trackElementClicked ).toHaveBeenCalledWith(
-			'shipping_banner_dismiss_modal_close_forever'
+	it( 'should record an event when user clicks "Remind me later"', async () => {
+		const { getByRole } = render(
+			<Fragment>
+				<div id="woocommerce-admin-print-label" />
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ trackElementClicked }
+					updateOptions={ jest.fn() }
+				/>
+			</Fragment>
 		);
-	} );
 
-	it( 'should record an event when user clicks "Remind me later"', () => {
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const remindMeLaterButton = actionButtons.first();
-		remindMeLaterButton.simulate( 'click' );
-		expect( trackElementClicked ).toHaveBeenCalledWith(
-			'shipping_banner_dismiss_modal_remind_me_later'
+		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
+
+		await waitFor( () =>
+			expect( trackElementClicked ).toHaveBeenCalledWith(
+				'shipping_banner_dismiss_modal_remind_me_later'
+			)
 		);
 	} );
 } );
 
 describe( 'Dismissing modal', () => {
-	let dismissModalWrapper;
+	test( 'Should hide the banner by clicking permanent dismissal', async () => {
+		const { getByRole, getByTestId } = render(
+			<Fragment>
+				<div
+					id="woocommerce-admin-print-label"
+					data-testid="print-label"
+				/>
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ jest.fn() }
+					updateOptions={ jest.fn() }
+				/>
+			</Fragment>
+		);
 
-	beforeEach( () => {
-		document.body.innerHTML =
-			document.body.innerHTML +
-			'<div id="woocommerce-admin-print-label">';
-		dismissModalWrapper = shallow(
-			<DismissModal
-				visible={ true }
-				onClose={ jest.fn() }
-				onCloseAll={ jest.fn() }
-				trackElementClicked={ jest.fn() }
-				updateOptions={ jest.fn() }
-			/>
+		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+
+		await waitFor( () =>
+			expect( getByTestId( 'print-label' ) ).not.toBeVisible()
 		);
 	} );
 
-	test( 'Should hide the banner by clicking permanent dismissal', () => {
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const permanenttDismissButton = actionButtons.last();
-		permanenttDismissButton.simulate( 'click' );
+	test( 'Should hide the banner by clicking temporary dismissal', async () => {
+		const { getByRole, getByTestId } = render(
+			<Fragment>
+				<div
+					id="woocommerce-admin-print-label"
+					data-testid="print-label"
+				/>
+				<DismissModal
+					visible={ true }
+					onClose={ jest.fn() }
+					onCloseAll={ jest.fn() }
+					trackElementClicked={ jest.fn() }
+					updateOptions={ jest.fn() }
+				/>
+			</Fragment>
+		);
 
-		const bannerStyle = document.getElementById(
-			'woocommerce-admin-print-label'
-		).style;
-		expect( bannerStyle.display ).toBe( 'none' );
-	} );
+		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
 
-	test( 'Should hide the banner by clicking  temporary dismissal', () => {
-		const actionButtons = dismissModalWrapper.find( Button );
-		expect( actionButtons.length ).toBe( 2 );
-		const remindMeLaterButton = actionButtons.first();
-		remindMeLaterButton.simulate( 'click' );
-
-		const bannerStyle = document.getElementById(
-			'woocommerce-admin-print-label'
-		).style;
-		expect( bannerStyle.display ).toBe( 'none' );
+		await waitFor( () =>
+			expect( getByTestId( 'print-label' ) ).not.toBeVisible()
+		);
 	} );
 } );

@@ -1,0 +1,273 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Leaderboard should render correct data in the table 1`] = `
+<div>
+  <div
+    class="woocommerce-card woocommerce-table woocommerce-analytics__card woocommerce-leaderboard"
+  >
+    
+    <div
+      class="woocommerce-card__body"
+    >
+      <div
+        aria-hidden="false"
+        aria-labelledby="caption-0"
+        class="woocommerce-table__table"
+        role="group"
+      >
+        <table>
+          <caption
+            class="woocommerce-table__caption screen-reader-text"
+            id="caption-0"
+          >
+            
+          </caption>
+          <tbody>
+            <tr>
+              <th
+                class="woocommerce-table__header is-left-aligned"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  aria-hidden="false"
+                >
+                  Name
+                </span>
+              </th>
+              <th
+                class="woocommerce-table__header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  aria-hidden="false"
+                >
+                  Items Sold
+                </span>
+              </th>
+              <th
+                class="woocommerce-table__header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  aria-hidden="false"
+                >
+                  Orders
+                </span>
+              </th>
+              <th
+                class="woocommerce-table__header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  aria-hidden="false"
+                >
+                  Net Sales
+                </span>
+              </th>
+            </tr>
+            <tr>
+              <th
+                class="woocommerce-table__item is-left-aligned"
+                scope="row"
+              >
+                <div>
+                  <a
+                    href="#"
+                  >
+                    awesome shirt
+                  </a>
+                </div>
+              </th>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  1,000.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  54.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  $999.99
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th
+                class="woocommerce-table__item is-left-aligned"
+                scope="row"
+              >
+                <div>
+                  <a
+                    href="#"
+                  >
+                    awesome pants
+                  </a>
+                </div>
+              </th>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  90.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  41.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  $875.00
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th
+                class="woocommerce-table__item is-left-aligned"
+                scope="row"
+              >
+                <div>
+                  <a
+                    href="#"
+                  >
+                    awesome hat
+                  </a>
+                </div>
+              </th>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  55.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  28.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  $75.75
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th
+                class="woocommerce-table__item is-left-aligned"
+                scope="row"
+              >
+                <div>
+                  <a
+                    href="#"
+                  >
+                    awesome sticker
+                  </a>
+                </div>
+              </th>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  10.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  14.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  $24.50
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th
+                class="woocommerce-table__item is-left-aligned"
+                scope="row"
+              >
+                <div>
+                  <a
+                    href="#"
+                  >
+                    awesome button
+                  </a>
+                </div>
+              </th>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  1.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  1.00
+                </div>
+              </td>
+              <td
+                class="woocommerce-table__item"
+              >
+                <div>
+                  $0.99
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Leaderboard should render empty message when there are no rows 1`] = `
+<div>
+  <div
+    class="woocommerce-card woocommerce-leaderboard"
+  >
+    
+    <div
+      class="woocommerce-card__body"
+    >
+      <div
+        class="woocommerce-table is-empty"
+        style="--number-of-rows: 5;"
+      >
+        No data recorded for the selected time period.
+      </div>
+    </div>
+  </div>
+</div>
+`;

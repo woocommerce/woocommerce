@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -11,11 +11,12 @@ import ImageUpload from '../index';
 describe( 'ImageUpload', () => {
 	describe( 'basic rendering', () => {
 		it( 'should render an image uploader ready for upload', () => {
-			const uploader = shallow( <ImageUpload /> );
+			const { getByRole, queryByRole } = render( <ImageUpload /> );
+
+			expect( queryByRole( 'img' ) ).toBeNull();
 			expect(
-				uploader.children().hasClass( 'woocommerce-image-upload' )
-			).toBe( true );
-			expect( uploader.children().hasClass( 'no-image' ) ).toBe( true );
+				getByRole( 'button', { name: 'Add an image' } )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should render an image uploader prepopulated with an upload', () => {
@@ -24,11 +25,12 @@ describe( 'ImageUpload', () => {
 				url:
 					'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg',
 			};
-			const uploader = shallow( <ImageUpload image={ image } /> );
+			const { getByRole } = render( <ImageUpload image={ image } /> );
+
+			expect( getByRole( 'img' ) ).toHaveAttribute( 'src', image.url );
 			expect(
-				uploader.children().hasClass( 'woocommerce-image-upload' )
-			).toBe( true );
-			expect( uploader.children().hasClass( 'has-image' ) ).toBe( true );
+				getByRole( 'button', { name: 'Remove image' } )
+			).toBeInTheDocument();
 		} );
 	} );
 } );

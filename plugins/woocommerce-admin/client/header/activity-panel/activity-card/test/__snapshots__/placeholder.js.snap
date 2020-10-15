@@ -1,248 +1,254 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ActivityCardPlaceholder should render a card placeholder with action placeholder 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
+      class="woocommerce-activity-card__icon"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </span>
     <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__actions"
-  >
-    <span
-      className="is-placeholder"
-    />
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </div>
+    <div
+      class="woocommerce-activity-card__actions"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </div>
   </div>
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a card placeholder with all optional placeholder 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
-    <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
-    <div
-      className="woocommerce-activity-card__subtitle is-placeholder"
-    />
-    <div
-      className="woocommerce-activity-card__date"
+      class="woocommerce-activity-card__icon"
     >
       <span
-        className="is-placeholder"
+        class="is-placeholder"
+      />
+    </span>
+    <div
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+      <div
+        class="woocommerce-activity-card__subtitle is-placeholder"
+      />
+      <div
+        class="woocommerce-activity-card__date"
+      >
+        <span
+          class="is-placeholder"
+        />
+      </div>
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
       />
     </div>
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__actions"
-  >
-    <span
-      className="is-placeholder"
-    />
+    <div
+      class="woocommerce-activity-card__actions"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </div>
   </div>
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a card placeholder with date placeholder 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
-    <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
-    <div
-      className="woocommerce-activity-card__date"
+      class="woocommerce-activity-card__icon"
     >
       <span
-        className="is-placeholder"
+        class="is-placeholder"
+      />
+    </span>
+    <div
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+      <div
+        class="woocommerce-activity-card__date"
+      >
+        <span
+          class="is-placeholder"
+        />
+      </div>
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
       />
     </div>
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
   </div>
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a card placeholder with multiple lines of content 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
+      class="woocommerce-activity-card__icon"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </span>
     <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
-    <span
-      className="is-placeholder"
-      key="1"
-    />
-    <span
-      className="is-placeholder"
-      key="2"
-    />
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
+      />
+      <span
+        class="is-placeholder"
+      />
+      <span
+        class="is-placeholder"
+      />
+    </div>
   </div>
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a card placeholder with no content 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
+      class="woocommerce-activity-card__icon"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </span>
     <div
-      className="woocommerce-activity-card__title is-placeholder"
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
     />
   </div>
-  <div
-    className="woocommerce-activity-card__body"
-  />
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a card placeholder with subtitle placeholder 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
+      class="woocommerce-activity-card__icon"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </span>
     <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+      <div
+        class="woocommerce-activity-card__subtitle is-placeholder"
+      />
+    </div>
     <div
-      className="woocommerce-activity-card__subtitle is-placeholder"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </div>
   </div>
 </div>
 `;
 
 exports[`ActivityCardPlaceholder should render a default placeholder 1`] = `
-<div
-  aria-hidden={true}
-  className="woocommerce-activity-card is-loading"
->
-  <span
-    className="woocommerce-activity-card__icon"
+<div>
+  <div
+    aria-hidden="true"
+    class="woocommerce-activity-card is-loading"
   >
     <span
-      className="is-placeholder"
-    />
-  </span>
-  <div
-    className="woocommerce-activity-card__header"
-  >
+      class="woocommerce-activity-card__icon"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </span>
     <div
-      className="woocommerce-activity-card__title is-placeholder"
-    />
-  </div>
-  <div
-    className="woocommerce-activity-card__body"
-  >
-    <span
-      className="is-placeholder"
-      key="0"
-    />
+      class="woocommerce-activity-card__header"
+    >
+      <div
+        class="woocommerce-activity-card__title is-placeholder"
+      />
+    </div>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      <span
+        class="is-placeholder"
+      />
+    </div>
   </div>
 </div>
 `;

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -10,8 +10,9 @@ import Gravatar from '../';
 
 describe( 'Gravatar', () => {
 	test( 'should fallback to default mystery person Gravatar', () => {
-		const gravatar = shallow( <Gravatar /> );
-		expect( gravatar.prop( 'src' ) ).toBe(
+		const { getByRole } = render( <Gravatar /> );
+		expect( getByRole( 'img' ) ).toHaveAttribute(
+			'src',
 			'https://www.gravatar.com/avatar/0?s=60&d=mp'
 		);
 	} );
@@ -24,33 +25,36 @@ describe( 'Gravatar', () => {
 				96: 'https://www.gravatar.com/avatar/098f6bcd4621d373cade4e832627b4f6?s=96',
 			},
 		};
-		const gravatar = shallow( <Gravatar user={ user } /> );
-		expect( gravatar.prop( 'src' ) ).toBe(
+		const { getByRole } = render( <Gravatar user={ user } /> );
+		expect( getByRole( 'img' ) ).toHaveAttribute(
+			'src',
 			'https://www.gravatar.com/avatar/098f6bcd4621d373cade4e832627b4f6?s=60&d=mp'
 		);
 	} );
 
 	test( 'should return an avatar from an email address', () => {
-		const gravatar = shallow( <Gravatar user="test@example.com" /> );
-		expect( gravatar.prop( 'src' ) ).toBe(
+		const { getByRole } = render( <Gravatar user="test@example.com" /> );
+		expect( getByRole( 'img' ) ).toHaveAttribute(
+			'src',
 			'https://www.gravatar.com/avatar/55502f40dc8b7c769880b10874abc9d0?s=60&d=mp'
 		);
 	} );
 
 	test( 'should return a resized image when passed a size', () => {
-		const gravatar = shallow(
+		const { getByRole } = render(
 			<Gravatar user="test@example.com" size={ 40 } />
 		);
-		expect( gravatar.prop( 'src' ) ).toBe(
+		expect( getByRole( 'img' ) ).toHaveAttribute(
+			'src',
 			'https://www.gravatar.com/avatar/55502f40dc8b7c769880b10874abc9d0?s=40&d=mp'
 		);
-		expect( gravatar.prop( 'width' ) ).toBe( 40 );
-		expect( gravatar.prop( 'height' ) ).toBe( 40 );
+		expect( getByRole( 'img' ) ).toHaveAttribute( 'height', '40' );
+		expect( getByRole( 'img' ) ).toHaveAttribute( 'width', '40' );
 	} );
 
 	test( 'should return an alt attribute', () => {
-		const gravatar = shallow( <Gravatar alt="test" /> );
-		expect( gravatar.prop( 'alt' ) ).toBe( 'test' );
+		const { getByRole } = render( <Gravatar alt="test" /> );
+		expect( getByRole( 'img' ) ).toHaveAttribute( 'alt', 'test' );
 	} );
 	test( 'should return an alt attribute from a user name', () => {
 		const user = {
@@ -62,7 +66,7 @@ describe( 'Gravatar', () => {
 			display_name: 'Justin',
 			name: 'Justin',
 		};
-		const gravatar = shallow( <Gravatar user={ user } /> );
-		expect( gravatar.prop( 'alt' ) ).toBe( 'Justin' );
+		const { getByRole } = render( <Gravatar user={ user } /> );
+		expect( getByRole( 'img' ) ).toHaveAttribute( 'alt', 'Justin' );
 	} );
 } );

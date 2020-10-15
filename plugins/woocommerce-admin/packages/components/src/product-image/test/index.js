@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -11,8 +11,8 @@ import ProductImage from '../';
 
 describe( 'ProductImage', () => {
 	test( 'should render the passed alt prop', () => {
-		const image = shallow( <ProductImage alt="testing" /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage alt="testing" /> );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should fallback to product alt text', () => {
@@ -25,8 +25,8 @@ describe( 'ProductImage', () => {
 				},
 			],
 		};
-		const image = shallow( <ProductImage product={ product } /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage product={ product } /> );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should fallback to empty alt attribute if not passed via prop or product object', () => {
@@ -38,8 +38,8 @@ describe( 'ProductImage', () => {
 				},
 			],
 		};
-		const image = shallow( <ProductImage product={ product } /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage product={ product } /> );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should have the correct width and height', () => {
@@ -57,8 +57,8 @@ describe( 'ProductImage', () => {
 				},
 			],
 		};
-		const image = shallow( <ProductImage product={ product } /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage product={ product } /> );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should render a variations image', () => {
@@ -68,8 +68,8 @@ describe( 'ProductImage', () => {
 				src: 'https://i.cloudup.com/pt4DjwRB84-3000x3000.png',
 			},
 		};
-		const image = shallow( <ProductImage product={ variation } /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage product={ variation } /> );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should render a placeholder image if no product images are found', () => {
@@ -80,8 +80,8 @@ describe( 'ProductImage', () => {
 		const product = {
 			name: 'Test Product',
 		};
-		const image = shallow( <ProductImage product={ product } /> );
-		expect( image ).toMatchSnapshot();
+		const { container } = render( <ProductImage product={ product } /> );
+		expect( container ).toMatchSnapshot();
 		setSetting( 'wcAssetUrl', '' );
 	} );
 } );

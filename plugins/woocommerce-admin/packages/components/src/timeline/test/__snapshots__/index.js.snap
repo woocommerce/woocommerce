@@ -1,231 +1,235 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Timeline Empty snapshot 1`] = `
-<div
-  className="woocommerce-timeline"
->
-  <p
-    className="timeline_no_events"
+<div>
+  <div
+    class="woocommerce-timeline"
   >
-    No data to display
-  </p>
+    <p
+      class="timeline_no_events"
+    >
+      No data to display
+    </p>
+  </div>
 </div>
 `;
 
 exports[`Timeline With data snapshot 1`] = `
-<div
-  className="woocommerce-timeline"
->
-  <ul>
-    <li
-      className="woocommerce-timeline-group"
-    >
-      <p
-        className="woocommerce-timeline-group__title"
+<div>
+  <div
+    class="woocommerce-timeline"
+  >
+    <ul>
+      <li
+        class="woocommerce-timeline-group"
       >
-        January 22, 2020
-      </p>
-      <ul>
-        <li
-          className="woocommerce-timeline-item"
+        <p
+          class="woocommerce-timeline-group__title"
         >
-          <div
-            className="woocommerce-timeline-item__top-border"
-          />
-          <div
-            className="woocommerce-timeline-item__title"
+          January 22, 2020
+        </p>
+        <ul>
+          <li
+            class="woocommerce-timeline-item"
           >
             <div
-              className="woocommerce-timeline-item__headline"
+              class="woocommerce-timeline-item__top-border"
+            />
+            <div
+              class="woocommerce-timeline-item__title"
             >
-              <svg
-                className="gridicon gridicons-cross is-error"
-                height={16}
-                viewBox="0 0 24 24"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="woocommerce-timeline-item__headline"
               >
-                <g>
-                  <path
-                    d="M18.36 19.78L12 13.41l-6.36 6.37-1.42-1.42L10.59 12 4.22 5.64l1.42-1.42L12 10.59l6.36-6.36 1.41 1.41L13.41 12l6.36 6.36z"
-                  />
-                </g>
-              </svg>
-              <span>
-                string in headline
+                <svg
+                  class="gridicon gridicons-cross is-error"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path
+                      d="M18.36 19.78L12 13.41l-6.36 6.37-1.42-1.42L10.59 12 4.22 5.64l1.42-1.42L12 10.59l6.36-6.36 1.41 1.41L13.41 12l6.36 6.36z"
+                    />
+                  </g>
+                </svg>
+                <span>
+                  string in headline
+                </span>
+              </div>
+              <span
+                class="woocommerce-timeline-item__timestamp"
+              >
+                3:13pm
               </span>
             </div>
-            <span
-              className="woocommerce-timeline-item__timestamp"
-            >
-              3:13pm
-            </span>
-          </div>
-          <div
-            className="woocommerce-timeline-item__body"
-          >
-            <span>
-              <span>
-                span in body
-              </span>
-            </span>
-          </div>
-        </li>
-      </ul>
-      <hr />
-    </li>
-    <li
-      className="woocommerce-timeline-group"
-    >
-      <p
-        className="woocommerce-timeline-group__title"
-      >
-        January 20, 2020
-      </p>
-      <ul>
-        <li
-          className="woocommerce-timeline-item"
-        >
-          <div
-            className="woocommerce-timeline-item__top-border"
-          />
-          <div
-            className="woocommerce-timeline-item__title"
-          >
             <div
-              className="woocommerce-timeline-item__headline"
+              class="woocommerce-timeline-item__body"
             >
-              <svg
-                className="gridicon gridicons-refresh is-warning"
-                height={16}
-                viewBox="0 0 24 24"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g>
-                  <path
-                    d="M17.91 14c-.478 2.833-2.943 5-5.91 5-3.308 0-6-2.692-6-6s2.692-6 6-6h2.172l-2.086 2.086L13.5 10.5 18 6l-4.5-4.5-1.414 1.414L14.172 5H12c-4.418 0-8 3.582-8 8s3.582 8 8 8c4.08 0 7.438-3.055 7.93-7h-2.02z"
-                  />
-                </g>
-              </svg>
               <span>
                 <span>
-                  span in headline
+                  span in body
                 </span>
               </span>
             </div>
-            <span
-              className="woocommerce-timeline-item__timestamp"
-            >
-              11:45pm
-            </span>
-          </div>
-          <div
-            className="woocommerce-timeline-item__body"
-          />
-        </li>
-        <li
-          className="woocommerce-timeline-item"
+          </li>
+        </ul>
+        <hr />
+      </li>
+      <li
+        class="woocommerce-timeline-group"
+      >
+        <p
+          class="woocommerce-timeline-group__title"
         >
-          <div
-            className="woocommerce-timeline-item__top-border"
-          />
-          <div
-            className="woocommerce-timeline-item__title"
+          January 20, 2020
+        </p>
+        <ul>
+          <li
+            class="woocommerce-timeline-item"
           >
             <div
-              className="woocommerce-timeline-item__headline"
+              class="woocommerce-timeline-item__top-border"
+            />
+            <div
+              class="woocommerce-timeline-item__title"
             >
-              <svg
-                className="gridicon gridicons-checkmark is-success"
-                height={16}
-                viewBox="0 0 24 24"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="woocommerce-timeline-item__headline"
               >
-                <g>
-                  <path
-                    d="M9 19.414l-6.707-6.707 1.414-1.414L9 16.586 20.293 5.293l1.414 1.414"
-                  />
-                </g>
-              </svg>
+                <svg
+                  class="gridicon gridicons-refresh is-warning"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path
+                      d="M17.91 14c-.478 2.833-2.943 5-5.91 5-3.308 0-6-2.692-6-6s2.692-6 6-6h2.172l-2.086 2.086L13.5 10.5 18 6l-4.5-4.5-1.414 1.414L14.172 5H12c-4.418 0-8 3.582-8 8s3.582 8 8 8c4.08 0 7.438-3.055 7.93-7h-2.02z"
+                    />
+                  </g>
+                </svg>
+                <span>
+                  <span>
+                    span in headline
+                  </span>
+                </span>
+              </div>
+              <span
+                class="woocommerce-timeline-item__timestamp"
+              >
+                11:45pm
+              </span>
+            </div>
+            <div
+              class="woocommerce-timeline-item__body"
+            />
+          </li>
+          <li
+            class="woocommerce-timeline-item"
+          >
+            <div
+              class="woocommerce-timeline-item__top-border"
+            />
+            <div
+              class="woocommerce-timeline-item__title"
+            >
+              <div
+                class="woocommerce-timeline-item__headline"
+              >
+                <svg
+                  class="gridicon gridicons-checkmark is-success"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path
+                      d="M9 19.414l-6.707-6.707 1.414-1.414L9 16.586 20.293 5.293l1.414 1.414"
+                    />
+                  </g>
+                </svg>
+                <span>
+                  <p>
+                    p tag in headline
+                  </p>
+                </span>
+              </div>
+              <span
+                class="woocommerce-timeline-item__timestamp"
+              />
+            </div>
+            <div
+              class="woocommerce-timeline-item__body"
+            >
               <span>
                 <p>
-                  p tag in headline
+                  p element in body
                 </p>
               </span>
-            </div>
-            <span
-              className="woocommerce-timeline-item__timestamp"
-            />
-          </div>
-          <div
-            className="woocommerce-timeline-item__body"
-          >
-            <span>
-              <p>
-                p element in body
-              </p>
-            </span>
-            <span>
-              string in body
-            </span>
-          </div>
-        </li>
-      </ul>
-      <hr />
-    </li>
-    <li
-      className="woocommerce-timeline-group"
-    >
-      <p
-        className="woocommerce-timeline-group__title"
-      >
-        January 17, 2020
-      </p>
-      <ul>
-        <li
-          className="woocommerce-timeline-item"
-        >
-          <div
-            className="woocommerce-timeline-item__top-border"
-          />
-          <div
-            className="woocommerce-timeline-item__title"
-          >
-            <div
-              className="woocommerce-timeline-item__headline"
-            >
-              <svg
-                className="gridicon gridicons-cross"
-                height={16}
-                viewBox="0 0 24 24"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g>
-                  <path
-                    d="M18.36 19.78L12 13.41l-6.36 6.37-1.42-1.42L10.59 12 4.22 5.64l1.42-1.42L12 10.59l6.36-6.36 1.41 1.41L13.41 12l6.36 6.36z"
-                  />
-                </g>
-              </svg>
               <span>
-                undefined body and string headline
+                string in body
               </span>
             </div>
-            <span
-              className="woocommerce-timeline-item__timestamp"
+          </li>
+        </ul>
+        <hr />
+      </li>
+      <li
+        class="woocommerce-timeline-group"
+      >
+        <p
+          class="woocommerce-timeline-group__title"
+        >
+          January 17, 2020
+        </p>
+        <ul>
+          <li
+            class="woocommerce-timeline-item"
+          >
+            <div
+              class="woocommerce-timeline-item__top-border"
+            />
+            <div
+              class="woocommerce-timeline-item__title"
             >
-              1:45am
-            </span>
-          </div>
-          <div
-            className="woocommerce-timeline-item__body"
-          />
-        </li>
-      </ul>
-      <hr />
-    </li>
-  </ul>
+              <div
+                class="woocommerce-timeline-item__headline"
+              >
+                <svg
+                  class="gridicon gridicons-cross"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path
+                      d="M18.36 19.78L12 13.41l-6.36 6.37-1.42-1.42L10.59 12 4.22 5.64l1.42-1.42L12 10.59l6.36-6.36 1.41 1.41L13.41 12l6.36 6.36z"
+                    />
+                  </g>
+                </svg>
+                <span>
+                  undefined body and string headline
+                </span>
+              </div>
+              <span
+                class="woocommerce-timeline-item__timestamp"
+              >
+                1:45am
+              </span>
+            </div>
+            <div
+              class="woocommerce-timeline-item__body"
+            />
+          </li>
+        </ul>
+        <hr />
+      </li>
+    </ul>
+  </div>
 </div>
 `;

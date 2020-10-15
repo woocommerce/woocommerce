@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
-import { Button } from '@wordpress/components';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ describe( 'Rendering', () => {
 		} );
 		const onComplete = jest.fn();
 
-		const pluginsWrapper = shallow(
+		const { queryByRole } = render(
 			<Plugins
 				autoInstall
 				pluginSlugs={ [ 'jetpack' ] }
@@ -29,97 +29,89 @@ describe( 'Rendering', () => {
 			/>
 		);
 
-		const buttons = pluginsWrapper.find( Button );
-		expect( buttons.length ).toBe( 0 );
+		expect( queryByRole( 'button' ) ).toBeNull();
 	} );
 
 	it( 'should render a continue button when no pluginSlugs are given', async () => {
-		const pluginsWrapper = shallow(
+		const { getByRole } = render(
 			<Plugins pluginSlugs={ [] } onComplete={ () => {} } />
 		);
 
-		const continueButton = pluginsWrapper.find( Button );
-		expect( continueButton.length ).toBe( 1 );
-		expect( continueButton.text() ).toBe( 'Continue' );
+		expect(
+			getByRole( 'button', { name: 'Continue' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should render install and no thanks buttons', async () => {
-		const pluginsWrapper = shallow(
+		const { getByRole } = render(
 			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ () => {} } />
 		);
 
-		const buttons = pluginsWrapper.find( Button );
-		expect( buttons.length ).toBe( 2 );
-		expect( buttons.at( 0 ).text() ).toBe( 'Install & enable' );
-		expect( buttons.at( 1 ).text() ).toBe( 'No thanks' );
+		expect(
+			getByRole( 'button', { name: 'Install & enable' } )
+		).toBeInTheDocument();
+		expect(
+			getByRole( 'button', { name: 'No thanks' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should render an abort button when the abort handler is provided', async () => {
-		const pluginsWrapper = shallow(
+		const { getByRole, getAllByRole } = render(
 			<Plugins pluginSlugs={ [ 'jetpack' ] } onAbort={ () => {} } />
 		);
 
-		const buttons = pluginsWrapper.find( Button );
-
-		expect( buttons.length ).toBe( 3 );
-		expect( buttons.at( 2 ).text() ).toBe( 'Abort' );
+		expect( getAllByRole( 'button' ) ).toHaveLength( 3 );
+		expect( getByRole( 'button', { name: 'Abort' } ) ).toBeInTheDocument();
 	} );
 } );
 
 describe( 'Installing and activating', () => {
-	let pluginsWrapper;
-	const response = {
-		success: true,
-		data: {
-			activated: [ 'jetpack' ],
-		},
-	};
-	const installAndActivatePlugins = jest.fn().mockResolvedValue( response );
-	const onComplete = jest.fn();
+	it( 'should call installAndActivatePlugins and onComplete', async () => {
+		const response = {
+			success: true,
+			data: {
+				activated: [ 'jetpack' ],
+			},
+		};
+		const installAndActivatePlugins = jest
+			.fn()
+			.mockResolvedValue( response );
+		const onComplete = jest.fn();
 
-	beforeEach( () => {
-		pluginsWrapper = shallow(
+		const { getByRole } = render(
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ onComplete }
 				installAndActivatePlugins={ installAndActivatePlugins }
 			/>
 		);
-	} );
 
-	it( 'should call installAndActivatePlugins', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
+		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
 
 		expect( installAndActivatePlugins ).toHaveBeenCalledWith( [
 			'jetpack',
 		] );
-	} );
 
-	it( 'should call the onComplete callback', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
-
-		await expect( onComplete ).toHaveBeenCalledWith(
-			[ 'jetpack' ],
-			response
+		await waitFor( () =>
+			expect( onComplete ).toHaveBeenCalledWith( [ 'jetpack' ], response )
 		);
 	} );
 } );
 
 describe( 'Installing and activating errors', () => {
-	let pluginsWrapper;
-	const response = {
-		errors: {
-			'failed-plugin': [ 'error message' ],
-		},
-	};
-	const installAndActivatePlugins = jest.fn().mockRejectedValue( response );
-	const onComplete = jest.fn();
-	const onError = jest.fn();
+	it( 'should call installAndActivatePlugins and onComplete', async () => {
+		const response = {
+			errors: {
+				'failed-plugin': [ 'error message' ],
+			},
+		};
+		const installAndActivatePlugins = jest
+			.fn()
+			.mockRejectedValue( response );
+		const onComplete = jest.fn();
+		const onError = jest.fn();
 
-	beforeEach( () => {
-		pluginsWrapper = shallow(
+		const { getByRole } = render(
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ onComplete }
@@ -127,19 +119,13 @@ describe( 'Installing and activating errors', () => {
 				onError={ onError }
 			/>
 		);
-	} );
 
-	it( 'should not call onComplete on install error', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
+		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
 
 		expect( onComplete ).not.toHaveBeenCalled();
-	} );
 
-	it( 'should call the onError callback', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
-
-		expect( onError ).toHaveBeenCalledWith( response.errors, response );
+		await waitFor( () =>
+			expect( onError ).toHaveBeenCalledWith( response.errors, response )
+		);
 	} );
 } );

@@ -1,24 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Card it renders correctly 1`] = `
-<div
-  className="woocommerce-card"
->
+<div>
   <div
-    className="woocommerce-card__header"
+    class="woocommerce-card"
   >
     <div
-      className="woocommerce-card__title-wrapper"
+      class="woocommerce-card__header"
     >
-      <h2
-        className="woocommerce-card__title woocommerce-card__header-item"
+      <div
+        class="woocommerce-card__title-wrapper"
       >
-        A Card Example
-      </h2>
+        <h2
+          class="woocommerce-card__title woocommerce-card__header-item"
+        >
+          A Card Example
+        </h2>
+      </div>
     </div>
+    <div
+      class="woocommerce-card__body"
+    />
   </div>
-  <div
-    className="woocommerce-card__body"
-  />
 </div>
 `;

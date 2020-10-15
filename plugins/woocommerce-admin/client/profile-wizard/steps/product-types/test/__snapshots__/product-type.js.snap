@@ -1,83 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ProductType should render the product type 1`] = `
-<div
-  className="woocommerce-product-type"
->
-  <span
-    className="woocommerce-product-type__label"
+<div>
+  <div
+    class="woocommerce-product-type"
   >
-    Product type label
-  </span>
-  <ForwardRef(Button)
-    isTertiary={true}
-    label="Learn more about recommended free business features"
-    onClick={[Function]}
-  >
-    <i
-      aria-hidden="true"
-      className="material-icons-outlined"
+    <span
+      class="woocommerce-product-type__label"
     >
-      info
-    </i>
-  </ForwardRef(Button)>
-  <Tooltip
-    position="bottom center"
-    text="This product type requires a paid extension.
-We'll add this to a cart so that
-you can purchase and install it later."
-  >
-    <Pill>
+      Product type label
+    </span>
+    <button
+      aria-label="Learn more about recommended free business features"
+      class="components-button is-tertiary"
+      type="button"
+    >
+      <i
+        aria-hidden="true"
+        class="material-icons-outlined"
+      >
+        info
+      </i>
+    </button>
+    
+    <span
+      class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+    >
       <span
-        className="screen-reader-text"
+        class="screen-reader-text"
       >
         This product type requires a paid extension.
 We'll add this to a cart so that
 you can purchase and install it later.
       </span>
       $120 per year
-    </Pill>
-  </Tooltip>
+    </span>
+  </div>
 </div>
 `;
 
 exports[`ProductType should render the product type with monthly prices 1`] = `
-<div
-  className="woocommerce-product-type"
->
-  <span
-    className="woocommerce-product-type__label"
+<div>
+  <div
+    class="woocommerce-product-type"
   >
-    Product type label
-  </span>
-  <ForwardRef(Button)
-    isTertiary={true}
-    label="Learn more about recommended free business features"
-    onClick={[Function]}
-  >
-    <i
-      aria-hidden="true"
-      className="material-icons-outlined"
+    <span
+      class="woocommerce-product-type__label"
     >
-      info
-    </i>
-  </ForwardRef(Button)>
-  <Tooltip
-    position="bottom center"
-    text="This product type requires a paid extension.
-We'll add this to a cart so that
-you can purchase and install it later."
-  >
-    <Pill>
+      Product type label
+    </span>
+    <button
+      aria-label="Learn more about recommended free business features"
+      class="components-button is-tertiary"
+      type="button"
+    >
+      <i
+        aria-hidden="true"
+        class="material-icons-outlined"
+      >
+        info
+      </i>
+    </button>
+    
+    <span
+      class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+    >
       <span
-        className="screen-reader-text"
+        class="screen-reader-text"
       >
         This product type requires a paid extension.
 We'll add this to a cart so that
 you can purchase and install it later.
       </span>
       $10 per month
-    </Pill>
-  </Tooltip>
+    </span>
+  </div>
 </div>
 `;
