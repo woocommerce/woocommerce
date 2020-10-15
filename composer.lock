@@ -581,16 +581,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.4.0",
+            "version": "v3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000"
+                "reference": "1046697451f5e8906e48f0a7532b7637c3ded108"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d64a2616932f312ec4fd8f4e46195c3f9aca0000",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/1046697451f5e8906e48f0a7532b7637c3ded108",
+                "reference": "1046697451f5e8906e48f0a7532b7637c3ded108",
                 "shasum": ""
             },
             "require": {
@@ -624,7 +624,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-09-15T12:10:40+00:00"
+            "time": "2020-10-12T15:35:42+00:00"
         }
     ],
     "packages-dev": [
