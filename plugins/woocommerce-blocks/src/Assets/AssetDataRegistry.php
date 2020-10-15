@@ -72,6 +72,7 @@ class AssetDataRegistry {
 		$currency = get_woocommerce_currency();
 		return [
 			'wpVersion'     => get_bloginfo( 'version' ),
+			'wcVersion'     => defined( 'WC_VERSION' ) ? WC_VERSION : '',
 			'adminUrl'      => admin_url(),
 			'countries'     => WC()->countries->get_countries(),
 			'currency'      => [

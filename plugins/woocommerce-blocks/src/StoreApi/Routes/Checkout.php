@@ -167,11 +167,16 @@ class Checkout extends AbstractRoute {
 		// Create a new user account as necessary.
 		// Note - CreateAccount class includes feature gating logic (i.e. this
 		// may not create an account depending on build).
-		try {
-			$create_account = Package::container()->get( CreateAccount::class );
-			$create_account->from_order_request( $order_object, $request );
-		} catch ( Exception $error ) {
-			$this->handle_error( $error );
+		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '4.7', '>=' ) ) {
+			// Checkout signup is feature gated to WooCommerce 4.7 and newer;
+			// Because it requires updated my-account/lost-password screen in 4.7+
+			// for setting initial password.
+			try {
+				$create_account = Package::container()->get( CreateAccount::class );
+				$create_account->from_order_request( $order_object, $request );
+			} catch ( Exception $error ) {
+				$this->handle_error( $error );
+			}
 		}
 
 		// Persist customer address data to account.
