@@ -10,6 +10,7 @@ const { JEST_PUPPETEER_CONFIG } = process.env;
 program
 	.usage( '<file ...> [options]' )
 	.option( '--dev', 'Development mode' )
+	.option( '--debug', 'Debug mode' )
 	.parse( process.argv );
 
 const appPath = getAppRoot();
@@ -60,7 +61,7 @@ const jestArgs = [
 	...program.args,
 ];
 
-if ( program.dev ) {
+if ( program.debug ) {
 	jestCommand = 'npx';
 	jestArgs.unshift( 'ndb', 'jest' );
 }
