@@ -41,4 +41,32 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		// Restore REQUEST_URI.
 		$_SERVER['REQUEST_URI'] = $default_uri;
 	}
+
+	/**
+	 * Test adjust line item function when order does not have meta `_reduced_stock` already.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/27445.
+	 */
+	public function test_wc_maybe_adjust_line_item_product_stock() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1000 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order_item_id = $order->add_product( $product, 10 );
+
+		// Stocks have not reduced yet.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 1000, $product->get_stock_quantity() );
+
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		// Stocks should have been reduced now.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 990, $product->get_stock_quantity() );
+	}
+
 }
