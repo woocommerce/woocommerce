@@ -57,6 +57,7 @@ jobs:
   allow_failures:
   - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - name: "WP Nightly"
 
 install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
