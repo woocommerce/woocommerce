@@ -8,8 +8,10 @@ DELAY_SEC=10
 
 # Counter for the loop that checks if the Docker container had been built
 count=0
+WP_BASE_URL=$(node utils/get-base-url.js)
+printf "Testing URL: $WP_BASE_URL\n\n"
 
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8084/?pagename=ready)" != "200" ]]
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${WP_BASE_URL}/?pagename=ready)" != "200" ]]
 
 do
   echo "$(date) - Docker container is still being built"
@@ -19,7 +21,7 @@ do
 
   if [[ $count -gt ${MAX_ATTEMPTS} ]]; then
   	echo "$(date) - Docker container couldn't be built"
-  	exit
+  	exit 1
   fi
 done
 

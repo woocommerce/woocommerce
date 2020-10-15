@@ -210,7 +210,7 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 
-	if ( ! $product || ! $product->managing_stock() || ! $already_reduced_stock || $item_quantity === $already_reduced_stock ) {
+	if ( ! $product || ! $product->managing_stock() ) {
 		return false;
 	}
 

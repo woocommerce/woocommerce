@@ -1,0 +1,12 @@
+{
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require-dev": {
+    "phpunit/phpunit": "7.5.20"
+  },
+  "config": {
+    "platform": {
+      "php": "7.1"
+    }
+  }
+}

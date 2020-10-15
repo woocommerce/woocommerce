@@ -173,7 +173,7 @@ jQuery( function( $ ) {
 
 			// View cart text.
 			if ( fragments && ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
-				$button.after( ' <a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
+				$button.after( '<a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
 					wc_add_to_cart_params.i18n_view_cart + '">' + wc_add_to_cart_params.i18n_view_cart + '</a>' );
 			}
 

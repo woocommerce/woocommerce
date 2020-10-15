@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -706,7 +707,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$terms[] = 'outofstock';
 			}
 
-			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+			$rating = min( 5, NumberUtil::round( $product->get_average_rating(), 0 ) );
 
 			if ( $rating > 0 ) {
 				$terms[] = 'rated-' . $rating;
@@ -1376,11 +1377,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// Calculate new value for filter below. Set multiplier to subtract or add the meta_value.
 			switch ( $operation ) {
 				case 'increase':
-					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock + wc_stock_amount( $stock_quantity );
 					$multiplier = 1;
 					break;
 				default:
-					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock - wc_stock_amount( $stock_quantity );
 					$multiplier = -1;
 					break;
 			}
@@ -1708,7 +1709,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product_type = 'variation';
 		} elseif ( 'product' === $post_type ) {
 			$terms        = get_the_terms( $product_id, 'product_type' );
-			$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+			$product_type = ! empty( $terms ) && ! is_wp_error( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
 		} else {
 			$product_type = false;
 		}

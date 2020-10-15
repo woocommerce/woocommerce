@@ -44,7 +44,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Init user set variables.
 	 */
 	public function init() {
-		$this->instance_form_fields = include 'includes/settings-flat-rate.php';
+		$this->instance_form_fields = include __DIR__ . '/includes/settings-flat-rate.php';
 		$this->title                = $this->get_option( 'title' );
 		$this->tax_status           = $this->get_option( 'tax_status' );
 		$this->cost                 = $this->get_option( 'cost' );

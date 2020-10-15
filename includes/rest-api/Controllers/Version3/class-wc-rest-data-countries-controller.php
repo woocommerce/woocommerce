@@ -4,7 +4,7 @@
  *
  * Handles requests to the /data/countries endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Data countries controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
@@ -39,7 +39,9 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -49,7 +51,9 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<location>[\w-]+)',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
@@ -73,7 +77,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request      Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_country( $country_code = false, $request ) {
+	public function get_country( $country_code, $request ) {
 		$countries = WC()->countries->get_countries();
 		$states    = WC()->countries->get_states();
 		$data      = array();

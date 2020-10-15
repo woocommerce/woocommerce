@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -387,16 +388,32 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	}
 
 	// Look within passed path within the theme - this is priority.
-	$template = locate_template(
-		array(
-			trailingslashit( $template_path ) . $template_name,
-			$template_name,
-		)
-	);
+	if ( false !== strpos( $template_name, 'product_cat' ) || false !== strpos( $template_name, 'product_tag' ) ) {
+		$cs_template = str_replace( '_', '-', $template_name );
+		$template = locate_template(
+			array(
+				trailingslashit( $template_path ) . $cs_template,
+				$cs_template,
+			)
+		);
+	}
+
+	if ( empty( $template ) ) {
+		$template = locate_template(
+			array(
+				trailingslashit( $template_path ) . $template_name,
+				$template_name,
+			)
+		);
+	}
 
 	// Get default template/.
 	if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
-		$template = $default_path . $template_name;
+		if ( empty( $cs_template ) ) {
+			$template = $default_path . $template_name;
+		} else {
+			$template = $default_path . $cs_template;
+		}
 	}
 
 	// Return what we found.
@@ -961,13 +978,13 @@ function wc_get_image_size( $image_size ) {
 			} elseif ( 'custom' === $cropping ) {
 				$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
 				$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
-				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['height'] = absint( NumberUtil::round( ( $size['width'] / $width ) * $height ) );
 				$size['crop']   = 1;
 			} else {
 				$cropping_split = explode( ':', $cropping );
 				$width          = max( 1, current( $cropping_split ) );
 				$height         = max( 1, end( $cropping_split ) );
-				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['height'] = absint( NumberUtil::round( ( $size['width'] / $width ) * $height ) );
 				$size['crop']   = 1;
 			}
 		}
@@ -1693,7 +1710,9 @@ function wc_nocache_headers() {
  * @return int
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	return wc_uasort_comparison( $a['position'], $b['position'] );
+	$a_position = is_null( $a ) ? null : $a['position'];
+	$b_position = is_null( $b ) ? null : $b['position'];
+	return wc_uasort_comparison( $a_position, $b_position );
 }
 
 /**
@@ -1758,7 +1777,46 @@ function wc_ascii_uasort_comparison( $a, $b ) {
 		$b = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $b );
 	}
 	// phpcs:enable WordPress.PHP.NoSilencedErrors.Discouraged
+
 	return strcmp( $a, $b );
+}
+
+/**
+ * Sort array according to current locale rules and maintaining index association.
+ * By default tries to use Collator from PHP Internationalization Functions if available.
+ * If PHP Collator class doesn't exists it fallback to removing accepts from a array
+ * and by sorting with `uasort( $data, 'strcmp' )` giving support for ASCII values.
+ *
+ * @since 4.6.0
+ * @param array  $data   List of values to sort.
+ * @param string $locale Locale.
+ * @return array
+ */
+function wc_asort_by_locale( &$data, $locale = '' ) {
+	// Use Collator if PHP Internationalization Functions (php-intl) is available.
+	if ( class_exists( 'Collator' ) ) {
+		$locale   = $locale ? $locale : get_locale();
+		$collator = new Collator( $locale );
+		$collator->asort( $data, Collator::SORT_STRING );
+		return $data;
+	}
+
+	$raw_data = $data;
+
+	array_walk(
+		$data,
+		function ( &$value ) {
+			$value = remove_accents( html_entity_decode( $value ) );
+		}
+	);
+
+	uasort( $data, 'strcmp' );
+
+	foreach ( $data as $key => $val ) {
+		$data[ $key ] = $raw_data[ $key ];
+	}
+
+	return $data;
 }
 
 /**
@@ -1803,7 +1861,7 @@ function wc_get_rounding_precision() {
 function wc_add_number_precision( $value, $round = true ) {
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
-	return $round ? round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
+	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
 }
 
 /**
@@ -1918,8 +1976,8 @@ add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
 /**
  * Prints human-readable information about a variable.
  *
- * Some server environments blacklist some debugging functions. This function provides a safe way to
- * turn an expression into a printable, readable form without calling blacklisted functions.
+ * Some server environments block some debugging functions. This function provides a safe way to
+ * turn an expression into a printable, readable form without calling blocked functions.
  *
  * @since 3.0
  *
@@ -2355,14 +2413,14 @@ function wc_decimal_to_fraction( $decimal ) {
  */
 function wc_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
+		return NumberUtil::round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	}
 
 	if ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
 		return wc_legacy_round_half_down( $value, $precision );
 	}
 
-	return round( $value, $precision );
+	return NumberUtil::round( $value, $precision );
 }
 
 /**

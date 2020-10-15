@@ -28,7 +28,6 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
-		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 
 		// Disable WXR export of schedule action posts.
@@ -49,19 +48,19 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once dirname( __FILE__ ) . '/wc-admin-functions.php';
-		include_once dirname( __FILE__ ) . '/wc-meta-box-functions.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-post-types.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-menus.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-customize.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-notices.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-assets.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-api-keys.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-webhooks.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
+		include_once __DIR__ . '/wc-admin-functions.php';
+		include_once __DIR__ . '/wc-meta-box-functions.php';
+		include_once __DIR__ . '/class-wc-admin-post-types.php';
+		include_once __DIR__ . '/class-wc-admin-taxonomies.php';
+		include_once __DIR__ . '/class-wc-admin-menus.php';
+		include_once __DIR__ . '/class-wc-admin-customize.php';
+		include_once __DIR__ . '/class-wc-admin-notices.php';
+		include_once __DIR__ . '/class-wc-admin-assets.php';
+		include_once __DIR__ . '/class-wc-admin-api-keys.php';
+		include_once __DIR__ . '/class-wc-admin-webhooks.php';
+		include_once __DIR__ . '/class-wc-admin-pointers.php';
+		include_once __DIR__ . '/class-wc-admin-importers.php';
+		include_once __DIR__ . '/class-wc-admin-exporters.php';
 
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
@@ -71,24 +70,15 @@ class WC_Admin {
 
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
-		}
-
-		// Setup/welcome.
-		if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			switch ( $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				case 'wc-setup':
-					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
-					break;
-			}
+			include_once __DIR__ . '/class-wc-admin-help.php';
 		}
 
 		// Helper.
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+		include_once __DIR__ . '/helper/class-wc-helper.php';
 
 		// Marketplace suggestions & related REST API.
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
+		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
 	}
 
 	/**
@@ -104,22 +94,22 @@ class WC_Admin {
 		switch ( $screen->id ) {
 			case 'dashboard':
 			case 'dashboard-network':
-				include 'class-wc-admin-dashboard.php';
+				include __DIR__ . '/class-wc-admin-dashboard.php';
 				break;
 			case 'options-permalink':
-				include 'class-wc-admin-permalink-settings.php';
+				include __DIR__ . '/class-wc-admin-permalink-settings.php';
 				break;
 			case 'plugins':
-				include 'plugin-updates/class-wc-plugins-screen-updates.php';
+				include __DIR__ . '/plugin-updates/class-wc-plugins-screen-updates.php';
 				break;
 			case 'update-core':
-				include 'plugin-updates/class-wc-updates-screen-updates.php';
+				include __DIR__ . '/plugin-updates/class-wc-updates-screen-updates.php';
 				break;
 			case 'users':
 			case 'user':
 			case 'profile':
 			case 'user-edit':
-				include 'class-wc-admin-profile.php';
+				include __DIR__ . '/class-wc-admin-profile.php';
 				break;
 		}
 	}
@@ -127,7 +117,7 @@ class WC_Admin {
 	/**
 	 * Handle redirects to setup/welcome page after install and updates.
 	 *
-	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
+	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
 		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
@@ -137,7 +127,7 @@ class WC_Admin {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		// Nonced plugin install redirects (whitelisted).
+		// Nonced plugin install redirects.
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
 			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
 
@@ -152,28 +142,6 @@ class WC_Admin {
 			exit;
 		}
 
-		// Setup wizard redirect.
-		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
-			$do_redirect  = true;
-			$current_page = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false;
-
-			// On these pages, or during these events, postpone the redirect.
-			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
-				$do_redirect = false;
-			}
-
-			// On these pages, or during these events, disable the redirect.
-			if ( 'wc-setup' === $current_page || ! WC_Admin_Notices::has_notice( 'install' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) || isset( $_GET['activate-multi'] ) ) {
-				delete_transient( '_wc_activation_redirect' );
-				$do_redirect = false;
-			}
-
-			if ( $do_redirect ) {
-				delete_transient( '_wc_activation_redirect' );
-				wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
-				exit;
-			}
-		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -223,7 +191,7 @@ class WC_Admin {
 
 			// get the preview email content.
 			ob_start();
-			include 'views/html-email-template-preview.php';
+			include __DIR__ . '/views/html-email-template-preview.php';
 			$message = ob_get_clean();
 
 			// create a new email.

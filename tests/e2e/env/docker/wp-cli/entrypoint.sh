@@ -33,7 +33,6 @@ if $(wp core is-installed);
 then
     echo "Wordpress is already installed..."
 else
-    WORDPRESS_INSTALLING=1
     declare -p WORDPRESS_TITLE >/dev/null
     declare -p WORDPRESS_LOGIN >/dev/null
     declare -p WORDPRESS_PASSWORD >/dev/null
@@ -62,9 +61,12 @@ if ! [[ ${CURRENT_DOMAIN} == ${URL} ]]; then
     wp search-replace ${CURRENT_DOMAIN} ${URL}
 fi
 
-if [[ $WORDPRESS_INSTALLING ]];
+if $(wp post list --post_type=page --name=ready);
 then
+    echo "Ready page already exists..."
+else
     wp post create \
+        --url=${URL} \
         --post_type=page \
         --post_status=publish \
         --post_title='Ready' \

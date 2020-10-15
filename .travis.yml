@@ -34,7 +34,6 @@ jobs:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     script:
       - npm run build:assets
-      - npm run build:packages
       - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
@@ -43,15 +42,12 @@ jobs:
   - name: "WP Nightly"
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
-  - name: "WP Latest"
-    php: 7.2
-    env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "WP Latest - 1"
     php: 7.2
-    env: WP_VERSION=5.3 WP_MULTISITE=0
+    env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "WP Latest - 2"
     php: 7.2
-    env: WP_VERSION=5.2 WP_MULTISITE=0
+    env: WP_VERSION=5.3 WP_MULTISITE=0
   - name: "Code Standards"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
@@ -71,9 +67,9 @@ install:
     else
       echo "xdebug.ini does not exist"
     fi
-  - nvm install 10
+  - nvm install
   - npm install
-  - composer install --no-dev
+  - composer install
   - |
     # Install WP Test suite, install PHPUnit globally:
     if [[ ! -z "$WP_VERSION" ]]; then

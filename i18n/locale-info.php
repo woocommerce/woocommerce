@@ -162,9 +162,18 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
-	'KE' => array(
+  'KE' => array(
 		'currency_code'  => 'KES',
 		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
+	'KR' => array(
+		'currency_code'  => 'KRW',
+		'currency_pos'   => 'right',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
 		'num_decimals'   => 0,

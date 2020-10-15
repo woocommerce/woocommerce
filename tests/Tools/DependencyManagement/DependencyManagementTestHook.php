@@ -25,6 +25,9 @@ final class DependencyManagementTestHook implements BeforeTestHook {
 	 * @param string $test "TestClass::TestMethod".
 	 */
 	public function executeBeforeTest( string $test ): void {
+		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
+		// in order to start the test in a clean state (without anything mocked).
+		wc_get_container()->get( LegacyProxy::class )->reset();
 	}
 }
 

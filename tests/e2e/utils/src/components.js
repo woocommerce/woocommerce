@@ -6,9 +6,8 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import modelRegistry from '../../utils/factories';
-import { SimpleProduct } from '@woocommerce/model-factories';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -29,19 +28,6 @@ const verifyAndPublish = async () => {
  * Complete onboarding wizard.
  */
 const completeOnboardingWizard = async () => {
-	// Wait for "Yes please" button to appear and click on it
-	await page.waitForSelector( 'button[name=save_step]' );
-	await expect( page ).toMatchElement(
-		'button[name=save_step]', { text: 'Yes please' }
-	);
-	await Promise.all( [
-		// Click on "Yes please" button to move to the next step
-		page.click( 'button[name=save_step]', { text: 'Yes please' } ),
-
-		// Wait for "Where is your store based?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
 	// Store Details section
 
 	// Fill store's address - first line
@@ -90,10 +76,10 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( industryCheckboxes ).toHaveLength( 10 );
+	expect( industryCheckboxes ).toHaveLength( 8 );
 
 	// Select all industries including "Other"
-	for ( let i = 0; i < 10; i++ ) {
+	for ( let i = 0; i < 8; i++ ) {
 		await industryCheckboxes[i].click();
 	}
 
@@ -149,9 +135,14 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Disable business extension downloads
-	const pluginToggle = await page.$( '.woocommerce-business-extensions .components-checkbox-control__input-container' );
-	pluginToggle.click();
+	// Query for the extensions toggles
+	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
+	expect( extensionsToggles ).toHaveLength( 3 );
+
+	// Disable download of the 3 extensions
+	for ( let i = 0; i < 3; i++ ) {
+		await extensionsToggles[i].click();
+	}
 
 	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
@@ -180,7 +171,7 @@ const completeOnboardingWizard = async () => {
 	// Benefits section
 
 	// Wait for Benefits section to appear
-	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
+	await page.waitForSelector( '.woocommerce-profile-wizard__benefits' );
 
 	// Wait for "No thanks" button to become active
 	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
@@ -354,7 +345,7 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
+	const product = await factories.products.simple.create( {
 		name: simpleProductName,
 		regularPrice: '9.99'
 	} );

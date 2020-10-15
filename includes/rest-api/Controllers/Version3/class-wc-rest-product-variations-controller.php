@@ -4,7 +4,7 @@
  *
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.0.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API variations controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Variations_V2_Controller
  */
 class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V2_Controller {
@@ -234,9 +234,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			if ( ! $parent ) {
 				return new WP_Error(
 					// Translators: %d parent ID.
-					"woocommerce_rest_{$this->post_type}_invalid_parent", sprintf( __( 'Cannot set attributes due to invalid parent product.', 'woocommerce' ), $variation->get_parent_id() ), array(
-						'status' => 404,
-					)
+					"woocommerce_rest_{$this->post_type}_invalid_parent",
+					__( 'Cannot set attributes due to invalid parent product.', 'woocommerce' ),
+					array( 'status' => 404 )
 				);
 			}
 
@@ -354,16 +354,21 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	protected function set_variation_image( $variation, $image ) {
 		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-		if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-			$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+		if ( 0 === $attachment_id ) {
+			if ( isset( $image['src'] ) ) {
+				$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
-			if ( is_wp_error( $upload ) ) {
-				if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
-					throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
+				if ( is_wp_error( $upload ) ) {
+					if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
+						throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
+					}
 				}
-			}
 
-			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
+				$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
+			} else {
+				$variation->set_image_id( '' );
+				return $variation;
+			}
 		}
 
 		if ( ! wp_attachment_is_image( $attachment_id ) ) {

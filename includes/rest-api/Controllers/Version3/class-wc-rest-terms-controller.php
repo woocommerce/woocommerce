@@ -2,7 +2,7 @@
 /**
  * Abstract Rest Terms Controller
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @version  3.3.0
  */
 

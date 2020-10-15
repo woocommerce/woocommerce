@@ -23,7 +23,7 @@ class WC_Query {
 	/**
 	 * Reference to the main product query on the page.
 	 *
-	 * @var array
+	 * @var WP_Query
 	 */
 	private static $product_query;
 
@@ -88,10 +88,14 @@ class WC_Query {
 	/**
 	 * Get page title for an endpoint.
 	 *
-	 * @param  string $endpoint Endpoint key.
-	 * @return string
+	 * @param string $endpoint Endpoint key.
+	 * @param string $action Optional action or variation within the endpoint.
+	 *
+	 * @since 2.3.0
+	 * @since 4.6.0 Added $action parameter.
+	 * @return string The page title.
 	 */
-	public function get_endpoint_title( $endpoint ) {
+	public function get_endpoint_title( $endpoint, $action = '' ) {
 		global $wp;
 
 		switch ( $endpoint ) {
@@ -130,14 +134,30 @@ class WC_Query {
 				$title = __( 'Add payment method', 'woocommerce' );
 				break;
 			case 'lost-password':
-				$title = __( 'Lost password', 'woocommerce' );
+				if ( in_array( $action, array( 'rp', 'resetpass', 'newaccount' ) ) ) {
+					$title = __( 'Set password', 'woocommerce' );
+				} else {
+					$title = __( 'Lost password', 'woocommerce' );
+				}
 				break;
 			default:
 				$title = '';
 				break;
 		}
 
-		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint );
+		/**
+		 * Filters the page title used for my-account endpoints.
+		 *
+		 * @since 2.6.0
+		 * @since 4.6.0 Added $action parameter.
+		 *
+		 * @see get_endpoint_title()
+		 *
+		 * @param string $title Default title.
+		 * @param string $endpoint Endpoint key.
+		 * @param string $action Optional action or variation within the endpoint.
+		 */
+		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint, $action );
 	}
 
 	/**
@@ -362,23 +382,10 @@ class WC_Query {
 		if ( 'product_query' !== $query->get( 'wc_query' ) ) {
 			return $posts;
 		}
-		$this->adjust_total_pages();
 		$this->remove_product_query_filters( $posts );
 		return $posts;
 	}
 
-	/**
-	 * The 'adjust_posts_count' method that handles the 'found_posts' filter indirectly initializes
-	 * the loop properties with a call to 'wc_setup_loop'. This includes setting 'total_pages' to
-	 * '$GLOBALS['wp_query']->max_num_pages', which at that point has a value of zero.
-	 * Thus we need to set the real value from the 'the_posts' filter, where $GLOBALS['wp_query']->max_num_pages'
-	 * will aready have been initialized.
-	 */
-	private function adjust_total_pages() {
-		if ( 0 === wc_get_loop_prop( 'total_pages' ) ) {
-			wc_set_loop_prop( 'total_pages', $GLOBALS['wp_query']->max_num_pages );
-		}
-	}
 
 	/**
 	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
@@ -396,12 +403,9 @@ class WC_Query {
 	}
 
 	/**
-	 * When we are listing products and the request is filtering by attributes via layered nav plugin
-	 * we need to adjust the total posts count to account for variable products having stock
-	 * in some variations but not in others.
-	 * We do that by just checking if each product is visible.
-	 *
-	 * We also cache the post visibility so that it isn't checked again when displaying the posts list.
+	 * This function used to be hooked to found_posts and adjust the posts count when the filtering by attribute
+	 * widget was used and variable products were present. Now it isn't hooked anymore and does nothing but return
+	 * the input unchanged, since the pull request in which it was introduced has been reverted.
 	 *
 	 * @since 4.4.0
 	 * @param int      $count Original posts count, as supplied by the found_posts filter.
@@ -410,35 +414,6 @@ class WC_Query {
 	 * @return int Adjusted posts count.
 	 */
 	public function adjust_posts_count( $count, $query ) {
-		if ( ! $query->get( 'wc_query' ) ) {
-			return $count;
-		}
-
-		$posts = $this->get_current_posts();
-		if ( is_null( $posts ) ) {
-			return $count;
-		}
-
-		foreach ( $posts as $post ) {
-			if ( is_object( $post ) && 'product' !== $post->post_type ) {
-				continue;
-			}
-
-			$product_id = is_object( $post ) ? $post->ID : $post;
-			$product    = wc_get_product( $product_id );
-			if ( ! is_object( $product ) ) {
-				continue;
-			}
-
-			if ( $product->is_visible() ) {
-				wc_set_loop_product_visibility( $product_id, true );
-			} else {
-				wc_set_loop_product_visibility( $product_id, false );
-				$count--;
-			}
-		}
-
-		wc_set_loop_prop( 'total', $count );
 		return $count;
 	}
 
@@ -514,7 +489,7 @@ class WC_Query {
 		// Additonal hooks to change WP Query.
 		add_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
-		add_filter( 'found_posts', array( $this, 'adjust_posts_count' ), 10, 2 );
+
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
 
@@ -614,7 +589,7 @@ class WC_Query {
 	 * @since 3.6.0
 	 *
 	 * @param array    $args Query args.
-	 * @param WC_Query $wp_query WC_Query object.
+	 * @param WP_Query $wp_query WP_Query object.
 	 *
 	 * @return array
 	 */
@@ -806,7 +781,7 @@ class WC_Query {
 	/**
 	 * Get the main query which product queries ran against.
 	 *
-	 * @return array
+	 * @return WP_Query
 	 */
 	public static function get_main_query() {
 		return self::$product_query;

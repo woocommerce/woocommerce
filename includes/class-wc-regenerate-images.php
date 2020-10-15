@@ -203,7 +203,7 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		// Use a whitelist of sizes we want to resize. Ignore others.
+		// List of sizes we want to resize. Ignore others.
 		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $image;
 		}

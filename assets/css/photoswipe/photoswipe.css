@@ -56,6 +56,18 @@ button.pswp__button--zoom:hover {
   .pswp img {
     max-width: none; }
 
+  /* adjust for admin bar */
+  .admin-bar .pswp {
+    height: calc(100% - 32px);
+    top: 32px;
+  }
+  @media screen and (max-width: 782px) {
+    .admin-bar .pswp {
+      height: calc(100% - 46px);
+      top: 46px;
+    }
+  }
+
 /* style is added when JS option showHideOpacity is set to true */
 .pswp--animate_opacity {
   /* 0.001, because opacity:0 doesn't trigger Paint action, which causes lag at start of transition */
