@@ -143,6 +143,12 @@ export class ActivityPanel extends Component {
 			( isEmbedded || location.pathname !== '/' ) &&
 			! isPerformingSetupTask;
 
+		const showOrdersStockAndReviews =
+			( taskListComplete || taskListHidden ) && ! isPerformingSetupTask;
+
+		const showStoreSetup =
+			! taskListComplete && ! taskListHidden && ! isPerformingSetupTask;
+
 		const inbox = showInbox
 			? {
 					name: 'inbox',
@@ -152,46 +158,42 @@ export class ActivityPanel extends Component {
 			  }
 			: null;
 
-		const setup =
-			! taskListComplete && ! isPerformingSetupTask && ! taskListHidden
-				? {
-						name: 'setup',
-						title: __( 'Store Setup', 'woocommerce-admin' ),
-						icon: <SetupProgress />,
-				  }
-				: null;
+		const setup = showStoreSetup
+			? {
+					name: 'setup',
+					title: __( 'Store Setup', 'woocommerce-admin' ),
+					icon: <SetupProgress />,
+			  }
+			: null;
 
-		const ordersStockAndReviews =
-			taskListComplete && ! isPerformingSetupTask
-				? [
-						{
-							name: 'orders',
-							title: __( 'Orders', 'woocommerce-admin' ),
-							icon: <PagesIcon />,
-							unread: hasUnreadOrders,
-						},
-						manageStock === 'yes' && {
-							name: 'stock',
-							title: __( 'Stock', 'woocommerce-admin' ),
-							icon: (
-								<i className="material-icons-outlined">
-									widgets
-								</i>
-							),
-							unread: hasUnreadStock,
-						},
-						reviewsEnabled === 'yes' && {
-							name: 'reviews',
-							title: __( 'Reviews', 'woocommerce-admin' ),
-							icon: (
-								<i className="material-icons-outlined">
-									star_border
-								</i>
-							),
-							unread: hasUnapprovedReviews,
-						},
-				  ].filter( Boolean )
-				: [];
+		const ordersStockAndReviews = showOrdersStockAndReviews
+			? [
+					{
+						name: 'orders',
+						title: __( 'Orders', 'woocommerce-admin' ),
+						icon: <PagesIcon />,
+						unread: hasUnreadOrders,
+					},
+					manageStock === 'yes' && {
+						name: 'stock',
+						title: __( 'Stock', 'woocommerce-admin' ),
+						icon: (
+							<i className="material-icons-outlined">widgets</i>
+						),
+						unread: hasUnreadStock,
+					},
+					reviewsEnabled === 'yes' && {
+						name: 'reviews',
+						title: __( 'Reviews', 'woocommerce-admin' ),
+						icon: (
+							<i className="material-icons-outlined">
+								star_border
+							</i>
+						),
+						unread: hasUnapprovedReviews,
+					},
+			  ].filter( Boolean )
+			: [];
 
 		const help = isPerformingSetupTask
 			? {
