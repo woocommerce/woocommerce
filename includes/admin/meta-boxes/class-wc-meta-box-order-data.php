@@ -344,8 +344,8 @@ class WC_Meta_Box_Order_Data {
 
 								if ( 'billing_phone' === $field_name ) {
 									$field_value = wc_make_phone_clickable( $field_value );
-								} else if ( 'billing_email' === $field_name ) {
-									$field_value = '<a href="mailto:' . $field_value . '">' . $field_value . '</a>';
+								} elseif ( 'billing_email' === $field_name ) {
+									$field_value = '<a href="mailto:' . esc_attr( $field_value ) . '">' . esc_html( $field_value ) . '</a>';
 								} else {
 									$field_value = make_clickable( esc_html( $field_value ) );
 								}
