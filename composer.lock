@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "94984eae625dec8220d48beb1ff4b40d",
+    "content-hash": "177fa175c12c63dd29d3241469dc07b7",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -44,16 +44,16 @@
         },
         {
             "name": "automattic/jetpack-constants",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f"
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/b4210d56948529b43785ce31e0055f435eac1f9f",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/9827a2f446b8c4faafaf1c740483031c073a381d",
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d",
                 "shasum": ""
             },
             "require-dev": {
@@ -71,7 +71,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "time": "2020-07-01T15:55:35+00:00"
+            "time": "2020-08-13T14:33:09+00:00"
         },
         {
             "name": "composer/installers",
