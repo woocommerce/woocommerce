@@ -656,7 +656,7 @@ class Onboarding {
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$profile                = get_option( self::PROFILE_DATA_OPTION, array() );
+		$profile                = (array) get_option( self::PROFILE_DATA_OPTION, array() );
 		$settings['onboarding'] = array(
 			'profile' => $profile,
 		);

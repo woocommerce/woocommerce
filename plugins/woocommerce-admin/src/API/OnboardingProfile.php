@@ -138,7 +138,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 	public function update_items( $request ) {
 		$params          = $request->get_json_params();
 		$query_args      = $this->prepare_objects_query( $params );
-		$onboarding_data = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$onboarding_data = (array) get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 		update_option( Onboarding::PROFILE_DATA_OPTION, array_merge( $onboarding_data, $query_args ) );
 
 		$result = array(
