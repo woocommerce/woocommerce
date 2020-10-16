@@ -64,13 +64,6 @@ export const Layout = ( {
 	const isTaskListEnabled = taskListHidden === false && ! taskListComplete;
 	const isDashboardShown = ! isTaskListEnabled || ! query.task;
 
-	const isInboxPanelEmpty = ( isEmpty ) => {
-		if ( isBatchUpdating ) {
-			return;
-		}
-		setShowInbox( ! isEmpty );
-	};
-
 	if ( isBatchUpdating && ! showInbox ) {
 		setShowInbox( true );
 	}
@@ -80,7 +73,7 @@ export const Layout = ( {
 			<Fragment>
 				{ showInbox && (
 					<div className="woocommerce-homescreen-column is-inbox">
-						<InboxPanel isPanelEmpty={ isInboxPanelEmpty } />
+						<InboxPanel />
 					</div>
 				) }
 				<div
