@@ -11,7 +11,7 @@
     "automattic/jetpack-autoloader": "2.2.0",
     "automattic/jetpack-constants": "1.4.0",
     "composer/installers": "1.7.0",
-    "maxmind-db/reader": "1.6.0",
+    "maxmind-db/reader": "1.8.0",
     "pelago/emogrifier": "3.1.0",
     "psr/container": "1.0.0",
     "woocommerce/action-scheduler": "3.1.6",
