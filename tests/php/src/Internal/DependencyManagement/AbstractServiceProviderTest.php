@@ -94,7 +94,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_throws_on_class_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'final public', instances can't be created." );
 
 		$this->sut->add_with_auto_arguments( ClassWithPrivateInjectionMethod::class );
 	}
@@ -114,7 +114,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_throws_on_concrete_private_method_injection() {
 		$this->expectException( ContainerException::class );
-		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'public', instances can't be created." );
+		$this->expectExceptionMessage( "Method '" . Definition::INJECTION_METHOD . "' of class '" . ClassWithPrivateInjectionMethod::class . "' isn't 'final public', instances can't be created." );
 
 		$this->sut->add_with_auto_arguments( ClassWithDependencies::class, ClassWithPrivateInjectionMethod::class );
 	}
