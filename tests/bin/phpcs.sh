@@ -11,6 +11,6 @@ if [[ ${RUN_PHPCS} == 1 ]]; then
 		fi
 
 		echo "Running Code Sniffer."
-		phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
+		vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
 	fi
 fi
