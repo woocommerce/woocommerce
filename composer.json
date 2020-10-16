@@ -12,7 +12,7 @@
     "automattic/jetpack-constants": "1.4.0",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",
-    "pelago/emogrifier": "3.1.0",
+    "pelago/emogrifier": "4.0.0",
     "psr/container": "1.0.0",
     "woocommerce/action-scheduler": "3.1.6",
     "woocommerce/woocommerce-admin": "1.6.1",
