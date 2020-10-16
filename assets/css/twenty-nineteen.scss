@@ -1122,6 +1122,16 @@ table.variations {
 	.select2-container--focus .select2-selection {
 		border-color: black;
 	}
+
+	form[name="checkout"] {
+		display: table;
+	}
+
+	.blockUI.blockOverlay {
+		position: relative;
+
+		@include loader();
+	}
 }
 
 .woocommerce-checkout-review-order-table {
