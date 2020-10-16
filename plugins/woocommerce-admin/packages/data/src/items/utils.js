@@ -57,9 +57,8 @@ export function getLeaderboard( options ) {
 	}
 
 	const leaderboard = leaderboards.get( options.id );
-	return { ...response, rows: leaderboard.rows };
+	return { ...response, rows: leaderboard?.rows };
 }
-
 /**
  * Returns items based on a search query.
  *

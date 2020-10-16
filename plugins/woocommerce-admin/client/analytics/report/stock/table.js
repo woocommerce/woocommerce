@@ -55,7 +55,7 @@ class StockReportTable extends Component {
 		];
 	}
 
-	getRowsContent( products ) {
+	getRowsContent( products = [] ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 

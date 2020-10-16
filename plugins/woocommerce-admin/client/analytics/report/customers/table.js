@@ -116,7 +116,7 @@ class CustomersReportTable extends Component {
 			getCurrencyConfig,
 		} = this.context;
 
-		return customers.map( ( customer ) => {
+		return customers?.map( ( customer ) => {
 			const {
 				avg_order_value: avgOrderValue,
 				date_last_active: dateLastActive,

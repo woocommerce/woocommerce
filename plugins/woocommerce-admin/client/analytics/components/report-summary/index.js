@@ -38,8 +38,11 @@ export class ReportSummary extends Component {
 		const { emptySearchResults, summaryData } = this.props;
 		const { totals } = summaryData;
 
-		const primaryValue = emptySearchResults ? 0 : totals.primary[ key ];
-		const secondaryValue = emptySearchResults ? 0 : totals.secondary[ key ];
+		const primaryTotal = totals.primary ? totals.primary[ key ] : 0;
+		const secondaryTotal = totals.secondary ? totals.secondary[ key ] : 0;
+
+		const primaryValue = emptySearchResults ? 0 : primaryTotal;
+		const secondaryValue = emptySearchResults ? 0 : secondaryTotal;
 
 		return {
 			delta: calculateDelta( primaryValue, secondaryValue ),

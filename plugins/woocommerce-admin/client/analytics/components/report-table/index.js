@@ -617,11 +617,12 @@ export default compose(
 
 		return {
 			primaryData,
-			ids: itemIdField
-				? extendedTableData.items.data.map(
-						( item ) => item[ itemIdField ]
-				  )
-				: [],
+			ids:
+				itemIdField && extendedTableData.items.data
+					? extendedTableData.items.data.map(
+							( item ) => item[ itemIdField ]
+					  )
+					: [],
 			tableData: extendedTableData,
 			query: { ...tableQuery, ...query },
 		};
