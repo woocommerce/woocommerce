@@ -1,44 +1,17 @@
-import { CustomerFlow, StoreOwnerFlow } from './flows';
-
-import {
-	completeOnboardingWizard,
-	completeOldSetupWizard,
-	createSimpleProduct,
-	createVariableProduct,
-	verifyAndPublish,
-} from './components';
-
-import {
-	clearAndFillInput,
-	clickTab,
-	settingsPageSaveChanges,
-	permalinkSettingsPageSaveChanges,
-	setCheckbox,
-	unsetCheckbox,
-	uiUnblocked,
-	verifyPublishAndTrash,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-	verifyValueOfInputField,
-} from './page-utils';
+/*
+ * External dependencies
+ */
+import allWPUtilities from '@wordpress/e2e-test-utils';
+/*
+ * Internal dependencies
+ */
+import allFlows from './flows';
+import allComponents from './components';
+import allUtilities from './page-utils';
 
 module.exports = {
-	CustomerFlow,
-	StoreOwnerFlow,
-	completeOnboardingWizard,
-	completeOldSetupWizard,
-	createSimpleProduct,
-	createVariableProduct,
-	verifyAndPublish,
-	clearAndFillInput,
-	clickTab,
-	settingsPageSaveChanges,
-	permalinkSettingsPageSaveChanges,
-	setCheckbox,
-	unsetCheckbox,
-	uiUnblocked,
-	verifyPublishAndTrash,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-	verifyValueOfInputField
-}
+	...allWPUtilities,
+	...allFlows,
+	...allComponents,
+	...allUtilities,
+};
