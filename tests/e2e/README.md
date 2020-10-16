@@ -262,7 +262,7 @@ We use the following tools to write e2e tests:
 - [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer) – provides all required configuration to run tests using Puppeteer
 - [expect-puppeteer](https://github.com/smooth-code/jest-puppeteer/tree/master/packages/expect-puppeteer) – assertion library for Puppeteer
 
-Tests are kept in `tests/e2e/core-tests/specs/` folder.
+In the WooCommerce Core repository the tests are kept in `tests/e2e/core-tests/specs/` folder. However, if you are writing tests in your own project using WooCommerce Core e2e packages, the tests should be located in `tests/e2e/specs/` folder.
 
 The following packages are used to write tests:
 
