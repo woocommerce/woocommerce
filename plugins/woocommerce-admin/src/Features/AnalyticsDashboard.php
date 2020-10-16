@@ -88,6 +88,7 @@ class AnalyticsDashboard {
 				'parent'       => 'woocommerce',
 				'path'         => self::MENU_SLUG,
 				'is_top_level' => true,
+				'order'        => 0,
 			)
 		);
 	}

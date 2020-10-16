@@ -409,6 +409,7 @@ class PageController {
 	 *   @type string      capability   Capability needed to access the page.
 	 *   @type string      icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
 	 *   @type int         position     Menu item position.
+	 *   @type int         order        Navigation item order.
 	 * }
 	 */
 	public function register_page( $options ) {
@@ -468,7 +469,7 @@ class PageController {
 	 *   @type string      path         Path for this page, full path in app context; ex /analytics/report
 	 *   @type string      capability   Capability needed to access the page.
 	 *   @type string      icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
-	 *   @type int         position     Menu item position.
+	 *   @type int         order        Navigation item order.
 	 * }
 	 */
 	public static function add_nav_item( $options ) {
@@ -484,6 +485,7 @@ class PageController {
 			'title'        => $options['title'],
 			'capability'   => $options['capability'],
 			'url'          => $options['path'],
+			'order'        => isset( $options['order'] ) ? $options['order'] : 20,
 			'is_top_level' => isset( $options['is_top_level'] ) && $options['is_top_level'],
 		);
 

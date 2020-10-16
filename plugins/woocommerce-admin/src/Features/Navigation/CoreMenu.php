@@ -50,7 +50,10 @@ class CoreMenu {
 		foreach ( $setting_pages as $setting_page ) {
 			$settings = $setting_page->add_settings_page( $settings );
 		}
+
+		$order = 0;
 		foreach ( $settings as $key => $setting ) {
+			$order += 10;
 			Menu::add_item(
 				array(
 					'parent'     => 'settings',
@@ -58,6 +61,7 @@ class CoreMenu {
 					'capability' => 'manage_woocommerce',
 					'id'         => $key,
 					'url'        => 'admin.php?page=wc-settings&tab=' . $key,
+					'order'      => $order,
 				)
 			);
 		}
