@@ -37,7 +37,6 @@ jobs:
      - composer install
     script:
       - npm run build:assets
-      - npm install jest --global
       - npm run docker:up
       - npm run test:e2e
     after_script:
