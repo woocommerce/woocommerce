@@ -1,7 +1,7 @@
 version: ~> 1.0
 
 language: php
-dist: xenial
+dist: focal
 
 cache:
   directories:
