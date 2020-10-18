@@ -7,31 +7,64 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "php": ">=7.0",
+    "automattic/jetpack-autoloader": "2.2.0",
+    "automattic/jetpack-constants": "1.5.0",
+    "composer/installers": "1.7.0",
+    "maxmind-db/reader": "1.6.0",
+    "pelago/emogrifier": "3.1.0",
+    "psr/container": "1.0.0",
+    "woocommerce/action-scheduler": "3.1.6",
+    "woocommerce/woocommerce-admin": "1.6.1",
+    "woocommerce/woocommerce-blocks": "3.4.0",
+    "league/container": "3.3.3"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "^0.14",
-    "phpunit/phpunit": "6.*",
-    "woocommerce/woocommerce-git-hooks": "*",
-    "woocommerce/woocommerce-sniffs": "*",
-    "wimg/php-compatibility": "^8.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
-    "apigen/apigen": "^4",
-    "nette/utils": "~2.3.0"
+    "bamarni/composer-bin-plugin": "^1.4"
+  },
+  "config": {
+    "platform": {
+      "php": "7.1"
+    },
+    "preferred-install": {
+        "woocommerce/action-scheduler": "dist",
+        "woocommerce/woocommerce-rest-api": "dist",
+        "woocommerce/woocommerce-blocks": "dist"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "includes/legacy",
+      "includes/libraries"
+    ],
+    "classmap": [
+      "includes/rest-api"
+    ],
+    "psr-4": {
+      "Automattic\\WooCommerce\\": "src/",
+      "Automattic\\WooCommerce\\Vendor\\League\\Container\\": "vendor/league/container/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
+      "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
+    },
+    "classmap": [
+      "tests/legacy/unit-tests/rest-api/Helpers"
+    ]
   },
   "scripts": {
-    "pre-update-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
-    ],
-    "pre-install-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
-    ],
     "post-install-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+      "@composer bin all install --ansi",
+      "sh ./bin/prefix-vendor-namespaces.sh",
+      "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+      "@composer bin all update --ansi",
+      "sh ./bin/prefix-vendor-namespaces.sh",
+      "sh ./bin/package-update.sh"
     ],
     "test": [
       "phpunit"
@@ -39,15 +72,38 @@
     "phpcs": [
       "phpcs -s -p"
     ],
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
+    ],
     "phpcbf": [
       "phpcbf -p"
+    ],
+    "makepot-audit": [
+      "wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+    ],
+    "makepot": [
+      "@makepot-audit --skip-audit"
+    ],
+    "bin": [
+      "echo 'bin not installed'"
     ]
   },
   "extra": {
+    "installer-paths": {
+      "packages/action-scheduler": ["woocommerce/action-scheduler"],
+      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
+      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"],
+      "packages/woocommerce-admin": ["woocommerce/woocommerce-admin"]
+    },
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+      "makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
+      "makepot": "Generate i18n/languages/woocommerce.pot file"
+    },
+    "bamarni-bin": {
+      "target-directory": "bin/composer"
     }
   }
 }

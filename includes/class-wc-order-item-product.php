@@ -2,7 +2,7 @@
 /**
  * Order Line Item (product)
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   3.0.0
  */
@@ -160,8 +160,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 		$this->set_prop( 'taxes', $tax_data );
-		$this->set_total_tax( array_sum( $tax_data['total'] ) );
-		$this->set_subtotal_tax( array_sum( $tax_data['subtotal'] ) );
+
+		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->set_total_tax( array_sum( $tax_data['total'] ) );
+			$this->set_subtotal_tax( array_sum( $tax_data['subtotal'] ) );
+		} else {
+			$this->set_total_tax( array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
+			$this->set_subtotal_tax( array_sum( array_map( 'wc_round_tax_total', $tax_data['subtotal'] ) ) );
+		}
 	}
 
 	/**
@@ -347,7 +353,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				'order'         => $order->get_order_key(),
 				'email'         => rawurlencode( $order->get_billing_email() ),
 				'key'           => $download_id,
-			), trailingslashit( home_url() )
+			),
+			trailingslashit( home_url() )
 		) : '';
 	}
 
@@ -361,9 +368,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product    = $this->get_product();
 		$order      = $this->get_order();
 		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
-		$email_hash = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
+			$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
 			$data_store         = WC_Data_Store::load( 'customer-download' );
 			$customer_downloads = $data_store->get_downloads(
 				array(
@@ -386,7 +393,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 							'order'         => $order->get_order_key(),
 							'uid'           => $email_hash,
 							'key'           => $download_id,
-						), trailingslashit( home_url() )
+						),
+						trailingslashit( home_url() )
 					);
 				}
 			}
@@ -417,7 +425,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * OffsetGet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
@@ -441,11 +448,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * OffsetSet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated Add deprecation notices in future release.
+	 * @deprecated 4.4.0
 	 * @param string $offset Offset.
 	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
+		wc_deprecated_function( 'WC_Order_Item_Product::offsetSet', '4.4.0', '' );
 		if ( 'line_subtotal' === $offset ) {
 			$offset = 'subtotal';
 		} elseif ( 'line_subtotal_tax' === $offset ) {

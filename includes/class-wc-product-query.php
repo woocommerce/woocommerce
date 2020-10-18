@@ -4,7 +4,7 @@
  *
  * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
  *
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  * @version  3.2.0
  * @since    3.2.0
  */
@@ -46,6 +46,7 @@ class WC_Product_Query extends WC_Object_Query {
 				'stock_quantity'    => '',
 				'stock_status'      => '',
 				'backorders'        => '',
+				'low_stock_amount'  => '',
 				'sold_individually' => '',
 				'weight'            => '',
 				'length'            => '',

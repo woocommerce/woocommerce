@@ -3,7 +3,7 @@
  * Order Data Store Interface
  *
  * @version 3.0.0
- * @package WooCommerce/Interface
+ * @package WooCommerce\Interface
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ interface WC_Order_Data_Store_Interface {
 	 * Get amount already refunded.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @return string
+	 * @return float
 	 */
 	public function get_total_refunded( $order );
 

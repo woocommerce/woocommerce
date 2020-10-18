@@ -4,7 +4,7 @@
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  * @deprecated  3.0.0 wc_display_item_meta function is used instead.
  * @version     2.4
  */
@@ -205,7 +205,7 @@ class WC_Order_Item_Meta {
 				$formatted_meta[ $formatted_meta_key ] = array(
 					'key'   => $meta_key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
-					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value, $this->meta, $this->item ),
 				);
 			}
 		}

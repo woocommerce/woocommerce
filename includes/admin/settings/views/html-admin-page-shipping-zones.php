@@ -104,11 +104,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+								foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
 									if ( ! $method->supports( 'shipping-zones' ) ) {
 										continue;
 									}
-									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '</li>';
 								}
 								?>
 							</select>

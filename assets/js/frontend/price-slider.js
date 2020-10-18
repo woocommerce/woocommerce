@@ -31,8 +31,9 @@ jQuery( function( $ ) {
 		$( 'input#min_price, input#max_price' ).hide();
 		$( '.price_slider, .price_label' ).show();
 
-		var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
-			max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
+		var min_price         = $( '.price_slider_amount #min_price' ).data( 'min' ),
+			max_price         = $( '.price_slider_amount #max_price' ).data( 'max' ),
+			step              = $( '.price_slider_amount' ).data( 'step' ) || 1,
 			current_min_price = $( '.price_slider_amount #min_price' ).val(),
 			current_max_price = $( '.price_slider_amount #max_price' ).val();
 
@@ -41,6 +42,7 @@ jQuery( function( $ ) {
 			animate: true,
 			min: min_price,
 			max: max_price,
+			step: step,
 			values: [ current_min_price, current_max_price ],
 			create: function() {
 

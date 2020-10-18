@@ -1,5 +1,5 @@
 /*
- * jQuery FlexSlider v2.7.1
+ * jQuery FlexSlider v2.7.2
  * Copyright 2012 WooThemes
  * Contributing Author: Tyler Smith
  */
@@ -236,15 +236,35 @@
           if (slider.pagingCount > 1) {
             for (var i = 0; i < slider.pagingCount; i++) {
               slide = slider.slides.eq(i);
-              if ( undefined === slide.attr( 'data-thumb-alt' ) ) { slide.attr( 'data-thumb-alt', '' ); }
-              var altText = ( '' !== slide.attr( 'data-thumb-alt' ) ) ? altText = ' alt="' + slide.attr( 'data-thumb-alt' ) + '"' : '';
-              item = (slider.vars.controlNav === "thumbnails") ? '<img src="' + slide.attr( 'data-thumb' ) + '"' + altText + '/>' : '<a href="#">' + j + '</a>';
+
+              if ( undefined === slide.attr( 'data-thumb-alt' ) ) { 
+                slide.attr( 'data-thumb-alt', '' ); 
+              }
+              
+              item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
+              if ( slider.vars.controlNav === "thumbnails" ) {
+                item = $( '<img/>' ).attr( 'src', slide.attr( 'data-thumb' ) );
+              }
+              
+              if ( '' !== slide.attr( 'data-thumb-alt' ) ) {
+                item.attr( 'alt', slide.attr( 'data-thumb-alt' ) );
+              }
+
               if ( 'thumbnails' === slider.vars.controlNav && true === slider.vars.thumbCaptions ) {
                 var captn = slide.attr( 'data-thumbcaption' );
-                if ( '' !== captn && undefined !== captn ) { item += '<span class="' + namespace + 'caption">' + captn + '</span>'; }
+                if ( '' !== captn && undefined !== captn ) { 
+                  var caption = $('<span></span>' ).addClass( namespace + 'caption' ).text( captn );
+                  item.append( caption );
+                }
               }
-              slider.controlNavScaffold.append('<li>' + item + '</li>');
+              
+              var liElement = $( '<li>' );
+              item.appendTo( liElement );
+              liElement.append( '</li>' );
+
+              slider.controlNavScaffold.append(liElement);
               j++;
+
             }
           }
 

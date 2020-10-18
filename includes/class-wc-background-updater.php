@@ -3,7 +3,8 @@
  * Background Updater
  *
  * @version 2.6.0
- * @package WooCommerce/Classes
+ * @deprecated 3.6.0 Replaced with queue.
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -106,7 +107,7 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			$result = (bool) call_user_func( $callback );
+			$result = (bool) call_user_func( $callback, $this );
 
 			if ( $result ) {
 				$logger->info( sprintf( '%s callback needs to run again', $callback ), array( 'source' => 'wc_db_updates' ) );

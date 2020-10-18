@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
-			window.location.href = window.location.href;
+			window.location.reload();
 			return;
 		}
 
@@ -83,7 +83,7 @@ jQuery( function( $ ) {
 		if ( $new_form.length === 0 ) {
 			// If the checkout is also displayed on this page, trigger reload instead.
 			if ( $( '.woocommerce-checkout' ).length ) {
-				window.location.href = window.location.href;
+				window.location.reload();
 				return;
 			}
 
@@ -95,6 +95,9 @@ jQuery( function( $ ) {
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
 			}
+
+			// Notify plugins that the cart was emptied.
+			$( document.body ).trigger( 'wc_cart_emptied' );
 		} else {
 			// If the checkout is also displayed on this page, trigger update event.
 			if ( $( '.woocommerce-checkout' ).length ) {
@@ -102,7 +105,7 @@ jQuery( function( $ ) {
 			}
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
-			$( '.woocommerce-cart-form' ).find( ':input[name="update_cart"]' ).prop( 'disabled', true );
+			$( '.woocommerce-cart-form' ).find( ':input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
@@ -131,7 +134,9 @@ jQuery( function( $ ) {
 	 */
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
-			$target = $( '.woocommerce-notices-wrapper:first' ) || $( '.cart-empty' ).closest( '.woocommerce' ) || $( '.woocommerce-cart-form' );
+			$target = $( '.woocommerce-notices-wrapper:first' ) ||
+				$( '.cart-empty' ).closest( '.woocommerce' ) ||
+				$( '.woocommerce-cart-form' );
 		}
 		$target.prepend( html_element );
 	};
@@ -185,6 +190,7 @@ jQuery( function( $ ) {
 		shipping_method_selected: function() {
 			var shipping_methods = {};
 
+			// eslint-disable-next-line max-len
 			$( 'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]' ).each( function() {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
@@ -267,7 +273,7 @@ jQuery( function( $ ) {
 			this.update_cart           = this.update_cart.bind( this );
 
 			$( document ).on(
-				'wc_update_cart',
+				'wc_update_cart added_to_cart',
 				function() { cart.update_cart.apply( cart, [].slice.call( arguments, 1 ) ); } );
 			$( document ).on(
 				'click',
@@ -298,14 +304,14 @@ jQuery( function( $ ) {
 				'.woocommerce-cart-form .cart_item :input',
 				this.input_changed );
 
-			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true );
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 		},
 
 		/**
 		 * After an input is changed, enable the update cart button.
 		 */
 		input_changed: function() {
-			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', false );
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', false ).attr( 'aria-disabled', false );
 		},
 
 		/**

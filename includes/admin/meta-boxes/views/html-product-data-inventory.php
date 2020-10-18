@@ -1,4 +1,10 @@
 <?php
+/**
+ * Displays the inventory tab in the product data meta box.
+ *
+ * @package WooCommerce\Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -65,6 +71,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
+			woocommerce_wp_text_input(
+				array(
+					'id'                => '_low_stock_amount',
+					'value'             => $product_object->get_low_stock_amount( 'edit' ),
+					'placeholder'       => get_option( 'woocommerce_notify_low_stock_amount' ),
+					'label'             => __( 'Low stock threshold', 'woocommerce' ),
+					'desc_tip'          => true,
+					'description'       => __( 'When product stock reaches this amount you will be notified by email', 'woocommerce' ),
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'step' => 'any',
+					),
+				)
+			);
+
 			do_action( 'woocommerce_product_options_stock_fields' );
 
 			echo '</div>';
@@ -74,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			array(
 				'id'            => '_stock_status',
 				'value'         => $product_object->get_stock_status( 'edit' ),
-				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external',
+				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
 				'label'         => __( 'Stock status', 'woocommerce' ),
 				'options'       => wc_get_product_stock_status_options(),
 				'desc_tip'      => true,

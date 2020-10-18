@@ -35,7 +35,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 
 		// Always set a timestamp.
 		if ( is_null( $download_log->get_timestamp( 'edit' ) ) ) {
-			$download_log->set_timestamp( current_time( 'timestamp', true ) );
+			$download_log->set_timestamp( time() );
 		}
 
 		$data = array(
@@ -157,16 +157,19 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	public function get_download_logs( $args = array() ) {
 		global $wpdb;
 
-		$args = wp_parse_args( $args, array(
-			'permission_id'   => '',
-			'user_id'         => '',
-			'user_ip_address' => '',
-			'orderby'         => 'download_log_id',
-			'order'           => 'DESC',
-			'limit'           => -1,
-			'page'            => 1,
-			'return'          => 'objects',
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'permission_id'   => '',
+				'user_id'         => '',
+				'user_ip_address' => '',
+				'orderby'         => 'download_log_id',
+				'order'           => 'ASC',
+				'limit'           => -1,
+				'page'            => 1,
+				'return'          => 'objects',
+			)
+		);
 
 		$query   = array();
 		$table   = $wpdb->prefix . self::get_table_name();
@@ -185,9 +188,9 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		}
 
 		$allowed_orders = array( 'download_log_id', 'timestamp', 'permission_id', 'user_id' );
-		$order          = in_array( $args['order'], $allowed_orders, true ) ? $args['order'] : 'download_log_id';
-		$orderby        = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
-		$orderby_sql    = sanitize_sql_orderby( "{$order} {$orderby}" );
+		$orderby        = in_array( $args['orderby'], $allowed_orders, true ) ? $args['orderby'] : 'download_log_id';
+		$order          = 'DESC' === strtoupper( $args['order'] ) ? 'DESC' : 'ASC';
+		$orderby_sql    = sanitize_sql_orderby( "{$orderby} {$order}" );
 		$query[]        = "ORDER BY {$orderby_sql}";
 
 		if ( 0 < $args['limit'] ) {

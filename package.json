@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "3.4.0",
+  "version": "4.7.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -9,52 +9,119 @@
   },
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
+  "config": {
+    "wp_org_slug": "woocommerce"
+  },
   "scripts": {
-    "build": "grunt",
+    "install": "lerna bootstrap",
+    "build": "./bin/build-zip.sh",
+    "build:core": "grunt && npm run makepot",
+    "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
-    "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
-    "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
-    "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register"
+    "build:packages": "lerna run build",
+    "build:zip": "npm run build && composer install && npm run build:dev",
+    "build:assets": "grunt assets",
+    "lint:js": "eslint assets/js --ext=js",
+    "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
+    "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",
+    "test:e2e": "npm explore @woocommerce/e2e-environment -- npm run test:e2e",
+    "test:e2e-debug": "npm explore @woocommerce/e2e-environment -- npm run test:e2e-debug",
+    "test:e2e-dev": "npm explore @woocommerce/e2e-environment -- npm run test:e2e-dev",
+    "makepot": "composer run-script makepot",
+    "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
+    "publish-packages": "lerna publish from-package",
+    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "autoprefixer": "~8.6.2",
-    "babel": "^6.5.2",
-    "babel-cli": "^6.14.0",
-    "babel-eslint": "^8.2.3",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-es2015": "^6.14.0",
-    "babel-preset-stage-2": "^6.13.0",
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
-    "chromedriver": "^2.40.0",
-    "config": "^1.24.0",
-    "cross-env": "^5.1.6",
-    "grunt": "^1.0.3",
-    "grunt-checktextdomain": "~1.0.1",
-    "grunt-contrib-clean": "~1.1.0",
-    "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-cssmin": "~2.2.1",
-    "grunt-contrib-jshint": "~1.1.0",
-    "grunt-contrib-uglify": "~3.3.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-phpcs": "~0.4.0",
-    "grunt-postcss": "~0.9.0",
-    "grunt-prompt": "^1.3.3",
-    "grunt-rtlcss": "~2.0.1",
-    "grunt-sass": "~2.1.0",
-    "grunt-shell": "~2.1.0",
-    "grunt-stylelint": "~0.10.0",
-    "grunt-wp-i18n": "~1.0.1",
-    "istanbul": "^1.0.0-alpha",
-    "mocha": "^5.2.0",
-    "stylelint": "~9.2.1",
-    "wc-e2e-page-objects": "0.10.0"
+    "@babel/cli": "7.12.0",
+    "@babel/core": "7.12.0",
+    "@babel/polyfill": "7.11.5",
+    "@babel/preset-env": "7.12.0",
+    "@babel/register": "7.12.0",
+    "@typescript-eslint/eslint-plugin": "3.10.1",
+    "@typescript-eslint/experimental-utils": "3.10.1",
+    "@typescript-eslint/parser": "3.10.1",
+    "@woocommerce/api": "file:tests/e2e/api",
+    "@woocommerce/e2e-core-tests": "file:tests/e2e/core-tests",
+    "@woocommerce/e2e-environment": "file:tests/e2e/env",
+    "@woocommerce/e2e-utils": "file:tests/e2e/utils",
+    "@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
+    "@wordpress/babel-preset-default": "3.0.2",
+    "@wordpress/e2e-test-utils": "4.6.0",
+    "@wordpress/eslint-plugin": "7.1.0",
+    "autoprefixer": "9.8.6",
+    "babel-eslint": "10.1.0",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
+    "commander": "4.1.1",
+    "config": "3.3.2",
+    "cross-env": "6.0.3",
+    "deasync": "0.1.20",
+    "eslint": "6.8.0",
+    "eslint-config-wpcalypso": "5.0.0",
+    "eslint-plugin-jest": "23.20.0",
+    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
+    "grunt": "1.3.0",
+    "grunt-contrib-clean": "2.0.0",
+    "grunt-contrib-concat": "1.0.1",
+    "grunt-contrib-copy": "1.0.0",
+    "grunt-contrib-cssmin": "3.0.0",
+    "grunt-contrib-uglify": "4.0.1",
+    "grunt-contrib-watch": "1.1.0",
+    "grunt-phpcs": "0.4.0",
+    "grunt-postcss": "0.9.0",
+    "grunt-rtlcss": "2.0.2",
+    "grunt-sass": "3.1.0",
+    "grunt-stylelint": "0.15.0",
+    "gruntify-eslint": "5.0.0",
+    "husky": "4.3.0",
+    "istanbul": "1.0.0-alpha.2",
+    "jest": "25.1.0",
+    "lerna": "3.22.1",
+    "lint-staged": "9.5.0",
+    "mocha": "7.2.0",
+    "node-sass": "4.13.1",
+    "prettier": "npm:wp-prettier@2.0.5",
+    "puppeteer": "^2.1.1",
+    "stylelint": "12.0.1",
+    "stylelint-config-wordpress": "16.0.0",
+    "typescript": "3.9.7",
+    "webpack": "4.44.1",
+    "webpack-cli": "3.3.12",
+    "wp-textdomain": "1.0.1"
   },
   "engines": {
-    "node": ">=8.9.3",
-    "npm": ">=5.5.1"
+    "node": "^10.22.0",
+    "npm": "^6.14.6"
   },
-  "dependencies": {
-    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
-  }
+  "husky": {
+    "hooks": {
+      "post-merge": "./bin/post-merge.sh",
+      "pre-commit": "lint-staged",
+      "pre-push": "./bin/pre-push.sh"
+    }
+  },
+  "lint-staged": {
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer run-script phpcs-pre-commit"
+    ],
+    "*.scss": [
+      "stylelint --syntax=scss --fix",
+      "git add"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.ts": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "browserslist": [
+    "> 0.1%",
+    "ie 8",
+    "ie 9"
+  ]
 }

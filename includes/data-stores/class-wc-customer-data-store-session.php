@@ -109,7 +109,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
-				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
+				if ( isset( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
 					$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
 				}
 			}

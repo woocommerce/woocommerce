@@ -1,8 +1,8 @@
 <?php
 /**
- * Settings for PayPal Gateway.
+ * Settings for PayPal Standard Gateway.
  *
- * @package WooCommerce/Classes/Payment
+ * @package WooCommerce\Classes\Payment
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -153,7 +153,7 @@ return array(
 	),
 	'api_signature'         => array(
 		'title'       => __( 'Live API signature', 'woocommerce' ),
-		'type'        => 'text',
+		'type'        => 'password',
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
@@ -177,7 +177,7 @@ return array(
 	),
 	'sandbox_api_signature' => array(
 		'title'       => __( 'Sandbox API signature', 'woocommerce' ),
-		'type'        => 'text',
+		'type'        => 'password',
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,

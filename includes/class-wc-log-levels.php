@@ -3,7 +3,7 @@
  * Standard log levels
  *
  * @version 3.2.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -95,7 +95,7 @@ abstract class WC_Log_Levels {
 	/**
 	 * Translate severity integer to level string.
 	 *
-	 * @param int $severity Serevity level.
+	 * @param int $severity Severity level.
 	 * @return bool|string False if not recognized. Otherwise string representation of level.
 	 */
 	public static function get_severity_level( $severity ) {

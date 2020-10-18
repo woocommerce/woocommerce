@@ -26,7 +26,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		// Always set a access granted date.
 		if ( is_null( $download->get_access_granted( 'edit' ) ) ) {
-			$download->set_access_granted( current_time( 'timestamp', true ) );
+			$download->set_access_granted( time() );
 		}
 
 		$data = array(
@@ -61,12 +61,12 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			apply_filters( 'woocommerce_downloadable_file_permission_format', $format, $data )
 		);
 
-		do_action( 'woocommerce_grant_product_download_access', $data );
-
 		if ( $result ) {
 			$download->set_id( $wpdb->insert_id );
 			$download->apply_changes();
 		}
+
+		do_action( 'woocommerce_grant_product_download_access', $data );
 	}
 
 	/**
@@ -281,7 +281,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'user_email'  => '',
 				'user_id'     => '',
 				'order_id'    => '',
@@ -345,7 +346,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$query[] = $wpdb->prepare( 'LIMIT %d, %d', absint( $args['limit'] ) * absint( $args['page'] - 1 ), absint( $args['limit'] ) );
 		}
 
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$results = $wpdb->get_results( implode( ' ', $query ), $get_results_output );
 
 		switch ( $args['return'] ) {

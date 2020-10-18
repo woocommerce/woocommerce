@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "packageNames": ["automattic/jetpack-autoloader"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "depTypeList": ["devDependencies"],
+      "extends": ["schedule:monthly"]
+    }
+  ],
+  "ignoreDeps": [
+    "woocommerce/action-scheduler",
+    "woocommerce/woocommerce-admin",
+    "woocommerce/woocommerce-blocks",
+    "woocommerce/woocommerce-rest-api"
+  ]
+}

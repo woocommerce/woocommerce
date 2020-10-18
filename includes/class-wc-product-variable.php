@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes/Products
+ * @package WooCommerce\Classes\Products
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -282,13 +282,21 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
-	 * @return array
+	 * @param string $return Optional. The format to return the results in. Can be 'array' to return an array of variation data or 'objects' for the product objects. Default 'array'.
+	 *
+	 * @return array[]|WC_Product_Variation[]
 	 */
-	public function get_available_variations() {
+	public function get_available_variations( $return = 'array' ) {
+		$variation_ids        = $this->get_children();
 		$available_variations = array();
 
-		foreach ( $this->get_children() as $child_id ) {
-			$variation = wc_get_product( $child_id );
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $variation_ids );
+		}
+
+		foreach ( $variation_ids as $variation_id ) {
+
+			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
 			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
@@ -300,11 +308,39 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$available_variations[] = $this->get_available_variation( $variation );
+			if ( 'array' === $return ) {
+				$available_variations[] = $this->get_available_variation( $variation );
+			} else {
+				$available_variations[] = $variation;
+			}
 		}
-		$available_variations = array_filter( $available_variations );
+
+		if ( 'array' === $return ) {
+			$available_variations = array_values( array_filter( $available_variations ) );
+		}
 
 		return $available_variations;
+	}
+
+	/**
+	 * Check if a given variation is currently available.
+	 *
+	 * @param WC_Product_Variation $variation Variation to check.
+	 *
+	 * @return bool True if the variation is available, false otherwise.
+	 */
+	private function variation_is_available( WC_Product_Variation $variation ) {
+		// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
+		if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			return false;
+		}
+
+		// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+		if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -325,7 +361,8 @@ class WC_Product_Variable extends WC_Product {
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
 		return apply_filters(
-			'woocommerce_available_variation', array(
+			'woocommerce_available_variation',
+			array(
 				'attributes'            => $variation->get_variation_attributes(),
 				'availability_html'     => wc_get_stock_html( $variation ),
 				'backorders_allowed'    => $variation->backorders_allowed(),
@@ -350,7 +387,9 @@ class WC_Product_Variable extends WC_Product {
 				'variation_is_visible'  => $variation->variation_is_visible(),
 				'weight'                => $variation->get_weight(),
 				'weight_html'           => wc_format_weight( $variation->get_weight() ),
-			), $this, $variation
+			),
+			$this,
+			$variation
 		);
 	}
 
@@ -402,27 +441,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @since 3.0.0
 	 */
 	public function validate_props() {
-		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		parent::validate_props();
+
 		if ( ! $this->get_manage_stock() ) {
-			$this->set_stock_quantity( '' );
-			$this->set_backorders( 'no' );
 			$this->data_store->sync_stock_status( $this );
-
-			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'onbackorder' );
-
-			// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
-			$this->set_stock_status( 'outofstock' );
-
-			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
-			$this->set_stock_status( 'instock' );
-
-			// Otherwise revert to status the children have.
-		} else {
-			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
 	}
 
@@ -433,25 +455,41 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function save() {
 		$this->validate_props();
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-			// Get names before save.
-			$previous_name = $this->data['name'];
-			$new_name      = $this->get_name( 'edit' );
-
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
-
-			$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
-			$this->data_store->sync_managed_variation_stock_status( $this );
-
+		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
+
+		/**
+		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		// Get names before save.
+		$previous_name = $this->data['name'];
+		$new_name      = $this->get_name( 'edit' );
+
+		if ( $this->get_id() ) {
+			$this->data_store->update( $this );
+		} else {
+			$this->data_store->create( $this );
+		}
+
+		$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
+		$this->data_store->sync_managed_variation_stock_status( $this );
+
+		/**
+		 * Trigger action after saving to the DB.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		return $this->get_id();
 	}
 
 	/*
@@ -503,7 +541,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_weight ) {
 			$has_weight = $this->data_store->child_has_weight( $this );
-			set_transient( $transient_name, $has_weight, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_weight, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_weight;
@@ -520,7 +558,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_dimension ) {
 			$has_dimension = $this->data_store->child_has_dimensions( $this );
-			set_transient( $transient_name, $has_dimension, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_dimension, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_dimension;
@@ -555,6 +593,7 @@ class WC_Product_Variable extends WC_Product {
 		return true;
 	}
 
+
 	/*
 	|--------------------------------------------------------------------------
 	| Sync with child variations.
@@ -586,10 +625,13 @@ class WC_Product_Variable extends WC_Product {
 			}
 
 			wc_do_deprecated_action(
-				'woocommerce_variable_product_sync', array(
+				'woocommerce_variable_product_sync',
+				array(
 					$product->get_id(),
 					$product->get_visible_children(),
-				), '3.0', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product'
+				),
+				'3.0',
+				'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product'
 			);
 		}
 

@@ -11,8 +11,7 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  * @version 2.6.0
  */
 

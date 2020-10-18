@@ -15,7 +15,8 @@ Welcome to the WooCommerce repository on GitHub. Here you can browse the source,
 If you are not a developer, please use the [WooCommerce plugin page](https://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
 ## Documentation
-* [WooCommerce Documentation](https://docs.woocommerce.com/documentation/plugins/woocommerce/)
+* [WooCommerce Documentation](https://docs.woocommerce.com/)
+* [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
@@ -25,13 +26,13 @@ To disclose a security issue to our team, [please submit a report via HackerOne 
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
-* The [WooCommerce premium support portal](https://woocommerce.com/my-account/create-a-ticket/) for customers who have purchased themes or extensions.
+* If you have a problem, you may want to start with the [self help guide](https://docs.woocommerce.com/document/woocommerce-self-service-guide/).
+* The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/ ) for customers who have purchased themes or extensions.
 * [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
+* The WooCommerce Help and Share Facebook group.
+* For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
 Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
-
-## Contributing new features to the WooCommerce REST API
-If you'd like to add a feature to the next version of the REST API, contribute here: https://github.com/woocommerce/wc-api-dev

@@ -4,7 +4,7 @@
  *
  * Admin Settings API used by Integrations, Shipping Methods, and Payment Gateways.
  *
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -708,7 +708,7 @@ abstract class WC_Settings_API {
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
+							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_html( $option_value ); ?></option>
 						<?php endforeach; ?>
 					</select>
 					<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
@@ -761,11 +761,11 @@ abstract class WC_Settings_API {
 							<?php if ( is_array( $option_value ) ) : ?>
 								<optgroup label="<?php echo esc_attr( $option_key ); ?>">
 									<?php foreach ( $option_value as $option_key_inner => $option_value_inner ) : ?>
-										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( (string) $option_key_inner, $value, true ), true ); ?>><?php echo esc_attr( $option_value_inner ); ?></option>
+										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( (string) $option_key_inner, $value, true ), true ); ?>><?php echo esc_html( $option_value_inner ); ?></option>
 									<?php endforeach; ?>
 								</optgroup>
 							<?php else : ?>
-								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( (string) $option_key, $value, true ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
+								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( (string) $option_key, $value, true ), true ); ?>><?php echo esc_html( $option_value ); ?></option>
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</select>
@@ -874,7 +874,8 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_textarea_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses( trim( stripslashes( $value ) ),
+		return wp_kses(
+			trim( stripslashes( $value ) ),
 			array_merge(
 				array(
 					'iframe' => array(

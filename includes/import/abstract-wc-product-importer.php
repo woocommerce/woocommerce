@@ -2,9 +2,11 @@
 /**
  * Abstract Product importer
  *
- * @package  WooCommerce/Import
+ * @package  WooCommerce\Import
  * @version  3.1.0
  */
+
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -84,7 +86,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * (default value: 0)
 	 *
 	 * @var int
-	 * @access protected
 	 */
 	protected $start_time = 0;
 
@@ -121,7 +122,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	public function get_parsed_data() {
-		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this->get_raw_data() );
+		/**
+		 * Filter product importer parsed data.
+		 *
+		 * @param array $parsed_data Parsed data.
+		 * @param WC_Product_Importer $importer Importer instance.
+		 */
+		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this );
 	}
 
 	/**
@@ -153,7 +160,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return 0;
 		}
 
-		return absint( min( round( ( $this->file_position / $size ) * 100 ), 100 ) );
+		return absint( min( NumberUtil::round( ( $this->file_position / $size ) * 100 ), 100 ) );
 	}
 
 	/**
@@ -174,13 +181,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
-			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
+			try {
+				// Prevent getting "variation_invalid_id" error message from Variation Data Store.
+				if ( 'variation' === $data['type'] ) {
+					$id = wp_update_post(
+						array(
+							'ID'        => $id,
+							'post_type' => 'product_variation',
+						)
+					);
+				}
 
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
+				$product = wc_get_product_object( $data['type'], $id );
+			} catch ( WC_Data_Exception $e ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_' . $e->getErrorCode(), $e->getMessage(), array( 'status' => 401 ) );
 			}
-
-			$product = new $classname( $id );
 		} elseif ( ! empty( $data['id'] ) ) {
 			$product = wc_get_product( $id );
 
@@ -196,7 +211,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				);
 			}
 		} else {
-			$product = new WC_Product_Simple( $id );
+			$product = wc_get_product_object( 'simple', $id );
 		}
 
 		return apply_filters( 'woocommerce_product_import_get_product_object', $product, $data );
@@ -207,11 +222,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @throws Exception If item cannot be processed.
 	 * @param  array $data Raw CSV data.
-	 * @return array|WC_Error
+	 * @return array|WP_Error
 	 */
 	protected function process_item( $data ) {
 		try {
 			do_action( 'woocommerce_product_import_before_process_item', $data );
+			$data = apply_filters( 'woocommerce_product_import_process_item_data', $data );
 
 			// Get product ID from SKU if created during the importation.
 			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) ) {
@@ -234,7 +250,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( 'external' === $object->get_type() ) {
-				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
+				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
+			}
+
+			if ( 'variation' === $object->get_type() ) {
+				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
+					$data['status'] = 0; // Variations cannot be drafts - set to private.
+				}
 			}
 
 			if ( 'importing' === $object->get_status() ) {
@@ -432,6 +454,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// Stop if parent is a product variation.
+		if ( $parent->is_type( 'variation' ) ) {
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
@@ -640,13 +667,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// If the attribute does not exist, create it.
-		$attribute_id = wc_create_attribute( array(
-			'name'         => $raw_name,
-			'slug'         => $attribute_name,
-			'type'         => 'select',
-			'order_by'     => 'menu_order',
-			'has_archives' => false,
-		) );
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => $raw_name,
+				'slug'         => $attribute_name,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
 
 		if ( is_wp_error( $attribute_id ) ) {
 			throw new Exception( $attribute_id->get_error_message(), 400 );
@@ -657,15 +686,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		register_taxonomy(
 			$taxonomy_name,
 			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_' . $taxonomy_name, array(
-				'labels'       => array(
-					'name' => $raw_name,
-				),
-				'hierarchical' => true,
-				'show_ui'      => false,
-				'query_var'    => true,
-				'rewrite'      => false,
-			) )
+			apply_filters(
+				'woocommerce_taxonomy_args_' . $taxonomy_name,
+				array(
+					'labels'       => array(
+						'name' => $raw_name,
+					),
+					'hierarchical' => true,
+					'show_ui'      => false,
+					'query_var'    => true,
+					'rewrite'      => false,
+				)
+			)
 		);
 
 		// Set product attributes global.
@@ -738,12 +770,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * separators.
 	 *
 	 * @since  3.2.0
-	 * @param  string $value Value to explode.
+	 * @param  string $value     Value to explode.
+	 * @param  string $separator Separator separating each value. Defaults to comma.
 	 * @return array
 	 */
-	protected function explode_values( $value ) {
+	protected function explode_values( $value, $separator = ',' ) {
 		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( ',', $value );
+		$values = explode( $separator, $value );
 		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
 
 		return $values;
@@ -761,21 +794,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * The exporter prepends a ' to fields that start with a - which causes
-	 * issues with negative numbers. This removes the ' if the input is still a valid
-	 * number after removal.
+	 * The exporter prepends a ' to escape fields that start with =, +, - or @.
+	 * Remove the prepended ' character preceding those characters.
 	 *
-	 * @since 3.3.0
-	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @since 3.5.2
+	 * @param  string $value A string that may or may not have been escaped with '.
 	 * @return string
 	 */
-	protected function unescape_negative_number( $value ) {
-		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = trim( $value, "'" );
-			if ( is_numeric( $unescaped ) ) {
-				return $unescaped;
-			}
+	protected function unescape_data( $value ) {
+		$active_content_triggers = array( "'=", "'+", "'-", "'@" );
+
+		if ( in_array( mb_substr( $value, 0, 2 ), $active_content_triggers, true ) ) {
+			$value = mb_substr( $value, 1 );
 		}
+
 		return $value;
 	}
+
 }
