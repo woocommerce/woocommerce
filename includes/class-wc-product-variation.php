@@ -4,7 +4,7 @@
  *
  * The WooCommerce product variation class handles product variation data.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  */
 
@@ -49,7 +49,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->data['tax_class'] = 'parent';
+		$this->data['tax_class']         = 'parent';
+		$this->data['attribute_summary'] = '';
 		parent::__construct( $product );
 	}
 
@@ -109,15 +110,18 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get variation attribute values. Keys are prefixed with attribute_, as stored.
+	 * Get variation attribute values. Keys are prefixed with attribute_, as stored, unless $with_prefix is false.
 	 *
-	 * @return array of attributes and their values for this variation
+	 * @param bool $with_prefix Whether keys should be prepended with attribute_ or not, default is true.
+	 * @return array of attributes and their values for this variation.
 	 */
-	public function get_variation_attributes() {
+	public function get_variation_attributes( $with_prefix = true ) {
 		$attributes           = $this->get_attributes();
 		$variation_attributes = array();
+		$prefix               = $with_prefix ? 'attribute_' : '';
+
 		foreach ( $attributes as $key => $value ) {
-			$variation_attributes[ 'attribute_' . $key ] = $value;
+			$variation_attributes[ $prefix . $key ] = $value;
 		}
 		return $variation_attributes;
 	}
@@ -167,7 +171,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$data = $this->get_variation_attributes();
 		}
 
-		$data = array_filter( $data );
+		$data = array_filter( $data, 'wc_array_filter_default_attributes' );
 
 		if ( empty( $data ) ) {
 			return $url;
@@ -187,11 +191,13 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function add_to_cart_url() {
 		$url = $this->is_purchasable() ? remove_query_arg(
-			'added-to-cart', add_query_arg(
+			'added-to-cart',
+			add_query_arg(
 				array(
 					'variation_id' => $this->get_id(),
 					'add-to-cart'  => $this->get_parent_id(),
-				), $this->get_permalink()
+				),
+				$this->get_permalink()
 			)
 		) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
@@ -413,6 +419,33 @@ class WC_Product_Variation extends WC_Product_Simple {
 		return apply_filters( $this->get_hook_prefix() . 'catalog_visibility', $this->parent_data['catalog_visibility'], $this );
 	}
 
+	/**
+	 * Get attribute summary.
+	 *
+	 * By default, attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @since 3.6.0
+	 * @return string
+	 */
+	public function get_attribute_summary( $context = 'view' ) {
+		return $this->get_prop( 'attribute_summary', $context );
+	}
+
+
+	/**
+	 * Set attribute summary.
+	 *
+	 * By default, attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @since 3.6.0
+	 * @param string $attribute_summary Summary of attribute names and values assigned to the variation.
+	 */
+	public function set_attribute_summary( $attribute_summary ) {
+		$this->set_prop( 'attribute_summary', $attribute_summary );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -426,23 +459,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param array $parent_data parent data array for this variation.
 	 */
 	public function set_parent_data( $parent_data ) {
-		$parent_data = wp_parse_args( $parent_data, array(
-			'title'              => '',
-			'status'             => '',
-			'sku'                => '',
-			'manage_stock'       => 'no',
-			'backorders'         => 'no',
-			'stock_quantity'     => '',
-			'weight'             => '',
-			'length'             => '',
-			'width'              => '',
-			'height'             => '',
-			'tax_class'          => '',
-			'shipping_class_id'  => 0,
-			'image_id'           => 0,
-			'purchase_note'      => '',
-			'catalog_visibility' => 'visible',
-		) );
+		$parent_data = wp_parse_args(
+			$parent_data,
+			array(
+				'title'              => '',
+				'status'             => '',
+				'sku'                => '',
+				'manage_stock'       => 'no',
+				'backorders'         => 'no',
+				'stock_quantity'     => '',
+				'weight'             => '',
+				'length'             => '',
+				'width'              => '',
+				'height'             => '',
+				'tax_class'          => '',
+				'shipping_class_id'  => 0,
+				'image_id'           => 0,
+				'purchase_note'      => '',
+				'catalog_visibility' => 'visible',
+			)
+		);
 
 		// Normalize tax class.
 		$parent_data['tax_class'] = sanitize_title( $parent_data['tax_class'] );
@@ -546,5 +582,22 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$valid_classes[] = 'parent';
 
 		return $valid_classes;
+	}
+
+	/**
+	 * Delete variation, set the ID to 0, and return result.
+	 *
+	 * @since  4.4.0
+	 * @param  bool $force_delete Should the variation be deleted permanently.
+	 * @return bool result
+	 */
+	public function delete( $force_delete = false ) {
+		$variation_id = $this->get_id();
+
+		if ( ! parent::delete( $force_delete ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

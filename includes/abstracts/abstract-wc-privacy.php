@@ -3,7 +3,7 @@
  * WooCommerce abstract privacy class.
  *
  * @since 3.4.0
- * @package WooCommerce/Abstracts
+ * @package WooCommerce\Abstracts
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * privacy data to be exported and privacy data to be deleted.
  *
  * @version  3.4.0
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 abstract class WC_Abstract_Privacy {
 	/**
@@ -61,9 +61,9 @@ abstract class WC_Abstract_Privacy {
 	 * @param int    $erase_priority  Erase priority.
 	 */
 	public function __construct( $name = '', $export_priority = 5, $erase_priority = 10 ) {
-		$this->name = $name;
+		$this->name            = $name;
 		$this->export_priority = $export_priority;
-		$this->erase_priority = $erase_priority;
+		$this->erase_priority  = $erase_priority;
 		$this->init();
 	}
 

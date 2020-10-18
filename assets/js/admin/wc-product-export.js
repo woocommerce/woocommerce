@@ -15,6 +15,7 @@
 
 		// Events.
 		$form.on( 'submit', { productExportForm: this }, this.onSubmit );
+		$form.find( '.woocommerce-exporter-types' ).on( 'change', { productExportForm: this }, this.exportTypeFields );
 	};
 
 	/**
@@ -43,7 +44,8 @@
 		var $this         = this,
 			selected_columns = $( '.woocommerce-exporter-columns' ).val(),
 			export_meta      = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
-			export_types     = $( '.woocommerce-exporter-types' ).val();
+			export_types     = $( '.woocommerce-exporter-types' ).val(),
+			export_category  = $( '.woocommerce-exporter-category' ).val();
 
 		$.ajax( {
 			type: 'POST',
@@ -56,6 +58,7 @@
 				selected_columns : selected_columns,
 				export_meta      : export_meta,
 				export_types     : export_types,
+				export_category  : export_category,
 				filename         : filename,
 				security         : wc_product_export_params.export_nonce
 			},
@@ -80,6 +83,20 @@
 		} ).fail( function( response ) {
 			window.console.log( response );
 		} );
+	};
+
+	/**
+	 * Handle fields per export type.
+	 */
+	productExportForm.prototype.exportTypeFields = function() {
+		var exportCategory = $( '.woocommerce-exporter-category' );
+
+		if ( -1 !== $.inArray( 'variation', $( this ).val() ) ) {
+			exportCategory.closest( 'tr' ).hide();
+			exportCategory.val( '' ).change(); // Reset WooSelect selected value.
+		} else {
+			exportCategory.closest( 'tr' ).show();
+		}
 	};
 
 	/**

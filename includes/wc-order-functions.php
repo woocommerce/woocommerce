@@ -4,7 +4,7 @@
  *
  * Functions for order specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.4.0
  */
 
@@ -73,7 +73,7 @@ function wc_get_orders( $args ) {
  *
  * @param  mixed $the_order Post object or post ID of the order.
  *
- * @return bool|WC_Order|WC_Refund
+ * @return bool|WC_Order|WC_Order_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
@@ -125,6 +125,16 @@ function wc_get_is_paid_statuses() {
 }
 
 /**
+ * Get list of statuses which are consider 'pending payment'.
+ *
+ * @since  3.6.0
+ * @return array
+ */
+function wc_get_is_pending_statuses() {
+	return apply_filters( 'woocommerce_order_is_pending_statuses', array( 'pending' ) );
+}
+
+/**
  * Get the nice name for an order status.
  *
  * @since  2.2
@@ -136,6 +146,21 @@ function wc_get_order_status_name( $status ) {
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
 	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
 	return $status;
+}
+
+/**
+ * Generate an order key with prefix.
+ *
+ * @since 3.5.4
+ * @param string $key Order key without a prefix. By default generates a 13 digit secret.
+ * @return string The order key.
+ */
+function wc_generate_order_key( $key = '' ) {
+	if ( '' === $key ) {
+		$key = wp_generate_password( 13, false );
+	}
+
+	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 }
 
 /**
@@ -294,7 +319,6 @@ function wc_register_order_type( $type, $args = array() ) {
 /**
  * Return the count of processing orders.
  *
- * @access public
  * @return int
  */
 function wc_processing_order_count() {
@@ -357,7 +381,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp', true ) );
+	$download->set_access_granted( time() );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
@@ -446,7 +470,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	// Do the same for regular cache.
-	WC_Cache_Helper::incr_cache_prefix( 'orders' );
+	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
@@ -502,6 +526,7 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
 			$refund->set_reason( $args['reason'] );
@@ -664,23 +689,42 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
  * @param array    $refunded_line_items Refunded items list.
  */
 function wc_restock_refunded_items( $order, $refunded_line_items ) {
+	if ( ! apply_filters( 'woocommerce_can_restock_refunded_items', true, $order, $refunded_line_items ) ) {
+		return;
+	}
+
 	$line_items = $order->get_items();
 
 	foreach ( $line_items as $item_id => $item ) {
 		if ( ! isset( $refunded_line_items[ $item_id ], $refunded_line_items[ $item_id ]['qty'] ) ) {
 			continue;
 		}
-		$product = $item->get_product();
+		$product            = $item->get_product();
+		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
+		$qty_to_refund      = $refunded_line_items[ $item_id ]['qty'];
 
-		if ( $product && $product->managing_stock() ) {
-			$old_stock = $product->get_stock_quantity();
-			$new_stock = wc_update_product_stock( $product, $refunded_line_items[ $item_id ]['qty'], 'increase' );
-
-			/* translators: 1: product ID 2: old stock level 3: new stock level */
-			$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
-
-			do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
+		if ( ! $item_stock_reduced || ! $qty_to_refund || ! $product || ! $product->managing_stock() ) {
+			continue;
 		}
+
+		$old_stock = $product->get_stock_quantity();
+		$new_stock = wc_update_product_stock( $product, $qty_to_refund, 'increase' );
+
+		// Update _reduced_stock meta to track changes.
+		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
+
+		if ( 0 < $item_stock_reduced ) {
+			$item->update_meta_data( '_reduced_stock', $item_stock_reduced );
+		} else {
+			$item->delete_meta_data( '_reduced_stock' );
+		}
+
+		/* translators: 1: product ID 2: old stock level 3: new stock level */
+		$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+
+		$item->save();
+
+		do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
 	}
 }
 
@@ -735,14 +779,18 @@ function wc_order_fully_refunded( $order_id ) {
 	}
 
 	// Create the refund object.
+	wc_switch_to_site_locale();
 	wc_create_refund(
 		array(
 			'amount'     => $max_refund,
-			'reason'     => __( 'Order fully refunded', 'woocommerce' ),
+			'reason'     => __( 'Order fully refunded.', 'woocommerce' ),
 			'order_id'   => $order_id,
 			'line_items' => array(),
 		)
 	);
+	wc_restore_locale();
+
+	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
@@ -777,7 +825,7 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
 			}
 		}
 	}
@@ -816,12 +864,15 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+	} elseif ( $order->has_status( 'cancelled' ) ) {
+		$order->get_data_store()->release_held_coupons( $order, true );
+		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_used_coupons() ) > 0 ) {
-		foreach ( $order->get_used_coupons() as $code ) {
+	if ( count( $order->get_coupon_codes() ) > 0 ) {
+		foreach ( $order->get_coupon_codes() as $code ) {
 			if ( ! $code ) {
 				continue;
 			}
@@ -838,10 +889,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					$coupon->decrease_usage_count( $used_by );
 					break;
 				case 'increase':
-					$coupon->increase_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by, $order );
 					break;
 			}
 		}
+		$order->get_data_store()->release_held_coupons( $order, true );
 	}
 }
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
@@ -887,7 +939,7 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @param int $order_id Order ID.
  */
 function wc_sanitize_order_id( $order_id ) {
-	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
+	return (int) filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
 }
 add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
 
@@ -908,13 +960,15 @@ function wc_get_order_note( $data ) {
 	}
 
 	return (object) apply_filters(
-		'woocommerce_get_order_note', array(
+		'woocommerce_get_order_note',
+		array(
 			'id'            => (int) $data->comment_ID,
 			'date_created'  => wc_string_to_datetime( $data->comment_date ),
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
-		), $data
+		),
+		$data
 	);
 }
 

@@ -4,7 +4,7 @@
  *
  * Functions for coupon specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.0.0
  */
 
@@ -17,7 +17,8 @@ defined( 'ABSPATH' ) || exit;
  */
 function wc_get_coupon_types() {
 	return (array) apply_filters(
-		'woocommerce_coupon_discount_types', array(
+		'woocommerce_coupon_discount_types',
+		array(
 			'percent'       => __( 'Percentage discount', 'woocommerce' ),
 			'fixed_cart'    => __( 'Fixed cart discount', 'woocommerce' ),
 			'fixed_product' => __( 'Fixed product discount', 'woocommerce' ),
@@ -77,11 +78,11 @@ function wc_coupons_enabled() {
  */
 function wc_get_coupon_code_by_id( $id ) {
 	$data_store = WC_Data_Store::load( 'coupon' );
-	return (string) $data_store->get_code_by_id( $id );
+	return empty( $id ) ? '' : (string) $data_store->get_code_by_id( $id );
 }
 
 /**
- * Get coupon code by ID.
+ * Get coupon ID by code.
  *
  * @since 3.0.0
  * @param string $code    Coupon code.
@@ -89,6 +90,11 @@ function wc_get_coupon_code_by_id( $id ) {
  * @return int
  */
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
+
+	if ( empty( $code ) ) {
+		return 0;
+	}
+
 	$data_store = WC_Data_Store::load( 'coupon' );
 	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 

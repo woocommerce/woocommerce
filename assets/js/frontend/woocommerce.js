@@ -14,23 +14,29 @@ jQuery( function( $ ) {
 		}
 	});
 
-	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
-		Cookies.set( 'store_notice', 'hidden', { path: '/' } );
-		$( '.woocommerce-store-notice' ).hide();
-	});
+	var noticeID   = $( '.woocommerce-store-notice' ).data( 'notice-id' ) || '',
+		cookieName = 'store_notice' + noticeID;
 
 	// Check the value of that cookie and show/hide the notice accordingly
-	if ( 'hidden' === Cookies.get( 'store_notice' ) ) {
+	if ( 'hidden' === Cookies.get( cookieName ) ) {
 		$( '.woocommerce-store-notice' ).hide();
 	} else {
 		$( '.woocommerce-store-notice' ).show();
 	}
 
+	// Set a cookie and hide the store notice when the dismiss button is clicked
+	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
+		Cookies.set( cookieName, 'hidden', { path: '/' } );
+		$( '.woocommerce-store-notice' ).hide();
+		event.preventDefault();
+	});
+
 	// Make form field descriptions toggle on focus.
-	$( document.body ).on( 'click', function() {
-		$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
-	} );
+	if ( $( '.woocommerce-input-wrapper span.description' ).length ) {
+		$( document.body ).on( 'click', function() {
+			$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
+		} );
+	}
 
 	$( '.woocommerce-input-wrapper' ).on( 'click', function( event ) {
 		event.stopPropagation();
@@ -66,19 +72,27 @@ jQuery( function( $ ) {
 
 	// Common scroll to element code.
 	$.scroll_to_notices = function( scrollElement ) {
-		var isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
-
 		if ( scrollElement.length ) {
-			if ( isSmoothScrollSupported ) {
-				scrollElement[0].scrollIntoView({
-					behavior: 'smooth',
-					block:    'center'
-				});
-			} else {
-				$( 'html, body' ).animate( {
-					scrollTop: ( scrollElement.offset().top - 100 )
-				}, 1000 );
-			}
+			$( 'html, body' ).animate( {
+				scrollTop: ( scrollElement.offset().top - 100 )
+			}, 1000 );
 		}
 	};
+
+	// Show password visiblity hover icon on woocommerce forms
+	$( '.woocommerce form .woocommerce-Input[type="password"]' ).wrap( '<span class="password-input"></span>' );
+	// Add 'password-input' class to the password wrapper in checkout page.
+	$( '.woocommerce form input' ).filter(':password').parent('span').addClass('password-input');
+	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
+
+	$( '.show-password-input' ).click(
+		function() {
+			$( this ).toggleClass( 'display-password' );
+			if ( $( this ).hasClass( 'display-password' ) ) {
+				$( this ).siblings( ['input[type="password"]'] ).prop( 'type', 'text' );
+			} else {
+				$( this ).siblings( 'input[type="text"]' ).prop( 'type', 'password' );
+			}
+		}
+	);
 });

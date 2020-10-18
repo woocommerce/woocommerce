@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -51,7 +53,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			),
 			'timeout'     => 60,
 			'httpversion' => '1.1',
-			'user-agent'  => 'WooCommerce/' . WC_VERSION,
+			'user-agent'  => 'WooCommerce/' . Constants::get_constant( 'WC_VERSION' ),
 		);
 
 		// Post back to get a response.
@@ -89,11 +91,11 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		$order_id    = wc_clean( wp_unslash( $_REQUEST['cm'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		$status      = wc_clean( strtolower( wp_unslash( $_REQUEST['st'] ) ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$amount      = wc_clean( wp_unslash( $_REQUEST['amt'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$amount      = isset( $_REQUEST['amt'] ) ? wc_clean( wp_unslash( $_REQUEST['amt'] ) ) : 0; // WPCS: input var ok, CSRF ok, sanitization ok.
 		$transaction = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		$order       = $this->get_paypal_order( $order_id );
 
-		if ( ! $order || ! $order->has_status( 'pending' ) ) {
+		if ( ! $order || ! $order->needs_payment() ) {
 			return false;
 		}
 
@@ -102,24 +104,24 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		if ( $transaction_result ) {
 			WC_Gateway_Paypal::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
 
-			update_post_meta( $order->get_id(), '_paypal_status', $status );
-			update_post_meta( $order->get_id(), '_transaction_id', $transaction );
+			$order->add_meta_data( '_paypal_status', $status );
+			$order->set_transaction_id( $transaction );
 
 			if ( 'completed' === $status ) {
-				if ( $order->get_total() !== $amount ) {
+				if ( number_format( $order->get_total(), 2, '.', '' ) !== number_format( $amount, 2, '.', '' ) ) {
 					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					/* translators: 1: Payment amount */
 					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 				} else {
-					$this->payment_complete( $order, $transaction, __( 'PDT payment completed', 'woocommerce' ) );
-
 					// Log paypal transaction fee and payment type.
 					if ( ! empty( $transaction_result['mc_fee'] ) ) {
-						update_post_meta( $order->get_id(), 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
+						$order->add_meta_data( 'PayPal Transaction Fee', wc_clean( $transaction_result['mc_fee'] ) );
 					}
 					if ( ! empty( $transaction_result['payment_type'] ) ) {
-						update_post_meta( $order->get_id(), 'Payment type', $transaction_result['payment_type'] );
+						$order->add_meta_data( 'Payment type', wc_clean( $transaction_result['payment_type'] ) );
 					}
+
+					$this->payment_complete( $order, $transaction, __( 'PDT payment completed', 'woocommerce' ) );
 				}
 			} else {
 				if ( 'authorization' === $transaction_result['pending_reason'] ) {

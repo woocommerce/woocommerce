@@ -4,7 +4,7 @@
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *
- * @package    WooCommerce/Classes
+ * @package    WooCommerce\Classes
  * @version    2.4.0
  * @deprecated 3.4.0
  */

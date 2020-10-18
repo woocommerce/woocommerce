@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 	 *
 	 * @class       WC_Email_New_Order
 	 * @version     2.0.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_New_Order extends WC_Email {
@@ -33,7 +33,6 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			$this->template_html  = 'emails/admin-new-order.php';
 			$this->template_plain = 'emails/plain/admin-new-order.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -45,6 +44,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_cancelled_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_cancelled_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_cancelled_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
@@ -60,7 +62,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
+			return __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -70,7 +72,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'New customer order', 'woocommerce' );
+			return __( 'New Order: #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -102,17 +104,18 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => true,
-					'plain_text'    => false,
-					'email'         => $this,
+				$this->template_html,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => true,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -120,33 +123,46 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Get content plain.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => true,
-					'plain_text'    => true,
-					'email'         => $this,
+				$this->template_plain,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => true,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Congratulations on the sale.', 'woocommerce' );
 		}
 
 		/**
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' );
 			$this->form_fields = array(
-				'enabled'    => array(
+				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
 					'default' => 'yes',
 				),
-				'recipient'  => array(
+				'recipient'          => array(
 					'title'       => __( 'Recipient(s)', 'woocommerce' ),
 					'type'        => 'text',
 					/* translators: %s: WP admin email */
@@ -155,25 +171,32 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'default'     => '',
 					'desc_tip'    => true,
 				),
-				'subject'    => array(
+				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
-				'heading'    => array(
+				'heading'            => array(
 					'title'       => __( 'Email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading(),
 					'default'     => '',
 				),
-				'email_type' => array(
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => $this->get_default_additional_content(),
+					'desc_tip'    => true,
+				),
+				'email_type'         => array(
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

@@ -2,10 +2,8 @@
 /**
  * Adds and controls pointers for contextual help/tutorials
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @package WooCommerce\Admin\Pointers
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +26,9 @@ class WC_Admin_Pointers {
 	 * Setup pointers for screen.
 	 */
 	public function setup_pointers_for_screen() {
-		if ( ! $screen = get_current_screen() ) {
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
 			return;
 		}
 
@@ -43,9 +43,10 @@ class WC_Admin_Pointers {
 	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
-		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) {
+		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
+
 		// These pointers will chain - they will not be shown at once.
 		$pointers = array(
 			'pointers' => array(
@@ -218,15 +219,15 @@ class WC_Admin_Pointers {
 	/**
 	 * Enqueue pointers and add script to page.
 	 *
-	 * @param array $pointers
+	 * @param array $pointers Pointers data.
 	 */
 	public function enqueue_pointers( $pointers ) {
-		$pointers = wp_json_encode( $pointers );
+		$pointers = rawurlencode( wp_json_encode( $pointers ) );
 		wp_enqueue_style( 'wp-pointer' );
 		wp_enqueue_script( 'wp-pointer' );
 		wc_enqueue_js(
 			"jQuery( function( $ ) {
-				var wc_pointers = {$pointers};
+				var wc_pointers = JSON.parse( decodeURIComponent( '{$pointers}' ) );
 
 				setTimeout( init_wc_pointers, 800 );
 

@@ -2,7 +2,7 @@
 /**
  * All functionality to regenerate images in the background when settings change.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.3.0
  * @since   3.3.0
  */
@@ -101,8 +101,12 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 
 		$log = wc_get_logger();
 
-		// translators: %s: ID of the attachment.
-		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), $this->attachment_id ),
+		$log->info(
+			sprintf(
+				// translators: %s: ID of the attachment.
+				__( 'Regenerating images for attachment ID: %s', 'woocommerce' ),
+				$this->attachment_id
+			),
 			array(
 				'source' => 'wc-image-regeneration',
 			)
@@ -202,7 +206,11 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 				$size_data['crop'] = false;
 			}
 
-			list( $orig_w, $orig_h ) = getimagesize( $fullsizepath );
+			$image_sizes = getimagesize( $fullsizepath );
+			if ( false === $image_sizes ) {
+				continue;
+			}
+			list( $orig_w, $orig_h ) = $image_sizes;
 
 			$dimensions = image_resize_dimensions( $orig_w, $orig_h, $size_data['width'], $size_data['height'], $size_data['crop'] );
 
@@ -222,6 +230,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 				unset( $sizes[ $size ] );
 			}
 		}
+
 		return $sizes;
 	}
 
@@ -232,7 +241,16 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	 * @return array
 	 */
 	public function adjust_intermediate_image_sizes( $sizes ) {
-		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) );
+		// Prevent a filter loop.
+		$unfiltered_sizes = array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' );
+		static $in_filter = false;
+		if ( $in_filter ) {
+			return $unfiltered_sizes;
+		}
+		$in_filter      = true;
+		$filtered_sizes = apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', $unfiltered_sizes );
+		$in_filter      = false;
+		return $filtered_sizes;
 	}
 
 	/**
@@ -243,7 +261,8 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	protected function complete() {
 		parent::complete();
 		$log = wc_get_logger();
-		$log->info( __( 'Completed product image regeneration job.', 'woocommerce' ),
+		$log->info(
+			__( 'Completed product image regeneration job.', 'woocommerce' ),
 			array(
 				'source' => 'wc-image-regeneration',
 			)

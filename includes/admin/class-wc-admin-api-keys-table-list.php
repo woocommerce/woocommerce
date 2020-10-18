@@ -70,33 +70,46 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $key ) {
-		$url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&edit-key=' . $key['key_id'] );
+		$url     = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&edit-key=' . $key['key_id'] );
+		$user_id = intval( $key['user_id'] );
 
-		$output  = '<strong>';
-		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
+		// Check if current user can edit other users or if it's the same user.
+		$can_edit = current_user_can( 'edit_user', $user_id ) || get_current_user_id() === $user_id;
+
+		$output = '<strong>';
+		if ( $can_edit ) {
+			$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
+		}
 		if ( empty( $key['description'] ) ) {
 			$output .= esc_html__( 'API key', 'woocommerce' );
 		} else {
 			$output .= esc_html( $key['description'] );
 		}
-		$output .= '</a>';
+		if ( $can_edit ) {
+			$output .= '</a>';
+		}
 		$output .= '</strong>';
 
 		// Get actions.
 		$actions = array(
 			/* translators: %s: API key ID. */
-			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
-			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
-			'trash' => '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url(
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
+		);
+
+		if ( $can_edit ) {
+			$actions['edit']  = '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>';
+			$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url(
 				wp_nonce_url(
 					add_query_arg(
 						array(
 							'revoke-key' => $key['key_id'],
-						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
-					), 'revoke'
+						),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
+					),
+					'revoke'
 				)
-			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>',
-		);
+			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>';
+		}
 
 		$row_actions = array();
 
@@ -183,6 +196,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
+		if ( ! current_user_can( 'remove_users' ) ) {
+			return array();
+		}
+
 		return array(
 			'revoke' => __( 'Revoke', 'woocommerce' ),
 		);
@@ -206,7 +223,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
 		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
 		submit_button(
-			$text, '', '', false,
+			$text,
+			'',
+			'',
+			false,
 			array(
 				'id' => 'search-submit',
 			)
@@ -238,7 +258,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		// Get the API keys.
 		$keys = $wpdb->get_results(
 			"SELECT key_id, user_id, description, permissions, truncated_key, last_access FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search}" .
-			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ), ARRAY_A
+			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ),
+			ARRAY_A
 		); // WPCS: unprepared SQL ok.
 
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" ); // WPCS: unprepared SQL ok.

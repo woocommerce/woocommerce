@@ -9,9 +9,11 @@
  * - if something is being stored e.g. item total, store unrounded. This is so taxes can be recalculated later accurately.
  * - if calculating a total, round (if settings allow).
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.2.0
  */
+
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 3.2.0
  */
 final class WC_Cart_Totals {
+	use WC_Item_Totals;
 
 	/**
 	 * Reference to cart object.
@@ -159,6 +162,7 @@ final class WC_Cart_Totals {
 			'price_includes_tax' => false,
 			'subtotal'           => 0,
 			'subtotal_tax'       => 0,
+			'subtotal_taxes'     => array(),
 			'total'              => 0,
 			'total_tax'          => 0,
 			'taxes'              => array(),
@@ -196,15 +200,6 @@ final class WC_Cart_Totals {
 			'total_tax' => 0,
 			'taxes'     => array(),
 		);
-	}
-
-	/**
-	 * Should we round at subtotal level only?
-	 *
-	 * @return bool
-	 */
-	protected function round_at_subtotal() {
-		return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 	}
 
 	/**
@@ -287,7 +282,7 @@ final class WC_Cart_Totals {
 
 			// Negative fees should not make the order total go negative.
 			if ( 0 > $fee->total ) {
-				$max_discount = round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
+				$max_discount = NumberUtil::round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
 
 				if ( $fee->total < $max_discount ) {
 					$fee->total = $max_discount;
@@ -348,7 +343,8 @@ final class WC_Cart_Totals {
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-			$shipping_line->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $shipping_line->taxes ) );
+			$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
+			$shipping_line->total_tax = array_sum( $shipping_line->taxes );
 
 			$this->shipping[ $key ] = $shipping_line;
 		}
@@ -421,13 +417,21 @@ final class WC_Cart_Totals {
 	 */
 	protected function remove_item_base_taxes( $item ) {
 		if ( $item->price_includes_tax && $item->taxable ) {
-			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+			if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+			} else {
+				/**
+				 * If we want all customers to pay the same price on this store, we should not remove base taxes from a VAT exempt user's price,
+				 * but just the relevent tax rate. See issue #20911.
+				 */
+				$base_tax_rates = $item->tax_rates;
+			}
 
 			// Work out a new base price without the shop's base tax.
 			$taxes = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
 
 			// Now we have a new item price (excluding TAX).
-			$item->price              = round( $item->price - array_sum( $taxes ) );
+			$item->price              = NumberUtil::round( $item->price - array_sum( $taxes ) );
 			$item->price_includes_tax = false;
 		}
 		return $item;
@@ -455,7 +459,7 @@ final class WC_Cart_Totals {
 				$new_taxes = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
 
 				// Now we have a new item price.
-				$item->price = round( $item->price - array_sum( $taxes ) + array_sum( $new_taxes ) );
+				$item->price = $item->price - array_sum( $taxes ) + array_sum( $new_taxes );
 			}
 		}
 		return $item;
@@ -484,8 +488,11 @@ final class WC_Cart_Totals {
 		if ( ! wc_tax_enabled() ) {
 			return array();
 		}
-		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+		$tax_class      = $item->product->get_tax_class();
+		$item_tax_rates = isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+
+		// Allow plugins to filter item tax rates.
+		return apply_filters( 'woocommerce_cart_totals_get_item_tax_rates', $item_tax_rates, $item, $this->cart );
 	}
 
 	/**
@@ -534,7 +541,7 @@ final class WC_Cart_Totals {
 	 * @param string $key Total name you want to set.
 	 * @param int    $total Total to set.
 	 */
-	protected function set_total( $key = 'total', $total ) {
+	protected function set_total( $key, $total ) {
 		$this->totals[ $key ] = $total;
 	}
 
@@ -547,6 +554,16 @@ final class WC_Cart_Totals {
 	 */
 	public function get_totals( $in_cents = false ) {
 		return $in_cents ? $this->totals : wc_remove_number_precision_deep( $this->totals );
+	}
+
+	/**
+	 * Returns array of values for totals calculation.
+	 *
+	 * @param string $field Field name. Will probably be `total` or `subtotal`.
+	 * @return array Items object
+	 */
+	protected function get_values_for_total( $field ) {
+		return array_values( wp_list_pluck( $this->items, $field ) );
 	}
 
 	/**
@@ -581,6 +598,22 @@ final class WC_Cart_Totals {
 		}
 
 		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
+	}
+
+	/**
+	 * Round merged taxes.
+	 *
+	 * @deprecated 3.9.0 `calculate_item_subtotals` should already appropriately round the tax values.
+	 * @since 3.5.4
+	 * @param array $taxes Taxes to round.
+	 * @return array
+	 */
+	protected function round_merged_taxes( $taxes ) {
+		foreach ( $taxes as $rate_id => $tax ) {
+			$taxes[ $rate_id ] = $this->round_line_tax( $tax );
+		}
+
+		return $taxes;
 	}
 
 	/**
@@ -652,7 +685,9 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
 
-		$this->set_total( 'items_total', array_sum( array_map( 'round', array_values( wp_list_pluck( $this->items, 'total' ) ) ) ) );
+		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
+
+		$this->set_total( 'items_total', $items_total );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
 		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
@@ -675,34 +710,48 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_item_subtotals() {
+		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
+
+		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+		$is_customer_vat_exempt          = $this->cart->get_customer()->get_is_vat_exempt();
+
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
-				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
+				if ( $is_customer_vat_exempt ) {
 					$item = $this->remove_item_base_taxes( $item );
-				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				} elseif ( $adjust_non_base_location_prices ) {
 					$item = $this->adjust_non_base_location_price( $item );
 				}
 			}
 
 			$item->subtotal = $item->price;
-			$subtotal_taxes = array();
 
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
-				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
-				$item->subtotal_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $subtotal_taxes ) );
+				$item->subtotal_taxes = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
+				$item->subtotal_tax   = array_sum( array_map( array( $this, 'round_line_tax' ), $item->subtotal_taxes ) );
 
 				if ( $item->price_includes_tax ) {
 					// Use unrounded taxes so we can re-calculate from the orders screen accurately later.
-					$item->subtotal = $item->subtotal - array_sum( $subtotal_taxes );
+					$item->subtotal = $item->subtotal - array_sum( $item->subtotal_taxes );
+				}
+
+				foreach ( $item->subtotal_taxes as $rate_id => $rate ) {
+					if ( ! isset( $merged_subtotal_taxes[ $rate_id ] ) ) {
+						$merged_subtotal_taxes[ $rate_id ] = 0;
+					}
+					$merged_subtotal_taxes[ $rate_id ] += $this->round_line_tax( $rate );
 				}
 			}
 
-			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => wc_remove_number_precision_deep( $subtotal_taxes ) );
+			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => wc_remove_number_precision_deep( $item->subtotal_taxes ) );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal']     = wc_remove_number_precision( $item->subtotal );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
-		$this->set_total( 'items_subtotal', array_sum( array_map( 'round', array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) ) );
-		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+
+		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
+
+		$this->set_total( 'items_subtotal', NumberUtil::round( $items_subtotal ) );
+		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
@@ -812,7 +861,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
+		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
@@ -822,19 +871,5 @@ final class WC_Cart_Totals {
 
 		// Allow plugins to filter the grand total, and sum the cart totals in case of modifications.
 		$this->cart->set_total( max( 0, apply_filters( 'woocommerce_calculated_total', $this->get_total( 'total' ), $this->cart ) ) );
-	}
-
-	/**
-	 * Apply rounding to an array of taxes before summing. Rounds to store DP setting, ignoring precision.
-	 *
-	 * @since  3.2.6
-	 * @param  float $value Tax value.
-	 * @return float
-	 */
-	protected function round_line_tax( $value ) {
-		if ( ! $this->round_at_subtotal() ) {
-			$value = wc_round_tax_total( $value, 0 );
-		}
-		return $value;
 	}
 }

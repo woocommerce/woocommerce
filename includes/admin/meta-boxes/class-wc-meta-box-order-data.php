@@ -6,7 +6,7 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @package     WooCommerce\Admin\Meta Boxes
  * @version     2.2.0
  */
 
@@ -39,7 +39,8 @@ class WC_Meta_Box_Order_Data {
 	public static function init_address_fields() {
 
 		self::$billing_fields = apply_filters(
-			'woocommerce_admin_billing_fields', array(
+			'woocommerce_admin_billing_fields',
+			array(
 				'first_name' => array(
 					'label' => __( 'First name', 'woocommerce' ),
 					'show'  => false,
@@ -69,11 +70,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'class'   => 'js_field-country select short',
 					'type'    => 'select',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
@@ -90,7 +91,8 @@ class WC_Meta_Box_Order_Data {
 		);
 
 		self::$shipping_fields = apply_filters(
-			'woocommerce_admin_shipping_fields', array(
+			'woocommerce_admin_shipping_fields',
+			array(
 				'first_name' => array(
 					'label' => __( 'First name', 'woocommerce' ),
 					'show'  => false,
@@ -120,11 +122,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'type'    => 'select',
 					'class'   => 'js_field-country select short',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
@@ -186,7 +188,7 @@ class WC_Meta_Box_Order_Data {
 
 					$meta_list = array();
 
-					if ( $payment_method ) {
+					if ( $payment_method && 'other' !== $payment_method ) {
 						/* translators: %s: payment method */
 						$payment_method_string = sprintf(
 							__( 'Payment via %s', 'woocommerce' ),
@@ -301,7 +303,7 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?></option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
 							</select>
 							<!--/email_off-->
 						</p>
@@ -342,6 +344,8 @@ class WC_Meta_Box_Order_Data {
 
 								if ( 'billing_phone' === $field_name ) {
 									$field_value = wc_make_phone_clickable( $field_value );
+								} elseif ( 'billing_email' === $field_name ) {
+									$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
 								} else {
 									$field_value = make_clickable( esc_html( $field_value ) );
 								}
@@ -402,9 +406,9 @@ class WC_Meta_Box_Order_Data {
 									}
 
 									if ( ! $found_method && ! empty( $payment_method ) ) {
-										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									} else {
-										echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									}
 									?>
 								</select>
@@ -535,7 +539,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
-			$props['order_key'] = 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) );
+			$props['order_key'] = wc_generate_order_key();
 		}
 
 		// Update customer.
@@ -556,9 +560,9 @@ class WC_Meta_Box_Order_Data {
 				}
 
 				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
-					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+					$props[ 'billing_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
 				}
 			}
 		}
@@ -575,21 +579,21 @@ class WC_Meta_Box_Order_Data {
 				}
 
 				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
-					$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+					$props[ 'shipping_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
 				}
 			}
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			$props['transaction_id'] = wc_clean( $_POST['_transaction_id'] );
+			$props['transaction_id'] = wc_clean( wp_unslash( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling.
 		if ( $order->get_payment_method() !== wp_unslash( $_POST['_payment_method'] ) ) {
 			$methods              = WC()->payment_gateways->payment_gateways();
-			$payment_method       = wc_clean( $_POST['_payment_method'] );
+			$payment_method       = wc_clean( wp_unslash( $_POST['_payment_method'] ) );
 			$payment_method_title = $payment_method;
 
 			if ( isset( $methods ) && isset( $methods[ $payment_method ] ) ) {
@@ -602,7 +606,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date.
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time( 'timestamp', true );
+			$date = time();
 		} else {
 			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':' . (int) $_POST['order_date_second'] ) );
 		}
@@ -616,7 +620,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Save order data.
 		$order->set_props( $props );
-		$order->set_status( wc_clean( $_POST['order_status'] ), '', true );
+		$order->set_status( wc_clean( wp_unslash( $_POST['order_status'] ) ), '', true );
 		$order->save();
 	}
 }

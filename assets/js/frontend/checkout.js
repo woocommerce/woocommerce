@@ -24,6 +24,8 @@ jQuery( function( $ ) {
 
 			if ( $( document.body ).hasClass( 'woocommerce-order-pay' ) ) {
 				this.$order_review.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
+				this.$order_review.on( 'submit', this.submitOrder );
+				this.$order_review.attr( 'novalidate', 'novalidate' );
 			}
 
 			// Prevent HTML5 validation which can conflict.
@@ -39,10 +41,10 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout ); // eslint-disable-line max-len
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
-			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
-			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
+			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed ); // eslint-disable-line max-len
+			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout ); // eslint-disable-line max-len
 
 			// Address fields
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
@@ -77,10 +79,12 @@ jQuery( function( $ ) {
 				$payment_methods.eq(0).prop( 'checked', true );
 			}
 
-			if ( $payment_methods.length > 1 ) {
+			// Get name of new selected method.
+			var checkedPaymentMethod = $payment_methods.filter( ':checked' ).eq(0).prop( 'id' );
 
+			if ( $payment_methods.length > 1 ) {
 				// Hide open descriptions.
-				$( 'div.payment_box' ).filter( ':visible' ).slideUp( 0 );
+				$( 'div.payment_box:not(".' + checkedPaymentMethod + '")' ).filter( ':visible' ).slideUp( 0 );
 			}
 
 			// Trigger click event for selected method
@@ -203,7 +207,7 @@ jQuery( function( $ ) {
 				event_type        = e.type;
 
 			if ( 'input' === event_type ) {
-				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' );
+				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' ); // eslint-disable-line max-len
 			}
 
 			if ( 'validate' === event_type || 'change' === event_type ) {
@@ -221,7 +225,7 @@ jQuery( function( $ ) {
 				if ( validate_email ) {
 					if ( $this.val() ) {
 						/* https://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex */
-						var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+						var pattern = new RegExp(/^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[0-9a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i); // eslint-disable-line max-len
 
 						if ( ! pattern.test( $this.val()  ) ) {
 							$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email' );
@@ -231,7 +235,7 @@ jQuery( function( $ ) {
 				}
 
 				if ( validated ) {
-					$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email' ).addClass( 'woocommerce-validated' );
+					$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email' ).addClass( 'woocommerce-validated' ); // eslint-disable-line max-len
 				}
 			}
 		},
@@ -255,10 +259,10 @@ jQuery( function( $ ) {
 
 			var country			 = $( '#billing_country' ).val(),
 				state			 = $( '#billing_state' ).val(),
-				postcode		 = $( 'input#billing_postcode' ).val(),
+				postcode		 = $( ':input#billing_postcode' ).val(),
 				city			 = $( '#billing_city' ).val(),
-				address			 = $( 'input#billing_address_1' ).val(),
-				address_2		 = $( 'input#billing_address_2' ).val(),
+				address			 = $( ':input#billing_address_1' ).val(),
+				address_2		 = $( ':input#billing_address_2' ).val(),
 				s_country		 = country,
 				s_state			 = state,
 				s_postcode		 = postcode,
@@ -279,10 +283,10 @@ jQuery( function( $ ) {
 			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
 				s_country		 = $( '#shipping_country' ).val();
 				s_state			 = $( '#shipping_state' ).val();
-				s_postcode		 = $( 'input#shipping_postcode' ).val();
+				s_postcode		 = $( ':input#shipping_postcode' ).val();
 				s_city			 = $( '#shipping_city' ).val();
-				s_address		 = $( 'input#shipping_address_1' ).val();
-				s_address_2		 = $( 'input#shipping_address_2' ).val();
+				s_address		 = $( ':input#shipping_address_1' ).val();
+				s_address_2		 = $( ':input#shipping_address_2' ).val();
 			}
 
 			var data = {
@@ -307,6 +311,7 @@ jQuery( function( $ ) {
 			if ( false !== args.update_shipping_method ) {
 				var shipping_methods = {};
 
+				// eslint-disable-next-line max-len
 				$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
 					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 				} );
@@ -329,7 +334,7 @@ jQuery( function( $ ) {
 				success:	function( data ) {
 
 					// Reload the page if requested
-					if ( true === data.reload ) {
+					if ( data && true === data.reload ) {
 						window.location.reload();
 						return;
 					}
@@ -356,9 +361,12 @@ jQuery( function( $ ) {
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
-							$( key ).replaceWith( value );
+							if ( ! wc_checkout_form.fragments || wc_checkout_form.fragments[ key ] !== value ) {
+								$( key ).replaceWith( value );
+							}
 							$( key ).unblock();
 						} );
+						wc_checkout_form.fragments = data.fragments;
 					}
 
 					// Recheck the terms and conditions box, if needed
@@ -370,11 +378,12 @@ jQuery( function( $ ) {
 					if ( ! $.isEmptyObject( paymentDetails ) ) {
 						$( '.payment_box :input' ).each( function() {
 							var ID = $( this ).attr( 'id' );
-
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
-								} else if ( 0 === $( this ).val().length ) {
+								} else if ( $.inArray( $( this ).attr( 'type' ), [ 'select' ] ) !== -1 ) {
+									$( this ).val( paymentDetails[ ID ] ).change();
+								} else if ( null !== $( this ).val() && 0 === $( this ).val().length ) {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
 							}
@@ -382,7 +391,7 @@ jQuery( function( $ ) {
 					}
 
 					// Check for error
-					if ( 'failure' === data.result ) {
+					if ( data && 'failure' === data.result ) {
 
 						var $form = $( 'form.checkout' );
 
@@ -391,7 +400,7 @@ jQuery( function( $ ) {
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
-							$form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
+							$form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' ); // eslint-disable-line max-len
 						} else {
 							$form.prepend( data );
 						}
@@ -411,6 +420,42 @@ jQuery( function( $ ) {
 
 			});
 		},
+		handleUnloadEvent: function( e ) {
+			// Modern browsers have their own standard generic messages that they will display.
+			// Confirm, alert, prompt or custom message are not allowed during the unload event
+			// Browsers will display their own standard messages
+
+			// Check if the browser is Internet Explorer
+			if((navigator.userAgent.indexOf('MSIE') !== -1 ) || (!!document.documentMode)) {
+				// IE handles unload events differently than modern browsers
+				e.preventDefault();
+				return undefined;
+			}
+
+			return true;
+		},
+		attachUnloadEventsOnSubmit: function() {
+			$( window ).on('beforeunload', this.handleUnloadEvent);
+		},
+		detachUnloadEventsOnSubmit: function() {
+			$( window ).unbind('beforeunload', this.handleUnloadEvent);
+		},
+		blockOnSubmit: function( $form ) {
+			var form_data = $form.data();
+
+			if ( 1 !== form_data['blockUI.isBlocked'] ) {
+				$form.block({
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6
+					}
+				});
+			}
+		},
+		submitOrder: function() {
+			wc_checkout_form.blockOnSubmit( $( this ) );
+		},
 		submit: function() {
 			wc_checkout_form.reset_update_checkout_timer();
 			var $form = $( this );
@@ -420,21 +465,15 @@ jQuery( function( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
+			// eslint-disable-next-line max-len
 			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method() ) !== false ) {
 
 				$form.addClass( 'processing' );
 
-				var form_data = $form.data();
+				wc_checkout_form.blockOnSubmit( $form );
 
-				if ( 1 !== form_data['blockUI.isBlocked'] ) {
-					$form.block({
-						message: null,
-						overlayCSS: {
-							background: '#fff',
-							opacity: 0.6
-						}
-					});
-				}
+				// Attach event to block reloading the page when the form has been submitted
+				wc_checkout_form.attachUnloadEventsOnSubmit();
 
 				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
 				$.ajaxSetup( {
@@ -471,8 +510,11 @@ jQuery( function( $ ) {
 					data:		$form.serialize(),
 					dataType:   'json',
 					success:	function( result ) {
+						// Detach the unload handler that prevents a reload / redirect
+						wc_checkout_form.detachUnloadEventsOnSubmit();
+
 						try {
-							if ( 'success' === result.result ) {
+							if ( 'success' === result.result && $form.triggerHandler( 'checkout_place_order_success' ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {
@@ -499,11 +541,14 @@ jQuery( function( $ ) {
 							if ( result.messages ) {
 								wc_checkout_form.submit_error( result.messages );
 							} else {
-								wc_checkout_form.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
+								wc_checkout_form.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' ); // eslint-disable-line max-len
 							}
 						}
 					},
 					error:	function( jqXHR, textStatus, errorThrown ) {
+						// Detach the unload handler that prevents a reload / redirect
+						wc_checkout_form.detachUnloadEventsOnSubmit();
+
 						wc_checkout_form.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
 					}
 				});
@@ -513,7 +558,7 @@ jQuery( function( $ ) {
 		},
 		submit_error: function( error_message ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
-			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
+			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 			wc_checkout_form.scroll_to_notices();
@@ -573,6 +618,7 @@ jQuery( function( $ ) {
 						$form.before( code );
 						$form.slideUp();
 
+						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 					}
 				},
@@ -611,6 +657,7 @@ jQuery( function( $ ) {
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );
 
+						$( document.body ).trigger( 'removed_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 
 						// Remove coupon code from coupon field

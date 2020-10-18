@@ -4,7 +4,7 @@
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *
- * @package WooCommerce/Shortcodes/My_Account
+ * @package WooCommerce\Shortcodes\My_Account
  * @version 2.0.0
  */
 
@@ -39,7 +39,7 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -111,11 +111,14 @@ class WC_Shortcode_My_Account {
 		$args = shortcode_atts(
 			array(
 				'order_count' => 15, // @deprecated 2.6.0. Keep for backward compatibility.
-			), $atts, 'woocommerce_my_account'
+			),
+			$atts,
+			'woocommerce_my_account'
 		);
 
 		wc_get_template(
-			'myaccount/my-account.php', array(
+			'myaccount/my-account.php',
+			array(
 				'current_user' => get_user_by( 'id', get_current_user_id() ),
 				'order_count'  => 'all' === $args['order_count'] ? -1 : $args['order_count'],
 			)
@@ -130,7 +133,7 @@ class WC_Shortcode_My_Account {
 	public static function view_order( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! current_user_can( 'view_order', $order_id ) ) {
+		if ( ! $order || ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . esc_html__( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="wc-forward">' . esc_html__( 'My account', 'woocommerce' ) . '</a></div>';
 
 			return;
@@ -141,10 +144,11 @@ class WC_Shortcode_My_Account {
 		$status->name = wc_get_order_status_name( $order->get_status() );
 
 		wc_get_template(
-			'myaccount/view-order.php', array(
+			'myaccount/view-order.php',
+			array(
 				'status'   => $status, // @deprecated 2.2.
-				'order'    => wc_get_order( $order_id ),
-				'order_id' => $order_id,
+				'order'    => $order,
+				'order_id' => $order->get_id(),
 			)
 		);
 	}
@@ -164,8 +168,29 @@ class WC_Shortcode_My_Account {
 	public static function edit_address( $load_address = 'billing' ) {
 		$current_user = wp_get_current_user();
 		$load_address = sanitize_key( $load_address );
+		$country      = get_user_meta( get_current_user_id(), $load_address . '_country', true );
 
-		$address = WC()->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
+		if ( ! $country ) {
+			$country = WC()->countries->get_base_country();
+		}
+
+		if ( 'billing' === $load_address ) {
+			$allowed_countries = WC()->countries->get_allowed_countries();
+
+			if ( ! array_key_exists( $country, $allowed_countries ) ) {
+				$country = current( array_keys( $allowed_countries ) );
+			}
+		}
+
+		if ( 'shipping' === $load_address ) {
+			$allowed_countries = WC()->countries->get_shipping_countries();
+
+			if ( ! array_key_exists( $country, $allowed_countries ) ) {
+				$country = current( array_keys( $allowed_countries ) );
+			}
+		}
+
+		$address = WC()->countries->get_address_fields( $country, $load_address . '_' );
 
 		// Enqueue scripts.
 		wp_enqueue_script( 'wc-country-select' );
@@ -182,14 +207,6 @@ class WC_Shortcode_My_Account {
 					case 'shipping_email':
 						$value = $current_user->user_email;
 						break;
-					case 'billing_country':
-					case 'shipping_country':
-						$value = WC()->countries->get_base_country();
-						break;
-					case 'billing_state':
-					case 'shipping_state':
-						$value = WC()->countries->get_base_state();
-						break;
 				}
 			}
 
@@ -197,7 +214,8 @@ class WC_Shortcode_My_Account {
 		}
 
 		wc_get_template(
-			'myaccount/form-edit-address.php', array(
+			'myaccount/form-edit-address.php',
+			array(
 				'load_address' => $load_address,
 				'address'      => apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
 			)
@@ -219,13 +237,16 @@ class WC_Shortcode_My_Account {
 			 */
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
-				list( $rp_login, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
-				$user                      = self::check_password_reset_key( $rp_key, $rp_login );
+				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
+				$userdata               = get_userdata( absint( $rp_id ) );
+				$rp_login               = $userdata ? $userdata->user_login : '';
+				$user                   = self::check_password_reset_key( $rp_key, $rp_login );
 
 				// Reset key / login is correct, display reset password form with hidden key / login values.
 				if ( is_object( $user ) ) {
 					return wc_get_template(
-						'myaccount/form-reset-password.php', array(
+						'myaccount/form-reset-password.php',
+						array(
 							'key'   => $rp_key,
 							'login' => $rp_login,
 						)
@@ -236,7 +257,8 @@ class WC_Shortcode_My_Account {
 
 		// Show lost password form by default.
 		wc_get_template(
-			'myaccount/form-lost-password.php', array(
+			'myaccount/form-lost-password.php',
+			array(
 				'form' => 'lost_password',
 			)
 		);
@@ -354,7 +376,9 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		self::set_reset_password_cookie();
 
-		wp_password_change_notification( $user );
+		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
+			wp_password_change_notification( $user );
+		}
 	}
 
 	/**
@@ -364,7 +388,7 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
-		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) ) : ''; // WPCS: input var ok.
+		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // WPCS: input var ok, sanitization ok.
 
 		if ( $value ) {
 			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );

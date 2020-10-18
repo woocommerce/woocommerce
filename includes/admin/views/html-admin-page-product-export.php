@@ -2,7 +2,7 @@
 /**
  * Admin View: Product Export
  *
- * @package WooCommerce/Admin/Export
+ * @package WooCommerce\Admin\Export
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -54,6 +54,26 @@ $exporter = new WC_Product_CSV_Exporter();
 									}
 									?>
 									<option value="variation"><?php esc_html_e( 'Product variations', 'woocommerce' ); ?></option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<select id="woocommerce-exporter-category" class="woocommerce-exporter-category wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all categories', 'woocommerce' ); ?>">
+								<?php
+								$categories = get_categories(
+									array(
+										'taxonomy'   => 'product_cat',
+										'hide_empty' => false,
+									)
+								);
+								foreach ( $categories as $category ) {
+									echo '<option value="' . esc_attr( $category->slug ) . '">' . esc_html( $category->name ) . '</option>';
+								}
+								?>
 								</select>
 							</td>
 						</tr>
