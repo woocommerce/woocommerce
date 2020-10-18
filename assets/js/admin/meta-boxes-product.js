@@ -160,7 +160,7 @@ jQuery( function( $ ) {
 
 			var $shipping_tab = $( 'div#shipping_product_data' );
 
-			if ('block' === $( $shipping_tab ).css( 'display' )) {
+			if ( 'block' === $( $shipping_tab ).css( 'display' ) ) {
 				$( 'a[href="#general_product_data"]' ).click();
 			}
 		}
