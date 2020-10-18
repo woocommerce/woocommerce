@@ -798,7 +798,7 @@ class WC_AJAX {
 
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
-			if ( ! in_array( $product->get_id(), $product_ids ) ) {
+			if ( ! in_array( $product->get_id(), $product_ids, true ) ) {
 				continue;
 			}
 			$files   = $product->get_downloads();
