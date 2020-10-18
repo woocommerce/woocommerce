@@ -100,12 +100,6 @@ jobs:
               - npm run test
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=3
-        - name: Javascript/CSS Lint check
-          script:
-              - npm install
-              - npm run lint:ci
-          env:
-              - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.3)
           script:
               - npm run test:e2e
