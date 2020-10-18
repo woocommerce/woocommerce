@@ -765,7 +765,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'grant-access', 'security' );
 
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+		if ( ! current_user_can( 'edit_shop_orders' ) || ! isset( $_POST['loop'], $_POST['order_id'], $_POST['product_ids'] ) ) {
 			wp_die( -1 );
 		}
 
@@ -774,17 +774,17 @@ class WC_AJAX {
 		$wpdb->hide_errors();
 
 		$order_id     = intval( $_POST['order_id'] );
-		$product_ids  = $_POST['product_ids'];
+		$product_ids  = array_filter( array_map( 'absint', (array) wp_unslash( $_POST['product_ids'] ) ) );
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
+		$items        = $order->get_items();
 
-		if ( ! is_array( $product_ids ) ) {
-			$product_ids = array( $product_ids );
-		}
-
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+			if ( ! in_array( $product->get_id(), $product_ids ) ) {
+				continue;
+			}
 			$files   = $product->get_downloads();
 
 			if ( ! $order->get_billing_email() ) {
@@ -793,7 +793,8 @@ class WC_AJAX {
 
 			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
-					if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
+					$inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order, $item->get_quantity(), $item );
+					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;
 						$file_counter ++;
@@ -801,9 +802,10 @@ class WC_AJAX {
 						if ( $file->get_name() ) {
 							$file_count = $file->get_name();
 						} else {
+							/* translators: %d file count */
 							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 						}
-						include 'admin/meta-boxes/views/html-order-download-permission.php';
+						include __DIR__ . '/admin/meta-boxes/views/html-order-download-permission.php';
 					}
 				}
 			}
