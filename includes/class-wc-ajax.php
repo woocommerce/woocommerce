@@ -795,6 +795,7 @@ class WC_AJAX {
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
+		$items        = $order->get_items();
 
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
