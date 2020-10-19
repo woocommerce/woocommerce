@@ -801,7 +801,7 @@ class WC_AJAX {
 			if ( ! in_array( $product->get_id(), $product_ids, true ) ) {
 				continue;
 			}
-			$files   = $product->get_downloads();
+			$files = $product->get_downloads();
 
 			if ( ! $order->get_billing_email() ) {
 				wp_die();
