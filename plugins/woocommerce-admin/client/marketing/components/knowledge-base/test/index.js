@@ -179,6 +179,60 @@ describe( 'No posts and loading', () => {
 	} );
 } );
 
+describe( 'Error and not loading', () => {
+	let knowledgeBaseWrapper;
+
+	beforeEach( () => {
+		knowledgeBaseWrapper = render(
+			<KnowledgeBase
+				posts={ [] }
+				isLoading={ false }
+				error={ {
+					message: 'error',
+				} }
+				category={ 'marketing' }
+			/>
+		);
+	} );
+
+	it( 'should not display the spinner', () => {
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 0 );
+	} );
+
+	it( 'should not display posts wrapper', () => {
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-knowledgebase-card__posts'
+			)
+		).toHaveLength( 0 );
+	} );
+
+	it( 'should display the error component', () => {
+		const { getByText } = knowledgeBaseWrapper;
+
+		expect(
+			getByText(
+				'There was an error loading knowledge base posts. Please check again later.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'should not display the pagination', () => {
+		const { queryByLabelText } = knowledgeBaseWrapper;
+
+		expect(
+			queryByLabelText( 'Previous Page', { selector: 'button' } )
+		).toBeNull();
+		expect(
+			queryByLabelText( 'Next Page', { selector: 'button' } )
+		).toBeNull();
+	} );
+} );
+
 describe( 'No posts and not loading', () => {
 	let knowledgeBaseWrapper;
 
@@ -212,9 +266,7 @@ describe( 'No posts and not loading', () => {
 		const { getByText } = knowledgeBaseWrapper;
 
 		expect(
-			getByText(
-				'There was an error loading knowledge base posts. Please check again later.'
-			)
+			getByText( 'There are no knowledge base posts.' )
 		).toBeInTheDocument();
 	} );
 

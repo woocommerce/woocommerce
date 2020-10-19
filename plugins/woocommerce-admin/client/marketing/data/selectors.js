@@ -13,3 +13,7 @@ export function getRecommendedPlugins( state, category ) {
 export function getBlogPosts( state, category ) {
 	return state.blogPosts[ category ] || [];
 }
+
+export function getBlogPostsError( state, category ) {
+	return state.errors.blogPosts && state.errors.blogPosts[ category ];
+}

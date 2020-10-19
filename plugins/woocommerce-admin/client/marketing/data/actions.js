@@ -8,39 +8,40 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import TYPES from './action-types';
 import { API_NAMESPACE } from './constants';
 
 export function receiveInstalledPlugins( plugins ) {
 	return {
-		type: 'SET_INSTALLED_PLUGINS',
+		type: TYPES.SET_INSTALLED_PLUGINS,
 		plugins,
 	};
 }
 
 export function receiveActivatingPlugin( pluginSlug ) {
 	return {
-		type: 'SET_ACTIVATING_PLUGIN',
+		type: TYPES.SET_ACTIVATING_PLUGIN,
 		pluginSlug,
 	};
 }
 
 export function removeActivatingPlugin( pluginSlug ) {
 	return {
-		type: 'REMOVE_ACTIVATING_PLUGIN',
+		type: TYPES.REMOVE_ACTIVATING_PLUGIN,
 		pluginSlug,
 	};
 }
 
 export function receiveRecommendedPlugins( plugins, category ) {
 	return {
-		type: 'SET_RECOMMENDED_PLUGINS',
+		type: TYPES.SET_RECOMMENDED_PLUGINS,
 		data: { plugins, category },
 	};
 }
 
 export function receiveBlogPosts( posts, category ) {
 	return {
-		type: 'SET_BLOG_POSTS',
+		type: TYPES.SET_BLOG_POSTS,
 		data: { posts, category },
 	};
 }
@@ -51,6 +52,14 @@ export function handleFetchError( error, message ) {
 
 	// eslint-disable-next-line no-console
 	console.log( error );
+}
+
+export function setError( category, error ) {
+	return {
+		type: TYPES.SET_ERROR,
+		category,
+		error,
+	};
 }
 
 export function* activateInstalledPlugin( pluginSlug ) {
