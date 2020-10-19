@@ -35,6 +35,8 @@ jobs:
         npm install
     - name: Lint JavaScript
       uses: bradennapier/eslint-plus-action@v3.4.2
+      with:
+        issueSummaryOnlyOnEvent: true
     - name: Lint CSS
       run: npm run lint:css
 
