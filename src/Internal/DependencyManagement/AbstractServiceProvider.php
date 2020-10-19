@@ -72,6 +72,11 @@ abstract class AbstractServiceProvider extends \Automattic\WooCommerce\Vendor\Le
 	 * @return \ReflectionClass|null The class of the parameter, or null if it hasn't any.
 	 */
 	private function get_class( \ReflectionParameter $parameter ) {
+		// TODO: Remove this 'if' block once minimum PHP version for WooCommerce is bumped to at least 7.1.
+		if ( version_compare( PHP_VERSION, '7.1', '<' ) ) {
+			return $parameter->getClass();
+		}
+
 		return $parameter->getType() && ! $parameter->getType()->isBuiltin()
 			? new \ReflectionClass( $parameter->getType()->getName() )
 			: null;
