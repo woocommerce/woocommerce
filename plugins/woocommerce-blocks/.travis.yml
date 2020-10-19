@@ -87,13 +87,6 @@ jobs:
           script:
               - echo 'woocommerce_blocks_phase = 3' > blocks.ini
               - npm run phpunit
-        - name: PHP Linting Check
-          php: 7.3
-          env:
-              - WP_TRAVISCI=phpcs
-              - WOOCOMMERCE_BLOCKS_PHASE=3
-          script:
-              - npm run lint:php
         - name: Javascript Tests
           script:
               - npm install
