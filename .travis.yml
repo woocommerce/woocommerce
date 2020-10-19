@@ -29,7 +29,6 @@ jobs:
   fast_finish: true
   include:
   - name: "Core E2E Tests"
-    php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     install:
      - nvm install
