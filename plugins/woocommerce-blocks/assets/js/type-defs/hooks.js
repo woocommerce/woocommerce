@@ -1,6 +1,7 @@
 /**
  * @typedef {import('./cart').CartData} CartData
  * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('./contexts').StoreNoticeObject} StoreNoticeObject
  */
 
 /**
@@ -73,6 +74,17 @@
  * @property {Function} removeItem             Callback for removing a cart item.
  * @property {Object}   cartItemQuantityErrors An array of errors thrown by
  *                                             the cart.
+ */
+
+/**
+ * @typedef {Object} CheckoutNotices
+ *
+ * @property {StoreNoticeObject[]} checkoutNotices       Array of notices in the
+ *                                                       checkout context.
+ * @property {StoreNoticeObject[]} expressPaymentNotices Array of notices in the
+ *                                                       express payment context.
+ * @property {StoreNoticeObject[]} paymentNotices        Array of notices in the
+ *                                                       payment context.
  */
 
 /**
