@@ -167,7 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Added postcode validation for addresses in India. #27546
 * Tweak - Use first gallery image on single product when image not assigned. #27289
 * Tweak - Renamed "Postcode / ZIP" to "Pin code", and renamed "State / County" to "State" for India. #27516
-* Tweak - Update product_cat/tag taxonomy template file names to product-cat/tag. . #27736
+* Tweak - Update product_cat/tag taxonomy template file names to product-cat/tag. #27736
 * Tweak - Exclude draft pages from the "Shop page" setting. #27890
 * Tweak - Styling to properly display product reviews within the dashboard activity widget. #27968
 * Fix - Fixes Photoswipe action buttons being obscured by admin bar. #27010
