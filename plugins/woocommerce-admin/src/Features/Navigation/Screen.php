@@ -123,18 +123,45 @@ class Screen {
 	public static function add_screen( $callback, $parent = null ) {
 		global $submenu;
 
+		$plugin_page = self::get_plugin_page( $callback );
+
 		if ( ! $parent ) {
 			$parent = Menu::get_parent_key( $callback );
 		}
 
-		$screen_id = get_plugin_page_hookname( $callback, $parent );
+		$screen_id = get_plugin_page_hookname( $plugin_page, $parent );
 
 		// This screen has already been added.
 		if ( in_array( $screen_id, self::$screen_ids, true ) ) {
 			return;
 		}
 
-		self::$screen_ids[] = get_plugin_page_hookname( $callback, $parent );
+		self::$screen_ids[] = $screen_id;
+	}
+
+	/**
+	 * Get the plugin page slug.
+	 *
+	 * @param string $callback Callback.
+	 * @return string
+	 */
+	public static function get_plugin_page( $callback ) {
+		$url   = Menu::get_callback_url( $callback );
+		$parts = wp_parse_url( $url );
+
+		if ( ! isset( $parts['query'] ) ) {
+			return $callback;
+		}
+
+		parse_str( $parts['query'], $query );
+
+		if ( ! isset( $query['page'] ) ) {
+			return $callback;
+		}
+
+		$plugin_page = wp_unslash( $query['page'] );
+		$plugin_page = plugin_basename( $plugin_page );
+		return $plugin_page;
 	}
 
 	/**
