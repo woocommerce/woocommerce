@@ -116,7 +116,7 @@ class WC_Meta_Box_Product_Data {
 				'variations'     => array(
 					'label'    => __( 'Variations', 'woocommerce' ),
 					'target'   => 'variable_product_options',
-					'class'    => array( 'variations_tab', 'show_if_variable' ),
+					'class'    => array( 'show_if_variable' ),
 					'priority' => 60,
 				),
 				'advanced'       => array(
