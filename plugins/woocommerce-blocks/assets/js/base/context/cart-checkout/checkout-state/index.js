@@ -11,7 +11,12 @@ import {
 	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
+import {
+	useCheckoutNotices,
+	useStoreNotices,
+	useEmitResponse,
+	usePrevious,
+} from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -103,6 +108,11 @@ export const CheckoutStateProvider = ( {
 		isFailResponse,
 		shouldRetry,
 	} = useEmitResponse();
+	const {
+		checkoutNotices,
+		paymentNotices,
+		expressPaymentNotices,
+	} = useCheckoutNotices();
 
 	// set observers on ref so it's always current.
 	useEffect( () => {
@@ -210,7 +220,16 @@ export const CheckoutStateProvider = ( {
 		dispatch,
 	] );
 
+	const previousStatus = usePrevious( checkoutState.status );
+	const previousHasError = usePrevious( checkoutState.hasError );
+
 	useEffect( () => {
+		if (
+			checkoutState.status === previousStatus &&
+			checkoutState.hasError === previousHasError
+		) {
+			return;
+		}
 		if ( checkoutState.status === STATUS.AFTER_PROCESSING ) {
 			const data = {
 				redirectUrl: checkoutState.redirectUrl,
@@ -244,17 +263,30 @@ export const CheckoutStateProvider = ( {
 							dispatch( actions.setIdle() );
 						}
 					} else {
-						// no error handling in place by anything so let's fall
-						// back to default
-						const message =
-							data.processingResponse?.message ||
-							__(
-								'Something went wrong. Please contact us to get assistance.',
-								'woo-gutenberg-products-block'
+						const hasErrorNotices =
+							checkoutNotices.some(
+								( notice ) => notice.status === 'error'
+							) ||
+							expressPaymentNotices.some(
+								( notice ) => notice.status === 'error'
+							) ||
+							paymentNotices.some(
+								( notice ) => notice.status === 'error'
 							);
-						addErrorNotice( message, {
-							id: 'checkout',
-						} );
+						if ( ! hasErrorNotices ) {
+							// no error handling in place by anything so let's fall
+							// back to default
+							const message =
+								data.processingResponse?.message ||
+								__(
+									'Something went wrong. Please contact us to get assistance.',
+									'woo-gutenberg-products-block'
+								);
+							addErrorNotice( message, {
+								id: 'checkout',
+							} );
+						}
+
 						dispatch( actions.setIdle() );
 					}
 				} );
@@ -280,7 +312,7 @@ export const CheckoutStateProvider = ( {
 							dispatch( actions.setComplete( response ) );
 						} else {
 							// this will set an error which will end up
-							// triggering the onCheckoutAfterProcessingWithErrors emitter.
+							// triggering the onCheckoutAfterProcessingWithError emitter.
 							// and then setting checkout to IDLE state.
 							dispatch( actions.setHasError( true ) );
 						}
@@ -300,11 +332,17 @@ export const CheckoutStateProvider = ( {
 		checkoutState.customerId,
 		checkoutState.customerNote,
 		checkoutState.processingResponse,
+		previousStatus,
+		previousHasError,
 		dispatchActions,
 		addErrorNotice,
 		isErrorResponse,
 		isFailResponse,
 		isSuccessResponse,
+		shouldRetry,
+		checkoutNotices,
+		expressPaymentNotices,
+		paymentNotices,
 	] );
 
 	const onSubmit = useCallback( () => {
