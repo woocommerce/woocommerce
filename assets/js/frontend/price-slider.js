@@ -6,7 +6,7 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	$( document.body ).bind( 'price_slider_create price_slider_slide', function( event, min, max ) {
+	$( document.body ).on( 'price_slider_create price_slider_slide', function( event, min, max ) {
 
 		$( '.price_slider_amount span.from' ).html( accounting.formatMoney( min, {
 			symbol:    woocommerce_price_slider_params.currency_format_symbol,
@@ -76,7 +76,7 @@ jQuery( function( $ ) {
 		wp.customize.widgetsPreview.WidgetPartial
 	);
 	if ( hasSelectiveRefresh ) {
-		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
+		wp.customize.selectiveRefresh.on( 'partial-content-rendered', function() {
 			init_price_filter();
 		} );
 	}
