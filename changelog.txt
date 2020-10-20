@@ -4,14 +4,11 @@
 
 **WooCommerce**
 
-* Enhancement - Added postcode validation for addresses in India. #27546
 * Tweak - Use first gallery image on single product when image not assigned. #27289
-* Tweak - Renamed "Postcode / ZIP" to "Pin code", and renamed "State / County" to "State" for India. #27516
 * Tweak - Update product_cat/tag taxonomy template file names to product-cat/tag. #27736
 * Tweak - Exclude draft pages from the "Shop page" setting. #27890
 * Tweak - Styling to properly display product reviews within the dashboard activity widget. #27968
 * Fix - Fixes Photoswipe action buttons being obscured by admin bar. #27010
-* Fix - Add i18n locale information for Uganda, Kenya and Tanzania. #27164
 * Fix - Allow variation image to be removed via REST API. #27299
 * Fix - Fixed WP CLI command to delete tax classes. #27310
 * Fix - Prevent regenerate image filter loop. #27483
@@ -33,6 +30,9 @@
 * Dev - REST API - Add user-friendly attribute names and values to order line items metadata.
 * Localization - Added Serbia districts. #27778
 * Localization - Make city, and postcode non-required fields. #27779
+* Localization - Add i18n locale information for Uganda, Kenya and Tanzania. #27164
+* Localization - Renamed "Postcode / ZIP" to "Pin code", and renamed "State / County" to "State" for India. #27516
+* Localization - Added postcode validation for addresses in India. #27546
 
 **WooCommerce Blocks - 3.5.0 & 3.6.0**
 
