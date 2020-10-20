@@ -45,7 +45,7 @@ abstract class AbstractServiceProvider extends \Automattic\WooCommerce\Vendor\Le
 					$default_value = $argument->getDefaultValue();
 					$definition->addArgument( new RawArgument( $default_value ) );
 				} else {
-					$argument_class = $argument->getClass();
+					$argument_class = $this->get_class( $argument );
 					if ( is_null( $argument_class ) ) {
 						throw new ContainerException( "Argument '{$argument->getName()}' of class '$class_name' doesn't have a type hint or has one that doesn't specify a class." );
 					}
@@ -59,6 +59,27 @@ abstract class AbstractServiceProvider extends \Automattic\WooCommerce\Vendor\Le
 		$this->getContainer()->add( $definition->getAlias(), $definition, $shared );
 
 		return $definition;
+	}
+
+	/**
+	 * Gets the class of a parameter.
+	 *
+	 * This method is a replacement for ReflectionParameter::getClass,
+	 * which is deprecated as of PHP 8.
+	 *
+	 * @param \ReflectionParameter $parameter The parameter to get the class for.
+	 *
+	 * @return \ReflectionClass|null The class of the parameter, or null if it hasn't any.
+	 */
+	private function get_class( \ReflectionParameter $parameter ) {
+		// TODO: Remove this 'if' block once minimum PHP version for WooCommerce is bumped to at least 7.1.
+		if ( version_compare( PHP_VERSION, '7.1', '<' ) ) {
+			return $parameter->getClass();
+		}
+
+		return $parameter->getType() && ! $parameter->getType()->isBuiltin()
+			? new \ReflectionClass( $parameter->getType()->getName() )
+			: null;
 	}
 
 	/**
