@@ -111,7 +111,6 @@ class CoreMenu {
 				'id'         => 'my-extensions',
 				'url'        => 'plugins.php',
 				'migrate'    => false,
-				'menuId'     => 'secondary',
 			)
 		);
 		Menu::add_item(
@@ -121,7 +120,6 @@ class CoreMenu {
 				'capability' => 'manage_woocommerce',
 				'id'         => 'marketplace',
 				'url'        => 'wc-addons',
-				'menuId'     => 'secondary',
 			)
 		);
 
@@ -156,7 +154,6 @@ class CoreMenu {
 				'capability' => 'manage_woocommerce',
 				'id'         => 'system-status',
 				'url'        => 'wc-status',
-				'menuId'     => 'secondary',
 			)
 		);
 		Menu::add_item(
@@ -167,7 +164,6 @@ class CoreMenu {
 				'id'         => 'import-export',
 				'url'        => 'import.php',
 				'migrate'    => false,
-				'menuId'     => 'secondary',
 			)
 		);
 		Menu::add_item(
@@ -177,9 +173,22 @@ class CoreMenu {
 				'capability' => 'manage_woocommerce',
 				'id'         => 'utilities',
 				'url'        => 'admin.php?page=wc-status&tab=tools',
-				'menuId'     => 'secondary',
 			)
 		);
+	}
+
+	/**
+	 * Get items excluded from WooCommerce menu migration.
+	 *
+	 * @return array
+	 */
+	public static function get_excluded_items() {
+		$excluded_items = array(
+			'woocommerce',
+			'wc-reports',
+		);
+
+		return apply_filters( 'woocommerce_navigation_core_excluded_items', $excluded_items );
 	}
 
 	/**
@@ -196,7 +205,7 @@ class CoreMenu {
 		}
 
 		foreach ( $submenu['woocommerce'] as $menu_item ) {
-			if ( 'woocommerce' === $menu_item[2] ) {
+			if ( in_array( $menu_item[2], self::get_excluded_items(), true ) ) {
 				continue;
 			}
 
@@ -213,7 +222,6 @@ class CoreMenu {
 					'capability' => $menu_item[1],
 					'id'         => sanitize_title( $menu_item[0] ),
 					'url'        => $menu_item[2],
-					'menuId'     => 'secondary',
 				)
 			);
 		}
