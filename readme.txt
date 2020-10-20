@@ -160,7 +160,52 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 4.7.0 - 2020-11-xx =
+= 4.7.0 - 2020-11-10 =
+
+**WooCommerce**
+
+* Enhancement - Added postcode validation for addresses in India. #27546
+* Tweak - Use first gallery image on single product when image not assigned. #27289
+* Tweak - Renamed "Postcode / ZIP" to "Pin code", and renamed "State / County" to "State" for India. #27516
+* Tweak - Update product_cat/tag taxonomy template file names to product-cat/tag. . #27736
+* Tweak - Exclude draft pages from the "Shop page" setting. #27890
+* Tweak - Styling to properly display product reviews within the dashboard activity widget. #27968
+* Fix - Fixes Photoswipe action buttons being obscured by admin bar. #27010
+* Fix - Add i18n locale information for Uganda, Kenya and Tanzania. #27164
+* Fix - Allow variation image to be removed via REST API. #27299
+* Fix - Fixed WP CLI command to delete tax classes. #27310
+* Fix - Prevent regenerate image filter loop. #27483
+* Fix - Fixed some race conditions in `WC_Install`. #27696
+* Fix - Improved PHP 8 support for `Automattic\WooCommerce\RestApi\Utilities\SingletonTrait`. #27707
+* Fix - Adjust stock even if `reduce_stock` meta is not set in `wc_maybe_reduce_stock_levels`. #27763
+* Fix - Removed duplicated CSS code from jQuery UI. #27767
+* Fix - New - Add woocommerce_should_send_low_stock_notification filter. #27819
+* Fix - HTML syntax error in scheduled product message. #27842
+* Fix - Update logic to determine if an order requires payment to check the order instead of the cart. #27893
+* Fix - Enhancement: Use more relevant `Set password` title for lost password reset form when applicable. #27898
+* Fix - Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted. #27934
+* Fix - Email address starting with `www` being displayed as a URL link in the admin order details page. #27983
+* Dev - Introduce (again) a dependency injection framework for the code in the src directory. #27733
+* Dev - Remove leftover code and data from the reverted improvement for variations filtering by attribute. #27748
+* Dev - Escaped labels in `woocommerce_form_field()`. #27800
+* Dev - Add a NumberUtil::round method to workaround a breaking change in the buil-in round function in PHP8. #27830
+* Dev - Remove default value from optional parameters that are followed by required parameters in functions/methods, since those are de-facto required and trigger a deprectation notice in PHP 8. #27840
+* Dev - REST API - Add user-friendly attribute names and values to order line items metadata.
+* Localization - Added Serbia districts. #27778
+* Localization - Make city, and postcode non-required fields. #27779
+
+**WooCommerce Blocks - 3.5.0 & 3.6.0**
+
+* Make 'retry' property on errors from checkoutAfterProcessingWithSuccess/Error observers default to true if it's undefined. ([3261](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3261))
+* Ensure new payment methods are only displayed when no saved payment method is selected. ([3247](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3247))
+* Load WC Blocks CSS after editor CSS. ([3219](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3219))
+* Restore saved payment method data after closing an express payment method. ([3210](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3210))
+* Use light default background colour for country/state dropdowns. ([3189](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3189))
+* Fix broken Express Payment Method use in the Checkout block for logged out or incognito users. ([3165](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3165))
+* Fix State label for Spain. ([3147](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3147))
+* Don't throw an error when registering a payment method fails. ([3134](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3134))
+* Don't load contents of payment method hidden tabs. ([3227](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3227))
+* Use noticeContexts from useEmitResponse instead of hardcoded values. ([3161](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3161))
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
