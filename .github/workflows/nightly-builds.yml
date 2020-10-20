@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update nightly tag
-        uses: richardsimko/github-tag-action@1.0.0
+        uses: richardsimko/github-tag-action@v1.0.4
         with:
           tag_name: nightly
         env:
