@@ -1,0 +1,120 @@
+.wc-block-components-select {
+	height: 3em;
+	position: relative;
+
+	label {
+		@include reset-typography();
+		@include font-size(regular);
+		line-height: 1.375; // =22px when font-size is 16px.
+		position: absolute;
+		transform: translateY(0.75em);
+		transform-origin: top left;
+		transition: all 200ms ease;
+		color: $gray-50;
+		z-index: 1;
+		margin: 0 0 0 #{$gap + 1px};
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap});
+		white-space: nowrap;
+
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	&.is-active label {
+		transform: translateY(#{$gap-smallest}) scale(0.75);
+	}
+
+	&.has-error {
+		.components-custom-select-control__button {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				border-color: $error-red;
+			}
+			&:focus {
+				outline: 1px dotted $error-red;
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	&.has-error label {
+		color: $error-red;
+	}
+
+	.components-custom-select-control__button {
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			@include font-size(regular);
+			background-color: #fff;
+			box-shadow: none;
+			color: $input-text-active;
+			font-family: inherit;
+			font-weight: normal;
+			height: 3em;
+			letter-spacing: inherit;
+			line-height: 1;
+			overflow: hidden;
+			padding: em($gap-large) $gap em($gap-smallest);
+			text-align: left;
+			text-overflow: ellipsis;
+			text-transform: none;
+			white-space: nowrap;
+			width: 100%;
+			.has-dark-controls & {
+				background-color: $input-background-dark;
+				border-color: $input-border-dark;
+				color: $input-text-dark;
+			}
+		}
+	}
+
+	.components-custom-select-control__button-icon {
+		right: #{$gap - 4px};
+		.has-dark-controls & {
+			fill: $input-text-dark;
+		}
+	}
+
+	.components-custom-select-control__menu {
+		background-color: $select-dropdown-light;
+		margin: 0;
+		max-height: 300px;
+		overflow: auto;
+
+		// Required by IE11.
+		&:empty {
+			display: none;
+		}
+		.has-dark-controls & {
+			background-color: $select-dropdown-dark;
+			color: $input-text-dark;
+		}
+	}
+
+	.components-custom-select-control__item {
+		@include font-size(regular);
+		margin-left: 0;
+		padding-left: $gap;
+		&:hover,
+		&:focus,
+		&.is-highlighted {
+			.has-dark-controls & {
+				background-color: $select-item-dark;
+			}
+		}
+	}
+
+	.components-custom-select-control__item-icon {
+		display: none;
+	}
+}
