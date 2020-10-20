@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.3
 Tested up to: 5.5
 Requires PHP: 7.0
-Stable tag: 4.6.0
+Stable tag: 4.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,20 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 4.6.1 - 2020-10-21 =
+
+**WooCommerce**
+
+* Update woocommerce-admin to 1.6.2. #28006
+
+**WooCommerce Admin - 1.6.2**
+
+* Fix for missing activity panels. #5400
+* Adds array casting on onboarding profile option. #5415
+* Gutenberg compatibility fix for home screen inbox. #5416
+* Gutenberg compat fix for empty reports (leaderboard, customers report). #5409
+* i18n fix for Performance Indicators labels Home Screen. #5405
 
 = 4.6.0 - 2020-10-14 =
 
