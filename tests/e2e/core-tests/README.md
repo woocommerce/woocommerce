@@ -52,9 +52,6 @@ The functions to access the core tests are:
 - `runUpdateGeneralSettingsTest` - Merchant can update general settings
 - `runProductSettingsTest` - Merchant can update product settings
 - `runTaxSettingsTest` - Merchant can update tax settings
-- `runOrderStatusFilterTest` - Merchant can filter orders by order status
-- `runOrderRefundTest` - Merchant can refund an order
-- `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
 
 ### Shopper
 
