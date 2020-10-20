@@ -5,7 +5,8 @@
 const {
 	StoreOwnerFlow,
 	clickTab,
-	uiUnblocked
+	uiUnblocked,
+	setCheckbox
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -111,13 +112,29 @@ const runAddVariableProductTest = () => {
 			await page.waitForSelector('select.variation_actions:not([disabled])');
 			await page.focus('select.variation_actions');
 			await expect(page).toSelect('select.variation_actions', 'Create variations from all attributes');
-			await expect( page ).toClick('a.do_variation_action');
+
+			// headless: false doesn't require this
+			const firstDialog = await expect(page).toDisplayDialog(async () => {
+				// Using this technique since toClick() isn't working.
+				// See: https://github.com/GoogleChrome/puppeteer/issues/1805#issuecomment-464802876
+				page.$eval('a.do_variation_action', elem => elem.click());
+			});
+
+			await expect(firstDialog.message()).toMatch('Are you sure you want to link all variations?');
 
 			// Set some variation data
 			await uiUnblocked();
 			await uiUnblocked();
 
-			await page.waitForSelector('.woocommerce_variation');
+			await page.focus('.variations_tab');
+			await expect( page ).toClick( '.variations_tab a' );
+			await page.waitForSelector(
+				'select[name="attribute_attr-1[0]"]',
+				{
+					visible: true,
+					timeout: 5000
+				}
+			);
 
 			// Verify that variations were created
 			await Promise.all([
@@ -153,22 +170,17 @@ const runAddVariableProductTest = () => {
 			   expect(page).toMatchElement('select[name="attribute_attr-2[7]"]', {text: 'val2'}),
 			   expect(page).toMatchElement('select[name="attribute_attr-3[7]"]', {text: 'val2'}),
 			]);
-			await expect(page).toClick('.woocommerce_variation:nth-of-type(2) .handlediv');
-			await page.waitFor(2000);
-			await page.focus('input[name="variable_is_virtual[0]"]');
-			await expect(page).toClick('input[name="variable_is_virtual[0]"]');
+
+			await page.focus( '.variations-pagenav' );
+			await expect(page).toClick('.variations-pagenav .expand_all');
+			await page.waitFor( 2000 );
+//			await setCheckbox('input[name="variable_is_virtual[0]"]');
 			await expect(page).toFill('input[name="variable_regular_price[0]"]', '9.99');
 
-			await expect(page).toClick('.woocommerce_variation:nth-of-type(3) .handlediv');
-			await page.waitFor(2000);
-			await page.focus('input[name="variable_is_virtual[1]"]');
-			await expect(page).toClick('input[name="variable_is_virtual[1]"]');
+//			await setCheckbox('input[name="variable_is_virtual[1]"]');
 			await expect(page).toFill('input[name="variable_regular_price[1]"]', '11.99');
 
-			await expect(page).toClick('.woocommerce_variation:nth-of-type(4) .handlediv');
-			await page.waitFor(2000);
-			await page.focus('input[name="variable_manage_stock[2]"]');
-			await expect(page).toClick('input[name="variable_manage_stock[2]"]');
+//			await setCheckbox('input[name="variable_manage_stock[2]"]');
 			await expect(page).toFill('input[name="variable_regular_price[2]"]', '20');
 			await expect(page).toFill('input[name="variable_weight[2]"]', '200');
 			await expect(page).toFill('input[name="variable_length[2]"]', '10');
@@ -186,6 +198,7 @@ const runAddVariableProductTest = () => {
 				'Move to Trash',
 				'1 product moved to the Trash.'
 			);
+/**/
 		});
 	});
 };
