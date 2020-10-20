@@ -5,7 +5,7 @@
 **WooCommerce**
 
 * Tweak - Use first gallery image on single product when image not assigned. #27289
-* Tweak - Update product_cat/tag taxonomy template file names to product-cat/tag. #27736
+* Tweak - Update `product_cat/tag` taxonomy template file names to `product-cat/tag`. #27736
 * Tweak - Exclude draft pages from the "Shop page" setting. #27890
 * Tweak - Styling to properly display product reviews within the dashboard activity widget. #27968
 * Fix - Fixes Photoswipe action buttons being obscured by admin bar. #27010
@@ -16,16 +16,16 @@
 * Fix - Improved PHP 8 support for `Automattic\WooCommerce\RestApi\Utilities\SingletonTrait`. #27707
 * Fix - Adjust stock even if `reduce_stock` meta is not set in `wc_maybe_reduce_stock_levels`. #27763
 * Fix - Removed duplicated CSS code from jQuery UI. #27767
-* Fix - New - Add woocommerce_should_send_low_stock_notification filter. #27819
 * Fix - HTML syntax error in scheduled product message. #27842
 * Fix - Update logic to determine if an order requires payment to check the order instead of the cart. #27893
 * Fix - Enhancement: Use more relevant `Set password` title for lost password reset form when applicable. #27898
 * Fix - Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted. #27934
 * Fix - Email address starting with `www` being displayed as a URL link in the admin order details page. #27983
+* Dev - Add `woocommerce_should_send_low_stock_notification` filter. #27819
 * Dev - Introduce (again) a dependency injection framework for the code in the src directory. #27733
 * Dev - Remove leftover code and data from the reverted improvement for variations filtering by attribute. #27748
 * Dev - Escaped labels in `woocommerce_form_field()`. #27800
-* Dev - Add a NumberUtil::round method to workaround a breaking change in the buil-in round function in PHP8. #27830
+* Dev - Add a `NumberUtil::round` method to workaround a breaking change in the buil-in round function in PHP8. #27830
 * Dev - Remove default value from optional parameters that are followed by required parameters in functions/methods, since those are de-facto required and trigger a deprectation notice in PHP 8. #27840
 * Dev - REST API - Add user-friendly attribute names and values to order line items metadata.
 * Localization - Added Serbia districts. #27778
