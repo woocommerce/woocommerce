@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-environment",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "WooCommerce End to End Testing Environment Configuration.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",
@@ -53,6 +53,7 @@
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
     "install-wp-tests": "./bin/install-wp-tests.sh",
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
+    "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
   }
 }

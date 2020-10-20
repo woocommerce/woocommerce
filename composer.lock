@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc3015cb9bc781605cedc88749cd28af",
+    "content-hash": "cba7b2c774868039e8dda4628b3b60aa",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -44,16 +44,16 @@
         },
         {
             "name": "automattic/jetpack-constants",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f"
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/b4210d56948529b43785ce31e0055f435eac1f9f",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/9827a2f446b8c4faafaf1c740483031c073a381d",
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d",
                 "shasum": ""
             },
             "require-dev": {
@@ -71,7 +71,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "time": "2020-07-01T15:55:35+00:00"
+            "time": "2020-08-13T14:33:09+00:00"
         },
         {
             "name": "composer/installers",
@@ -197,20 +197,20 @@
         },
         {
             "name": "league/container",
-            "version": "3.3.1",
+            "version": "3.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/container.git",
-                "reference": "93238f74ff5964aee27a78508cdfbdba1cd338f6"
+                "reference": "7dc67bdf89efc338e674863c0ea70a63efe4de05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/container/zipball/93238f74ff5964aee27a78508cdfbdba1cd338f6",
-                "reference": "93238f74ff5964aee27a78508cdfbdba1cd338f6",
+                "url": "https://api.github.com/repos/thephpleague/container/zipball/7dc67bdf89efc338e674863c0ea70a63efe4de05",
+                "reference": "7dc67bdf89efc338e674863c0ea70a63efe4de05",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.0",
+                "php": "^7.0 || ^8.0",
                 "psr/container": "^1.0"
             },
             "provide": {
@@ -259,7 +259,13 @@
                 "provider",
                 "service"
             ],
-            "time": "2020-05-18T08:20:23+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/philipobenito",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-09-28T13:38:44+00:00"
         },
         {
             "name": "maxmind-db/reader",

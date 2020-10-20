@@ -387,7 +387,7 @@ class WC_Admin_Taxonomies {
 	 * @param object $term Term object.
 	 * @return array
 	 */
-	public function product_cat_row_actions( $actions = array(), $term ) {
+	public function product_cat_row_actions( $actions, $term ) {
 		$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
 
 		if ( $default_category_id !== $term->term_id && current_user_can( 'edit_term', $term->term_id ) ) {

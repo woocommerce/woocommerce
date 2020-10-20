@@ -12,13 +12,15 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClas
  */
 class ClassWithPrivateInjectionMethod {
 
-	// phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	// phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingPublic, WooCommerce.Functions.InternalInjectionMethod.MissingFinal
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 */
-	final private function init() {
+	private function init() {
 	}
+
+	// phpcs:enable
 }
