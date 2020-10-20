@@ -1,5 +1,14 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
+ * External dependencies
+ */
+const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
+
+/**
  * Internal dependencies
  */
 const {
@@ -14,15 +23,6 @@ const {
 const {
 	waitAndClick
 } = require( '@woocommerce/e2e-environment' );
-
-/**
- * External dependencies
- */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
 
 const runInitialStoreSettingsTest = () => {
 	describe('Store owner can finish initial store setup', () => {
