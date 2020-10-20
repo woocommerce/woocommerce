@@ -66,6 +66,7 @@ jQuery( function( $ ) {
 	}
 
 	init_price_filter();
+	$( document.body ).on( 'init_price_filter', init_price_filter );
 
 	var hasSelectiveRefresh = (
 		'undefined' !== typeof wp &&
