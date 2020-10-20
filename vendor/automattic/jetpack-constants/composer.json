@@ -1,0 +1,24 @@
+{
+	"name": "automattic/jetpack-constants",
+	"description": "A wrapper for defining constants in a more testable way.",
+	"type": "library",
+	"license": "GPL-2.0-or-later",
+	"require": {},
+	"require-dev": {
+		"phpunit/phpunit": "^5.7 || ^6.5 || ^7.5",
+		"php-mock/php-mock": "^2.1"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"scripts": {
+		"phpunit": [
+			"@composer install",
+			"./vendor/phpunit/phpunit/phpunit --colors=always"
+		]
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true
+}
