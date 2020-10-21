@@ -94,7 +94,7 @@ class WC_Data_Store_WP {
 				$object->get_id()
 			)
 		);
-		return $this->filter_raw_data( $object, $raw_meta_data );
+		return $this->filter_raw_meta_data( $object, $raw_meta_data );
 	}
 
 	/**
@@ -107,7 +107,7 @@ class WC_Data_Store_WP {
 	 *
 	 * @return mixed|void
 	 */
-	public function filter_raw_data( &$object, $raw_meta_data ) {
+	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
 		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 		return apply_filters( "woocommerce_data_store_wp_{$this->meta_type}_read_meta", $meta_data, $object, $this );
