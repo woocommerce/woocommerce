@@ -181,6 +181,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Enhancement: Use more relevant `Set password` title for lost password reset form when applicable. #27898
 * Fix - Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted. #27934
 * Fix - Email address starting with `www` being displayed as a URL link in the admin order details page. #27983
+* Fix - Unexpected HTTP 401 woocommerce_rest_cannot_view Sorry, you cannot list resources REST API responses that occur when a plugin or custom code determines the current WordPress user before WooCommerce is fully initialized. #27587
 * Dev - Add `woocommerce_should_send_low_stock_notification` filter. #27819
 * Dev - Introduce (again) a dependency injection framework for the code in the src directory. #27733
 * Dev - Remove leftover code and data from the reverted improvement for variations filtering by attribute. #27748
