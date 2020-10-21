@@ -22,6 +22,7 @@ class Navigation {
 	public function __construct() {
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_features', array( $this, 'maybe_remove_nav_feature' ), 0 );
+		add_action( 'update_option_woocommerce_navigation_enabled', array( $this, 'reload_page_on_toggle' ), 10, 2 );
 
 		if ( Loader::is_feature_enabled( 'navigation' ) ) {
 			add_action( 'in_admin_header', array( __CLASS__, 'embed_navigation' ) );
@@ -87,5 +88,21 @@ class Navigation {
 			array(),
 			Loader::get_file_version( 'css' )
 		);
+	}
+
+	/**
+	 * Reloads the page when the option is toggled to make sure all nav features are loaded.
+	 *
+	 * @param string $old_value Old value.
+	 * @param string $value     New value.
+	 */
+	public static function reload_page_on_toggle( $old_value, $value ) {
+		if ( $old_value === $value ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
 	}
 }

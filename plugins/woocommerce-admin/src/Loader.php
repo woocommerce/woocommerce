@@ -60,6 +60,8 @@ class Loader {
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
+		add_filter( 'woocommerce_get_sections_advanced', array( __CLASS__, 'add_features_section' ) );
+		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'add_features_settings' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
@@ -230,6 +232,52 @@ class Loader {
 				new $feature();
 			}
 		}
+	}
+
+	/**
+	 * Adds the Features section to the advanced tab of WooCommerce Settings
+	 *
+	 * @param array $sections Sections.
+	 * @return array
+	 */
+	public static function add_features_section( $sections ) {
+		$sections['features'] = __( 'Features', 'woocommerce-admin' );
+		return $sections;
+	}
+
+	/**
+	 * Adds the Features settings.
+	 *
+	 * @param array  $settings Settings.
+	 * @param string $current_section Current section slug.
+	 * @return array
+	 */
+	public static function add_features_settings( $settings, $current_section ) {
+		if ( 'features' !== $current_section ) {
+			return $settings;
+		}
+
+		return apply_filters(
+			'woocommerce_settings_features',
+			array(
+				array(
+					'title' => __( 'Features', 'woocommerce-admin' ),
+					'type'  => 'title',
+					'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' ),
+					'id'    => 'features_options',
+				),
+				array(
+					'title' => __( 'Navigation', 'woocommerce-admin' ),
+					'desc'  => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce-admin' ),
+					'id'    => 'woocommerce_navigation_enabled',
+					'type'  => 'checkbox',
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'features_options',
+				),
+			)
+		);
 	}
 
 	/**
