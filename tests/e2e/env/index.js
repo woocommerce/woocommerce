@@ -12,7 +12,6 @@ const {
 	useE2EJestPuppeteerConfig,
 } = require( './config' );
 const { getAppRoot, getTestConfig } = require( './utils' );
-const webpackAlias = require( './webpack-alias' );
 
 const {
 	clickAndWaitForNewPage,
@@ -39,7 +38,6 @@ module.exports = {
 	useE2EJestPuppeteerConfig,
 	getAppRoot,
 	getTestConfig,
-	webpackAlias,
 	clickAndWaitForNewPage,
 	getAccountCredentials,
 	isEventuallyPresent,
