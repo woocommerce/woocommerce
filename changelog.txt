@@ -48,6 +48,20 @@
 * Don't load contents of payment method hidden tabs. ([3227](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3227))
 * Use noticeContexts from useEmitResponse instead of hardcoded values. ([3161](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3161))
 
+= 4.6.1 - 2020-10-21 =
+
+**WooCommerce**
+
+* Update woocommerce-admin to 1.6.2. #28006
+
+**WooCommerce Admin - 1.6.2**
+
+* Fix for missing activity panels. #5400
+* Adds array casting on onboarding profile option. #5415
+* Gutenberg compatibility fix for home screen inbox. #5416
+* Gutenberg compat fix for empty reports (leaderboard, customers report). #5409
+* i18n fix for Performance Indicators labels Home Screen. #5405
+
 = 4.6.0 - 2020-10-14 =
 
 **WooCommerce**
