@@ -37,7 +37,7 @@ class WooCommerce_Payments {
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_note_action_install-now', array( $this, 'install' ) );
+		add_action( 'init', array( $this, 'install_on_action' ) );
 		add_action( 'wc-admin-woocommerce-payments_add_note', array( $this, 'add_note' ) );
 	}
 
@@ -100,13 +100,22 @@ class WooCommerce_Payments {
 	public static function get_note() {
 		$note = new Note();
 		$note->set_title( __( 'Try the new way to get paid', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with WooCommerce Payments.', 'woocommerce-admin' ) );
+		$note->set_content(
+			__( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with <strong>WooCommerce Payments</strong>.', 'woocommerce-admin' ) .
+			'<br><br>' .
+			sprintf(
+				/* translators: 1: opening link tag, 2: closing tag */
+				__( 'By clicking "Get started", you agree to our %1$sTerms of Service%2$s', 'woocommerce-admin' ),
+				'<a href="https://wordpress.com/tos/" target="_blank">',
+				'</a>'
+			)
+		);
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/payments/', Note::E_WC_ADMIN_NOTE_UNACTIONED );
-		$note->add_action( 'install-now', __( 'Install now', 'woocommerce-admin' ), false, Note::E_WC_ADMIN_NOTE_ACTIONED, true );
+		$note->add_action( 'get-started', __( 'Get started', 'woocommerce-admin' ), wc_admin_url( '&action=setup-woocommerce-payments' ), Note::E_WC_ADMIN_NOTE_ACTIONED, true );
 
 		// Create the note as "actioned" if the plugin is already installed.
 		if ( self::is_installed() ) {
@@ -128,22 +137,58 @@ class WooCommerce_Payments {
 	}
 
 	/**
-	 * Install WooCommerce Payments when note is actioned.
+	 * Install and activate WooCommerce Payments.
 	 *
-	 * @param Note $note Note being acted upon.
+	 * @return boolean Whether the plugin was successfully activated.
 	 */
-	public function install( $note ) {
-		if ( self::NOTE_NAME === $note->get_name() && current_user_can( 'install_plugins' ) ) {
-			$install_request = array( 'plugins' => self::PLUGIN_SLUG );
-			$installer       = new \Automattic\WooCommerce\Admin\API\Plugins();
-			$result          = $installer->install_plugins( $install_request );
-
-			if ( is_wp_error( $result ) ) {
-				return;
-			}
-
-			$activate_request = array( 'plugins' => self::PLUGIN_SLUG );
-			$installer->activate_plugins( $activate_request );
+	private function install_and_activate_wcpay() {
+		$install_request = array( 'plugins' => self::PLUGIN_SLUG );
+		$installer       = new \Automattic\WooCommerce\Admin\API\Plugins();
+		$result          = $installer->install_plugins( $install_request );
+		if ( is_wp_error( $result ) ) {
+			return false;
 		}
+
+		$activate_request = array( 'plugins' => self::PLUGIN_SLUG );
+		$result           = $installer->activate_plugins( $activate_request );
+		if ( is_wp_error( $result ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Install & activate WooCommerce Payments plugin, and redirect to setup.
+	 */
+	public function install_on_action() {
+		// TODO: Need to validate this request more strictly since we're taking install actions directly?
+		/* phpcs:disable WordPress.Security.NonceVerification */
+		if (
+			! isset( $_GET['page'] ) ||
+			'wc-admin' !== $_GET['page'] ||
+			! isset( $_GET['action'] ) ||
+			'setup-woocommerce-payments' !== $_GET['action']
+		) {
+			return;
+		}
+		/* phpcs:enable */
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+
+		$this->install_and_activate_wcpay();
+
+		// WooCommerce Payments is installed at this point, so link straight into the onboarding flow.
+		$connect_url = add_query_arg(
+			array(
+				'wcpay-connect' => '1',
+				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+			),
+			admin_url()
+		);
+		wp_safe_redirect( $connect_url );
+		exit;
 	}
 }
