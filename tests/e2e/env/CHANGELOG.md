@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+- support for custom container name
+
 ## Fixed
 
 - Remove redundant `puppeteer` dependency
