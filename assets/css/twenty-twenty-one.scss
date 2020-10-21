@@ -171,6 +171,7 @@ a.button {
 
 .price {
 	font-family: $headings;
+	font-size: 1rem;
 
 	del {
 		opacity: 0.5;
@@ -365,8 +366,9 @@ ul.products {
 		}
 
 		.woocommerce-loop-product__title {
-			margin: 1.5rem 0 0.5rem;
-			font-size: 2.5rem;
+			margin: 0.5rem 0 0.5rem;
+			font-size: 1.5rem;
+			font-weight: 700;
 
 			&::before {
 				content: none;
@@ -384,7 +386,7 @@ ul.products {
 		}
 
 		.price {
-			margin-bottom: 2rem;
+			margin-bottom: 1rem;
 		}
 
 		.price,
