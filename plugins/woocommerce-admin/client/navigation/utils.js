@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
+
+/**
  * Get the params from a location as a key/value pair object.
  *
  * @param {Object} location Window location
@@ -121,15 +126,6 @@ export const addHistoryListener = ( listener ) => {
 };
 
 /**
- * Get the admin URL for the given path.
- *
- * @param {string} path Path to append to URL.
- */
-export const getAdminUrl = ( path ) => {
-	return ( window.wcNavigation.adminUrl || '' ) + path;
-};
-
-/**
  * Get the closest matching item.
  *
  * @param {Array} items An array of items to match against.
@@ -139,7 +135,10 @@ export const getMatchingItem = ( items ) => {
 	let highestMatch = 0;
 
 	items.forEach( ( item ) => {
-		const score = getMatchScore( window.location, getAdminUrl( item.url ) );
+		const score = getMatchScore(
+			window.location,
+			getAdminLink( item.url )
+		);
 		if ( score >= highestMatch ) {
 			matchedItem = item;
 			highestMatch = score;

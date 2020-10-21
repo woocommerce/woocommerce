@@ -4,42 +4,34 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Icon, wordpress } from '@wordpress/icons';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import { useSelect } from '@wordpress/data';
 
-/**
- * Internal dependencies
- */
-import { NAVIGATION_STORE_NAME } from '../../store';
-
 const Header = () => {
+	const siteTitle = getSetting( 'siteTitle', '' );
+	const siteUrl = getSetting( 'siteUrl', '' );
+
 	const toggleFolded = () => {
 		document.body.classList.toggle( 'is-folded' );
 	};
 
 	let buttonIcon = <Icon size="36px" icon={ wordpress } />;
 
-	const { isRequestingSiteIcon, siteIconUrl, siteTitle, siteUrl } = useSelect(
-		( select ) => {
-			const { getSiteTitle, getSiteUrl } = select(
-				NAVIGATION_STORE_NAME
-			);
-			const { isResolving } = select( 'core/data' );
-			const { getEntityRecord } = select( 'core' );
-			const siteData =
-				getEntityRecord( 'root', '__unstableBase', undefined ) || {};
+	const { isRequestingSiteIcon, siteIconUrl } = useSelect( ( select ) => {
+		const { isResolving } = select( 'core/data' );
+		const { getEntityRecord } = select( 'core' );
+		const siteData =
+			getEntityRecord( 'root', '__unstableBase', undefined ) || {};
 
-			return {
-				isRequestingSiteIcon: isResolving( 'core', 'getEntityRecord', [
-					'root',
-					'__unstableBase',
-					undefined,
-				] ),
-				siteIconUrl: siteData.siteIconUrl,
-				siteTitle: getSiteTitle(),
-				siteUrl: getSiteUrl(),
-			};
-		}
-	);
+		return {
+			isRequestingSiteIcon: isResolving( 'core', 'getEntityRecord', [
+				'root',
+				'__unstableBase',
+				undefined,
+			] ),
+			siteIconUrl: siteData.siteIconUrl,
+		};
+	} );
 
 	if ( siteIconUrl ) {
 		buttonIcon = <img alt={ __( 'Site Icon' ) } src={ siteIconUrl } />;

@@ -3,6 +3,7 @@
  */
 import { SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
+import { withNavigationHydration } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,4 +18,8 @@ const Navigation = () => (
 	</SlotFillProvider>
 );
 
-export default Navigation;
+const HydratedNavigation = withNavigationHydration( window.wcNavigation )(
+	Navigation
+);
+
+export default HydratedNavigation;

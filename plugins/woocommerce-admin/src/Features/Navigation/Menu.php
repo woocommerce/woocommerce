@@ -375,11 +375,7 @@ class Menu {
 		global $submenu, $parent_file, $typenow, $self;
 
 		$data = array(
-			'adminUrl'     => get_admin_url(),
-			'dashboardUrl' => get_dashboard_url(),
-			'menuItems'    => self::get_prepared_menu_item_data(),
-			'siteTitle'    => get_bloginfo( 'name' ),
-			'siteUrl'      => get_site_url(),
+			'menuItems' => self::get_prepared_menu_item_data(),
 		);
 
 		$paul = wp_add_inline_script( WC_ADMIN_APP, 'window.wcNavigation = ' . wp_json_encode( $data ), 'before' );

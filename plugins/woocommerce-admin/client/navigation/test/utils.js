@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
+
+/**
  * Internal dependencies
  */
 import {
 	addHistoryListener,
-	getAdminUrl,
 	getFullUrl,
 	getMatchingItem,
 	getMatchScore,
@@ -12,9 +16,8 @@ import {
 
 const originalLocation = window.location;
 global.window = Object.create( window );
-global.window.wcNavigation = {
-	adminUrl: 'https://teststore.com/wp-admin/',
-};
+global.window.wcNavigation = {};
+
 const sampleMenuItems = [
 	{
 		id: 'main',
@@ -38,14 +41,6 @@ const sampleMenuItems = [
 	},
 ];
 
-describe( 'getAdminUrl', () => {
-	it( 'should get the admin URL with a given path', () => {
-		expect( getAdminUrl( 'admin.php?page=testpage' ) ).toBe(
-			'https://teststore.com/wp-admin/admin.php?page=testpage'
-		);
-	} );
-} );
-
 describe( 'getMatchingItem', () => {
 	beforeAll( () => {
 		delete window.location;
@@ -56,16 +51,14 @@ describe( 'getMatchingItem', () => {
 	} );
 
 	it( 'should get the closest matched item', () => {
-		window.location = new URL(
-			'https://teststore.com/wp-admin/admin.php?page=wc-admin'
-		);
+		window.location = new URL( getAdminLink( 'admin.php?page=wc-admin' ) );
 		const matchingItem = getMatchingItem( sampleMenuItems );
 		expect( matchingItem.id ).toBe( 'main' );
 	} );
 
 	it( 'should match the item without hash if a better match does not exist', () => {
 		window.location = new URL(
-			'https://teststore.com/wp-admin/admin.php?page=wc-admin#hash'
+			getAdminLink( 'admin.php?page=wc-admin#hash' )
 		);
 		const matchingItem = getMatchingItem( sampleMenuItems );
 		expect( matchingItem.id ).toBe( 'main' );
@@ -73,7 +66,7 @@ describe( 'getMatchingItem', () => {
 
 	it( 'should exactly match the item with a hash if it exists', () => {
 		window.location = new URL(
-			'https://teststore.com/wp-admin/admin.php?page=wc-admin&path=/test-path#anchor'
+			getAdminLink( 'admin.php?page=wc-admin&path=/test-path#anchor' )
 		);
 		const matchingItem = getMatchingItem( sampleMenuItems );
 		expect( matchingItem.id ).toBe( 'hash' );
@@ -81,7 +74,9 @@ describe( 'getMatchingItem', () => {
 
 	it( 'should roughly match the item with the highest number of matching arguments', () => {
 		window.location = new URL(
-			'https://teststore.com/wp-admin/admin.php?page=wc-admin&path=/test-path&section=section-name'
+			getAdminLink(
+				'admin.php?page=wc-admin&path=/test-path&section=section-name'
+			)
 		);
 		const matchingItem = getMatchingItem( sampleMenuItems );
 		expect( matchingItem.id ).toBe( 'multiple-args' );
@@ -91,7 +86,7 @@ describe( 'getMatchingItem', () => {
 describe( 'getMatchScore', () => {
 	beforeAll( () => {
 		delete window.location;
-		window.location = new URL( 'https://teststore.com' );
+		window.location = new URL( getAdminLink( '/' ) );
 	} );
 
 	afterAll( () => {
@@ -101,10 +96,8 @@ describe( 'getMatchScore', () => {
 	it( 'should return the largest integer for an exact match', () => {
 		expect(
 			getMatchScore(
-				new URL(
-					'https://teststore.com/wp-admin/admin.php?page=testpage'
-				),
-				'https://teststore.com/wp-admin/admin.php?page=testpage'
+				new URL( getAdminLink( 'admin.php?page=testpage' ) ),
+				getAdminLink( 'admin.php?page=testpage' )
 			)
 		).toBe( Number.MAX_SAFE_INTEGER );
 	} );
@@ -112,9 +105,7 @@ describe( 'getMatchScore', () => {
 	it( 'should return the largest integer for an exact match with a partial URL', () => {
 		expect(
 			getMatchScore(
-				new URL(
-					'https://teststore.com/wp-admin/admin.php?page=testpage'
-				),
+				new URL( getFullUrl( '/wp-admin/admin.php?page=testpage' ) ),
 				'/wp-admin/admin.php?page=testpage'
 			)
 		).toBe( Number.MAX_SAFE_INTEGER );
@@ -123,10 +114,8 @@ describe( 'getMatchScore', () => {
 	it( 'should return the largest integer - 1 for an exact match without a hash', () => {
 		expect(
 			getMatchScore(
-				new URL(
-					'https://teststore.com/wp-admin/admin.php?page=testpage#hash'
-				),
-				'https://teststore.com/wp-admin/admin.php?page=testpage'
+				new URL( getAdminLink( 'admin.php?page=testpage#hash' ) ),
+				getAdminLink( 'admin.php?page=testpage' )
 			)
 		).toBe( Number.MAX_SAFE_INTEGER - 1 );
 	} );
@@ -135,9 +124,11 @@ describe( 'getMatchScore', () => {
 		expect(
 			getMatchScore(
 				new URL(
-					'https://teststore.com/wp-admin/admin.php?page=testpage&param1=a&param2=b&param3=c'
+					getAdminLink(
+						'admin.php?page=testpage&param1=a&param2=b&param3=c'
+					)
 				),
-				'https://teststore.com/wp-admin/admin.php?page=testpage&param1=a&param2=b'
+				getAdminLink( 'admin.php?page=testpage&param1=a&param2=b' )
 			)
 		).toBe( 3 );
 	} );
@@ -146,9 +137,11 @@ describe( 'getMatchScore', () => {
 		expect(
 			getMatchScore(
 				new URL(
-					'https://teststore.com/wp-admin/admin.php?page=testpage&param1=a&param2=b&param3=c'
+					getAdminLink(
+						'admin.php?page=testpage&param1=a&param2=b&param3=c'
+					)
 				),
-				'https://teststore.com/wp-admin/plugins.php?page=testpage&param1=a&param2=b'
+				getAdminLink( 'plugins.php?page=testpage&param1=a&param2=b' )
 			)
 		).toBe( 0 );
 	} );
@@ -157,32 +150,32 @@ describe( 'getMatchScore', () => {
 describe( 'getFullUrl', () => {
 	beforeAll( () => {
 		delete window.location;
-		window.location = new URL( 'https://teststore.com' );
+		window.location = new URL( getAdminLink( '/' ) );
 	} );
 
 	afterAll( () => {
 		window.location = originalLocation;
 	} );
 
+	const adminUrl = new URL( getAdminLink( '/' ) );
+
 	it( 'should get the full URL from a path', () => {
 		expect( getFullUrl( '/wp-admin/admin.php?page=testpage' ) ).toBe(
-			'https://teststore.com/wp-admin/admin.php?page=testpage'
+			adminUrl.origin + '/wp-admin/admin.php?page=testpage'
 		);
 	} );
 
 	it( 'should return the same URL from an already complete URL', () => {
-		expect(
-			getFullUrl(
-				'https://teststore.com/wp-admin/admin.php?page=testpage'
-			)
-		).toBe( 'https://teststore.com/wp-admin/admin.php?page=testpage' );
+		expect( getFullUrl( getAdminLink( 'admin.php?page=testpage' ) ) ).toBe(
+			getAdminLink( 'admin.php?page=testpage' )
+		);
 	} );
 } );
 
 describe( 'getParams', () => {
 	it( 'should get the params from a location', () => {
 		const location = new URL(
-			'https://teststore.com/wp-admin/admin.php?page=testpage&param1=a'
+			getAdminLink( 'admin.php?page=testpage&param1=a' )
 		);
 		const params = getParams( location );
 		expect( Object.keys( params ).length ).toBe( 2 );

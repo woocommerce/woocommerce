@@ -10,13 +10,14 @@ import {
 	__experimentalNavigationMenu as NavigationMenu,
 	__experimentalNavigationGroup as NavigationGroup,
 } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { addHistoryListener, getMatchingItem } from '../../utils';
-import { NAVIGATION_STORE_NAME } from '../../store';
 import Header from '../header';
 import Item from '../../components/Item';
 
@@ -27,8 +28,7 @@ const Container = ( { menuItems } ) => {
 		adminMenu.classList.add( 'folded' );
 	}, [] );
 
-	const dashboardUrl =
-		window.wcNavigation && window.wcNavigation.dashboardUrl;
+	const dashboardUrl = getAdminLink( '' );
 
 	const categories = menuItems.filter( ( item ) => item.isCategory );
 	categories.push( {

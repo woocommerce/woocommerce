@@ -12,13 +12,3 @@ export const getMenuItems = ( state ) => {
 export const getActiveItem = ( state ) => {
 	return state.activeItem || null;
 };
-
-// @todo This should be moved into @wordpress/core-data.
-export const getSiteTitle = ( state ) => {
-	return state.siteTitle || null;
-};
-
-// @todo This should be moved into @wordpress/core-data.
-export const getSiteUrl = ( state ) => {
-	return state.siteUrl || null;
-};
