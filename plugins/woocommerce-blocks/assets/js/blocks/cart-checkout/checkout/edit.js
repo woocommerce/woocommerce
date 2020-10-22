@@ -171,7 +171,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 				>
 					<ToggleControl
 						label={ __(
-							'Allow shopper to sign up for a user account during checkout',
+							'Allow shoppers to sign up for a user account during checkout',
 							'woo-gutenberg-products-block'
 						) }
 						checked={ allowCreateAccount }
@@ -194,7 +194,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 				</p>
 				<ToggleControl
 					label={ __(
-						'Allow customers to optionally add order notes',
+						'Allow shoppers to optionally add order notes',
 						'woo-gutenberg-products-block'
 					) }
 					checked={ showOrderNotes }
