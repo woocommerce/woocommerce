@@ -318,7 +318,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_author_email, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			);
 
 			if ( $comments ) {
@@ -327,7 +327,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 					echo '<li>';
 
-					echo get_avatar( $comment->comment_author, '32' );
+					echo get_avatar( $comment->comment_author_email, '32' );
 
 					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
