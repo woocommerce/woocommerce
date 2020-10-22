@@ -1242,6 +1242,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
+							'parent_name'  => array(
+								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 							'product_id'   => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
 								'type'        => 'mixed',
