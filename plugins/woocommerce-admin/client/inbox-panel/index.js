@@ -75,7 +75,6 @@ const renderNotes = ( { hasNotes, isBatchUpdating, lastRead, notes } ) => {
 const InboxPanel = ( props ) => {
 	const {
 		isError,
-		isPanelEmpty,
 		isResolving,
 		isBatchUpdating,
 		notes,
@@ -121,10 +120,6 @@ const InboxPanel = ( props ) => {
 	const hasNotes = hasValidNotes( notes );
 
 	const isActivityHeaderVisible = hasNotes || isResolving || isUpdatingNote;
-
-	if ( isPanelEmpty ) {
-		isPanelEmpty( ! hasNotes && ! isActivityHeaderVisible );
-	}
 
 	// @todo After having a pagination implemented we should call the method "getNotes" with a different query since
 	// the current one is only getting 25 notes and the count of unread notes only will refer to this 25 and not all the existing ones.
