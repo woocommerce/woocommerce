@@ -485,8 +485,8 @@ class PageController {
 			'title'        => $options['title'],
 			'capability'   => $options['capability'],
 			'url'          => $options['path'],
-			'order'        => isset( $options['order'] ) ? $options['order'] : 20,
-			'is_top_level' => isset( $options['is_top_level'] ) && $options['is_top_level'],
+			'order'        => isset( $options['order'] ) ? $options['order'] : 100,
+			'is_top_level' => ( isset( $options['is_top_level'] ) && $options['is_top_level'] ) || ! $options['parent'],
 		);
 
 		if ( isset( $options['is_category'] ) && $options['is_category'] ) {
