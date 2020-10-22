@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
+import { NavSlotFillProvider } from '@woocommerce/navigation';
 import { withNavigationHydration } from '@woocommerce/data';
 
 /**
@@ -12,10 +12,10 @@ import './stylesheets/index.scss';
 import Container from './components/container';
 
 const Navigation = () => (
-	<SlotFillProvider>
+	<NavSlotFillProvider>
 		<Container />
 		<PluginArea />
-	</SlotFillProvider>
+	</NavSlotFillProvider>
 );
 
 const HydratedNavigation = withNavigationHydration( window.wcNavigation )(

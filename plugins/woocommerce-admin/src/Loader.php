@@ -451,6 +451,7 @@ class Loader {
 				'wp-date',
 				'wp-plugins',
 				'wc-tracks',
+				'wc-navigation',
 			),
 			$js_file_version,
 			true

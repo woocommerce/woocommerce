@@ -57,58 +57,63 @@ export default () => {
 			report: 'revenue',
 			title: __( 'Revenue', 'woocommerce-admin' ),
 			component: RevenueReport,
+			id: 'woocommerce-analytics-revenue',
 		},
 		{
 			report: 'products',
 			title: __( 'Products', 'woocommerce-admin' ),
 			component: ProductsReport,
+			id: 'woocommerce-analytics-products',
 		},
 		{
 			report: 'variations',
 			title: __( 'Variations', 'woocommerce-admin' ),
 			component: VariationsReport,
+			id: 'woocommerce-analytics-variations',
 		},
 		{
 			report: 'orders',
 			title: __( 'Orders', 'woocommerce-admin' ),
 			component: OrdersReport,
+			id: 'woocommerce-analytics-orders',
 		},
 		{
 			report: 'categories',
 			title: __( 'Categories', 'woocommerce-admin' ),
 			component: CategoriesReport,
+			id: 'woocommerce-analytics-categories',
 		},
 		{
 			report: 'coupons',
 			title: __( 'Coupons', 'woocommerce-admin' ),
 			component: CouponsReport,
+			id: 'woocommerce-analytics-coupons',
 		},
 		{
 			report: 'taxes',
 			title: __( 'Taxes', 'woocommerce-admin' ),
 			component: TaxesReport,
-		},
-		{
-			report: 'downloads',
-			title: __( 'Downloads', 'woocommerce-admin' ),
-			component: DownloadsReport,
+			id: 'woocommerce-analytics-taxes',
 		},
 		manageStock === 'yes'
 			? {
 					report: 'stock',
 					title: __( 'Stock', 'woocommerce-admin' ),
 					component: StockReport,
+					id: 'woocommerce-analytics-stock',
 			  }
 			: null,
 		{
 			report: 'customers',
 			title: __( 'Customers', 'woocommerce-admin' ),
 			component: CustomersReport,
+			id: 'woocommerce-analytics-customers',
 		},
 		{
 			report: 'downloads',
 			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
+			id: 'woocommerce-analytics-downloads',
 		},
 	].filter( Boolean );
 
