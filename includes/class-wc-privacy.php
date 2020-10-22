@@ -382,8 +382,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			foreach ( $user_ids as $user_id ) {
 				$posts_made_prior = get_posts(
 					array(
-						'post_type' => $post_types_to_assign,
-						'author'    => $user_id,
+						'post_type'   => $post_types_to_assign,
+						'author'      => $user_id,
+						'numberposts' => -1,
 					)
 				);
 
