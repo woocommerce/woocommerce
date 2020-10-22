@@ -170,9 +170,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
 			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+		}
 
-			if ( is_callable( array( $item->get_product(), 'get_parent_data' ) ) ) {
-				$data['parent_name'] = $item->get_product()->get_title();
+		// Add parent_name if the product is a variation.
+		if ( is_callable( array( $item, 'get_product' ) ) ) {
+			$product = $item->get_product();
+
+			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
+				$data['parent_name'] = $product->get_title();
 			} else {
 				$data['parent_name'] = null;
 			}
