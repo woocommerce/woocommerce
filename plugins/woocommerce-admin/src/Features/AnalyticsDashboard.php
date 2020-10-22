@@ -72,6 +72,7 @@ class AnalyticsDashboard {
 				'dashboard_chart_type',
 				'dashboard_chart_interval',
 				'dashboard_leaderboard_rows',
+				'homepage_layout',
 				'homepage_stats',
 			)
 		);

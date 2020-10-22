@@ -54,7 +54,7 @@
 		}
 	}
 
-	.components-popover:not(.is-mobile) {
+	.woocommerce-filters-date__content:not(.is-mobile) {
 		z-index: 2; /* below of woocommerce-layout__header */
 	}
 }

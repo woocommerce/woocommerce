@@ -8,6 +8,13 @@ import { render, screen } from '@testing-library/react';
  */
 import { ActivityPanel } from '../';
 
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: () => ( {
+		updateUserPreferences: () => {},
+	} ),
+} ) );
+
 describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
 		render( <ActivityPanel isEmbedded query={ {} } /> );

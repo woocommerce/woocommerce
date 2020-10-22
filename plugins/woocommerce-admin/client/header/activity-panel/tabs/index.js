@@ -9,11 +9,13 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { Tab } from '../tab';
+import { DisplayOptions } from '../display-options';
 
 export const Tabs = ( {
 	tabs,
 	onTabClick,
 	selectedTab: selectedTabName,
+	showDisplayOptions,
 	tabOpen = false,
 } ) => {
 	const [ { tabOpen: tabIsOpenState, currentTab }, setTabState ] = useState( {
@@ -64,6 +66,7 @@ export const Tabs = ( {
 						} }
 					/>
 				) ) }
+			{ showDisplayOptions && <DisplayOptions /> }
 		</NavigableMenu>
 	);
 };

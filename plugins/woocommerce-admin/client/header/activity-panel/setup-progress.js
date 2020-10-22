@@ -1,6 +1,6 @@
 export const SetupProgress = () => (
 	<svg
-		className="setup-progress"
+		className="woocommerce-layout__activity-panel-tab-icon setup-progress"
 		width="18"
 		height="18"
 		viewBox="0 0 24 24"
@@ -14,7 +14,6 @@ export const SetupProgress = () => (
 		/>
 		<path
 			d="M4 12V12C4 16.4183 7.58172 20 12 20V20C16.4183 20 20 16.4183 20 12V12C20 7.58172 16.4183 4 12 4V4"
-			// stroke="#1E1E1E"
 			strokeWidth="2"
 			strokeLinecap="round"
 		/>

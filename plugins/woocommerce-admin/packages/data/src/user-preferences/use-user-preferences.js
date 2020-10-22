@@ -101,6 +101,7 @@ export const useUserPreferences = () => {
 					'dashboard_chart_interval',
 					'dashboard_leaderboard_rows',
 					'activity_panel_inbox_last_read',
+					'homepage_layout',
 					'homepage_stats',
 					'android_app_banner_dismissed',
 				];

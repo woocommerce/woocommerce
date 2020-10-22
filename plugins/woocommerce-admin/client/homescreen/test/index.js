@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { useUserPreferences } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -21,6 +22,11 @@ jest.mock( 'inbox-panel', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
 
 // We aren't testing the <QuickLinks /> component here.
 jest.mock( 'quick-links', () => jest.fn().mockReturnValue( '[QuickLinks]' ) );
+
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: jest.fn().mockReturnValue( {} ),
+} ) );
 
 describe( 'Homescreen Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
@@ -141,5 +147,48 @@ describe( 'Homescreen Layout', () => {
 
 		const quickLinks = screen.queryByText( '[QuickLinks]' );
 		expect( quickLinks ).toBeDefined();
+	} );
+
+	it( 'should default to two columns', () => {
+		useUserPreferences.mockReturnValue( {
+			homepage_layout: '',
+		} );
+		const { container } = render(
+			<Layout
+				requestingTaskList={ false }
+				taskListHidden={ false }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		// Expect that we're rendering the two-column home screen.
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-homescreen two-columns'
+			)
+		).toHaveLength( 1 );
+	} );
+
+	it( 'switches to single column layout based on user preference', () => {
+		useUserPreferences.mockReturnValue( {
+			homepage_layout: 'single_column',
+		} );
+		const { container } = render(
+			<Layout
+				requestingTaskList={ false }
+				taskListHidden={ false }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		// Expect that we're rendering the two-column home screen.
+		const homescreen = container.getElementsByClassName(
+			'woocommerce-homescreen'
+		);
+		expect( homescreen ).toHaveLength( 1 );
+
+		expect( homescreen[ 0 ] ).not.toHaveClass( 'two-columns' );
 	} );
 } );

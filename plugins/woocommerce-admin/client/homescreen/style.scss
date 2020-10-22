@@ -8,37 +8,52 @@
 	max-width: 1032px;
 	margin: 0 auto;
 	justify-content: space-between;
+	flex-direction: column;
 
 	.woocommerce-task-dashboard__container {
 		width: 100%;
 		margin-bottom: $gap-large;
 	}
 
-	&.hasInbox .woocommerce-homescreen-column {
-		width: calc(50% - 12px);
-		margin: 0;
+	&.two-columns {
+		flex-direction: row;
+
+		.woocommerce-homescreen-column {
+			width: calc(50% - 12px);
+			margin: 0;
+
+			@include breakpoint( '<782px' ) {
+				width: 100%;
+				position: inherit;
+				top: auto;
+			}
+		}
 
 		@include breakpoint( '<782px' ) {
-			width: 100%;
-			position: inherit;
-			top: auto;
+			flex-direction: column;
 		}
 	}
 
 	@include breakpoint( '<782px' ) {
 		margin-left: -16px;
 		margin-right: -16px;
-		flex-direction: column-reverse;
 	}
 }
+
 .woocommerce-homescreen-column {
-	width: 50%;
+	width: 662px;
 	top: 130px;
 	margin: 0 auto;
 	align-self: flex-start;
 
 	> div {
 		margin-bottom: $gap-large;
+	}
+
+	@include breakpoint( '<782px' ) {
+		width: 100%;
+		position: inherit;
+		top: auto;
 	}
 }
 .temp-content {

@@ -13,7 +13,11 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { NOTES_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	useUserPreferences,
+	NOTES_STORE_NAME,
+	OPTIONS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -39,6 +43,9 @@ export const Layout = ( {
 	shouldShowWelcomeModal,
 	updateOptions,
 } ) => {
+	const userPrefs = useUserPreferences();
+	const twoColumns =
+		( userPrefs.homepage_layout || 'two_columns' ) === 'two_columns';
 	const [ showInbox, setShowInbox ] = useState( true );
 	const [ isContentSticky, setIsContentSticky ] = useState( false );
 	const content = useRef( null );
@@ -47,7 +54,7 @@ export const Layout = ( {
 			return;
 		}
 		const { bottom } = content.current.getBoundingClientRect();
-		const shouldBeSticky = showInbox && bottom < window.innerHeight;
+		const shouldBeSticky = twoColumns && bottom < window.innerHeight;
 
 		setIsContentSticky( shouldBeSticky );
 	};
@@ -106,7 +113,7 @@ export const Layout = ( {
 	return (
 		<div
 			className={ classnames( 'woocommerce-homescreen', {
-				hasInbox: showInbox,
+				'two-columns': twoColumns,
 			} ) }
 		>
 			{ isDashboardShown

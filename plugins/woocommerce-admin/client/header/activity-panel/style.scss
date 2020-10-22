@@ -42,21 +42,29 @@
 	}
 
 	svg {
-		width: 18px;
-		height: 18px;
+		width: 24px;
+		height: 24px;
 
-		// custom progress icon, requires specific coloring
-		&.setup-progress {
+		&.woocommerce-layout__activity-panel-tab-icon {
 			fill: none;
 
-			path:last-child {
+			rect,
+			path {
 				stroke: currentColor;
 			}
 		}
 
-		@include breakpoint( '>960px' ) {
-			width: 24px;
-			height: 24px;
+		// custom progress icon, requires specific coloring
+		&.setup-progress {
+			path:first-child {
+				stroke: '#DCDCDE';
+			}
+		}
+	}
+
+	.woocommerce-layout__homescreen-display-options {
+		svg.woocommerce-layout__activity-panel-tab-icon {
+			height: 14px;
 		}
 	}
 
@@ -103,7 +111,8 @@
 			right: 0;
 		}
 
-		&.is-active {
+		&.is-active,
+		&.is-opened {
 			color: $gray-900;
 			box-shadow: none;
 
@@ -154,6 +163,22 @@
 		&:focus,
 		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
 			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700;
+		}
+
+		// Hide display options if we're in single column.
+		@include breakpoint( '<782px' ) {
+			&.display-options {
+				display: none;
+			}
+		}
+	}
+
+	.woocommerce-layout__activity-panel-popover {
+		margin-top: 0;
+		z-index: 1001; // One higher than the other activity panels.
+
+		.components-menu-group {
+			padding: 12px;
 		}
 	}
 }
