@@ -11,7 +11,7 @@
  *
  * class DeprecatedGoose extends DeprecatedClassFacade {
  *     static $facade_over_classname = 'Goose';
- *     static $deprecated_in_version = '1.6.0';
+ *     static $deprecated_in_version = '1.7.0';
  * }
  */
 
