@@ -50,7 +50,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'         => __( 'Guest checkout', 'woocommerce' ),
-				'desc'          => __( 'Allow customers to place orders without an account', 'woocommerce' ),
+				'desc'          => __( 'Allow shoppers to place orders without an account', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -59,7 +59,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'         => __( 'Login', 'woocommerce' ),
-				'desc'          => __( 'Allow customers to log into an existing account during checkout', 'woocommerce' ),
+				'desc'          => __( 'Allow shoppers to log into an existing account during checkout', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_checkout_login_reminder',
 				'default'       => 'no',
 				'type'          => 'checkbox',
@@ -68,7 +68,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
-				'desc'          => __( 'Allow customers to create an account during checkout', 'woocommerce' ),
+				'desc'          => __( 'Allow shoppers to sign up for a user account during checkout', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 				'default'       => 'no',
 				'type'          => 'checkbox',
@@ -76,7 +76,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'desc'          => __( 'Allow customers to create an account on the "My account" page', 'woocommerce' ),
+				'desc'          => __( 'Allow shoppers to create an account on the "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
 				'type'          => 'checkbox',
