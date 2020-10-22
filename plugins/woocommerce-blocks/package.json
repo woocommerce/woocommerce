@@ -61,6 +61,7 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
+		"@automattic/color-studio": "2.3.1",
 		"@babel/cli": "7.12.1",
 		"@babel/core": "7.12.3",
 		"@babel/plugin-proposal-class-properties": "7.12.1",

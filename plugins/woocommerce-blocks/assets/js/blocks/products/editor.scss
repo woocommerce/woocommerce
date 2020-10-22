@@ -37,7 +37,7 @@
 		overflow: hidden;
 	}
 	.wc-block-all-products-grid-item-template {
-		border-top: 1px solid #e2e4e7;
+		border-top: 1px solid $gray-200;
 		margin-top: 20px;
 		width: 100%;
 		overflow: hidden;
@@ -96,7 +96,7 @@
 			&::before,
 			&::after {
 				content: "";
-				background: #e2e4e7;
+				background: $gray-200;
 				display: block;
 				position: absolute;
 				width: 100%;

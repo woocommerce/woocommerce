@@ -5,13 +5,13 @@
 	@include font-size(small);
 
 	&--in-stock {
-		color: $valid-green;
+		color: $in-stock-color;
 	}
 	&--out-of-stock {
-		color: $error-red;
+		color: $no-stock-color;
 	}
 	&--low-stock,
 	&--available-on-backorder {
-		color: $notice-yellow;
+		color: $low-stock-color;
 	}
 }

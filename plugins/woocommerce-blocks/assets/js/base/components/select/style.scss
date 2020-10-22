@@ -10,7 +10,7 @@
 		transform: translateY(0.75em);
 		transform-origin: top left;
 		transition: all 200ms ease;
-		color: $gray-50;
+		color: $gray-700;
 		z-index: 1;
 		margin: 0 0 0 #{$gap + 1px};
 		overflow: hidden;
@@ -36,17 +36,17 @@
 			&:hover,
 			&:focus,
 			&:active {
-				border-color: $error-red;
+				border-color: $alert-red;
 			}
 			&:focus {
-				outline: 1px dotted $error-red;
+				outline: 1px dotted $alert-red;
 				outline-offset: 2px;
 			}
 		}
 	}
 
 	&.has-error label {
-		color: $error-red;
+		color: $alert-red;
 	}
 
 	.components-custom-select-control__button {

@@ -12,7 +12,7 @@
 		top: 0;
 		transform-origin: top left;
 		line-height: 1.375; // =22px when font-size is 16px.
-		color: $gray-50;
+		color: $gray-700;
 		transition: transform 200ms ease;
 		margin: 0 0 0 #{$gap + 1px};
 		overflow: hidden;
@@ -76,16 +76,16 @@
 		&:hover,
 		&:focus,
 		&:active {
-			border-color: $error-red;
+			border-color: $alert-red;
 		}
 		&:focus {
-			outline: 1px dotted $error-red;
+			outline: 1px dotted $alert-red;
 			outline-offset: 2px;
 		}
 	}
 
 	&.has-error label {
-		color: $error-red;
+		color: $alert-red;
 	}
 
 	&:only-child {

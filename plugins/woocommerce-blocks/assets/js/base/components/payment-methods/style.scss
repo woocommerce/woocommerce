@@ -67,7 +67,7 @@
 		left: 0;
 		top: 0;
 		transform-origin: top left;
-		color: $gray-50;
+		color: $gray-700;
 		transition: transform 200ms ease;
 		margin: 0 0 0 #{$gap + 1px};
 		overflow: hidden;
@@ -109,14 +109,14 @@
 	}
 
 	.wc-block-gateway-input.has-error {
-		border-color: $error-red;
+		border-color: $alert-red;
 		&:focus {
-			outline-color: $error-red;
+			outline-color: $alert-red;
 		}
 	}
 
 	.wc-block-gateway-input.has-error + label {
-		color: $error-red;
+		color: $alert-red;
 	}
 }
 

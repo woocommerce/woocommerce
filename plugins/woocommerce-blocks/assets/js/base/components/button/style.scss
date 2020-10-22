@@ -1,7 +1,7 @@
 .wc-block-components-button:not(.is-link) {
 	@include reset-typography();
 	align-items: center;
-	background-color: $black;
+	background-color: $gray-900;
 	color: $white;
 	display: inline-flex;
 	font-weight: bold;
@@ -18,7 +18,7 @@
 	&:hover,
 	&:focus,
 	&:active {
-		background-color: $black;
+		background-color: $gray-900;
 		color: $white;
 	}
 
