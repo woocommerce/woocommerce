@@ -102,7 +102,7 @@ describe( `${ block.name } Block`, () => {
 			it( 'visibility can be toggled', async () => {
 				const selector = `${ block.class } .wc-block-checkout__add-note`;
 				const toggleLabel = await findLabelWithText(
-					'Allow customers to optionally add order notes'
+					'Allow shoppers to optionally add order notes'
 				);
 				await expect( toggleLabel ).toToggleElement( selector );
 			} );
