@@ -379,6 +379,9 @@ class WC_Shortcode_My_Account {
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}
+
+		// Ensure that the Wordpress after_password_reset action runs since we're bypassing that flow.
+		do_action( 'after_password_reset', $user, $new_pass );
 	}
 
 	/**
