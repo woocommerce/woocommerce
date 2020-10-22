@@ -41,6 +41,7 @@ class DraftOrders {
 			add_filter( 'wc_order_statuses', [ $this, 'register_draft_order_status' ] );
 			add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
 			add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ] );
+			add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ] );
 			add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
 			add_action( 'admin_init', [ $this, 'install' ] );
 		} else {
