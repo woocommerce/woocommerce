@@ -78,9 +78,16 @@ class _Layout extends Component {
 			isJetpackConnected,
 		} = this.props;
 
+		const navigationFlag = {
+			has_navigation: !! window.wcNavigation,
+		};
+
 		if ( isEmbedded ) {
 			const path = document.location.pathname + document.location.search;
-			recordPageView( path, { is_embedded: true } );
+			recordPageView( path, {
+				is_embedded: true,
+				...navigationFlag,
+			} );
 			return;
 		}
 
@@ -101,6 +108,7 @@ class _Layout extends Component {
 			jetpack_installed: installedPlugins.includes( 'jetpack' ),
 			jetpack_active: activePlugins.includes( 'jetpack' ),
 			jetpack_connected: isJetpackConnected,
+			...navigationFlag,
 		} );
 	}
 
