@@ -86,7 +86,7 @@
 		}
 	},
 	"dependencies": {
-		"@woocommerce/e2e-environment": "0.1.5",
+		"@woocommerce/e2e-environment": "0.1.6",
 		"@wordpress/api-fetch": "2.2.8",
 		"@wordpress/base-styles": "3.1.0",
 		"@wordpress/components": "11.0.0",
