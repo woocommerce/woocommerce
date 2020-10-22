@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.0.0
  */
+
+/**
+ * Class WC_Tests_API_Orders_V2
+ */
 class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -77,7 +81,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$site_level_attribute_id = wc_create_attribute( array( 'name' => 'Site Level Color' ) );
 		$site_level_attribute_slug = wc_attribute_taxonomy_name_by_id( $site_level_attribute_id );
 
-		// Register the attribute so that wp_insert_term will be successful
+		// Register the attribute so that wp_insert_term will be successful.
 		register_taxonomy( $site_level_attribute_slug, array( 'product' ), array() );
 
 		$site_level_term_insertion_result = wp_insert_term( 'Site Level Value - Blue', $site_level_attribute_slug );
@@ -88,9 +92,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 		$line_item = new WC_Order_Item_Product();
 		$line_item->set_product( $variation );
-		$line_item->set_props( array(
-			'variation' => array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug )
-		) );
+		$line_item->set_props( array( 'variation' => array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug ) ) );
 
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$order->add_item( $line_item );
@@ -358,7 +360,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
-		// non-existent customer
+		// Non-existent customer.
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
 		$request->set_body_params(
 			array(
@@ -788,6 +790,6 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
 		$this->assertEquals( 5, count( $meta_data_item_properties ) );
-		$this->assertEquals( [ 'id', 'key', 'value', 'display_key', 'display_value' ], array_keys( $meta_data_item_properties ) );
+		$this->assertEquals( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $meta_data_item_properties ) );
 	}
 }
