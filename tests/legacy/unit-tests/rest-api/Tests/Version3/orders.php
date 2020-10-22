@@ -200,6 +200,39 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that line items for variations includes the parent product name.
+	 */
+	public function test_get_item_with_variation_parent_name() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		// The name property contains the parent product name and the attribute value (ex. "Dummy Variable Product - small").
+		$this->assertEquals( $variation->get_name(), $last_line_item['name'] );
+		$this->assertStringContainsString( $variation->get_attribute( 'pa_size' ), $last_line_item['name'] );
+		// The parent_name property only contains the parent product name (ex. "Dummy Variable Product").
+		$this->assertEquals( $product->get_name(), $last_line_item['parent_name'] );
+		$this->assertNotEquals( $variation->get_name(), $last_line_item['parent_name'] );
+		$this->assertStringNotContainsString( $variation->get_attribute( 'pa_size' ), $last_line_item['parent_name'] );
+	}
+
+	/**
 	 * Tests getting an order with an invalid ID.
 	 * @since 3.5.0
 	 */
