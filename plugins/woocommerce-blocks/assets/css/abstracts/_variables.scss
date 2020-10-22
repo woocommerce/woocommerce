@@ -1,22 +1,14 @@
-$gap-largest: 40px;
+@import "node_modules/@wordpress/base-styles/variables";
+
+// @todo replace with $grid-unit values when `@woocommerce/base-styles` is updated.
+// see: https://github.com/WordPress/gutenberg/blob/master/packages/base-styles/_variables.scss#L23-L36
+$gap-largest: 40px; // $grid-unit-50
 $gap-larger: 36px;
-$gap-large: 24px;
-$gap: 16px;
-$gap-small: 12px;
-$gap-smaller: 8px;
-$gap-smallest: 4px;
-
-// Variables pulled from Gutenberg.
-// Editor Widths
-$sidebar-width: 280px;
-$content-width: 610px; // For the visual width, subtract 30px (2 * $block-padding + 2px borders). This comes to 580px, which is optimized for 70 characters.
-
-// Blocks
-$block-padding: 14px; // Space between block footprint and focus boundaries. These are drawn outside the block footprint, and do not affect the size.
-$block-spacing: 4px; // Vertical space between blocks.
-$block-side-ui-width: 28px; // Width of the movers/drag handle UI.
-$block-side-ui-clearance: 2px; // Space between movers/drag handle UI, and block.
-$block-container-side-padding: $block-side-ui-width + $block-padding + 2 * $block-side-ui-clearance; // Total space left and right of the block footprint.
+$gap-large: 24px; // $grid-unit-30
+$gap: 16px; // $grid-unit-20
+$gap-small: 12px; // $grid-unit-15
+$gap-smaller: 8px; // $grid-unit-10
+$gap-smallest: 4px; // $grid-unit-05
 
 // Cart block
 $cart-image-width: 5rem;

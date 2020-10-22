@@ -26,9 +26,9 @@ $fontSizes: (
 // Adds animation to placeholder section
 @mixin placeholder() {
 	animation: loading-fade 1.2s ease-in-out infinite;
-	background-color: $core-grey-light-500 !important;
-	border-color: $core-grey-light-500 !important;
-	color: $core-grey-light-500 !important;
+	background-color: $gray-200 !important;
+	border-color: $gray-200 !important;
+	color: $gray-200 !important;
 	box-shadow: none;
 	pointer-events: none;
 
@@ -146,4 +146,14 @@ $fontSizes: (
 // Converts a px unit to em.
 @function em($size, $base: 16px) {
 	@return $size / $base * 1em;
+}
+
+// Encodes hex colors so they can be used in URL content.
+@function encode-color($color) {
+	@if type-of($color) != "color" or str-index(#{$color}, "#") != 1 {
+		@return $color;
+	}
+
+	$hex: str-slice(ie-hex-str($color), 4);
+	@return "%23" + unquote("#{$hex}");
 }

@@ -1,6 +1,6 @@
 .wc-block-components-validation-error {
 	@include font-size(smaller);
-	color: $error-red;
+	color: $alert-red;
 	max-width: 100%;
 	position: absolute;
 	top: calc(100% - 1px);

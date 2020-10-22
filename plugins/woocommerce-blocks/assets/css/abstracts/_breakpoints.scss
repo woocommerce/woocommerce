@@ -8,6 +8,8 @@
 // See https://github.com/WordPress/gutenberg/tree/master/packages/viewport#usage
 $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 
+// @todo refactor breakpoints so they use the mixins from Gutenberg
+// https://github.com/WordPress/gutenberg/blob/master/packages/base-styles/_mixins.scss
 @mixin breakpoint( $sizes... ) {
 	@each $size in $sizes {
 		@if type-of( $size ) == string {

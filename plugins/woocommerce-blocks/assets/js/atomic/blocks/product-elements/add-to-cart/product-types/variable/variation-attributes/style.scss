@@ -23,9 +23,9 @@
 			margin-bottom: $gap-large;
 
 			select {
-				border-color: $error-red;
+				border-color: $alert-red;
 				&:focus {
-					outline-color: $error-red;
+					outline-color: $alert-red;
 				}
 			}
 		}
