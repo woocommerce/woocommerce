@@ -94,6 +94,11 @@ class Menu {
 	 * @return string
 	 */
 	public static function get_callback_url( $callback ) {
+		// Return the full URL.
+		if ( strpos( $callback, 'http' ) === 0 ) {
+			return $callback;
+		}
+
 		$pos  = strpos( $callback, '?' );
 		$file = $pos > 0 ? substr( $callback, 0, $pos ) : $callback;
 		if ( file_exists( ABSPATH . "/wp-admin/$file" ) ) {
