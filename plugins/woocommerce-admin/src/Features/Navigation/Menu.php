@@ -156,26 +156,26 @@ class Menu {
 		}
 
 		$defaults           = array(
-			'id'              => '',
-			'title'           => '',
-			'capability'      => 'manage_woocommerce',
-			'order'           => 100,
-			'migrate'         => true,
-			'menuId'          => 'primary',
-			'isCategory'      => true,
-			'parent'          => self::DEFAULT_PARENT,
-			'backButtonLabel' => __(
-				'WooCommerce Home',
-				'woocommerce-admin'
-			),
-			'is_top_level'    => false,
+			'id'           => '',
+			'title'        => '',
+			'capability'   => 'manage_woocommerce',
+			'order'        => 100,
+			'migrate'      => true,
+			'menuId'       => 'primary',
+			'isCategory'   => true,
+			'parent'       => self::DEFAULT_PARENT,
+			'is_top_level' => false,
 		);
 		$menu_item          = wp_parse_args( $args, $defaults );
 		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
 		unset( $menu_item['url'] );
 
 		if ( true === $menu_item['is_top_level'] ) {
-			$menu_item['parent'] = 'woocommerce';
+			$menu_item['parent']          = 'woocommerce';
+			$menu_item['backButtonLabel'] = __(
+				'WooCommerce Home',
+				'woocommerce-admin'
+			);
 		} else {
 			$menu_item['parent'] = 'woocommerce' === $menu_item['parent'] ? self::DEFAULT_PARENT : $menu_item['parent'];
 		}
