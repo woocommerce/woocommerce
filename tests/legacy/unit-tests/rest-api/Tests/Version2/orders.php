@@ -544,6 +544,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 			'meta_data'    => array(),
 			'sku'          => null,
 			'price'        => 4,
+			'parent_name'  => null,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
