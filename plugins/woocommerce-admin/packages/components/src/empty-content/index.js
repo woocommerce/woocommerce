@@ -131,7 +131,7 @@ EmptyContent.propTypes = {
 	/**
 	 * An additional message to be displayed.
 	 */
-	message: PropTypes.string,
+	message: PropTypes.node,
 	/**
 	 * The url string of an image path for img src.
 	 */

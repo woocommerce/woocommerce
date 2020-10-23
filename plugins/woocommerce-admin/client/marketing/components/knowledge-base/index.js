@@ -17,6 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './style.scss';
 import { Slider } from '../../components';
 import { STORE_KEY } from '../../data/constants';
+import ReadBlogMessage from './ReadBlogMessage';
 
 const KnowledgeBase = ( {
 	posts,
@@ -110,26 +111,29 @@ const KnowledgeBase = ( {
 	};
 
 	const renderEmpty = () => {
-		const emptyTitle = __(
-			'There are no knowledge base posts.',
-			'woocommerce-admin'
-		);
+		const emptyTitle = __( 'No posts yet', 'woocommerce-admin' );
 
 		return (
-			<EmptyContent title={ emptyTitle } illustration="" actionLabel="" />
+			<EmptyContent
+				title={ emptyTitle }
+				message={ <ReadBlogMessage /> }
+				illustration=""
+				actionLabel=""
+			/>
 		);
 	};
 
 	const renderError = () => {
-		const emptyTitle = __(
-			'There was an error loading knowledge base posts. Please check again later.',
+		const errorTitle = __(
+			"Oops, our posts aren't loading right now",
 			'woocommerce-admin'
 		);
 
 		return (
 			<EmptyContent
-				title={ emptyTitle }
-				illustrationWidth={ 250 }
+				title={ errorTitle }
+				message={ <ReadBlogMessage /> }
+				illustration=""
 				actionLabel=""
 			/>
 		);
