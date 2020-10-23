@@ -135,7 +135,7 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Run all calculations methods on the given items in sequence.
+	 * Run all calculation methods on the given items in sequence.
 	 *
 	 * @since 3.2.0
 	 */
