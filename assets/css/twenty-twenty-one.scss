@@ -1646,6 +1646,11 @@ a.reset_variations {
 
 .woocommerce-checkout {
 
+	.woocommerce {
+		max-width: var(--responsive--alignwide-width);
+		margin: 0 auto;
+	}
+
 	ul.woocommerce-error {
 		flex-direction: column;
 		align-items: flex-start;
