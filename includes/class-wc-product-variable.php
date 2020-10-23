@@ -413,7 +413,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Sets an array of children for the product.
 	 *
 	 * @since 3.0.0
-	 * @param array $children Childre products.
+	 * @param array $children Children products.
 	 */
 	public function set_children( $children ) {
 		$this->children = array_filter( wp_parse_id_list( (array) $children ) );
