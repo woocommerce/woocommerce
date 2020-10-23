@@ -272,7 +272,6 @@ class WC_Notes_Run_Db_Update {
 				return;
 			} else {
 				// Db update not needed && notice is unactioned -> Thank you note.
-				\WC_Install::update_db_version();
 				self::update_done_notice( $note_id );
 				return;
 			}

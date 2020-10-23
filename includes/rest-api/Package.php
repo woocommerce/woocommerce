@@ -4,7 +4,7 @@
  *
  * Returns information about the package and handles init.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  */
 
 namespace Automattic\WooCommerce\RestApi;

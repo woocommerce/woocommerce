@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -129,7 +130,7 @@ class WC_Tracks_Client {
 	 * @return string A string representing a timestamp.
 	 */
 	public static function build_timestamp() {
-		$ts = round( microtime( true ) * 1000 );
+		$ts = NumberUtil::round( microtime( true ) * 1000 );
 
 		return number_format( $ts, 0, '', '' );
 	}
@@ -201,6 +202,7 @@ class WC_Tracks_Client {
 					$binary .= chr( wp_rand( 0, 255 ) );
 				}
 
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				$anon_id = 'woo:' . base64_encode( $binary );
 			}
 		}

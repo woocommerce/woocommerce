@@ -8,13 +8,15 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Converts a string (e.g. 'yes' or 'no') to a bool.
  *
  * @since 3.0.0
- * @param string $string String to convert.
+ * @param string|bool $string String to convert. If a bool is passed it will be returned as-is.
  * @return bool
  */
 function wc_string_to_bool( $string ) {
@@ -25,7 +27,7 @@ function wc_string_to_bool( $string ) {
  * Converts a bool to a 'yes' or 'no'.
  *
  * @since 3.0.0
- * @param bool $bool String to convert.
+ * @param bool|string $bool Bool to convert. If a string is passed it will first be converted to a bool.
  * @return string
  */
 function wc_bool_to_string( $bool ) {
@@ -228,11 +230,11 @@ function wc_round_tax_total( $value, $precision = null ) {
 	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
+		$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
 		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
 	} else {
-		$rounded_tax = round( $value, $precision );
+		$rounded_tax = NumberUtil::round( $value, $precision );
 	}
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
@@ -259,7 +261,7 @@ function wc_legacy_round_half_down( $value, $precision ) {
 		$value = implode( '.', $value );
 	}
 
-	return round( floatval( $value ), $precision );
+	return NumberUtil::round( floatval( $value ), $precision );
 }
 
 /**
@@ -820,7 +822,7 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 		foreach ( $base as $k => $v ) {
 			$amount      = $v / 100;
-			$amount      = round( $amount * $factor );
+			$amount      = NumberUtil::round( $amount * $factor );
 			$new_decimal = $v - $amount;
 
 			$new_hex_component = dechex( $new_decimal );
@@ -851,7 +853,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 		foreach ( $base as $k => $v ) {
 			$amount      = 255 - $v;
 			$amount      = $amount / 100;
-			$amount      = round( $amount * $factor );
+			$amount      = NumberUtil::round( $amount * $factor );
 			$new_decimal = $v + $amount;
 
 			$new_hex_component = dechex( $new_decimal );

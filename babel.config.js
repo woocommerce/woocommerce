@@ -1,4 +1,4 @@
-const e2eBabelConfig = require( '@woocommerce/e2e-environment' ).babelConfig;
+const { e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = function( api ) {
 	api.cache( true );

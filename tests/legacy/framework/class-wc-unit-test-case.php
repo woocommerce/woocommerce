@@ -183,7 +183,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return mixed The instance.
 	 */
 	public function get_instance_of( string $class_name ) {
-		return null;
+		return wc_get_container()->get( $class_name );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return mixed The instance.
 	 */
 	public function get_legacy_instance_of( string $class_name ) {
-		return null;
+		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name );
 	}
 
 	/**
@@ -204,12 +204,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * This may be needed when registering mocks for already resolved shared classes.
 	 */
 	public function reset_container_resolutions() {
+		wc_get_container()->reset_all_resolved();
 	}
 
 	/**
 	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
 	 */
 	public function reset_legacy_proxy_mocks() {
+		wc_get_container()->get( LegacyProxy::class )->reset();
 	}
 
 	/**
@@ -220,6 +222,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @throws \Exception Invalid parameter.
 	 */
 	public function register_legacy_proxy_function_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks( $mocks );
 	}
 
 	/**
@@ -230,6 +233,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @throws \Exception Invalid parameter.
 	 */
 	public function register_legacy_proxy_static_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_static_mocks( $mocks );
 	}
 
 	/**
@@ -240,5 +244,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @throws \Exception Invalid parameter.
 	 */
 	public function register_legacy_proxy_class_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
 	}
 }

@@ -4,7 +4,7 @@
  *
  * Handles requests to the /payment_gateways endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.0.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Paymenga gateways controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {

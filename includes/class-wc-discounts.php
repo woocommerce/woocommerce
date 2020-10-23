@@ -6,6 +6,8 @@
  * @since   3.2.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -230,7 +232,7 @@ class WC_Discounts {
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return absint( round( $item->price - $this->get_discount( $item->key, true ) ) );
+		return absint( NumberUtil::round( $item->price - $this->get_discount( $item->key, true ) ) );
 	}
 
 	/**
@@ -359,7 +361,7 @@ class WC_Discounts {
 			$discounted_price = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : round( $item->price );
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : NumberUtil::round( $item->price );
 
 			// See how many and what price to apply to.
 			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
@@ -910,7 +912,7 @@ class WC_Discounts {
 
 			if ( $this->object->get_prices_include_tax() ) {
 				// Add tax to tax-exclusive subtotal.
-				$subtotal = $subtotal + wc_add_number_precision( round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
+				$subtotal = $subtotal + wc_add_number_precision( NumberUtil::round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
 			}
 
 			return $subtotal;

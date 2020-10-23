@@ -69,6 +69,9 @@ class WC_Unit_Tests_Bootstrap {
 
 		// load WC testing framework.
 		$this->includes();
+
+		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
+		$this->initialize_dependency_injection();
 	}
 
 	/**
@@ -116,6 +119,35 @@ class WC_Unit_Tests_Bootstrap {
 		CodeHacker::add_hack( new BypassFinalsHack() );
 
 		CodeHacker::enable();
+	}
+
+	/**
+	 * Re-initialize the dependency injection engine.
+	 *
+	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
+	 * to replace the registered read-only container with a fully configurable one for testing.
+	 * To this end we hack a bit and use reflection to grab the underlying container that the read-only one stores
+	 * in a private property.
+	 *
+	 * Additionally, we replace the legacy/function proxies with mockable versions to easily replace anything
+	 * in tests as appropriate.
+	 *
+	 * @throws \Exception The Container class doesn't have a 'container' property.
+	 */
+	private function initialize_dependency_injection() {
+		try {
+			$inner_container_property = new \ReflectionProperty( \Automattic\WooCommerce\Container::class, 'container' );
+		} catch ( ReflectionException $ex ) {
+			throw new \Exception( "Error when trying to get the private 'container' property from the " . \Automattic\WooCommerce\Container::class . ' class using reflection during unit testing bootstrap, has the property been removed or renamed?' );
+		}
+
+		$inner_container_property->setAccessible( true );
+		$inner_container = $inner_container_property->getValue( wc_get_container() );
+
+		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
+		$inner_container->reset_all_resolved();
+
+		$GLOBALS['wc_container'] = $inner_container;
 	}
 
 	/**

@@ -1,9 +1,0 @@
-{
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "types": [ "node", "jest", "faker", "axios", "moxios", "create-hmac" ],
-    "rootDir": "src", 
-    "outDir": "dist"
-  },
-  "include": [ "src/" ]
-}

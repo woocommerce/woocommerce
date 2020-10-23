@@ -4,8 +4,8 @@ PROTECTED_BRANCH="master"
 REMOTE_REF=$(echo "$HUSKY_GIT_STDIN" | cut -d " " -f 3)
 
 if [ -n "$REMOTE_REF" ]; then
-	if [ "refs/heads/${PROTECTED_BRANCH}" == "$REMOTE_REF" ]; then
-		if [ "$TERM" == "dumb" ]; then
+	if [ "refs/heads/${PROTECTED_BRANCH}" = "$REMOTE_REF" ]; then
+		if [ "$TERM" = "dumb" ]; then
 			>&2 echo "Sorry, you are unable to push to master using a GUI client! Please use git CLI."
 			exit 1
 		fi

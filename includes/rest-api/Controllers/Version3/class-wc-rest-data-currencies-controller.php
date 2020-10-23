@@ -4,7 +4,7 @@
  *
  * Handles requests to the /data/currencies endpoint.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Data Currencies controller class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * @package WooCommerce\RestApi
  */
 class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 
@@ -36,7 +36,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -46,7 +48,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/current', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/current',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_current_item' ),
@@ -56,7 +60,9 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<currency>[\w-]{3})', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<currency>[\w-]{3})',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
@@ -80,7 +86,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
-	public function get_currency( $code = false, $request ) {
+	public function get_currency( $code, $request ) {
 		$currencies = get_woocommerce_currencies();
 		$data       = array();
 

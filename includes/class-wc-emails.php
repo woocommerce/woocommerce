@@ -218,17 +218,17 @@ class WC_Emails {
 		// Include email classes.
 		include_once dirname( __FILE__ ) . '/emails/class-wc-email.php';
 
-		$this->emails['WC_Email_New_Order']                 = include 'emails/class-wc-email-new-order.php';
-		$this->emails['WC_Email_Cancelled_Order']           = include 'emails/class-wc-email-cancelled-order.php';
-		$this->emails['WC_Email_Failed_Order']              = include 'emails/class-wc-email-failed-order.php';
-		$this->emails['WC_Email_Customer_On_Hold_Order']    = include 'emails/class-wc-email-customer-on-hold-order.php';
-		$this->emails['WC_Email_Customer_Processing_Order'] = include 'emails/class-wc-email-customer-processing-order.php';
-		$this->emails['WC_Email_Customer_Completed_Order']  = include 'emails/class-wc-email-customer-completed-order.php';
-		$this->emails['WC_Email_Customer_Refunded_Order']   = include 'emails/class-wc-email-customer-refunded-order.php';
-		$this->emails['WC_Email_Customer_Invoice']          = include 'emails/class-wc-email-customer-invoice.php';
-		$this->emails['WC_Email_Customer_Note']             = include 'emails/class-wc-email-customer-note.php';
-		$this->emails['WC_Email_Customer_Reset_Password']   = include 'emails/class-wc-email-customer-reset-password.php';
-		$this->emails['WC_Email_Customer_New_Account']      = include 'emails/class-wc-email-customer-new-account.php';
+		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
+		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
+		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
+		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
+		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
+		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
+		$this->emails['WC_Email_Customer_Refunded_Order']   = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
+		$this->emails['WC_Email_Customer_Invoice']          = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
+		$this->emails['WC_Email_Customer_Note']             = include __DIR__ . '/emails/class-wc-email-customer-note.php';
+		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
+		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 	}
@@ -611,6 +611,17 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Determine if the current product should trigger a low stock notification
+		 *
+		 * @param int $product_id - The low stock product id
+		 *
+		 * @since 4.7.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_low_stock_notification', true, $product->get_id() ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
 			/* translators: 1: product name 2: items in stock */
@@ -635,6 +646,17 @@ class WC_Emails {
 	 */
 	public function no_stock( $product ) {
 		if ( 'no' === get_option( 'woocommerce_notify_no_stock', 'yes' ) ) {
+			return;
+		}
+
+		/**
+		 * Determine if the current product should trigger a no stock notification
+		 *
+		 * @param int $product_id - The out of stock product id
+		 *
+		 * @since 4.6.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_no_stock_notification', true, $product->get_id() ) ) {
 			return;
 		}
 

@@ -115,7 +115,7 @@ class WC_Plugin_Updates {
 		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with WooCommerce %s. Please update them or confirm compatibility before updating WooCommerce, or you may experience issues:", 'woocommerce' ), $new_version );
 
 		ob_start();
-		include 'views/html-notice-untested-extensions-inline.php';
+		include __DIR__ . '/views/html-notice-untested-extensions-inline.php';
 		return ob_get_clean();
 	}
 
@@ -130,7 +130,7 @@ class WC_Plugin_Updates {
 		$plugins       = $this->major_untested_plugins;
 
 		ob_start();
-		include 'views/html-notice-untested-extensions-modal.php';
+		include __DIR__ . '/views/html-notice-untested-extensions-modal.php';
 		return ob_get_clean();
 	}
 

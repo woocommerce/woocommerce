@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -557,7 +559,7 @@ class WC_Gateway_Paypal_Request {
 			$precision = 0;
 		}
 
-		return round( $price, $precision );
+		return NumberUtil::round( $price, $precision );
 	}
 
 	/**

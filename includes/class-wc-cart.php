@@ -9,6 +9,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
@@ -858,8 +860,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_totals() {
 		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
-		$taxes = $this->get_taxes();
-		$tax_totals = array();
+		$taxes          = $this->get_taxes();
+		$tax_totals     = array();
 
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
@@ -877,7 +879,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
-					$tax += round( $shipping_taxes[ $key ], wc_get_price_decimals() );
+					$tax += NumberUtil::round( $shipping_taxes[ $key ], wc_get_price_decimals() );
 					unset( $shipping_taxes[ $key ] );
 				}
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
@@ -1040,7 +1042,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Gather posted attributes.
 				$posted_attributes = array();
-
 				foreach ( $parent_data->get_attributes() as $attribute ) {
 					if ( ! $attribute['is_variation'] ) {
 						continue;
@@ -1056,7 +1057,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						}
 
 						// Don't include if it's empty.
-						if ( ! empty( $value ) ) {
+						if ( ! empty( $value ) || '0' === $value ) {
 							$posted_attributes[ $attribute_key ] = $value;
 						}
 					}
@@ -1528,7 +1529,15 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( ! $this->get_customer()->get_shipping_country() || ! $this->get_customer()->get_shipping_state() || ! $this->get_customer()->get_shipping_postcode() ) {
+			$country = $this->get_customer()->get_shipping_country();
+			if ( ! $country ) {
+				return false;
+			}
+			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
+			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+				return false;
+			}
+			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}

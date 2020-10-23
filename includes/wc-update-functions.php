@@ -2134,39 +2134,15 @@ function wc_update_400_db_version() {
 /**
  * Register attributes as terms for variable products, in increments of 100 products.
  *
- * @return bool true if there are more products to process.
+ * This migration was added to support a new mechanism to improve the filtering of
+ * variable products by attribute (https://github.com/woocommerce/woocommerce/pull/26260),
+ * however that mechanism was later reverted (https://github.com/woocommerce/woocommerce/pull/27625)
+ * due to numerous issues found. Thus the migration is no longer needed.
+ *
+ * @return bool true if the migration needs to be run again.
  */
 function wc_update_440_insert_attribute_terms_for_variable_products() {
-	$state_option_name = 'woocommerce_' . __FUNCTION__ . '_state';
-
-	$page     = intval( get_option( $state_option_name, 1 ) );
-	$products = wc_get_products(
-		array(
-			'type'  => 'variable',
-			'limit' => 100,
-			'page'  => $page,
-		)
-	);
-	if ( empty( $products ) ) {
-		delete_option( $state_option_name );
-		return false;
-	}
-
-	$attribute_taxonomy_names = wc_get_attribute_taxonomy_names();
-	foreach ( $products as $product ) {
-		$variation_ids = $product->get_children();
-		foreach ( $variation_ids as $variation_id ) {
-			$variation            = wc_get_product( $variation_id );
-			$variation_attributes = $variation->get_attributes();
-			foreach ( $variation_attributes as $attr_name => $attr_value ) {
-				wp_set_post_terms( $variation_id, array( $attr_value ), $attr_name );
-			}
-			$attributes_to_delete = array_diff( $attribute_taxonomy_names, array_keys( $variation_attributes ) );
-			wp_delete_object_term_relationships( $variation_id, $attributes_to_delete );
-		}
-	}
-
-	return update_option( $state_option_name, $page + 1 );
+	return false;
 }
 
 /**

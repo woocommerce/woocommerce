@@ -28,7 +28,6 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                          => 'install_notice',
 		'update'                           => 'update_notice',
 		'template_files'                   => 'template_file_check_notice',
 		'legacy_shipping'                  => 'legacy_shipping_notice',
@@ -253,16 +252,17 @@ class WC_Admin_Notices {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';
 			}
 		} else {
-			WC_Install::update_db_version();
 			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
 		}
 	}
 
 	/**
 	 * If we have just installed, show a message with the install pages button.
+	 *
+	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-install.php';
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**

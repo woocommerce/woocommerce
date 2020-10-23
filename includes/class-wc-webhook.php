@@ -12,10 +12,11 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'legacy/class-wc-legacy-webhook.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-webhook.php';
 
 /**
  * Webhook class.
@@ -346,7 +347,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// Webhook away!
 		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
-		$duration = round( microtime( true ) - $start_time, 5 );
+		$duration = NumberUtil::round( microtime( true ) - $start_time, 5 );
 
 		$this->log_delivery( $delivery_id, $http_args, $response, $duration );
 
@@ -481,8 +482,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the.
-	 * recipient can verify the authenticity of the webhook. Note that the signature.
+	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the
+	 * recipient can verify the authenticity of the webhook. Note that the signature
 	 * is calculated after the body has already been encoded (JSON by default).
 	 *
 	 * @since  2.2.0
@@ -492,6 +493,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function generate_signature( $payload ) {
 		$hash_algo = apply_filters( 'woocommerce_webhook_hash_algorithm', 'sha256', $payload, $this->get_id() );
 
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		return base64_encode( hash_hmac( $hash_algo, $payload, wp_specialchars_decode( $this->get_secret(), ENT_QUOTES ), true ) );
 	}
 

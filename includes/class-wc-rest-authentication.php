@@ -2,7 +2,7 @@
 /**
  * REST API Authentication
  *
- * @package  WooCommerce\API
+ * @package  WooCommerce\RestApi
  * @since    2.6.0
  */
 
@@ -39,6 +39,7 @@ class WC_REST_Authentication {
 	 */
 	public function __construct() {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
+		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'check_user_permissions' ), 10, 3 );
@@ -87,6 +88,33 @@ class WC_REST_Authentication {
 		}
 
 		return $this->perform_oauth_authentication();
+	}
+
+	/**
+	 * Authenticate the user if authentication wasn't performed during the
+	 * determine_current_user action.
+	 *
+	 * Necessary in cases where wp_get_current_user() is called before WooCommerce is loaded.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/26847
+	 *
+	 * @param WP_Error|null|bool $error Error data.
+	 * @return WP_Error|null|bool
+	 */
+	public function authentication_fallback( $error ) {
+		if ( ! empty( $error ) ) {
+			// Another plugin has already declared a failure.
+			return $error;
+		}
+		if ( empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) && 0 === get_current_user_id() ) {
+			// Authentication hasn't occurred during `determine_current_user`, so check auth.
+			$user_id = $this->authenticate( false );
+			if ( $user_id ) {
+				wp_set_current_user( $user_id );
+				return true;
+			}
+		}
+		return $error;
 	}
 
 	/**
