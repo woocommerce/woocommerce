@@ -2,13 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { Card } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -16,6 +14,7 @@ import { Card } from '@woocommerce/components';
 import './style.scss';
 import RecommendedExtensionsItem from './item';
 import { STORE_KEY } from '../../data/constants';
+import Card from '../card';
 
 const RecommendedExtensions = ( {
 	extensions,
@@ -41,26 +40,24 @@ const RecommendedExtensions = ( {
 				categoryClass
 			) }
 		>
-			<Fragment>
-				{ isLoading ? (
-					<Spinner />
-				) : (
-					<div
-						className={ classnames(
-							'woocommerce-marketing-recommended-extensions-card__items',
-							`woocommerce-marketing-recommended-extensions-card__items--count-${ extensions.length }`
-						) }
-					>
-						{ extensions.map( ( extension ) => (
-							<RecommendedExtensionsItem
-								key={ extension.product }
-								category={ category }
-								{ ...extension }
-							/>
-						) ) }
-					</div>
-				) }
-			</Fragment>
+			{ isLoading ? (
+				<Spinner />
+			) : (
+				<div
+					className={ classnames(
+						'woocommerce-marketing-recommended-extensions-card__items',
+						`woocommerce-marketing-recommended-extensions-card__items--count-${ extensions.length }`
+					) }
+				>
+					{ extensions.map( ( extension ) => (
+						<RecommendedExtensionsItem
+							key={ extension.product }
+							category={ category }
+							{ ...extension }
+						/>
+					) ) }
+				</div>
+			) }
 		</Card>
 	);
 };

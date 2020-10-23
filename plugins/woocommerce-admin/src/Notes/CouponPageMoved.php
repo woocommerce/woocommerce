@@ -2,7 +2,7 @@
 /**
  * WooCommerce Admin Coupon Page Moved provider.
  *
- * Adds a notice when the store manager access the coupons page via the old WooCommere > Coupons menu.
+ * Adds a notice when the store manager access the coupons page via the old WooCommerce > Coupons menu.
  */
 
 namespace Automattic\WooCommerce\Admin\Notes;

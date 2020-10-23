@@ -15,7 +15,7 @@ export default ( props ) => {
 			{ ...props }
 			className={ classnames(
 				props.className,
-				'woocommere-admin-marketing-button'
+				'woocommerce-admin-marketing-button'
 			) }
 		/>
 	);

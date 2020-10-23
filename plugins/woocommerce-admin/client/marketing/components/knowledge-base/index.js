@@ -3,12 +3,12 @@
  */
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 import classNames from 'classnames';
+import { Spinner } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { Card, Pagination, EmptyContent } from '@woocommerce/components';
+import { Pagination, EmptyContent } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -17,6 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './style.scss';
 import { Slider } from '../../components';
 import { STORE_KEY } from '../../data/constants';
+import Card from '../card';
 import ReadBlogMessage from './ReadBlogMessage';
 
 const KnowledgeBase = ( {

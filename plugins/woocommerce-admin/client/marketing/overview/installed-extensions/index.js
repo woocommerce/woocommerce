@@ -6,7 +6,11 @@ import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { Card } from '@woocommerce/components';
+import {
+	Card,
+	CardHeader,
+	__experimentalText as Text,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,14 +37,16 @@ class InstalledExtensions extends Component {
 			return null;
 		}
 
+		const title = __(
+			'Installed marketing extensions',
+			'woocommerce-admin'
+		);
+
 		return (
-			<Card
-				title={ __(
-					'Installed marketing extensions',
-					'woocommerce-admin'
-				) }
-				className="woocommerce-marketing-installed-extensions-card"
-			>
+			<Card className="woocommerce-marketing-installed-extensions-card">
+				<CardHeader>
+					<Text variant="title.small">{ title }</Text>
+				</CardHeader>
 				{ plugins.map( ( plugin ) => {
 					return (
 						<InstalledExtensionRow

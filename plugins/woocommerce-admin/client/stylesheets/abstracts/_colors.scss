@@ -1,11 +1,6 @@
 @import 'node_modules/@automattic/color-studio/dist/color-variables.scss';
 @import 'node_modules/@wordpress/base-styles/colors';
 
-// TODO: Remove this when the next update of @wordpress/base-styles is
-// released (see https://github.com/woocommerce/woocommerce-admin/pull/4707/files#r451921109)
-$gray-700: #757575; // Meets 4.6:1 text contrast against white.
-$gray-100: #f0f0f0;
-
 $transparent: rgba(255, 255, 255, 0);
 
 $gray-text: $gray-700;

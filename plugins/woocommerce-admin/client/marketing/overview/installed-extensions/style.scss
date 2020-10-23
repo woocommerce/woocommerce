@@ -1,8 +1,4 @@
 .woocommerce-marketing-installed-extensions-card {
-	.woocommerce-card__body {
-		padding: 0;
-	}
-
 	&__item {
 		display: flex;
 		align-items: center;
@@ -22,7 +18,7 @@
 	}
 
 	&__item:not(:last-child) {
-		border-bottom: 1px solid $gray-100;
+		border-bottom: 1px solid $gray-200;
 	}
 
 	&__item-text-and-actions {

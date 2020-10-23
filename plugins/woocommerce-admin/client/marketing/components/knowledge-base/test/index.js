@@ -57,21 +57,14 @@ describe( 'Posts and not loading', () => {
 	} );
 
 	it( 'should display default title and description', () => {
-		const { getByRole } = knowledgeBaseWrapper;
+		const { getByText } = knowledgeBaseWrapper;
+
+		expect( getByText( 'WooCommerce knowledge base' ) ).toBeInTheDocument();
 
 		expect(
-			getByRole( 'heading', {
-				level: 2,
-				name: 'WooCommerce knowledge base',
-			} )
-		).toBeInTheDocument();
-
-		expect(
-			getByRole( 'heading', {
-				level: 2,
-				name:
-					'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
-			} )
+			getByText(
+				'Learn the ins and outs of successful marketing from the experts at WooCommerce.'
+			)
 		).toBeInTheDocument();
 	} );
 
@@ -422,7 +415,7 @@ describe( 'Page with single post', () => {
 
 describe( 'Custom title and description ', () => {
 	it( 'should override defaults', () => {
-		const { getByRole } = render(
+		const { getByText } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
 				isLoading={ false }
@@ -432,15 +425,7 @@ describe( 'Custom title and description ', () => {
 			/>
 		);
 
-		expect(
-			getByRole( 'heading', { level: 2, name: 'Custom Title' } )
-		).toBeInTheDocument();
-
-		expect(
-			getByRole( 'heading', {
-				level: 2,
-				name: 'Custom Description',
-			} )
-		).toBeInTheDocument();
+		expect( getByText( 'Custom Title' ) ).toBeInTheDocument();
+		expect( getByText( 'Custom Description' ) ).toBeInTheDocument();
 	} );
 } );
