@@ -258,7 +258,7 @@ class AssetDataRegistry {
 			}
 			return;
 		}
-		if ( \method_exists( $data, '__invoke' ) ) {
+		if ( \is_callable( $data ) ) {
 			$this->lazy_data[ $key ] = $data;
 			return;
 		}

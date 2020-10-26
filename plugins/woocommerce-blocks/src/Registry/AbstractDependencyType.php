@@ -38,7 +38,7 @@ abstract class AbstractDependencyType {
 	 */
 	protected function resolve_value( Container $container ) {
 		$callback = $this->callable_or_value;
-		return \method_exists( $callback, '__invoke' )
+		return \is_callable( $callback )
 			? $callback( $container )
 			: $callback;
 	}
