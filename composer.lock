@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2da21327225a11510050822b603a5ca4",
+    "content-hash": "ed84c4d91482a5c508caaf50e843de58",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -259,12 +259,6 @@
                 "provider",
                 "service"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/philipobenito",
-                    "type": "github"
-                }
-            ],
             "time": "2020-09-28T13:38:44+00:00"
         },
         {
@@ -501,20 +495,6 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-03-16T08:31:04+00:00"
         },
         {
@@ -554,16 +534,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.6.2",
+            "version": "1.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "0978d750472813aa21e5c80651005a3ccd1fc0a3"
+                "reference": "3015abbda8657ef097b7763e4c941daa06dab6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/0978d750472813aa21e5c80651005a3ccd1fc0a3",
-                "reference": "0978d750472813aa21e5c80651005a3ccd1fc0a3",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3015abbda8657ef097b7763e4c941daa06dab6f7",
+                "reference": "3015abbda8657ef097b7763e4c941daa06dab6f7",
                 "shasum": ""
             },
             "require": {
@@ -597,7 +577,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-10-16T19:24:07+00:00"
+            "time": "2020-10-26T20:25:00+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -706,6 +686,5 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    },
-    "plugin-api-version": "1.1.0"
+    }
 }
