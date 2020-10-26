@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import {
+	TAXES_ENABLED,
+	DISPLAY_CART_PRICES_INCLUDING_TAX,
+} from '@woocommerce/block-settings';
 import { createInterpolateElement } from 'wordpress-element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
@@ -12,6 +15,8 @@ import PropTypes from 'prop-types';
  */
 import TotalsItem from '../totals-item';
 import './style.scss';
+
+const SHOW_TAXES = TAXES_ENABLED && DISPLAY_CART_PRICES_INCLUDING_TAX;
 
 const TotalsFooterItem = ( { currency, values } ) => {
 	const { total_price: totalPrice, total_tax: totalTax } = values;
@@ -23,7 +28,7 @@ const TotalsFooterItem = ( { currency, values } ) => {
 			label={ __( 'Total', 'woo-gutenberg-products-block' ) }
 			value={ parseInt( totalPrice, 10 ) }
 			description={
-				DISPLAY_CART_PRICES_INCLUDING_TAX && (
+				SHOW_TAXES && (
 					<p className="wc-block-components-totals-footer-item-tax">
 						{ createInterpolateElement(
 							__(
