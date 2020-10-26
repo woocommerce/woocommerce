@@ -9,7 +9,7 @@
 	"labels": [ "type: dependencies", "skip-changelog" ],
 	"packageRules": [
 		{
-			"packageNames": [ "automattic/jetpack-autoloader" ],
+			"packageNames": [ "automattic/jetpack-autoloader", "composer/installers" ],
 			"rangeStrategy": "bump"
 		},
 		{

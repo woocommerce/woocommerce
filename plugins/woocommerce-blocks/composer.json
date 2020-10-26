@@ -12,7 +12,7 @@
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require": {
-		"composer/installers": "1.7.0",
+		"composer/installers": "^1.7.0",
 		"automattic/jetpack-autoloader": "^2.0.0"
 	},
 	"require-dev": {
