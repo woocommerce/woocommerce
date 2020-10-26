@@ -317,20 +317,6 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-09-02T16:06:40+00:00"
         },
         {
@@ -560,6 +546,5 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    },
-    "plugin-api-version": "1.1.0"
+    }
 }
