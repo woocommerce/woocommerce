@@ -47,7 +47,13 @@ const ActiveFiltersBlock = ( {
 			},
 			displayStyle: blockAttributes.displayStyle,
 		} );
-	}, [ minPrice, maxPrice, formatPriceRange ] );
+	}, [
+		minPrice,
+		maxPrice,
+		blockAttributes.displayStyle,
+		setMinPrice,
+		setMaxPrice,
+	] );
 
 	const activeAttributeFilters = useMemo( () => {
 		return productAttributes.map( ( attribute ) => {
@@ -64,7 +70,7 @@ const ActiveFiltersBlock = ( {
 				/>
 			);
 		} );
-	}, [ productAttributes ] );
+	}, [ productAttributes, blockAttributes.displayStyle ] );
 
 	const hasFilters = () => {
 		return (

@@ -16,7 +16,7 @@ import './style.scss';
  *
  * @param {Object} props Incoming props for the component.
  * @param {string} props.className CSS class used.
- * @param {function():any} props.onChange Function called when inputs change.
+ * @param {function(string):any} props.onChange Function called when inputs change.
  * @param {Array} props.options Options for list.
  * @param {Array} props.checked Which items are checked.
  * @param {boolean} props.isLoading If loading or not.
@@ -142,6 +142,7 @@ const CheckboxList = ( {
 		);
 	}, [
 		options,
+		onChange,
 		checked,
 		showExpanded,
 		limit,

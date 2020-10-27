@@ -20,7 +20,7 @@ export const usePrevious = ( value, validation ) => {
 		) {
 			ref.current = value;
 		}
-	}, [ value, ref.current ] );
+	}, [ value, validation ] );
 
 	return ref.current;
 };
