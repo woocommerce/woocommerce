@@ -89,3 +89,10 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
+
+before_install:
+  OLD_COMPOSER_PATH=$(which composer)
+  rm -rf ${OLD_COMPOSER_PATH}
+  curl https://getcomposer.org/download/1.10.16/composer.phar -o composer
+  chmod +x composer
+  mv composer ${OLD_COMPOSER_PATH}
