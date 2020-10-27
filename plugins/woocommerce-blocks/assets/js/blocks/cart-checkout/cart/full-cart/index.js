@@ -85,7 +85,7 @@ const Cart = ( { attributes } ) => {
 				id: error.code,
 			} );
 		} );
-	}, [ cartItemErrors ] );
+	}, [ addErrorNotice, cartItemErrors ] );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 

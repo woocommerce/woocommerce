@@ -86,11 +86,11 @@ export const useElementOptions = ( overloadedOptions ) => {
 					? { showIcon: isActive }
 					: {};
 			return {
-				...options,
+				...prevOptions,
 				style: {
-					...options.style,
+					...prevOptions.style,
 					base: {
-						...options.style.base,
+						...prevOptions.style.base,
 						'::placeholder': {
 							color,
 						},

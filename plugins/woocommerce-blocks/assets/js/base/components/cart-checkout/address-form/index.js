@@ -100,7 +100,8 @@ const AddressForm = ( {
 		}
 	}, [
 		values,
-		countryValidationError,
+		countryValidationError.message,
+		countryValidationError.hidden,
 		setValidationErrors,
 		clearValidationError,
 		type,

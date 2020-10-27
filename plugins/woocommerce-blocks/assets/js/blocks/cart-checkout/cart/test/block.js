@@ -40,13 +40,7 @@ describe( 'Testing cart', () => {
 			screen.getByText( /Proceed to Checkout/i )
 		).toBeInTheDocument();
 
-		/**
-		 * @todo Investigate extra POST request on initial cart render.
-		 *
-		 * We have an unfixed bug in our test in which the full cart triggers a POST
-		 * request to `wc/store/cart/update-item` causing the fetch to be called twice.
-		 */
-		expect( fetchMock ).toHaveBeenCalledTimes( 2 );
+		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 	it( 'renders empty cart if there are no items in the cart', async () => {
 		fetchMock.mockResponse( ( req ) => {

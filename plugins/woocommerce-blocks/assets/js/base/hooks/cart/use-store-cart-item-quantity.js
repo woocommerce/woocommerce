@@ -55,6 +55,7 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 		},
 		[ cartItemKey ]
 	);
+	const previousIsPendingQuantity = usePrevious( isPendingQuantity );
 
 	const isPendingDelete = useSelect(
 		( select ) => {
@@ -67,6 +68,7 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 		},
 		[ cartItemKey ]
 	);
+	const previousIsPendingDelete = usePrevious( isPendingDelete );
 
 	const removeItem = () => {
 		return cartItemKey
@@ -78,34 +80,46 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 
 	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
-		// Don't run it if quantity didn't change but it was set for the first time.
-		if ( cartItemKey && Number.isFinite( previousDebouncedQuantity ) ) {
+		if (
+			cartItemKey &&
+			Number.isFinite( previousDebouncedQuantity ) &&
+			previousDebouncedQuantity !== debouncedQuantity
+		) {
 			changeCartItemQuantity( cartItemKey, debouncedQuantity ).then(
 				triggerFragmentRefresh
 			);
 		}
-	}, [ debouncedQuantity, cartItemKey ] );
+	}, [
+		cartItemKey,
+		changeCartItemQuantity,
+		debouncedQuantity,
+		previousDebouncedQuantity,
+	] );
 
 	useEffect( () => {
-		if ( isPendingQuantity ) {
-			dispatchActions.incrementCalculating();
-		} else {
-			dispatchActions.decrementCalculating();
+		if ( previousIsPendingQuantity !== isPendingQuantity ) {
+			if ( isPendingQuantity ) {
+				dispatchActions.incrementCalculating();
+			} else {
+				dispatchActions.decrementCalculating();
+			}
 		}
-	}, [ isPendingQuantity ] );
+	}, [ dispatchActions, isPendingQuantity, previousIsPendingQuantity ] );
 
 	useEffect( () => {
-		if ( isPendingDelete ) {
-			dispatchActions.incrementCalculating();
-		} else if ( ! isPendingDelete && cartErrors.length ) {
-			dispatchActions.decrementCalculating();
+		if ( previousIsPendingDelete !== isPendingDelete ) {
+			if ( isPendingDelete ) {
+				dispatchActions.incrementCalculating();
+			} else {
+				dispatchActions.decrementCalculating();
+			}
 		}
 		return () => {
 			if ( isPendingDelete ) {
 				dispatchActions.decrementCalculating();
 			}
 		};
-	}, [ isPendingDelete ] );
+	}, [ dispatchActions, isPendingDelete, previousIsPendingDelete ] );
 
 	return {
 		isPendingDelete,

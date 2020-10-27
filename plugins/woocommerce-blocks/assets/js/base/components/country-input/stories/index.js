@@ -27,7 +27,7 @@ const StoryComponent = ( { label, errorMessage } ) => {
 	} = useValidationContext();
 	useEffect( () => {
 		setValidationErrors( { country: errorMessage } );
-	}, [ errorMessage ] );
+	}, [ errorMessage, setValidationErrors ] );
 	const updateCountry = ( country ) => {
 		clearValidationError( 'country' );
 		selectCountry( country );
