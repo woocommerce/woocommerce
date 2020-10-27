@@ -164,7 +164,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Tweak - Use first gallery image on single product when image not assigned. #27289
 * Tweak - Update `product_cat/tag` taxonomy template file names to `product-cat/tag`. #27736
 * Tweak - Exclude draft pages from the "Shop page" setting. #27890
 * Tweak - Styling to properly display product reviews within the dashboard activity widget. #27968
