@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useValidationContext } from '@woocommerce/base-context';
@@ -27,6 +27,7 @@ const ValidatedTextInput = ( {
 	showError = true,
 	...rest
 } ) => {
+	const [ isPristine, setIsPristine ] = useState( true );
 	const inputRef = useRef();
 	const {
 		getValidationError,
@@ -39,39 +40,51 @@ const ValidatedTextInput = ( {
 	const textInputId = id || 'textinput-' + instanceId;
 	errorId = errorId || textInputId;
 
-	const validateInput = ( errorsHidden = true ) => {
-		if ( inputRef.current.checkValidity() ) {
-			clearValidationError( errorId );
-		} else {
-			setValidationErrors( {
-				[ errorId ]: {
-					message:
-						inputRef.current.validationMessage ||
-						__( 'Invalid value.', 'woo-gutenberg-products-block' ),
-					hidden: errorsHidden,
-				},
-			} );
-		}
-	};
+	const validateInput = useCallback(
+		( errorsHidden = true ) => {
+			if ( inputRef.current.checkValidity() ) {
+				clearValidationError( errorId );
+			} else {
+				setValidationErrors( {
+					[ errorId ]: {
+						message:
+							inputRef.current.validationMessage ||
+							__(
+								'Invalid value.',
+								'woo-gutenberg-products-block'
+							),
+						hidden: errorsHidden,
+					},
+				} );
+			}
+		},
+		[ clearValidationError, errorId, setValidationErrors ]
+	);
 
 	useEffect( () => {
-		if ( focusOnMount ) {
-			inputRef.current.focus();
+		if ( isPristine ) {
+			if ( focusOnMount ) {
+				inputRef.current.focus();
+			}
+			setIsPristine( false );
 		}
-	}, [ focusOnMount ] );
+	}, [ focusOnMount, isPristine, setIsPristine ] );
 
 	useEffect( () => {
-		if ( validateOnMount ) {
-			validateInput();
+		if ( isPristine ) {
+			if ( validateOnMount ) {
+				validateInput();
+			}
+			setIsPristine( false );
 		}
-	}, [ validateOnMount ] );
+	}, [ isPristine, setIsPristine, validateOnMount, validateInput ] );
 
 	// Remove validation errors when unmounted.
 	useEffect( () => {
 		return () => {
 			clearValidationError( errorId );
 		};
-	}, [ errorId ] );
+	}, [ clearValidationError, errorId ] );
 
 	const errorMessage = getValidationError( errorId ) || {};
 	const hasError = errorMessage.message && ! errorMessage.hidden;

@@ -3,7 +3,6 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import { getAttributes, getTerms } from '@woocommerce/editor-components/utils';
-import { find } from 'lodash';
 
 /**
  * Internal dependencies
@@ -14,12 +13,12 @@ import { formatError } from '../base/utils/errors.js';
  * Get attribute data (name, taxonomy etc) from server data.
  *
  * @param {number} attributeId Attribute ID to look for.
- * @param {Array} attributeList List of attributes.
+ * @param {Array|null} attributeList List of attributes.
  * @param {string} matchField Field to match on. e.g. id or slug.
  */
 const getAttributeData = ( attributeId, attributeList, matchField = 'id' ) => {
-	return attributeList
-		? find( attributeList, [ matchField, attributeId ] )
+	return Array.isArray( attributeList )
+		? attributeList.find( ( attr ) => attr[ matchField ] === attributeId )
 		: null;
 };
 
@@ -30,8 +29,9 @@ const getAttributeData = ( attributeId, attributeList, matchField = 'id' ) => {
  */
 const withAttributes = ( OriginalComponent ) => {
 	return ( props ) => {
-		const { selected } = props;
-		const [ attributes, setAttributes ] = useState( [] );
+		const { selected = [] } = props;
+		const selectedSlug = selected.length ? selected[ 0 ].attr_slug : null;
+		const [ attributes, setAttributes ] = useState( null );
 		const [ expandedAttribute, setExpandedAttribute ] = useState( 0 );
 		const [ termsList, setTermsList ] = useState( {} );
 		const [ loading, setLoading ] = useState( true );
@@ -39,43 +39,44 @@ const withAttributes = ( OriginalComponent ) => {
 		const [ error, setError ] = useState( null );
 
 		useEffect( () => {
-			getAttributes()
-				.then( ( newAttributes ) => {
-					newAttributes = newAttributes.map( ( attribute ) => ( {
-						...attribute,
-						parent: 0,
-					} ) );
+			if ( attributes === null ) {
+				getAttributes()
+					.then( ( newAttributes ) => {
+						newAttributes = newAttributes.map( ( attribute ) => ( {
+							...attribute,
+							parent: 0,
+						} ) );
 
-					setAttributes( newAttributes );
+						setAttributes( newAttributes );
 
-					if ( selected.length > 0 ) {
-						const selectedAttributeFromTerm = attributes
-							? getAttributeData(
-									selected[ 0 ].attr_slug,
-									newAttributes,
-									'taxonomy'
-							  )
-							: null;
-
-						if ( selectedAttributeFromTerm ) {
-							setExpandedAttribute(
-								selectedAttributeFromTerm.id
+						if ( selectedSlug ) {
+							const selectedAttributeFromTerm = getAttributeData(
+								selectedSlug,
+								newAttributes,
+								'taxonomy'
 							);
+
+							if ( selectedAttributeFromTerm ) {
+								setExpandedAttribute(
+									selectedAttributeFromTerm.id
+								);
+							}
 						}
-					}
-				} )
-				.catch( async ( e ) => {
-					setError( await formatError( e ) );
-				} )
-				.finally( () => {
-					setLoading( false );
-				} );
-		}, [] );
+					} )
+					.catch( async ( e ) => {
+						setError( await formatError( e ) );
+					} )
+					.finally( () => {
+						setLoading( false );
+					} );
+			}
+		}, [ attributes, selectedSlug ] );
 
 		useEffect( () => {
-			const attributeData = attributes
-				? getAttributeData( expandedAttribute, attributes )
-				: null;
+			const attributeData = getAttributeData(
+				expandedAttribute,
+				attributes
+			);
 
 			if ( ! attributeData ) {
 				return;
@@ -91,10 +92,10 @@ const withAttributes = ( OriginalComponent ) => {
 						attr_slug: attributeData.taxonomy,
 					} ) );
 
-					setTermsList( {
-						...termsList,
+					setTermsList( ( previousTermsList ) => ( {
+						...previousTermsList,
 						[ expandedAttribute ]: newTerms,
-					} );
+					} ) );
 				} )
 				.catch( async ( e ) => {
 					setError( await formatError( e ) );
@@ -107,7 +108,7 @@ const withAttributes = ( OriginalComponent ) => {
 		return (
 			<OriginalComponent
 				{ ...props }
-				attributes={ attributes }
+				attributes={ attributes || [] }
 				error={ error }
 				expandedAttribute={ expandedAttribute }
 				onExpandAttribute={ setExpandedAttribute }
