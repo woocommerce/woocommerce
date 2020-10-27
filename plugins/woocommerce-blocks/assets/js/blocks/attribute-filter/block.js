@@ -8,6 +8,7 @@ import {
 	useQueryStateByKey,
 	useQueryStateByContext,
 	useCollectionData,
+	usePrevious,
 	useShallowEqual,
 } from '@woocommerce/base-hooks';
 import {
@@ -113,7 +114,7 @@ const AttributeFilterBlock = ( {
 		 * @param {string} termSlug The term of the slug to check.
 		 */
 		const isTermInQueryState = ( termSlug ) => {
-			if ( ! queryState || ! queryState.attributes ) {
+			if ( ! queryState?.attributes ) {
 				return false;
 			}
 			return queryState.attributes.some(
@@ -168,16 +169,11 @@ const AttributeFilterBlock = ( {
 	] );
 
 	// Track checked STATE changes - if state changes, update the query.
-	useEffect(
-		() => {
-			if ( ! blockAttributes.showFilterButton ) {
-				onSubmit();
-			}
-		},
-		// There is no need to add blockAttributes.showFilterButton as a dependency.
-		// It will only change in the editor and there we don't need to call onSubmit in any case.
-		[ checked, onSubmit ]
-	);
+	useEffect( () => {
+		if ( ! blockAttributes.showFilterButton ) {
+			onSubmit( checked );
+		}
+	}, [ blockAttributes.showFilterButton, checked, onSubmit ] );
 
 	const checkedQuery = useMemo( () => {
 		return productAttributesQuery
@@ -188,17 +184,16 @@ const AttributeFilterBlock = ( {
 	}, [ productAttributesQuery, attributeObject.taxonomy ] );
 
 	const currentCheckedQuery = useShallowEqual( checkedQuery );
-
+	const previousCheckedQuery = usePrevious( currentCheckedQuery );
 	// Track ATTRIBUTES QUERY changes so the block reflects current filters.
-	useEffect(
-		() => {
-			if ( ! isShallowEqual( checked, checkedQuery ) ) {
-				setChecked( checkedQuery );
-			}
-		},
-		// We only want to apply this effect when the query changes, so we are intentionally leaving `checked` out of the dependencies.
-		[ currentCheckedQuery ]
-	);
+	useEffect( () => {
+		if (
+			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // checked query changed
+			! isShallowEqual( checked, currentCheckedQuery ) // checked query doesn't match the UI
+		) {
+			setChecked( currentCheckedQuery );
+		}
+	}, [ checked, currentCheckedQuery, previousCheckedQuery ] );
 
 	/**
 	 * Returns an array of term objects that have been chosen via the checkboxes.
@@ -215,19 +210,29 @@ const AttributeFilterBlock = ( {
 		[ attributeTerms ]
 	);
 
-	const onSubmit = () => {
-		if ( isEditor ) {
-			return;
-		}
+	const onSubmit = useCallback(
+		( isChecked ) => {
+			if ( isEditor ) {
+				return;
+			}
 
-		updateAttributeFilter(
+			updateAttributeFilter(
+				productAttributesQuery,
+				setProductAttributesQuery,
+				attributeObject,
+				getSelectedTerms( isChecked ),
+				blockAttributes.queryType === 'or' ? 'in' : 'and'
+			);
+		},
+		[
+			isEditor,
 			productAttributesQuery,
 			setProductAttributesQuery,
 			attributeObject,
-			getSelectedTerms( checked ),
-			blockAttributes.queryType === 'or' ? 'in' : 'and'
-		);
-	};
+			getSelectedTerms,
+			blockAttributes.queryType,
+		]
+	);
 
 	const multiple =
 		blockAttributes.displayStyle !== 'dropdown' ||
@@ -357,7 +362,7 @@ const AttributeFilterBlock = ( {
 					<FilterSubmitButton
 						className="wc-block-attribute-filter__button"
 						disabled={ isLoading || isDisabled }
-						onClick={ onSubmit }
+						onClick={ () => onSubmit( checked ) }
 					/>
 				) }
 			</div>

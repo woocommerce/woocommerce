@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
-import { Fragment, useState, useCallback } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import {
 	Placeholder,
@@ -258,7 +258,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		</Placeholder>
 	);
 
-	const onDone = useCallback( () => {
+	const onDone = () => {
 		setIsEditing( false );
 		debouncedSpeak(
 			__(
@@ -266,37 +266,34 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 				'woo-gutenberg-products-block'
 			)
 		);
-	}, [] );
+	};
 
-	const onChange = useCallback(
-		( selected ) => {
-			if ( ! selected || ! selected.length ) {
-				return;
-			}
+	const onChange = ( selected ) => {
+		if ( ! selected || ! selected.length ) {
+			return;
+		}
 
-			const selectedId = selected[ 0 ].id;
-			const productAttribute = find( ATTRIBUTES, [
-				'attribute_id',
-				selectedId.toString(),
-			] );
+		const selectedId = selected[ 0 ].id;
+		const productAttribute = find( ATTRIBUTES, [
+			'attribute_id',
+			selectedId.toString(),
+		] );
 
-			if ( ! productAttribute || attributeId === selectedId ) {
-				return;
-			}
+		if ( ! productAttribute || attributeId === selectedId ) {
+			return;
+		}
 
-			const attributeName = productAttribute.attribute_label;
+		const attributeName = productAttribute.attribute_label;
 
-			setAttributes( {
-				attributeId: selectedId,
-				heading: sprintf(
-					// Translators: %s attribute name.
-					__( 'Filter by %s', 'woo-gutenberg-products-block' ),
-					attributeName
-				),
-			} );
-		},
-		[ attributeId ]
-	);
+		setAttributes( {
+			attributeId: selectedId,
+			heading: sprintf(
+				// Translators: %s attribute name.
+				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
+				attributeName
+			),
+		} );
+	};
 
 	const renderAttributeControl = () => {
 		const messages = {

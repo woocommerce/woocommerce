@@ -2,8 +2,8 @@
  * Validate a min and max value for a range slider against defined constraints (min, max, step).
  *
  * @param {Array} values Array containing min and max values.
- * @param {number} min Min allowed value for the sliders.
- * @param {number} max Max allowed value for the sliders.
+ * @param {number|null} min Min allowed value for the sliders.
+ * @param {number|null} max Max allowed value for the sliders.
  * @param {number} step Step value for the sliders.
  * @param {boolean} isMin Whether we're currently interacting with the min range slider or not, so we update the correct values.
  * @return {Array} Validated and updated min/max values that fit within the range slider constraints.

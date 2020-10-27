@@ -112,7 +112,6 @@ const PriceSlider = ( {
 		minConstraint,
 		maxConstraint,
 		hasValidConstraints,
-		stepValue,
 	] );
 
 	/**
@@ -186,7 +185,14 @@ const PriceSlider = ( {
 				parseInt( values[ 1 ], 10 ),
 			] );
 		},
-		[ minPrice, maxPrice, minConstraint, maxConstraint, stepValue ]
+		[
+			onChange,
+			minPrice,
+			maxPrice,
+			minConstraint,
+			maxConstraint,
+			stepValue,
+		]
 	);
 
 	/**
@@ -221,14 +227,7 @@ const PriceSlider = ( {
 				parseInt( values[ 1 ], 10 ),
 			] );
 		},
-		[
-			minConstraint,
-			maxConstraint,
-			stepValue,
-			minPriceInput,
-			maxPriceInput,
-			currency,
-		]
+		[ onChange, stepValue, minPriceInput, maxPriceInput ]
 	);
 
 	const classes = classnames(

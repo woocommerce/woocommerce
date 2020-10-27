@@ -70,7 +70,7 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 const extractPaginationAndSortAttributes = ( query ) => {
 	/* eslint-disable-next-line no-unused-vars, camelcase */
 	const { order, orderby, page, per_page, ...totalQuery } = query;
-	return totalQuery;
+	return totalQuery || {};
 };
 
 const announceLoadingCompletion = ( totalProducts ) => {
@@ -95,6 +95,11 @@ const announceLoadingCompletion = ( totalProducts ) => {
 		);
 	}
 };
+
+const areQueryTotalsDifferent = (
+	{ totalQuery: nextQuery, totalProducts: nextProducts },
+	{ totalQuery: currentQuery } = {}
+) => ! isEqual( nextQuery, currentQuery ) && Number.isFinite( nextProducts );
 
 const ProductList = ( {
 	attributes,
@@ -129,28 +134,27 @@ const ProductList = ( {
 	// the total number of products is a finite number.
 	const previousQueryTotals = usePrevious(
 		{ totalQuery, totalProducts },
-		(
-			{ totalQuery: nextQuery, totalProducts: nextProducts },
-			{ totalQuery: currentQuery } = {}
-		) =>
-			! isEqual( nextQuery, currentQuery ) &&
-			Number.isFinite( nextProducts )
+		areQueryTotalsDifferent
 	);
-	const isPreviousTotalQueryEqual =
-		typeof previousQueryTotals === 'object' &&
-		isEqual( totalQuery, previousQueryTotals.totalQuery );
-	useEffect( () => {
-		// If query state (excluding pagination/sorting attributes) changed,
-		// reset pagination to the first page.
-		if ( ! isPreviousTotalQueryEqual ) {
-			onPageChange( 1 );
 
-			// Make sure there was a previous query, so we don't announce it on page load.
-			if ( previousQueryTotals ) {
-				announceLoadingCompletion( totalProducts );
-			}
+	// If query state (excluding pagination/sorting attributes) changed,
+	// reset pagination to the first page.
+	useEffect( () => {
+		if ( isEqual( totalQuery, previousQueryTotals?.totalQuery ) ) {
+			return;
 		}
-	}, [ queryState ] );
+		onPageChange( 1 );
+
+		// Make sure there was a previous query, so we don't announce it on page load.
+		if ( previousQueryTotals?.totalQuery ) {
+			announceLoadingCompletion( totalProducts );
+		}
+	}, [
+		previousQueryTotals?.totalQuery,
+		totalProducts,
+		onPageChange,
+		totalQuery,
+	] );
 
 	const onPaginationChange = ( newPage ) => {
 		scrollToTop( { focusableSelector: 'a, button' } );
@@ -175,7 +179,9 @@ const ProductList = ( {
 	const { contentVisibility } = attributes;
 	const perPage = attributes.columns * attributes.rows;
 	const totalPages =
-		! Number.isFinite( totalProducts ) && isPreviousTotalQueryEqual
+		! Number.isFinite( totalProducts ) &&
+		Number.isFinite( previousQueryTotals?.totalProducts ) &&
+		isEqual( totalQuery, previousQueryTotals?.totalQuery )
 			? Math.ceil( previousQueryTotals.totalProducts / perPage )
 			: Math.ceil( totalProducts / perPage );
 	const listProducts = products.length

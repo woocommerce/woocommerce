@@ -5,6 +5,8 @@ import { QUERY_STATE_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useRef, useEffect, useCallback } from '@wordpress/element';
 import { useQueryStateContext } from '@woocommerce/base-context';
+import { usePrevious } from '@woocommerce/base-hooks';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 import { assign } from 'lodash';
 
 /**
@@ -43,7 +45,7 @@ export const useQueryStateByContext = ( context ) => {
 		( value ) => {
 			setValueForQueryContext( context, value );
 		},
-		[ context ]
+		[ context, setValueForQueryContext ]
 	);
 
 	return [ queryState, setQueryState ];
@@ -56,11 +58,11 @@ export const useQueryStateByContext = ( context ) => {
  * "Query State" is a wp.data store that keeps track of an arbitrary object of
  * query keys and their values.
  *
- * @param {*}      queryKey     The specific query key to retrieve the value for.
- * @param {*}      defaultValue Default value if query does not exist.
- * @param {string} [context]    What context to retrieve the query state for. If
- *                              not provided will attempt to use what is provided
- *                              by query state context.
+ * @param {*}      queryKey       The specific query key to retrieve the value for.
+ * @param {*}      [defaultValue] Default value if query does not exist.
+ * @param {string} [context]      What context to retrieve the query state for. If
+ *                                not provided will attempt to use what is provided
+ *                                by query state context.
  *
  * @return {*}  Whatever value is set at the query state index using the
  *              provided context and query key.
@@ -81,7 +83,7 @@ export const useQueryStateByKey = ( queryKey, defaultValue, context ) => {
 		( value ) => {
 			setQueryValue( context, queryKey, value );
 		},
-		[ context, queryKey ]
+		[ context, queryKey, setQueryValue ]
 	);
 
 	return [ queryValue, setQueryValueByKey ];
@@ -117,15 +119,31 @@ export const useSynchronizedQueryState = ( synchronizedQuery, context ) => {
 	const queryStateContext = useQueryStateContext();
 	context = context || queryStateContext;
 	const [ queryState, setQueryState ] = useQueryStateByContext( context );
+	const currentQueryState = useShallowEqual( queryState );
 	const currentSynchronizedQuery = useShallowEqual( synchronizedQuery );
+	const previousSynchronizedQuery = usePrevious( currentSynchronizedQuery );
 	// used to ensure we allow initial synchronization to occur before
 	// returning non-synced state.
 	const isInitialized = useRef( false );
 	// update queryState anytime incoming synchronizedQuery changes
 	useEffect( () => {
-		setQueryState( assign( {}, queryState, currentSynchronizedQuery ) );
-		isInitialized.current = true;
-	}, [ currentSynchronizedQuery ] );
+		if (
+			! isShallowEqual(
+				previousSynchronizedQuery,
+				currentSynchronizedQuery
+			)
+		) {
+			setQueryState(
+				assign( {}, currentQueryState, currentSynchronizedQuery )
+			);
+			isInitialized.current = true;
+		}
+	}, [
+		currentQueryState,
+		currentSynchronizedQuery,
+		previousSynchronizedQuery,
+		setQueryState,
+	] );
 	return isInitialized.current
 		? [ queryState, setQueryState ]
 		: [ synchronizedQuery, setQueryState ];

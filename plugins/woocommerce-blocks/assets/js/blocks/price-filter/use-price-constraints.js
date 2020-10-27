@@ -28,8 +28,9 @@ export const usePriceConstraint = ( price, minorUnit, direction ) => {
 			: Math.floor( parseFloat( price, 10 ) / step ) * step;
 	}
 
-	const previousConstraint = usePrevious( currentConstraint, ( val ) =>
-		Number.isFinite( val )
+	const previousConstraint = usePrevious(
+		currentConstraint,
+		Number.isFinite
 	);
 	return Number.isFinite( currentConstraint )
 		? currentConstraint
