@@ -200,6 +200,39 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that line items for variations includes the parent product name.
+	 */
+	public function test_get_item_with_variation_parent_name() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		// The name property contains the parent product name and the attribute value (ex. "Dummy Variable Product - small").
+		$this->assertEquals( $variation->get_name(), $last_line_item['name'] );
+		$this->assertTrue( false !== strpos( $last_line_item['name'], $variation->get_attribute( 'pa_size' ) ) );
+		// The parent_name property only contains the parent product name (ex. "Dummy Variable Product").
+		$this->assertEquals( $product->get_name(), $last_line_item['parent_name'] );
+		$this->assertNotEquals( $variation->get_name(), $last_line_item['parent_name'] );
+		$this->assertTrue( false === strpos( $last_line_item['parent_name'], $variation->get_attribute( 'pa_size' ) ) );
+	}
+
+	/**
 	 * Tests getting an order with an invalid ID.
 	 * @since 3.5.0
 	 */
@@ -612,6 +645,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'meta_data'    => array(),
 			'sku'          => null,
 			'price'        => 4,
+			'parent_name'  => null,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -878,9 +912,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
-		$this->assertEquals( 14, count( $line_item_properties ) );
+		$this->assertEquals( 15, count( $line_item_properties ) );
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
+		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
 
 		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
 		$this->assertEquals( 5, count( $meta_data_item_properties ) );
