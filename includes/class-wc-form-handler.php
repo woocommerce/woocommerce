@@ -911,7 +911,7 @@ class WC_Form_Handler {
 			$product_name = $product->get_name();
 
 			/* translators: %1$s: Product link, %2$s: Product title, %3$s: Product name. */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s"><u>%3$s</u></a>.', 'woocommerce' ), esc_url( $url ), esc_html( $product_name ), esc_html( $product_name ) ), 'error' );
+			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%3$s</a>.', 'woocommerce' ), esc_url( $url ), esc_html( $product_name ), esc_html( $product_name ) ), 'error' );
 
 			return false;
 		}
