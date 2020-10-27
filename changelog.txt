@@ -29,6 +29,7 @@
 * Dev - Add a `NumberUtil::round` method to workaround a breaking change in the buil-in round function in PHP8. #27830
 * Dev - Remove default value from optional parameters that are followed by required parameters in functions/methods, since those are de-facto required and trigger a deprectation notice in PHP 8. #27840
 * Dev - REST API - Add user-friendly attribute names and values to order line items metadata.
+* Dev - REST API - Adds `parent_name` to `line_items` of the GET /orders endpoint.
 * Localization - Added Serbia districts. #27778
 * Localization - Make city, and postcode non-required fields. #27779
 * Localization - Add i18n locale information for Uganda, Kenya and Tanzania. #27164
@@ -47,6 +48,12 @@
 * Don't throw an error when registering a payment method fails. ([3134](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3134))
 * Don't load contents of payment method hidden tabs. ([3227](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3227))
 * Use noticeContexts from useEmitResponse instead of hardcoded values. ([3161](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3161))
+
+**WooCommerce Admin - 1.6.3**
+
+* Tweak: Add BR and IN to list of stripe countries [#5377](https://github.com/woocommerce/woocommerce-admin/pull/5377)
+* Fix: Redirect instead of stalling on WCPay Inbox note action [#5413](https://github.com/woocommerce/woocommerce-admin/pull/5413)
+
 
 = 4.6.1 - 2020-10-21 =
 
