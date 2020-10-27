@@ -45,12 +45,10 @@ a.button {
 	text-align: center;
 	box-sizing: border-box;
 	word-break: break-word;
-	color: #fff;
 	text-decoration: none !important;
 
 	&:hover,
 	&:visited {
-		color: #fff;
 		text-decoration: underline !important;
 	}
 }
@@ -239,7 +237,7 @@ a.button {
 	}
 }
 
-#site-content {
+#main {
 
 	.woocommerce-error,
 	.woocommerce-info {
@@ -296,7 +294,7 @@ a.button {
 	margin-bottom: 1.5em;
 }
 
-#site-content {
+#main {
 
 	.post-inner {
 		padding-top: 0;
@@ -1128,7 +1126,7 @@ a.reset_variations {
  */
 .woocommerce-account {
 
-	#site-content {
+	#main {
 
 		.post-inner {
 			padding-top: 0;
@@ -1259,7 +1257,7 @@ a.reset_variations {
 
 .logged-in.woocommerce-account {
 
-	#site-content {
+	#main {
 
 		.woocommerce {
 			display: flex;
@@ -1489,14 +1487,14 @@ a.reset_variations {
 		padding-top: 0;
 	}
 
-	#site-content {
+	#main {
 
 		.entry-header {
 			padding: 3vw 0 1.5vw;
 		}
 
 		.woocommerce {
-			max-width: 1600px;
+			max-width: var(--responsive--alignwide-width);
 			padding: 0 5vw;
 			margin: 0 auto;
 
@@ -2166,7 +2164,7 @@ a.reset_variations {
 
 @media only screen and (max-width: 768px) {
 
-	#site-content {
+	#main {
 
 		.woocommerce {
 
@@ -2351,7 +2349,7 @@ a.reset_variations {
 
 	.logged-in.woocommerce-account {
 
-		#site-content {
+		#main {
 
 			.woocommerce {
 				flex-direction: column;
@@ -2526,7 +2524,7 @@ a.reset_variations {
 
 	.woocommerce-checkout {
 
-		#site-content {
+		#main {
 
 			.woocommerce {
 
