@@ -178,7 +178,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - HTML syntax error in scheduled product message. #27842
 * Fix - Update logic to determine if an order requires payment to check the order instead of the cart. #27893
 * Fix - Enhancement: Use more relevant `Set password` title for lost password reset form when applicable. #27898
-* Fix - Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted. #27934
 * Fix - Email address starting with `www` being displayed as a URL link in the admin order details page. #27983
 * Fix - Unexpected HTTP 401 "Sorry, you cannot list resources" REST API responses that occur when a plugin or custom code determines the current WordPress user before WooCommerce is fully initialized. #27587
 * Dev - Add `woocommerce_should_send_low_stock_notification` filter. #27819
