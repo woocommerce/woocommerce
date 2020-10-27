@@ -132,6 +132,7 @@ class SearchFilter extends Component {
 						) }
 						onChange={ this.onSearchChange }
 						type={ input.type }
+						autocompleter={ input.autocompleter }
 						placeholder={ labels.placeholder }
 						selected={ selected }
 						inlineTags
