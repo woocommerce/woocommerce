@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	insertBlock,
 	getAllBlocks,
 	openDocumentSettingsSidebar,
 	switchUserToAdmin,
@@ -12,14 +11,15 @@ import {
 	visitBlockPage,
 } from '@woocommerce/blocks-test-utils';
 
+import {
+	insertBlockDontWaitForInsertClose,
+	closeInserter,
+} from '../../utils.js';
+
 const block = {
 	name: 'Checkout',
 	slug: 'woocommerce/checkout',
 	class: '.wc-block-checkout',
-};
-
-const closeInserter = async () => {
-	await page.click( '.edit-post-header [aria-label="Add block"]' );
 };
 
 if ( process.env.WP_VERSION < 5.3 || process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
@@ -33,7 +33,7 @@ describe( `${ block.name } Block`, () => {
 	} );
 
 	it( 'can only be inserted once', async () => {
-		await insertBlock( block.name );
+		await insertBlockDontWaitForInsertClose( block.name );
 		await closeInserter();
 		expect( await getAllBlocks() ).toHaveLength( 1 );
 	} );
