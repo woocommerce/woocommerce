@@ -80,7 +80,7 @@
 		"@testing-library/jest-dom": "5.11.4",
 		"@testing-library/react": "11.1.0",
 		"@types/jest": "26.0.15",
-		"@types/react": "16.9.52",
+		"@types/react": "16.9.54",
 		"@types/wordpress__data": "4.6.9",
 		"@types/wordpress__element": "2.4.1",
 		"@woocommerce/eslint-plugin": "1.0.0-beta.0",
