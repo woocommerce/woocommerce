@@ -91,4 +91,4 @@ branches:
     - /^release\//
 
 before_install:
-  - composer self-update --rollback | exit 0
+  - composer self-update --rollback || exit 0
