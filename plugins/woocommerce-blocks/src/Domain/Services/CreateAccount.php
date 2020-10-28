@@ -35,15 +35,16 @@ class CreateAccount {
 		// Checkout signup is feature gated to WooCommerce 4.7 and newer;
 		// uses updated my-account/lost-password screen from 4.7+ for
 		// setting initial password.
-		// Also currently gated to dev builds only.
-		return Package::is_experimental_build();
+		// This service is feature gated to plugin only, to match the
+		// availability of the Checkout block (feature plugin only).
+		return Package::is_feature_plugin_build() && defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '4.7', '>=' );
 	}
 
 	/**
 	 * Init - register handlers for WooCommerce core email hooks.
 	 */
 	public function init() {
-		if ( ! self::is_feature_enabled() || defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '4.7', '<' ) ) {
+		if ( ! self::is_feature_enabled() ) {
 			return;
 		}
 

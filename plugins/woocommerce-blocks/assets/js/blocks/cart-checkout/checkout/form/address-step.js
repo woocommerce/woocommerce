@@ -93,6 +93,7 @@ AddressStep.propTypes = {
 	showApartmentField: PropTypes.bool.isRequired,
 	showCompanyField: PropTypes.bool.isRequired,
 	showPhoneField: PropTypes.bool.isRequired,
+	allowCreateAccount: PropTypes.bool.isRequired,
 };
 
 export default AddressStep;

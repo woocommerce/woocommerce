@@ -23,10 +23,7 @@ import {
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
-import {
-	CHECKOUT_ALLOWS_GUEST,
-	isExperimentalBuild,
-} from '@woocommerce/block-settings';
+import { CHECKOUT_ALLOWS_GUEST } from '@woocommerce/block-settings';
 import { compareWithWooVersion, getSetting } from '@woocommerce/settings';
 
 /**
@@ -87,11 +84,8 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 	// Checkout signup is feature gated to WooCommerce 4.7 and newer;
 	// uses updated my-account/lost-password screen from 4.7+ for
 	// setting initial password.
-	// Also currently gated to dev builds only.
 	const allowCreateAccount =
-		attributes.allowCreateAccount &&
-		isExperimentalBuild() &&
-		compareWithWooVersion( '4.7.0', '<=' );
+		attributes.allowCreateAccount && compareWithWooVersion( '4.7.0', '<=' );
 
 	useEffect( () => {
 		if ( hasErrorsToDisplay ) {

@@ -17,7 +17,6 @@ import {
 	PRIVACY_URL,
 	TERMS_URL,
 	CHECKOUT_PAGE_ID,
-	isExperimentalBuild,
 } from '@woocommerce/block-settings';
 import { compareWithWooVersion, getAdminLink } from '@woocommerce/settings';
 import { createInterpolateElement } from 'wordpress-element';
@@ -58,9 +57,9 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 	// Checkout signup is feature gated to WooCommerce 4.7 and newer;
 	// uses updated my-account/lost-password screen from 4.7+ for
 	// setting initial password.
-	// Also currently gated to dev builds only.
-	const showCreateAccountOption =
-		isExperimentalBuild() && compareWithWooVersion( '4.7.0', '<=' );
+	// Also implicitly gated to feature plugin, because Checkout
+	// block is gated to plugin
+	const showCreateAccountOption = compareWithWooVersion( '4.7.0', '<=' );
 	return (
 		<InspectorControls>
 			{ currentPostId !== CHECKOUT_PAGE_ID && (
