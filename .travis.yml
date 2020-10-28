@@ -91,6 +91,6 @@ branches:
     - /^release\//
 
 before_install:
-  - curl -sS https://getcomposer.org/installer | php -- --version=1.10.16
-  - chmod +x composer.phar
-  - mv composer.phar ${which composer}
+  - which composer
+  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
+  - chmod +x /usr/local/bin/composer
