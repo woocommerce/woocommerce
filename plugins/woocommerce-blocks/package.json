@@ -163,7 +163,7 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "3.4.3",
 		"wordpress-components": "npm:@wordpress/components@8.5.0",
-		"wordpress-compose": "npm:@wordpress/compose@3.21.0",
+		"wordpress-compose": "npm:@wordpress/compose@3.22.0",
 		"wordpress-element": "npm:@wordpress/element@2.18.0"
 	},
 	"husky": {
