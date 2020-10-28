@@ -110,7 +110,7 @@ const verifyPublishAndTrash = async ( button, publishNotice, publishVerification
 	}
 
 	// Trash
-	await page.scrollTo( '#submitdiv' );
+	await page.focus( '#submitdiv' );
 	await expect( page ).toClick( 'a.submitdelete' );
 	await page.waitForSelector( '#message' );
 
