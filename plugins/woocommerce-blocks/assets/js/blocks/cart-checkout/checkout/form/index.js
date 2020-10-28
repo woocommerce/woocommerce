@@ -49,6 +49,7 @@ CheckoutForm.propTypes = {
 	showCompanyField: PropTypes.bool.isRequired,
 	showOrderNotes: PropTypes.bool.isRequired,
 	showPhoneField: PropTypes.bool.isRequired,
+	allowCreateAccount: PropTypes.bool.isRequired,
 };
 
 export default CheckoutForm;
