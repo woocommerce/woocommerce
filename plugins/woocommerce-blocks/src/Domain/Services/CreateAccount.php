@@ -98,31 +98,27 @@ class CreateAccount {
 	}
 
 	/**
-	 * Create a user account for specified order and request (if necessary).
+	 * Create a user account for specified request (if necessary).
 	 * If a new account is created:
-	 * - The order is associated with the account.
 	 * - The user is logged in.
 	 *
-	 * @param \WC_Order        $order   The order currently being processed.
 	 * @param \WP_REST_Request $request The current request object being handled.
 	 *
 	 * @throws Exception On error.
 	 * @return int The new user id, or 0 if no user was created.
 	 */
-	public function from_order_request( \WC_Order $order, \WP_REST_Request $request ) {
+	public function from_order_request( \WP_REST_Request $request ) {
 		if ( ! self::is_feature_enabled() || ! $this->should_create_customer_account( $request ) ) {
 			return 0;
 		}
 
 		$customer_id = $this->create_customer_account(
-			$order->get_billing_email(),
-			$order->get_billing_first_name(),
-			$order->get_billing_last_name()
+			$request['billing_address']['email'],
+			$request['billing_address']['first_name'],
+			$request['billing_address']['last_name']
 		);
-
 		// Log the customer in and associate with the order.
 		wc_set_customer_auth_cookie( $customer_id );
-		$order->set_customer_id( get_current_user_id() );
 
 		return $customer_id;
 	}
