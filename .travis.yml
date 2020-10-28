@@ -91,8 +91,6 @@ branches:
     - /^release\//
 
 before_install:
-  OLD_COMPOSER_PATH=$(which composer)
-  rm -rf ${OLD_COMPOSER_PATH}
-  curl -sS https://getcomposer.org/installer | php -- --version=1.10.16
-  chmod +x composer.phar
-  mv composer.phar ${OLD_COMPOSER_PATH}
+  - curl -sS https://getcomposer.org/installer | php -- --version=1.10.16
+  - chmod +x composer.phar
+  - mv composer.phar ${which composer}
