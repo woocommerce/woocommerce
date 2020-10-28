@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
 /**
  * Onboarding_Profiler.
  */
-class Onboarding_Profiler {
+class OnboardingProfiler {
 	/**
 	 * Note traits.
 	 */

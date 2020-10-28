@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Start_Dropshipping_Business.
  */
-class Start_Dropshipping_Business {
+class StartDropshippingBusiness {
 	/**
 	 * Note traits.
 	 */

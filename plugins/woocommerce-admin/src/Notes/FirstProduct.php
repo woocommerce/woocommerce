@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * First_Product.
  */
-class First_Product {
+class FirstProduct {
 	/**
 	 * Note traits.
 	 */

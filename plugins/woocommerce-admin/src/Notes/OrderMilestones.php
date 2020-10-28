@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Order_Milestones
  */
-class Order_Milestones {
+class OrderMilestones {
 	/**
 	 * Name of the "other milestones" note.
 	 */

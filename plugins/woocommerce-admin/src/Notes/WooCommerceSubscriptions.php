@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
 /**
  * WooCommerce_Subscriptions.
  */
-class WooCommerce_Subscriptions {
+class WooCommerceSubscriptions {
 	/**
 	 * Note traits.
 	 */

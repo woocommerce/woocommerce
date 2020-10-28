@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Set_Up_Additional_Payment_Types
  */
-class Set_Up_Additional_Payment_Types {
+class SetUpAdditionalPaymentTypes {
 	/**
 	 * Note traits.
 	 */

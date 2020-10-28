@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Woo_Subscriptions_Notes
  */
-class Woo_Subscriptions_Notes {
+class WooSubscriptionsNotes {
 	const LAST_REFRESH_OPTION_KEY = 'woocommerce_admin-wc-helper-last-refresh';
 	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection';
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';

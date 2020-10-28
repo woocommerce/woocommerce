@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Performance_On_Mobile
  */
-class Performance_On_Mobile {
+class PerformanceOnMobile {
 	/**
 	 * Note traits.
 	 */

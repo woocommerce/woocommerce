@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Choose_Niche.
  */
-class Choose_Niche {
+class ChooseNiche {
 	/**
 	 * Note traits.
 	 */

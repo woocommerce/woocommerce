@@ -179,10 +179,6 @@ install_deps() {
 	# As zip file does not include tests, we have to get it from git repo.
 	git clone --depth 1 --branch $LATEST_WC_TAG https://github.com/woocommerce/woocommerce.git
 
-	# Bring in WooCommerce Core dependencies
-	cd "woocommerce"
-	composer install --no-dev
-
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
 

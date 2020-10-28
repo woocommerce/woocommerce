@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Admin\PluginsHelper;
 /**
  * WC_Admin_Notes_Google_Ads_And_Marketing
  */
-class Google_Ads_And_Marketing {
+class GoogleAdsAndMarketing {
 	/**
 	 * Note traits.
 	 */

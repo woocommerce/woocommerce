@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Test_Checkout
  */
-class Test_Checkout {
+class TestCheckout {
 	/**
 	 * Note traits.
 	 */

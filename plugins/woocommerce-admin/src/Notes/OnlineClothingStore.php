@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Online_Clothing_Store.
  */
-class Online_Clothing_Store {
+class OnlineClothingStore {
 	/**
 	 * Note traits.
 	 */

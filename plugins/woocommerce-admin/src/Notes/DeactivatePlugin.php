@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Deactivate_Plugin.
  */
-class Deactivate_Plugin {
+class DeactivatePlugin {
 	/**
 	 * Note traits.
 	 */

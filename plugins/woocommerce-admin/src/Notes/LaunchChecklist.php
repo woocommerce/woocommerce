@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Launch_Checklist
  */
-class Launch_Checklist {
+class LaunchChecklist {
 	/**
 	 * Note traits.
 	 */

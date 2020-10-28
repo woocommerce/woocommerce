@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Onboarding_Email_Marketing
  */
-class Onboarding_Email_Marketing {
+class OnboardingEmailMarketing {
 	/**
 	 * Note traits.
 	 */

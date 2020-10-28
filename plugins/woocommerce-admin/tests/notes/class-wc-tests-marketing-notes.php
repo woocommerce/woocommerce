@@ -7,7 +7,7 @@
 
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\WooCommerce_Payments;
+use \Automattic\WooCommerce\Admin\Notes\WooCommercePayments;
 
 /**
  * Class WC_Tests_Marketing_Notes
@@ -61,7 +61,7 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		// Set user preferences to disallow marketing suggestions.
 		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
 
-		WooCommerce_Payments::possibly_add_note();
+		WooCommercePayments::possibly_add_note();
 
 		// Load all marketing notes and check that the note was not added.
 		$data_store = \WC_Data_Store::load( 'admin-note' );

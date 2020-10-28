@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Review_Shipping_Settings
  */
-class Review_Shipping_Settings {
+class ReviewShippingSettings {
 	use NoteTraits;
 
 	const NOTE_NAME = 'wc-admin-review-shipping-settings';

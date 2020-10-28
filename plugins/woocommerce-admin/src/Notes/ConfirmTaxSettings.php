@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ConfirmTaxSettings.
  */
-class Confirm_Tax_Settings {
+class ConfirmTaxSettings {
 	/**
 	 * Note traits.
 	 */

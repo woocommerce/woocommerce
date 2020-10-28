@@ -78,7 +78,7 @@ class WC_Admin_Notes extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Choose_Niche.
  *
- * @deprecated since 1.7.0, use Choose_Niche
+ * @deprecated since 1.7.0, use ChooseNiche
  */
 class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
 	/**
@@ -86,7 +86,7 @@ class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Choose_Niche';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\ChooseNiche';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -99,7 +99,7 @@ class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Coupon_Page_Moved.
  *
- * @deprecated since 1.7.0, use Coupon_Page_Moved
+ * @deprecated since 1.7.0, use CouponPageMoved
  */
 class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	/**
@@ -107,7 +107,7 @@ class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Coupon_Page_Moved';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\CouponPageMoved';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -120,7 +120,7 @@ class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Customize_Store_With_Blocks.
  *
- * @deprecated since 1.7.0, use Customize_Store_With_Blocks
+ * @deprecated since 1.7.0, use CustomizeStoreWithBlocks
  */
 class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	/**
@@ -128,7 +128,7 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Customize_Store_With_Blocks';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\CustomizeStoreWithBlocks';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -141,7 +141,7 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Deactivate_Plugin.
  *
- * @deprecated since 1.7.0, use Deactivate_Plugin
+ * @deprecated since 1.7.0, use DeactivatePlugin
  */
 class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 	/**
@@ -149,7 +149,7 @@ class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Deactivate_Plugin';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\DeactivatePlugin';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -162,7 +162,7 @@ class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Draw_Attention.
  *
- * @deprecated since 1.7.0, use Draw_Attention
+ * @deprecated since 1.7.0, use DrawAttention
  */
 class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
 	/**
@@ -170,7 +170,7 @@ class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Draw_Attention';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\DrawAttention';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -183,7 +183,7 @@ class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Edit_Products_On_The_Move.
  *
- * @deprecated since 1.7.0, use Edit_Products_On_The_Move
+ * @deprecated since 1.7.0, use EditProductsOnTheMove
  */
 class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	/**
@@ -191,7 +191,7 @@ class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Edit_Products_On_The_Move';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\EditProductsOnTheMove';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -204,7 +204,7 @@ class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_EU_VAT_Number.
  *
- * @deprecated since 1.7.0, use EU_VAT_Number
+ * @deprecated since 1.7.0, use EUVATNumber
  */
 class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	/**
@@ -212,7 +212,7 @@ class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\EU_VAT_Number';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\EUVATNumber';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -225,7 +225,7 @@ class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Facebook_Marketing_Expert.
  *
- * @deprecated since 1.7.0, use Facebook_Marketing_Expert
+ * @deprecated since 1.7.0, use FacebookMarketingExpert
  */
 class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	/**
@@ -233,7 +233,7 @@ class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Facebook_Marketing_Expert';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\FacebookMarketingExpert';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -246,7 +246,7 @@ class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_First_Product.
  *
- * @deprecated since 1.7.0, use First_Product
+ * @deprecated since 1.7.0, use FirstProduct
  */
 class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	/**
@@ -254,7 +254,7 @@ class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\First_Product';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\FirstProduct';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -267,7 +267,7 @@ class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Giving_Feedback_Notes.
  *
- * @deprecated since 1.7.0, use Giving_Feedback_Notes
+ * @deprecated since 1.7.0, use GivingFeedbackNotes
  */
 class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	/**
@@ -275,7 +275,7 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Giving_Feedback_Notes';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\GivingFeedbackNotes';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -288,7 +288,7 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Historical_Data.
  *
- * @deprecated since 1.7.0, use Historical_Data
+ * @deprecated since 1.7.0, use HistoricalData
  */
 class WC_Admin_Notes_Historical_Data extends DeprecatedClassFacade {
 	/**
@@ -296,7 +296,7 @@ class WC_Admin_Notes_Historical_Data extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Historical_Data';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\HistoricalData';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -309,7 +309,7 @@ class WC_Admin_Notes_Historical_Data extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Home_Screen_Feedback.
  *
- * @deprecated since 1.7.0, use Home_Screen_Feedback
+ * @deprecated since 1.7.0, use HomeScreenFeedback
  */
 class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
 	/**
@@ -317,7 +317,7 @@ class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Home_Screen_Feedback';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\HomeScreenFeedback';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -330,7 +330,7 @@ class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Insight_First_Sale.
  *
- * @deprecated since 1.7.0, use Insight_First_Sale
+ * @deprecated since 1.7.0, use InsightFirstSale
  */
 class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	/**
@@ -338,7 +338,7 @@ class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Insight_First_Sale';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\InsightFirstSale';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -351,7 +351,7 @@ class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Install_JP_And_WCS_Plugins.
  *
- * @deprecated since 1.7.0, use Install_JP_And_WCS_Plugins
+ * @deprecated since 1.7.0, use InstallJPAndWCSPlugins
  */
 class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	/**
@@ -359,7 +359,7 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Install_JP_And_WCS_Plugins';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -372,7 +372,7 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Launch_Checklist.
  *
- * @deprecated since 1.7.0, use Launch_Checklist
+ * @deprecated since 1.7.0, use LaunchChecklist
  */
 class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	/**
@@ -380,7 +380,7 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Launch_Checklist';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\LaunchChecklist';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -414,7 +414,7 @@ class WC_Admin_Notes_Marketing extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Migrate_From_Shopify.
  *
- * @deprecated since 1.7.0, use Migrate_From_Shopify
+ * @deprecated since 1.7.0, use MigrateFromShopify
  */
 class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	/**
@@ -422,7 +422,7 @@ class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Migrate_From_Shopify';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\MigrateFromShopify';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -435,7 +435,7 @@ class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Mobile_App.
  *
- * @deprecated since 1.7.0, use Mobile_App
+ * @deprecated since 1.7.0, use MobileApp
  */
 class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	/**
@@ -443,7 +443,7 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Mobile_App';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\MobileApp';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -456,7 +456,7 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Need_Some_Inspiration.
  *
- * @deprecated since 1.7.0, use Need_Some_Inspiration
+ * @deprecated since 1.7.0, use NeedSomeInspiration
  */
 class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
 	/**
@@ -464,7 +464,7 @@ class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Need_Some_Inspiration';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\NeedSomeInspiration';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -477,7 +477,7 @@ class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_New_Sales_Record.
  *
- * @deprecated since 1.7.0, use New_Sales_Record
+ * @deprecated since 1.7.0, use NewSalesRecord
  */
 class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	/**
@@ -485,7 +485,7 @@ class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\New_Sales_Record';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\NewSalesRecord';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -498,7 +498,7 @@ class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Onboarding_Email_Marketing.
  *
- * @deprecated since 1.7.0, use Onboarding_Email_Marketing
+ * @deprecated since 1.7.0, use OnboardingEmailMarketing
  */
 class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	/**
@@ -506,7 +506,7 @@ class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Onboarding_Email_Marketing';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\OnboardingEmailMarketing';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -519,7 +519,7 @@ class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Onboarding_Payments.
  *
- * @deprecated since 1.7.0, use Onboarding_Payments
+ * @deprecated since 1.7.0, use OnboardingPayments
  */
 class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	/**
@@ -527,7 +527,7 @@ class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Onboarding_Payments';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\OnboardingPayments';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -540,7 +540,7 @@ class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Onboarding_Profiler.
  *
- * @deprecated since 1.7.0, use Onboarding_Profiler
+ * @deprecated since 1.7.0, use OnboardingProfiler
  */
 class WC_Admin_Notes_Onboarding_Profiler extends DeprecatedClassFacade {
 	/**
@@ -548,7 +548,7 @@ class WC_Admin_Notes_Onboarding_Profiler extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Onboarding_Profiler';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\OnboardingProfiler';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -561,7 +561,7 @@ class WC_Admin_Notes_Onboarding_Profiler extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Online_Clothing_Store.
  *
- * @deprecated since 1.7.0, use Online_Clothing_Store
+ * @deprecated since 1.7.0, use OnlineClothingStore
  */
 class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	/**
@@ -569,7 +569,7 @@ class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Online_Clothing_Store';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\OnlineClothingStore';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -582,7 +582,7 @@ class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Order_Milestones.
  *
- * @deprecated since 1.7.0, use Order_Milestones
+ * @deprecated since 1.7.0, use OrderMilestones
  */
 class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	/**
@@ -590,7 +590,7 @@ class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Order_Milestones';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\OrderMilestones';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -603,7 +603,7 @@ class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Performance_On_Mobile.
  *
- * @deprecated since 1.7.0, use Performance_On_Mobile
+ * @deprecated since 1.7.0, use PerformanceOnMobile
  */
 class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	/**
@@ -611,7 +611,7 @@ class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Performance_On_Mobile';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\PerformanceOnMobile';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -624,7 +624,7 @@ class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Personalize_Store.
  *
- * @deprecated since 1.7.0, use Personalize_Store
+ * @deprecated since 1.7.0, use PersonalizeStore
  */
 class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	/**
@@ -632,7 +632,7 @@ class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Personalize_Store';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\PersonalizeStore';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -645,7 +645,7 @@ class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Real_Time_Order_Alerts.
  *
- * @deprecated since 1.7.0, use Real_Time_Order_Alerts
+ * @deprecated since 1.7.0, use RealTimeOrderAlerts
  */
 class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	/**
@@ -653,7 +653,7 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Real_Time_Order_Alerts';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\RealTimeOrderAlerts';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -666,7 +666,7 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Review_Shipping_Settings.
  *
- * @deprecated since 1.7.0, use Review_Shipping_Settings
+ * @deprecated since 1.7.0, use ReviewShippingSettings
  */
 class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
 	/**
@@ -674,7 +674,7 @@ class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Review_Shipping_Settings';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\ReviewShippingSettings';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -687,7 +687,7 @@ class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Selling_Online_Courses.
  *
- * @deprecated since 1.7.0, use Selling_Online_Courses
+ * @deprecated since 1.7.0, use SellingOnlineCourses
  */
 class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	/**
@@ -695,7 +695,7 @@ class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Selling_Online_Courses';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\SellingOnlineCourses';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -708,7 +708,7 @@ class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Set_Up_Additional_Payment_Types.
  *
- * @deprecated since 1.7.0, use Set_Up_Additional_Payment_Types
+ * @deprecated since 1.7.0, use SetUpAdditionalPaymentTypes
  */
 class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFacade {
 	/**
@@ -716,7 +716,7 @@ class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFaca
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Set_Up_Additional_Payment_Types';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -729,7 +729,7 @@ class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFaca
 /**
  * WC_Admin_Notes_Start_Dropshipping_Business.
  *
- * @deprecated since 1.7.0, use Start_Dropshipping_Business
+ * @deprecated since 1.7.0, use StartDropshippingBusiness
  */
 class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
 	/**
@@ -737,7 +737,7 @@ class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Start_Dropshipping_Business';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\StartDropshippingBusiness';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -750,7 +750,7 @@ class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Test_Checkout.
  *
- * @deprecated since 1.7.0, use Test_Checkout
+ * @deprecated since 1.7.0, use TestCheckout
  */
 class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	/**
@@ -758,7 +758,7 @@ class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Test_Checkout';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\TestCheckout';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -771,7 +771,7 @@ class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Tracking_Opt_In.
  *
- * @deprecated since 1.7.0, use Tracking_Opt_In
+ * @deprecated since 1.7.0, use TrackingOptIn
  */
 class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	/**
@@ -779,7 +779,7 @@ class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Tracking_Opt_In';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\TrackingOptIn';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -792,7 +792,7 @@ class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_Woo_Subscriptions_Notes.
  *
- * @deprecated since 1.7.0, use Woo_Subscriptions_Notes
+ * @deprecated since 1.7.0, use WooSubscriptionsNotes
  */
 class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	/**
@@ -800,7 +800,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Woo_Subscriptions_Notes';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\WooSubscriptionsNotes';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -813,7 +813,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_WooCommerce_Payments.
  *
- * @deprecated since 1.7.0, use WooCommerce_Payments
+ * @deprecated since 1.7.0, use WooCommercePayments
  */
 class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	/**
@@ -821,7 +821,7 @@ class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\WooCommerce_Payments';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\WooCommercePayments';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -834,7 +834,7 @@ class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes_WooCommerce_Subscriptions.
  *
- * @deprecated since 1.7.0, use WooCommerce_Subscriptions
+ * @deprecated since 1.7.0, use WooCommerceSubscriptions
  */
 class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	/**
@@ -842,7 +842,7 @@ class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\WooCommerce_Subscriptions';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\WooCommerceSubscriptions';
 
 	/**
 	 * The version that this class was deprecated in.

@@ -47,7 +47,7 @@ class DeprecatedClassFacade {
 	 */
 	public function __call( $name, $arguments ) {
 		_deprecated_function(
-			static::$facade_over_classname . '::' . $name,
+			static::class . '::' . $name,
 			static::$deprecated_in_version
 		);
 		return call_user_func_array(
@@ -67,7 +67,7 @@ class DeprecatedClassFacade {
 	 */
 	public static function __callStatic( $name, $arguments ) {
 		_deprecated_function(
-			static::$facade_over_classname . '::' . $name,
+			static::class . '::' . $name,
 			static::$deprecated_in_version
 		);
 		return call_user_func_array(

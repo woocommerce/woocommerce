@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WooCommerce_Payments
  */
-class WooCommerce_Payments {
+class WooCommercePayments {
 	/**
 	 * Note traits.
 	 */

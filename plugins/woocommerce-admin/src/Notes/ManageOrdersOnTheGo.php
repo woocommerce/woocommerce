@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Manage_Orders_On_The_Go
  */
-class Manage_Orders_On_The_Go {
+class ManageOrdersOnTheGo {
 	/**
 	 * Note traits.
 	 */

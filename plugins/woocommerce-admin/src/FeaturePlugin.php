@@ -8,19 +8,19 @@ namespace Automattic\WooCommerce\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\Historical_Data;
-use \Automattic\WooCommerce\Admin\Notes\Order_Milestones;
-use \Automattic\WooCommerce\Admin\Notes\Woo_Subscriptions_Notes;
-use \Automattic\WooCommerce\Admin\Notes\Tracking_Opt_In;
-use \Automattic\WooCommerce\Admin\Notes\WooCommerce_Payments;
-use \Automattic\WooCommerce\Admin\Notes\Install_JP_And_WCS_Plugins;
-use \Automattic\WooCommerce\Admin\Notes\Draw_Attention;
-use \Automattic\WooCommerce\Admin\Notes\Coupon_Page_Moved;
+use \Automattic\WooCommerce\Admin\Notes\HistoricalData;
+use \Automattic\WooCommerce\Admin\Notes\OrderMilestones;
+use \Automattic\WooCommerce\Admin\Notes\WooSubscriptionsNotes;
+use \Automattic\WooCommerce\Admin\Notes\TrackingOptIn;
+use \Automattic\WooCommerce\Admin\Notes\WooCommercePayments;
+use \Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins;
+use \Automattic\WooCommerce\Admin\Notes\DrawAttention;
+use \Automattic\WooCommerce\Admin\Notes\CouponPageMoved;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
-use \Automattic\WooCommerce\Admin\Notes\Home_Screen_Feedback;
-use \Automattic\WooCommerce\Admin\Notes\Set_Up_Additional_Payment_Types;
-use \Automattic\WooCommerce\Admin\Notes\Test_Checkout;
-use \Automattic\WooCommerce\Admin\Notes\Selling_Online_Courses;
+use \Automattic\WooCommerce\Admin\Notes\HomeScreenFeedback;
+use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
+use \Automattic\WooCommerce\Admin\Notes\TestCheckout;
+use \Automattic\WooCommerce\Admin\Notes\SellingOnlineCourses;
 
 /**
  * Feature plugin main class.
@@ -70,6 +70,7 @@ class FeaturePlugin {
 
 		$this->define_constants();
 
+		require_once WC_ADMIN_ABSPATH . '/src/Notes/DeprecatedNotes.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/core-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/page-controller-functions.php';
@@ -181,17 +182,17 @@ class FeaturePlugin {
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
-		new Woo_Subscriptions_Notes();
-		new Historical_Data();
-		new Order_Milestones();
-		new Tracking_Opt_In();
-		new WooCommerce_Payments();
-		new Install_JP_And_WCS_Plugins();
-		new Draw_Attention();
-		new Home_Screen_Feedback();
-		new Set_Up_Additional_Payment_Types();
-		new Test_Checkout();
-		new Selling_Online_Courses();
+		new WooSubscriptionsNotes();
+		new HistoricalData();
+		new OrderMilestones();
+		new TrackingOptIn();
+		new WooCommercePayments();
+		new InstallJPAndWCSPlugins();
+		new DrawAttention();
+		new HomeScreenFeedback();
+		new SetUpAdditionalPaymentTypes();
+		new TestCheckout();
+		new SellingOnlineCourses();
 
 		// Initialize RemoteInboxNotificationsEngine.
 		RemoteInboxNotificationsEngine::init();

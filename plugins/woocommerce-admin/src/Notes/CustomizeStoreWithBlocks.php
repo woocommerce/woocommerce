@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Customize_Store_With_Blocks.
  */
-class Customize_Store_With_Blocks {
+class CustomizeStoreWithBlocks {
 	/**
 	 * Note traits.
 	 */

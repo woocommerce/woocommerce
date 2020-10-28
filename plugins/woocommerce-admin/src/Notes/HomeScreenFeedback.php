@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Home_Screen_Feedback.
  */
-class Home_Screen_Feedback {
+class HomeScreenFeedback {
 	/**
 	 * Note traits.
 	 */

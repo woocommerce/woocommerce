@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Real_Time_Order_Alerts
  */
-class Real_Time_Order_Alerts {
+class RealTimeOrderAlerts {
 	/**
 	 * Note traits.
 	 */

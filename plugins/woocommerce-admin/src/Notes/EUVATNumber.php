@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * EU_VAT_Number
  */
-class EU_VAT_Number {
+class EUVATNumber {
 	/**
 	 * Note traits.
 	 */

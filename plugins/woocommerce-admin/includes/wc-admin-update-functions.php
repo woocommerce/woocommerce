@@ -9,7 +9,7 @@
 
 use \Automattic\WooCommerce\Admin\Install as Installer;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\Deactivate_Plugin;
+use \Automattic\WooCommerce\Admin\Notes\DeactivatePlugin;
 
 /**
  * Update order stats `status` index length.
@@ -115,7 +115,7 @@ function wc_admin_update_130_db_version() {
 function wc_admin_update_140_change_deactivate_plugin_note_type() {
 	global $wpdb;
 
-	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", Deactivate_Plugin::NOTE_NAME ) );
+	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", DeactivatePlugin::NOTE_NAME ) );
 }
 
 /**
@@ -129,7 +129,7 @@ function wc_admin_update_140_db_version() {
  * Remove Facebook Experts note.
  */
 function wc_admin_update_160_remove_facebook_note() {
-	WC_Admin_Notes::delete_notes_with_name( 'wc-admin-facebook-marketing-expert' );
+	Notes::delete_notes_with_name( 'wc-admin-facebook-marketing-expert' );
 }
 
 /**

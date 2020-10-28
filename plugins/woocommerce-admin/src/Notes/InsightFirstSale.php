@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Insight_First_Sale.
  */
-class Insight_First_Sale {
+class InsightFirstSale {
 	/**
 	 * Note traits.
 	 */

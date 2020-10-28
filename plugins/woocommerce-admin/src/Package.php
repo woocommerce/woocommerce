@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Composer;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Notes\Deactivate_Plugin;
+use Automattic\WooCommerce\Admin\Notes\DeactivatePlugin;
 use Automattic\WooCommerce\Admin\FeaturePlugin;
 
 /**
@@ -49,7 +49,7 @@ class Package {
 		// Avoid double initialization when the feature plugin is in use.
 		if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			self::$active_version = WC_ADMIN_VERSION_NUMBER;
-			$update_version       = new Deactivate_Plugin();
+			$update_version       = new DeactivatePlugin();
 			if ( version_compare( WC_ADMIN_VERSION_NUMBER, self::VERSION, '<' ) ) {
 				if ( method_exists( $update_version, 'possibly_add_note' ) ) {
 					$update_version::possibly_add_note();
@@ -123,7 +123,7 @@ class Package {
 	 * Add deactivation hook for versions of the plugin that don't have the deactivation note.
 	 */
 	public static function on_deactivation() {
-		$update_version = new Deactivate_Plugin();
+		$update_version = new DeactivatePlugin();
 		$update_version::delete_note();
 	}
 }

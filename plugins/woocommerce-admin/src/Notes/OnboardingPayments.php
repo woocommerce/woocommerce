@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Onboarding_Payments.
  */
-class Onboarding_Payments {
+class OnboardingPayments {
 	/**
 	 * Note traits.
 	 */

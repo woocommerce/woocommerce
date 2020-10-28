@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Personalize_Store
  */
-class Personalize_Store {
+class PersonalizeStore {
 	/**
 	 * Note traits.
 	 */

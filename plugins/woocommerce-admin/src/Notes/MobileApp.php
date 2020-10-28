@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Mobile_App
  */
-class Mobile_App {
+class MobileApp {
 	/**
 	 * Note traits.
 	 */

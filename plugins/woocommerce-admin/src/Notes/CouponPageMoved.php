@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Coupon_Page_Moved class.
  */
-class Coupon_Page_Moved {
+class CouponPageMoved {
 
 	use NoteTraits, CouponsMovedTrait;
 

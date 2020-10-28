@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Draw_Attention
  */
-class Draw_Attention {
+class DrawAttention {
 	/**
 	 * Note traits.
 	 */

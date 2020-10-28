@@ -8,7 +8,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks;
-use Automattic\WooCommerce\Admin\Notes\Confirm_Tax_Settings;
+use Automattic\WooCommerce\Admin\Notes\ConfirmTaxSettings;
 
 /**
  * This contains logic for setting up shipping when the profiler completes.
@@ -60,7 +60,7 @@ class OnboardingAutomateTaxes {
 			update_option( 'wc_connect_taxes_enabled', 'yes' );
 			update_option( 'woocommerce_calc_taxes', 'yes' );
 			self::track_tax_automation();
-			Confirm_Tax_Settings::possibly_add_note();
+			ConfirmTaxSettings::possibly_add_note();
 		}
 	}
 

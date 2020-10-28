@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * New_Sales_Record
  */
-class New_Sales_Record {
+class NewSalesRecord {
 	/**
 	 * Note traits.
 	 */

@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Migrate_From_Shopify.
  */
-class Migrate_From_Shopify {
+class MigrateFromShopify {
 	/**
 	 * Note traits.
 	 */

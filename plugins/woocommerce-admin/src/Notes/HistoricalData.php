@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\Install;
 /**
  * Historical_Data.
  */
-class Historical_Data {
+class HistoricalData {
 	/**
 	 * Note traits.
 	 */

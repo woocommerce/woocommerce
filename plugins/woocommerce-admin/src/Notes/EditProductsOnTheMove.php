@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Edit_Products_On_The_Move
  */
-class Edit_Products_On_The_Move {
+class EditProductsOnTheMove {
 	/**
 	 * Note traits.
 	 */

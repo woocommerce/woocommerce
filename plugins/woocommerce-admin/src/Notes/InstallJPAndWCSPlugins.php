@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Admin\PluginsHelper;
 /**
  * Install_JP_And_WCS_Plugins
  */
-class Install_JP_And_WCS_Plugins {
+class InstallJPAndWCSPlugins {
 	/**
 	 * Note traits.
 	 */

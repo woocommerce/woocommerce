@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Tracking_Opt_In
  */
-class Tracking_Opt_In {
+class TrackingOptIn {
 	/**
 	 * Note traits.
 	 */

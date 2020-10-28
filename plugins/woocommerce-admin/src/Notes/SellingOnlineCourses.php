@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
 /**
  * Selling_Online_Courses
  */
-class Selling_Online_Courses {
+class SellingOnlineCourses {
 	/**
 	 * Note traits.
 	 */

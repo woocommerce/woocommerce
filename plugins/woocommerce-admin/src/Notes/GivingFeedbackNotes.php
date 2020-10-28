@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Giving_Feedback_Notes
  */
-class Giving_Feedback_Notes {
+class GivingFeedbackNotes {
 	/**
 	 * Note traits.
 	 */
