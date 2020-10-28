@@ -12,7 +12,7 @@
   "module": "build-module/index.js",
   "dependencies": {
     "@woocommerce/api": "0.1.0",
-    "@wordpress/e2e-test-utils": "4.6.0",
+    "@wordpress/e2e-test-utils": "^4.6.0",
     "faker": "^5.1.0",
     "fishery": "^1.0.1"
   },

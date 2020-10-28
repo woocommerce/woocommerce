@@ -31,11 +31,11 @@
     "puppeteer": "^2.1.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
-    "@babel/polyfill": "^7.8.3",
-    "@babel/preset-env": "^7.8.4",
-    "@wordpress/eslint-plugin": "^4.0.0",
+    "@babel/cli": "7.12.0",
+    "@babel/core": "7.12.0",
+    "@babel/polyfill": "7.11.5",
+    "@babel/preset-env": "7.12.0",
+    "@wordpress/eslint-plugin": "7.1.0",
     "ndb": "^1.1.5",
     "semver": "^7.3.2"
   },
