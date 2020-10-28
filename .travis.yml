@@ -89,3 +89,6 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
+
+before_install:
+  - composer self-update --1
