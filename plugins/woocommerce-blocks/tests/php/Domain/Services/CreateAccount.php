@@ -42,15 +42,18 @@ class CreateAccount extends WP_UnitTestCase {
 		$test_request = new \WP_REST_Request();
 		$should_create_account = array_key_exists( 'should_create_account', $options ) ? $options['should_create_account'] : false;
 		$test_request->set_param( 'should_create_account', $should_create_account );
+		$test_request->set_param( 'billing_address', [
+			'email'      => $email,
+			'first_name' => $first_name,
+			'last_name'  => $last_name
+		]);
 
 		$test_order = new \WC_Order();
-		$test_order->set_billing_email( $email );
-		$test_order->set_billing_first_name( $first_name );
-		$test_order->set_billing_last_name( $last_name );
 
 		/// -- End test-specific setup.
 
-		$user_id = $this->get_test_instance()->from_order_request( $test_order, $test_request );
+		$user_id = $this->get_test_instance()->from_order_request( $test_request );
+		$test_order->set_customer_id( $user_id );
 
 		/// -- Undo test-specific setup; restore previous state.
 		update_option( 'woocommerce_enable_guest_checkout', $tmp_enable_guest_checkout );
