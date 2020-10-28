@@ -91,6 +91,4 @@ branches:
     - /^release\//
 
 before_install:
-  - rm /home/travis/.phpenv/shims/composer
-  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/home/travis/.phpenv/shims --filename=composer --version=1.10.16
-  - chmod +x /home/travis/.phpenv/shims/composer
+  - composer self-update --rollback
