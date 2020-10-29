@@ -4,6 +4,7 @@
  */
 const {
 	CustomerFlow,
+	shopper,
 	StoreOwnerFlow,
 	createSimpleProduct,
 	uiUnblocked
@@ -27,7 +28,7 @@ const runCartPageTest = () => {
 		});
 
 		it('should display no item in the cart', async () => {
-			await CustomerFlow.goToCart();
+			await shopper.goToCart();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 
