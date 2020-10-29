@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
-import { waitForSelector } from './lib';
 
 /**
  * Perform a "select all" and then fill a input.
@@ -108,7 +107,7 @@ const verifyPublishAndTrash = async (
 	// Publish
 	await expect( page ).toClick( button );
 
-	await waitForSelector( page, publishNotice );
+	await page.waitForSelector( publishNotice );
 
 	// Verify
 	await expect( page ).toMatchElement( publishNotice, {
@@ -130,7 +129,7 @@ const verifyPublishAndTrash = async (
 
 	// Trash
 	await expect( page ).toClick( 'a', { text: 'Move to Trash' } );
-	await waitForSelector( page, '#message' );
+	await page.waitForSelector( '#message' );
 
 	// Verify
 	await expect( page ).toMatchElement( publishNotice, {

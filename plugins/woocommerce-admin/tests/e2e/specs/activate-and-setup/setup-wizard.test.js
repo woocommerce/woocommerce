@@ -13,7 +13,6 @@ import {
 	verifyCheckboxIsSet,
 	verifyValueOfInputField,
 } from '../../utils/actions';
-import { waitForSelector, waitForElementCount } from '../../utils/lib';
 
 const config = require( 'config' );
 const baseUrl = config.get( 'url' );
@@ -36,10 +35,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 		}
 		await page.click( `tr[data-slug="${ slug }"] .activate a` );
 
-		await waitForSelector(
-			page,
-			`tr[data-slug="${ slug }"] .deactivate a`
-		);
+		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
 	} );
 } );
 

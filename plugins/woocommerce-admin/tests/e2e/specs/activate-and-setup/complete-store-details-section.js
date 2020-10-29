@@ -6,7 +6,6 @@
  * Internal dependencies
  */
 import { verifyCheckboxIsUnset } from '../../utils/actions';
-import { waitForSelector } from '../../utils/lib';
 const config = require( 'config' );
 
 export async function completeStoreDetailsSection( storeDetails = {} ) {
@@ -63,13 +62,13 @@ export async function completeStoreDetailsSection( storeDetails = {} ) {
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 
 	// Wait for "Continue" button to become active
-	await waitForSelector( page, 'button.is-primary:not(:disabled)' );
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	// Click on "Continue" button to move to the next step
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
 	// Wait for usage tracking pop-up window to appear
-	await waitForSelector( page, '.components-modal__header-heading' );
+	await page.waitForSelector( '.components-modal__header-heading' );
 	await expect( page ).toMatchElement( '.components-modal__header-heading', {
 		text: 'Build a better WooCommerce',
 	} );
