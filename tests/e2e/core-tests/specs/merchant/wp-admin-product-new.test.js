@@ -6,8 +6,12 @@ const {
 	StoreOwnerFlow,
 	clickTab,
 	uiUnblocked,
-	setCheckbox
+	setCheckbox,
 } = require( '@woocommerce/e2e-utils' );
+const {
+	waitAndClick,
+	waitForSelector,
+} = require( '@woocommerce/e2e-environment' );
 
 /**
  * External dependencies
@@ -86,30 +90,30 @@ const runAddVariableProductTest = () => {
 			await expect(page).toSelect('#product-type', 'Variable product');
 
 			// Create attributes for variations
-			await expect( page ).toClick( '.attribute_tab a' );
+			await waitAndClick( page, '.attribute_tab a' );
 			await expect( page ).toSelect( 'select[name="attribute_taxonomy"]', 'Custom product attribute' );
 
 			for ( let i = 0; i < 3; i++ ) {
-				await expect(page).toClick('button.add_attribute', {text: 'Add'});
+				await expect(page).toClick( 'button.add_attribute', {text: 'Add'} );
 				// Wait for attribute form to load
 				await uiUnblocked();
 
 				await page.focus(`input[name="attribute_names[${i}]"]`);
 				await expect(page).toFill(`input[name="attribute_names[${i}]"]`, 'attr #' + (i + 1));
 				await expect(page).toFill(`textarea[name="attribute_values[${i}]"]`, 'val1 | val2');
-				await expect(page).toClick(`input[name="attribute_variation[${i}]"]`);
+				await waitAndClick( page, `input[name="attribute_variation[${i}]"]`);
 			}
 
-			await expect(page).toClick('button', {text: 'Save attributes'});
+			await expect(page).toClick( 'button', {text: 'Save attributes'});
 
 			// Wait for attribute form to save (triggers 2 UI blocks)
 			await uiUnblocked();
 			await uiUnblocked();
 
 			// Create variations from attributes
-			await page.focus( '.variations_tab' );
-			await expect( page ).toClick( '.variations_tab a' );
-			await page.waitForSelector('select.variation_actions:not([disabled])');
+			await waitForSelector( page, '.variations_tab' );
+			await waitAndClick( page, '.variations_tab a' );
+			await waitForSelector( page, 'select.variation_actions:not(:disabled)');
 			await page.focus('select.variation_actions');
 			await expect(page).toSelect('select.variation_actions', 'Create variations from all attributes');
 
@@ -126,9 +130,9 @@ const runAddVariableProductTest = () => {
 			await uiUnblocked();
 			await uiUnblocked();
 
-			await page.focus('.variations_tab');
-			await expect( page ).toClick( '.variations_tab a' );
-			await page.waitForSelector(
+			await waitAndClick( page, '.variations_tab a' );
+			await waitForSelector(
+				page,
 				'select[name="attribute_attr-1[0]"]',
 				{
 					visible: true,
@@ -142,45 +146,44 @@ const runAddVariableProductTest = () => {
 				expect(page).toMatchElement('select[name="attribute_attr-2[0]"]', {text: 'val1'}),
 				expect(page).toMatchElement('select[name="attribute_attr-3[0]"]', {text: 'val1'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[1]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[1]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[1]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[1]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[1]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[1]"]', {text: 'val2'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[2]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[2]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[2]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[2]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[2]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[2]"]', {text: 'val1'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[3]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[3]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[3]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[3]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[3]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[3]"]', {text: 'val2'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[4]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[4]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[4]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[4]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[4]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[4]"]', {text: 'val1'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[5]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[5]"]', {text: 'val1'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[5]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[5]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[5]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[5]"]', {text: 'val2'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[6]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[6]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[6]"]', {text: 'val1'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[6]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[6]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[6]"]', {text: 'val1'}),
 
-			   expect(page).toMatchElement('select[name="attribute_attr-1[7]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-2[7]"]', {text: 'val2'}),
-			   expect(page).toMatchElement('select[name="attribute_attr-3[7]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-1[7]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-2[7]"]', {text: 'val2'}),
+				expect(page).toMatchElement('select[name="attribute_attr-3[7]"]', {text: 'val2'}),
 			]);
 
-			await page.focus( '.variations-pagenav' );
-			await expect(page).toClick('.variations-pagenav .expand_all');
+			await waitAndClick( page, '.variations-pagenav .expand_all');
 			await page.waitFor( 2000 );
-//			await setCheckbox('input[name="variable_is_virtual[0]"]');
+			await setCheckbox('input[name="variable_is_virtual[0]"]');
 			await expect(page).toFill('input[name="variable_regular_price[0]"]', '9.99');
 
-//			await setCheckbox('input[name="variable_is_virtual[1]"]');
+			await setCheckbox('input[name="variable_is_virtual[1]"]');
 			await expect(page).toFill('input[name="variable_regular_price[1]"]', '11.99');
 
-//			await setCheckbox('input[name="variable_manage_stock[2]"]');
+			await setCheckbox('input[name="variable_manage_stock[2]"]');
 			await expect(page).toFill('input[name="variable_regular_price[2]"]', '20');
 			await expect(page).toFill('input[name="variable_weight[2]"]', '200');
 			await expect(page).toFill('input[name="variable_length[2]"]', '10');
