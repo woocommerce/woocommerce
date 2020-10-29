@@ -102,7 +102,7 @@ class WC_Shop_Customizer {
 		$max_notice = __( 'The maximum allowed setting is %d', 'woocommerce' );
 		?>
 		<script type="text/javascript">
-			jQuery( document ).ready( function( $ ) {
+			jQuery( function( $ ) {
 				$( document.body ).on( 'change', '.woocommerce-cropping-control input[type="radio"]', function() {
 					var $wrapper = $( this ).closest( '.woocommerce-cropping-control' ),
 						value    = $wrapper.find( 'input:checked' ).val();
