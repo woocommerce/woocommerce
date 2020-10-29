@@ -75,8 +75,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 			$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
-			$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
-			$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
+			$query['where']  .= "AND posts.post_date >= '" . gmdate( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
+			$query['where']  .= "AND posts.post_date <= '" . gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
 			$query['groupby'] = 'GROUP BY product_id';
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
@@ -93,8 +93,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			include_once dirname( __FILE__ ) . '/reports/class-wc-report-sales-by-date.php';
 
 			$sales_by_date                 = new WC_Report_Sales_By_Date();
-			$sales_by_date->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
-			$sales_by_date->end_date       = strtotime( date( 'Y-m-d', current_time( 'timestamp' ) ) );
+			$sales_by_date->start_date     = strtotime( gmdate( 'Y-m-01', current_time( 'timestamp' ) ) );
+			$sales_by_date->end_date       = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) );
 			$sales_by_date->chart_groupby  = 'day';
 			$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
 
@@ -117,7 +117,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					?>
 				<li class="sales-this-month">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ) ); ?>">
-					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time( 'timestamp' ) ) ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo $reports->sales_sparkline( '', max( 7, gmdate( 'd', current_time( 'timestamp' ) ) ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: %s: net sales */
@@ -135,7 +135,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					?>
 				<li class="best-seller-this-month">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ) ); ?>">
-					<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, date( 'd', current_time( 'timestamp' ) ) ), 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, gmdate( 'd', current_time( 'timestamp' ) ) ), 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
@@ -318,7 +318,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_author_email, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			);
 
 			if ( $comments ) {
@@ -327,7 +327,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 					echo '<li>';
 
-					echo get_avatar( $comment->comment_author, '32' );
+					echo get_avatar( $comment->comment_author_email, '32' );
 
 					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 

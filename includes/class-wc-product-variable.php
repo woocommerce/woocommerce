@@ -135,7 +135,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Note: Variable prices do not show suffixes like other product types. This
 	 * is due to some things like tax classes being set at variation level which
 	 * could differ from the parent price. The only way to show accurate prices
-	 * would be to load the variation and get IT's price, which adds extra
+	 * would be to load the variation and get it's price, which adds extra
 	 * overhead and still has edge cases where the values would be inaccurate.
 	 *
 	 * Additionally, ranges of prices no longer show 'striked out' sale prices
@@ -413,7 +413,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Sets an array of children for the product.
 	 *
 	 * @since 3.0.0
-	 * @param array $children Childre products.
+	 * @param array $children Children products.
 	 */
 	public function set_children( $children ) {
 		$this->children = array_filter( wp_parse_id_list( (array) $children ) );
@@ -464,7 +464,7 @@ class WC_Product_Variable extends WC_Product {
 		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
 		 *
 		 * @param WC_Data          $this The object being saved.
-		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @param WC_Data_Store_WP $data_store The data store persisting the data.
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -485,7 +485,7 @@ class WC_Product_Variable extends WC_Product {
 		 * Trigger action after saving to the DB.
 		 *
 		 * @param WC_Data          $this The object being saved.
-		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @param WC_Data_Store_WP $data_store The data store persisting the data.
 		 */
 		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -590,7 +590,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function has_options() {
-		return true;
+		return apply_filters( 'woocommerce_product_has_options', true, $this );
 	}
 
 
@@ -662,9 +662,9 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sort an associativate array of $variation_id => $price pairs in order of min and max prices.
+	 * Sort an associative array of $variation_id => $price pairs in order of min and max prices.
 	 *
-	 * @param array $prices Associativate array of $variation_id => $price pairs.
+	 * @param array $prices associative array of $variation_id => $price pairs.
 	 * @return array
 	 */
 	protected function sort_variation_prices( $prices ) {

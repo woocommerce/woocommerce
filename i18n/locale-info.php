@@ -153,6 +153,15 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 	),
+	'JM' => array(
+		'currency_code'  => 'JMD',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'lbs',
+		'dimension_unit' => 'in',
+	),
 	'JP' => array(
 		'currency_code'  => 'JPY',
 		'currency_pos'   => 'left',

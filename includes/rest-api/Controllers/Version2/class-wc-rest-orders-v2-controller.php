@@ -172,6 +172,17 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 		}
 
+		// Add parent_name if the product is a variation.
+		if ( is_callable( array( $item, 'get_product' ) ) ) {
+			$product = $item->get_product();
+
+			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
+				$data['parent_name'] = $product->get_title();
+			} else {
+				$data['parent_name'] = null;
+			}
+		}
+
 		// Format taxes.
 		if ( ! empty( $data['taxes']['total'] ) ) {
 			$taxes = array();
@@ -1229,6 +1240,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							'name'         => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
 								'type'        => 'mixed',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'parent_name'  => array(
+								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'product_id'   => array(

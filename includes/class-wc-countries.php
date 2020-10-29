@@ -520,6 +520,7 @@ class WC_Countries {
 					'IN'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {postcode}\n{state}, {country}",
 					'IS'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'IT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
+					'JM'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode_upper}\n{country}",
 					'JP'      => "{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
 					'TW'      => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
 					'LI'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -1067,6 +1068,19 @@ class WC_Countries {
 						'state'    => array(
 							'required' => true,
 							'label'    => __( 'Province', 'woocommerce' ),
+						),
+					),
+					'JM' => array(
+						'city'     => array(
+							'label' => __( 'Town / City / Post Office', 'woocommerce' ),
+						),
+						'postcode' => array(
+							'required' => false,
+							'label'    => __( 'Postal Code', 'woocommerce' ),
+						),
+						'state'    => array(
+							'required' => true,
+							'label'    => __( 'Parish', 'woocommerce' ),
 						),
 					),
 					'JP' => array(

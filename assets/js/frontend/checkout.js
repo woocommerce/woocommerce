@@ -507,8 +507,9 @@ jQuery( function( $ ) {
 				$.ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
-					data:		$form.serialize(),
-					dataType:   'json',
+					data:		new FormData( this ),
+					contentType: false,
+					processData: false,
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
