@@ -563,7 +563,7 @@ jQuery( function( $ ) {
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 			wc_checkout_form.scroll_to_notices();
-			$( document.body ).trigger( 'checkout_error' );
+			$( document.body ).trigger( 'checkout_error' , [ error_message ] );
 		},
 		scroll_to_notices: function() {
 			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' );
