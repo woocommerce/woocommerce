@@ -497,7 +497,7 @@ class WC_Post_Types {
 			3 => __( 'Category updated.', 'woocommerce' ),
 			4 => __( 'Category not added.', 'woocommerce' ),
 			5 => __( 'Category not updated.', 'woocommerce' ),
-			6 => __( 'Category not deleted.', 'woocommerce' ),
+			6 => __( 'Categories deleted.', 'woocommerce' ),
 		);
 
 		$messages['product_tag'] = array(
@@ -507,7 +507,7 @@ class WC_Post_Types {
 			3 => __( 'Tag updated.', 'woocommerce' ),
 			4 => __( 'Tag not added.', 'woocommerce' ),
 			5 => __( 'Tag not updated.', 'woocommerce' ),
-			6 => __( 'Tag not deleted.', 'woocommerce' ),
+			6 => __( 'Tags deleted.', 'woocommerce' ),
 		);
 
 		$wc_product_attributes = array();
@@ -533,7 +533,7 @@ class WC_Post_Types {
 						/* translators: %s: taxonomy label */
 						5 => sprintf( _x( '%s not updated', 'taxonomy term messages', 'woocommerce' ), $label ),
 						/* translators: %s: taxonomy label */
-						6 => sprintf( _x( '%s not deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
+						6 => sprintf( _x( '%s deleted', 'taxonomy term messages', 'woocommerce' ), $label ),
 					);
 				}
 			}

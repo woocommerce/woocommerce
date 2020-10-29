@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "94984eae625dec8220d48beb1ff4b40d",
+    "content-hash": "ed84c4d91482a5c508caaf50e843de58",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -44,16 +44,16 @@
         },
         {
             "name": "automattic/jetpack-constants",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f"
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/b4210d56948529b43785ce31e0055f435eac1f9f",
-                "reference": "b4210d56948529b43785ce31e0055f435eac1f9f",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/9827a2f446b8c4faafaf1c740483031c073a381d",
+                "reference": "9827a2f446b8c4faafaf1c740483031c073a381d",
                 "shasum": ""
             },
             "require-dev": {
@@ -71,7 +71,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "time": "2020-07-01T15:55:35+00:00"
+            "time": "2020-08-13T14:33:09+00:00"
         },
         {
             "name": "composer/installers",
@@ -258,12 +258,6 @@
                 "league",
                 "provider",
                 "service"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/philipobenito",
-                    "type": "github"
-                }
             ],
             "time": "2020-09-28T13:38:44+00:00"
         },
@@ -501,20 +495,6 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-03-16T08:31:04+00:00"
         },
         {
@@ -554,16 +534,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.6.1",
+            "version": "1.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "4be058217d90b7f15b711d018b899260b38d011a"
+                "reference": "3015abbda8657ef097b7763e4c941daa06dab6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/4be058217d90b7f15b711d018b899260b38d011a",
-                "reference": "4be058217d90b7f15b711d018b899260b38d011a",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3015abbda8657ef097b7763e4c941daa06dab6f7",
+                "reference": "3015abbda8657ef097b7763e4c941daa06dab6f7",
                 "shasum": ""
             },
             "require": {
@@ -597,20 +577,20 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-10-14T14:21:15+00:00"
+            "time": "2020-10-26T20:25:00+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.4.0",
+            "version": "v3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000"
+                "reference": "1046697451f5e8906e48f0a7532b7637c3ded108"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d64a2616932f312ec4fd8f4e46195c3f9aca0000",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/1046697451f5e8906e48f0a7532b7637c3ded108",
+                "reference": "1046697451f5e8906e48f0a7532b7637c3ded108",
                 "shasum": ""
             },
             "require": {
@@ -644,7 +624,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-09-15T12:10:40+00:00"
+            "time": "2020-10-12T15:35:42+00:00"
         }
     ],
     "packages-dev": [
@@ -706,6 +686,5 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    },
-    "plugin-api-version": "1.1.0"
+    }
 }

@@ -1475,18 +1475,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	 * Output the product image before the single product summary.
 	 */
 	function woocommerce_show_product_images() {
-		global $product;
-		$post_thumbnail_id = $product->get_image_id();
-		$gallery_image_ids = '';
-
-		if ( ! $post_thumbnail_id ) {
-			$gallery_image_ids = $product->get_gallery_image_ids();
-			if ( ! empty( $gallery_image_ids ) ) {
-				$post_thumbnail_id = array_shift( $gallery_image_ids );
-			}
-		}
-		$args = compact( 'post_thumbnail_id', 'gallery_image_ids' );
-		wc_get_template( 'single-product/product-image.php', $args );
+		wc_get_template( 'single-product/product-image.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
@@ -1495,13 +1484,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	 * Output the product thumbnails.
 	 */
 	function woocommerce_show_product_thumbnails() {
-		global $product;
-		$attachment_ids = $product->get_gallery_image_ids();
-
-		if ( $attachment_ids && ! $product->get_image_id() ) {
-			array_shift( $attachment_ids );
-		}
-		wc_get_template( 'single-product/product-thumbnails.php', array( 'attachment_ids' => $attachment_ids ) );
+		wc_get_template( 'single-product/product-thumbnails.php' );
 	}
 }
 
@@ -2874,7 +2857,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html = '';
 
 			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
-				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . $args['label'] . $required . '</label>';
+				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required . '</label>';
 			}
 
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;

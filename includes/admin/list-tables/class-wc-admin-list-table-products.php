@@ -417,7 +417,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		unset( $views['mine'] );
 
 		// Add sorting link.
-		if ( current_user_can( 'edit_others_pages' ) ) {
+		if ( current_user_can( 'edit_others_products' ) ) {
 			$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
 			$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
 			$query_string     = add_query_arg( 'orderby', rawurlencode( 'menu_order title' ), $query_string );
