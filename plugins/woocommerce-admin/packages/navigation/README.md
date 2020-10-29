@@ -87,7 +87,7 @@ Updates the query parameters of the current page.
 | path | <code>String</code> | Relative path (defaults to current path). |
 | currentQuery | <code>Object</code> | object of current query params (defaults to current querystring). |
 
-## flattenFilters(filters) ⇒ <code>Array</code>
+### flattenFilters(filters) ⇒ <code>Array</code>
 Collapse an array of filter values with subFilters into a 1-dimensional array.
 
 **Returns**: <code>Array</code> - Flattened array of all filters.
@@ -96,7 +96,7 @@ Collapse an array of filter values with subFilters into a 1-dimensional array.
 | --- | --- | --- |
 | filters | <code>Array</code> | Set of filters with possible subfilters. |
 
-## getActiveFiltersFromQuery(query, config) ⇒ <code>Array.&lt;activeFilters&gt;</code>
+### getActiveFiltersFromQuery(query, config) ⇒ <code>Array.&lt;activeFilters&gt;</code>
 Given a query object, return an array of activeFilters, if any.
 
 **Returns**: <code>Array.&lt;activeFilters&gt;</code> - - array of activeFilters
@@ -106,7 +106,7 @@ Given a query object, return an array of activeFilters, if any.
 | query | <code>object</code> | query oject |
 | config | <code>object</code> | config object |
 
-## getDefaultOptionValue(config, options) ⇒ <code>string</code> \| <code>undefined</code>
+### getDefaultOptionValue(config, options) ⇒ <code>string</code> \| <code>undefined</code>
 Get the default option's value from the configuration object for a given filter. The first option is used as default if no <code>defaultOption</code> is provided.
 
 **Returns**: <code>string</code> \| <code>undefined</code> - - the value of the default option.
@@ -116,7 +116,7 @@ Get the default option's value from the configuration object for a given filter.
 | config | <code>object</code> | a filter config object. |
 | options | <code>array</code> | select options. |
 
-## getQueryFromActiveFilters(activeFilters, query, config) ⇒ <code>object</code>
+### getQueryFromActiveFilters(activeFilters, query, config) ⇒ <code>object</code>
 Given activeFilters, create a new query object to update the url. Use previousFilters to
 Remove unused params.
 
@@ -128,7 +128,7 @@ Remove unused params.
 | query | <code>object</code> | the current url query object |
 | config | <code>object</code> | config object |
 
-## getUrlKey(key, rule) ⇒ <code>string</code>
+### getUrlKey(key, rule) ⇒ <code>string</code>
 Get the url query key from the filter key and rule.
 
 **Returns**: <code>string</code> - - url query key.
@@ -138,7 +138,7 @@ Get the url query key from the filter key and rule.
 | key | <code>string</code> | filter key. |
 | rule | <code>string</code> | filter rule. |
 
-## activeFilter : <code>Object</code>
+### activeFilter : <code>Object</code>
 Describe activeFilter object.
 
 **Properties**
