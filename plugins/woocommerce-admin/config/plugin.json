@@ -5,6 +5,7 @@
 		"analytics-dashboard": true,
 		"analytics-dashboard/customizable": true,
 		"coupons": true,
+		"customer-effort-score-tracks": false,
 		"marketing": true,
 		"onboarding": true,
 		"remote-inbox-notifications": true,
