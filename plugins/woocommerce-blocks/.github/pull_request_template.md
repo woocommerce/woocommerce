@@ -4,6 +4,7 @@
 Fixes #
 
 <!-- Don't forget to update the title with something descriptive. -->
+<!-- If your pull request implements a feature flag, make sure you update [this doc](../docs/blocks/features-and-blocks-behind-a-flag.md) -->
 
 #### Accessibility
 
@@ -13,6 +14,7 @@ Fixes #
 - [ ] I've tested using a screen reader
 - [ ] All animations respect [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - [ ] All text has [at least a 4.5 color contrast with its background](https://webaim.org/resources/contrastchecker/)
+- [ ] I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) for any feature flags or experimental interfaces implemented in this pull request.
 
 ### Screenshots
 
