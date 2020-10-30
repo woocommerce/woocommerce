@@ -92,3 +92,8 @@ branches:
 
 before_install:
   - composer self-update --1
+
+# Git clone depth
+# By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
+git:
+  depth: 1
