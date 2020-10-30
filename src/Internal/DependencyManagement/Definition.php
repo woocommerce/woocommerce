@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
-use Automattic\WooCommerce\Vendor\League\Container\Definition\Definition as BaseDefinition;
+use Automattic\WooCommerce\Internal\Vendor\League\Container\Definition\Definition as BaseDefinition;
 
 /**
  * An extension of the definition class that replaces constructor injection with method injection.

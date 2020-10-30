@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\Cl
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithPrivateInjectionMethod;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithScalarInjectionMethodArgument;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
-use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterface;
+use Automattic\WooCommerce\Internal\Vendor\League\Container\Definition\DefinitionInterface;
 
 /**
  * Tests for AbstractServiceProvider.

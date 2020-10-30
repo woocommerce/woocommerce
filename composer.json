@@ -42,8 +42,7 @@
       "includes/rest-api"
     ],
     "psr-4": {
-      "Automattic\\WooCommerce\\": "src/",
-      "Automattic\\WooCommerce\\Vendor\\League\\Container\\": "vendor/league/container/"
+      "Automattic\\WooCommerce\\": "src/"
     }
   },
   "autoload-dev": {
@@ -58,12 +57,12 @@
   "scripts": {
     "post-install-cmd": [
       "@composer bin all install --ansi",
-      "sh ./bin/prefix-vendor-namespaces.sh",
+      "sh ./bin/move-vendor-packages.sh",
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
       "@composer bin all update --ansi",
-      "sh ./bin/prefix-vendor-namespaces.sh",
+      "sh ./bin/move-vendor-packages.sh",
       "sh ./bin/package-update.sh"
     ],
     "test": [
@@ -104,6 +103,19 @@
     },
     "bamarni-bin": {
       "target-directory": "bin/composer"
+    },
+    "mozart": {
+      "dep_namespace": "Automattic\\WooCommerce\\Internal\\Vendor\\",
+      "dep_directory": "/src/Internal/Vendor/",
+      "packages": [
+        "league/container"
+      ],
+      "excluded_packages": [
+        "psr/container"
+      ],
+      "classmap_directory": "/classmaps",
+      "classmap_prefix": "WOO_",
+      "delete_vendor_directories": true
     }
   }
 }
