@@ -5,7 +5,7 @@
  * @package Woocommerce Admin
  */
 
-namespace Automattic\WooCommerce\Admin\Features;
+namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
 /**
  * Contains logic for the Navigation
  */
-class Navigation {
+class Init {
 	/**
 	 * Hook into WooCommerce.
 	 */
