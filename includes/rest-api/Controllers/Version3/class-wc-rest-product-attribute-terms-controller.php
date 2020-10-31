@@ -28,8 +28,8 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribu
 	/**
 	 * Update term meta fields.
 	 *
-	 * @param WP_Term $term
-	 * @param WP_REST_Request $request
+	 * @param WP_Term         $term The term to update.
+	 * @param WP_REST_Request         $request Request data.
 	 * @return bool|WP_Error
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
