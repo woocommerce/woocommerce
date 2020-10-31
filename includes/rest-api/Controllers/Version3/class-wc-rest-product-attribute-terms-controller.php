@@ -24,4 +24,19 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribu
 	 * @var string
 	 */
 	protected $namespace = 'wc/v3';
+
+	/**
+	 * Update term meta fields.
+	 *
+	 * @param WP_Term $term
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function update_term_meta_fields( $term, $request ) {
+		$id = (int) $term->term_id;
+
+		update_term_meta( $id, 'order', $request['menu_order'] );
+
+		return true;
+	}
 }
