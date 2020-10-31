@@ -1353,6 +1353,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
+			if( is_numeric( $product ) ) {
+				$product = wc_get_product( $product );
+			}
 			$default_args = array(
 				'name'         => $product->get_name(),
 				'tax_class'    => $product->get_tax_class(),
