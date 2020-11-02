@@ -10,5 +10,5 @@ jobs:
       env:
         APPROVALS: "1"
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ADD_LABEL: "status:%20ready%20to%20merge"
+        ADD_LABEL: "status: ready to merge"
         REMOVE_LABEL: "status:%20needs%20review"
