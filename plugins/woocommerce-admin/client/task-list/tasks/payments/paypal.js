@@ -328,7 +328,7 @@ export class PayPal extends Component {
 										</Button>
 										<p>
 											{ __(
-												'You will be redirected to the Paypal website to create the connection.',
+												'You will be redirected to the PayPal website to create the connection.',
 												'woocommerce-admin'
 											) }
 										</p>
@@ -346,7 +346,7 @@ export class PayPal extends Component {
 			key: 'connect',
 			label: __( 'Connect your PayPal account', 'woocommerce-admin' ),
 			description: __(
-				'A Paypal account is required to process payments. Connect your store to your PayPal account.',
+				'A PayPal account is required to process payments. Connect your store to your PayPal account.',
 				'woocommerce-admin'
 			),
 			content: this.renderAutomaticConfig(),
