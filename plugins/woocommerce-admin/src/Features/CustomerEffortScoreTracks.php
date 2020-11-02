@@ -13,8 +13,10 @@ defined( 'ABSPATH' ) || exit;
  * Triggers customer effort score on several different actions.
  */
 class CustomerEffortScoreTracks {
-	const CES_TRACKS_QUEUE_OPTION_NAME       = 'woocommerce_ces_tracks_queue';
-	const CLEAR_CES_TRACKS_QUEUE_OPTION_NAME = 'woocommerce_clear_ces_tracks_queue';
+	const CES_TRACKS_QUEUE_OPTION_NAME = 'woocommerce_ces_tracks_queue';
+
+	const CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME
+		= 'woocommerce_clear_ces_tracks_queue_for_page';
 
 	/**
 	 * Constructor. Sets up filters to hook into WooCommerce.
@@ -98,6 +100,8 @@ class CustomerEffortScoreTracks {
 				'How easy was it to add a product?',
 				'woocommerce-admin'
 			),
+			'pagenow'    => 'product',
+			'adminpage'  => 'post-php',
 			'props'      => array(
 				'product_count' => $this->get_product_count(),
 			),
@@ -118,6 +122,8 @@ class CustomerEffortScoreTracks {
 				'How easy was it to edit your product?',
 				'woocommerce-admin'
 			),
+			'pagenow'    => 'product',
+			'adminpage'  => 'post-php',
 			'props'      => array(
 				'product_count' => $this->get_product_count(),
 			),
@@ -133,14 +139,31 @@ class CustomerEffortScoreTracks {
 	 * sets the clear option.
 	 */
 	public function maybe_clear_ces_tracks_queue() {
-		$clear_ces_tracks_queue = get_option(
-			self::CLEAR_CES_TRACKS_QUEUE_OPTION_NAME,
+		$clear_ces_tracks_queue_for_page = get_option(
+			self::CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME,
 			false
 		);
 
-		if ( $clear_ces_tracks_queue ) {
-			update_option( self::CES_TRACKS_QUEUE_OPTION_NAME, array() );
-			update_option( self::CLEAR_CES_TRACKS_QUEUE_OPTION_NAME, false );
+		if ( ! $clear_ces_tracks_queue_for_page ) {
+			return;
 		}
+
+		$queue           = get_option(
+			self::CES_TRACKS_QUEUE_OPTION_NAME,
+			array()
+		);
+		$remaining_items = array_filter(
+			$queue,
+			function( $item ) use ( $clear_ces_tracks_queue_for_page ) {
+				return $clear_ces_tracks_queue_for_page['pagenow'] !== $item['pagenow']
+					|| $clear_ces_tracks_queue_for_page['adminpage'] !== $item['adminpage'];
+			}
+		);
+
+		update_option(
+			self::CES_TRACKS_QUEUE_OPTION_NAME,
+			array_values( $remaining_items )
+		);
+		update_option( self::CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME, false );
 	}
 }
