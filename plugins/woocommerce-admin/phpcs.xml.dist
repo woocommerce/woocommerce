@@ -38,8 +38,8 @@
 	</rule>
 
 	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
-      <exclude-pattern>src/*</exclude-pattern>
-    </rule>
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
 
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
@@ -56,5 +56,12 @@
 	<rule ref="Generic.Commenting.Todo">
 		<exclude-pattern>src/</exclude-pattern>
 		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<arg name="basepath" value="."/>
+	<rule ref="Suin.Classes.PSR4">
+		<exclude-pattern>includes/</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+		<exclude-pattern>src/Notes/DeprecatedNotes.php</exclude-pattern>
 	</rule>
 </ruleset>

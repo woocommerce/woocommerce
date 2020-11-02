@@ -14,7 +14,8 @@
 	},
 	"require-dev": {
 		"phpunit/phpunit": "7.5.20",
-		"woocommerce/woocommerce-sniffs": "0.1.0"
+		"woocommerce/woocommerce-sniffs": "0.1.0",
+		"suin/phpcs-psr4-sniff": "^2.2"
 	},
 	"config": {
 		"platform": {
