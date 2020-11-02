@@ -9,6 +9,8 @@ export const MAX_PER_PAGE = 100;
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 export const HOUR = 60 * MINUTE;
+export const DAY = 24 * HOUR;
+export const MONTH = ( 365 * DAY ) / 12;
 
 export const DEFAULT_REQUIREMENT = {
 	timeout: 1 * MINUTE,
