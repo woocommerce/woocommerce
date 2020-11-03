@@ -69,7 +69,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_anonymize_completed_orders'       => 'relative_date_selector',
 		);
 
-		$this->assertEqualsCanonicalizing( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $settings_ids_and_types );
 	}
 
 	/**

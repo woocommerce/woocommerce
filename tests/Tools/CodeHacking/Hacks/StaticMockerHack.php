@@ -132,10 +132,10 @@ final class StaticMockerHack extends CodeHack {
 				if ( ! in_array( $class_name, $this->mockable_classes, true ) ) {
 					throw new \Exception( "FunctionsMockerHack::add_function_mocks: Can't mock methods of the '$class_name' class since it isn't in the list of mockable classes supplied to 'initialize'." );
 				}
+
+				$this->method_mocks[ $class_name ][ $method_name ] = $method_mock;
 			}
 		}
-
-		$this->method_mocks = array_merge_recursive( $this->method_mocks, $mocks );
 	}
 
 	/**
