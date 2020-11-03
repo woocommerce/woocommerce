@@ -130,9 +130,9 @@ final class FunctionsMockerHack extends CodeHack {
 			if ( ! is_callable( $mock ) ) {
 				throw new \Exception( "FunctionsMockerHack::add_function_mocks: The mock supplied for '$function_name' isn't callable." );
 			}
-		}
 
-		$this->function_mocks = array_merge( $this->function_mocks, $mocks );
+			$this->function_mocks[ $function_name ] = $mock;
+		}
 	}
 
 	/**
