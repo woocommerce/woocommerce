@@ -81,13 +81,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$settings               = $sut->get_settings( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
-		FunctionsMockerHack::add_function_mocks(
-			array(
-				'wc_site_is_https' => function() use ( $site_is_https ) {
-					return $site_is_https;
-				},
-			)
-		);
+		update_option( 'home', $site_is_https ? 'https://foo.bar' : 'http://foo.bar' );
 
 		$expected = array(
 			'advanced_page_options'                        => array( 'title', 'sectionend' ),
@@ -115,9 +109,8 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_logout_endpoint'                  => 'text',
 		);
 
-		if ( ! $site_is_https ) {
-			$expected['woocommerce_force_ssl_checkout']   = 'checkbox';
-			$expected['woocommerce_unforce_ssl_checkout'] = 'checkbox';
+		if ( $site_is_https ) {
+			unset( $expected['unforce_ssl_checkout'], $expected['force_ssl_checkout'] );
 		}
 
 		$this->assertEquals( $expected, $settings_ids_and_types );

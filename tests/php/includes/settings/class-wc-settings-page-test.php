@@ -44,7 +44,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 			'foo'     => 'bar',
 			'example' => 'Example',
 		);
-		$this->assertEqualsCanonicalizing( $expected, $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 		$actual = $sut->get_settings( '' );
 
 		$expected = array( 'key' => 'value' );
-		$this->assertEqualsCanonicalizing( $expected, $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -68,7 +68,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 		$actual = $sut->get_settings( 'foobar' );
 
 		$expected = array( 'foo' => 'bar' );
-		$this->assertEqualsCanonicalizing( $expected, $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 		$actual = $sut->get_settings( 'fizzbuzz' );
 
 		$expected = array( 'fizzbuzz_key' => 'fizzbuzz_value' );
-		$this->assertEqualsCanonicalizing( $expected, $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -107,7 +107,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 		$expected_section  = 'foobar';
 		$expected_settings = array( 'foo' => 'bar' );
 		$this->assertEquals( $expected_section, $actual_section );
-		$this->assertEqualsCanonicalizing( $expected_settings, $actual_settings );
+		$this->assertEquals( $expected_settings, $actual_settings );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 			''            => 'General',
 			'new_section' => 'New Section',
 		);
-		$this->assertEqualsCanonicalizing( $expected_sections, $actual_sections );
+		$this->assertEquals( $expected_sections, $actual_sections );
 	}
 
 	/**
