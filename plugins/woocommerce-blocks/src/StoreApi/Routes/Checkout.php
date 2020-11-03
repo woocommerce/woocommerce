@@ -182,6 +182,14 @@ class Checkout extends AbstractRoute {
 		// Persist customer address data to account.
 		$order_controller->sync_customer_data_with_order( $order_object );
 
+		/*
+		* Fire woocommerce_blocks_checkout_order_processed, should work the same way as woocommerce_checkout_order_processed
+		* But we're opting for a new action because the original ones attaches POST data.
+		* NOTE: this hook is still experimental, and might change or get removed.
+		* @todo: Document and stabilize __experimental_woocommerce_blocks_checkout_order_processed
+		*/
+		do_action( '__experimental_woocommerce_blocks_checkout_order_processed', $order_object );
+
 		if ( ! $order_object->needs_payment() ) {
 			$payment_result = $this->process_without_payment( $order_object, $request );
 		} else {
