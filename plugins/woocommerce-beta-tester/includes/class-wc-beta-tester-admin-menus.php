@@ -287,6 +287,12 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			),
 			array(
 				'parent' => 'wc-beta-tester',
+				'id'     => 'import-export-settings',
+				'title'  => __( 'Import/Export Settings', 'woocommerce-beta-tester' ),
+				'href'   => admin_url( 'admin.php?page=wc-beta-tester-import-export' ),
+			),
+			array(
+				'parent' => 'wc-beta-tester',
 				'id'     => 'show-version-info',
 				/* translators: %s: current version */
 				'title'  => sprintf( __( 'Release %s information', 'woocommerce-beta-tester' ), WC_VERSION ),
