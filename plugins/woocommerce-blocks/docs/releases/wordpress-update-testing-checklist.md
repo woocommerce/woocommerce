@@ -10,7 +10,7 @@ Additionally, ensure your test environment includes a mixture of existing blocks
 
 ## Testing Checklist
 
-1. Run through the [smoke testing checklist](../contributors/smoke-testing.md) to ensure critical features are still functional.
+1. Run through the [smoke testing checklist](../testing/smoke-testing.md) to ensure critical features are still functional.
 2. Verify the appearance of blocks on the frontend using the latest official theme. This includes new Twenty-X themes introduced every year.
 
 ## Updating `readme.txt`
