@@ -1572,15 +1572,15 @@ class WC_AJAX {
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
-		$products        = array();
+		$products = array();
 
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
-			
+
 			if ( ! wc_products_array_filter_readable( $product_object ) ) {
 				continue;
 			}
-			
+
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
 
