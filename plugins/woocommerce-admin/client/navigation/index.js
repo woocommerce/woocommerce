@@ -8,7 +8,7 @@ import { withNavigationHydration } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import './stylesheets/index.scss';
+import './style.scss';
 import Container from './components/container';
 
 const Navigation = () => (

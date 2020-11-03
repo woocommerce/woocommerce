@@ -9,7 +9,7 @@
 	z-index: 1001; /* on top of #wp-content-editor-tools */
 
 	&.is-scrolled {
-		box-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
+		box-shadow: $header-scroll-shadow;
 	}
 
 	@include breakpoint( '<782px' ) {

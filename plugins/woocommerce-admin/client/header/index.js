@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useUserPreferences } from '@woocommerce/data';
@@ -15,14 +15,13 @@ import { __experimentalText as Text } from '@wordpress/components';
 import './style.scss';
 import ActivityPanel from './activity-panel';
 import { MobileAppBanner } from '../mobile-banner';
+import useIsScrolled from '../hooks/useIsScrolled';
 
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
-	const rafHandle = useRef( null );
-	const threshold = useRef( null );
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const pageTitle = sections.slice( -1 )[ 0 ];
-	const [ isScrolled, setIsScrolled ] = useState( false );
+	const isScrolled = useIsScrolled();
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 
 	const isModalDismissed = userData.android_app_banner_dismissed === 'yes';
@@ -30,27 +29,6 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const className = classnames( 'woocommerce-layout__header', {
 		'is-scrolled': isScrolled,
 	} );
-
-	useEffect( () => {
-		threshold.current = headerElement.current.offsetTop;
-
-		const updateIsScrolled = () => {
-			setIsScrolled( window.pageYOffset > threshold.current - 20 );
-		};
-
-		const scrollListener = () => {
-			rafHandle.current = window.requestAnimationFrame(
-				updateIsScrolled
-			);
-		};
-
-		window.addEventListener( 'scroll', scrollListener );
-
-		return () => {
-			window.removeEventListener( 'scroll', scrollListener );
-			window.cancelAnimationFrame( rafHandle.current );
-		};
-	}, [] );
 
 	useEffect( () => {
 		if ( ! isEmbedded ) {

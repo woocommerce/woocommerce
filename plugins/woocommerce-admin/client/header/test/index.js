@@ -67,9 +67,17 @@ describe( 'Header', () => {
 		);
 
 		const topLevelElement = container.firstChild;
-		expect( topLevelElement.classList ).not.toContain( 'is-scrolled' );
+		expect( Object.values( topLevelElement.classList ) ).not.toContain(
+			'is-scrolled'
+		);
+		Object.defineProperty( window, 'pageYOffset', {
+			value: 200,
+			writable: false,
+		} );
 		fireEvent.scroll( window, { target: { scrollY: 200 } } );
-		expect( topLevelElement.classList ).toContain( 'is-scrolled' );
+		expect( Object.values( topLevelElement.classList ) ).toContain(
+			'is-scrolled'
+		);
 	} );
 
 	it( 'correctly updates the document title to reflect the navigation state', () => {
