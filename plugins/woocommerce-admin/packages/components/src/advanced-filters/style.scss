@@ -102,6 +102,10 @@
 	.components-popover:not(.is-mobile) .components-popover__content {
 		min-width: 180px;
 	}
+
+	.components-popover__content > div {
+		width: 100%;
+	}
 }
 
 .woocommerce-filters-advanced__fieldset {
