@@ -47,7 +47,7 @@ function CustomerEffortScoreTracksContainer( {
 				<CustomerEffortScoreTracks
 					key={ index }
 					initiallyVisible={ true }
-					trackName={ item.track_name }
+					action={ item.action }
 					label={ item.label }
 					trackProps={ item.props || {} }
 				/>
