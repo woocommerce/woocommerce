@@ -634,7 +634,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Converts a WP post date string into a timestamp.
 	 *
-	 * @since 4.7.0
+	 * @since 4.8.0
 	 *
 	 * @param  string $time_string The WP post date string.
 	 * @return int|null The date string converted to a timestamp or null.
