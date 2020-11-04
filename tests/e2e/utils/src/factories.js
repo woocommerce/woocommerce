@@ -1,11 +1,9 @@
 import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
 
-const httpClient = HTTPClientFactory.withBasicAuth(
-	config.get( 'url' ) + '/wp-json',
-	config.get( 'users.admin.username' ),
-	config.get( 'users.admin.password' ),
-);
+const httpClient = HTTPClientFactory.build( config.get( 'url' ) )
+	.withBasicAuth( config.get( 'users.admin.username' ), config.get( 'users.admin.password' ) )
+	.create();
 
 import { simpleProductFactory } from './factories/simple-product';
 
