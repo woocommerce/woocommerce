@@ -26,7 +26,7 @@ export class SimpleProduct extends AbstractProduct {
 	 *
 	 * @param {Object} properties The properties to set in the object.
 	 */
-	public constructor( properties: Partial< SimpleProduct > = {} ) {
+	public constructor( properties?: Partial< SimpleProduct > ) {
 		super();
 		Object.assign( this, properties );
 	}
