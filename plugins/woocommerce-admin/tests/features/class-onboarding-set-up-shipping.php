@@ -6,6 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
+use \Automattic\WooCommerce\Admin\Notes\ReviewShippingSettings;
 
 /**
  * Tests shipping set up during onboarding.
@@ -65,5 +66,37 @@ class WC_Tests_OnboardingShippingSetUp extends WC_Unit_Test_Case {
 	 */
 	public function get_empty_base_location() {
 		return null;
+	}
+
+	/**
+	 * Verify that the shipping note does not include label printing for non-us countries.
+	 * Related issue: https://github.com/woocommerce/woocommerce-admin/issues/5394.
+	 */
+	public function test_shipping_note_does_not_include_label_printing_for_non_us_countries() {
+		// Given AU:QLD as the default country.
+		update_option( 'woocommerce_default_country', 'AU:QLD' );
+
+		// When note is retrieved.
+		$note = ReviewShippingSettings::get_note()->get_content();
+
+		// Then it should not contain 'Label printing: enabled'.
+		$contains_string = strpos( $note, 'Label printing: enabled' );
+		$this->assertFalse( $contains_string );
+	}
+
+	/**
+	 * Verify that the shipping note includes label printing for US.
+	 * Related issue: https://github.com/woocommerce/woocommerce-admin/issues/5394.
+	 */
+	public function test_shipping_note_includes_label_printing_string_for_us() {
+		// Given US:CA as the default country.
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// When note is retrieved.
+		$note = ReviewShippingSettings::get_note()->get_content();
+
+		// Then it should contain 'Label printing: enabled'.
+		$contains_string = strpos( $note, 'Label printing: enabled' );
+		$this->assertNotFalse( $contains_string );
 	}
 }
