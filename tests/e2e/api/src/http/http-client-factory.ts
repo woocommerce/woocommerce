@@ -23,7 +23,7 @@ type BasicAuthMethod = {
  */
 interface BuildParams {
 	wpURL: string,
-	usePrettyPermalinks?: boolean,
+	useIndexPermalinks?: boolean,
 	auth?: OAuthMethod | BasicAuthMethod,
 }
 
@@ -77,13 +77,22 @@ export class HTTPClientFactory {
 	}
 
 	/**
-	 * Configures the client's pretty permalink setting.
+	 * Configures the client to use index permalinks.
 	 *
-	 * @param {boolean} enabled True if the installation is using pretty permalinks, false if it is not.
 	 * @return {HTTPClientFactory} This factory.
 	 */
-	public prettyPermalinks( enabled: boolean ): this {
-		this.clientConfig.usePrettyPermalinks = enabled;
+	public withIndexPermalinks(): this {
+		this.clientConfig.useIndexPermalinks = true;
+		return this;
+	}
+
+	/**
+	 * Configures the client to use query permalinks.
+	 *
+	 * @return {HTTPClientFactory} This factory.
+	 */
+	public withoutIndexPermalinks(): this {
+		this.clientConfig.useIndexPermalinks = false;
 		return this;
 	}
 
@@ -101,7 +110,7 @@ export class HTTPClientFactory {
 			axiosConfig.baseURL += '/';
 		}
 
-		if ( this.clientConfig.usePrettyPermalinks ) {
+		if ( this.clientConfig.useIndexPermalinks ) {
 			axiosConfig.baseURL += 'wp-json/';
 		} else {
 			interceptors.push( new AxiosURLToQueryInterceptor( 'rest_route' ) );
