@@ -22,13 +22,14 @@ import {
 /**
  * Internal dependencies
  */
-import QuickLinks from '../quick-links';
 import StatsOverview from './stats-overview';
-import './style.scss';
-import '../dashboard/style.scss';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../inbox-panel';
 import { WelcomeModal } from './welcome-modal';
+
+import './style.scss';
+import '../dashboard/style.scss';
+import { StoreManagementLinks } from '../store-management-links';
 
 const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
@@ -92,7 +93,7 @@ export const Layout = ( {
 				>
 					{ isTaskListEnabled && renderTaskList() }
 					<StatsOverview />
-					{ ! isTaskListEnabled && <QuickLinks /> }
+					{ ! isTaskListEnabled && <StoreManagementLinks /> }
 				</div>
 			</Fragment>
 		);
