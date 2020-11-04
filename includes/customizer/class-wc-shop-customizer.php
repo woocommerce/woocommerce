@@ -769,7 +769,7 @@ class WC_Shop_Customizer {
 			);
 		} else {
 			$choose_pages = array(
-				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+				'woocommerce_terms_page_id' => __( 'Terms and conditions', 'woocommerce' ),
 			);
 		}
 		$pages        = get_pages(
