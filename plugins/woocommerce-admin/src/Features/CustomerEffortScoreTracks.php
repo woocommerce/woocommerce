@@ -83,6 +83,12 @@ class CustomerEffortScoreTracks {
 			return;
 		}
 
+		// Only enqueue a survey if tracking is allowed.
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+		if ( ! $allow_tracking ) {
+			return;
+		}
+
 		if ( 'publish' !== $old_status ) {
 			$this->enqueue_ces_survey_for_new_product();
 		} else {

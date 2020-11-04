@@ -12,6 +12,7 @@ import { OPTIONS_STORE_NAME, MONTH } from '@woocommerce/data';
 const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
 	'woocommerce_admin_install_timestamp';
+const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 /**
  * A CustomerEffortScore wrapper that uses tracks to track the selected
@@ -23,6 +24,7 @@ const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
  * @param {string}   props.label              The label displayed in the modal.
  * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
+ * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
  * @param {boolean}  props.resolving          Are values still being resolved.
  * @param {number}   props.storeAge           The age of the store in months.
  * @param {Function} props.updateOptions      Function to update options.
@@ -33,6 +35,7 @@ function CustomerEffortScoreTracks( {
 	trackProps,
 	label,
 	cesShownForActions,
+	allowTracking,
 	resolving,
 	storeAge,
 	updateOptions,
@@ -41,6 +44,11 @@ function CustomerEffortScoreTracks( {
 	const [ shown, setShown ] = useState( false );
 
 	if ( resolving ) {
+		return null;
+	}
+
+	// Don't show if tracking is disallowed.
+	if ( ! allowTracking ) {
 		return null;
 	}
 
@@ -104,6 +112,11 @@ CustomerEffortScoreTracks.propTypes = {
 	 */
 	cesShownForActions: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	/**
+	 * Whether tracking is allowed or not.
+	 */
+	allowTracking: PropTypes.bool,
+
+	/**
 	 * Whether props are still being resolved.
 	 */
 	resolving: PropTypes.bool.isRequired,
@@ -111,6 +124,10 @@ CustomerEffortScoreTracks.propTypes = {
 	 * The age of the store in months.
 	 */
 	storeAge: PropTypes.number,
+	/**
+	 * Function to update options.
+	 */
+	updateOptions: PropTypes.func,
 };
 
 export default compose(
@@ -127,12 +144,20 @@ export default compose(
 		const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
 		const storeAge = Math.round( storeAgeInMs / MONTH );
 
+		const allowTrackingOption =
+			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
+		const allowTracking = allowTrackingOption === 'yes';
+
 		const resolving =
 			isResolving( 'getOption', [ SHOWN_FOR_ACTIONS_OPTION_NAME ] ) ||
-			isResolving( 'getOption', [ ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ] );
+			isResolving( 'getOption', [
+				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+			] ) ||
+			isResolving( 'getOption', [ ALLOW_TRACKING_OPTION_NAME ] );
 
 		return {
 			cesShownForActions,
+			allowTracking,
 			storeAge,
 			resolving,
 		};
