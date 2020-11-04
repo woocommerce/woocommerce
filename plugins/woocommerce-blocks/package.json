@@ -146,7 +146,7 @@
 	},
 	"dependencies": {
 		"@stripe/react-stripe-js": "1.1.2",
-		"@stripe/stripe-js": "1.10.0",
+		"@stripe/stripe-js": "1.11.0",
 		"@woocommerce/components": "4.0.0",
 		"@wordpress/autop": "2.9.0",
 		"@wordpress/deprecated": "2.9.0",
