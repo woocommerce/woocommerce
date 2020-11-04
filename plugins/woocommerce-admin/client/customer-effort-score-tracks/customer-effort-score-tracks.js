@@ -19,7 +19,6 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * customer effort score.
  *
  * @param {Object}   props                    Component props.
- * @param {boolean}  props.initiallyVisible   Whether or not the tracks modal is initially visible.
  * @param {string}   props.action             The action name sent to Tracks.
  * @param {Object}   props.trackProps         Additional props sent to Tracks.
  * @param {string}   props.label              The label displayed in the modal.
@@ -30,7 +29,6 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * @param {Function} props.updateOptions      Function to update options.
  */
 function CustomerEffortScoreTracks( {
-	initiallyVisible,
 	action,
 	trackProps,
 	label,
@@ -40,7 +38,6 @@ function CustomerEffortScoreTracks( {
 	storeAge,
 	updateOptions,
 } ) {
-	const [ visible, setVisible ] = useState( initiallyVisible );
 	const [ shown, setShown ] = useState( false );
 
 	if ( resolving ) {
@@ -56,9 +53,13 @@ function CustomerEffortScoreTracks( {
 		return null;
 	}
 
-	// Use the `shown` state value to only update the shown_for_actions option
-	// once.
-	if ( visible && ! shown ) {
+	const openedCallback = () => {
+		// Use the `shown` state value to only update the shown_for_actions
+		// option once.
+		if ( shown ) {
+			return;
+		}
+
 		setShown( true );
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
@@ -66,7 +67,7 @@ function CustomerEffortScoreTracks( {
 				...cesShownForActions,
 			],
 		} );
-	}
+	};
 
 	const trackCallback = ( score ) => {
 		recordEvent( 'ces_feedback', {
@@ -80,21 +81,13 @@ function CustomerEffortScoreTracks( {
 	return (
 		<CustomerEffortScore
 			trackCallback={ trackCallback }
-			visible={ visible }
-			toggleVisible={ () => setVisible( ! visible ) }
 			label={ label }
+			openedCallback={ openedCallback }
 		/>
 	);
 }
 
 CustomerEffortScoreTracks.propTypes = {
-	/**
-	 * Whether or not the tracks is initially visible. True is used for when
-	 * this is loaded on page load (in client/index.js). False is used if the
-	 * tracks modal is loaded as part of the layout and displayed
-	 * programmatically.
-	 */
-	initiallyVisible: PropTypes.bool,
 	/**
 	 * The action name sent to Tracks.
 	 */
