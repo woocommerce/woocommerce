@@ -64,3 +64,4 @@ export { default as Timeline } from './timeline';
 export { default as useFilters } from './higher-order/use-filters';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
+export { Badge } from './badge';

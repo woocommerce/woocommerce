@@ -6,6 +6,11 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
+ * Internal dependencies
+ */
+import { Badge } from '../badge';
+
+/**
  * `AccordionPanel` is used to give the panel content an accessible wrapper.
  *
  * @param {Object} props
@@ -29,11 +34,7 @@ const AccordionPanel = ( {
 				<span className="woocommerce-accordion-title">
 					{ titleText }
 				</span>
-				{ countUnread !== null && (
-					<span className="woocommerce-accordion-badge">
-						{ countUnread }
-					</span>
-				) }
+				{ countUnread !== null && <Badge count={ countUnread } /> }
 			</span>
 		);
 	};

@@ -5,9 +5,14 @@
 
 	.woocommerce-task-dashboard__container {
 		.woocommerce-task-card {
-			.components-card__header.is-size-medium {
-				padding-top: 0;
+			.wooocommerce-task-card__header {
+				display: flex;
+
+				.woocommerce-badge {
+					margin-left: 16px;
+				}
 			}
+
 			.woocommerce-list__item:not(.is-complete) {
 				.woocommerce-task__icon {
 					border: 1px solid $gray-100;
@@ -486,48 +491,6 @@
 				width: 60px;
 			}
 		}
-	}
-}
-
-.woocommerce-task-dashboard__container .woocommerce-task-card__progress-bar {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	border: 0;
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
-	height: 4px;
-	width: 100%;
-	vertical-align: top;
-
-	// Firefox
-	& {
-		background-color: $gray-100;
-	}
-
-	&::-moz-progress-bar {
-		background-color: $gray-700;
-		border-top-left-radius: 2px;
-		border-top-right-radius: 2px;
-	}
-
-	// Chrome
-	&::-webkit-progress-bar {
-		background-color: $gray-100;
-		border-top-left-radius: 2px;
-		border-top-right-radius: 2px;
-	}
-
-	&::-webkit-progress-value {
-		background-color: $gray-700;
-		border-top-left-radius: 2px;
-	}
-}
-
-.woocommerce-task-dashboard__container
-.woocommerce-task-card__progress-bar.completed {
-	&::-webkit-progress-value {
-		border-top-right-radius: 2px;
 	}
 }
 

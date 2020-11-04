@@ -99,27 +99,3 @@
 		}
 	}
 }
-
-.woocommerce-dashboard-card {
-	.components-card__header.is-size-large,
-	.components-card__header.is-size-medium {
-		min-height: 63px;
-		min-height: unset;
-		display: grid;
-		grid-template-columns: auto 24px;
-
-		// IE doesn't support `align-items` on grid container
-
-		& > * {
-			align-self: center;
-		}
-	}
-
-	.components-card__body.is-size-large {
-		padding: 0;
-	}
-
-	.components-card__footer.is-size-large {
-		padding: 0 $gap-smaller;
-	}
-}
