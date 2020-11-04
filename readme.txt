@@ -160,6 +160,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 4.6.2 - 2020-11-05 =
+
+**WooCommerce**
+
+* Prevent checkout from creating accounts when related setting is disabled.
+
 = 4.6.1 - 2020-10-21 =
 
 **WooCommerce**
