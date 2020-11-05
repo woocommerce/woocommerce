@@ -103,15 +103,6 @@ class CoreMenu {
 				'is_top_level' => true,
 			),
 			array(
-				'title'        => __( 'Extensions', 'woocommerce-admin' ),
-				'capability'   => 'activate_plugins',
-				'id'           => 'extensions',
-				'migrate'      => false,
-				'menuId'       => 'secondary',
-				'order'        => 20,
-				'is_top_level' => true,
-			),
-			array(
 				'title'        => __( 'Settings', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
 				'id'           => 'settings',
@@ -178,21 +169,15 @@ class CoreMenu {
 				$product_items[1],
 				$product_items[2],
 				$coupon_items[0],
-				// Extensions category.
+				// Marketplace category.
 				array(
-					'parent'     => 'extensions',
-					'title'      => __( 'My extensions', 'woocommerce-admin' ),
-					'capability' => 'manage_woocommerce',
-					'id'         => 'my-extensions',
-					'url'        => 'plugins.php',
-					'migrate'    => false,
-				),
-				array(
-					'parent'     => 'extensions',
-					'title'      => __( 'Marketplace', 'woocommerce-admin' ),
-					'capability' => 'manage_woocommerce',
-					'id'         => 'marketplace',
-					'url'        => 'wc-addons',
+					'title'        => __( 'Marketplace', 'woocommerce-admin' ),
+					'capability'   => 'manage_woocommerce',
+					'id'           => 'marketplace',
+					'url'          => 'wc-addons',
+					'menuId'       => 'secondary',
+					'order'        => 20,
+					'is_top_level' => true,
 				),
 				// Tools category.
 				array(

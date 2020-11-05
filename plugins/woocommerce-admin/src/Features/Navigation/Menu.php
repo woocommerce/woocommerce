@@ -248,7 +248,6 @@ class Menu {
 	 *      'parent'     => (string) Parent menu item ID.
 	 *      'capability' => (string) Capability to view this menu item.
 	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'order'      => (int) Menu item order.
 	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
 	 *      'menuId'     => (string) The ID of the menu to add the item to.
 	 *    ).
@@ -257,6 +256,7 @@ class Menu {
 		$item_args = array_merge(
 			$args,
 			array(
+				'order'        => null,
 				'menuId'       => 'plugins',
 				'is_top_level' => ! isset( $args['parent'] ),
 			)
@@ -273,7 +273,6 @@ class Menu {
 	 *      'title'      => (string) Title of the menu item. Required.
 	 *      'capability' => (string) Capability to view this menu item.
 	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'order'      => (int) Menu item order.
 	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
 	 *      'menuId'     => (string) The ID of the menu to add the category to.
 	 *    ).
@@ -282,6 +281,7 @@ class Menu {
 		$category_args = array_merge(
 			$args,
 			array(
+				'order'        => null,
 				'menuId'       => 'plugins',
 				'is_top_level' => ! isset( $args['parent'] ),
 			)
@@ -519,7 +519,8 @@ class Menu {
 
 		// Sort the menu items.
 		$order = array_column( $menu_items, 'order' );
-		array_multisort( $order, SORT_ASC, $menu_items );
+		$title = array_column( $menu_items, 'title' );
+		array_multisort( $order, SORT_ASC, $title, SORT_ASC, $menu_items );
 
 		return array_values( $menu_items );
 	}
