@@ -85,6 +85,11 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 3.7.1 - 2020-11-05 =
+
+#### Bug Fixes
+- Ensure that accounts are not created via checkout block request if account registration is disabled for WooCommerce ([#3371](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3371))
+
 = 3.7.0 - 2020-10-29 =
 
 #### Enhancements
