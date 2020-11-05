@@ -66,8 +66,6 @@ contributors.html
 # Packages
 /packages/*
 !/packages/README.md
-/src/Internal/Vendor/*
-!/src/Internal/Vendor/README.md
 
 # Screenshots for e2e tests failures
 /screenshots/
