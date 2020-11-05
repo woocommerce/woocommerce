@@ -3,7 +3,7 @@
  * List of settings to be exported.
  */
 
-function wp_beta_tester_setting_list() {
+function wc_beta_tester_setting_list() {
 	$settings_list = array(
 		'date_format',
 		'gmt_offset',
@@ -124,5 +124,5 @@ function wp_beta_tester_setting_list() {
 		'woocommerce_version',
 		'woocommerce_weight_unit'
 	);
-	return apply_filters( 'wp_beta_tester_setting_list', $settings_list );
+	return apply_filters( 'wc_beta_tester_setting_list', $settings_list );
 }
