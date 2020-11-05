@@ -1,4 +1,4 @@
-import { ModelTransformation } from '../model-transformer';
+import { ModelTransformation, TransformationOrder } from '../model-transformer';
 import { Model } from '../../models/model';
 
 /**
@@ -17,7 +17,7 @@ export class KeyChangeTransformation< T extends Model > implements ModelTransfor
 	 * Ensure that this transformation always happens at the very end since it changes the keys
 	 * in the transformed object.
 	 */
-	public readonly priority = 999999;
+	public readonly order = TransformationOrder.Last + TransformationOrder.Last;
 
 	/**
 	 * The key change transformations that this object should perform.

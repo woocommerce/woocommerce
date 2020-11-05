@@ -7,9 +7,37 @@ import { Model } from '../models/model';
  * @interface ModelTransformation
  */
 export interface ModelTransformation {
-	readonly priority: number;
-	toModel( properties: any ): any;
+	/**
+	 * The order of execution for the transformer. Higher numbers are executed later.
+	 *
+	 * @type {number}
+	 */
+	readonly order: number;
+
+	/**
+	 * Performs a transformation from model properties to raw properties.
+	 *
+	 * @param {*} properties The properties to transform.
+	 * @return {*} The transformed properties.
+	 */
 	fromModel( properties: any ): any;
+
+	/**
+	 * Performs a transformation from raw properties to model properties.
+	 *
+	 * @param {*} properties The properties to transform.
+	 * @return {*} The transformed properties.
+	 */
+	toModel( properties: any ): any;
+}
+
+/**
+ * An enum for more easily defining transformation order values.
+ */
+export enum TransformationOrder {
+	First = 0,
+	Normal = 500000,
+	Last = 1000000
 }
 
 /**
@@ -31,7 +59,7 @@ export class ModelTransformer< T extends Model > {
 	 */
 	public constructor( transformations: ModelTransformation[] ) {
 		// Ensure that the transformations are sorted by priority.
-		transformations.sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 );
+		transformations.sort( ( a, b ) => ( a.order > b.order ) ? 1 : -1 );
 
 		this.transformations = transformations;
 	}

@@ -5,27 +5,24 @@ import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../model
 import { ModelTransformer } from '../../../framework/model-transformer';
 import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
 
-function fromServer( data: any ): SettingGroup {
-	if ( ! data.id ) {
-		throw new Error( 'An invalid response was received.' );
-	}
-
-	const t = new ModelTransformer< SettingGroup >(
+function createTransformer(): ModelTransformer< SettingGroup > {
+	return new ModelTransformer(
 		[
 			new KeyChangeTransformation< SettingGroup >( { parentID: 'parent_id' } ),
 		],
 	);
-
-	return t.toModel( SettingGroup, data );
 }
 
-function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParams > {
+function restList(
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< SettingGroup >,
+): ListFn< SettingGroupRepositoryParams > {
 	return async () => {
 		const response = await httpClient.get( '/wc/v3/settings' );
 
 		const list: SettingGroup[] = [];
 		for ( const raw of response.data ) {
-			list.push( fromServer( raw ) );
+			list.push( transformer.toModel( SettingGroup, raw ) );
 		}
 
 		return Promise.resolve( list );
@@ -39,8 +36,10 @@ function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParam
  * @return {ListsSettingGroups} The created repository.
  */
 export function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSettingGroups {
+	const transformer = createTransformer();
+
 	return new ModelRepository(
-		restList( httpClient ),
+		restList( httpClient, transformer ),
 		null,
 		null,
 		null,

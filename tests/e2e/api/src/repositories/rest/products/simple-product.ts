@@ -4,42 +4,28 @@ import { SimpleProduct } from '../../../models';
 import { CreatesSimpleProducts, SimpleProductRepositoryParams } from '../../../models/products/simple-product';
 import { ModelTransformer } from '../../../framework/model-transformer';
 import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
+import { AddPropertyTransformation } from '../../../framework/transformations/add-property-transformation';
 
-function fromServer( data: any ): SimpleProduct {
-	if ( ! data.id ) {
-		throw new Error( 'An invalid response was received.' );
-	}
-
-	const t = new ModelTransformer< SimpleProduct >(
+function createTransformer(): ModelTransformer< SimpleProduct > {
+	return new ModelTransformer(
 		[
+			new AddPropertyTransformation( {}, { type: 'simple' } ),
 			new KeyChangeTransformation< SimpleProduct >( { regularPrice: 'regular_price' } ),
 		],
 	);
-
-	return t.toModel( SimpleProduct, data );
 }
 
-function toServer( model: Partial< SimpleProduct > ): any {
-	const t = new ModelTransformer< SimpleProduct >(
-		[
-			new KeyChangeTransformation< SimpleProduct >( { regularPrice: 'regular_price' } ),
-		],
-	);
-
-	return Object.assign(
-		{ type: 'simple' },
-		t.fromModel( model ),
-	);
-}
-
-function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProductRepositoryParams > {
+function restCreate(
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< SimpleProduct >,
+): CreateFn< SimpleProductRepositoryParams > {
 	return async ( properties ) => {
 		const response = await httpClient.post(
 			'/wc/v3/products',
-			toServer( properties ),
+			transformer.fromModel( properties ),
 		);
 
-		return Promise.resolve( fromServer( response.data ) );
+		return Promise.resolve( transformer.toModel( SimpleProduct, response.data ) );
 	};
 }
 
@@ -50,9 +36,11 @@ function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProductRepository
  * @return {CreatesSimpleProducts} The created repository.
  */
 export function simpleProductRESTRepository( httpClient: HTTPClient ): CreatesSimpleProducts {
+	const transformer = createTransformer();
+
 	return new ModelRepository(
 		null,
-		restCreate( httpClient ),
+		restCreate( httpClient, transformer ),
 		null,
 		null,
 		null,

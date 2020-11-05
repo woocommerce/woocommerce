@@ -14,43 +14,47 @@ import {
 } from '../../../models/settings/setting';
 import { ModelTransformer } from '../../../framework/model-transformer';
 
-function fromServer( data: any ): Setting {
-	if ( ! data.id ) {
-		throw new Error( 'An invalid response was received.' );
-	}
-
-	const t = new ModelTransformer< Setting >( [] );
-	return t.toModel( Setting, data );
+function createTransformer(): ModelTransformer< Setting > {
+	return new ModelTransformer( [] );
 }
 
-function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {
+function restList(
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< Setting >,
+): ListChildFn< SettingRepositoryParams > {
 	return async ( parent ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent );
 
 		const list: Setting[] = [];
 		for ( const raw of response.data ) {
-			list.push( fromServer( raw ) );
+			list.push( transformer.toModel( Setting, raw ) );
 		}
 
 		return Promise.resolve( list );
 	};
 }
 
-function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParams > {
+function restRead(
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< Setting >,
+): ReadChildFn< SettingRepositoryParams > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent + '/' + id );
-		return Promise.resolve( fromServer( response.data ) );
+		return Promise.resolve( transformer.toModel( Setting, response.data ) );
 	};
 }
 
-function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryParams > {
+function restUpdate(
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< Setting >,
+): UpdateChildFn< SettingRepositoryParams > {
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
 			'/wc/v3/settings/' + parent + '/' + id,
-			params,
+			transformer.fromModel( params ),
 		);
 
-		return Promise.resolve( fromServer( response.data ) );
+		return Promise.resolve( transformer.toModel( Setting, response.data ) );
 	};
 }
 
@@ -61,11 +65,13 @@ function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryP
  * @return {ListsSettings|ReadsSettings|UpdatesSettings} The created repository.
  */
 export function settingRESTRepository( httpClient: HTTPClient ): ListsSettings & ReadsSettings & UpdatesSettings {
+	const transformer = createTransformer();
+
 	return new ModelRepository(
-		restList( httpClient ),
+		restList( httpClient, transformer ),
 		null,
-		restRead( httpClient ),
-		restUpdate( httpClient ),
+		restRead( httpClient, transformer ),
+		restUpdate( httpClient, transformer ),
 		null,
 	);
 }

@@ -2,12 +2,12 @@ import { ModelTransformation, ModelTransformer } from '../model-transformer';
 import { DummyModel } from '../../__test_data__/dummy-model';
 
 class DummyTransformation implements ModelTransformation {
-	public readonly priority: number;
+	public readonly order: number;
 
 	private readonly fn: ( ( p: any ) => any ) | null;
 
-	public constructor( priority: number, fn: ( ( p: any ) => any ) | null ) {
-		this.priority = priority;
+	public constructor( order: number, fn: ( ( p: any ) => any ) | null ) {
+		this.order = order;
 		this.fn = fn;
 	}
 
@@ -29,7 +29,7 @@ class DummyTransformation implements ModelTransformation {
 }
 
 describe( 'ModelTransformer', () => {
-	it( 'should prioritize transformers correctly', () => {
+	it( 'should order transformers correctly', () => {
 		const fn1 = jest.fn();
 		fn1.mockReturnValue( { name: 'fn1' } );
 		const fn2 = jest.fn();
@@ -37,7 +37,7 @@ describe( 'ModelTransformer', () => {
 
 		const transformer = new ModelTransformer< DummyModel >(
 			[
-				// Ensure the priorities are backwards so sorting is tested.
+				// Ensure the orders are backwards so sorting is tested.
 				new DummyTransformation( 1, fn2 ),
 				new DummyTransformation( 0, fn1 ),
 			],
