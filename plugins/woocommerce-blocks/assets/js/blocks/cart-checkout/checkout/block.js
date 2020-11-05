@@ -23,7 +23,10 @@ import {
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
-import { CHECKOUT_ALLOWS_GUEST } from '@woocommerce/block-settings';
+import {
+	CHECKOUT_ALLOWS_GUEST,
+	CHECKOUT_ALLOWS_SIGNUP,
+} from '@woocommerce/block-settings';
 import { compareWithWooVersion, getSetting } from '@woocommerce/settings';
 
 /**
@@ -102,7 +105,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		! isEditor &&
 		! customerId &&
 		! CHECKOUT_ALLOWS_GUEST &&
-		! allowCreateAccount
+		! ( allowCreateAccount && CHECKOUT_ALLOWS_SIGNUP )
 	) {
 		return (
 			<>

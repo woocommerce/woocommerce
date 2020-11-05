@@ -142,6 +142,7 @@ class Assets {
 			'privacy'  => wc_privacy_policy_page_id(),
 			'terms'    => wc_terms_and_conditions_page_id(),
 		];
+		$checkout       = WC()->checkout();
 
 		// Global settings used in each block.
 		return array_merge(
@@ -187,8 +188,14 @@ class Assets {
 					'privacy'  => self::format_page_resource( $page_ids['privacy'] ),
 					'terms'    => self::format_page_resource( $page_ids['terms'] ),
 				],
-				'checkoutAllowsGuest'           => filter_var( get_option( 'woocommerce_enable_guest_checkout' ), FILTER_VALIDATE_BOOLEAN ),
-				'checkoutAllowsSignup'          => filter_var( get_option( 'woocommerce_enable_signup_and_login_from_checkout' ), FILTER_VALIDATE_BOOLEAN ),
+				'checkoutAllowsGuest'           => $checkout instanceof \WC_Checkout && false === filter_var(
+					$checkout->is_registration_required(),
+					FILTER_VALIDATE_BOOLEAN
+				),
+				'checkoutAllowsSignup'          => $checkout instanceof \WC_Checkout && filter_var(
+					$checkout->is_registration_enabled(),
+					FILTER_VALIDATE_BOOLEAN
+				),
 				'baseLocation'                  => wc_get_base_location(),
 				'woocommerceBlocksPhase'        => WOOCOMMERCE_BLOCKS_PHASE,
 				'hasDarkEditorStyleSupport'     => current_theme_supports( 'dark-editor-style' ),

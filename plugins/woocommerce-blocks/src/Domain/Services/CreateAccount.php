@@ -139,8 +139,19 @@ class CreateAccount {
 		}
 
 		// From here we know that the shopper is not logged in.
+		// check for whether account creation is enabled at the global level.
+		$checkout = WC()->checkout();
+		if ( ! $checkout instanceof \WC_Checkout ) {
+			// If checkout class is not available, we have major problems, don't create account.
+			return false;
+		}
 
-		if ( false === filter_var( get_option( 'woocommerce_enable_guest_checkout' ), FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( false === filter_var( $checkout->is_registration_enabled(), FILTER_VALIDATE_BOOLEAN ) ) {
+			// Registration is not enabled for the store, so return false.
+			return false;
+		}
+
+		if ( true === filter_var( $checkout->is_registration_required(), FILTER_VALIDATE_BOOLEAN ) ) {
 			// Store requires an account for all checkouts (purchases).
 			// Create an account independent of shopper option in $request.
 			// Note - checkbox is not displayed to shopper in this case.
