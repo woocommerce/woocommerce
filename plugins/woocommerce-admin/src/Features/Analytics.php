@@ -112,114 +112,151 @@ class Analytics {
 	 * Registers report pages.
 	 */
 	public function register_pages() {
-		$navigation_enabled = Loader::is_feature_enabled( 'navigation' );
-
-		$overview_page = array(
-			'id'           => 'woocommerce-analytics',
-			'title'        => __( 'Analytics', 'woocommerce-admin' ),
-			'path'         => '/analytics/overview',
-			'icon'         => 'dashicons-chart-bar',
-			'position'     => 56, // After WooCommerce & Product menu items.
-			'order'        => 10,
-			'is_category'  => true,
-			'is_top_level' => true,
-		);
-
-		$report_pages = array(
-			$overview_page,
-			array(
-				'id'     => 'woocommerce-analytics-overview',
-				'title'  => __( 'Overview', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/overview',
-				'order'  => 10,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-products',
-				'title'  => __( 'Products', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/products',
-				'order'  => 20,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-revenue',
-				'title'  => __( 'Revenue', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/revenue',
-				'order'  => 30,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-orders',
-				'title'  => __( 'Orders', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/orders',
-				'order'  => 40,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-variations',
-				'title'  => __( 'Variations', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/variations',
-				'order'  => 50,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-categories',
-				'title'  => __( 'Categories', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/categories',
-				'order'  => 60,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-coupons',
-				'title'  => __( 'Coupons', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/coupons',
-				'order'  => 70,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-taxes',
-				'title'  => __( 'Taxes', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/taxes',
-				'order'  => 80,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-downloads',
-				'title'  => __( 'Downloads', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/downloads',
-				'order'  => 90,
-			),
-			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
-				'id'     => 'woocommerce-analytics-stock',
-				'title'  => __( 'Stock', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/stock',
-				'order'  => 100,
-			) : null,
-			array(
-				'id'           => 'woocommerce-analytics-customers',
-				'title'        => __( 'Customers', 'woocommerce-admin' ),
-				'parent'       => 'woocommerce',
-				'path'         => '/customers',
-				'is_top_level' => true,
-				'order'        => 50,
-			),
-			array(
-				'id'     => 'woocommerce-analytics-settings',
-				'title'  => $navigation_enabled ? __( 'Analytics', 'woocommerce-admin' ) : __( 'Settings', 'woocommerce-admin' ),
-				'parent' => $navigation_enabled ? 'settings' : 'woocommerce-analytics',
-				'path'   => '/analytics/settings',
-			),
-		);
-
-		$report_pages = apply_filters( 'woocommerce_analytics_report_menu_items', $report_pages );
-
+		$report_pages = self::get_report_pages();
 		foreach ( $report_pages as $report_page ) {
 			if ( ! is_null( $report_page ) ) {
 				wc_admin_register_page( $report_page );
 			}
 		}
+	}
+
+	/**
+	 * Get report pages.
+	 */
+	public static function get_report_pages() {
+		$overview_page = array(
+			'id'       => 'woocommerce-analytics',
+			'title'    => __( 'Analytics', 'woocommerce-admin' ),
+			'path'     => '/analytics/overview',
+			'icon'     => 'dashicons-chart-bar',
+			'position' => 56, // After WooCommerce & Product menu items.
+		);
+
+		$report_pages = array(
+			$overview_page,
+			array(
+				'id'       => 'woocommerce-analytics-overview',
+				'title'    => __( 'Overview', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/overview',
+				'nav_args' => array(
+					'order'  => 10,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-products',
+				'title'    => __( 'Products', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/products',
+				'nav_args' => array(
+					'order'  => 20,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-revenue',
+				'title'    => __( 'Revenue', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/revenue',
+				'nav_args' => array(
+					'order'  => 30,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-orders',
+				'title'    => __( 'Orders', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/orders',
+				'nav_args' => array(
+					'order'  => 40,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-variations',
+				'title'    => __( 'Variations', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/variations',
+				'nav_args' => array(
+					'order'  => 50,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-categories',
+				'title'    => __( 'Categories', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/categories',
+				'nav_args' => array(
+					'order'  => 60,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-coupons',
+				'title'    => __( 'Coupons', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/coupons',
+				'nav_args' => array(
+					'order'  => 70,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-taxes',
+				'title'    => __( 'Taxes', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/taxes',
+				'nav_args' => array(
+					'order'  => 80,
+					'parent' => 'analytics',
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-downloads',
+				'title'    => __( 'Downloads', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/downloads',
+				'nav_args' => array(
+					'order'  => 90,
+					'parent' => 'analytics',
+				),
+			),
+			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
+				'id'       => 'woocommerce-analytics-stock',
+				'title'    => __( 'Stock', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/stock',
+				'nav_args' => array(
+					'order'  => 100,
+					'parent' => 'analytics',
+				),
+			) : null,
+			array(
+				'id'       => 'woocommerce-analytics-customers',
+				'title'    => __( 'Customers', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce',
+				'path'     => '/customers',
+				'nav_args' => array(
+					'is_top_level' => true,
+					'order'        => 50,
+				),
+			),
+			array(
+				'id'       => 'woocommerce-analytics-settings',
+				'title'    => __( 'Settings', 'woocommerce-admin' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/settings',
+				'nav_args' => array(
+					'title'  => __( 'Analytics', 'woocommerce-admin' ),
+					'parent' => 'settings',
+				),
+			),
+		);
+
+		return apply_filters( 'woocommerce_analytics_report_menu_items', $report_pages );
 	}
 
 	/**

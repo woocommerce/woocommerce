@@ -132,10 +132,13 @@ class Marketing {
 		// First register the page.
 		PageController::get_instance()->register_page(
 			[
-				'id'     => 'woocommerce-marketing-overview',
-				'title'  => __( 'Overview', 'woocommerce-admin' ),
-				'path'   => 'wc-admin&path=/marketing',
-				'parent' => 'woocommerce-marketing',
+				'id'       => 'woocommerce-marketing-overview',
+				'title'    => __( 'Overview', 'woocommerce-admin' ),
+				'path'     => 'wc-admin&path=/marketing',
+				'parent'   => 'woocommerce-marketing',
+				'nav_args' => array(
+					'parent' => 'marketing',
+				),
 			]
 		);
 

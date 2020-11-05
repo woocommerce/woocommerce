@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
+use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
 
 /**
  * Contains logic for the WooCommerce Navigation menu.
@@ -83,8 +84,10 @@ class Menu {
 	 * Init.
 	 */
 	public function init() {
+		add_action( 'admin_menu', array( $this, 'add_core_items' ) );
 		add_filter( 'admin_enqueue_scripts', array( $this, 'enqueue_data' ), 20 );
 		add_filter( 'add_menu_classes', array( $this, 'migrate_menu_items' ), 30 );
+		add_filter( 'add_menu_classes', array( $this, 'migrate_core_child_items' ) );
 	}
 
 	/**
@@ -150,7 +153,7 @@ class Menu {
 	 *      'menuId'     => (string) The ID of the menu to add the category to.
 	 *    ).
 	 */
-	public static function add_category( $args ) {
+	private static function add_category( $args ) {
 		if ( ! isset( $args['id'] ) || isset( self::$menu_items[ $args['id'] ] ) ) {
 			return;
 		}
@@ -202,7 +205,7 @@ class Menu {
 	 *      'menuId'     => (string) The ID of the menu to add the item to.
 	 *    ).
 	 */
-	public static function add_item( $args ) {
+	private static function add_item( $args ) {
 		if ( ! isset( $args['id'] ) || isset( self::$menu_items[ $args['id'] ] ) ) {
 			return;
 		}
@@ -233,6 +236,57 @@ class Menu {
 		if ( isset( $args['url'] ) ) {
 			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
 		}
+	}
+
+	/**
+	 * Adds a plugin item.
+	 *
+	 * @param array $args Array containing the necessary arguments.
+	 *    $args = array(
+	 *      'id'         => (string) The unique ID of the menu item. Required.
+	 *      'title'      => (string) Title of the menu item. Required.
+	 *      'parent'     => (string) Parent menu item ID.
+	 *      'capability' => (string) Capability to view this menu item.
+	 *      'url'        => (string) URL or callback to be used. Required.
+	 *      'order'      => (int) Menu item order.
+	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
+	 *      'menuId'     => (string) The ID of the menu to add the item to.
+	 *    ).
+	 */
+	public static function add_plugin_item( $args ) {
+		$item_args = array_merge(
+			$args,
+			array(
+				'menuId'       => 'plugins',
+				'is_top_level' => ! isset( $args['parent'] ),
+			)
+		);
+		self::add_item( $item_args );
+	}
+
+	/**
+	 * Adds a plugin category.
+	 *
+	 * @param array $args Array containing the necessary arguments.
+	 *    $args = array(
+	 *      'id'         => (string) The unique ID of the menu item. Required.
+	 *      'title'      => (string) Title of the menu item. Required.
+	 *      'capability' => (string) Capability to view this menu item.
+	 *      'url'        => (string) URL or callback to be used. Required.
+	 *      'order'      => (int) Menu item order.
+	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
+	 *      'menuId'     => (string) The ID of the menu to add the category to.
+	 *    ).
+	 */
+	public static function add_plugin_category( $args ) {
+		$category_args = array_merge(
+			$args,
+			array(
+				'menuId'       => 'plugins',
+				'is_top_level' => ! isset( $args['parent'] ),
+			)
+		);
+		self::add_category( $category_args );
 	}
 
 	/**
@@ -277,6 +331,106 @@ class Menu {
 				'url'        => "post-new.php?post_type={$post_type}",
 			)
 		);
+	}
+
+	/**
+	 * Get menu item templates for a given post type.
+	 *
+	 * @param string $post_type Post type to add.
+	 * @param array  $menu_args Arguments merged with the returned menu items.
+	 * @return array
+	 */
+	public static function get_post_type_items( $post_type, $menu_args = array() ) {
+		$post_type_object = get_post_type_object( $post_type );
+
+		if ( ! $post_type_object || ! $post_type_object->show_in_menu ) {
+			return;
+		}
+
+		return array(
+			array_merge(
+				array(
+					'title'      => esc_attr( $post_type_object->labels->menu_name ),
+					'capability' => $post_type_object->cap->edit_posts,
+					'id'         => $post_type,
+					'url'        => "edit.php?post_type={$post_type}",
+				),
+				$menu_args
+			),
+			array_merge(
+				array(
+					'parent'     => $post_type,
+					'title'      => esc_attr( $post_type_object->labels->all_items ),
+					'capability' => $post_type_object->cap->edit_posts,
+					'id'         => "{$post_type}-all-items",
+					'url'        => "edit.php?post_type={$post_type}",
+				),
+				$menu_args
+			),
+			array_merge(
+				array(
+					'parent'     => $post_type,
+					'title'      => esc_attr( $post_type_object->labels->add_new ),
+					'capability' => $post_type_object->cap->create_posts,
+					'id'         => "{$post_type}-add-new",
+					'url'        => "post-new.php?post_type={$post_type}",
+				),
+				$menu_args
+			),
+		);
+	}
+
+	/**
+	 * Add core menu items.
+	 */
+	public function add_core_items() {
+		$categories = CoreMenu::get_categories();
+		foreach ( $categories as $category ) {
+			self::add_category( $category );
+		}
+
+		$items = CoreMenu::get_items();
+		foreach ( $items as $item ) {
+			self::add_item( $item );
+		}
+	}
+
+	/**
+	 * Migrate any remaining WooCommerce child items.
+	 *
+	 * @param array $menu Menu items.
+	 * @return array
+	 */
+	public function migrate_core_child_items( $menu ) {
+		global $submenu;
+
+		if ( ! isset( $submenu['woocommerce'] ) ) {
+			return;
+		}
+
+		foreach ( $submenu['woocommerce'] as $menu_item ) {
+			if ( in_array( $menu_item[2], CoreMenu::get_excluded_items(), true ) ) {
+				continue;
+			}
+
+			// Don't add already added items.
+			$callbacks = self::get_callbacks();
+			if ( array_key_exists( $menu_item[2], $callbacks ) ) {
+				continue;
+			}
+
+			self::add_item(
+				array(
+					'parent'     => 'settings',
+					'title'      => $menu_item[0],
+					'capability' => $menu_item[1],
+					'id'         => sanitize_title( $menu_item[0] ),
+					'url'        => $menu_item[2],
+				)
+			);
+		}
+
+		return $menu;
 	}
 
 	/**

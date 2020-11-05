@@ -36,45 +36,43 @@ add_action( 'admin_enqueue_scripts', 'add_navigation_items_register_script' );
  */
 function add_navigation_items_register_items() {
 	if (
-		! method_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu', 'add_category' ) ||
-		! method_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu', 'add_item' )
+		! method_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu', 'add_plugin_category' ) ||
+		! method_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu', 'add_plugin_item' )
 	) {
 		return;
 	}
 
-	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_item(
+	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(
 		array(
-			'id'         => 'example-marketing-plugin',
-			'title'      => 'Example Marketing Settings',
+			'id'         => 'example-plugin',
+			'title'      => 'Example Plugin',
 			'capability' => 'view_woocommerce_reports',
-			'parent'     => 'settings',
 			'url'        => 'https://www.google.com',
 		)
 	);
 
-	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_category(
+	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_category(
 		array(
-			'id'         => 'example-marketing-category',
-			'parent'     => 'woocommerce-marketing',
-			'title'      => 'Example Marketing Category',
+			'id'         => 'example-category',
+			'title'      => 'Example Category',
 			'capability' => 'view_woocommerce_reports',
 		)
 	);
 
-	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_item(
+	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(
 		array(
-			'id'         => 'example-marketing-category-child-1',
-			'parent'     => 'example-marketing-category',
+			'id'         => 'example-category-child-1',
+			'parent'     => 'example-category',
 			'title'      => 'Sub Menu Child 1',
 			'capability' => 'view_woocommerce_reports',
 			'url'        => 'https://www.google.com',
 		)
 	);
 
-	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_item(
+	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(
 		array(
-			'id'         => 'example-marketing-category-child-2',
-			'parent'     => 'example-marketing-category',
+			'id'         => 'example-category-child-2',
+			'parent'     => 'example-category',
 			'title'      => 'Sub Menu Child 2',
 			'capability' => 'view_woocommerce_reports',
 			'url'        => 'https://www.google.com',

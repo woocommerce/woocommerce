@@ -453,47 +453,16 @@ class PageController {
 			);
 		}
 
-		self::add_nav_item( $options );
 		$this->connect_page( $options );
 	}
 
 	/**
-	 * Add the item to the WooCommerce Navigation menu.
+	 * Get registered pages.
 	 *
-	 * @param array $options {
-	 *   Array describing the page.
-	 *
-	 *   @type string      id           Id to reference the page.
-	 *   @type string      title        Page title. Used in menus and breadcrumbs.
-	 *   @type string|null parent       Parent ID. Null for new top level page.
-	 *   @type string      path         Path for this page, full path in app context; ex /analytics/report
-	 *   @type string      capability   Capability needed to access the page.
-	 *   @type string      icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
-	 *   @type int         order        Navigation item order.
-	 * }
+	 * @return array
 	 */
-	public static function add_nav_item( $options ) {
-		$navigation_enabled = Loader::is_feature_enabled( 'navigation' );
-
-		if ( ! $navigation_enabled ) {
-			return;
-		}
-
-		$item_options = array(
-			'id'           => $options['id'],
-			'parent'       => $options['parent'],
-			'title'        => $options['title'],
-			'capability'   => $options['capability'],
-			'url'          => $options['path'],
-			'order'        => isset( $options['order'] ) ? $options['order'] : 100,
-			'is_top_level' => ( isset( $options['is_top_level'] ) && $options['is_top_level'] ) || ! $options['parent'],
-		);
-
-		if ( isset( $options['is_category'] ) && $options['is_category'] ) {
-			\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_category( $item_options );
-		} else {
-			\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_item( $item_options );
-		}
+	public function get_pages() {
+		return $this->pages;
 	}
 
 	/**

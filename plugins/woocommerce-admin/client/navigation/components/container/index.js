@@ -65,9 +65,14 @@ const Container = ( { menuItems } ) => {
 	const getMenuItemsByCategory = ( items ) => {
 		return items.reduce( ( acc, item ) => {
 			if ( ! acc[ item.parent ] ) {
-				acc[ item.parent ] = [ [], [] ];
+				acc[ item.parent ] = [ [], [], [] ];
 			}
-			const index = item.menuId !== 'secondary' ? 0 : 1;
+			let index = 0;
+			if ( item.menuId === 'secondary' ) {
+				index = 1;
+			} else if ( item.menuId === 'plugins' ) {
+				index = 2;
+			}
 			acc[ item.parent ][ index ].push( item );
 			return acc;
 		}, {} );
@@ -97,9 +102,11 @@ const Container = ( { menuItems } ) => {
 					></NavigationBackButton>
 				) }
 				{ categories.map( ( category ) => {
-					const [ primaryItems, secondaryItems ] = categorizedItems[
-						category.id
-					];
+					const [
+						primaryItems,
+						secondaryItems,
+						pluginItems,
+					] = categorizedItems[ category.id ] || [ [], [], [] ];
 					return (
 						<NavigationMenu
 							key={ category.id }
@@ -111,6 +118,22 @@ const Container = ( { menuItems } ) => {
 							{ !! primaryItems.length && (
 								<NavigationGroup>
 									{ primaryItems.map( ( item ) => (
+										<Item key={ item.id } item={ item } />
+									) ) }
+								</NavigationGroup>
+							) }
+							{ !! pluginItems.length && (
+								<NavigationGroup
+									title={
+										category.id === 'woocommerce'
+											? __(
+													'Extensions',
+													'woocommerce-admin'
+											  )
+											: null
+									}
+								>
+									{ pluginItems.map( ( item ) => (
 										<Item key={ item.id } item={ item } />
 									) ) }
 								</NavigationGroup>

@@ -168,25 +168,8 @@ class Screen {
 	 * Register post type for use in WooCommerce Navigation screens.
 	 *
 	 * @param string $post_type Post type to add.
-	 * @param string $parent_id Parent menu item ID.
 	 */
-	public static function register_post_type( $post_type, $parent_id ) {
+	public static function register_post_type( $post_type ) {
 		self::$post_types[] = $post_type;
-
-		$post_type_object = get_post_type_object( $post_type );
-
-		if ( ! $post_type_object || ! $post_type_object->show_in_menu || ! $parent_id ) {
-			return;
-		}
-
-		Menu::add_item(
-			array(
-				'parent'     => $parent_id,
-				'title'      => esc_attr( $post_type_object->labels->menu_name ),
-				'capability' => $post_type_object->cap->edit_posts,
-				'id'         => $post_type,
-				'url'        => "edit.php?post_type={$post_type}",
-			)
-		);
 	}
 }

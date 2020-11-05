@@ -12,7 +12,7 @@ const MyPlugin = () => {
     }
 
     return (
-        <WooNavigationItem item="example-marketing-category-child-2">
+        <WooNavigationItem item="example-category-child-2">
             <Button onClick={ handleClick }>
                 { __( 'JavaScript Example', 'plugin-domain' ) }
             </Button>
