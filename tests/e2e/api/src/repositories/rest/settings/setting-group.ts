@@ -2,6 +2,21 @@ import { HTTPClient } from '../../../http';
 import { ListFn, ModelRepository } from '../../../framework/model-repository';
 import { SettingGroup } from '../../../models';
 import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../models/settings/setting-group';
+import { ModelTransformer } from '../../../framework/model-transformer';
+
+function fromServer( data: any ): SettingGroup {
+	if ( ! data.id ) {
+		throw new Error( 'An invalid response was received.' );
+	}
+
+	return ModelTransformer.toModel(
+		SettingGroup,
+		data,
+		{
+			parent_id: 'parentID',
+		},
+	);
+}
 
 function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParams > {
 	return async () => {
@@ -9,12 +24,7 @@ function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParam
 
 		const list: SettingGroup[] = [];
 		for ( const raw of response.data ) {
-			list.push( new SettingGroup( {
-				id: raw.id,
-				label: raw.label,
-				description: raw.description,
-				parentID: raw.parent_id,
-			} ) );
+			list.push( fromServer( raw ) );
 		}
 
 		return Promise.resolve( list );

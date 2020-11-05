@@ -12,6 +12,15 @@ import {
 	SettingRepositoryParams,
 	UpdatesSettings,
 } from '../../../models/settings/setting';
+import { ModelTransformer } from '../../../framework/model-transformer';
+
+function fromServer( data: any ): Setting {
+	if ( ! data.id ) {
+		throw new Error( 'An invalid response was received.' );
+	}
+
+	return ModelTransformer.toModel( Setting, data );
+}
 
 function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {
 	return async ( parent ) => {
@@ -19,15 +28,7 @@ function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParam
 
 		const list: Setting[] = [];
 		for ( const raw of response.data ) {
-			list.push( new Setting( {
-				id: raw.id,
-				label: raw.label,
-				description: raw.description,
-				type: raw.type,
-				options: raw.options,
-				default: raw.default,
-				value: raw.value,
-			} ) );
+			list.push( fromServer( raw ) );
 		}
 
 		return Promise.resolve( list );
@@ -37,16 +38,7 @@ function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParam
 function restRead( httpClient: HTTPClient ): ReadChildFn< SettingRepositoryParams > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( '/wc/v3/settings/' + parent + '/' + id );
-
-		return Promise.resolve( new Setting( {
-			id: response.data.id,
-			label: response.data.label,
-			description: response.data.description,
-			type: response.data.type,
-			options: response.data.options,
-			default: response.data.default,
-			value: response.data.value,
-		} ) );
+		return Promise.resolve( fromServer( response.data ) );
 	};
 }
 
@@ -57,15 +49,7 @@ function restUpdate( httpClient: HTTPClient ): UpdateChildFn< SettingRepositoryP
 			params,
 		);
 
-		return Promise.resolve( new Setting( {
-			id: response.data.id,
-			label: response.data.label,
-			description: response.data.description,
-			type: response.data.type,
-			options: response.data.options,
-			default: response.data.default,
-			value: response.data.value,
-		} ) );
+		return Promise.resolve( fromServer( response.data ) );
 	};
 }
 
