@@ -19,7 +19,8 @@ function fromServer( data: any ): Setting {
 		throw new Error( 'An invalid response was received.' );
 	}
 
-	return ModelTransformer.toModel( Setting, data );
+	const t = new ModelTransformer< Setting >( [] );
+	return t.toModel( Setting, data );
 }
 
 function restList( httpClient: HTTPClient ): ListChildFn< SettingRepositoryParams > {

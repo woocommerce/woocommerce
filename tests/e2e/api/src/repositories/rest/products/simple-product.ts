@@ -3,30 +3,32 @@ import { CreateFn, ModelRepository } from '../../../framework/model-repository';
 import { SimpleProduct } from '../../../models';
 import { CreatesSimpleProducts, SimpleProductRepositoryParams } from '../../../models/products/simple-product';
 import { ModelTransformer } from '../../../framework/model-transformer';
+import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
 
 function fromServer( data: any ): SimpleProduct {
 	if ( ! data.id ) {
 		throw new Error( 'An invalid response was received.' );
 	}
 
-	return ModelTransformer.toModel(
-		SimpleProduct,
-		data,
-		{
-			regular_price: 'regularPrice',
-		},
+	const t = new ModelTransformer< SimpleProduct >(
+		[
+			new KeyChangeTransformation< SimpleProduct >( { regularPrice: 'regular_price' } ),
+		],
 	);
+
+	return t.toModel( SimpleProduct, data );
 }
 
 function toServer( model: Partial< SimpleProduct > ): any {
+	const t = new ModelTransformer< SimpleProduct >(
+		[
+			new KeyChangeTransformation< SimpleProduct >( { regularPrice: 'regular_price' } ),
+		],
+	);
+
 	return Object.assign(
 		{ type: 'simple' },
-		ModelTransformer.fromModel(
-			model,
-			{
-				regularPrice: 'regular_price',
-			},
-		),
+		t.fromModel( model ),
 	);
 }
 

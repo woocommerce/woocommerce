@@ -1,90 +1,90 @@
-import { Model } from '../../models/model';
-import { ModelTransformer } from '../model-transformer';
+import { ModelTransformation, ModelTransformer } from '../model-transformer';
+import { DummyModel } from '../../__test_data__/dummy-model';
 
-class DummyModel extends Model {
-	public name: string = '';
+class DummyTransformation implements ModelTransformation {
+	public readonly priority: number;
 
-	public constructor( partial?: Partial< DummyModel > ) {
-		super();
-		Object.assign( this, partial );
+	private readonly fn: ( ( p: any ) => any ) | null;
+
+	public constructor( priority: number, fn: ( ( p: any ) => any ) | null ) {
+		this.priority = priority;
+		this.fn = fn;
+	}
+
+	public fromModel( properties: any ): any {
+		if ( ! this.fn ) {
+			return properties;
+		}
+
+		return this.fn( properties );
+	}
+
+	public toModel( properties: any ): any {
+		if ( ! this.fn ) {
+			return properties;
+		}
+
+		return this.fn( properties );
 	}
 }
 
 describe( 'ModelTransformer', () => {
-	describe( 'fromModel', () => {
-		it( 'should convert models plainly', () => {
-			const model = new DummyModel( { name: 'Test' } );
+	it( 'should prioritize transformers correctly', () => {
+		const fn1 = jest.fn();
+		fn1.mockReturnValue( { name: 'fn1' } );
+		const fn2 = jest.fn();
+		fn2.mockReturnValue( { name: 'fn2' } );
 
-			const transformed = ModelTransformer.fromModel( model );
+		const transformer = new ModelTransformer< DummyModel >(
+			[
+				// Ensure the priorities are backwards so sorting is tested.
+				new DummyTransformation( 1, fn2 ),
+				new DummyTransformation( 0, fn1 ),
+			],
+		);
 
-			expect( transformed ).toMatchObject(
-				{
-					name: 'Test',
-				},
-			);
-		} );
+		const transformed = transformer.toModel( DummyModel, { name: 'fn0' } );
 
-		it( 'should convert models with key changes', () => {
-			const model = new DummyModel( { name: 'Test' } );
-
-			const transformed = ModelTransformer.fromModel(
-				model,
-				{ name: 'new-test' },
-			);
-
-			expect( transformed ).toMatchObject(
-				{
-					'new-test': 'Test',
-				},
-			);
-		} );
-
-		it( 'should convert models with transformations', () => {
-			const model = new DummyModel( { name: 'Test' } );
-
-			const transformed = ModelTransformer.fromModel(
-				model,
-				undefined,
-				{ name: ( val ) => 'Transform-' + val },
-			);
-
-			expect( transformed ).toMatchObject(
-				{
-					name: 'Transform-Test',
-				},
-			);
-		} );
+		expect( fn1 ).toHaveBeenCalledWith( { name: 'fn0' } );
+		expect( fn2 ).toHaveBeenCalledWith( { name: 'fn1' } );
+		expect( transformed ).toMatchObject( { name: 'fn2' } );
 	} );
 
-	describe( 'toModel', () => {
-		it( 'should create models plainly', () => {
-			const transformed = ModelTransformer.toModel(
-				DummyModel,
-				{ name: 'Test' },
-			);
+	it( 'should transform to model', () => {
+		const transformer = new ModelTransformer< DummyModel >(
+			[
+				new DummyTransformation(
+					0,
+					( p: any ) => {
+						p.name = 'Transformed-' + p.name;
+						return p;
+					},
+				),
+			],
+		);
 
-			expect( transformed ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		} );
+		const model = transformer.toModel( DummyModel, { name: 'Test' } );
 
-		it( 'should create models with key changes', () => {
-			const transformed = ModelTransformer.toModel(
-				DummyModel,
-				{ test: 'Test' },
-				{ test: 'name' },
-			);
+		expect( model ).toBeInstanceOf( DummyModel );
+		expect( model.name ).toEqual( 'Transformed-Test' );
+	} );
 
-			expect( transformed ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		} );
+	it( 'should transform from model', () => {
+		const transformer = new ModelTransformer< DummyModel >(
+			[
+				new DummyTransformation(
+					0,
+					( p: any ) => {
+						p.name = 'Transformed-' + p.name;
+						return p;
+					},
+				),
+			],
+		);
 
-		it( 'should create models with transformations', () => {
-			const transformed = ModelTransformer.toModel(
-				DummyModel,
-				{ name: 'Test' },
-				undefined,
-				{ name: ( val ) => 'Transform-' + val },
-			);
+		const transformed = transformer.fromModel( new DummyModel( { name: 'Test' } ) );
 
-			expect( transformed ).toMatchObject( new DummyModel( { name: 'Transform-Test' } ) );
-		} );
+		expect( transformed ).not.toBeInstanceOf( DummyModel );
+		expect( transformed.name ).toEqual( 'Transformed-Test' );
 	} );
 } );

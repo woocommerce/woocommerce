@@ -1,92 +1,76 @@
 import { Model } from '../models/model';
 
 /**
- * A map for converting between API/Model keys.
+ * An interface for an object that can perform transformations both to and from a representation
+ * and return the input data after performing the desired transformation.
  *
- * @typedef KeyChangeMap
- * @alias Object.<string,string>
+ * @interface ModelTransformation
  */
-type KeyChangeMap< F, T > = {
-	[ key in keyof F ]?: keyof T;
+export interface ModelTransformation {
+	readonly priority: number;
+	toModel( properties: any ): any;
+	fromModel( properties: any ): any;
 }
 
 /**
- * A map for transformations between API/Model data.
- *
- * @typedef TransformationMap
- * @alias Object.<string,Function>
+ * A class for transforming models to/from a generic representation.
  */
-type TransformationMap< T > = {
-	[ key in keyof T ]?: ( val: any ) => any;
-}
-
-export namespace ModelTransformer {
+export class ModelTransformer< T extends Model > {
 	/**
-	 * Given an object, this function will transform it using the described key changes and transformations.
+	 * An array of transformations to use when converting data to/from models.
 	 *
-	 * @param {*} data
-	 * @param {KeyChangeMap} keyChanges A map of keys to change into another key.
-	 * @param {TransformationMap} transformations A map of transformations to perform on values keyed by the key.
-	 * @return {*} The transformed data.
+	 * @type {Array.<ModelTransformation>}
 	 * @private
 	 */
-	function transform< F, T >(
-		data: F,
-		keyChanges?: KeyChangeMap< F, T >,
-		transformations?: TransformationMap< F >,
-	): any {
-		const transformed: any = {};
-
-		for ( const inputKey in data ) {
-			let key: string = inputKey;
-			if ( keyChanges && keyChanges.hasOwnProperty( inputKey ) ) {
-				key = keyChanges[ inputKey ] as string;
-			}
-
-			let value = data[ inputKey ];
-			if ( transformations && transformations.hasOwnProperty( inputKey ) ) {
-				value = ( transformations[ inputKey ] as ( val: any ) => any )( value );
-			}
-
-			transformed[ key ] = value;
-		}
-
-		return transformed;
-	}
+	private transformations: readonly ModelTransformation[];
 
 	/**
-	 * Given a model this will transform it into a standard object.
+	 * Creates a new model transformer instance.
 	 *
-	 * @param {F} data The model data to transform.
-	 * @param {KeyChangeMap} keyChanges A map of keys to change into another key.
-	 * @param {TransformationMap} transformations A map of transformations to perform on values keyed by the key.
-	 * @return {*} The transformed data.
-	 * @template F
+	 * @param {Array.<ModelTransformation>} transformations The transformations to use.
 	 */
-	export function fromModel< F extends Partial< Model > >(
-		data: F,
-		keyChanges?: KeyChangeMap< F, any >,
-		transformations?: TransformationMap< F >,
-	): any {
-		return transform( data, keyChanges, transformations );
+	public constructor( transformations: ModelTransformation[] ) {
+		// Ensure that the transformations are sorted by priority.
+		transformations.sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 );
+
+		this.transformations = transformations;
 	}
 
 	/**
-	 * Given an object this will transform it into a model object.
+	 * Takes the input data and runs all of the transformations on it before returning the created model.
 	 *
-	 * @param {Function} modelClass The model class we want to instantiate.
-	 * @param {*} data The raw data to transform.
-	 * @param {KeyChangeMap} keyChanges A map of keys to change into another key.
-	 * @param {TransformationMap} transformations A map of transformations to perform on values keyed by the key.
-	 * @return {T} The created model.
+	 * @param {Function.<T>} modelClass The model class we're trying to create.
+	 * @param {*} data The data we're transforming.
+	 * @return {T} The transformed model.
 	 * @template T
 	 */
-	export function toModel< T extends Model, F >(
-		modelClass: new ( properties: Partial< T > ) => T,
-		data: F,
-		keyChanges?: KeyChangeMap< F, T >,
-		transformations?: TransformationMap< F >,
-	): T {
-		return new modelClass( transform( data, keyChanges, transformations ) );
+	public toModel( modelClass: new( properties: Partial< T > ) => T, data: any ): T {
+		const transformed: any = this.transformations.reduce(
+			( properties: any, transformer: ModelTransformation ) => {
+				return transformer.toModel( properties );
+			},
+			data,
+		);
+
+		return new modelClass( transformed );
+	}
+
+	/**
+	 * Takes the input model and runs all of the transformations on it before returning the data.
+	 *
+	 * @param {Partial.<T>} model The model to transform.
+	 * @return {*} The transformed data.
+	 * @template T
+	 */
+	public fromModel( model: Partial< T > ): any {
+		// Convert the model class to raw properties so that the transformations can be simple.
+		const raw = JSON.parse( JSON.stringify( model ) );
+
+		return this.transformations.reduce(
+			( properties: any, transformer: ModelTransformation ) => {
+				return transformer.fromModel( properties );
+			},
+			raw,
+		);
 	}
 }

@@ -3,19 +3,20 @@ import { ListFn, ModelRepository } from '../../../framework/model-repository';
 import { SettingGroup } from '../../../models';
 import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../models/settings/setting-group';
 import { ModelTransformer } from '../../../framework/model-transformer';
+import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
 
 function fromServer( data: any ): SettingGroup {
 	if ( ! data.id ) {
 		throw new Error( 'An invalid response was received.' );
 	}
 
-	return ModelTransformer.toModel(
-		SettingGroup,
-		data,
-		{
-			parent_id: 'parentID',
-		},
+	const t = new ModelTransformer< SettingGroup >(
+		[
+			new KeyChangeTransformation< SettingGroup >( { parentID: 'parent_id' } ),
+		],
 	);
+
+	return t.toModel( SettingGroup, data );
 }
 
 function restList( httpClient: HTTPClient ): ListFn< SettingGroupRepositoryParams > {
