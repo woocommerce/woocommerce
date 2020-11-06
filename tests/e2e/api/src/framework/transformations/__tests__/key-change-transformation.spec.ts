@@ -5,7 +5,7 @@ describe( 'KeyChangeTransformation', () => {
 	let transformation: KeyChangeTransformation< DummyModel >;
 
 	beforeEach( () => {
-		transformation = new KeyChangeTransformation<DummyModel>(
+		transformation = new KeyChangeTransformation< DummyModel >(
 			{
 				name: 'new-name',
 			},

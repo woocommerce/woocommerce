@@ -1,4 +1,4 @@
-import { AbstractProduct } from './abstract-product';
+import { AbstractProduct, ProductSearchParams, ProductUpdateParams } from './abstract-product';
 import { HTTPClient } from '../../http';
 import { simpleProductRESTRepository } from '../../repositories/rest/products/simple-product';
 import {
@@ -13,7 +13,7 @@ import {
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, never, 'regularPrice' >;
+export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, ProductSearchParams, ProductUpdateParams >;
 
 /**
  * An interface for listing simple products using the repository.

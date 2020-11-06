@@ -11,6 +11,24 @@ import {
 } from './shared-types';
 
 /**
+ * The common parameters that all products can use in search.
+ */
+export type ProductSearchParams = { search: string };
+
+/**
+ * The common parameters that all products can update.
+ */
+export type ProductUpdateParams = 'name' | 'slug' | 'created' | 'postStatus' | 'shortDescription'
+	| 'description' | 'sku' | 'categories' | 'tags' | 'isFeatured'
+	| 'isVirtual' | 'attributes' | 'images' | 'catalogVisibility'
+	| 'regularPrice' | 'onePerOrder' | 'taxStatus' | 'taxClass'
+	| 'salePrice' | 'saleStart' | 'saleEnd' | 'isDownloadable'
+	| 'downloadLimit' | 'daysToDownload' | 'weight' | 'length'
+	| 'width' | 'height' | 'trackInventory' | 'remainingStock'
+	| 'stockStatus' | 'backorderStatus' | 'allowReviews'
+	| 'metaData';
+
+/**
  * The base class for all product types.
  */
 export abstract class AbstractProduct extends Model {
