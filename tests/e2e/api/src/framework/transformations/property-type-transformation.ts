@@ -115,7 +115,11 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertTo( value: string, type: PropertyType ): any {
+	private convertTo( value: string | string[], type: PropertyType ): any {
+		if ( Array.isArray( value ) ) {
+			return value.map( ( v: string ) => this.convertTo( v, type ) );
+		}
+
 		switch ( type ) {
 			case PropertyType.String: return String( value );
 			case PropertyType.Integer: return parseInt( value );
@@ -138,7 +142,11 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertFrom( value: any, type: PropertyType ): string {
+	private convertFrom( value: any | any[], type: PropertyType ): string | string[] {
+		if ( Array.isArray( value ) ) {
+			return value.map( ( v: string ) => this.convertFrom( v, type ) as string );
+		}
+
 		switch ( type ) {
 			case PropertyType.String:
 			case PropertyType.Integer:

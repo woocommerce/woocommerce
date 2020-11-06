@@ -85,4 +85,14 @@ describe( 'PropertyTypeTransformation', () => {
 
 		expect( transformed.callback ).toStrictEqual( 'Transformed-Test' );
 	} );
+
+	it( 'should convert arrays', () => {
+		let transformed = transformation.toModel( { integer: [ '100', '200', '300' ] } );
+
+		expect( transformed.integer ).toStrictEqual( [ 100, 200, 300 ] );
+
+		transformed = transformation.fromModel( { integer: [ 100, 200, 300 ] } );
+
+		expect( transformed.integer ).toStrictEqual( [ '100', '200', '300' ] );
+	} );
 } );

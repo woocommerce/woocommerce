@@ -57,7 +57,12 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 	 */
 	public fromModel( properties: any ): any {
 		if ( properties.hasOwnProperty( this.property ) ) {
-			properties[ this.property ] = this.transformer.fromModel( properties[ this.property ] );
+			const val = properties[ this.property ];
+			if ( Array.isArray( val ) ) {
+				properties[ this.property ] = val.map( ( v ) => this.transformer.fromModel( v ) );
+			} else {
+				properties[ this.property ] = this.transformer.fromModel( val );
+			}
 		}
 
 		return properties;
@@ -71,7 +76,12 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 	 */
 	public toModel( properties: any ): any {
 		if ( properties.hasOwnProperty( this.property ) ) {
-			properties[ this.property ] = this.transformer.toModel( this.modelClass, properties[ this.property ] );
+			const val = properties[ this.property ];
+			if ( Array.isArray( val ) ) {
+				properties[ this.property ] = val.map( ( v ) => this.transformer.toModel( this.modelClass, v ) );
+			} else {
+				properties[ this.property ] = this.transformer.toModel( this.modelClass, val );
+			}
 		}
 
 		return properties;
