@@ -234,20 +234,26 @@ class ProfileWizard extends Component {
 		updateProfileItems( { completed: true } ).then( () => {
 			clearTaskCache();
 
+			const homescreenUrl = new URL(
+				getNewPath( {}, '/', {} ),
+				window.location.href
+			).href;
+
 			if ( shouldConnectJetpack ) {
 				document.body.classList.add( 'woocommerce-admin-is-loading' );
 
-				connectToJetpack(
-					getHistory().push( getNewPath( {}, '/', {} ) )
-				);
+				connectToJetpack( () => {
+					return homescreenUrl;
+				} );
 			} else {
-				getHistory().push( getNewPath( {}, '/', {} ) );
+				window.location.href = homescreenUrl;
 			}
 		} );
 	}
 
 	skipProfiler() {
 		const { createNotice, updateProfileItems } = this.props;
+
 		updateProfileItems( { skipped: true } )
 			.then( () => {
 				recordEvent( 'storeprofiler_store_details_skip' );
