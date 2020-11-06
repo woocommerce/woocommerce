@@ -22,6 +22,12 @@
 		z-index: 1100; //Must be greater than z-index on .woocommerce-layout__header
 	}
 
+	.components-navigation {
+		overflow-y: auto;
+		height: calc(100vh - #{$header-height});
+		box-sizing: border-box;
+	}
+
 	&:not(.is-folded) {
 		#wpcontent,
 		#wpfooter {

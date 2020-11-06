@@ -3,11 +3,6 @@
 		color: inherit; // This should be handled at component level.
 	}
 
-	.components-navigation {
-		height: 100%;
-		box-sizing: border-box;
-	}
-
 	.components-navigation__menu {
 		display: flex;
 		flex-direction: column;
