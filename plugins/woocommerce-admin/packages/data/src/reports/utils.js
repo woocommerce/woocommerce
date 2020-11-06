@@ -369,7 +369,13 @@ export function getReportChartData( options ) {
 		}
 
 		forEach( pagedData, function ( _data ) {
-			intervals = intervals.concat( _data.data.intervals );
+			if (
+				_data.data &&
+				_data.data.intervals &&
+				Array.isArray( _data.data.intervals )
+			) {
+				intervals = intervals.concat( _data.data.intervals );
+			}
 		} );
 	}
 
