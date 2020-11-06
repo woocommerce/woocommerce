@@ -9,12 +9,12 @@ import { Model } from '../models/model';
 export interface ModelTransformation {
 	/**
 	 * The order of execution for the transformer.
-	 * - For "toModel" higher numbers execute later.
-	 * - For "fromModel" the order is reversed.
+	 * - For "fromModel" higher numbers execute later.
+	 * - For "toModel" the order is reversed.
 	 *
 	 * @type {number}
 	 */
-	readonly order: number;
+	readonly fromModelOrder: number;
 
 	/**
 	 * Performs a transformation from model properties to raw properties.
@@ -34,12 +34,18 @@ export interface ModelTransformation {
 }
 
 /**
- * An enum for more easily defining transformation order values.
+ * An enum for defining the "toModel" transformation order values.
  */
 export enum TransformationOrder {
 	First = 0,
 	Normal = 500000,
-	Last = 1000000
+	Last = 1000000,
+
+	/**
+	 * A special value reserved for transformations that MUST come after all orders due to
+	 * the way that they destroy the property keys or values.
+	 */
+	VeryLast = 2000000
 }
 
 /**
@@ -61,7 +67,7 @@ export class ModelTransformer< T extends Model > {
 	 */
 	public constructor( transformations: ModelTransformation[] ) {
 		// Ensure that the transformations are sorted by priority.
-		transformations.sort( ( a, b ) => ( a.order > b.order ) ? 1 : -1 );
+		transformations.sort( ( a, b ) => ( a.fromModelOrder > b.fromModelOrder ) ? 1 : -1 );
 
 		this.transformations = transformations;
 	}

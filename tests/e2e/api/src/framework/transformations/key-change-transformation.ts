@@ -17,7 +17,7 @@ export class KeyChangeTransformation< T extends Model > implements ModelTransfor
 	 * Ensure that this transformation always happens at the very end since it changes the keys
 	 * in the transformed object.
 	 */
-	public readonly order = TransformationOrder.Last + TransformationOrder.Last;
+	public readonly fromModelOrder = TransformationOrder.VeryLast + 1;
 
 	/**
 	 * The key change transformations that this object should perform.

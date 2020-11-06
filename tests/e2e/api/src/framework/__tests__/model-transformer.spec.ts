@@ -2,12 +2,12 @@ import { ModelTransformation, ModelTransformer } from '../model-transformer';
 import { DummyModel } from '../../__test_data__/dummy-model';
 
 class DummyTransformation implements ModelTransformation {
-	public readonly order: number;
+	public readonly fromModelOrder: number;
 
 	private readonly fn: ( ( p: any ) => any ) | null;
 
 	public constructor( order: number, fn: ( ( p: any ) => any ) | null ) {
-		this.order = order;
+		this.fromModelOrder = order;
 		this.fn = fn;
 	}
 

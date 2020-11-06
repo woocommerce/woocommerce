@@ -10,7 +10,7 @@ import { ModelTransformation } from '../model-transformer';
 type TransformationCallback = ( properties: any ) => any;
 
 export class CustomTransformation implements ModelTransformation {
-	public readonly order: number;
+	public readonly fromModelOrder: number;
 
 	/**
 	 * The hook to run for toModel.
@@ -40,7 +40,7 @@ export class CustomTransformation implements ModelTransformation {
 		toHook: TransformationCallback | null,
 		fromHook: TransformationCallback | null,
 	) {
-		this.order = order;
+		this.fromModelOrder = order;
 		this.toHook = toHook;
 		this.fromHook = fromHook;
 	}

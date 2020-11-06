@@ -11,7 +11,7 @@ type AdditionalProperties = { [ key: string ]: any };
  * a default value if it is not already set.
  */
 export class AddPropertyTransformation implements ModelTransformation {
-	public readonly order = TransformationOrder.Normal;
+	public readonly fromModelOrder = TransformationOrder.Normal;
 
 	/**
 	 *The additional properties to add when executing toModel.
