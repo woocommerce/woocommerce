@@ -1,4 +1,5 @@
 import { Model } from '../models/model';
+import { ModelConstructor } from '../models/shared-types';
 
 /**
  * An interface for an object that can perform transformations both to and from a representation
@@ -99,7 +100,7 @@ export class ModelTransformer< T extends Model > {
 	 * @return {T} The transformed model.
 	 * @template T
 	 */
-	public toModel( modelClass: new( properties: Partial< T > ) => T, data: any ): T {
+	public toModel( modelClass: ModelConstructor< T >, data: any ): T {
 		const transformed: any = this.transformations.reduceRight(
 			( properties: any, transformer: ModelTransformation ) => {
 				return transformer.toModel( properties );

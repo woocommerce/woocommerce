@@ -1,3 +1,14 @@
+import { Model } from './model';
+
+/**
+ * A constructor for a model.
+ *
+ * @typedef ModelConstructor
+ * @alias Function.<T>
+ * @template T
+ */
+export type ModelConstructor< T extends Model > = new ( properties: Partial< T > ) => T;
+
 /**
  * A post's status.
  *
