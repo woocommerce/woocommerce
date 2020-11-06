@@ -37,6 +37,11 @@ class WC_Beta_Tester_Import_Export {
 	protected const IMPORT_FILENAME = 'woocommerce-settings-json';
 
 	/**
+	 * @var array Import status message
+	 */
+	protected $message;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -54,7 +59,7 @@ class WC_Beta_Tester_Import_Export {
 	 * Add options page to menu
 	 */
 	public function add_to_menu() {
-		add_submenu_page( 'plugins.php', __( 'WooCommerce Tester Import/Export Settings', 'woocommerce-beta-tester' ), __( 'WC Import/Export Settings', 'woocommerce-beta-tester' ), static::IMPORT_CAP, 'wc-beta-tester-settings', array( $this, 'settings_page_html' ) );
+		add_submenu_page( 'plugins.php', __( 'WooCommerce Tester Import/Export', 'woocommerce-beta-tester' ), __( 'WC Import/Export', 'woocommerce-beta-tester' ), static::IMPORT_CAP, 'wc-beta-tester-settings', array( $this, 'settings_page_html' ) );
 	}
 
 	/**
@@ -65,11 +70,22 @@ class WC_Beta_Tester_Import_Export {
 			return;
 		}
 
-		$settings = $this->maybe_import_settings();
+		$export_url = wp_nonce_url( admin_url( 'admin-ajax.php?action=wc_beta_tester_export_settings' ), static::NONCE_ACTION );
+		$this->maybe_import_settings();
+
+		// show error/update messages.
+		if ( ! empty( $this->message ) ) {
+			?>
+			<div class="notice <?php
+				echo ! empty( $this->message['type'] ) ? esc_attr( $this->message['type'] ) : '';
+				?>"><?php echo esc_html( $this->message['message'] ); ?></div>
+			<?php
+		}
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-			<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=wc_beta_tester_export_settings' ) ) ?>" class="button-primary"><?php
+			<p><?php esc_html_e( 'Export your WooCommerce Settings. The export file should not contain any fields that identify your site or reveal secrets (eg. API keys).', 'woocommerce-beta-tester' ); ?></p>
+			<a href="<?php echo esc_url( $export_url ) ?>" class="button-primary"><?php
 				/* translators Export WooCommerce settings button text. */
 				esc_html_e( 'Export WooCommerce Settings', 'woocommerce-beta-tester' );
 			?></a>
@@ -77,6 +93,7 @@ class WC_Beta_Tester_Import_Export {
 			<form method="POST" enctype="multipart/form-data">
 				<?php wp_nonce_field( static::NONCE_ACTION ); ?>
 				<input type="hidden" name="action" value="<?php echo static::IMPORT_ACTION; ?>" />
+				<p><?php esc_html_e( 'Import WooCommerce Settings exported with this tool. Some settings like store address, payment gateways, etc. will need to be configured manually.', 'woocommerce-beta-tester' ); ?></p>
 				<button type="submit" class="button-primary"><?php
 				/* translators Import WooCommerce settings button text. */
 				esc_html_e( 'Import WooCommerce Settings', 'woocommerce-beta-tester' );
@@ -85,13 +102,17 @@ class WC_Beta_Tester_Import_Export {
 			</form>
 		</div>
 		<?php
-		echo $settings;
 	}
 
 	/**
 	 * Export settings in json format.
 	 */
 	public function export_settings() {
+		if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], static::NONCE_ACTION ) ) {
+			header( 'HTTP/1.1 403 Forbidden' );
+			exit;
+		}
+
 		$filename = sprintf( 'woocommerce-settings-%s.json', gmdate( 'Ymdgi' ) );
 		wc_set_time_limit( 0 );
 		wc_nocache_headers();
@@ -107,17 +128,22 @@ class WC_Beta_Tester_Import_Export {
 	 * Import settings in json format if submitted.
 	 */
 	public function maybe_import_settings() {
-		$return_string = '';
 		if ( empty( $_POST ) || empty( $_POST['action'] ) || $_POST['action'] !== static::IMPORT_ACTION ) {
-			return $return_string;
+			return;
 		}
 
 		if ( ! wp_verify_nonce( $_POST['_wpnonce'], static::NONCE_ACTION ) ) {
-			return __( 'Invalid submission', 'woocommerce-beta-tester' );
+			$this->add_message( __( 'Invalid submission', 'woocommerce-beta-tester' ) );
+			return;
 		}
 
 		if ( ! empty( $_FILES[ static::IMPORT_FILENAME ] ) ) {
 			$tmp_file = $_FILES[ static::IMPORT_FILENAME ]['tmp_name'];
+			if ( empty( $tmp_file ) ) {
+				$this->add_message( __( 'No file uploaded.', 'woocommerce-beta-tester' ) );
+				return;
+			}
+
 			if ( is_readable( $tmp_file ) ) {
 				$maybe_json = file_get_contents( $tmp_file );
 				$settings = json_decode( $maybe_json, true );
@@ -129,12 +155,16 @@ class WC_Beta_Tester_Import_Export {
 						$setting = maybe_unserialize( $settings[ $option_name ] );
 						update_option( $option_name, $setting );
 					}
-					// @todo: implement as notice
-					$return_string = __( 'Settings Updated', 'woocommerce-beta-tester' );
+					$this->add_message( __( 'Settings Imported', 'woocommerce-beta-tester' ), 'updated' );
+				} else {
+					$this->add_message( __( 'File did not contain well formed JSON.', 'woocommerce-beta-tester' ) );
 				}
+			} else {
+				$this->add_message( __( 'Fie could not be read.', 'woocommerce-beta-tester' ) );
 			}
+		} else {
+			$this->add_message( __( 'No file uploaded.', 'woocommerce-beta-tester' ) );
 		}
-		return $return_string;
 	}
 
 	/**
@@ -149,6 +179,19 @@ class WC_Beta_Tester_Import_Export {
 			}
 		}
 		return $settings;
+	}
+
+	/**
+	 * Add an setttings import status message.
+	 *
+	 * @param string $message Message string.
+	 * @param string $type Message type. Optional. Default 'error'.
+	 */
+	protected function add_message( $message, $type = 'error' ) {
+		$this->message = array(
+			'message' => $message,
+			'type'    => $type
+		);
 	}
 
 	/**

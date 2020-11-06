@@ -20,6 +20,7 @@ class WC_Beta_Tester_Admin_Menus {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 50 );
 		}
 		add_action( 'admin_footer', array( $this, 'version_information_template' ) );
+		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 	}
 
 	/**
@@ -260,7 +261,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			array(
 				'parent' => 0,
 				'id'     => 'wc-beta-tester',
-				'title'  => __( 'WC Beta Tester', 'woocommerce-beta-tester' ),
+				'title'  => __( 'WooCommerce Tester', 'woocommerce-beta-tester' ),
 			)
 		);
 
@@ -318,6 +319,22 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 		foreach ( $nodes as $node ) {
 			$wp_admin_bar->add_node( $node );
+		}
+	}
+
+	/**
+	 * Hide menu items from view so the pages exist, but the menu items do not.
+	 */
+	public function hide_from_menus() {
+		global $submenu;
+
+		$items_to_remove = array( 'wc-beta-tester-settings', 'wc-beta-tester-version-picker', 'wc-beta-tester' );
+		if ( isset( $submenu['plugins.php'] ) ) {
+			foreach ( $submenu['plugins.php'] as $key => $menu ) {
+				if (  in_array( $menu[2], $items_to_remove ) ) {
+					unset( $submenu['plugins.php'][ $key ] );
+				}
+			}
 		}
 	}
 
