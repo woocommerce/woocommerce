@@ -105,6 +105,14 @@
 	.woocommerce-layout__activity-panel-empty {
 		border-top: 1px solid $gray-200;
 	}
+
+	.woocommerce-activity-card__button {
+		&:focus {
+			box-shadow: unset;
+			outline: unset;
+			border: 1px solid $gray-200;
+		}
+	}
 }
 
 .components-panel__body-title {

@@ -30,10 +30,11 @@ jest.mock( '../panels', () => {
 	};
 } );
 
-// Mock the orders.
+// Mock the orders and order statuses.
 jest.mock( '../orders/utils', () => {
 	return {
 		getUnreadOrders: jest.fn().mockImplementation( () => 100 ),
+		getOrderStatuses: jest.fn().mockImplementation( () => [ 'status' ] ),
 	};
 } );
 

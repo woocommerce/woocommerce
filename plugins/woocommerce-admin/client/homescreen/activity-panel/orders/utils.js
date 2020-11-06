@@ -8,14 +8,10 @@ import { SETTINGS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../../analytics/settings/config';
 
-export function getUnreadOrders( select ) {
+export function getUnreadOrders( select, orderStatuses ) {
 	const { getItemsTotalCount, getItemsError, isResolving } = select(
 		ITEMS_STORE_NAME
 	);
-	const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
-	const {
-		woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
-	} = getMutableSetting( 'wc_admin', 'wcAdminSettings', {} );
 
 	if ( ! orderStatuses.length ) {
 		return false;
@@ -43,4 +39,12 @@ export function getUnreadOrders( select ) {
 	}
 
 	return totalOrders;
+}
+
+export function getOrderStatuses( select ) {
+	const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
+	const {
+		woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
+	} = getMutableSetting( 'wc_admin', 'wcAdminSettings', {} );
+	return orderStatuses;
 }

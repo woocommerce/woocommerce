@@ -9,13 +9,14 @@ import { Accordion, AccordionPanel } from '@woocommerce/components';
  * Internal dependencies
  */
 import './style.scss';
-import { getUnreadOrders } from './orders/utils';
+import { getOrderStatuses, getUnreadOrders } from './orders/utils';
 import { getAllPanels } from './panels';
 
 export const ActivityPanel = () => {
 	const panels = useSelect( ( select ) => {
-		const countUnreadOrders = getUnreadOrders( select );
-		return getAllPanels( { countUnreadOrders } );
+		const orderStatuses = getOrderStatuses( select );
+		const countUnreadOrders = getUnreadOrders( select, orderStatuses );
+		return getAllPanels( { countUnreadOrders, orderStatuses } );
 	} );
 	return (
 		<Accordion>

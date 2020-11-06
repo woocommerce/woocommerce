@@ -27,7 +27,6 @@ import {
 	ActivityCard,
 	ActivityCardPlaceholder,
 } from '../../../header/activity-panel/activity-card';
-import { DEFAULT_ACTIONABLE_STATUSES } from '../../../analytics/settings/config';
 import { CurrencyContext } from '../../../lib/currency-context';
 import './style.scss';
 
@@ -283,9 +282,11 @@ class OrdersPanel extends Component {
 }
 
 OrdersPanel.propTypes = {
-	orders: PropTypes.array.isRequired,
 	isError: PropTypes.bool,
 	isRequesting: PropTypes.bool,
+	countUnreadOrders: PropTypes.number,
+	orders: PropTypes.array.isRequired,
+	orderStatuses: PropTypes.array,
 };
 
 OrdersPanel.defaultProps = {
@@ -297,7 +298,7 @@ OrdersPanel.defaultProps = {
 OrdersPanel.contextType = CurrencyContext;
 
 export default withSelect( ( select, props ) => {
-	const { countUnreadOrders } = props;
+	const { countUnreadOrders, orderStatuses } = props;
 	const { getItems, getItemsError } = select( ITEMS_STORE_NAME );
 	const { getReportItems, getReportItemsError, isResolving } = select(
 		REPORTS_STORE_NAME
@@ -315,10 +316,10 @@ export default withSelect( ( select, props ) => {
 	const actionableOrdersQuery = {
 		page: 1,
 		per_page: 5,
-		status: DEFAULT_ACTIONABLE_STATUSES,
+		status: orderStatuses,
 		_fields: [ 'id', 'date_created_gmt', 'status' ],
 	};
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	/* eslint-disable @wordpress/no-unused-vars-before-return */
 	const actionableOrders = Array.from(
 		getItems( 'orders', actionableOrdersQuery ).values()
 	);
@@ -333,7 +334,7 @@ export default withSelect( ( select, props ) => {
 				getItemsError( 'orders', actionableOrdersQuery )
 			),
 			isRequesting: isRequestingActionable,
-			orderStatuses: DEFAULT_ACTIONABLE_STATUSES,
+			orderStatuses,
 		};
 	}
 
@@ -360,9 +361,13 @@ export default withSelect( ( select, props ) => {
 		'orders',
 		ordersQuery,
 	] );
+	/* eslint-enable @wordpress/no-unused-vars-before-return */
 	let orders = [];
 
 	if ( reportOrders && reportOrders.length ) {
+		if ( actionableOrders && ! actionableOrders.length ) {
+			return { isRequesting: true };
+		}
 		// Merge the core endpoint data with our reporting table.
 		const actionableOrdersById = keyBy( actionableOrders, 'id' );
 		orders = reportOrders.map( ( order ) =>
@@ -373,6 +378,6 @@ export default withSelect( ( select, props ) => {
 		orders,
 		isError,
 		isRequesting,
-		orderStatuses: DEFAULT_ACTIONABLE_STATUSES,
+		orderStatuses,
 	};
 } )( OrdersPanel );
