@@ -6,14 +6,15 @@
 		"analytics-dashboard/customizable": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
+		"homescreen": true,
 		"marketing": true,
+		"minified-js": true,
+		"mobile-app-banner": true,
+		"navigation": true,
 		"onboarding": true,
 		"remote-inbox-notifications": true,
 		"shipping-label-banner": true,
 		"store-alerts": true,
-		"minified-js": true,
-		"wcpay": true,
-		"mobile-app-banner": true,
-		"navigation": true
+		"wcpay": true
 	}
 }

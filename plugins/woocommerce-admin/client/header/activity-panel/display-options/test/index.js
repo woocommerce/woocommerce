@@ -42,22 +42,22 @@ describe( 'Activity Panel - Homescreen Display Options', () => {
 		// Verify the default of two columns.
 		expect(
 			getByText( 'Single column', { selector: 'button' } )
-		).not.toBeChecked();
+		).toBeChecked();
 		expect(
 			getByText( 'Two columns', { selector: 'button' } )
-		).toBeChecked();
+		).not.toBeChecked();
 
-		fireEvent.click( getByText( 'Single column', { selector: 'button' } ) );
+		fireEvent.click( getByText( 'Two columns', { selector: 'button' } ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'homescreen_display_option',
 			{
-				display_option: 'single_column',
+				display_option: 'two_columns',
 			}
 		);
 
 		expect( updateUserPreferences ).toHaveBeenCalledWith( {
-			homepage_layout: 'single_column',
+			homepage_layout: 'two_columns',
 		} );
 	} );
 } );

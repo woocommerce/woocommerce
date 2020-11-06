@@ -6,8 +6,9 @@ import {
 	MenuGroup,
 	MenuItemsChoice,
 } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { useUserPreferences } from '@woocommerce/data';
+import { useUserPreferences, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -39,6 +40,13 @@ const LAYOUTS = [
 ];
 
 export const DisplayOptions = () => {
+	const defaultHomescreenLayout = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		return (
+			getOption( 'woocommerce_default_homepage_layout' ) ||
+			'single_column'
+		);
+	} );
 	const {
 		updateUserPreferences,
 		homepage_layout: layout,
@@ -72,7 +80,7 @@ export const DisplayOptions = () => {
 								display_option: newLayout,
 							} );
 						} }
-						value={ layout || 'two_columns' }
+						value={ layout || defaultHomescreenLayout }
 					/>
 				</MenuGroup>
 			) }

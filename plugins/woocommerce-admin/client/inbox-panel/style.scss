@@ -196,15 +196,6 @@
 	}
 }
 
-.woocommerce-homepage-notes-wrapper {
-	.is-inbox & {
-		height: calc(100% - 30px);
-		& > div {
-			overflow: auto;
-		}
-	}
-}
-
 // Tweak to fix dropdown and placeholder in IE 11
 @media all and ( -ms-high-contrast: none ), ( -ms-high-contrast: active ) {
 	.woocommerce-admin-dismiss-dropdown {

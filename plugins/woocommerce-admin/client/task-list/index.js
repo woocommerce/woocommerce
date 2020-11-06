@@ -34,7 +34,7 @@ import { getAllTasks, recordTaskViewEvent } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
 import sanitizeHTML from '../lib/sanitize-html';
 
-class TaskDashboard extends Component {
+export class TaskDashboard extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -73,6 +73,7 @@ class TaskDashboard extends Component {
 		if ( ! this.getIncompleteTasks().length && ! isTaskListComplete ) {
 			updateOptions( {
 				woocommerce_task_list_complete: 'yes',
+				woocommerce_default_homepage_layout: 'two_columns',
 			} );
 		}
 	}
@@ -215,6 +216,7 @@ class TaskDashboard extends Component {
 		this.props.updateOptions( {
 			woocommerce_task_list_hidden: 'yes',
 			woocommerce_task_list_prompt_shown: true,
+			woocommerce_default_homepage_layout: 'two_columns',
 		} );
 	}
 

@@ -1,14 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	Fragment,
-	Suspense,
-	lazy,
-	useState,
-	useRef,
-	useEffect,
-} from '@wordpress/element';
+import { Suspense, lazy, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import classnames from 'classnames';
@@ -18,6 +11,7 @@ import {
 	NOTES_STORE_NAME,
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,17 +20,20 @@ import StatsOverview from './stats-overview';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../inbox-panel';
 import { WelcomeModal } from './welcome-modal';
+import ActivityHeader from '../header/activity-panel/activity-header';
 import { ActivityPanel } from './activity-panel';
 
 import './style.scss';
 import '../dashboard/style.scss';
 import { StoreManagementLinks } from '../store-management-links';
+import { Column } from './column';
 
 const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
 );
 
 export const Layout = ( {
+	defaultHomescreenLayout,
 	isBatchUpdating,
 	query,
 	requestingTaskList,
@@ -47,28 +44,9 @@ export const Layout = ( {
 } ) => {
 	const userPrefs = useUserPreferences();
 	const twoColumns =
-		( userPrefs.homepage_layout || 'two_columns' ) === 'two_columns';
+		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
+		'two_columns';
 	const [ showInbox, setShowInbox ] = useState( true );
-	const [ isContentSticky, setIsContentSticky ] = useState( false );
-	const content = useRef( null );
-	const maybeStickContent = () => {
-		if ( ! content.current ) {
-			return;
-		}
-		const { bottom } = content.current.getBoundingClientRect();
-		const shouldBeSticky = twoColumns && bottom < window.innerHeight;
-
-		setIsContentSticky( shouldBeSticky );
-	};
-
-	useEffect( () => {
-		maybeStickContent();
-		window.addEventListener( 'resize', maybeStickContent );
-
-		return () => {
-			window.removeEventListener( 'resize', maybeStickContent );
-		};
-	}, [] );
 
 	const isTaskListEnabled = taskListHidden === false && ! taskListComplete;
 	const isDashboardShown = ! isTaskListEnabled || ! query.task;
@@ -79,27 +57,25 @@ export const Layout = ( {
 
 	const renderColumns = () => {
 		return (
-			<Fragment>
-				<div className="woocommerce-homescreen-column">
+			<>
+				<Column shouldStick={ twoColumns }>
+					<ActivityHeader
+						className="your-store-today"
+						title={ __( 'Your store today', 'woocommerce-admin' ) }
+						subtitle={ __(
+							"To do's, tips, and insights for your business",
+							'woocommerce-admin'
+						) }
+					/>
 					<ActivityPanel />
-					{ showInbox && (
-						<div className="is-inbox">
-							<InboxPanel />
-						</div>
-					) }
-				</div>
-				<div
-					className="woocommerce-homescreen-column"
-					ref={ content }
-					style={ {
-						position: isContentSticky ? 'sticky' : 'static',
-					} }
-				>
 					{ isTaskListEnabled && renderTaskList() }
-					<StatsOverview />
 					{ ! isTaskListEnabled && <StoreManagementLinks /> }
-				</div>
-			</Fragment>
+				</Column>
+				<Column shouldStick={ twoColumns }>
+					<StatsOverview />
+					<InboxPanel />
+				</Column>
+			</>
 		);
 	};
 
@@ -181,7 +157,12 @@ export default compose(
 		const shouldShowWelcomeModal =
 			! welcomeModalDismissedIsResolving && ! welcomeModalDismissed;
 
+		const defaultHomescreenLayout =
+			getOption( 'woocommerce_default_homepage_layout' ) ||
+			'single_column';
+
 		return {
+			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			taskListComplete:

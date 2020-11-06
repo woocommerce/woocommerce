@@ -138,3 +138,17 @@ function wc_admin_update_160_remove_facebook_note() {
 function wc_admin_update_160_db_version() {
 	Installer::update_db_version( '1.6.0' );
 }
+
+/**
+ * Set "two column" homescreen layout as default for existing stores.
+ */
+function wc_admin_update_170_homescreen_layout() {
+	add_option( 'woocommerce_default_homepage_layout', 'two_columns', '', 'no' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_170_db_version() {
+	Installer::update_db_version( '1.7.0' );
+}

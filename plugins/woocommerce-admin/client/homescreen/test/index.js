@@ -146,9 +146,56 @@ describe( 'Homescreen Layout', () => {
 		expect( quickLinks ).toBeDefined();
 	} );
 
-	it( 'should default to two columns', () => {
+	it( 'should default to layout option value', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: '',
+		} );
+		const { container } = render(
+			<Layout
+				defaultHomescreenLayout="two_columns"
+				requestingTaskList={ false }
+				taskListHidden={ false }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		// Expect that we're rendering the two-column home screen.
+		// The user doesn't have a preference set, but the component received a prop
+		// defaulting to the two column view.
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-homescreen two-columns'
+			)
+		).toHaveLength( 1 );
+	} );
+
+	it( 'should falback to single column layout', () => {
+		useUserPreferences.mockReturnValue( {
+			homepage_layout: '',
+		} );
+		const { container } = render(
+			<Layout
+				requestingTaskList={ false }
+				taskListHidden={ false }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		// Expect that we're rendering the single column home screen.
+		// If a default layout prop isn't specified, the default falls back to single column view.
+		const homescreen = container.getElementsByClassName(
+			'woocommerce-homescreen'
+		);
+		expect( homescreen ).toHaveLength( 1 );
+
+		expect( homescreen[ 0 ] ).not.toHaveClass( 'two-columns' );
+	} );
+
+	it( 'switches to two column layout based on user preference', () => {
+		useUserPreferences.mockReturnValue( {
+			homepage_layout: 'two_columns',
 		} );
 		const { container } = render(
 			<Layout
@@ -165,27 +212,5 @@ describe( 'Homescreen Layout', () => {
 				'woocommerce-homescreen two-columns'
 			)
 		).toHaveLength( 1 );
-	} );
-
-	it( 'switches to single column layout based on user preference', () => {
-		useUserPreferences.mockReturnValue( {
-			homepage_layout: 'single_column',
-		} );
-		const { container } = render(
-			<Layout
-				requestingTaskList={ false }
-				taskListHidden={ false }
-				query={ {} }
-				updateOptions={ () => {} }
-			/>
-		);
-
-		// Expect that we're rendering the two-column home screen.
-		const homescreen = container.getElementsByClassName(
-			'woocommerce-homescreen'
-		);
-		expect( homescreen ).toHaveLength( 1 );
-
-		expect( homescreen[ 0 ] ).not.toHaveClass( 'two-columns' );
 	} );
 } );

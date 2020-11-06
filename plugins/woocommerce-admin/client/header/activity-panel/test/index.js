@@ -15,6 +15,11 @@ jest.mock( '@woocommerce/data', () => ( {
 	} ),
 } ) );
 
+// We aren't testing the <DisplayOptions /> component here.
+jest.mock( '../display-options', () => ( {
+	DisplayOptions: jest.fn().mockReturnValue( '[DisplayOptions]' ),
+} ) );
+
 describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
 		render( <ActivityPanel isEmbedded query={ {} } /> );
