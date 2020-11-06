@@ -98,7 +98,7 @@ class Analytics {
 			'button'   => __( 'Clear', 'woocommerce-admin' ),
 			'desc'     => sprintf(
 				/* translators: 1: opening link tag, 2: closing tag */
-				'This tool will reset the cached values used in WooCommerce Analytics. If numbers still look off, try %1$sReimporting Historical Data%2$s.',
+				__( 'This tool will reset the cached values used in WooCommerce Analytics. If numbers still look off, try %1$sReimporting Historical Data%2$s.', 'woocommerce-admin' ),
 				'<a href="' . esc_url( $settings_url ) . '">',
 				'</a>'
 			),
