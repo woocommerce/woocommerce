@@ -94,8 +94,8 @@ export const config = applyFilters( SETTINGS_FILTER, {
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: __(
-			'Orders with these statuses require action on behalf of the store admin.' +
-				'These orders will show up in the Orders tab under the activity panel.',
+			'Orders with these statuses require action on behalf of the store admin. ' +
+				'These orders will show up in the Home Screen - Orders task.',
 			'woocommerce-admin'
 		),
 		defaultValue: DEFAULT_ACTIONABLE_STATUSES,

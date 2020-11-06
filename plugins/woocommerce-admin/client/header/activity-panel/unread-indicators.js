@@ -4,9 +4,7 @@
 import {
 	NOTES_STORE_NAME,
 	REVIEWS_STORE_NAME,
-	SETTINGS_STORE_NAME,
 	USER_STORE_NAME,
-	ITEMS_STORE_NAME,
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
@@ -14,7 +12,6 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { DEFAULT_ACTIONABLE_STATUSES } from '../../analytics/settings/config';
 import { getUnreadNotesCount } from '../../inbox-panel/utils';
 
 export function getUnreadNotes( select ) {
@@ -58,42 +55,6 @@ export function getUnreadNotes( select ) {
 	const unreadNotesCount = getUnreadNotesCount( latestNotes, lastRead );
 
 	return unreadNotesCount > 0;
-}
-
-export function getUnreadOrders( select ) {
-	const { getItems, getItemsTotalCount, getItemsError, isResolving } = select(
-		ITEMS_STORE_NAME
-	);
-	const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
-	const {
-		woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
-	} = getMutableSetting( 'wc_admin', 'wcAdminSettings', {} );
-
-	if ( ! orderStatuses.length ) {
-		return false;
-	}
-
-	const ordersQuery = {
-		page: 1,
-		per_page: 1, // Core endpoint requires per_page > 0.
-		status: orderStatuses,
-		_fields: [ 'id' ],
-	};
-
-	getItems( 'orders', ordersQuery );
-
-	// Disable eslint rule requiring `latestNote` to be defined below because the next two statements
-	// depend on `getItemsTotalCount` to have been called.
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const totalOrders = getItemsTotalCount( 'orders', ordersQuery );
-	const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
-	const isRequesting = isResolving( 'getItems', [ 'orders', ordersQuery ] );
-
-	if ( isError || isRequesting ) {
-		return null;
-	}
-
-	return totalOrders > 0;
 }
 
 export function getUnapprovedReviews( select ) {

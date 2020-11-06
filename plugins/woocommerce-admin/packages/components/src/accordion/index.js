@@ -3,6 +3,7 @@
  */
 import { Panel } from '@wordpress/components';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Use `Accordion` to display an accordion that renders the children inside.
@@ -13,7 +14,11 @@ import PropTypes from 'prop-types';
  * @return {Object} -
  */
 const Accordion = ( { className, children } ) => {
-	return <Panel className={ className }>{ children }</Panel>;
+	return (
+		<Panel className={ classnames( className, 'woocommerce-accordion' ) }>
+			{ children }
+		</Panel>
+	);
 };
 
 Accordion.propTypes = {

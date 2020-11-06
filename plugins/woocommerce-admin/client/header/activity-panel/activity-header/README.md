@@ -11,7 +11,7 @@ import ActivityHeader from 'layout/activity-panel/activity-header';
 render: function() {
   return (
     <ActivityHeader
-      title="Orders"
+      title="Reviews"
     />
   );
 }

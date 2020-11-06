@@ -40,3 +40,7 @@ export function* getItems( itemType, query ) {
 export function* getReviewsTotalCount( itemType, query ) {
 	yield getItems( itemType, query );
 }
+
+export function* getItemsTotalCount( itemType, query ) {
+	yield getItems( itemType, query );
+}

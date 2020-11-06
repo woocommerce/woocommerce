@@ -1,0 +1,114 @@
+.woocommerce-accordion-card {
+	.components-panel__body-title {
+		margin: 0;
+		padding: 1em 0;
+		.components-button {
+			display: flex;
+			flex-direction: row;
+			width: 100%;
+			padding-left: 24px;
+			font-style: normal;
+			font-weight: 400;
+			font-size: 20px;
+			line-height: 28px;
+			color: $gray-900;
+			&:focus {
+				box-shadow: unset;
+				outline: unset;
+			}
+			.woocommerce-accordion-header {
+				order: 1;
+				text-align: left;
+				width: 50%;
+				.woocommerce-accordion-title {
+					vertical-align: bottom;
+					margin-right: $gap;
+				}
+			}
+			& > span {
+				order: 2;
+				width: 50%;
+				text-align: right;
+				.components-panel__arrow {
+					width: 30px;
+					height: 30px;
+					vertical-align: text-top;
+				}
+			}
+		}
+	}
+
+	.woocommerce-activity-card__actions {
+		margin: 0;
+		.components-button {
+			background: $gray-100;
+			border-radius: 12px;
+			height: 24px;
+			padding-left: $gap;
+			width: 65px;
+		}
+	}
+
+	.woocommerce-activity-card {
+		padding: $gap-largest/2 $gutter $gutter;
+		&__header {
+			margin-bottom: $gap-smaller;
+		}
+	}
+
+	.woocommerce-layout__activity-panel-outbound-link {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 50px;
+		border-bottom: 1px solid $gray-100;
+		padding: $gap $fallback-gutter;
+		padding: $gap $gutter;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 18px;
+		margin: 0;
+		text-decoration: none;
+
+		.gridicon {
+			display: none;
+		}
+
+		&:hover {
+			background: $gray-200;
+		}
+
+		&:active {
+			background: $gray-100;
+		}
+
+		&:focus {
+			background: $gray-200;
+			box-shadow: inset 0 0 0 1px $box-shadow-blue,
+				inset 0 0 0 2px $gray-200;
+		}
+
+		&:hover,
+		&:focus {
+			.gridicon {
+				display: initial;
+			}
+		}
+
+		&:active {
+			.gridicon {
+				display: initial;
+			}
+		}
+	}
+
+	.woocommerce-layout__activity-panel-empty {
+		border-top: 1px solid $gray-200;
+	}
+}
+
+.components-panel__body-title {
+	.woocommerce-accordion-card .is-opened & {
+		border-bottom: 1px solid $gray-200;
+	}
+}

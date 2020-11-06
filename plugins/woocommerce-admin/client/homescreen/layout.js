@@ -26,6 +26,7 @@ import StatsOverview from './stats-overview';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../inbox-panel';
 import { WelcomeModal } from './welcome-modal';
+import { ActivityPanel } from './activity-panel';
 
 import './style.scss';
 import '../dashboard/style.scss';
@@ -79,11 +80,14 @@ export const Layout = ( {
 	const renderColumns = () => {
 		return (
 			<Fragment>
-				{ showInbox && (
-					<div className="woocommerce-homescreen-column is-inbox">
-						<InboxPanel />
-					</div>
-				) }
+				<div className="woocommerce-homescreen-column">
+					<ActivityPanel />
+					{ showInbox && (
+						<div className="is-inbox">
+							<InboxPanel />
+						</div>
+					) }
+				</div>
 				<div
 					className="woocommerce-homescreen-column"
 					ref={ content }

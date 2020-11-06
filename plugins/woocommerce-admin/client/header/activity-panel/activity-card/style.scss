@@ -19,6 +19,17 @@
 			grid-template-columns: 76px 1fr;
 		}
 	}
+
+	&__button {
+		display: block;
+		height: unset;
+		background: none;
+		align-items: unset;
+		transition: unset;
+		text-align: left;
+		width: 100%;
+		padding: 0;
+	}
 }
 
 .woocommerce-activity-card__unread {
@@ -55,6 +66,10 @@
 			line-height: 24px;
 			font-weight: normal;
 		}
+
+		.woocommerce-activity-card__button & {
+			margin-bottom: $gap-smaller;
+		}
 	}
 
 	.woocommerce-activity-card__date {
@@ -67,6 +82,9 @@
 
 	.woocommerce-activity-card__subtitle {
 		order: 3;
+		.woocommerce-activity-card__button & {
+			margin-bottom: $gap-smallest;
+		}
 	}
 
 	@include breakpoint( '>782px' ) {
