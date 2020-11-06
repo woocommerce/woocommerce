@@ -66,6 +66,16 @@ describe( 'PropertyTypeTransformation', () => {
 		expect( transformed.date ).toStrictEqual( '2020-11-06T03:11:41.000Z' );
 	} );
 
+	it( 'should convert empty dates', () => {
+		let transformed = transformation.toModel( { date: '' } );
+
+		expect( transformed.date ).toStrictEqual( null );
+
+		transformed = transformation.fromModel( { date: null } );
+
+		expect( transformed.date ).toStrictEqual( '' );
+	} );
+
 	it( 'should use conversion callbacks', () => {
 		let transformed = transformation.toModel( { callback: 'Test' } );
 

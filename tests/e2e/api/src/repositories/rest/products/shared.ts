@@ -1,4 +1,4 @@
-import { ModelTransformation, ModelTransformer } from '../../../framework/model-transformer';
+import { ModelTransformation, ModelTransformer, TransformationOrder } from '../../../framework/model-transformer';
 import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
 import { AbstractProduct } from '../../../models/products/abstract-product';
 import { AddPropertyTransformation } from '../../../framework/transformations/add-property-transformation';
@@ -7,6 +7,7 @@ import {
 	PropertyType,
 	PropertyTypeTransformation,
 } from '../../../framework/transformations/property-type-transformation';
+import { CustomTransformation } from '../../../framework/transformations/custom-transformation';
 
 /**
  * Creates a transformer for the shared properties of all products.
@@ -33,6 +34,35 @@ export function createProductTransformer< T extends AbstractProduct >(
 				'date_on_sale_to',
 			],
 		),
+		new CustomTransformation(
+			TransformationOrder.Normal,
+			( properties: any ) => {
+				if ( properties.hasOwnProperty( 'dimensions' ) ) {
+					properties.length = properties.dimensions.length;
+					properties.width = properties.dimensions.width;
+					properties.height = properties.dimensions.height;
+					delete properties.dimensions;
+				}
+
+				return properties;
+			},
+			( properties: any ) => {
+				if ( properties.hasOwnProperty( 'length ' ) ||
+					properties.hasOwnProperty( 'width' ) ||
+					properties.hasOwnProperty( 'height' ) ) {
+					properties.dimensions = {
+						length: properties.length,
+						width: properties.width,
+						height: properties.height,
+					};
+					delete properties.length;
+					delete properties.width;
+					delete properties.height;
+				}
+
+				return properties;
+			},
+		),
 		new PropertyTypeTransformation(
 			{
 				created: PropertyType.Date,
@@ -42,6 +72,8 @@ export function createProductTransformer< T extends AbstractProduct >(
 				isVirtual: PropertyType.Boolean,
 				onePerOrder: PropertyType.Boolean,
 				onSale: PropertyType.Boolean,
+				saleStart: PropertyType.Date,
+				saleEnd: PropertyType.Date,
 				isDownloadable: PropertyType.Boolean,
 				downloadLimit: PropertyType.Integer,
 				daysToDownload: PropertyType.Integer,
@@ -72,6 +104,8 @@ export function createProductTransformer< T extends AbstractProduct >(
 				taxClass: 'tax_class',
 				onSale: 'on_sale',
 				salePrice: 'sale_price',
+				saleStart: 'date_on_sale_from_gmt',
+				saleEnd: 'date_on_sale_to_gmt',
 				isDownloadable: 'downloadable',
 				downloadLimit: 'download_limit',
 				daysToDownload: 'download_expiry',

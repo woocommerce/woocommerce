@@ -183,11 +183,18 @@ export abstract class AbstractProduct extends Model {
 	public readonly salePrice: string = '';
 
 	/**
-	 * The GMT timeframe during which the product should be one sale.
+	 * The GMT datetime when the product should start to be on sale.
 	 *
-	 * @type {{start: Date, end: Date}}
+	 * @type {Date|null}
 	 */
-	public readonly saleWindow?: { start: Date, end: Date };
+	public readonly saleStart: Date | null = null;
+
+	/**
+	 * The GMT datetime when the product should no longer be on sale.
+	 *
+	 * @type {Date|null}
+	 */
+	public readonly saleEnd: Date | null = null;
 
 	/**
 	 * Indicates whether or not the product is downloadable.

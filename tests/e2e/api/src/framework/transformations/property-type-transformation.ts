@@ -121,7 +121,12 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.Integer: return parseInt( value );
 			case PropertyType.Float: return parseFloat( value );
 			case PropertyType.Boolean: return Boolean( value );
-			case PropertyType.Date: return new Date( value );
+			case PropertyType.Date:
+				if ( '' === value ) {
+					return null;
+				}
+
+				return new Date( value );
 		}
 	}
 
@@ -141,7 +146,13 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.Boolean:
 				return String( value );
 
-			case PropertyType.Date: return ( value as Date ).toISOString();
+			case PropertyType.Date: {
+				if ( null === value ) {
+					return '';
+				}
+
+				return ( value as Date ).toISOString();
+			}
 		}
 	}
 }
