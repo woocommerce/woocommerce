@@ -126,7 +126,7 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.Float: return parseFloat( value );
 			case PropertyType.Boolean: return Boolean( value );
 			case PropertyType.Date:
-				if ( '' === value ) {
+				if ( ! value ) {
 					return null;
 				}
 
@@ -155,7 +155,7 @@ export class PropertyTypeTransformation implements ModelTransformation {
 				return String( value );
 
 			case PropertyType.Date: {
-				if ( null === value ) {
+				if ( ! value ) {
 					return '';
 				}
 
