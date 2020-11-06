@@ -8,7 +8,9 @@ import { Model } from '../models/model';
  */
 export interface ModelTransformation {
 	/**
-	 * The order of execution for the transformer. Higher numbers are executed later.
+	 * The order of execution for the transformer.
+	 * - For "toModel" higher numbers execute later.
+	 * - For "fromModel" the order is reversed.
 	 *
 	 * @type {number}
 	 */
@@ -65,25 +67,6 @@ export class ModelTransformer< T extends Model > {
 	}
 
 	/**
-	 * Takes the input data and runs all of the transformations on it before returning the created model.
-	 *
-	 * @param {Function.<T>} modelClass The model class we're trying to create.
-	 * @param {*} data The data we're transforming.
-	 * @return {T} The transformed model.
-	 * @template T
-	 */
-	public toModel( modelClass: new( properties: Partial< T > ) => T, data: any ): T {
-		const transformed: any = this.transformations.reduce(
-			( properties: any, transformer: ModelTransformation ) => {
-				return transformer.toModel( properties );
-			},
-			data,
-		);
-
-		return new modelClass( transformed );
-	}
-
-	/**
 	 * Takes the input model and runs all of the transformations on it before returning the data.
 	 *
 	 * @param {Partial.<T>} model The model to transform.
@@ -100,5 +83,24 @@ export class ModelTransformer< T extends Model > {
 			},
 			raw,
 		);
+	}
+
+	/**
+	 * Takes the input data and runs all of the transformations on it before returning the created model.
+	 *
+	 * @param {Function.<T>} modelClass The model class we're trying to create.
+	 * @param {*} data The data we're transforming.
+	 * @return {T} The transformed model.
+	 * @template T
+	 */
+	public toModel( modelClass: new( properties: Partial< T > ) => T, data: any ): T {
+		const transformed: any = this.transformations.reduceRight(
+			( properties: any, transformer: ModelTransformation ) => {
+				return transformer.toModel( properties );
+			},
+			data,
+		);
+
+		return new modelClass( transformed );
 	}
 }

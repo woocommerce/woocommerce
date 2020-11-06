@@ -31,7 +31,7 @@ export class CustomTransformation implements ModelTransformation {
 	/**
 	 * Creates a new transformation.
 	 *
-	 * @param {number} order The order for the transformation. Higher numbers are executed later.
+	 * @param {number} order The order for the transformation.
 	 * @param {TransformationCallback|null} toHook The hook to run for toModel.
 	 * @param {TransformationCallback|null} fromHook The hook to run for fromModel.
 	 */

@@ -43,11 +43,21 @@ describe( 'ModelTransformer', () => {
 			],
 		);
 
-		const transformed = transformer.toModel( DummyModel, { name: 'fn0' } );
+		let transformed = transformer.fromModel( new DummyModel( { name: 'fn0' } ) );
 
 		expect( fn1 ).toHaveBeenCalledWith( { name: 'fn0' } );
 		expect( fn2 ).toHaveBeenCalledWith( { name: 'fn1' } );
 		expect( transformed ).toMatchObject( { name: 'fn2' } );
+
+		// Reset and make sure "toModel" happens in reverse order.
+		fn1.mockClear();
+		fn2.mockClear();
+
+		transformed = transformer.toModel( DummyModel, { name: 'fn3' } );
+
+		expect( fn2 ).toHaveBeenCalledWith( { name: 'fn3' } );
+		expect( fn1 ).toHaveBeenCalledWith( { name: 'fn2' } );
+		expect( transformed ).toMatchObject( { name: 'fn1' } );
 	} );
 
 	it( 'should transform to model', () => {
