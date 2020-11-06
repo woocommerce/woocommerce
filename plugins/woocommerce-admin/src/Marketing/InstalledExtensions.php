@@ -64,6 +64,7 @@ class InstalledExtensions {
 		return [
 			'automatewoo',
 			'mailchimp-for-woocommerce',
+			'creative-mail-by-constant-contact',
 			'facebook-for-woocommerce',
 			'kliken-marketing-for-google',
 			'hubspot-for-woocommerce',

@@ -355,6 +355,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 						'woocommerce-services',
 						'woocommerce-payments',
 						'mailchimp-for-woocommerce',
+						'creative-mail-by-constant-contact',
 						'facebook-for-woocommerce',
 						'kliken-marketing-for-google',
 					),

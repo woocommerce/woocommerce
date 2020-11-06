@@ -739,6 +739,7 @@ class Onboarding {
 			array(
 				'facebook-for-woocommerce'            => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
 				'mailchimp-for-woocommerce'           => 'mailchimp-for-woocommerce/mailchimp-woocommerce.php',
+				'creative-mail-by-constant-contact'   => 'creative-mail-by-constant-contact/creative-mail-plugin.php',
 				'kliken-marketing-for-google'         => 'kliken-marketing-for-google/kliken-marketing-for-google.php',
 				'jetpack'                             => 'jetpack/jetpack.php',
 				'woocommerce-services'                => 'woocommerce-services/woocommerce-services.php',

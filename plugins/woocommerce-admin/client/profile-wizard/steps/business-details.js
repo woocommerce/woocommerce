@@ -71,6 +71,11 @@ class BusinessDetails extends Component {
 			'mailchimp-for-woocommerce': businessExtensions
 				? businessExtensions.includes( 'mailchimp-for-woocommerce' )
 				: true,
+			'creative-mail-by-constant-contact': businessExtensions
+				? businessExtensions.includes(
+						'creative-mail-by-constant-contact'
+				  )
+				: true,
 			'kliken-marketing-for-google': businessExtensions
 				? businessExtensions.includes( 'kliken-marketing-for-google' )
 				: true,
@@ -81,6 +86,7 @@ class BusinessDetails extends Component {
 			'facebook-for-woocommerce',
 			'mailchimp-for-woocommerce',
 			'kliken-marketing-for-google',
+			'creative-mail-by-constant-contact',
 		];
 
 		this.bundleInstall =
@@ -128,6 +134,9 @@ class BusinessDetails extends Component {
 			),
 			install_mailchimp: businessExtensions.includes(
 				'mailchimp-for-woocommerce'
+			),
+			install_creative_mail: businessExtensions.includes(
+				'creative-mail-by-constant-contact'
 			),
 			install_google_ads: businessExtensions.includes(
 				'kliken-marketing-for-google'
@@ -423,6 +432,18 @@ class BusinessDetails extends Component {
 				icon: 'onboarding/mailchimp.png',
 				description: __(
 					'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.',
+					'woocommerce-admin'
+				),
+			},
+			{
+				slug: 'creative-mail-by-constant-contact',
+				title: __(
+					'Email marketing for WooCommerce with Creative Mail',
+					'woocommerce-admin'
+				),
+				icon: 'onboarding/creativemail.png',
+				description: __(
+					'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.',
 					'woocommerce-admin'
 				),
 			},

@@ -26,6 +26,10 @@ export const pluginNames = {
 		'Mailchimp for WooCommerce',
 		'woocommerce-admin'
 	),
+	'creative-mail-by-constant-contact': __(
+		'Creative Mail for WooCommerce',
+		'woocommerce-admin'
+	),
 	'woocommerce-gateway-paypal-express-checkout': __(
 		'WooCommerce PayPal',
 		'woocommerce-admin'
