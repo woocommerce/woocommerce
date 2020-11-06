@@ -162,7 +162,7 @@ export const StatsOverview = () => {
 						} );
 					} }
 				>
-					{ __( 'View detailed stats' ) }
+					{ __( 'View detailed stats', 'woocommerce-admin' ) }
 				</Link>
 			</CardFooter>
 		</Card>
