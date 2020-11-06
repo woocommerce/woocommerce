@@ -364,6 +364,7 @@ class Menu {
 					'capability' => $post_type_object->cap->edit_posts,
 					'id'         => "{$post_type}-all-items",
 					'url'        => "edit.php?post_type={$post_type}",
+					'order'      => 10,
 				),
 				$menu_args
 			),
@@ -374,6 +375,7 @@ class Menu {
 					'capability' => $post_type_object->cap->create_posts,
 					'id'         => "{$post_type}-add-new",
 					'url'        => "post-new.php?post_type={$post_type}",
+					'order'      => 20,
 				),
 				$menu_args
 			),

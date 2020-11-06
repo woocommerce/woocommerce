@@ -138,6 +138,7 @@ class Marketing {
 				'parent'   => 'woocommerce-marketing',
 				'nav_args' => array(
 					'parent' => 'marketing',
+					'order'  => 10,
 				),
 			]
 		);
