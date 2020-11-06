@@ -153,7 +153,11 @@ class WC_Beta_Tester_Import_Export {
 							continue;
 						}
 						$setting = maybe_unserialize( $settings[ $option_name ] );
-						update_option( $option_name, $setting );
+						if ( is_null( $setting ) ) {
+							delete_option( $option_name );
+						} else {
+							update_option( $option_name, $setting );
+						}
 					}
 					$this->add_message( __( 'Settings Imported', 'woocommerce-beta-tester' ), 'updated' );
 				} else {
@@ -175,6 +179,9 @@ class WC_Beta_Tester_Import_Export {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			foreach ( $this->get_setting_list() as $option_name ) {
 				$setting = get_option( $option_name );
+				if ( false === $setting ) {
+					$setting = null;
+				}
 				$settings[ $option_name ] = is_string( $setting ) ? $setting : serialize( $setting );
 			}
 		}
