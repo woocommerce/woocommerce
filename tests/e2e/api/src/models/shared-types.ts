@@ -33,31 +33,3 @@ export class MetaData {
 		Object.assign( this, properties );
 	}
 }
-
-/**
- * An object for more easily representing the dual local/gmt times returned by the API.
- */
-export class DateTime {
-	/**
-	 * The local time representation.
-	 *
-	 * @type {Date}
-	 */
-	public readonly local: Date = new Date();
-
-	/**
-	 * The GMT representation.
-	 *
-	 * @type {Date}
-	 */
-	public readonly gmt: Date = new Date();
-
-	/**
-	 * Creates a new datetime.
-	 *
-	 * @param {Partial.<DateTime>} properties The properties to set.
-	 */
-	public constructor( properties?: Partial< DateTime > ) {
-		Object.assign( this, properties );
-	}
-}

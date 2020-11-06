@@ -9,6 +9,9 @@ import { ModelTransformation } from '../model-transformer';
  */
 type TransformationCallback = ( properties: any ) => any;
 
+/**
+ * A model transformer for executing arbitrary callbacks on input properties.
+ */
 export class CustomTransformation implements ModelTransformation {
 	public readonly fromModelOrder: number;
 

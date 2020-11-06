@@ -1,5 +1,5 @@
 import { Model } from '../model';
-import { DateTime, PostStatus } from '../shared-types';
+import { PostStatus } from '../shared-types';
 import {
 	BackorderStatus,
 	CatalogVisibility,
@@ -36,18 +36,18 @@ export abstract class AbstractProduct extends Model {
 	public readonly permalink: string = '';
 
 	/**
-	 * The datetime when the product was created.
+	 * The GMT datetime when the product was created.
 	 *
-	 * @type {DateTime}
+	 * @type {Date}
 	 */
-	public readonly created: DateTime = new DateTime();
+	public readonly created: Date = new Date();
 
 	/**
-	 * The datetime when the product was last modified.
+	 * The GMT datetime when the product was last modified.
 	 *
-	 * @type {DateTime}
+	 * @type {Date}
 	 */
-	public readonly modified: DateTime = new DateTime();
+	public readonly modified: Date = new Date();
 
 	/**
 	 * The product's current post status.
@@ -183,11 +183,11 @@ export abstract class AbstractProduct extends Model {
 	public readonly salePrice: string = '';
 
 	/**
-	 * The timeframe during which the product should be one sale.
+	 * The GMT timeframe during which the product should be one sale.
 	 *
-	 * @type {{start: DateTime, end: DateTime}}
+	 * @type {{start: Date, end: Date}}
 	 */
-	public readonly saleWindow?: { start: DateTime, end: DateTime };
+	public readonly saleWindow?: { start: Date, end: Date };
 
 	/**
 	 * Indicates whether or not the product is downloadable.
@@ -279,13 +279,6 @@ export abstract class AbstractProduct extends Model {
 	 * @type {number}
 	 */
 	public readonly remainingStock: number = -1;
-
-	/**
-	 * Indicates whether or not a product is in stock.
-	 *
-	 * @type {boolean}
-	 */
-	public readonly isInStock: boolean = false;
 
 	/**
 	 * The product's stock status.

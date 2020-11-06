@@ -1,5 +1,3 @@
-import { DateTime } from '../shared-types';
-
 /**
  * An enum describing the catalog visibility options for products.
  *
@@ -210,18 +208,18 @@ export class ProductImage {
 	public readonly id: number = -1;
 
 	/**
-	 * The date and time when the image was created.
+	 * The GMT datetime when the image was created.
 	 *
-	 * @type {DateTime}
+	 * @type {Date}
 	 */
-	public readonly created: DateTime = new DateTime();
+	public readonly created: Date = new Date();
 
 	/**
-	 * The date and time when the image was modified.
+	 * The GMT datetime when the image was last modified.
 	 *
-	 * @type {DateTime}
+	 * @type {Date}
 	 */
-	public readonly modified: DateTime = new DateTime();
+	public readonly modified: Date = new Date();
 
 	/**
 	 * The URL for the image file.
