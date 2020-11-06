@@ -133,6 +133,7 @@ export class ProductDownload {
 	/**
 	 * The URL of the downloadable file.
 	 *
+	 *
 	 * @type {string}
 	 */
 	public readonly url: string = '';
@@ -178,6 +179,13 @@ export class ProductAttribute {
 	 * @type {boolean}
 	 */
 	public readonly isVisibleOnProductPage: boolean = false;
+
+	/**
+	 * Indicates whether or not the attribute should be used in variations.
+	 *
+	 * @type {boolean}
+	 */
+	public readonly isForVariations: boolean = false;
 
 	/**
 	 * The options which are available for the attribute.
@@ -241,13 +249,6 @@ export class ProductImage {
 	 * @type {string}
 	 */
 	public readonly altText: string = '';
-
-	/**
-	 * The sort order for the image.
-	 *
-	 * @type {number}
-	 */
-	public readonly sortOrder: number = -1;
 
 	/**
 	 * Creates a new product image.

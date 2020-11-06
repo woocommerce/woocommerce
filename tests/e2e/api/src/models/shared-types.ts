@@ -20,7 +20,7 @@ export type PostStatus = 'draft' | 'pending' | 'private' | 'publish' | string;
 /**
  * A metadata object.
  */
-export class MetaData {
+export class MetaData extends Model {
 	/**
 	 * The key of the metadata.
 	 *
@@ -41,6 +41,7 @@ export class MetaData {
 	 * @param {Partial.<MetaData>} properties The properties to set.
 	 */
 	public constructor( properties?: Partial< MetaData > ) {
+		super();
 		Object.assign( this, properties );
 	}
 }

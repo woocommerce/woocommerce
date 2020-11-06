@@ -8,13 +8,98 @@ import {
 	PropertyTypeTransformation,
 } from '../../../framework/transformations/property-type-transformation';
 import { CustomTransformation } from '../../../framework/transformations/custom-transformation';
+import { ProductAttribute, ProductDownload, ProductImage, ProductTerm } from '../../../models/products/shared-types';
+import { ModelTransformerTransformation } from '../../../framework/transformations/model-transformer-transformation';
+import { MetaData } from '../../../models/shared-types';
+import { createMetaDataTransformer } from '../shared';
+
+/**
+ * Creates a transformer for the product term object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+function createProductTermTransformer(): ModelTransformer< ProductTerm > {
+	return new ModelTransformer(
+		[
+			new PropertyTypeTransformation( { id: PropertyType.Integer } ),
+		],
+	);
+}
+
+/**
+ * Creates a transformer for the product attribute object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+function createProductAttributeTransformer(): ModelTransformer< ProductAttribute > {
+	return new ModelTransformer(
+		[
+			new PropertyTypeTransformation(
+				{
+					id: PropertyType.Integer,
+					sortOrder: PropertyType.Integer,
+					isVisibleOnProductPage: PropertyType.Boolean,
+					isForVariations: PropertyType.Boolean,
+				},
+			),
+			new KeyChangeTransformation< ProductAttribute >(
+				{
+					sortOrder: 'position',
+					isVisibleOnProductPage: 'visible',
+					isForVariations: 'variation',
+				},
+			),
+		],
+	);
+}
+
+/**
+ * Creates a transformer for the product image object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+function createProductImageTransformer(): ModelTransformer< ProductImage > {
+	return new ModelTransformer(
+		[
+			new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
+			new PropertyTypeTransformation(
+				{
+					id: PropertyType.Integer,
+					created: PropertyType.Date,
+					modified: PropertyType.Date,
+				},
+			),
+			new KeyChangeTransformation< ProductImage >(
+				{
+					created: 'date_created_gmt',
+					modified: 'date_modified_gmt',
+					url: 'src',
+					altText: 'altText',
+				},
+			),
+		],
+	);
+}
+
+/**
+ * Creates a transformer for the product download object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+function createProductDownloadTransformer(): ModelTransformer< ProductDownload > {
+	return new ModelTransformer(
+		[
+			new KeyChangeTransformation< ProductDownload >( { url: 'file' } ),
+		],
+	);
+}
 
 /**
  * Creates a transformer for the shared properties of all products.
  *
  * @param {string} type The product type.
  * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
- * @return {ModelTransformer} The created transform.
+ * @return {ModelTransformer} The created transformer.
  */
 export function createProductTransformer< T extends AbstractProduct >(
 	type: string,
@@ -34,6 +119,12 @@ export function createProductTransformer< T extends AbstractProduct >(
 				'date_on_sale_to',
 			],
 		),
+		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
+		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
+		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
+		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
+		new ModelTransformerTransformation( 'downloads', ProductDownload, createProductDownloadTransformer() ),
+		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 		new CustomTransformation(
 			TransformationOrder.Normal,
 			( properties: any ) => {
@@ -121,6 +212,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 				allowReviews: 'reviews_allowed',
 				averageRating: 'average_rating',
 				numRatings: 'rating_count',
+				metaData: 'meta_data',
 			},
 		),
 	);

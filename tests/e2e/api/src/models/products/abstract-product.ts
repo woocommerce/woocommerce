@@ -1,5 +1,5 @@
 import { Model } from '../model';
-import { PostStatus } from '../shared-types';
+import { MetaData, PostStatus } from '../shared-types';
 import {
 	BackorderStatus,
 	CatalogVisibility,
@@ -335,4 +335,11 @@ export abstract class AbstractProduct extends Model {
 	 * @type {number}
 	 */
 	public readonly numRatings: number = -1;
+
+	/**
+	 * The extra metadata for the product.
+	 *
+	 * @type {ReadonlyArray.<MetaData>}
+	 */
+	public readonly metaData: readonly MetaData[] = [];
 }
