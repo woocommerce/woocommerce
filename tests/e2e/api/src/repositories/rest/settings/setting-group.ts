@@ -1,9 +1,10 @@
 import { HTTPClient } from '../../../http';
-import { ListFn, ModelRepository } from '../../../framework/model-repository';
+import { ModelRepository } from '../../../framework/model-repository';
 import { SettingGroup } from '../../../models';
 import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../models/settings/setting-group';
 import { ModelTransformer } from '../../../framework/model-transformer';
 import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
+import { restList } from '../shared';
 
 function createTransformer(): ModelTransformer< SettingGroup > {
 	return new ModelTransformer(
@@ -11,22 +12,6 @@ function createTransformer(): ModelTransformer< SettingGroup > {
 			new KeyChangeTransformation< SettingGroup >( { parentID: 'parent_id' } ),
 		],
 	);
-}
-
-function restList(
-	httpClient: HTTPClient,
-	transformer: ModelTransformer< SettingGroup >,
-): ListFn< SettingGroupRepositoryParams > {
-	return async () => {
-		const response = await httpClient.get( '/wc/v3/settings' );
-
-		const list: SettingGroup[] = [];
-		for ( const raw of response.data ) {
-			list.push( transformer.toModel( SettingGroup, raw ) );
-		}
-
-		return Promise.resolve( list );
-	};
 }
 
 /**
@@ -39,7 +24,7 @@ export function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSetti
 	const transformer = createTransformer();
 
 	return new ModelRepository(
-		restList( httpClient, transformer ),
+		restList< SettingGroupRepositoryParams >( () => '/wc/v3/settings', SettingGroup, httpClient, transformer ),
 		null,
 		null,
 		null,

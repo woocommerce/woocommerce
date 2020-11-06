@@ -1,10 +1,5 @@
 import { HTTPClient } from '../../../http';
-import {
-	ListChildFn,
-	ModelRepository,
-	ReadChildFn,
-	UpdateChildFn,
-} from '../../../framework/model-repository';
+import { ModelRepository, ParentID } from '../../../framework/model-repository';
 import { Setting } from '../../../models';
 import {
 	ListsSettings,
@@ -13,49 +8,11 @@ import {
 	UpdatesSettings,
 } from '../../../models/settings/setting';
 import { ModelTransformer } from '../../../framework/model-transformer';
+import { restListChild, restReadChild, restUpdateChild } from '../shared';
+import { ModelID } from '../../../models/model';
 
 function createTransformer(): ModelTransformer< Setting > {
 	return new ModelTransformer( [] );
-}
-
-function restList(
-	httpClient: HTTPClient,
-	transformer: ModelTransformer< Setting >,
-): ListChildFn< SettingRepositoryParams > {
-	return async ( parent ) => {
-		const response = await httpClient.get( '/wc/v3/settings/' + parent );
-
-		const list: Setting[] = [];
-		for ( const raw of response.data ) {
-			list.push( transformer.toModel( Setting, raw ) );
-		}
-
-		return Promise.resolve( list );
-	};
-}
-
-function restRead(
-	httpClient: HTTPClient,
-	transformer: ModelTransformer< Setting >,
-): ReadChildFn< SettingRepositoryParams > {
-	return async ( parent, id ) => {
-		const response = await httpClient.get( '/wc/v3/settings/' + parent + '/' + id );
-		return Promise.resolve( transformer.toModel( Setting, response.data ) );
-	};
-}
-
-function restUpdate(
-	httpClient: HTTPClient,
-	transformer: ModelTransformer< Setting >,
-): UpdateChildFn< SettingRepositoryParams > {
-	return async ( parent, id, params ) => {
-		const response = await httpClient.patch(
-			'/wc/v3/settings/' + parent + '/' + id,
-			transformer.fromModel( params ),
-		);
-
-		return Promise.resolve( transformer.toModel( Setting, response.data ) );
-	};
 }
 
 /**
@@ -65,13 +22,14 @@ function restUpdate(
  * @return {ListsSettings|ReadsSettings|UpdatesSettings} The created repository.
  */
 export function settingRESTRepository( httpClient: HTTPClient ): ListsSettings & ReadsSettings & UpdatesSettings {
+	const buildURL = ( parent: ParentID< SettingRepositoryParams >, id: ModelID ) => '/wc/v3/settings/' + parent + '/' + id;
 	const transformer = createTransformer();
 
 	return new ModelRepository(
-		restList( httpClient, transformer ),
+		restListChild< SettingRepositoryParams >( ( parent ) => '/wc/v3/settings/' + parent, Setting, httpClient, transformer ),
 		null,
-		restRead( httpClient, transformer ),
-		restUpdate( httpClient, transformer ),
+		restReadChild< SettingRepositoryParams >( buildURL, Setting, httpClient, transformer ),
+		restUpdateChild< SettingRepositoryParams >( buildURL, Setting, httpClient, transformer ),
 		null,
 	);
 }
