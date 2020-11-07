@@ -470,9 +470,10 @@ function get_woocommerce_currency() {
  *
  * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
  *
+ * @param $sort Optionally allow sorting by currency title. Accepts asc, desc.
  * @return array
  */
-function get_woocommerce_currencies() {
+function get_woocommerce_currencies($sort = '') {
 	static $currencies;
 
 	if ( ! isset( $currencies ) ) {
@@ -648,6 +649,14 @@ function get_woocommerce_currencies() {
 		);
 	}
 
+	if($sort === 'asc') {
+		asort($currencies, SORT_STRING);
+	}
+
+	if($sort === 'desc') {
+		arsort($currencies, SORT_STRING);
+	}
+	
 	return $currencies;
 }
 
