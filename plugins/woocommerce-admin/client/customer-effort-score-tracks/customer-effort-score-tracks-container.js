@@ -48,6 +48,7 @@ function CustomerEffortScoreTracksContainer( {
 					key={ index }
 					action={ item.action }
 					label={ item.label }
+					onSubmitLabel={ item.onsubmit_label }
 					trackProps={ item.props || {} }
 				/>
 			) ) }
