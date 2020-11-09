@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; ?>
 			<?php if ( 'payment-methods' === $current_section ) : ?>
 				<div class="addons-shipping-methods">
-					<?php WC_Admin_Addons::wcpay_banner_block(); ?>
+					<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
 				</div>
 			<?php endif; ?>
 			<ul class="products">
