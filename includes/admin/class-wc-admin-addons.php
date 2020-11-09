@@ -478,8 +478,8 @@ class WC_Admin_Addons {
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
 			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
-			'title'       => __( 'Securely accept major cards on your store and manage transactions right from your dashboard.', 'woocommerce' ),
-			'description' => __( 'See payments, track cash flow into your bank account, and stay on top of disputes – all from the comfort of your own store. Free to install, with no set up fees or monthly fees.', 'woocommerce' ),
+			'title'       => __( 'Payments made simple, with no monthly fees -- designed exclusively for WooCommerce stores.', 'woocommerce' ),
+			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
 			'button'      => __( 'Simplify my payments' ),
 			'href'        => $button_url,
 			'logos'       => array(),
