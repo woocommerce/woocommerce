@@ -2,19 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	AddressForm,
-	FormStep,
-} from '@woocommerce/base-components/cart-checkout';
+import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import PropTypes from 'prop-types';
 
-const BillingFieldsStep = ( {
-	addressFieldsConfig,
-	billingFields,
-	defaultAddressFields,
-	setBillingFields,
-} ) => {
+const BillingFieldsStep = ( { children } ) => {
 	const { isProcessing: checkoutIsProcessing } = useCheckoutContext();
 
 	return (
@@ -28,23 +20,13 @@ const BillingFieldsStep = ( {
 				'woo-gutenberg-products-block'
 			) }
 		>
-			<AddressForm
-				id="billing"
-				onChange={ setBillingFields }
-				type="billing"
-				values={ billingFields }
-				fields={ Object.keys( defaultAddressFields ) }
-				fieldConfig={ addressFieldsConfig }
-			/>
+			{ children }
 		</FormStep>
 	);
 };
 
 BillingFieldsStep.propTypes = {
-	addressFieldsConfig: PropTypes.object.isRequired,
-	billingFields: PropTypes.object.isRequired,
-	defaultAddressFields: PropTypes.object.isRequired,
-	setBillingFields: PropTypes.func.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default BillingFieldsStep;

@@ -37,7 +37,7 @@ const CheckoutForm = ( {
 			/>
 			<ShippingOptionsStep />
 			<PaymentMethodStep />
-			<OrderNotesStep showOrderNotes={ showOrderNotes } />
+			{ showOrderNotes && <OrderNotesStep /> }
 		</Form>
 	);
 };
