@@ -104,7 +104,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 	 */
 	protected function get_terms_response( $taxonomy, $request ) {
 		$page          = (int) $request['page'];
-		$per_page      = $request['per_page'] ? $request['per_page'] : 0;
+		$per_page      = $request['per_page'] ? (int) $request['per_page'] : 0;
 		$prepared_args = array(
 			'taxonomy'   => $taxonomy,
 			'exclude'    => $request['exclude'],
