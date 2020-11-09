@@ -48,6 +48,10 @@ export class KeyChangeTransformation< T extends Model > implements ModelTransfor
 		for ( const key in this.changes ) {
 			const value = this.changes[ key ];
 
+			if ( ! properties.hasOwnProperty( key ) ) {
+				continue;
+			}
+
 			properties[ value ] = properties[ key ];
 			delete properties[ key ];
 		}
@@ -64,6 +68,10 @@ export class KeyChangeTransformation< T extends Model > implements ModelTransfor
 	public toModel( properties: any ): any {
 		for ( const key in this.changes ) {
 			const value = this.changes[ key ];
+
+			if ( ! properties.hasOwnProperty( value ) ) {
+				continue;
+			}
 
 			properties[ key ] = properties[ value ];
 			delete properties[ value ];

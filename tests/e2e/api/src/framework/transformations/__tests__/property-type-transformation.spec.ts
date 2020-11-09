@@ -66,16 +66,6 @@ describe( 'PropertyTypeTransformation', () => {
 		expect( transformed.date ).toStrictEqual( '2020-11-06T03:11:41.000Z' );
 	} );
 
-	it( 'should convert empty dates', () => {
-		let transformed = transformation.toModel( { date: '' } );
-
-		expect( transformed.date ).toStrictEqual( null );
-
-		transformed = transformation.fromModel( { date: null } );
-
-		expect( transformed.date ).toStrictEqual( '' );
-	} );
-
 	it( 'should use conversion callbacks', () => {
 		let transformed = transformation.toModel( { callback: 'Test' } );
 
@@ -94,5 +84,25 @@ describe( 'PropertyTypeTransformation', () => {
 		transformed = transformation.fromModel( { integer: [ 100, 200, 300 ] } );
 
 		expect( transformed.integer ).toStrictEqual( [ '100', '200', '300' ] );
+	} );
+
+	it( 'should do nothing without property', () => {
+		let transformed = transformation.toModel( { name: 'Test' } );
+
+		expect( transformed.name ).toStrictEqual( 'Test' );
+
+		transformed = transformation.fromModel( { name: 'Test' } );
+
+		expect( transformed.name ).toStrictEqual( 'Test' );
+	} );
+
+	it( 'should preserve null', () => {
+		let transformed = transformation.toModel( { integer: null } );
+
+		expect( transformed.integer ).toStrictEqual( null );
+
+		transformed = transformation.fromModel( { integer: null } );
+
+		expect( transformed.integer ).toStrictEqual( null );
 	} );
 } );

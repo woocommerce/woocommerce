@@ -193,7 +193,7 @@ export function restUpdate< T extends ModelRepositoryParams >(
 	return async ( id, params ) => {
 		const response = await httpClient.patch(
 			buildURL( id ),
-			transformer.fromModel( params as Partial< ModelClass< T > > ),
+			transformer.fromModel( params as any ),
 		);
 
 		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
@@ -218,7 +218,7 @@ export function restUpdateChild< T extends ModelRepositoryParams >(
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
 			buildURL( parent, id ),
-			transformer.fromModel( params as Partial< ModelClass< T > > ),
+			transformer.fromModel( params as any ),
 		);
 
 		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
@@ -236,9 +236,8 @@ export function restDelete< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, never, BuildURLFn >,
 	httpClient: HTTPClient,
 ): DeleteFn {
-	return async ( id ) => {
-		await httpClient.delete( buildURL( id ) );
-		return Promise.resolve( true );
+	return ( id ) => {
+		return httpClient.delete( buildURL( id ) ).then( () => true );
 	};
 }
 
@@ -253,8 +252,7 @@ export function restDeleteChild< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, BuildURLWithParentFn< T >, never >,
 	httpClient: HTTPClient,
 ): DeleteChildFn< T > {
-	return async ( parent, id ) => {
-		await httpClient.delete( buildURL( parent, id ) );
-		return Promise.resolve( true );
+	return ( parent, id ) => {
+		return httpClient.delete( buildURL( parent, id ) ).then( () => true );
 	};
 }

@@ -82,7 +82,7 @@ export class ModelTransformer< T extends Model > {
 	 */
 	public fromModel( model: Partial< T > ): any {
 		// Convert the model class to raw properties so that the transformations can be simple.
-		const raw = JSON.parse( JSON.stringify( model ) );
+		const raw = Object.assign( {}, model );
 
 		return this.transformations.reduce(
 			( properties: any, transformer: ModelTransformation ) => {

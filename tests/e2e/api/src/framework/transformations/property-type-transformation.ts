@@ -12,6 +12,7 @@ export enum PropertyType {
 	Boolean,
 	Date,
 }
+type PropertyTypeTypes = null | string | number | boolean | Date;
 
 /**
  * A callback that can be used to transform property types.
@@ -115,9 +116,13 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertTo( value: string | string[], type: PropertyType ): any {
+	private convertTo( value: any, type: PropertyType ): PropertyTypeTypes | PropertyTypeTypes[] {
 		if ( Array.isArray( value ) ) {
-			return value.map( ( v: string ) => this.convertTo( v, type ) );
+			return value.map( ( v: string ) => this.convertTo( v, type ) as PropertyTypeTypes );
+		}
+
+		if ( null === value ) {
+			return null;
 		}
 
 		switch ( type ) {
@@ -126,10 +131,6 @@ export class PropertyTypeTransformation implements ModelTransformation {
 			case PropertyType.Float: return parseFloat( value );
 			case PropertyType.Boolean: return Boolean( value );
 			case PropertyType.Date:
-				if ( ! value ) {
-					return null;
-				}
-
 				return new Date( value );
 		}
 	}
@@ -142,9 +143,13 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertFrom( value: any | any[], type: PropertyType ): string | string[] {
+	private convertFrom( value: PropertyTypeTypes | PropertyTypeTypes[], type: PropertyType ): any {
 		if ( Array.isArray( value ) ) {
-			return value.map( ( v: string ) => this.convertFrom( v, type ) as string );
+			return value.map( ( v ) => this.convertFrom( v, type ) );
+		}
+
+		if ( null === value ) {
+			return null;
 		}
 
 		switch ( type ) {
@@ -155,10 +160,6 @@ export class PropertyTypeTransformation implements ModelTransformation {
 				return String( value );
 
 			case PropertyType.Date: {
-				if ( ! value ) {
-					return '';
-				}
-
 				return ( value as Date ).toISOString();
 			}
 		}

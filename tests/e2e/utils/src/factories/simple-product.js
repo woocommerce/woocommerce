@@ -13,10 +13,10 @@ export function simpleProductFactory( httpClient ) {
 
 	return new AsyncFactory(
 		( { params } ) => {
-			return new SimpleProduct( {
+			return {
 				name: params.name ?? faker.commerce.productName(),
 				regularPrice: params.regularPrice ?? faker.commerce.price(),
-			} );
+			};
 		},
 		( params ) => repository.create( params ),
 	);
