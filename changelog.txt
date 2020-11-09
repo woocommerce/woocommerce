@@ -53,6 +53,11 @@
 * Tweak: Add BR and IN to list of stripe countries [#5377](https://github.com/woocommerce/woocommerce-admin/pull/5377)
 * Fix: Redirect instead of stalling on WCPay Inbox note action [#5413](https://github.com/woocommerce/woocommerce-admin/pull/5413)
 
+= 4.6.2 - 2020-11-05 =
+
+**WooCommerce**
+
+* Prevent checkout from creating accounts when related setting is disabled.
 
 = 4.6.1 - 2020-10-21 =
 
