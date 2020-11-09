@@ -64,6 +64,11 @@ const getCoreConfig = ( options = {} ) => {
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
+		},
 		module: {
 			rules: [
 				{
@@ -133,6 +138,7 @@ const getMainConfig = ( options = {} ) => {
 		optimization: {
 			splitChunks: {
 				minSize: 0,
+				automaticNameDelimiter: '--',
 				cacheGroups: {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
@@ -213,6 +219,11 @@ const getFrontConfig = ( options = {} ) => {
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
+		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
 		},
 		module: {
 			rules: [
@@ -306,6 +317,11 @@ const getPaymentsConfig = ( options = {} ) => {
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksPaymentMethodExtensionJsonp',
+		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
 		},
 		module: {
 			rules: [
@@ -410,6 +426,7 @@ const getStylingConfig = ( options = {} ) => {
 		optimization: {
 			splitChunks: {
 				minSize: 0,
+				automaticNameDelimiter: '--',
 				cacheGroups: {
 					editor: {
 						// Capture all `editor` stylesheets and editor-components stylesheets.
