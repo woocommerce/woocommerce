@@ -610,8 +610,18 @@ class WC_Admin_Addons {
 			return;
 		}
 
-		if ( isset( $_GET['install-addon'] ) && 'woocommerce-services' === $_GET['install-addon'] ) {
-			self::install_woocommerce_services_addon();
+		if ( isset( $_GET['install-addon'] ) ) {
+			switch ( $_GET['install-addon'] ) {
+				case 'woocommerce-services':
+					self::install_woocommerce_services_addon();
+				break;
+				case 'woocommerce-payments':
+					self::install_woocommerce_payments_addon();
+				break;
+				default:
+					// Do nothing.
+				break;
+			}
 		}
 
 		$sections        = self::get_sections();
@@ -647,6 +657,26 @@ class WC_Admin_Addons {
 		$services_plugin    = array(
 			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
 			'repo-slug' => 'woocommerce-services',
+		);
+
+		WC_Install::background_installer( $services_plugin_id, $services_plugin );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
+	 * Install WooCommerce Payments from the Extensions screens.
+	 *
+	 * @return void
+	 */
+	public static function install_woocommerce_payments_addon() {
+		check_admin_referer( 'install-addon_woocommerce-payments' );
+
+		$services_plugin_id = 'woocommerce-payments';
+		$services_plugin    = array(
+			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-payments',
 		);
 
 		WC_Install::background_installer( $services_plugin_id, $services_plugin );
