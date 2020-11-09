@@ -449,6 +449,68 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the outputting of the WooCommerce Pay banner block.
+	 *
+	 * @param object $block Block data.
+	 */
+	public static function output_wcpay_banner_block( $block = array() ) {
+		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
+		$location  = wc_get_base_location();
+
+		if (
+			! in_array( $location['country'], array( 'US' ), true ) ||
+			$is_active ||
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$button_url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'install-addon' => 'woocommerce-payments',
+				)
+			),
+			'install-addon_woocommerce-payments'
+		);
+
+		$defaults = array(
+			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
+			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
+			'title'       => __( 'Securely accept major cards on your store and manage transactions right from your dashboard.', 'woocommerce' ),
+			'description' => __( 'See payments, track cash flow into your bank account, and stay on top of disputes – all from the comfort of your own store. Free to install, with no set up fees or monthly fees.', 'woocommerce' ),
+			'button'      => __( 'Simplify my payments' ),
+			'href'        => $button_url,
+			'logos'       => array(),
+		);
+
+		$block_data = array_merge( $defaults, $block );
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
+				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<?php
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-green'
+					);
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections Section data.
@@ -477,6 +539,8 @@ class WC_Admin_Addons {
 				case 'wcs_banner_block':
 					self::output_wcs_banner_block( (array) $section );
 					break;
+				case 'wcpay_banner_block':
+					self::output_wcpay_banner_block( (array) $section );
 			}
 		}
 	}
