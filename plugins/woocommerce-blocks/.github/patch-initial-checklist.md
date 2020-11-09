@@ -84,3 +84,4 @@ This only needs done if the patch release needs to be included in WooCommerce Co
   - Testing should include completing the [Smoke testing checklist](../docs/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
   - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
   - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
+* [ ] Make sure you join the `#woo-core-releases` Slack channel to represent Woo Blocks for the release of WooCommerce core this version is included in.
