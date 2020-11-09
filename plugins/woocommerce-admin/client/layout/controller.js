@@ -59,7 +59,7 @@ export const getPages = () => {
 			__( 'Home', 'woocommerce-admin' ),
 		],
 		wpOpenMenu: 'toplevel_page_woocommerce',
-		id: 'woocommerce-home',
+		id: 'home',
 	} );
 
 	if ( window.wcAdminFeatures.analytics ) {
