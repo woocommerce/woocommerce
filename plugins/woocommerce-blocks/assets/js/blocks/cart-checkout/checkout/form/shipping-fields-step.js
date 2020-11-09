@@ -2,26 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	AddressForm,
-	FormStep,
-} from '@woocommerce/base-components/cart-checkout';
-import { DebouncedValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import PropTypes from 'prop-types';
 
 const ShippingFieldsStep = ( {
-	addressFieldsConfig,
-	defaultAddressFields,
-	billingFields,
-	setPhone,
 	shippingAsBilling,
-	shippingFields,
-	showPhoneField,
-	setShippingFields,
 	setShippingAsBilling,
-	requirePhoneField,
+	children,
 } ) => {
 	const { isProcessing: checkoutIsProcessing } = useCheckoutContext();
 
@@ -36,31 +25,7 @@ const ShippingFieldsStep = ( {
 				'woo-gutenberg-products-block'
 			) }
 		>
-			<AddressForm
-				id="shipping"
-				onChange={ setShippingFields }
-				values={ shippingFields }
-				fields={ Object.keys( defaultAddressFields ) }
-				fieldConfig={ addressFieldsConfig }
-			/>
-			{ showPhoneField && (
-				<DebouncedValidatedTextInput
-					id="phone"
-					type="tel"
-					label={
-						requirePhoneField
-							? __( 'Phone', 'woo-gutenberg-products-block' )
-							: __(
-									'Phone (optional)',
-									'woo-gutenberg-products-block'
-							  )
-					}
-					value={ billingFields.phone }
-					autoComplete="tel"
-					onChange={ setPhone }
-					required={ requirePhoneField }
-				/>
-			) }
+			{ children }
 			<CheckboxControl
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __(
@@ -75,16 +40,9 @@ const ShippingFieldsStep = ( {
 };
 
 ShippingFieldsStep.propTypes = {
-	addressFieldsConfig: PropTypes.object.isRequired,
-	billingFields: PropTypes.object.isRequired,
-	defaultAddressFields: PropTypes.object.isRequired,
-	requirePhoneField: PropTypes.bool.isRequired,
-	setPhone: PropTypes.func.isRequired,
 	shippingAsBilling: PropTypes.bool.isRequired,
 	setShippingAsBilling: PropTypes.func.isRequired,
-	setShippingFields: PropTypes.func.isRequired,
-	shippingFields: PropTypes.object.isRequired,
-	showPhoneField: PropTypes.bool.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default ShippingFieldsStep;
