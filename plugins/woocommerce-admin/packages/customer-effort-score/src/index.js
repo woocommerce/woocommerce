@@ -85,7 +85,7 @@ CustomerEffortScore.propTypes = {
 
 export default compose(
 	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
+		const { createNotice } = dispatch( 'core/notices2' );
 
 		return {
 			createNotice,

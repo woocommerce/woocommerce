@@ -48,6 +48,7 @@ const wcAdminPackages = [
 	'customer-effort-score',
 	'date',
 	'navigation',
+	'notices',
 	'number',
 	'data',
 	'tracks',
