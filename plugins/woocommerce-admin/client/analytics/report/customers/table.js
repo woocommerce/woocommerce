@@ -47,7 +47,7 @@ class CustomersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Sign Up', 'woocommerce-admin' ),
+				label: __( 'Date Registered', 'woocommerce-admin' ),
 				key: 'date_registered',
 				isSortable: true,
 			},
