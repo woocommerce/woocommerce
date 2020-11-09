@@ -2,10 +2,10 @@ import type { AxiosRequestConfig } from 'axios';
 import * as createHmac from 'create-hmac';
 import * as OAuth from 'oauth-1.0a';
 import { AxiosInterceptor } from './axios-interceptor';
-import { buildURL } from './utils';
+import { buildURLWithParams } from './utils';
 
 /**
- * A utility class for managing the lifecycle of an authentication interceptor.
+ * An interceptor for adding OAuth 1.0a signatures to HTTP requests.
  */
 export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	/**
@@ -14,7 +14,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	 * @type {Object}
 	 * @private
 	 */
-	private oauth: OAuth;
+	private readonly oauth: OAuth;
 
 	/**
 	 * Creates a new interceptor.
@@ -44,7 +44,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
 	 */
 	protected handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
-		const url = buildURL( request );
+		const url = buildURLWithParams( request );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
 				username: this.oauth.consumer.key,
