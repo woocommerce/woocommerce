@@ -220,7 +220,7 @@ class WC_Shortcodes {
 
 			foreach ( $product_categories as $category ) {
 				wc_get_template(
-					'content-product_cat.php',
+					'content-product-cat.php',
 					array(
 						'category' => $category,
 					)
