@@ -673,13 +673,13 @@ class WC_Admin_Addons {
 	public static function install_woocommerce_payments_addon() {
 		check_admin_referer( 'install-addon_woocommerce-payments' );
 
-		$services_plugin_id = 'woocommerce-payments';
-		$services_plugin    = array(
+		$wcpay_plugin_id = 'woocommerce-payments';
+		$wcpay_plugin    = array(
 			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
 			'repo-slug' => 'woocommerce-payments',
 		);
 
-		WC_Install::background_installer( $services_plugin_id, $services_plugin, esc_url( admin_url( 'admin.php?page=wc-admin&path=%2Fpayments%2Fconnect' ) ) );
+		WC_Install::background_installer( $services_plugin_id, $wcpay_plugin );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;
