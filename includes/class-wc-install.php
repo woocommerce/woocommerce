@@ -1398,11 +1398,12 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 *
 	 * @param string $plugin_to_install_id Plugin ID.
 	 * @param array  $plugin_to_install Plugin information.
+	 * @param string $redirect Redirect URL.
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
 	 */
-	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+	public static function background_installer( $plugin_to_install_id, $plugin_to_install, $redirect = '' ) {
 		// Explicitly clear the event.
 		$args = func_get_args();
 
@@ -1519,7 +1520,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			if ( $activate ) {
 				try {
 					add_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ), 10, 2 );
-					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
+					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file, $redirect );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
