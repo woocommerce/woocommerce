@@ -15,3 +15,4 @@ Every release includes specific testing instructions for new features and bug fi
 - [3.6.0](./360.md)
 - [3.7.0](./370.md)
     - [3.7.1](./371.md)
+- [3.8.0](./380.md)
