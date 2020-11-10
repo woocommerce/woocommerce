@@ -314,6 +314,23 @@ class WC_Tracker {
 		return ( ! empty( $authenticated ) ) ? 'yes' : 'no';
 	}
 
+	/**
+	 * Get the time WC was activated in days.
+	 *
+	 * Since WC Admin is now in core, we can piggyback of `woocommerce_admin_install_timestamp`
+	 * options meta to learn when WC was installed.
+	 *
+	 * @return int $days Number of days the store was active.
+	 */
+	public static function get_age_of_store() {
+		$wc_admin_installed = get_option( 'woocommerce_admin_install_timestamp', 0 );
+
+		if ( 0 === $wc_admin_installed ) {
+			return 0;
+		}
+
+		return ceil( ( time() - intval( $wc_admin_installed ) ) / DAY_IN_SECONDS );
+	}
 
 	/**
 	 * Get user totals based on user role.
@@ -345,7 +362,7 @@ class WC_Tracker {
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $product_statuses as $product_status ) {
-			$product_count[ $product_status->name ] = $product_status->count;
+			$product_count[ 'product_type_' . str_replace( array( ' ', '-' ), '_', strtolower( $product_status->name ) ) ] = $product_status->count;
 		}
 
 		return $product_count;
@@ -376,6 +393,24 @@ class WC_Tracker {
 		$order_totals = self::get_order_totals();
 
 		return array_merge( $order_dates, $order_counts, $order_totals );
+	}
+
+	/**
+	 * Get order counts by status.
+	 *
+	 * @param string $status The string of the order status without `wc-` prefix.
+	 * @return int $count The count of orders per status.
+	 */
+	public static function get_orders_count_by_status( $status = '' ) {
+		if ( empty( $status ) ) {
+			return 0;
+		}
+
+		$status = 'wc-' . $status;
+
+		$count = wp_count_posts( 'shop_order' );
+
+		return intval( $count->{$status} );
 	}
 
 	/**
