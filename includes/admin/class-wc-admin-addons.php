@@ -541,6 +541,7 @@ class WC_Admin_Addons {
 					break;
 				case 'wcpay_banner_block':
 					self::output_wcpay_banner_block( (array) $section );
+					break;
 			}
 		}
 	}
