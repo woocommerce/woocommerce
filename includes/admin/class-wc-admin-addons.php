@@ -480,7 +480,7 @@ class WC_Admin_Addons {
 			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
 			'title'       => __( 'Payments made simple, with no monthly fees -- designed exclusively for WooCommerce stores.', 'woocommerce' ),
 			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
-			'button'      => __( 'Simplify my payments' ),
+			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 			'logos'       => array(),
 		);
@@ -614,13 +614,13 @@ class WC_Admin_Addons {
 			switch ( $_GET['install-addon'] ) {
 				case 'woocommerce-services':
 					self::install_woocommerce_services_addon();
-				break;
+					break;
 				case 'woocommerce-payments':
 					self::install_woocommerce_payments_addon();
-				break;
+					break;
 				default:
 					// Do nothing.
-				break;
+					break;
 			}
 		}
 
