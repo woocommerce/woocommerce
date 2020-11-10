@@ -595,7 +595,7 @@ class DataStore extends SqlQuery {
 	/**
 	 * Normalizes order_by clause to match to SQL query.
 	 *
-	 * @param string $order_by Order by option requeste by user.
+	 * @param string $order_by Order by option requested by user.
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
