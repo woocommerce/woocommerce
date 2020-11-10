@@ -48,29 +48,40 @@ describe( 'Activity Panel', () => {
 		expect( screen.queryByText( 'Inbox' ) ).toBeNull();
 	} );
 
+	it( 'should not render help tab if not on home screen', () => {
+		render(
+			<ActivityPanel
+				getHistory={ () => ( {
+					location: {
+						pathname: '/customers',
+					},
+				} ) }
+				query={ {} }
+			/>
+		);
+
+		expect( screen.queryByText( 'Help' ) ).toBeNull();
+	} );
+
+	it( 'should render help tab if on home screen', () => {
+		render(
+			<ActivityPanel
+				getHistory={ () => ( {
+					location: {
+						pathname: '/',
+					},
+				} ) }
+				query={ {} }
+			/>
+		);
+
+		expect( screen.getByText( 'Help' ) ).toBeDefined();
+	} );
+
 	it( 'should render help tab before options load', async () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions
-				query={ {
-					task: 'products',
-				} }
-			/>
-		);
-
-		const tabs = await screen.findAllByRole( 'tab' );
-
-		// Expect that the only tab is "Help".
-		expect( tabs ).toHaveLength( 1 );
-		expect( screen.getByText( 'Help' ) ).toBeDefined();
-	} );
-
-	it( 'should render help tab when on single task', async () => {
-		render(
-			<ActivityPanel
-				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden={ false }
 				query={ {
 					task: 'products',
 				} }
@@ -90,41 +101,14 @@ describe( 'Activity Panel', () => {
 				requestingTaskListOptions={ false }
 				taskListComplete={ false }
 				taskListHidden={ false }
+				getHistory={ () => ( {
+					location: {
+						pathname: '/customers',
+					},
+				} ) }
 				query={ {
 					task: 'products',
 					path: '/customers',
-				} }
-			/>
-		);
-
-		// Expect that "Help" tab is absent.
-		expect( screen.queryByText( 'Help' ) ).toBeNull();
-	} );
-
-	it( 'should not render help tab when TaskList is hidden', () => {
-		render(
-			<ActivityPanel
-				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden
-				query={ {
-					task: 'products',
-				} }
-			/>
-		);
-
-		// Expect that "Help" tab is absent.
-		expect( screen.queryByText( 'Help' ) ).toBeNull();
-	} );
-
-	it( 'should not render help tab when TaskList is complete', () => {
-		render(
-			<ActivityPanel
-				requestingTaskListOptions={ false }
-				taskListComplete
-				taskListHidden={ false }
-				query={ {
-					task: 'products',
 				} }
 			/>
 		);

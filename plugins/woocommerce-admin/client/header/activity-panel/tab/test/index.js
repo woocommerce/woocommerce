@@ -76,7 +76,7 @@ describe( 'ActivityPanel Tab', () => {
 		expect( queryByText( 'unread activity' ) ).toBeNull();
 	} );
 
-	it( 'is tabbable if its selected or if its closed and the first item', () => {
+	it( 'is always tabbable even if active', () => {
 		const { getByRole, rerender } = render(
 			<Tab
 				icon={ <PagesIcon /> }
@@ -111,26 +111,6 @@ describe( 'ActivityPanel Tab', () => {
 		tab = getByRole( 'tab' );
 
 		expect( tab ).not.toHaveAttribute( 'tabindex' );
-	} );
-
-	it( 'is not tabbable if its not selected, or its open', () => {
-		const { getByRole, rerender } = render(
-			<Tab
-				icon={ <PagesIcon /> }
-				title={ 'Hello World' }
-				name={ 'overview' }
-				unread={ false }
-				selected={ false }
-				isPanelOpen={ false }
-				index={ 1 }
-				onTabClick={ () => {} }
-			/>
-		);
-
-		let tab = getByRole( 'tab' );
-
-		// Tab index is not set if its the currently selected item, or the panel is closed and the item is the first item.
-		expect( tab ).toHaveAttribute( 'tabindex', '-1' );
 
 		rerender(
 			<Tab
@@ -138,7 +118,7 @@ describe( 'ActivityPanel Tab', () => {
 				title={ 'Hello World' }
 				name={ 'overview' }
 				unread={ false }
-				selected={ false }
+				selected={ true }
 				isPanelOpen={ true }
 				index={ 1 }
 				onTabClick={ () => {} }
@@ -147,7 +127,7 @@ describe( 'ActivityPanel Tab', () => {
 
 		tab = getByRole( 'tab' );
 
-		expect( tab ).toHaveAttribute( 'tabindex', '-1' );
+		expect( tab ).not.toHaveAttribute( 'tabindex' );
 	} );
 
 	it( 'calls the onTabClick handler if a tab is clicked', () => {

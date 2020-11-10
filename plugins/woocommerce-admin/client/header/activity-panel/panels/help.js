@@ -28,6 +28,39 @@ import { getPaymentMethods } from '../../../task-list/tasks/payments/methods';
 export const SETUP_TASK_HELP_ITEMS_FILTER =
 	'woocommerce_admin_setup_task_help_items';
 
+function getHomeItems() {
+	return [
+		{
+			title: __( 'Get Support', 'woocommerce-admin' ),
+			link: 'https://woocommerce.com/my-account/create-a-ticket/',
+		},
+		{
+			title: __( 'Home Screen', 'woocommerce-admin' ),
+			link: 'https://docs.woocommerce.com/document/home-screen',
+		},
+		{
+			title: __( 'Inbox', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/home-screen/#section-1',
+		},
+		{
+			title: __( 'Stats Overview', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/home-screen/#section-2',
+		},
+		{
+			title: __( 'Store Management', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/home-screen/#section-3',
+		},
+		{
+			title: __( 'Store Setup Checklist', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/woocommerce-setup-wizard/#section-9',
+		},
+	];
+}
+
 function getAppearanceItems() {
 	return [
 		{
@@ -270,7 +303,7 @@ function getItems( props ) {
 		case 'payments':
 			return getPaymentsItems( props );
 		default:
-			return [];
+			return getHomeItems();
 	}
 }
 

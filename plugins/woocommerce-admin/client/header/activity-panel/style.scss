@@ -252,6 +252,14 @@
 		height: calc(100vh - #{$header-height + $adminbar-height});
 		top: #{$header-height + $adminbar-height};
 	}
+	.has-woocommerce-navigation & {
+		height: calc(100vh - #{$header-height + $header-height});
+		top: #{$header-height + $header-height};
+		@include breakpoint( '>782px' ) {
+			height: calc(100vh - #{$header-height});
+			top: #{$header-height};
+		}
+	}
 
 	&.is-open {
 		transform: initial;

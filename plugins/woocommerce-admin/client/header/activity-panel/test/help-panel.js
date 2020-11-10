@@ -159,6 +159,28 @@ describe( 'Activity Panels', () => {
 			).toBeDefined();
 		} );
 
+		it( 'only shows links for home screen when supported', () => {
+			const homescreen = render(
+				<HelpPanel
+					activePlugins={ [ 'woocommerce-services' ] }
+					taskName=""
+				/>
+			);
+
+			const homescreenLinkTitles = [
+				'Get Support',
+				'Home Screen',
+				'Inbox',
+				'Stats Overview',
+				'Store Management',
+				'Store Setup Checklist',
+			];
+
+			homescreenLinkTitles.forEach( ( title ) => {
+				expect( homescreen.getByText( title ) ).toBeDefined();
+			} );
+		} );
+
 		describe( 'Filters', () => {
 			const testNamespace = 'wc/admin/tests';
 

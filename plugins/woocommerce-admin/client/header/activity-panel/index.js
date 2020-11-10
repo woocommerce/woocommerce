@@ -10,7 +10,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
-import { Icon, lifesaver } from '@wordpress/icons';
+import { Icon, help as helpIcon } from '@wordpress/icons';
 import { getSetting, getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section, Spinner } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -151,6 +151,9 @@ export class ActivityPanel extends Component {
 		const showInbox =
 			( isEmbedded || ! this.isHomescreen() ) && ! isPerformingSetupTask;
 
+		const showHelp =
+			( this.isHomescreen() && ! isEmbedded ) || isPerformingSetupTask;
+
 		const showStockAndReviews =
 			( taskListComplete || taskListHidden ) && ! isPerformingSetupTask;
 
@@ -197,11 +200,11 @@ export class ActivityPanel extends Component {
 			  ].filter( Boolean )
 			: [];
 
-		const help = isPerformingSetupTask
+		const help = showHelp
 			? {
 					name: 'help',
 					title: __( 'Help', 'woocommerce-admin' ),
-					icon: <Icon icon={ lifesaver } />,
+					icon: <Icon icon={ helpIcon } />,
 			  }
 			: null;
 
