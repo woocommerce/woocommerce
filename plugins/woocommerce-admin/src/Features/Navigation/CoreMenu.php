@@ -166,6 +166,7 @@ class CoreMenu {
 			array(
 				$home_item,
 				$order_items[1],
+				$order_items[2],
 				$product_items[1],
 				$product_items[2],
 				$coupon_items[0],
