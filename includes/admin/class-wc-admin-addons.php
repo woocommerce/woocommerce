@@ -440,7 +440,7 @@ class WC_Admin_Addons {
 					self::output_button(
 						$block_data['href'],
 						$block_data['button'],
-						'addons-button-outline-green'
+						'addons-button-outline-purple'
 					);
 				?>
 			</div>
