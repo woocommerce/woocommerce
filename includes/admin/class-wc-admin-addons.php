@@ -478,7 +478,7 @@ class WC_Admin_Addons {
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
 			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
-			'title'       => __( 'Payments made simple, with no monthly fees &mdash; designed exclusively for WooCommerce stores.', 'woocommerce' ),
+			'title'       => __( 'Payments made simple, with no monthly fees &mdash; exclusively for WooCommerce stores.', 'woocommerce' ),
 			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
@@ -584,7 +584,7 @@ class WC_Admin_Addons {
 	 * @param string $plugin The plugin the button is promoting.
 	 */
 	public static function output_button( $url, $text, $style, $plugin = '' ) {
-		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $style;
+		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-purple' : $style;
 		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
 		$url   = self::add_in_app_purchase_url_params( $url );
