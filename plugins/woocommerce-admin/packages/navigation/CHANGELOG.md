@@ -1,3 +1,7 @@
+# 5.2.0
+
+-   Add slot/fill components WooNavigationItem, NavSlotFillProvider, and useNavSlot.
+
 # 5.1.1
 
 -   Version bump to undeprecate the package.
