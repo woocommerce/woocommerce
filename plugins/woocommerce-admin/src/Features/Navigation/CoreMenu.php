@@ -165,11 +165,11 @@ class CoreMenu {
 		return array_merge(
 			array(
 				$home_item,
-				$order_items[1],
-				$order_items[2],
-				$product_items[1],
-				$product_items[2],
-				$coupon_items[0],
+				$order_items['all'],
+				$order_items['new'],
+				$product_items['all'],
+				$product_items['new'],
+				$coupon_items['default'],
 				// Marketplace category.
 				array(
 					'title'        => __( 'Marketplace', 'woocommerce-admin' ),
