@@ -12,12 +12,14 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const {
+	getTestConfig,
 	waitAndClick
 } = require( '@woocommerce/e2e-environment' );
 
 /**
  * External dependencies
  */
+const { HTTPClientFactory } = require( '@woocommerce/api' );
 const {
 	it,
 	describe,
@@ -67,6 +69,18 @@ const runInitialStoreSettingsTest = () => {
 				verifyValueOfInputField('#permalink_structure', '/%postname%/'),
 				verifyValueOfInputField('#woocommerce_permalink_structure', '/product/'),
 			]);
+		});
+
+		it( 'can use api with pretty permalinks', async () => {
+			const testConfig = getTestConfig();
+			const admin = testConfig.users.admin;
+			const client = HTTPClientFactory.build( testConfig.url )
+				.withBasicAuth( admin.username, admin.password )
+				.withIndexPermalinks()
+				.create();
+
+			const response = await client.get( '/wc/v3/products' );
+			expect( response.statusCode ).toBe( 200 );
 		});
 	});
 };
