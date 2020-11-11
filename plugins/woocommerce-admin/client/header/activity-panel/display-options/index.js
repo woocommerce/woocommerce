@@ -65,7 +65,7 @@ export const DisplayOptions = () => {
 				className: 'woocommerce-layout__activity-panel-popover',
 			} }
 		>
-			{ () => (
+			{ ( { onClose } ) => (
 				<MenuGroup
 					className="woocommerce-layout__homescreen-display-options"
 					label={ __( 'Layout', 'woocommerce-admin' ) }
@@ -76,6 +76,7 @@ export const DisplayOptions = () => {
 							updateUserPreferences( {
 								homepage_layout: newLayout,
 							} );
+							onClose();
 							recordEvent( 'homescreen_display_option', {
 								display_option: newLayout,
 							} );
