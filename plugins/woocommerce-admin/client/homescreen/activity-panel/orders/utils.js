@@ -14,7 +14,7 @@ export function getUnreadOrders( select, orderStatuses ) {
 	);
 
 	if ( ! orderStatuses.length ) {
-		return false;
+		return 0;
 	}
 
 	const ordersQuery = {
