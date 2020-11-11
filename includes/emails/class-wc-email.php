@@ -1049,10 +1049,10 @@ class WC_Email extends WC_Settings_API {
 				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
 				jQuery( 'a.toggle_editor' ).text( view ).click( function() {
+					var label = hide;
+
 					if ( jQuery( this ).closest(' .template' ).find( '.editor' ).is(':visible') ) {
 						var label = view;
-					} else {
-						var label = hide;
 					}
 
 					jQuery( this ).text( label ).closest(' .template' ).find( '.editor' ).slideToggle();
