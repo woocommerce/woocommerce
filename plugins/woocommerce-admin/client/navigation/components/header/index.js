@@ -8,6 +8,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from 'react';
 import classnames from 'classnames';
+import { debounce } from 'lodash';
 
 /**
  * Internal dependencies
@@ -23,20 +24,30 @@ const Header = () => {
 		document.body.classList.toggle( 'is-folded' );
 	};
 
-	const foldOnMobile = ( screenWidth ) => {
-		if ( screenWidth <= 960 ) {
-			document.body.classList.add( 'is-folded' );
-		}
+	const foldOnMobile = ( screenWidth = document.body.clientWidth ) => {
+		const isSmallScreen = screenWidth <= 960;
+
+		document.body.classList[ isSmallScreen ? 'add' : 'remove' ](
+			'is-folded'
+		);
 	};
 
 	useEffect( () => {
-		foldOnMobile( document.body.clientWidth );
+		foldOnMobile();
+		const foldEvents = [
+			{
+				eventName: 'orientationchange',
+				handler: ( e ) => foldOnMobile( e.target.screen.availWidth ),
+			},
+			{
+				eventName: 'resize',
+				handler: debounce( () => foldOnMobile(), 200 ),
+			},
+		];
 
-		window.addEventListener(
-			'orientationchange',
-			( e ) => foldOnMobile( e.target.screen.availWidth ),
-			false
-		);
+		for ( const { eventName, handler } of foldEvents ) {
+			window.addEventListener( eventName, handler, false );
+		}
 	}, [] );
 
 	let buttonIcon = <Icon size="36px" icon={ wordpress } />;
