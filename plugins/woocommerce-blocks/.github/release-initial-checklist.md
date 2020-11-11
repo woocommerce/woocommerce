@@ -63,6 +63,7 @@ When creating testing notes, please write them from the perspective of a "user" 
 * [ ] Post release announcement on [WooCommerce Developer Blog](https://woocommerce.wordpress.com/category/blocks/). Use previous posts for inspiration. If the release contains new features, or API changes, explain what's new so Woo devs/builders/merchants can get excited about it. This post can take time to get right - get feedback from the team, and don't rush it :)
   - Ensure the release notes are included in the post verbatim.
   - Don't forget to use category `Blocks` for the post.
+* [ ] Announce the release internally (`#woo-announcements` slack).
 * [ ] Update user-facing documentation as needed. When the plugin is released, ensure user-facing documentation is kept up to date with new blocks and compatibility information. The dev team should update documents in collaboration with support team and WooCommerce docs guild. In particular, please review and update as needed:
   - Are there any new blocks in this release? Ensure they have adequate user documentation.
   - Ensure any major improvements or changes are documented.
@@ -77,7 +78,7 @@ This only needs to be done if this release is the last release of the feature pl
 * [ ] Create a pull request for updating the package in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/master/composer.json) for the blocks package to the version being pulled in.
   * The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/27676). Essentially you link to all the important things that have already been prepared. Note, you need to make sure you link to all the related documents for the feature plugin releases since the last package version bump in Woo Core.
   * Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should include ensuring any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
-  * Testing should include completing the [Smoke testing checklist](../docs/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
+  * Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
   * Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
   * After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 * [ ] Make sure you join the `#woo-core-releases` Slack channel to represent Woo Blocks for the release of WooCommerce core this version is included in.
