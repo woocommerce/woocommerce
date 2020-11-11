@@ -910,8 +910,8 @@ class WC_Form_Handler {
 			$url          = get_permalink( $product_id );
 			$product_name = $product->get_name();
 
-			/* translators: %1$s: Product link, %2$s: Product title, %3$s: Product name. */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%3$s</a>.', 'woocommerce' ), esc_url( $url ), esc_html( $product_name ), esc_html( $product_name ) ), 'error' );
+			/* translators: 1: product link, 2: product name */
+			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( $url ), esc_html( $product_name ) ), 'error' );
 
 			return false;
 		}
