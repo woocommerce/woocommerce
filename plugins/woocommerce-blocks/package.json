@@ -128,7 +128,7 @@
 		"prettier": "npm:wp-prettier@2.0.5",
 		"progress-bar-webpack-plugin": "2.1.0",
 		"promptly": "3.2.0",
-		"react-test-renderer": "16.14.0",
+		"react-test-renderer": "17.0.1",
 		"request-promise": "4.2.6",
 		"rimraf": "3.0.2",
 		"sass-loader": "7.3.1",
