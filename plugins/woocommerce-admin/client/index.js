@@ -45,7 +45,7 @@ if ( appRoot ) {
 		);
 	}
 	render( <HydratedPageLayout />, appRoot );
-} else {
+} else if ( embeddedRoot ) {
 	let HydratedEmbedLayout = withSettingsHydration(
 		settingsGroup,
 		window.wcSettings

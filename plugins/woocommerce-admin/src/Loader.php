@@ -10,6 +10,7 @@ use \_WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\API\Plugins;
+use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use WC_Marketplace_Suggestions;
 
 /**
@@ -835,7 +836,7 @@ class Loader {
 	 * TODO: See usage in `admin.php`. This needs refactored and implemented properly in core.
 	 */
 	public static function is_embed_page() {
-		return wc_admin_is_connected_page();
+		return wc_admin_is_connected_page() || ( ! self::is_admin_page() && Screen::is_woocommerce_page() );
 	}
 
 	/**
