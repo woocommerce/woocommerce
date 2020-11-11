@@ -135,12 +135,15 @@ class Stripe extends Component {
 	async updateSettings( values ) {
 		const { updateOptions, stripeSettings, createNotice } = this.props;
 
+		const prefix = values.publishable_key.match( /^pk_live_/ )
+			? ''
+			: 'test_';
 		const update = await updateOptions( {
 			woocommerce_stripe_settings: {
 				...stripeSettings,
-				publishable_key: values.publishable_key,
-				secret_key: values.secret_key,
-				testmode: 'no',
+				[ prefix + 'publishable_key' ]: values.publishable_key,
+				[ prefix + 'secret_key' ]: values.secret_key,
+				testmode: prefix === 'test_' ? 'yes' : 'no',
 				enabled: 'yes',
 			},
 		} );
@@ -151,7 +154,7 @@ class Stripe extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem saving your payment setings',
+					'There was a problem saving your payment settings',
 					'woocommerce-admin'
 				)
 			);
@@ -173,7 +176,7 @@ class Stripe extends Component {
 			null
 		) {
 			errors.publishable_key = __(
-				'Please enter a valid publishable key. Valid keys start with "pk_live" or "pk_test".',
+				'Please enter a valid publishable key (starting with "pk_").',
 				'woocommerce-admin'
 			);
 		}
@@ -182,7 +185,15 @@ class Stripe extends Component {
 			null
 		) {
 			errors.secret_key = __(
-				'Please enter a valid secret key. Valid keys start with "sk_live", "sk_test", "rk_live or "rk_test".',
+				'Please enter a valid secret key (starting with "sk_" or "rk_").',
+				'woocommerce-admin'
+			);
+		} else if (
+			values.secret_key.slice( 3, 7 ) !==
+			values.publishable_key.slice( 3, 7 )
+		) {
+			errors.secret_key = __(
+				'Please enter a secret key in the same mode as the publishable key.',
 				'woocommerce-admin'
 			);
 		}

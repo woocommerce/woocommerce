@@ -57,7 +57,7 @@ class Bacs extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem saving your payment setings',
+					'There was a problem saving your payment settings',
 					'woocommerce-admin'
 				)
 			);

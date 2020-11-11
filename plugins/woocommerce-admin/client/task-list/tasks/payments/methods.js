@@ -170,6 +170,15 @@ export function getPaymentMethods( {
 		} );
 	}
 
+	// Whether publishable and secret keys are filled for given mode.
+	const isStripeConfigured =
+		options.woocommerce_stripe_settings &&
+		( options.woocommerce_stripe_settings.testmode === 'no'
+			? options.woocommerce_stripe_settings.publishable_key &&
+			  options.woocommerce_stripe_settings.secret_key
+			: options.woocommerce_stripe_settings.test_publishable_key &&
+			  options.woocommerce_stripe_settings.test_secret_key );
+
 	methods.push(
 		{
 			key: 'stripe',
@@ -192,10 +201,7 @@ export function getPaymentMethods( {
 				! hasCbdIndustry,
 			plugins: [ 'woocommerce-gateway-stripe' ],
 			container: <Stripe />,
-			isConfigured:
-				options.woocommerce_stripe_settings &&
-				options.woocommerce_stripe_settings.publishable_key &&
-				options.woocommerce_stripe_settings.secret_key,
+			isConfigured: isStripeConfigured,
 			isEnabled:
 				options.woocommerce_stripe_settings &&
 				options.woocommerce_stripe_settings.enabled === 'yes',
