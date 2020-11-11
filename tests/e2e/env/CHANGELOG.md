@@ -1,4 +1,10 @@
-# 0.16
+# Unreleased
+
+## Fixed
+
+- Remove redundant `puppeteer` dependency
+
+# 0.1.6
 
 ## Added
 
@@ -25,6 +31,6 @@
 - removed the products and orders delete resets
 - eliminated the use of docker-compose.yaml in the root of the project
 
-# 0.15
+# 0.1.5
 
 - Initial/beta release
