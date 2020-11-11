@@ -250,13 +250,17 @@ class Menu {
 	 *      'url'        => (string) URL or callback to be used. Required.
 	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
 	 *      'menuId'     => (string) The ID of the menu to add the item to.
+	 *      'order'      => (int) Menu item order.
 	 *    ).
 	 */
 	public static function add_plugin_item( $args ) {
+		if ( ! isset( $args['parent'] ) ) {
+			unset( $args['order'] );
+		}
+
 		$item_args = array_merge(
 			$args,
 			array(
-				'order'        => null,
 				'menuId'       => 'plugins',
 				'is_top_level' => ! isset( $args['parent'] ),
 			)
@@ -275,13 +279,17 @@ class Menu {
 	 *      'url'        => (string) URL or callback to be used. Required.
 	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
 	 *      'menuId'     => (string) The ID of the menu to add the category to.
+	 *      'order'      => (int) Menu item order.
 	 *    ).
 	 */
 	public static function add_plugin_category( $args ) {
+		if ( ! isset( $args['parent'] ) ) {
+			unset( $args['order'] );
+		}
+
 		$category_args = array_merge(
 			$args,
 			array(
-				'order'        => null,
 				'menuId'       => 'plugins',
 				'is_top_level' => ! isset( $args['parent'] ),
 			)
