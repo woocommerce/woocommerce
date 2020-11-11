@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { Suspense, lazy, useState } from '@wordpress/element';
+import {
+	Suspense,
+	lazy,
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import classnames from 'classnames';
@@ -55,10 +62,26 @@ export const Layout = ( {
 		setShowInbox( true );
 	}
 
+	const isWideViewport = useRef( true );
+	const maybeToggleColumns = useCallback( () => {
+		isWideViewport.current = window.innerWidth >= 782;
+	}, [] );
+
+	useLayoutEffect( () => {
+		maybeToggleColumns();
+		window.addEventListener( 'resize', maybeToggleColumns );
+
+		return () => {
+			window.removeEventListener( 'resize', maybeToggleColumns );
+		};
+	}, [ maybeToggleColumns ] );
+
+	const shouldStickColumns = isWideViewport.current && twoColumns;
+
 	const renderColumns = () => {
 		return (
 			<>
-				<Column shouldStick={ twoColumns }>
+				<Column shouldStick={ shouldStickColumns }>
 					<ActivityHeader
 						className="your-store-today"
 						title={ __( 'Your store today', 'woocommerce-admin' ) }
@@ -69,11 +92,16 @@ export const Layout = ( {
 					/>
 					<ActivityPanel />
 					{ isTaskListEnabled && renderTaskList() }
-					{ ! isTaskListEnabled && <StoreManagementLinks /> }
+					{ ! isTaskListEnabled && shouldStickColumns && (
+						<StoreManagementLinks />
+					) }
 				</Column>
-				<Column shouldStick={ twoColumns }>
+				<Column shouldStick={ shouldStickColumns }>
 					<StatsOverview />
 					<InboxPanel />
+					{ ! isTaskListEnabled && ! shouldStickColumns && (
+						<StoreManagementLinks />
+					) }
 				</Column>
 			</>
 		);
