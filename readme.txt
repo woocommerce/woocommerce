@@ -160,6 +160,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 4.7.1 - 2020-11-xx =
+
+**WooCommerce**
+
+* Fix - Prevent variable product to be added to cart until a valid variation is selected first. #28103
+* Fix - Load product category page and shortcode content with `content-product-cat.php`. #28233
+
 = 4.7.0 - 2020-11-10 =
 
 **WooCommerce**
