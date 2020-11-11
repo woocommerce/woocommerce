@@ -47,8 +47,10 @@ const Container = ( { menuItems } ) => {
 
 	useEffect( () => {
 		const initialMatchedItem = getMatchingItem( menuItems );
-		setActiveItem( initialMatchedItem );
-		setActiveLevel( initialMatchedItem.parent );
+		if ( initialMatchedItem ) {
+			setActiveItem( initialMatchedItem );
+			setActiveLevel( initialMatchedItem.parent );
+		}
 
 		const removeListener = addHistoryListener( () => {
 			setTimeout( () => {

@@ -538,6 +538,7 @@ class Menu {
 
 		$data = array(
 			'menuItems' => self::get_prepared_menu_item_data(),
+			'postType'  => isset( $_GET['post'] ) ? get_post_type( $_GET['post'] ) : null,
 		);
 
 		$paul = wp_add_inline_script( WC_ADMIN_APP, 'window.wcNavigation = ' . wp_json_encode( $data ), 'before' );
