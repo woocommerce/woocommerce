@@ -144,18 +144,21 @@ Layout.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+		const { getOption, isResolving, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		);
 
 		const welcomeModalDismissed =
 			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ===
 			'yes';
 
-		const welcomeModalDismissedIsResolving = isResolving( 'getOption', [
-			'woocommerce_task_list_welcome_modal_dismissed',
-		] );
+		const welcomeModalDismissedHasResolved = hasFinishedResolution(
+			'getOption',
+			[ 'woocommerce_task_list_welcome_modal_dismissed' ]
+		);
 
 		const shouldShowWelcomeModal =
-			! welcomeModalDismissedIsResolving && ! welcomeModalDismissed;
+			welcomeModalDismissedHasResolved && ! welcomeModalDismissed;
 
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
