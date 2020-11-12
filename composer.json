@@ -24,7 +24,7 @@
   },
   "config": {
     "platform": {
-      "php": "7.1"
+      "php": "7.0"
     },
     "preferred-install": {
         "woocommerce/action-scheduler": "dist",
