@@ -191,7 +191,7 @@ jQuery( function( $ ) {
 		},
 		is_valid_json: function( raw_json ) {
 			try {
-				var json = $.parseJSON( raw_json );
+				var json = JSON.parse( raw_json );
 
 				return ( json && 'object' === typeof json );
 			} catch ( e ) {
