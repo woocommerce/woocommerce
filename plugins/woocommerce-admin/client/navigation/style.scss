@@ -22,9 +22,12 @@
 		z-index: 1100; //Must be greater than z-index on .woocommerce-layout__header
 	}
 
-	.components-navigation {
+	.woocommerce-navigation__wrapper {
 		overflow-y: auto;
 		height: calc(100vh - #{$header-height});
+	}
+
+	.components-navigation {
 		box-sizing: border-box;
 	}
 

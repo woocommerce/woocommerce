@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
 	__experimentalNavigation as Navigation,
@@ -85,82 +85,93 @@ const Container = ( { menuItems } ) => {
 		[ menuItems ]
 	);
 
+	const navDomRef = useRef( null );
+
 	return (
 		<div className="woocommerce-navigation">
 			<Header />
-			<Navigation
-				activeItem={ activeItem ? activeItem.id : null }
-				activeMenu={ activeLevel }
-				onActivateMenu={ ( ...args ) => {
-					const navDomRef = document.querySelector(
-						'.components-navigation'
-					);
+			<div className="woocommerce-navigation__wrapper" ref={ navDomRef }>
+				<Navigation
+					activeItem={ activeItem ? activeItem.id : null }
+					activeMenu={ activeLevel }
+					onActivateMenu={ ( ...args ) => {
+						if ( navDomRef && navDomRef.current ) {
+							navDomRef.current.scrollTop = 0;
+						}
 
-					if ( navDomRef ) {
-						navDomRef.scrollTop = 0;
-					}
-
-					setActiveLevel( ...args );
-				} }
-			>
-				{ activeLevel === 'woocommerce' && dashboardUrl && (
-					<NavigationBackButton
-						className="woocommerce-navigation__back-to-dashboard"
-						href={ dashboardUrl }
-						backButtonLabel={ __(
-							'WordPress Dashboard',
-							'woocommerce-navigation'
-						) }
-					></NavigationBackButton>
-				) }
-				{ categories.map( ( category ) => {
-					const [
-						primaryItems,
-						secondaryItems,
-						pluginItems,
-					] = categorizedItems[ category.id ] || [ [], [], [] ];
-					return (
-						<NavigationMenu
-							key={ category.id }
-							title={ category.title }
-							menu={ category.id }
-							parentMenu={ category.parent }
-							backButtonLabel={ category.backButtonLabel || null }
-						>
-							{ !! primaryItems.length && (
-								<NavigationGroup>
-									{ primaryItems.map( ( item ) => (
-										<Item key={ item.id } item={ item } />
-									) ) }
-								</NavigationGroup>
+						setActiveLevel( ...args );
+					} }
+				>
+					{ activeLevel === 'woocommerce' && dashboardUrl && (
+						<NavigationBackButton
+							className="woocommerce-navigation__back-to-dashboard"
+							href={ dashboardUrl }
+							backButtonLabel={ __(
+								'WordPress Dashboard',
+								'woocommerce-navigation'
 							) }
-							{ !! pluginItems.length && (
-								<NavigationGroup
-									title={
-										category.id === 'woocommerce'
-											? __(
-													'Extensions',
-													'woocommerce-admin'
-											  )
-											: null
-									}
-								>
-									{ pluginItems.map( ( item ) => (
-										<Item key={ item.id } item={ item } />
-									) ) }
-								</NavigationGroup>
-							) }
-							{ !! secondaryItems.length && (
-								<NavigationGroup>
-									{ secondaryItems.map( ( item ) => (
-										<Item key={ item.id } item={ item } />
-									) ) }
-								</NavigationGroup>
-							) }
-						</NavigationMenu>
-					);
-				} ) }
-			</Navigation>
+						></NavigationBackButton>
+					) }
+					{ categories.map( ( category ) => {
+						const [
+							primaryItems,
+							secondaryItems,
+							pluginItems,
+						] = categorizedItems[ category.id ] || [ [], [], [] ];
+						return (
+							<NavigationMenu
+								key={ category.id }
+								title={ category.title }
+								menu={ category.id }
+								parentMenu={ category.parent }
+								backButtonLabel={
+									category.backButtonLabel || null
+								}
+							>
+								{ !! primaryItems.length && (
+									<NavigationGroup>
+										{ primaryItems.map( ( item ) => (
+											<Item
+												key={ item.id }
+												item={ item }
+											/>
+										) ) }
+									</NavigationGroup>
+								) }
+								{ !! pluginItems.length && (
+									<NavigationGroup
+										title={
+											category.id === 'woocommerce'
+												? __(
+														'Extensions',
+														'woocommerce-admin'
+												  )
+												: null
+										}
+									>
+										{ pluginItems.map( ( item ) => (
+											<Item
+												key={ item.id }
+												item={ item }
+											/>
+										) ) }
+									</NavigationGroup>
+								) }
+								{ !! secondaryItems.length && (
+									<NavigationGroup>
+										{ secondaryItems.map( ( item ) => (
+											<Item
+												key={ item.id }
+												item={ item }
+											/>
+										) ) }
+									</NavigationGroup>
+								) }
+							</NavigationMenu>
+						);
+					} ) }
+				</Navigation>
+			</div>
 		</div>
 	);
 };
