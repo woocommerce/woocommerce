@@ -170,8 +170,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			array(
 				'name'              => $post_object->post_title,
 				'slug'              => $post_object->post_name,
-				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'      => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified'     => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'            => $post_object->post_status,
 				'description'       => $post_object->post_content,
 				'short_description' => $post_object->post_excerpt,

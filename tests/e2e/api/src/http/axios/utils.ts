@@ -1,5 +1,10 @@
 import { AxiosRequestConfig } from 'axios';
 
+// @ts-ignore
+import buildFullPath = require( 'axios/lib/core/buildFullPath' );
+// @ts-ignore
+import appendParams = require( 'axios/lib/helpers/buildURL' );
+
 /**
  * Given an Axios request config this function generates the URL that Axios will
  * use to make the request.
@@ -8,17 +13,16 @@ import { AxiosRequestConfig } from 'axios';
  * @return {string} The merged URL.
  */
 export function buildURL( request: AxiosRequestConfig ): string {
-	const base = request.baseURL || '';
-	if ( ! request.url ) {
-		return base;
-	}
+	return buildFullPath( request.baseURL, request.url );
+}
 
-	// Axios ignores the base when the URL is absolute.
-	const url = request.url;
-	if ( ! base || url.match( /^([a-z][a-z\d+\-.]*:)?\/\/[^\/]/i ) ) {
-		return url;
-	}
-
-	// Remove trailing slashes from the base and leading slashes from the URL so we can combine them consistently.
-	return base.replace( /\/+$/, '' ) + '/' + url.replace( /^\/+/, '' );
+/**
+ * Given an Axios request config this function generates the URL that Axios will
+ * use to make the request with the query parameters included.
+ *
+ * @param {AxiosRequestConfig} request The Axios request we're building the URL for.
+ * @return {string} The merged URL.
+ */
+export function buildURLWithParams( request: AxiosRequestConfig ): string {
+	return appendParams( buildURL( request ), request.params, request.paramsSerializer );
 }

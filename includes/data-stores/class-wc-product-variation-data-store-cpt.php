@@ -62,8 +62,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			array(
 				'name'              => $post_object->post_title,
 				'slug'              => $post_object->post_name,
-				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'      => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified'     => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'            => $post_object->post_status,
 				'menu_order'        => $post_object->menu_order,
 				'reviews_allowed'   => 'open' === $post_object->comment_status,
