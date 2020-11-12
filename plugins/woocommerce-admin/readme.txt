@@ -35,7 +35,7 @@ WooCommerce Admin also allows store owners to customize a new dashboard screen w
 = Minimum Requirements =
 
 * WordPress 5.3
-* WooCommerce 3.6.0 or greater
+* WooCommerce 4.5 or greater
 * PHP version 5.6.20 or greater. PHP 7.2 or greater is recommended
 * MySQL version 5.0 or greater. MySQL 5.6 or greater is recommended
 
