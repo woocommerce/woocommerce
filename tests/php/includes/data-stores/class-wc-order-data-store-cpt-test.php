@@ -22,7 +22,12 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertNotWPError( $refund );
 
 		// Prime cache.
-		$fetched_order = wc_get_orders( array( 'p' => $order->get_id() ) )[0];
+		$fetched_order = wc_get_orders(
+			array(
+				'post__in' => array( $order->get_id() ),
+				'type'     => 'shop_order',
+			)
+		)[0];
 
 		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order->get_id();
 		$cached_refunds = wp_cache_get( $refund_cache_key, 'orders' );
