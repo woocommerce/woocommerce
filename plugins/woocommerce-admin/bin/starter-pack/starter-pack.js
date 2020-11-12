@@ -9,7 +9,8 @@ const files = [
 	'_webpack.config.js',
 	'_main.php',
 	'_package.json',
-	'._eslintrc',
+	'._eslintrc.js',
+	'._prettierrc.json',
 ];
 const maybeThrowError = ( error ) => {
 	if ( error ) throw error;

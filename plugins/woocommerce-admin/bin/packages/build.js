@@ -263,6 +263,11 @@ if ( files.length ) {
 } else {
 	process.stdout.write( chalk.inverse( '>> Building packages \n' ) );
 	buildDependencyExtractionAssets();
-	getPackages().forEach( buildPackage );
+	getPackages()
+		.filter(
+			( package ) =>
+				! /dependency-extraction-webpack-plugin/.test( package )
+		)
+		.forEach( buildPackage );
 	process.stdout.write( '\n' );
 }
