@@ -163,15 +163,6 @@ class WC_Plugin_Updates {
 			$version .= '.' . $new_version_parts[1];
 		}
 
-		if ( 'major' === $release ) {
-			$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
-
-			// If user has already moved to the major version, we don't need to flag up anything.
-			if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
-				return array();
-			}
-		}
-
 		foreach ( $extensions as $file => $plugin ) {
 			if ( ! empty( $plugin[ self::VERSION_TESTED_HEADER ] ) ) {
 				$plugin_version_parts = explode( '.', $plugin[ self::VERSION_TESTED_HEADER ] );
