@@ -1,7 +1,7 @@
 .woocommerce-inbox-message {
 	position: relative;
 	color: $gray-text;
-	background: $gray-100;
+	background: $studio-white;
 	border-radius: 2px;
 	@include font-size( 13 );
 	margin: 0 0 $gap-large;
@@ -32,10 +32,6 @@
 		border: 1px solid $gray-200;
 	}
 
-	&.message-is-unread {
-		background: $studio-white;
-	}
-
 	.line {
 		width: 100%;
 	}
@@ -59,12 +55,8 @@
 		@include font-size( 16 );
 		font-style: normal;
 		line-height: 1.5;
-		font-weight: normal;
+		font-weight: bold;
 		margin: $gap-smaller 0;
-
-		.message-is-unread & {
-			font-weight: bold;
-		}
 
 		.is-placeholder & {
 			& > div {
