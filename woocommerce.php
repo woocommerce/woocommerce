@@ -51,6 +51,7 @@ function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.Fu
  * Returns the WooCommerce PSR11-compatible object container.
  * Code in the `includes` directory should use the container to get instances of classes in the `src` directory.
  *
+ * @since  4.4.0
  * @return \Psr\Container\ContainerInterface The WooCommerce PSR11 container.
  */
 function wc_get_container() : \Psr\Container\ContainerInterface {
