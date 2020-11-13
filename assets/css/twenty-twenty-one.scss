@@ -937,10 +937,6 @@ a.reset_variations {
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: flex-start;
-
-			img.attachment-woocommerce_thumbnail {
-				height: auto !important;
-			}
 		}
 	}
 }
@@ -2119,6 +2115,9 @@ a.reset_variations {
 			align-items: flex-start;
 			margin-bottom: 5em;
 
+			img.attachment-woocommerce_thumbnail {
+				height: auto !important;
+			}
 		}
 
 		li.product-category {
