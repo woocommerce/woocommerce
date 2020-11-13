@@ -1340,6 +1340,9 @@ a.reset_variations {
 		td.product-thumbnail {
 			padding: 1.4rem;
 			width: 10%;
+			img {
+				height: auto !important;
+			}
 		}
 
 		td.product-name {
