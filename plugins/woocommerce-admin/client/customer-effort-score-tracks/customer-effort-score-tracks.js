@@ -8,6 +8,7 @@ import CustomerEffortScore from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME, MONTH } from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 
 const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
@@ -88,6 +89,15 @@ function CustomerEffortScoreTracks( {
 			trackCallback={ trackCallback }
 			label={ label }
 			openedCallback={ openedCallback }
+			icon={
+				<span
+					style={ { height: 21, width: 21 } }
+					role="img"
+					aria-label={ __( 'Pencil icon', 'woocommerce-admin' ) }
+				>
+					✏️
+				</span>
+			}
 		/>
 	);
 }

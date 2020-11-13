@@ -6,9 +6,6 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-/**
- * Internal dependencies
- */
 
 /**
  * Use `CustomerEffortScore` to gather a customer effort score.
@@ -16,17 +13,19 @@ import { withDispatch } from '@wordpress/data';
  * NOTE: This should live in @woocommerce/customer-effort-score to allow
  * reuse.
  *
- * @param {Object}   props               Component props.
- * @param {Function} props.trackCallback Function to call when the results should be tracked.
- * @param {string}   props.label         The label displayed in the modal.
- * @param {Function} props.createNotice  Create a notice (snackbar).
+ * @param {Object}   props                Component props.
+ * @param {Function} props.trackCallback  Function to call when the results should be tracked.
+ * @param {string}   props.label          The label displayed in the modal.
+ * @param {Function} props.createNotice   Create a notice (snackbar).
  * @param {Function} props.openedCallback Function to call when the modal is opened.
+ * @param {Object}   props.icon           Icon (React component) to be shown on the notice.
  */
 function CustomerEffortScore( {
 	trackCallback,
 	label,
 	createNotice,
 	openedCallback,
+	icon,
 } ) {
 	const [ score, setScore ] = useState( 0 );
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
@@ -39,10 +38,14 @@ function CustomerEffortScore( {
 					label: __( 'Give feedback', 'woocommerce-admin' ),
 					onClick: () => {
 						setVisible( true );
-						openedCallback();
+
+						if ( openedCallback ) {
+							openedCallback();
+						}
 					},
 				},
 			],
+			icon,
 		} );
 
 		setShouldCreateNotice( false );
@@ -80,7 +83,15 @@ CustomerEffortScore.propTypes = {
 	/**
 	 * Create a notice (snackbar).
 	 */
-	createNotice: PropTypes.func,
+	createNotice: PropTypes.func.isRequired,
+	/**
+	 * Callback executed when the modal is opened.
+	 */
+	openedCallback: PropTypes.func,
+	/**
+	 * Icon (React component) to be displayed.
+	 */
+	icon: PropTypes.element,
 };
 
 export default compose(

@@ -23,3 +23,15 @@
 		}
 	}
 }
+
+.components-snackbar {
+	.components-snackbar__content-with-icon {
+		margin-left: 32px;
+	}
+
+	.components-snackbar__icon {
+		position: absolute;
+		top: 24px;
+		left: 26px;
+	}
+}
