@@ -126,7 +126,7 @@ class BusinessDetails extends Component {
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
 			install_woocommerce_services: businessExtensions.includes(
-				'facebook-for-woocommerce'
+				'woocommerce-services'
 			),
 			install_jetpack: businessExtensions.includes( 'jetpack' ),
 			install_facebook: businessExtensions.includes(
