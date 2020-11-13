@@ -937,6 +937,10 @@ a.reset_variations {
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: flex-start;
+
+			img.attachment-woocommerce_thumbnail {
+				height: auto !important;
+			}
 		}
 	}
 }
@@ -1340,6 +1344,7 @@ a.reset_variations {
 		td.product-thumbnail {
 			padding: 1.4rem;
 			width: 10%;
+
 			img {
 				height: auto !important;
 			}
