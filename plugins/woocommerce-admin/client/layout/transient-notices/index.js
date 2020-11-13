@@ -46,10 +46,11 @@ TransientNotices.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		// NOTE: This uses core/notices2, if this file is copied back upstream
-		// to Gutenberg this needs to be changed back to core/notices.
-		const notices = select( 'core/notices2' ).getNotices();
+		// to Gutenberg this needs to be changed back to just core/notices.
+		const notices = select( 'core/notices' ).getNotices();
+		const notices2 = select( 'core/notices2' ).getNotices();
 
-		return { notices };
+		return { notices: notices.concat( notices2 ) };
 	} ),
 	withDispatch( ( dispatch ) => ( {
 		// NOTE: This uses core/notices2, if this file is copied back upstream

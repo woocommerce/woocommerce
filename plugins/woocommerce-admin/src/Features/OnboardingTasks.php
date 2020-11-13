@@ -241,7 +241,7 @@ class OnboardingTasks {
 			return;
 		}
 
-		wp_enqueue_script( 'onboarding-product-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+		wp_enqueue_script( 'onboarding-product-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ), array( 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 	}
 
 	/**
