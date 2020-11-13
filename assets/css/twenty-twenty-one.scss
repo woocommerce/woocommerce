@@ -1962,6 +1962,13 @@ a.reset_variations {
 	.payment_box {
 		padding: 1rem;
 		background: #eee;
+		color: var(--global--color-dark-gray);
+
+		a,
+		a:hover,
+		a:visited {
+			color: var(--global--color-dark-gray);
+		}
 
 		ul,
 		ol {
