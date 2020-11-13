@@ -45,11 +45,21 @@ class SetUpAdditionalPaymentTypes {
 	}
 
 	/**
-	 * Executes when the WooCommerce Payments plugin is activated. Possibly
-	 * adds the note if it isn't already in the database and if it matches any
-	 * criteria (see get_note()).
+	 * Executes when the WooCommerce Payments plugin is activated. It does nothing
+	 * if WooCommerce Payments plugin is not included in onboarding business extensions,
+	 * otherwise it possibly adds the note if it isn't already in the database and if
+	 * it matches any criteria (see get_note()).
 	 */
 	public static function on_activate_wcpay() {
+		$onboarding_profile = get_option( 'woocommerce_onboarding_profile', array() );
+		if ( is_array( $onboarding_profile ) && array_key_exists( 'business_extensions', $onboarding_profile ) ) {
+			if ( ! is_array( $onboarding_profile['business_extensions'] ) ||
+				! in_array( 'woocommerce-payments', $onboarding_profile['business_extensions'], true )
+			) {
+				return;
+			}
+		}
+
 		self::possibly_add_note();
 	}
 
