@@ -746,6 +746,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @since 3.1.0
 	 * @param array $query_vars query vars from a WC_Order_Query.
+	 *
+	 * @throws \Exception When status arg exists with a status that is not
+	 *                    registered as a custom post status.
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
@@ -772,14 +775,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Add the 'wc-' prefix to status if needed.
 		if ( ! empty( $query_vars['post_status'] ) ) {
+			// Add the 'wc-' prefix to status if needed.
 			if ( is_array( $query_vars['post_status'] ) ) {
 				foreach ( $query_vars['post_status'] as &$status ) {
 					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 				}
 			} else {
 				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
+			}
+
+			// Verify post_status is actually registered.
+			$post_stati = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] );
+			foreach ( $post_stati as $post_status ) {
+				$post_status_exists = get_post_stati( array( 'name' => $post_status ) );
+				if ( empty( $post_status_exists ) ) {
+					$message = sprintf(
+						/* translators: %s: status name */
+						__(
+							'The provided order query contains an order status that is not registered as a custom post status (status provided is %s). It is possible there is something removing an expected registered custom post status before the query is made.',
+							'woocommerce'
+						),
+						$post_status
+					);
+					// Bail.
+					throw new \Exception( $message );
+				}
 			}
 		}
 
@@ -853,28 +874,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
-		$args = $this->get_wp_query_args( $query_vars );
+		$orders = array();
+		try {
+			$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) ) {
-			$query = (object) array(
-				'posts'         => array(),
-				'found_posts'   => 0,
-				'max_num_pages' => 0,
-			);
-		} else {
-			$query = new WP_Query( $args );
+			if ( ! empty( $args['errors'] ) ) {
+				$query = (object) array(
+					'posts'         => array(),
+					'found_posts'   => 0,
+					'max_num_pages' => 0,
+				);
+			} else {
+				$query = new WP_Query( $args );
+			}
+
+			$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
+
+			if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+				return (object) array(
+					'orders'        => $orders,
+					'total'         => $query->found_posts,
+					'max_num_pages' => $query->max_num_pages,
+				);
+			}
+		} catch ( \Exception $exception ) {
+			wc_caught_exception( $exception, __METHOD__ );
 		}
-
-		$orders = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_order', $query->posts ) );
-
-		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
-			return (object) array(
-				'orders'        => $orders,
-				'total'         => $query->found_posts,
-				'max_num_pages' => $query->max_num_pages,
-			);
-		}
-
 		return $orders;
 	}
 

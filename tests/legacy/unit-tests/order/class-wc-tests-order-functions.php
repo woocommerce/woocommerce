@@ -16,6 +16,34 @@ use Automattic\Jetpack\Constants;
 class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Property for holding caught exceptions during tests.
+	 * @var \Exception
+	 */
+	private $caught_exception;
+
+	/**
+	 * Setup before tests
+	 */
+	public function setUp() {
+		// Set listening for exceptions.
+		add_action(
+			'woocommerce_caught_exception',
+			function( $exception_object ) {
+				$this->caught_exception = $exception_object;
+			}
+		);
+		parent::setUp();
+	}
+
+	/**
+	 * Teardown after tests.
+	 */
+	public function tearDown() {
+		remove_all_actions( 'woocommerce_caught_exception' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test wc_get_order_statuses().
 	 *
 	 * @since 2.3.0
@@ -1445,7 +1473,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit' => 2,
+				'usage_limit'          => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);
@@ -1525,7 +1553,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit' => 2,
+				'usage_limit'          => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);
@@ -1577,5 +1605,20 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$prefix    = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
 		$this->assertStringStartsWith( $prefix, $order_key );
 		$this->assertEquals( 13, strlen( str_replace( $prefix, '', $order_key ) ) );
+	}
+
+	/**
+	 * Test when the provided status param does not exist as a registered
+	 * post status
+	 */
+	public function test_wc_get_order_non_registered_status_param() {
+		// Temporarily hide error logging we don't care about (and keeps from polluting stdout).
+		$original_logging_destination = ini_get( 'error_log' );
+		ini_set( 'error_log', '/dev/null' );
+		$orders = wc_get_orders( array( 'status' => 'i-do-not-exist' ) );
+		$this->assertEmpty( $orders );
+		$this->assertContains( 'provided order query contains an order status that is not registered', $this->caught_exception->getMessage() );
+		// Restore original logging destination.
+		ini_set( 'error_log', $original_logging_destination );
 	}
 }
