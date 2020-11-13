@@ -57,7 +57,7 @@ class WC_Helper_Updater {
 				'upgrade_notice' => $data['upgrade_notice'],
 			);
 
-			if ( $data['requires_php'] ) {
+			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
 			}
 
