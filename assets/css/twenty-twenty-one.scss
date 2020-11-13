@@ -1678,6 +1678,16 @@ a.reset_variations {
 		}
 	}
 
+	form[name="checkout"] {
+		display: table;
+	}
+
+	.blockUI.blockOverlay {
+		position: relative;
+
+		@include loader();
+	}
+
 	form {
 
 		.col2-set {
