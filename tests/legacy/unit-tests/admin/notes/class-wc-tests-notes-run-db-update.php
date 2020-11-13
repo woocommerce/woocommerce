@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Admin\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Tests for the WC_Notes_Run_Db_Update class.
@@ -51,7 +51,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$note_ids   = $data_store->get_notes_with_name( WC_Notes_Run_Db_Update::NOTE_NAME );
 		foreach ( $note_ids as $note_id ) {
-			$note = new WC_Admin_Note( $note_id );
+			$note = new Note( $note_id );
 			$data_store->delete( $note );
 		}
 	}
@@ -87,15 +87,15 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 			),
 		);
 
-		$note = new WC_Admin_Note();
+		$note = new Note();
 
 		$note->set_title( 'WooCommerce database update required' );
 		$note->set_content( 'To keep things running smoothly, we have to update your database to the newest version.' );
-		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_UPDATE );
 		$note->set_name( WC_Notes_Run_Db_Update::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-core' );
-		$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->set_status( Note::E_WC_ADMIN_NOTE_UNACTIONED );
 
 		// Set new actions.
 		$note->clear_actions();
@@ -177,7 +177,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// An 'update required' notice should be created.
 		$this->assertEquals( 1, count( $note_ids ), 'A db update note should be created if db is NOT up to date.' );
 
-		$note = new WC_Admin_Note( $note_ids[0] );
+		$note = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_run', $actions[0]->name, 'A db update note to update the database should be displayed now.' );
 
@@ -187,7 +187,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// Magic 2: update-db note to thank you note.
 		WC_Notes_Run_Db_Update::show_reminder();
 
-		$note = new WC_Admin_Note( $note_ids[0] );
+		$note = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_done', $actions[0]->name, 'A db update note--Thanks for the update--should be displayed now.' );
 	}

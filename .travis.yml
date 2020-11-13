@@ -70,10 +70,9 @@ install:
     fi
   - composer install
   - |
-    # Install WP Test suite, install PHPUnit globally:
+    # Install WP Test suite:
     if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      composer global require "phpunit/phpunit=6.5.*|7.5.*"
     fi
 
 script:
@@ -89,6 +88,3 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
-
-before_install:
-  - composer self-update --1
