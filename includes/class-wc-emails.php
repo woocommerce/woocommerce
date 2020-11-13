@@ -263,11 +263,17 @@ class WC_Emails {
 	/**
 	 * Get the email header.
 	 *
-	 * @param mixed $email_heading Heading for the email.
-	 * @param WC_Email $email      Email object for the email.
+	 * @param mixed    $email_heading Heading for the email.
+	 * @param WC_Email $email         Email object for the email.
 	 */
 	public function email_header( $email_heading, $email ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading, 'email' => $email ) );
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'email'         => $email,
+			)
+		);
 	}
 
 	/**
