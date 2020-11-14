@@ -162,6 +162,24 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 4.8.0 - 2020-12-xx =
 
+* Enhancement - Limited the system status report's "not tested with version" warning to major versions. #28114
+* Enhancement - Add shipping, tax, and fee lines to refund REST API response. #28241
+* Tweak - Reduced the memory usage of AJAX product searches. #28177
+* Tweak - Replaced deprecated jQuery functionality. #28005, #28058
+* Tweak - Hid "Add to cart" button for out of stock grouped products. #28169
+* Fix - Stock adjustment when deleting a refunded order item. #28069
+* Fix - Avatar display for recent reviews widget in admin area. #28067
+* Fix - Incorrect product sorting user capability. #28062
+* Fix - PayPal response emptying uninitialized cart. #28027
+* Fix - Display of visual feedback after pressing "Place Order" in `Twenty Twenty` and `Twenty Nineteen` themes #27997
+* Fix - Category and tag bulk deletion message. #27856
+* Dev - Filter: `woocommerce_product_has_options` to products. #27514
+* Dev - Added error message to `checkout_error` JS event. #28101
+* Dev - Replaced usage of deprecated `woocommerce_reset_loop()` in product category shortcodes. #28242
+* Localization - Jamaican currency, states, and address structure. #27723
+* Localization - Better display of inclusive taxes during checkout. #28064
+* Localization - Validation for Belgium postcodes. #28145
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
 == Upgrade Notice ==
