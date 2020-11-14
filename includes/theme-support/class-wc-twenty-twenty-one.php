@@ -33,6 +33,9 @@ class WC_Twenty_Twenty_One {
 		// Enqueue theme compatibility styles.
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 
+		// Enqueue wp-admin compatibility styles.
+		add_action( 'admin_enqueue_scripts', array( __CLASS__ , 'enqueue_admin_styles' ) );
+
 		// Register theme features.
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
@@ -82,6 +85,20 @@ class WC_Twenty_Twenty_One {
 
 		return apply_filters( 'woocommerce_twenty_twenty_one_styles', $styles );
 	}
+
+	/**
+	 * Enqueue the wp-admin CSS overrides for this theme.
+	 */
+	public static function enqueue_admin_styles() {
+		wp_enqueue_style(
+			'woocommerce-twenty-twenty-one-admin',
+			str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/twenty-twenty-one-admin.css',
+			'',
+			Constants::get_constant( 'WC_VERSION' ),
+			'all'
+		);
+	}
+
 
 }
 
