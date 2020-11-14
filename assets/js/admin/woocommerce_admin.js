@@ -308,15 +308,6 @@
 			return false;
 		});
 
-		// Select availability
-		$( 'select.availability' ).change( function() {
-			if ( $( this ).val() === 'all' ) {
-				$( this ).closest( 'tr' ).next( 'tr' ).hide();
-			} else {
-				$( this ).closest( 'tr' ).next( 'tr' ).show();
-			}
-		}).change();
-
 		// Hidden options
 		$( '.hide_options_if_checked' ).each( function() {
 			$( this ).find( 'input:eq(0)' ).change( function() {
