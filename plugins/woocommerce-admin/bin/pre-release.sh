@@ -88,7 +88,12 @@ status "Here are the changes so far. Make sure the following changes are reflect
 
 echo "- docs/: folder will have changes to documentation, if any."
 echo "- package.json: new version number."
-echo "- woocommerce-admin.php: new version numbers."
+echo "- woocommerce-admin.php: new version number."
+echo "- composer.json: new version number."
+echo "- readme.txt: new version number."
+echo "- src/FeaturePlugin.php: new version number."
+echo "- src/Composer/Package.php: new version number."
+echo "- package-lock.json: dependencies updated."
 echo -e "\n"
 echo -e "\n"
 
