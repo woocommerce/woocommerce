@@ -24,6 +24,7 @@ curl "https://example-store.com/wp-json/wc/store/cart/coupons"
 [
 	{
 		"code": "20off",
+		"type": "fixed_cart",
 		"totals": {
 			"currency_code": "GBP",
 			"currency_symbol": "£",
@@ -71,7 +72,8 @@ curl "https://example-store.com/wp-json/wc/store/cart/coupons/20off"
 
 ```json
 {
-	"code": "20off",
+	"code": "halfprice",
+	"type": "percent",
 	"totals": {
 		"currency_code": "GBP",
 		"currency_symbol": "£",
@@ -80,8 +82,8 @@ curl "https://example-store.com/wp-json/wc/store/cart/coupons/20off"
 		"currency_thousand_separator": ",",
 		"currency_prefix": "£",
 		"currency_suffix": "",
-		"total_discount": "1667",
-		"total_discount_tax": "333"
+		"total_discount": "9950",
+		"total_discount_tax": "0"
 	}
 }
 ```
@@ -107,6 +109,7 @@ curl --request POST https://example-store.com/wp-json/wc/store/cart/coupons?code
 ```json
 {
 	"code": "20off",
+	"type": "percent",
 	"totals": {
 		"currency_code": "GBP",
 		"currency_symbol": "£",

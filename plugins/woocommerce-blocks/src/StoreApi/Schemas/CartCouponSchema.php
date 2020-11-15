@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @since 2.5.0
+ * @since $VID:$ Coupon type (`discount_type`) added.
  */
 class CartCouponSchema extends AbstractSchema {
 	/**
@@ -24,8 +25,8 @@ class CartCouponSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'code'   => [
-				'description' => __( 'The coupons unique code.', 'woo-gutenberg-products-block' ),
+			'code'          => [
+				'description' => __( 'The coupon\'s unique code.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'arg_options' => [
@@ -33,7 +34,15 @@ class CartCouponSchema extends AbstractSchema {
 					'validate_callback' => [ $this, 'coupon_exists' ],
 				],
 			],
-			'totals' => [
+			'discount_type' => [
+				'description' => __( 'The discount type for the coupon (e.g. percentage or fixed amount)', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'arg_options' => [
+					'validate_callback' => [ $this, 'coupon_exists' ],
+				],
+			],
+			'totals'        => [
 				'description' => __( 'Total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -71,7 +80,7 @@ class CartCouponSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Convert a WooCommerce cart item to an object suitable for the response.
+	 * Generate a response from passed coupon code.
 	 *
 	 * @param string $coupon_code Coupon code from the cart.
 	 * @return array
@@ -81,9 +90,11 @@ class CartCouponSchema extends AbstractSchema {
 		$cart                 = $controller->get_cart_instance();
 		$total_discounts      = $cart->get_coupon_discount_totals();
 		$total_discount_taxes = $cart->get_coupon_discount_tax_totals();
+		$coupon               = new \WC_Coupon( $coupon_code );
 		return [
-			'code'   => $coupon_code,
-			'totals' => (object) array_merge(
+			'code'          => $coupon_code,
+			'discount_type' => $coupon->get_discount_type(),
+			'totals'        => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'total_discount'     => $this->prepare_money_response( isset( $total_discounts[ $coupon_code ] ) ? $total_discounts[ $coupon_code ] : 0, wc_get_price_decimals() ),
