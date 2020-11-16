@@ -19,17 +19,35 @@ const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const siteUrl = getSetting( 'siteUrl', '' );
 	const isScrolled = useIsScrolled();
+	const navClasses = {
+		folded: 'is-folded',
+		expanded: 'is-expanded',
+	};
+
+	const foldNav = () => {
+		document.body.classList.add( navClasses.folded );
+		document.body.classList.remove( navClasses.expanded );
+	};
+
+	const expandNav = () => {
+		document.body.classList.remove( navClasses.folded );
+		document.body.classList.add( navClasses.expanded );
+	};
 
 	const toggleFolded = () => {
-		document.body.classList.toggle( 'is-folded' );
+		if ( document.body.classList.contains( navClasses.folded ) ) {
+			expandNav();
+		} else {
+			foldNav();
+		}
 	};
 
 	const foldOnMobile = ( screenWidth = document.body.clientWidth ) => {
-		const isSmallScreen = screenWidth <= 960;
-
-		document.body.classList[ isSmallScreen ? 'add' : 'remove' ](
-			'is-folded'
-		);
+		if ( screenWidth <= 960 ) {
+			foldNav();
+		} else {
+			expandNav();
+		}
 	};
 
 	useEffect( () => {
