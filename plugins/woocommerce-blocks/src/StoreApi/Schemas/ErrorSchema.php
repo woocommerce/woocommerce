@@ -16,6 +16,13 @@ class ErrorSchema extends AbstractSchema {
 	protected $title = 'error';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'error';
+
+	/**
 	 * Product schema properties.
 	 *
 	 * @return array

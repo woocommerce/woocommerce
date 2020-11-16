@@ -15,6 +15,13 @@ class ImageAttachmentSchema extends AbstractSchema {
 	protected $title = 'image';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'image';
+
+	/**
 	 * Product schema properties.
 	 *
 	 * @return array

@@ -2,6 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
 
 /**
  * CartSchema class.
@@ -16,6 +18,13 @@ class CartSchema extends AbstractSchema {
 	 * @var string
 	 */
 	protected $title = 'cart';
+
+	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'cart';
 
 	/**
 	 * Item schema instance.
@@ -55,6 +64,7 @@ class CartSchema extends AbstractSchema {
 	/**
 	 * Constructor.
 	 *
+	 * @param ExtendRestApi          $extend Rest Extending instance.
 	 * @param CartItemSchema         $item_schema Item schema instance.
 	 * @param CartCouponSchema       $coupon_schema Coupon schema instance.
 	 * @param CartShippingRateSchema $shipping_rate_schema Shipping rates schema instance.
@@ -62,6 +72,7 @@ class CartSchema extends AbstractSchema {
 	 * @param ErrorSchema            $error_schema Error schema instance.
 	 */
 	public function __construct(
+		ExtendRestApi $extend,
 		CartItemSchema $item_schema,
 		CartCouponSchema $coupon_schema,
 		CartShippingRateSchema $shipping_rate_schema,
@@ -73,6 +84,7 @@ class CartSchema extends AbstractSchema {
 		$this->shipping_rate_schema    = $shipping_rate_schema;
 		$this->shipping_address_schema = $shipping_address_schema;
 		$this->error_schema            = $error_schema;
+		parent::__construct( $extend );
 	}
 
 	/**

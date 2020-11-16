@@ -3,6 +3,8 @@ namespace Automattic\WooCommerce\Blocks\StoreApi;
 
 use Exception;
 use Schemas\AbstractSchema;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
 
 /**
  * SchemaController class.
@@ -19,9 +21,19 @@ class SchemaController {
 	protected $schemas = [];
 
 	/**
-	 * Constructor.
+	 * Stores Rest Extending instance
+	 *
+	 * @var ExtendRestApi
 	 */
-	public function __construct() {
+	private $extend;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param ExtendRestApi $extend Rest Extending instance.
+	 */
+	public function __construct( ExtendRestApi $extend ) {
+		$this->extend = $extend;
 		$this->initialize();
 	}
 
@@ -45,35 +57,50 @@ class SchemaController {
 	 */
 	protected function initialize() {
 		$this->schemas = [
-			'cart'                    => new Schemas\CartSchema(
+			Schemas\CartSchema::IDENTIFIER             => new Schemas\CartSchema(
+				$this->extend,
 				new Schemas\CartItemSchema(
-					new Schemas\ImageAttachmentSchema()
+					$this->extend,
+					new Schemas\ImageAttachmentSchema( $this->extend )
 				),
-				new Schemas\CartCouponSchema(),
-				new Schemas\CartShippingRateSchema(),
-				new Schemas\ShippingAddressSchema(),
-				new Schemas\ErrorSchema()
+				new Schemas\CartCouponSchema( $this->extend ),
+				new Schemas\CartShippingRateSchema( $this->extend ),
+				new Schemas\ShippingAddressSchema( $this->extend ),
+				new Schemas\ErrorSchema( $this->extend )
 			),
-			'cart-coupon'             => new Schemas\CartCouponSchema(),
-			'cart-item'               => new Schemas\CartItemSchema(
-				new Schemas\ImageAttachmentSchema()
+			Schemas\CartCouponSchema::IDENTIFIER       => new Schemas\CartCouponSchema( $this->extend ),
+			Schemas\CartItemSchema::IDENTIFIER         => new Schemas\CartItemSchema(
+				$this->extend,
+				new Schemas\ImageAttachmentSchema( $this->extend )
 			),
-			'checkout'                => new Schemas\CheckoutSchema(
-				new Schemas\BillingAddressSchema(),
-				new Schemas\ShippingAddressSchema()
+			Schemas\CheckoutSchema::IDENTIFIER         => new Schemas\CheckoutSchema(
+				$this->extend,
+				new Schemas\BillingAddressSchema( $this->extend ),
+				new Schemas\ShippingAddressSchema(
+					$this->extend
+				)
 			),
-			'product'                 => new Schemas\ProductSchema(
-				new Schemas\ImageAttachmentSchema()
+			Schemas\ProductSchema::IDENTIFIER          => new Schemas\ProductSchema(
+				$this->extend,
+				new Schemas\ImageAttachmentSchema(
+					$this->extend
+				)
 			),
-			'product-attribute'       => new Schemas\ProductAttributeSchema(),
-			'product-category'        => new Schemas\ProductCategorySchema(
-				new Schemas\ImageAttachmentSchema()
+			Schemas\ProductAttributeSchema::IDENTIFIER => new Schemas\ProductAttributeSchema( $this->extend ),
+			Schemas\ProductCategorySchema::IDENTIFIER  => new Schemas\ProductCategorySchema(
+				$this->extend,
+				new Schemas\ImageAttachmentSchema( $this->extend )
 			),
-			'product-collection-data' => new Schemas\ProductCollectionDataSchema(),
-			'product-review'          => new Schemas\ProductReviewSchema(
-				new Schemas\ImageAttachmentSchema()
+			Schemas\ProductCollectionDataSchema::IDENTIFIER => new Schemas\ProductCollectionDataSchema(
+				$this->extend
 			),
-			'term'                    => new Schemas\TermSchema(),
+			Schemas\ProductReviewSchema::IDENTIFIER    => new Schemas\ProductReviewSchema(
+				$this->extend,
+				new Schemas\ImageAttachmentSchema( $this->extend )
+			),
+			Schemas\TermSchema::IDENTIFIER             => new Schemas\TermSchema(
+				$this->extend
+			),
 		];
 	}
 }

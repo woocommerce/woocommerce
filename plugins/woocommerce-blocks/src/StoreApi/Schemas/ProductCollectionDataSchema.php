@@ -16,6 +16,13 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	protected $title = 'product-collection-data';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'product-collection-data';
+
+	/**
 	 * Product collection data schema properties.
 	 *
 	 * @return array

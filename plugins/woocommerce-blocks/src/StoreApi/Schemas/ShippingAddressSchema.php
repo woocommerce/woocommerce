@@ -20,6 +20,13 @@ class ShippingAddressSchema extends AbstractSchema {
 	protected $title = 'shipping_address';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'shipping-address';
+
+	/**
 	 * Term properties.
 	 *
 	 * @return array

@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount;
 
 /**
@@ -78,6 +79,7 @@ class Bootstrap {
 		}
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
+		$this->container->get( ExtendRestApi::class );
 		$this->container->get( PaymentsApi::class );
 		$this->container->get( RestApi::class );
 		Library::init();
@@ -181,7 +183,7 @@ class Bootstrap {
 		$this->container->register(
 			RestApi::class,
 			function ( Container $container ) {
-				return new RestApi();
+				return new RestApi( $container->get( ExtendRestApi::class ) );
 			}
 		);
 		$this->container->register(
@@ -200,6 +202,12 @@ class Bootstrap {
 			CreateAccount::class,
 			function( Container $container ) {
 				return new CreateAccount( $container->get( Package::class ) );
+			}
+		);
+		$this->container->register(
+			ExtendRestApi::class,
+			function( Container $container ) {
+				return new ExtendRestApi( $container->get( Package::class ) );
 			}
 		);
 	}

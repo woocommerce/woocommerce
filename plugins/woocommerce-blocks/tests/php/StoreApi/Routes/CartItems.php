@@ -9,11 +9,16 @@ use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Package;
 
 /**
  * Cart Controller Tests.
  */
 class CartItems extends TestCase {
+
+	private $mock_extend;
+
 	/**
 	 * Setup test products data. Called before every test.
 	 */
@@ -21,6 +26,8 @@ class CartItems extends TestCase {
 		global $wpdb;
 
 		parent::setUp();
+
+		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
 
 		wp_set_current_user( 0 );
 
@@ -218,7 +225,7 @@ class CartItems extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items' );
 		$cart       = wc()->cart->get_cart();
 		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
@@ -245,7 +252,7 @@ class CartItems extends TestCase {
 	 * Tests schema of both products in cart to cover as much schema as possible.
 	 */
 	public function test_schema_matches_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items' );
 		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart->get_cart();

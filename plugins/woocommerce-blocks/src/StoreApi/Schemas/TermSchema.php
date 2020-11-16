@@ -16,6 +16,13 @@ class TermSchema extends AbstractSchema {
 	protected $title = 'term';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'term';
+
+	/**
 	 * Term properties.
 	 *
 	 * @return array

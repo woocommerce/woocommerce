@@ -10,11 +10,16 @@ use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use \WC_Helper_Coupon as CouponHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 
 /**
  * Cart Coupons Controller Tests.
  */
 class CartCoupons extends TestCase {
+
+	private $mock_extend;
+
 	/**
 	 * Setup test products data. Called before every test.
 	 */
@@ -22,6 +27,8 @@ class CartCoupons extends TestCase {
 		parent::setUp();
 
 		wp_set_current_user( 0 );
+
+		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
 
 		$this->product = ProductHelper::create_simple_product( false );
 		$this->coupon  = CouponHelper::create_coupon();
@@ -154,7 +161,7 @@ class CartCoupons extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-coupons' );
 
 		$response   = $controller->prepare_item_for_response( $this->coupon->get_code(), new \WP_REST_Request() );
@@ -168,7 +175,7 @@ class CartCoupons extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-coupons' );
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( $this->coupon->get_code(), new \WP_REST_Request() );

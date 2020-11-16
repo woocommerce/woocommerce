@@ -11,11 +11,17 @@ use \WC_Helper_Product as ProductHelper;
 use \WC_Helper_Coupon as CouponHelper;
 use \WC_Helper_Shipping;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Package;
+
 
 /**
  * Cart Controller Tests.
  */
 class Cart extends TestCase {
+
+	private $mock_extend;
+
 	/**
 	 * Setup test products data. Called before every test.
 	 */
@@ -27,6 +33,8 @@ class Cart extends TestCase {
 		update_option( 'woocommerce_weight_unit', 'g' );
 
 		$this->products = [];
+
+		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
 
 		// Create some test products.
 		$this->products[0] = ProductHelper::create_simple_product( false );
@@ -350,7 +358,7 @@ class Cart extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart' );
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
@@ -370,7 +378,7 @@ class Cart extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart' );
 		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart;

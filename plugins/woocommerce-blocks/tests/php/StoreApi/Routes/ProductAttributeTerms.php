@@ -9,11 +9,16 @@ use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 
 /**
  * Product Attributes Controller Tests.
  */
 class ProductAttributeTerms extends TestCase {
+
+	private $mock_extend;
+
 	/**
 	 * Setup test products data. Called before every test.
 	 */
@@ -21,6 +26,7 @@ class ProductAttributeTerms extends TestCase {
 		parent::setUp();
 
 		wp_set_current_user( 0 );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
 
 		$this->attributes    = [];
 		$this->attributes[0] = ProductHelper::create_attribute( 'color', [ 'red', 'green', 'blue' ] );
@@ -66,7 +72,7 @@ class ProductAttributeTerms extends TestCase {
 	 * Test conversion of product to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$schema     = new \Automattic\WooCommerce\Blocks\StoreApi\Schemas\TermSchema();
+		$schema     = new \Automattic\WooCommerce\Blocks\StoreApi\Schemas\TermSchema( $this->mock_extend );
 		$controller = new \Automattic\WooCommerce\Blocks\StoreApi\Routes\ProductAttributeTerms( $schema );
 		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );
 		$data       = $response->get_data();
@@ -82,7 +88,7 @@ class ProductAttributeTerms extends TestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attribute-terms' );
 		$params     = $controller->get_collection_params();
 
@@ -95,7 +101,7 @@ class ProductAttributeTerms extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attribute-terms' );
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );

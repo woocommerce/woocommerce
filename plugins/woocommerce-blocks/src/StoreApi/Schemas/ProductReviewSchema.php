@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
+
 /**
  * ProductReviewSchema class.
  *
@@ -15,6 +18,13 @@ class ProductReviewSchema extends AbstractSchema {
 	protected $title = 'product_review';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'product-review';
+
+	/**
 	 * Image attachment schema instance.
 	 *
 	 * @var ImageAttachmentSchema
@@ -24,10 +34,12 @@ class ProductReviewSchema extends AbstractSchema {
 	/**
 	 * Constructor.
 	 *
+	 * @param ExtendRestApi         $extend Rest Extending instance.
 	 * @param ImageAttachmentSchema $image_attachment_schema Image attachment schema instance.
 	 */
-	public function __construct( ImageAttachmentSchema $image_attachment_schema ) {
+	public function __construct( ExtendRestApi $extend, ImageAttachmentSchema $image_attachment_schema ) {
 		$this->image_attachment_schema = $image_attachment_schema;
+		parent::__construct( $extend );
 	}
 
 	/**
