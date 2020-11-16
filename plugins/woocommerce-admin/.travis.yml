@@ -14,17 +14,6 @@ matrix:
         - name: 'PHP 7.3 unit tests, PHP Coding standards check and JS tests'
           php: 7.3
           env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_PHPCS=1 RUN_JS=1 COMPOSER_DEV=1
-        - name: 'PHP 7.3 E2E tests'
-          php: 7.3
-          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_E2E=1
-          script:
-              - composer require wp-cli/i18n-command
-              - npm run build
-              - npm install jest --global
-              - npm run docker:up
-              - npm run test:e2e
-          after_script:
-              - npm run docker:down
         - name: 'PHP 7.3 unit tests, run in random order'
           php: 7.3
           env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1

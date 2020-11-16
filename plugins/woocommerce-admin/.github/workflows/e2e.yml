@@ -1,0 +1,34 @@
+name: E2E tests
+on: [pull_request]
+
+jobs:
+    e2e-tests:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Setup PHP
+              uses: shivammathur/setup-php@2.7.0
+              with:
+                  php-version: '7.3'
+            - name: Install PHP dependencies
+              run: |
+                  composer self-update 2.0.6
+                  composer i
+            - name: Setup Node.js
+              uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'
+            - name: Build
+              env:
+                  WP_VERSION: latest
+                  WP_MULTISITE: 0
+                  WP_CORE_DIR: /tmp/wordpress
+                  RUN_E2E: 1
+              run: |
+                  npm i
+                  composer require wp-cli/i18n-command
+                  npm run build
+                  npm install jest --global
+                  npm run docker:up
+                  npm run test:e2e
