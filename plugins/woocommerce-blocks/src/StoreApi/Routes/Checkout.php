@@ -272,29 +272,44 @@ class Checkout extends AbstractRoute {
 	}
 
 	/**
+	 * Whether the passed argument is a draft order or an order that is
+	 * pending/failed and the cart hasn't changed.
+	 *
+	 * @param \WC_Order $order_object Order object to check.
+	 * @return boolean Whether the order is valid as a draft order.
+	 */
+	protected function is_valid_draft_order( $order_object ) {
+		if ( ! $order_object instanceof \WC_Order ) {
+			return false;
+		}
+
+		// Draft orders are okay.
+		if ( $order_object->has_status( 'checkout-draft' ) ) {
+			return true;
+		}
+
+		// Pending and failed orders can be retried if the cart hasn't changed.
+		if ( $order_object->needs_payment() && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get an order object, either using a current draft order, or returning a new one.
 	 *
 	 * @param integer $order_id Draft order ID.
 	 * @return \WC_Order|boolean Either the draft order, or false if one has not yet been created.
 	 */
 	protected function get_draft_order_object( $order_id ) {
+		// If order ID doesn't exist or it doesn't match a draft order, create
+		// a new draft order. That might happen when trying to checkout directly
+		// from the Cart block with an express payment method and the draft
+		// order hasn't been created yet.
 		$draft_order_object = $order_id ? wc_get_order( $order_id ) : false;
 
-		if ( ! $draft_order_object instanceof \WC_Order ) {
-			return false;
-		}
-
-		// Draft orders are okay.
-		if ( $draft_order_object->has_status( 'checkout-draft' ) ) {
-			return $draft_order_object;
-		}
-
-		// Pending and failed orders can be retried if the cart hasn't changed.
-		if ( $draft_order_object->needs_payment() && $draft_order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
-			return $draft_order_object;
-		}
-
-		return false;
+		return $this->is_valid_draft_order( $draft_order_object ) ? $draft_order_object : $this->create_or_update_draft_order();
 	}
 
 	/**
@@ -308,14 +323,14 @@ class Checkout extends AbstractRoute {
 		$cart_controller  = new CartController();
 		$order_controller = new OrderController();
 		$reserve_stock    = \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ? new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() : new ReserveStock();
-		$order_object     = $this->get_draft_order_object( $this->get_draft_order_id() );
+		$order_object     = $this->get_draft_order_id() ? wc_get_order( $this->get_draft_order_id() ) : null;
 		$created          = false;
 
 		// Validate items etc are allowed in the order before it gets created.
 		$cart_controller->validate_cart_items();
 		$cart_controller->validate_cart_coupons();
 
-		if ( ! $order_object instanceof \WC_Order ) {
+		if ( ! $this->is_valid_draft_order( $order_object ) ) {
 			$order_object = $order_controller->create_order_from_cart();
 			$created      = true;
 		} else {
