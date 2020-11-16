@@ -1,6 +1,6 @@
 # Create Extension
 
-Easily scaffold out a modern JavaScript WordPress plugin with WooCommerce tooling.
+Scaffold a modern JavaScript WordPress plugin with WooCommerce tooling.
 
 ## Includes
 
@@ -16,7 +16,7 @@ At the root of a [WooCommerce Admin](https://github.com/woocommerce/woocommerce-
 npm run create-wc-extension
 ```
 
-The script will create a sibling directory with the a name of your choosing. Once you change directories into the new folder, install dependencies and start a development build.
+The script will create a sibling directory by a name of your choosing. Once you change directories into the new folder, install dependencies and start a development build.
 
 ```
 npm install
