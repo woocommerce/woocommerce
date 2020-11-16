@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Reduced the memory usage of AJAX product searches. #28177
 * Tweak - Replaced deprecated jQuery functionality. #28005, #28058
 * Tweak - Hid "Add to cart" button for out of stock grouped products. #28169
+* Tweak - Made product date deserialization more explicit. #28052
 * Fix - Stock adjustment when deleting a refunded order item. #28069
 * Fix - Avatar display for recent reviews widget in admin area. #28067
 * Fix - Incorrect product sorting user capability. #28062
