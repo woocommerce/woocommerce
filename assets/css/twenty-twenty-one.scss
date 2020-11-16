@@ -2005,6 +2005,10 @@ a.reset_variations {
 				margin-bottom: 0;
 			}
 		}
+
+		input[type=checkbox] {
+		    width: 25px !important;
+		}
 	}
 
 	> label:first-of-type {
