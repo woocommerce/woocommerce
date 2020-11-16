@@ -1,0 +1,24 @@
+# Create Extension
+
+Easily scaffold out a modern JavaScript WordPress plugin with WooCommerce tooling.
+
+## Includes
+
+-   [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts)
+-   [WooCommerce Dependency Extraction Webpack Plugin](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/dependency-extraction-webpack-plugin)
+-   [WooCommerce ESLint Plugin with WordPress Prettier](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/eslint-plugin)
+
+### Usage
+
+At the root of a [WooCommerce Admin](https://github.com/woocommerce/woocommerce-admin) installation, run the create extension command.
+
+```
+npm run create-wc-extension
+```
+
+The script will create a sibling directory with the a name of your choosing. Once you change directories into the new folder, install dependencies and start a development build.
+
+```
+npm install
+npm start
+```
