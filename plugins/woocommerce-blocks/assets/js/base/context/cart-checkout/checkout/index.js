@@ -14,13 +14,19 @@ import CheckoutProcessor from './processor';
  *
  * @param {Object}  props               Incoming props for the provider.
  * @param {Object}  props.children      The children being wrapped.
+ * @param {boolean} [props.isCart]      Whether it's rendered in the Cart
+ *                                      component.
  * @param {string}  [props.redirectUrl] Initialize what the checkout will
  *                                      redirect to after successful
  *                                      submit.
  */
-export const CheckoutProvider = ( { children, redirectUrl } ) => {
+export const CheckoutProvider = ( {
+	children,
+	isCart = false,
+	redirectUrl,
+} ) => {
 	return (
-		<CheckoutStateProvider redirectUrl={ redirectUrl } isCart={ false }>
+		<CheckoutStateProvider redirectUrl={ redirectUrl } isCart={ isCart }>
 			<BillingDataProvider>
 				<ShippingDataProvider>
 					<PaymentMethodDataProvider>
