@@ -9,11 +9,16 @@ use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Package;
 
 /**
  * Controller Tests.
  */
 class ProductCollectionData extends TestCase {
+
+	private $mock_extend;
+
 	/**
 	 * Setup test products data. Called before every test.
 	 */
@@ -21,6 +26,7 @@ class ProductCollectionData extends TestCase {
 		parent::setUp();
 
 		wp_set_current_user( 0 );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
 
 		$this->products    = [];
 		$this->products[0] = ProductHelper::create_simple_product( false );
@@ -161,7 +167,7 @@ class ProductCollectionData extends TestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-collection-data' );
 		$params     = $controller->get_collection_params();
 
@@ -176,7 +182,7 @@ class ProductCollectionData extends TestCase {
 	public function test_schema_matches_response() {
 		ProductHelper::create_variation_product();
 
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController() );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-collection-data' );
 		$schema     = $controller->get_item_schema();
 

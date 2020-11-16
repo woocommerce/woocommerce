@@ -19,6 +19,13 @@ class CartCouponSchema extends AbstractSchema {
 	protected $title = 'cart_coupon';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'cart-coupon';
+
+	/**
 	 * Cart schema properties.
 	 *
 	 * @return array

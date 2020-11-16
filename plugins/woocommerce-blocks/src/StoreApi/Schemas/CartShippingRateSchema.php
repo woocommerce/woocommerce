@@ -17,6 +17,13 @@ class CartShippingRateSchema extends AbstractSchema {
 	protected $title = 'cart-shipping-rate';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'cart-shipping-rate';
+
+	/**
 	 * Cart schema properties.
 	 *
 	 * @return array

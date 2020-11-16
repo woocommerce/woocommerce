@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
+
 /**
  * CartItemSchema class.
  *
@@ -16,20 +19,11 @@ class CartItemSchema extends ProductSchema {
 	protected $title = 'cart_item';
 
 	/**
-	 * Image attachment schema instance.
+	 * The schema item identifier.
 	 *
-	 * @var ImageAttachmentSchema
+	 * @var string
 	 */
-	protected $image_attachment_schema;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param ImageAttachmentSchema $image_attachment_schema Image attachment schema instance.
-	 */
-	public function __construct( ImageAttachmentSchema $image_attachment_schema ) {
-		$this->image_attachment_schema = $image_attachment_schema;
-	}
+	const IDENTIFIER = 'cart-item';
 
 	/**
 	 * Cart schema properties.
@@ -266,6 +260,7 @@ class CartItemSchema extends ProductSchema {
 					]
 				),
 			],
+			self::EXTENDING_KEY    => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
 
@@ -304,6 +299,7 @@ class CartItemSchema extends ProductSchema {
 					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], wc_get_price_decimals() ),
 				]
 			),
+			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
 	}
 

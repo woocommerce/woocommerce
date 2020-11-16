@@ -3,6 +3,8 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\StoreApi\RoutesController;
 use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
 
 /**
  * RestApi class.
@@ -12,9 +14,19 @@ use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
  */
 class RestApi {
 	/**
-	 * Constructor
+	 * Stores Rest Extending instance
+	 *
+	 * @var ExtendRestApi
 	 */
-	public function __construct() {
+	private $extend;
+
+	/**
+	 * Constructor
+	 *
+	 * @param ExtendRestApi $extend Rest Extending instance.
+	 */
+	public function __construct( ExtendRestApi $extend ) {
+		$this->extend = $extend;
 		$this->init();
 	}
 
@@ -30,7 +42,7 @@ class RestApi {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
-		$schemas = new SchemaController();
+		$schemas = new SchemaController( $this->extend );
 		$routes  = new RoutesController( $schemas );
 		$routes->register_routes();
 	}

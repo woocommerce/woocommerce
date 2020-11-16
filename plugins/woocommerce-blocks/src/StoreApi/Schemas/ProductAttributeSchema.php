@@ -16,6 +16,13 @@ class ProductAttributeSchema extends AbstractSchema {
 	protected $title = 'product_attribute';
 
 	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'product-attribute';
+
+	/**
 	 * Term properties.
 	 *
 	 * @return array
