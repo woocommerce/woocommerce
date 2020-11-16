@@ -36,7 +36,7 @@ class RealTimeOrderAlerts {
 		}
 
 		// Check that the previous mobile app note was not actioned.
-		if ( Mobile_App::has_note_been_actioned() ) {
+		if ( MobileApp::has_note_been_actioned() ) {
 			return;
 		}
 

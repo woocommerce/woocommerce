@@ -36,16 +36,16 @@ class EditProductsOnTheMove {
 		}
 
 		// Check that the previous mobile app notes have not been actioned.
-		if ( Mobile_App::has_note_been_actioned() ) {
+		if ( MobileApp::has_note_been_actioned() ) {
 			return;
 		}
-		if ( Real_Time_Order_Alerts::has_note_been_actioned() ) {
+		if ( RealTimeOrderAlerts::has_note_been_actioned() ) {
 			return;
 		}
-		if ( Manage_Orders_On_The_Go::has_note_been_actioned() ) {
+		if ( ManageOrdersOnTheGo::has_note_been_actioned() ) {
 			return;
 		}
-		if ( Performance_On_Mobile::has_note_been_actioned() ) {
+		if ( PerformanceOnMobile::has_note_been_actioned() ) {
 			return;
 		}
 
