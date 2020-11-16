@@ -117,6 +117,21 @@ describe( 'Activity Panel', () => {
 		expect( screen.queryByText( 'Help' ) ).toBeNull();
 	} );
 
+	it( 'should render display options if on home screen', () => {
+		render(
+			<ActivityPanel
+				getHistory={ () => ( {
+					location: {
+						pathname: '/',
+					},
+				} ) }
+				query={ {} }
+			/>
+		);
+
+		expect( screen.getByText( '[DisplayOptions]' ) ).toBeDefined();
+	} );
+
 	it( 'should only render the store setup link when TaskList is not complete', () => {
 		const { queryByText, rerender } = render(
 			<ActivityPanel

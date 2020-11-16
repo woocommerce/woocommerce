@@ -29,6 +29,7 @@ import {
 import { isWCAdmin } from '../../dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
+import { DisplayOptions } from './display-options';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -154,6 +155,9 @@ export class ActivityPanel extends Component {
 		const showHelp =
 			( this.isHomescreen() && ! isEmbedded ) || isPerformingSetupTask;
 
+		const showDisplayOptions =
+			! isEmbedded && this.isHomescreen() && ! isPerformingSetupTask;
+
 		const showStockAndReviews =
 			( taskListComplete || taskListHidden ) && ! isPerformingSetupTask;
 
@@ -208,7 +212,19 @@ export class ActivityPanel extends Component {
 			  }
 			: null;
 
-		return [ inbox, ...stockAndReviews, setup, help ].filter( Boolean );
+		const displayOptions = showDisplayOptions
+			? {
+					component: DisplayOptions,
+			  }
+			: null;
+
+		return [
+			inbox,
+			...stockAndReviews,
+			setup,
+			displayOptions,
+			help,
+		].filter( Boolean );
 	}
 
 	getPanelContent( tab ) {
@@ -314,7 +330,6 @@ export class ActivityPanel extends Component {
 
 	render() {
 		const tabs = this.getTabs();
-		const { isEmbedded } = this.props;
 		const { mobileOpen, currentTab, isPanelOpen } = this.state;
 		const headerId = uniqueId( 'activity-panel-header_' );
 		const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
@@ -328,10 +343,6 @@ export class ActivityPanel extends Component {
 					'woocommerce-admin'
 			  )
 			: __( 'View Activity Panel', 'woocommerce-admin' );
-
-		const isPerformingSetupTask = this.isPerformingSetupTask();
-		const showDisplayOptions =
-			! isEmbedded && this.isHomescreen() && ! isPerformingSetupTask;
 
 		return (
 			<div>
@@ -374,7 +385,6 @@ export class ActivityPanel extends Component {
 							onTabClick={ ( tab, tabOpen ) => {
 								this.togglePanel( tab, tabOpen );
 							} }
-							showDisplayOptions={ showDisplayOptions }
 						/>
 						{ this.renderPanel() }
 					</div>

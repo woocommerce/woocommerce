@@ -9,13 +9,11 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { Tab } from '../tab';
-import { DisplayOptions } from '../display-options';
 
 export const Tabs = ( {
 	tabs,
 	onTabClick,
 	selectedTab: selectedTabName,
-	showDisplayOptions,
 	tabOpen = false,
 } ) => {
 	const [ { tabOpen: tabIsOpenState, currentTab }, setTabState ] = useState( {
@@ -38,35 +36,40 @@ export const Tabs = ( {
 			className="woocommerce-layout__activity-panel-tabs"
 		>
 			{ tabs &&
-				tabs.map( ( tab, i ) => (
-					<Tab
-						key={ i }
-						index={ i }
-						isPanelOpen={ tabIsOpenState }
-						selected={ currentTab === tab.name }
-						{ ...tab }
-						onTabClick={ () => {
-							const isTabOpen =
-								currentTab === tab.name || currentTab === ''
-									? ! tabIsOpenState
-									: true;
+				tabs.map( ( tab, i ) => {
+					if ( tab.component ) {
+						const { component: Comp, options } = tab;
+						return <Comp key={ i } { ...options } />;
+					}
+					return (
+						<Tab
+							key={ i }
+							index={ i }
+							isPanelOpen={ tabIsOpenState }
+							selected={ currentTab === tab.name }
+							{ ...tab }
+							onTabClick={ () => {
+								const isTabOpen =
+									currentTab === tab.name || currentTab === ''
+										? ! tabIsOpenState
+										: true;
 
-							// If a panel is being opened, or if an existing panel is already open and a different one is being opened, record a track.
-							if ( ! isTabOpen || currentTab !== tab.name ) {
-								recordEvent( 'activity_panel_open', {
-									tab: tab.name,
+								// If a panel is being opened, or if an existing panel is already open and a different one is being opened, record a track.
+								if ( ! isTabOpen || currentTab !== tab.name ) {
+									recordEvent( 'activity_panel_open', {
+										tab: tab.name,
+									} );
+								}
+
+								setTabState( {
+									tabOpen: isTabOpen,
+									currentTab: tab.name,
 								} );
-							}
-
-							setTabState( {
-								tabOpen: isTabOpen,
-								currentTab: tab.name,
-							} );
-							onTabClick( tab, isTabOpen );
-						} }
-					/>
-				) ) }
-			{ showDisplayOptions && <DisplayOptions /> }
+								onTabClick( tab, isTabOpen );
+							} }
+						/>
+					);
+				} ) }
 		</NavigableMenu>
 	);
 };

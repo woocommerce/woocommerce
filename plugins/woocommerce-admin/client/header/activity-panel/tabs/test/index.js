@@ -19,6 +19,10 @@ const generateTabs = () => {
 	} ) );
 };
 
+const CustomTab = () => {
+	return <div>Custom Tab</div>;
+};
+
 describe( 'Activity Panel Tabs', () => {
 	it( 'correctly tracks the selected tab', () => {
 		const { getAllByRole } = render(
@@ -95,5 +99,17 @@ describe( 'Activity Panel Tabs', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
 			tab: generatedTabs[ 3 ].name,
 		} );
+	} );
+
+	it( 'should render tabs with a custom component defined in tab config', () => {
+		const generatedTabs = generateTabs();
+		generatedTabs.push( {
+			component: CustomTab,
+		} );
+
+		const { getByText } = render(
+			<Tabs tabs={ generatedTabs } onTabClick={ () => {} } />
+		);
+		expect( getByText( 'Custom Tab' ) ).toBeDefined();
 	} );
 } );
