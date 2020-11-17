@@ -135,7 +135,6 @@ export default function ( { attributes, setAttributes } ) {
 			<Button
 				className="wc-block-price-slider__add-product-button"
 				isDefault
-				isLarge
 				href={ getAdminLink( 'post-new.php?post_type=product' ) }
 			>
 				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +

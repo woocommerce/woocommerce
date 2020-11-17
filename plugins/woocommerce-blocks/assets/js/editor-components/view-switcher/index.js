@@ -39,7 +39,6 @@ const ViewSwitcher = ( {
 						<Button
 							key={ view.value }
 							isPrimary={ currentView === view.value }
-							isLarge
 							aria-pressed={ currentView === view.value }
 							onMouseDown={ () => {
 								if ( currentView !== view.value ) {
