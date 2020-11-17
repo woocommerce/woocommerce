@@ -11,6 +11,7 @@ use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Controller Tests.
@@ -26,7 +27,7 @@ class ProductCollectionData extends TestCase {
 		parent::setUp();
 
 		wp_set_current_user( 0 );
-		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating() ) );
 
 		$this->products    = [];
 		$this->products[0] = ProductHelper::create_simple_product( false );

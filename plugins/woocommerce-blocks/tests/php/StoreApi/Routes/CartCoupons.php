@@ -12,6 +12,7 @@ use \WC_Helper_Coupon as CouponHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Cart Coupons Controller Tests.
@@ -28,7 +29,7 @@ class CartCoupons extends TestCase {
 
 		wp_set_current_user( 0 );
 
-		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ) );
 
 		$this->product = ProductHelper::create_simple_product( false );
 		$this->coupon  = CouponHelper::create_coupon();
