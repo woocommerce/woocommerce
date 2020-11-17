@@ -211,11 +211,6 @@ a.button {
 	}
 }
 
-.woocommerce-message {
-	background: #eee;
-	color: $body-color;
-}
-
 .woocommerce-error {
 	color: #fff;
 	background: #b22222;
@@ -245,6 +240,7 @@ a.button {
 	}
 }
 
+.woocommerce-message,
 .woocommerce-info {
 	background: #eee;
 	color: #000;
@@ -2012,7 +2008,7 @@ a.reset_variations {
 		}
 
 		input[type=checkbox] {
-		    width: 25px !important;
+			width: 25px !important;
 		}
 	}
 
@@ -2174,7 +2170,9 @@ a.reset_variations {
 	.woocommerce-page {
 
 		.related.products {
+
 			ul.products[class*=columns-] {
+
 				li.product {
 					padding: 0 2vw 3em 0 !important;
 					margin-bottom: 2em;
@@ -2299,6 +2297,7 @@ a.reset_variations {
 		}
 
 		.related.products {
+
 			ul.products {
 				display: flex;
 				flex-direction: column;
