@@ -2173,6 +2173,15 @@ a.reset_variations {
 	.woocommerce,
 	.woocommerce-page {
 
+		.related.products {
+			ul.products[class*=columns-] {
+				li.product {
+					padding: 0 2vw 3em 0 !important;
+					margin-bottom: 2em;
+				}
+			}
+		}
+
 		ul.products[class*=columns-] {
 
 			li.product {
