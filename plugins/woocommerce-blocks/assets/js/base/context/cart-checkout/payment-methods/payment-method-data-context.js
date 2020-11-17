@@ -195,8 +195,8 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		( message ) => {
 			if ( message ) {
 				addErrorNotice( message, {
-					context: noticeContexts.EXPRESS_PAYMENTS,
 					id: 'wc-express-payment-error',
+					context: noticeContexts.EXPRESS_PAYMENTS,
 				} );
 			} else {
 				removeNotice(

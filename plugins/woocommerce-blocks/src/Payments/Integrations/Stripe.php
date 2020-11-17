@@ -258,7 +258,7 @@ final class Stripe extends AbstractPaymentMethodType {
 				'wc_gateway_stripe_process_payment_error',
 				function( $error ) use ( &$result ) {
 					$payment_details                 = $result->payment_details;
-					$payment_details['errorMessage'] = $error->getLocalizedMessage();
+					$payment_details['errorMessage'] = wp_strip_all_tags( $error->getLocalizedMessage() );
 					$result->set_payment_details( $payment_details );
 				}
 			);

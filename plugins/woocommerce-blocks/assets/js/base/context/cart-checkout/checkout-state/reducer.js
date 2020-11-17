@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { decodeEntities } from '@wordpress/html-entities';
+
+/**
  * Internal dependencies
  */
 import { TYPES, DEFAULT_STATE, STATUS } from './constants';
@@ -54,7 +59,7 @@ export const prepareResponseData = ( data ) => {
 	};
 	if ( Array.isArray( data.payment_details ) ) {
 		data.payment_details.forEach( ( { key, value } ) => {
-			responseData.paymentDetails[ key ] = value;
+			responseData.paymentDetails[ key ] = decodeEntities( value );
 		} );
 	}
 	return responseData;
