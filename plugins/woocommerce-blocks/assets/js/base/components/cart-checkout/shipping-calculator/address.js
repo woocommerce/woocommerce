@@ -30,31 +30,10 @@ const ShippingCalculatorAddress = ( {
 		return ! hasValidationErrors;
 	};
 
-	// Make all fields optional except 'country'.
-	const fieldConfig = {};
-	addressFields.forEach( ( field ) => {
-		if ( field === 'country' ) {
-			fieldConfig[ field ] = {
-				...fieldConfig[ field ],
-				errorMessage: __(
-					'Please select a country to calculate rates.',
-					'woo-gutenberg-products-block'
-				),
-				required: true,
-			};
-		} else {
-			fieldConfig[ field ] = {
-				...fieldConfig[ field ],
-				required: false,
-			};
-		}
-	} );
-
 	return (
 		<form className="wc-block-components-shipping-calculator-address">
 			<AddressForm
 				fields={ addressFields }
-				fieldConfig={ fieldConfig }
 				onChange={ setAddress }
 				values={ address }
 			/>

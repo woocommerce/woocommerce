@@ -13,13 +13,18 @@ import './style.scss';
 const Packages = ( {
 	className,
 	collapsible = false,
-	noResultsMessage,
+	noResultsMessage = null,
 	renderOption,
 	shippingRates = [],
 } ) => {
 	const { selectShippingRate, selectedShippingRates } = useSelectShippingRate(
 		shippingRates
 	);
+
+	if ( ! shippingRates.length ) {
+		return noResultsMessage;
+	}
+
 	/* eslint-disable camelcase */
 	return (
 		<div className="wc-block-components-shipping-rates-control">
@@ -50,7 +55,7 @@ Packages.propTypes = {
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
 	collapsible: PropTypes.bool,
-	noResultsMessage: PropTypes.string,
+	noResultsMessage: PropTypes.node,
 	shippingRates: PropTypes.arrayOf(
 		PropTypes.shape( {
 			items: PropTypes.arrayOf(

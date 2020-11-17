@@ -101,7 +101,7 @@ const ShippingRatesControl = ( {
 };
 
 ShippingRatesControl.propTypes = {
-	noResultsMessage: PropTypes.string.isRequired,
+	noResultsMessage: PropTypes.node.isRequired,
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
 	collapsibleWhenMultiple: PropTypes.bool,

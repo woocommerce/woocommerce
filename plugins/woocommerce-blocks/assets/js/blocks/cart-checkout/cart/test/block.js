@@ -31,7 +31,6 @@ describe( 'Testing cart', () => {
 				emptyCart={ null }
 				attributes={ {
 					isShippingCalculatorEnabled: false,
-					isShippingCostHidden: true,
 				} }
 			/>
 		);
@@ -53,7 +52,6 @@ describe( 'Testing cart', () => {
 				emptyCart={ '<div>Empty Cart</div>' }
 				attributes={ {
 					isShippingCalculatorEnabled: false,
-					isShippingCostHidden: true,
 				} }
 			/>
 		);

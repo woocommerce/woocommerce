@@ -48,11 +48,10 @@ const CheckoutSidebar = ( {
 			/>
 			{ needsShipping && (
 				<TotalsShippingItem
-					currency={ totalsCurrency }
-					noResultsMessage={ null }
-					isCheckout={ true }
 					showCalculator={ false }
+					showRateSelector={ false }
 					values={ cartTotals }
+					currency={ totalsCurrency }
 				/>
 			) }
 			{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (

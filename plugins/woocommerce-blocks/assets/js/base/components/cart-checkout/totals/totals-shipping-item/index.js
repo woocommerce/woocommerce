@@ -25,16 +25,14 @@ import './style.scss';
  * @param {Object} props Incoming props for the component.
  * @param {Object} props.currency Currency information.
  * @param {Object} props.values Values in use.
- * @param {boolean} props.isCheckout Whether in checkout or not.
+ * @param {boolean} props.showRateSelector Whether to display the rate selector below the shipping total.
  * @param {boolean} props.showCalculator Whether to show shipping calculator or not.
- * @param {boolean} props.showRatesWithoutAddress Whether to show rates without address or not.
  */
 const TotalsShippingItem = ( {
 	currency,
 	values,
-	isCheckout = false,
 	showCalculator = true,
-	showRatesWithoutAddress = false,
+	showRateSelector = true,
 } ) => {
 	const [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] = useState(
 		false
@@ -42,82 +40,42 @@ const TotalsShippingItem = ( {
 	const {
 		shippingRates,
 		shippingRatesLoading,
-		hasShippingAddress,
 		shippingAddress,
+		cartHasCalculatedShipping,
 	} = useStoreCart();
+
 	const totalShippingValue = DISPLAY_CART_PRICES_INCLUDING_TAX
 		? parseInt( values.total_shipping, 10 ) +
 		  parseInt( values.total_shipping_tax, 10 )
 		: parseInt( values.total_shipping, 10 );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue;
-	const showingRates = showRatesWithoutAddress || hasShippingAddress;
-
-	// If we have no rates, and an address is needed.
-	if ( ! hasRates && ! hasShippingAddress && ! isCheckout ) {
-		return (
-			<>
-				<TotalsItem
-					className="wc-block-components-totals-shipping"
-					label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
-					value={
-						showCalculator ? (
-							<button
-								className="wc-block-components-totals-shipping__change-address-button"
-								onClick={ () => {
-									setIsShippingCalculatorOpen(
-										! isShippingCalculatorOpen
-									);
-								} }
-							>
-								{ __(
-									'Calculate',
-									'woo-gutenberg-products-block'
-								) }
-							</button>
-						) : (
-							<em>
-								{ __(
-									'Calculated during checkout',
-									'woo-gutenberg-products-block'
-								) }
-							</em>
-						)
-					}
-				/>
-				{ showCalculator && isShippingCalculatorOpen && (
-					<ShippingCalculator
-						onUpdate={ () => {
-							setIsShippingCalculatorOpen( false );
-						} }
-					/>
-				) }
-			</>
-		);
-	}
+	const calculatorButtonProps = {
+		isShippingCalculatorOpen,
+		setIsShippingCalculatorOpen,
+	};
 
 	return (
 		<div className="wc-block-components-totals-shipping">
 			<TotalsItem
 				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
-				value={ totalShippingValue ? totalShippingValue : '' }
+				value={
+					cartHasCalculatedShipping ? (
+						totalShippingValue
+					) : (
+						<NoShippingPlaceholder
+							showCalculator={ showCalculator }
+							{ ...calculatorButtonProps }
+						/>
+					)
+				}
 				description={
 					<>
-						<ShippingLocation address={ shippingAddress } />{ ' ' }
-						{ showCalculator && (
-							<button
-								className="wc-block-components-totals-shipping__change-address-button"
-								onClick={ () => {
-									setIsShippingCalculatorOpen(
-										! isShippingCalculatorOpen
-									);
-								} }
-								aria-expanded={ isShippingCalculatorOpen }
-							>
-								{ __(
-									'(change address)',
-									'woo-gutenberg-products-block'
-								) }
-							</button>
+						{ cartHasCalculatedShipping && (
+							<ShippingAddress
+								shippingAddress={ shippingAddress }
+								showCalculator={ showCalculator }
+								{ ...calculatorButtonProps }
+							/>
 						) }
 					</>
 				}
@@ -130,7 +88,7 @@ const TotalsShippingItem = ( {
 					} }
 				/>
 			) }
-			{ ! isCheckout && showingRates && (
+			{ showRateSelector && cartHasCalculatedShipping && (
 				<ShippingRateSelector
 					hasRates={ hasRates }
 					shippingRates={ shippingRates }
@@ -141,15 +99,79 @@ const TotalsShippingItem = ( {
 	);
 };
 
+const ShippingAddress = ( {
+	showCalculator,
+	isShippingCalculatorOpen,
+	setIsShippingCalculatorOpen,
+	shippingAddress,
+} ) => {
+	return (
+		<>
+			<ShippingLocation address={ shippingAddress } />
+			{ showCalculator && (
+				<CalculatorButton
+					label={ __(
+						'(change address)',
+						'woo-gutenberg-products-block'
+					) }
+					isShippingCalculatorOpen={ isShippingCalculatorOpen }
+					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+				/>
+			) }
+		</>
+	);
+};
+
+const NoShippingPlaceholder = ( {
+	showCalculator,
+	isShippingCalculatorOpen,
+	setIsShippingCalculatorOpen,
+} ) => {
+	if ( ! showCalculator ) {
+		return (
+			<em>
+				{ __(
+					'Calculated during checkout',
+					'woo-gutenberg-products-block'
+				) }
+			</em>
+		);
+	}
+
+	return (
+		<CalculatorButton
+			isShippingCalculatorOpen={ isShippingCalculatorOpen }
+			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+		/>
+	);
+};
+
+const CalculatorButton = ( {
+	label = __( 'Calculate', 'woo-gutenberg-products-block' ),
+	isShippingCalculatorOpen,
+	setIsShippingCalculatorOpen,
+} ) => {
+	return (
+		<button
+			className="wc-block-components-totals-shipping__change-address-button"
+			onClick={ () => {
+				setIsShippingCalculatorOpen( ! isShippingCalculatorOpen );
+			} }
+			aria-expanded={ isShippingCalculatorOpen }
+		>
+			{ label }
+		</button>
+	);
+};
+
 TotalsShippingItem.propTypes = {
 	currency: PropTypes.object.isRequired,
 	values: PropTypes.shape( {
 		total_shipping: PropTypes.string,
 		total_shipping_tax: PropTypes.string,
 	} ).isRequired,
-	isCheckout: PropTypes.bool,
+	showRateSelector: PropTypes.bool,
 	showCalculator: PropTypes.bool,
-	showRatesWithoutAddress: PropTypes.bool,
 };
 
 export default TotalsShippingItem;

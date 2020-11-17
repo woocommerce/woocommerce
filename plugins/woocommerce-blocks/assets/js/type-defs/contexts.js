@@ -39,6 +39,7 @@
  * @property {function()}           onShippingRateFail          Used to register a callback to be invoked when there is
  *                                                              an error with retrieving shipping rates.
  * @property {boolean}              needsShipping               True if the cart has items requiring shipping.
+ * @property {boolean}              hasCalculatedShipping       True if the cart has calculated shipping costs.
  */
 
 /**

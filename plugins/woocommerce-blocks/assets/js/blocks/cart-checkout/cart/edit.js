@@ -36,7 +36,6 @@ import './editor.scss';
 const BlockSettings = ( { attributes, setAttributes } ) => {
 	const {
 		isShippingCalculatorEnabled,
-		isShippingCostHidden,
 		checkoutPageId,
 		hasDarkControls,
 	} = attributes;
@@ -90,22 +89,6 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 						onChange={ () =>
 							setAttributes( {
 								isShippingCalculatorEnabled: ! isShippingCalculatorEnabled,
-							} )
-						}
-					/>
-					<ToggleControl
-						label={ __(
-							'Hide shipping costs until an address is entered',
-							'woo-gutenberg-products-block'
-						) }
-						help={ __(
-							'If checked, shipping rates will be hidden until the customer uses the shipping calculator or enters their address during checkout.',
-							'woo-gutenberg-products-block'
-						) }
-						checked={ isShippingCostHidden }
-						onChange={ () =>
-							setAttributes( {
-								isShippingCostHidden: ! isShippingCostHidden,
 							} )
 						}
 					/>
