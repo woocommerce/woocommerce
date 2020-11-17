@@ -94,7 +94,7 @@ export class Setting extends Model {
 	 *
 	 * @param {Object} properties The properties to set in the object.
 	 */
-	public constructor( properties: Partial< Setting > = {} ) {
+	public constructor( properties?: Partial< Setting > ) {
 		super();
 		Object.assign( this, properties );
 	}

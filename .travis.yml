@@ -70,10 +70,9 @@ install:
     fi
   - composer install
   - |
-    # Install WP Test suite, install PHPUnit globally:
+    # Install WP Test suite:
     if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      composer global require "phpunit/phpunit=6.5.*|7.5.*"
     fi
 
 script:
@@ -90,10 +89,12 @@ branches:
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
 
+# Composer 2.0.7 introduced a change that broke the jetpack autoloader in PHP 7.0 - 7.3.
 before_install:
-  - composer self-update --1
+  - composer self-update 2.0.6
 
 # Git clone depth
 # By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
 git:
   depth: 1
+

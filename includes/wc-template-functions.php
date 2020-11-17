@@ -2491,7 +2491,7 @@ if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 
 		foreach ( $product_categories as $category ) {
 			wc_get_template(
-				'content-product_cat.php',
+				'content-product-cat.php',
 				array(
 					'category' => $category,
 				)

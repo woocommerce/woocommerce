@@ -12,15 +12,8 @@ import {
 	UpdatesChildModels,
 	UpdatesModels,
 } from '../model-repository';
+import { DummyModel } from '../../__test_data__/dummy-model';
 
-class DummyModel extends Model {
-	public name: string = '';
-
-	public constructor( partial?: Partial< DummyModel > ) {
-		super();
-		Object.assign( this, partial );
-	}
-}
 type DummyModelParams = ModelRepositoryParams< DummyModel, never, { search: string }, 'name' >
 
 class DummyChildModel extends Model {
