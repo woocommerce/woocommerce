@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
@@ -64,7 +65,6 @@ class Bootstrap {
 		if ( ! $this->has_core_dependencies() ) {
 			return;
 		}
-		$this->define_feature_flag();
 		$this->register_dependencies();
 		$this->register_payment_methods();
 
@@ -129,26 +129,15 @@ class Bootstrap {
 	}
 
 	/**
-	 * Define the global feature flag.
-	 */
-	protected function define_feature_flag() {
-		$default_flag  = defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ? '2' : '1';
-		$allowed_flags = [ '1', '2', '3' ];
-
-		if ( file_exists( __DIR__ . '/../../blocks.ini' ) ) {
-			$woo_options = parse_ini_file( __DIR__ . '/../../blocks.ini' );
-			$flag        = is_array( $woo_options ) && in_array( $woo_options['woocommerce_blocks_phase'], $allowed_flags, true ) ? $woo_options['woocommerce_blocks_phase'] : $default_flag;
-		} else {
-			$flag = $default_flag;
-		}
-
-		define( 'WOOCOMMERCE_BLOCKS_PHASE', intval( $flag ) );
-	}
-
-	/**
 	 * Register core dependencies with the container.
 	 */
 	protected function register_dependencies() {
+		$this->container->register(
+			FeatureGating::class,
+			function ( Container $container ) {
+				return new FeatureGating();
+			}
+		);
 		$this->container->register(
 			AssetApi::class,
 			function ( Container $container ) {
