@@ -92,3 +92,9 @@ branches:
 # Composer 2.0.7 introduced a change that broke the jetpack autoloader in PHP 7.0 - 7.3.
 before_install:
   - composer self-update 2.0.6
+
+# Git clone depth
+# By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
+git:
+  depth: 1
+
