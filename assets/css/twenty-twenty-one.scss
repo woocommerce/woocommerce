@@ -530,7 +530,7 @@ dl.variation,
 		margin-bottom: 8rem;
 
 		p.price {
-			margin-bottom: 3.5rem;
+			margin-bottom: 2rem;
 		}
 	}
 
@@ -605,6 +605,7 @@ dl.variation,
 }
 
 table.variations {
+	margin: 1rem 0;
 
 	label {
 		margin: 0;
@@ -924,6 +925,10 @@ a.reset_variations {
 
 .related.products,
 .up-sells {
+
+	h2 {
+		margin-bottom: 2rem;
+	}
 
 	clear: both;
 
@@ -2285,7 +2290,6 @@ a.reset_variations {
 		}
 
 		.related.products {
-
 			ul.products {
 				display: flex;
 				flex-direction: column;
