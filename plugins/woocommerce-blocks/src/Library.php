@@ -66,12 +66,12 @@ class Library {
 			$blocks[] = 'AttributeFilter';
 			$blocks[] = 'ActiveFilters';
 
-			if ( Package::is_feature_plugin_build() ) {
+			if ( Package::feature()->is_feature_plugin_build() ) {
 				$blocks[] = 'Checkout';
 				$blocks[] = 'Cart';
 			}
 		}
-		if ( Package::is_experimental_build() ) {
+		if ( Package::feature()->is_experimental_build() ) {
 			$blocks[] = 'SingleProduct';
 		}
 		foreach ( $blocks as $class ) {

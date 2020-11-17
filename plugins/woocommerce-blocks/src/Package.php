@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Domain\Package as NewPackage;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
 use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Main package class.
@@ -60,6 +61,15 @@ class Package {
 	}
 
 	/**
+	 * Returns an instance of the the FeatureGating class.
+	 *
+	 * @return FeatureGating
+	 */
+	public static function feature() {
+		return self::get_package()->feature();
+	}
+
+	/**
 	 * Checks if we're executing the code in an experimental build mode.
 	 *
 	 * @return boolean
@@ -76,6 +86,7 @@ class Package {
 	public static function is_feature_plugin_build() {
 		return self::get_package()->is_feature_plugin_build();
 	}
+
 	/**
 	 * Loads the dependency injection container for woocommerce blocks.
 	 *
@@ -98,7 +109,8 @@ class Package {
 					$version = '3.9.0-dev';
 					return new NewPackage(
 						$version,
-						dirname( __DIR__ )
+						dirname( __DIR__ ),
+						new FeatureGating()
 					);
 				}
 			);

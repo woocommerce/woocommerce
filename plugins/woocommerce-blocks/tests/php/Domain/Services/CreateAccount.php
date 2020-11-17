@@ -3,7 +3,9 @@
 namespace Automattic\WooCommerce\Blocks\Tests\Library;
 
 use \WP_UnitTestCase;
-use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Package as NewPackage;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount as TestedCreateAccount;
@@ -19,9 +21,8 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount as TestedCreateA
  * @since $VID:$
  */
 class CreateAccount extends WP_UnitTestCase {
-
 	private function get_test_instance() {
-		return new TestedCreateAccount( new Package( 'test', './' ) );
+		return new TestedCreateAccount( new NewPackage( 'test', './', new FeatureGating( 2 ) ) );
 	}
 
 	/**
@@ -49,7 +50,7 @@ class CreateAccount extends WP_UnitTestCase {
 			'email'      => $email,
 			'first_name' => $first_name,
 			'last_name'  => $last_name
-		]);
+		] );
 
 		$test_order = new \WC_Order();
 

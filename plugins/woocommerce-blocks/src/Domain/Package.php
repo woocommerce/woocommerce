@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
+use Automattic\WooCommerce\Blocks\Package as NewPackage;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+
 /**
  * Main package class.
  *
@@ -25,14 +28,23 @@ class Package {
 	private $path;
 
 	/**
+	 * Holds the feature gating class instance.
+	 *
+	 * @var FeatureGating
+	 */
+	private $feature_gating;
+
+	/**
 	 * Constructor
 	 *
-	 * @param string $version      Version of the plugin.
-	 * @param string $plugin_path  Path to the main plugin file.
+	 * @param string        $version        Version of the plugin.
+	 * @param string        $plugin_path    Path to the main plugin file.
+	 * @param FeatureGating $feature_gating Feature gating class instance.
 	 */
-	public function __construct( $version, $plugin_path ) {
-		$this->version = $version;
-		$this->path    = $plugin_path;
+	public function __construct( $version, $plugin_path, FeatureGating $feature_gating ) {
+		$this->version        = $version;
+		$this->path           = $plugin_path;
+		$this->feature_gating = $feature_gating;
 	}
 
 	/**
@@ -70,12 +82,21 @@ class Package {
 	}
 
 	/**
+	 * Returns an instance of the the FeatureGating class.
+	 *
+	 * @return FeatureGating
+	 */
+	public function feature() {
+		return $this->feature_gating;
+	}
+
+	/**
 	 * Checks if we're executing the code in an experimental build mode.
 	 *
 	 * @return boolean
 	 */
-	public static function is_experimental_build() {
-		return WOOCOMMERCE_BLOCKS_PHASE > 2;
+	public function is_experimental_build() {
+		return $this->feature()->is_experimental_build();
 	}
 
 	/**
@@ -83,7 +104,7 @@ class Package {
 	 *
 	 * @return boolean
 	 */
-	public static function is_feature_plugin_build() {
-		return WOOCOMMERCE_BLOCKS_PHASE > 1;
+	public function is_feature_plugin_build() {
+		return $this->feature()->is_feature_plugin_build();
 	}
 }
