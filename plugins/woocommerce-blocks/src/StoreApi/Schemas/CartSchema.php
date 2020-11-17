@@ -94,7 +94,7 @@ class CartSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'coupons'          => [
+			'coupons'                 => [
 				'description' => __( 'List of applied cart coupons.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -104,7 +104,7 @@ class CartSchema extends AbstractSchema {
 					'properties' => $this->force_schema_readonly( $this->coupon_schema->get_properties() ),
 				],
 			],
-			'shipping_rates'   => [
+			'shipping_rates'          => [
 				'description' => __( 'List of available shipping rates for the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -114,7 +114,7 @@ class CartSchema extends AbstractSchema {
 					'properties' => $this->force_schema_readonly( $this->shipping_rate_schema->get_properties() ),
 				],
 			],
-			'shipping_address' => [
+			'shipping_address'        => [
 				'description' => __( 'Current set shipping address for the customer.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -124,7 +124,7 @@ class CartSchema extends AbstractSchema {
 					'properties' => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
 				],
 			],
-			'items'            => [
+			'items'                   => [
 				'description' => __( 'List of cart items.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -134,31 +134,37 @@ class CartSchema extends AbstractSchema {
 					'properties' => $this->force_schema_readonly( $this->item_schema->get_properties() ),
 				],
 			],
-			'items_count'      => [
+			'items_count'             => [
 				'description' => __( 'Number of items in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'items_weight'     => [
+			'items_weight'            => [
 				'description' => __( 'Total weight (in grams) of all products in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'number',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'needs_payment'    => [
+			'needs_payment'           => [
 				'description' => __( 'True if the cart needs payment. False for carts with only free products and no shipping costs.', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'needs_shipping'   => [
+			'needs_shipping'          => [
 				'description' => __( 'True if the cart needs shipping. False for carts with only digital goods or stores with no shipping methods set-up.', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'totals'           => [
+			'has_calculated_shipping' => [
+				'description' => __( 'True if the cart meets the criteria for showing shipping costs, and rates have been calculated and included in the totals.', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'totals'                  => [
 				'description' => __( 'Cart total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -203,14 +209,14 @@ class CartSchema extends AbstractSchema {
 							'readonly'    => true,
 						],
 						'total_shipping'     => [
-							'description' => __( 'Total price of shipping.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
+							'description' => __( 'Total price of shipping. If shipping has not been calculated, a null response will be sent.', 'woo-gutenberg-products-block' ),
+							'type'        => [ 'string', 'null' ],
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'total_shipping_tax' => [
-							'description' => __( 'Total tax on shipping.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
+							'description' => __( 'Total tax on shipping. If shipping has not been calculated, a null response will be sent.', 'woo-gutenberg-products-block' ),
+							'type'        => [ 'string', 'null' ],
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
@@ -252,7 +258,7 @@ class CartSchema extends AbstractSchema {
 					]
 				),
 			],
-			'errors'           => [
+			'errors'                  => [
 				'description' => __( 'List of cart item errors, for example, items in the cart which are out of stock.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -277,16 +283,22 @@ class CartSchema extends AbstractSchema {
 		// Get cart errors first so if recalculations are performed, it's reflected in the response.
 		$cart_errors = $this->get_cart_errors( $cart );
 
+		// The core cart class will not include shipping in the cart totals if `show_shipping()` returns false. This can
+		// happen if an address is required, or through the use of hooks. This tracks if shipping has actually been
+		// calculated so we can avoid returning costs and rates prematurely.
+		$has_calculated_shipping = $cart->show_shipping();
+
 		return [
-			'coupons'          => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
-			'shipping_rates'   => array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
-			'shipping_address' => $this->shipping_address_schema->get_item_response( wc()->customer ),
-			'items'            => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
-			'items_count'      => $cart->get_cart_contents_count(),
-			'items_weight'     => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
-			'needs_payment'    => $cart->needs_payment(),
-			'needs_shipping'   => $cart->needs_shipping(),
-			'totals'           => (object) array_merge(
+			'coupons'                 => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
+			'shipping_rates'          => $has_calculated_shipping ? array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ) : [],
+			'shipping_address'        => $this->shipping_address_schema->get_item_response( wc()->customer ),
+			'items'                   => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
+			'items_count'             => $cart->get_cart_contents_count(),
+			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
+			'needs_payment'           => $cart->needs_payment(),
+			'needs_shipping'          => $cart->needs_shipping(),
+			'has_calculated_shipping' => $has_calculated_shipping,
+			'totals'                  => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
@@ -295,8 +307,8 @@ class CartSchema extends AbstractSchema {
 					'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), wc_get_price_decimals() ),
 					'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), wc_get_price_decimals() ),
 					'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), wc_get_price_decimals() ),
-					'total_shipping'     => $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ),
-					'total_shipping_tax' => $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ),
+					'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ) : null,
+					'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ) : null,
 
 					// Explicitly request context='edit'; default ('view') will render total as markup.
 					'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), wc_get_price_decimals() ),
@@ -304,7 +316,7 @@ class CartSchema extends AbstractSchema {
 					'tax_lines'          => $this->get_tax_lines( $cart ),
 				]
 			),
-			'errors'           => $cart_errors,
+			'errors'                  => $cart_errors,
 		];
 	}
 

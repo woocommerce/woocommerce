@@ -50,7 +50,7 @@ describe( 'useStoreCart', () => {
 		},
 		shippingRates: previewCart.shipping_rates,
 		shippingRatesLoading: false,
-		hasShippingAddress: false,
+		cartHasCalculatedShipping: true,
 	};
 
 	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
@@ -66,6 +66,7 @@ describe( 'useStoreCart', () => {
 		needsShipping: true,
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
+		hasCalculatedShipping: true,
 	};
 	const mockCartTotals = {
 		currency_code: 'USD',
@@ -86,7 +87,7 @@ describe( 'useStoreCart', () => {
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
 		shippingRatesLoading: false,
-		hasShippingAddress: false,
+		cartHasCalculatedShipping: true,
 		receiveCart: undefined,
 	};
 

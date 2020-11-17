@@ -7,6 +7,8 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import { Notice } from 'wordpress-components';
+import classnames from 'classnames';
 
 const renderShippingRatesControlOption = ( option ) => {
 	const priceWithTaxes = DISPLAY_CART_PRICES_INCLUDING_TAX
@@ -50,10 +52,20 @@ const ShippingRateSelector = ( {
 			<ShippingRatesControl
 				className="wc-block-components-totals-shipping__options"
 				collapsibleWhenMultiple={ true }
-				noResultsMessage={ __(
-					'No shipping options were found.',
-					'woo-gutenberg-products-block'
-				) }
+				noResultsMessage={
+					<Notice
+						isDismissible={ false }
+						className={ classnames(
+							'wc-block-components-shipping-rates-control__no-results-notice',
+							'woocommerce-error'
+						) }
+					>
+						{ __(
+							'No shipping options were found.',
+							'woo-gutenberg-products-block'
+						) }
+					</Notice>
+				}
 				renderOption={ renderShippingRatesControlOption }
 				shippingRates={ shippingRates }
 				shippingRatesLoading={ shippingRatesLoading }

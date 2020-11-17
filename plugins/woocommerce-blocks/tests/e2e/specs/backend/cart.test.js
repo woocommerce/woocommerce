@@ -56,14 +56,6 @@ describe( `${ block.name } Block`, () => {
 			);
 			await expect( toggleLabel ).toToggleElement( selector );
 		} );
-
-		it( 'can toggle shipping costs', async () => {
-			const selector = `${ block.class } .wc-block-components-totals-shipping__fieldset`;
-			const toggleLabel = await findLabelWithText(
-				'Hide shipping costs until an address is entered'
-			);
-			await expect( toggleLabel ).toToggleElement( selector );
-		} );
 	} );
 
 	it( 'shows empty cart when changing the view', async () => {

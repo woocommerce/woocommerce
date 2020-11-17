@@ -174,7 +174,6 @@ class Assets {
 				'productCount'                  => array_sum( (array) $product_counts ),
 				'attributes'                    => array_values( wc_get_attribute_taxonomies() ),
 				'isShippingCalculatorEnabled'   => filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ),
-				'isShippingCostHidden'          => filter_var( get_option( 'woocommerce_shipping_cost_requires_address' ), FILTER_VALIDATE_BOOLEAN ),
 				'wcBlocksAssetUrl'              => plugins_url( 'assets/', __DIR__ ),
 				'wcBlocksBuildUrl'              => plugins_url( 'build/', __DIR__ ),
 				'restApiRoutes'                 => [

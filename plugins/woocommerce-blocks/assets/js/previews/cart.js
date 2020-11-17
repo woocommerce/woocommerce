@@ -160,6 +160,7 @@ export const previewCart = {
 	items_weight: 0,
 	needs_payment: true,
 	needs_shipping: SHIPPING_ENABLED,
+	has_calculated_shipping: true,
 	totals: {
 		currency_code: 'USD',
 		currency_symbol: '$',
@@ -174,10 +175,10 @@ export const previewCart = {
 		total_fees_tax: '0',
 		total_discount: '0',
 		total_discount_tax: '0',
-		total_shipping: '200',
+		total_shipping: '0',
 		total_shipping_tax: '0',
 		total_tax: '0',
-		total_price: '3200',
+		total_price: '3000',
 		tax_lines: [],
 	},
 };

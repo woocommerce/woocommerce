@@ -5,8 +5,6 @@ import PropTypes from 'prop-types';
 import RadioControl, {
 	RadioControlOptionLayout,
 } from '@woocommerce/base-components/radio-control';
-import { Notice } from 'wordpress-components';
-import classnames from 'classnames';
 
 const PackageOptions = ( {
 	className,
@@ -17,18 +15,7 @@ const PackageOptions = ( {
 	selected,
 } ) => {
 	if ( options.length === 0 ) {
-		return (
-			<Notice
-				isDismissible={ false }
-				className={ classnames(
-					'wc-block-components-shipping-rates-control__no-results-notice',
-					'woocommerce-message',
-					'woocommerce-info'
-				) }
-			>
-				{ noResultsMessage }
-			</Notice>
-		);
+		return noResultsMessage;
 	}
 
 	if ( options.length > 1 ) {
@@ -64,7 +51,7 @@ PackageOptions.propTypes = {
 	options: PropTypes.arrayOf( PropTypes.object ).isRequired,
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
-	noResultsMessage: PropTypes.string,
+	noResultsMessage: PropTypes.node,
 	selected: PropTypes.string,
 };
 

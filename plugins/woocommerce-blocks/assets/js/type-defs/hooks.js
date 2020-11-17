@@ -33,8 +33,7 @@
  * @property {boolean}             shippingRatesLoading Whether or not the
  *                                                      shipping rates are
  *                                                      being loaded.
- * @property {boolean}             hasShippingAddress   Whether or not the cart
- *                                                      has a shipping address yet.
+ * @property {boolean}             cartHasCalculatedShipping Whether or not the cart has calculated shipping yet.
  * @property {function(Object):any} receiveCart         Dispatcher to receive
  *                                                      updated cart.
  */

@@ -85,6 +85,7 @@ export const ShippingDataProvider = ( { children } ) => {
 	const { dispatchActions } = useCheckoutContext();
 	const {
 		cartNeedsShipping: needsShipping,
+		cartHasCalculatedShipping: hasCalculatedShipping,
 		shippingRates,
 		shippingRatesLoading,
 		cartErrors,
@@ -251,6 +252,7 @@ export const ShippingDataProvider = ( { children } ) => {
 			eventSubscribers.onShippingRateSelectSuccess,
 		onShippingRateSelectFail: eventSubscribers.onShippingRateSelectFail,
 		needsShipping,
+		hasCalculatedShipping,
 	};
 	return (
 		<>

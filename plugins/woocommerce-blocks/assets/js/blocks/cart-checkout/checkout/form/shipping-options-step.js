@@ -19,6 +19,8 @@ import {
 } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import { Notice } from 'wordpress-components';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -55,11 +57,14 @@ const ShippingOptionsStep = () => {
 		shippingRates,
 		shippingRatesLoading,
 		needsShipping,
+		hasCalculatedShipping,
 	} = useShippingDataContext();
 
 	if ( ! needsShipping ) {
 		return null;
 	}
+
+	const packageCount = getShippingRatesPackageCount( shippingRates );
 
 	return (
 		<FormStep
@@ -76,14 +81,31 @@ const ShippingOptionsStep = () => {
 					: ''
 			}
 		>
-			{ isEditor && ! getShippingRatesPackageCount( shippingRates ) ? (
+			{ isEditor && ! packageCount ? (
 				<NoShippingPlaceholder />
 			) : (
 				<ShippingRatesControl
-					noResultsMessage={ __(
-						'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
-						'woo-gutenberg-products-block'
-					) }
+					noResultsMessage={
+						hasCalculatedShipping ? (
+							<Notice
+								isDismissible={ false }
+								className={ classnames(
+									'wc-block-components-shipping-rates-control__no-results-notice',
+									'woocommerce-error'
+								) }
+							>
+								{ __(
+									'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+									'woo-gutenberg-products-block'
+								) }
+							</Notice>
+						) : (
+							__(
+								'Shipping options will appear here after entering your full shipping address.',
+								'woo-gutenberg-products-block'
+							)
+						)
+					}
 					renderOption={ renderShippingRatesControlOption }
 					shippingRates={ shippingRates }
 					shippingRatesLoading={ shippingRatesLoading }

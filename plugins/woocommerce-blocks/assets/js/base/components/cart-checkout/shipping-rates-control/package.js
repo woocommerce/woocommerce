@@ -117,7 +117,7 @@ Package.propTypes = {
 	} ).isRequired,
 	className: PropTypes.string,
 	collapsible: PropTypes.bool,
-	noResultsMessage: PropTypes.string,
+	noResultsMessage: PropTypes.node,
 	selected: PropTypes.string,
 	showItems: PropTypes.bool,
 	title: PropTypes.string,

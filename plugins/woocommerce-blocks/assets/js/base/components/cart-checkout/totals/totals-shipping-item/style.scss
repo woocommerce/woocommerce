@@ -1,4 +1,6 @@
 .wc-block-components-totals-shipping {
+	@include with-translucent-border(1px 0 0);
+
 	// Added extra label for specificity.
 	fieldset.wc-block-components-totals-shipping__fieldset {
 		background-color: transparent;
