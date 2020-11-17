@@ -14,8 +14,6 @@ import {
 	getPaymentRequest,
 	updatePaymentRequest,
 	canDoPaymentRequest,
-	getBillingData,
-	getPaymentMethodData,
 	normalizeShippingAddressForCheckout,
 	normalizeShippingOptionSelectionsForCheckout,
 	getStripeServerData,
@@ -124,21 +122,10 @@ export const useInitialization = ( {
 		onClick();
 	};
 
-	const abortPayment = useCallback( ( paymentMethod, message ) => {
-		const response = {
-			fail: {
-				message,
-				billingData: getBillingData( paymentMethod ),
-				paymentMethodData: getPaymentMethodData(
-					paymentMethod,
-					currentPaymentRequestType.current
-				),
-			},
-		};
+	const abortPayment = useCallback( ( paymentMethod ) => {
 		paymentMethod.complete( 'fail' );
 		setIsProcessing( false );
 		setIsFinished( true );
-		return response;
 	}, [] );
 
 	const completePayment = useCallback( ( paymentMethod ) => {
