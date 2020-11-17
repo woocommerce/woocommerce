@@ -640,7 +640,7 @@ function wc_let_to_num( $size ) {
 function wc_date_format() {
 	$date_format = get_option( 'date_format' );
 	if ( empty( $date_format ) ) {
-		// Return default date format if the option is empty
+		// Return default date format if the option is empty.
 		$date_format = 'F j, Y';
 	}
 	return apply_filters( 'woocommerce_date_format', $date_format );
@@ -654,7 +654,7 @@ function wc_date_format() {
 function wc_time_format() {
 	$time_format = get_option( 'time_format' );
 	if ( empty( $time_format ) ) {
-		// Return default time format if the option is empty
+		// Return default time format if the option is empty.
 		$time_format = 'g:i a';
 	}
 	return apply_filters( 'woocommerce_time_format', $time_format );
