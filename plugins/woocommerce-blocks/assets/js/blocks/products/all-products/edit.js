@@ -224,7 +224,6 @@ class Editor extends Component {
 						<Button
 							className="wc-block-all-products__done-button"
 							isPrimary
-							isLarge
 							onClick={ onDone }
 						>
 							{ __( 'Done', 'woo-gutenberg-products-block' ) }

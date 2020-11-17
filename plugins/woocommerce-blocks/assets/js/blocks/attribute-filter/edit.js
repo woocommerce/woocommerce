@@ -239,7 +239,6 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			<Button
 				className="wc-block-attribute-filter__add-attribute-button"
 				isDefault
-				isLarge
 				href={ getAdminLink(
 					'edit.php?post_type=product&page=product_attributes'
 				) }
