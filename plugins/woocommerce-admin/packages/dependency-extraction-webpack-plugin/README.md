@@ -23,3 +23,9 @@ module.exports = {
 	plugins: [ new WooCommerceDependencyExtractionWebpackPlugin() ],
 };
 ```
+
+Additional module requests on top of Wordpress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/master/packages/dependency-extraction-webpack-plugin) are:
+
+| Request          | Global    | Script handle |
+| ---------------- | --------- | ------------- |
+| `@woocommerce/*` | `wc['*']` | `wc-*`        |
