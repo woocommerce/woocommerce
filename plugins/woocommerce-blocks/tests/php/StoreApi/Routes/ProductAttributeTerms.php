@@ -11,6 +11,7 @@ use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Product Attributes Controller Tests.
@@ -26,7 +27,7 @@ class ProductAttributeTerms extends TestCase {
 		parent::setUp();
 
 		wp_set_current_user( 0 );
-		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating() ) );
 
 		$this->attributes    = [];
 		$this->attributes[0] = ProductHelper::create_attribute( 'color', [ 'red', 'green', 'blue' ] );

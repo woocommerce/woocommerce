@@ -13,6 +13,7 @@ use \WC_Helper_Shipping;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 
 /**
@@ -34,7 +35,7 @@ class Cart extends TestCase {
 
 		$this->products = [];
 
-		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ) );
 
 		// Create some test products.
 		$this->products[0] = ProductHelper::create_simple_product( false );

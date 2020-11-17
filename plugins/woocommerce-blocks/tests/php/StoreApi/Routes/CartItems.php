@@ -11,6 +11,7 @@ use \WC_Helper_Product as ProductHelper;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Cart Controller Tests.
@@ -27,7 +28,7 @@ class CartItems extends TestCase {
 
 		parent::setUp();
 
-		$this->mock_extend = new ExtendRestApi( new Package( '', '' ) );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ) );
 
 		wp_set_current_user( 0 );
 
