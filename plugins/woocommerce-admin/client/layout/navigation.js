@@ -33,7 +33,7 @@ const NavigationPlugin = () => {
 		.map( ( page ) => {
 			const pageWithId = {
 				...page,
-				id: `wc-admin&path=${ page.path }`,
+				id: `wc_admin/wc-admin&path=${ page.path }`,
 			};
 			if ( pageWithId.path === '/analytics/settings' ) {
 				return {
@@ -58,7 +58,7 @@ const NavigationPlugin = () => {
 				</WooNavigationItem>
 			) ) }
 			{ reports.map( ( item ) => {
-				const id = `wc-admin&path=/analytics/${ item.report }`;
+				const id = `wc_admin/wc-admin&path=/analytics/${ item.report }`;
 				return (
 					<WooNavigationItem item={ id } key={ id }>
 						<Link

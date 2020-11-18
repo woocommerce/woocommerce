@@ -57,7 +57,7 @@ class CoreMenu {
 					'parent'     => 'settings',
 					'title'      => $setting,
 					'capability' => 'manage_woocommerce',
-					'id'         => $key,
+					'id'         => 'settings/' . $key,
 					'url'        => 'admin.php?page=wc-settings&tab=' . $key,
 					'order'      => $order,
 				)
@@ -142,7 +142,7 @@ class CoreMenu {
 
 			$wca_items[] = array_merge(
 				array(
-					'id'         => $page['path'],
+					'id'         => 'wc_admin/' . $page['path'],
 					'url'        => $page['path'],
 					'title'      => $page['title'][0],
 					'capability' => $page['capability'],
