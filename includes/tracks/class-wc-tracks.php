@@ -38,16 +38,16 @@ class WC_Tracks {
 	public static function get_blog_details( $user_id ) {
 		$blog_details = get_transient( 'wc_tracks_blog_details' );
 
-		$product_counts = WC_Tracker::get_product_counts();
-
 		if ( false === $blog_details ) {
+			$product_counts = WC_Tracker::get_product_counts();
+
 			$blog_details = array(
 				'url'              => home_url(),
 				'blog_lang'        => get_user_locale( $user_id ),
 				'blog_id'          => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 				'products_count'   => $product_counts['total'],
 				'age_of_store'     => WC_Tracker::get_age_of_store(),
-				'completed_orders' => WC_Tracker::get_orders_count_by_status( 'completed' ),
+				'completed_orders' => wc_orders_count( 'completed' ),
 			);
 
 			// No longer needed as already displayed above for `products_count`.
@@ -56,6 +56,7 @@ class WC_Tracks {
 			$blog_details = array_merge( $blog_details, $product_counts );
 			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
 		}
+
 		return $blog_details;
 	}
 
