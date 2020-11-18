@@ -2208,6 +2208,10 @@ a.reset_variations {
 
 @media only screen and (max-width: 768px) {
 
+	.woocommerce section.content-area {
+		padding-top: 0;
+	}
+
 	#main {
 
 		.woocommerce {
