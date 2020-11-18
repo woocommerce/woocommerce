@@ -14,13 +14,17 @@ export const getItems = ( state, itemType, query ) => {
 	}, new Map() );
 };
 
-export const getItemsTotalCount = ( state, itemType, query ) => {
+export const getItemsTotalCount = (
+	state,
+	itemType,
+	query,
+	defaultValue = 0
+) => {
 	const resourceName = getResourceName( itemType, query );
-	return (
-		( state.items[ resourceName ] &&
-			state.items[ resourceName ].totalCount ) ||
-		0
-	);
+	const totalCount = state.items[ resourceName ]
+		? state.items[ resourceName ].totalCount
+		: defaultValue;
+	return totalCount;
 };
 
 export const getItemsError = ( state, itemType, query ) => {

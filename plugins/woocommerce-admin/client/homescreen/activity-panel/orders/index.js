@@ -304,8 +304,8 @@ export default withSelect( ( select, props ) => {
 		REPORTS_STORE_NAME
 	);
 
-	if ( ! countUnreadOrders ) {
-		return { isRequesting: countUnreadOrders !== 0 };
+	if ( ! orderStatuses.length && countUnreadOrders === 0 ) {
+		return { isRequesting: false };
 	}
 
 	// Query the core Orders endpoint for the most up-to-date statuses.
@@ -361,10 +361,16 @@ export default withSelect( ( select, props ) => {
 	/* eslint-enable @wordpress/no-unused-vars-before-return */
 	let orders = [];
 
-	if ( reportOrders && reportOrders.length ) {
-		if ( actionableOrders && ! actionableOrders.length ) {
-			return { isRequesting: true };
-		}
+	if (
+		countUnreadOrders === null ||
+		typeof reportOrders === 'undefined' ||
+		( reportOrders.length && ! actionableOrders.length ) ||
+		isRequesting
+	) {
+		return { isRequesting: true };
+	}
+
+	if ( reportOrders.length ) {
 		// Merge the core endpoint data with our reporting table.
 		const actionableOrdersById = keyBy( actionableOrders, 'id' );
 		orders = reportOrders.map( ( order ) =>

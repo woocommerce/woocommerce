@@ -24,14 +24,21 @@ export function getUnreadOrders( select, orderStatuses ) {
 		_fields: [ 'id' ],
 	};
 
+	const defaultValue = null;
+
 	// Disable eslint rule requiring `latestNote` to be defined below because the next two statements
 	// depend on `getItemsTotalCount` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const totalOrders = getItemsTotalCount( 'orders', ordersQuery );
+	const totalOrders = getItemsTotalCount(
+		'orders',
+		ordersQuery,
+		defaultValue
+	);
 	const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
 	const isRequesting = isResolving( 'getItemsTotalCount', [
 		'orders',
 		ordersQuery,
+		defaultValue,
 	] );
 
 	if ( isError || isRequesting ) {
