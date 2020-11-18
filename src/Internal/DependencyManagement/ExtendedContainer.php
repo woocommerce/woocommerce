@@ -6,8 +6,8 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
 use Automattic\WooCommerce\Utilities\StringUtil;
-use Automattic\WooCommerce\Internal\Vendor\League\Container\Container as BaseContainer;
-use Automattic\WooCommerce\Internal\Vendor\League\Container\Definition\DefinitionInterface;
+use Automattic\WooCommerce\Vendor\League\Container\Container as BaseContainer;
+use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterface;
 
 /**
  * This class extends the original League's Container object by adding some functionality

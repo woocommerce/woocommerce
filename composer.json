@@ -6,6 +6,12 @@
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
   "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "lib"
+    }
+  ],
   "require": {
     "php": ">=7.0",
     "automattic/jetpack-autoloader": "2.2.0",
@@ -17,11 +23,10 @@
     "woocommerce/action-scheduler": "3.1.6",
     "woocommerce/woocommerce-admin": "1.7.0",
     "woocommerce/woocommerce-blocks": "3.8.0",
-    "league/container": "3.3.3"
+    "woocommerce/woocommerce-lib": "@dev"
   },
   "require-dev": {
-    "bamarni/composer-bin-plugin": "^1.4",
-    "league/container": "3.3.3"
+    "bamarni/composer-bin-plugin": "^1.4"
   },
   "config": {
     "platform": {
@@ -85,8 +90,8 @@
     "bin": [
       "echo 'bin not installed'"
     ],
-    "move-vendor-packages": [
-      "sh ./bin/move-vendor-packages.sh"
+    "build-lib": [
+      "sh ./bin/build-lib.sh"
     ]
   },
   "extra": {
@@ -106,19 +111,6 @@
     },
     "bamarni-bin": {
       "target-directory": "bin/composer"
-    },
-    "mozart": {
-      "dep_namespace": "Automattic\\WooCommerce\\Internal\\Vendor\\",
-      "dep_directory": "/src/Internal/Vendor/",
-      "packages": [
-        "league/container"
-      ],
-      "excluded_packages": [
-        "psr/container"
-      ],
-      "classmap_directory": "/classmaps",
-      "classmap_prefix": "WOO_",
-      "delete_vendor_directories": true
     }
   }
 }

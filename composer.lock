@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0373a0a4d2df08885d048edab884822b",
+    "content-hash": "cf86e77a0dae2549e3e8060ae85f8af7",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -40,6 +40,9 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/master"
+            },
             "time": "2020-08-14T20:34:36+00:00"
         },
         {
@@ -71,6 +74,9 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-constants/tree/master"
+            },
             "time": "2020-08-13T14:33:09+00:00"
         },
         {
@@ -215,78 +221,6 @@
             "time": "2020-04-07T06:57:05+00:00"
         },
         {
-            "name": "league/container",
-            "version": "3.3.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/container.git",
-                "reference": "7dc67bdf89efc338e674863c0ea70a63efe4de05"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/container/zipball/7dc67bdf89efc338e674863c0ea70a63efe4de05",
-                "reference": "7dc67bdf89efc338e674863c0ea70a63efe4de05",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.0 || ^8.0",
-                "psr/container": "^1.0"
-            },
-            "provide": {
-                "psr/container-implementation": "^1.0"
-            },
-            "replace": {
-                "orno/di": "~2.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.0",
-                "squizlabs/php_codesniffer": "^3.3"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-3.x": "3.x-dev",
-                    "dev-2.x": "2.x-dev",
-                    "dev-1.x": "1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "League\\Container\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Phil Bennett",
-                    "email": "philipobenito@gmail.com",
-                    "homepage": "http://www.philipobenito.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A fast and intuitive dependency injection container.",
-            "homepage": "https://github.com/thephpleague/container",
-            "keywords": [
-                "container",
-                "dependency",
-                "di",
-                "injection",
-                "league",
-                "provider",
-                "service"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/philipobenito",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-09-28T13:38:44+00:00"
-        },
-        {
             "name": "maxmind-db/reader",
             "version": "v1.6.0",
             "source": {
@@ -344,6 +278,10 @@
                 "geolocation",
                 "maxmind"
             ],
+            "support": {
+                "issues": "https://github.com/maxmind/MaxMind-DB-Reader-php/issues",
+                "source": "https://github.com/maxmind/MaxMind-DB-Reader-php/tree/v1.6.0"
+            },
             "time": "2019-12-19T22:59:03+00:00"
         },
         {
@@ -418,6 +356,10 @@
                 "email",
                 "pre-processing"
             ],
+            "support": {
+                "issues": "https://github.com/MyIntervals/emogrifier/issues",
+                "source": "https://github.com/MyIntervals/emogrifier"
+            },
             "time": "2019-12-26T19:37:31+00:00"
         },
         {
@@ -467,6 +409,10 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/master"
+            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -558,6 +504,10 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
+            "support": {
+                "issues": "https://github.com/woocommerce/action-scheduler/issues",
+                "source": "https://github.com/woocommerce/action-scheduler/tree/master"
+            },
             "time": "2020-05-12T16:22:33+00:00"
         },
         {
@@ -659,6 +609,60 @@
                 "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v3.8.0"
             },
             "time": "2020-11-10T15:07:11+00:00"
+        },
+        {
+            "name": "woocommerce/woocommerce-lib",
+            "version": "dev-use-mozart-to-renamespace-dependencies",
+            "dist": {
+                "type": "path",
+                "url": "lib",
+                "reference": "d9d4733f0ed94289ad50fdf98cb4bc028384f482"
+            },
+            "require": {
+                "php": ">=7.0",
+                "psr/container": "^1.0"
+            },
+            "require-dev": {
+                "league/container": "3.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "mozart": {
+                    "dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
+                    "dep_directory": "/packages/",
+                    "packages": [
+                        "league/container"
+                    ],
+                    "excluded_packages": [
+                        "psr/container"
+                    ],
+                    "classmap_directory": "/classes/",
+                    "classmap_prefix": "WC_",
+                    "delete_vendor_directories": false
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Automattic\\WooCommerce\\Vendor\\": "packages/"
+                },
+                "psr-0": {
+                    "Automattic\\WooCommerce\\Vendor\\": "packages/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "\"../vendor/bin/mozart\" compose",
+                    "composer dump-autoload"
+                ],
+                "post-update-cmd": [
+                    "\"../vendor/bin/mozart\" compose",
+                    "composer dump-autoload"
+                ]
+            },
+            "description": "A package for hiding re-namespaced dependencies and executing them",
+            "transport-options": {
+                "relative": true
+            }
         }
     ],
     "packages-dev": [
@@ -706,12 +710,18 @@
                 "isolation",
                 "tool"
             ],
+            "support": {
+                "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
+                "source": "https://github.com/bamarni/composer-bin-plugin/tree/master"
+            },
             "time": "2020-05-03T08:27:20+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "woocommerce/woocommerce-lib": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -721,5 +731,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

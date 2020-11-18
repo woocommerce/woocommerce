@@ -5,8 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
-use Automattic\WooCommerce\Internal\Vendor\League\Container\Argument\RawArgument;
-use Automattic\WooCommerce\Internal\Vendor\League\Container\Definition\DefinitionInterface;
+use Automattic\WooCommerce\Vendor\League\Container\Argument\RawArgument;
+use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterface;
+use Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\AbstractServiceProvider as BaseServiceProvider;
 
 /**
  * Base class for the service providers used to register classes in the container.
@@ -18,7 +19,7 @@ use Automattic\WooCommerce\Internal\Vendor\League\Container\Definition\Definitio
  * - The `share_with_auto_arguments` method, sibling of the above.
  * - Convenience `add` and `share` methods that are just proxies for the same methods in `$this->getContainer()`.
  */
-abstract class AbstractServiceProvider extends \Automattic\WooCommerce\Internal\Vendor\League\Container\ServiceProvider\AbstractServiceProvider {
+abstract class AbstractServiceProvider extends BaseServiceProvider {
 
 	/**
 	 * Register a class in the container and use reflection to guess the injection method arguments.
