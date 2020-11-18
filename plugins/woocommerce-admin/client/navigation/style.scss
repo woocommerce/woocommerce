@@ -11,6 +11,18 @@
 		display: none !important;
 	}
 
+	&.woocommerce_page_wc-settings,
+	&.woocommerce_page_wc-status {
+		.woo-nav-tab-wrapper {
+			display: none;
+		}
+
+		.woocommerce .subsubsub {
+			font-size: 14px;
+			margin: 5px 0;
+		}
+	}
+
 	#wpcontent,
 	#wpfooter {
 		margin-left: $navigation-width;

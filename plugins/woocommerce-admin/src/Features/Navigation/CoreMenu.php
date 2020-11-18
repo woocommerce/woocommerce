@@ -187,6 +187,7 @@ class CoreMenu {
 					'capability' => 'manage_woocommerce',
 					'id'         => 'system-status',
 					'url'        => 'wc-status',
+					'order'      => 20,
 				),
 				array(
 					'parent'     => 'tools',
@@ -195,6 +196,7 @@ class CoreMenu {
 					'id'         => 'import-export',
 					'url'        => 'import.php',
 					'migrate'    => false,
+					'order'      => 10,
 				),
 				array(
 					'parent'     => 'tools',
@@ -202,6 +204,23 @@ class CoreMenu {
 					'capability' => 'manage_woocommerce',
 					'id'         => 'utilities',
 					'url'        => 'admin.php?page=wc-status&tab=tools',
+					'order'      => 30,
+				),
+				array(
+					'parent'     => 'tools',
+					'title'      => __( 'Logs', 'woocommerce-admin' ),
+					'capability' => 'manage_woocommerce',
+					'id'         => 'logs',
+					'url'        => 'admin.php?page=wc-status&tab=logs',
+					'order'      => 40,
+				),
+				array(
+					'parent'     => 'tools',
+					'title'      => __( 'Scheduled Actions', 'woocommerce-admin' ),
+					'capability' => 'manage_woocommerce',
+					'id'         => 'scheduled_actions',
+					'url'        => 'admin.php?page=wc-status&tab=action-scheduler',
+					'order'      => 50,
 				),
 			),
 			// WooCommerce Admin items.
