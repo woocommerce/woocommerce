@@ -10,15 +10,13 @@ import {
  * Internal dependencies
  */
 import stripeCcPaymentMethod from './credit-card';
-import PaymentRequestPaymentMethod from './payment-request';
+import paymentRequestPaymentMethod from './payment-request';
 import { getStripeServerData } from './stripe-utils';
 
 // Register Stripe Credit Card.
-registerPaymentMethod( ( Config ) => new Config( stripeCcPaymentMethod ) );
+registerPaymentMethod( stripeCcPaymentMethod );
 
 // Register Stripe Payment Request (Apple/Chrome Pay) if enabled.
 if ( getStripeServerData().allowPaymentRequest ) {
-	registerExpressPaymentMethod(
-		( Config ) => new Config( PaymentRequestPaymentMethod )
-	);
+	registerExpressPaymentMethod( paymentRequestPaymentMethod );
 }

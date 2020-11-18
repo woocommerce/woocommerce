@@ -52,7 +52,7 @@ function paymentRequestAvailable( currencyCode ) {
 	} );
 }
 
-const PaymentRequestPaymentMethod = {
+const paymentRequestPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
 	content: <PaymentRequestExpress stripe={ componentStripePromise } />,
 	edit: <ApplePayPreview />,
@@ -64,4 +64,4 @@ const PaymentRequestPaymentMethod = {
 	paymentMethodId: 'stripe',
 };
 
-export default PaymentRequestPaymentMethod;
+export default paymentRequestPaymentMethod;
