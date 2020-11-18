@@ -154,7 +154,7 @@ class CoreMenu {
 		$home_item = array();
 		if ( defined( '\Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG' ) ) {
 			$home_item = array(
-				'id'           => 'wc-admin&path=/',
+				'id'           => 'wc_admin/wc-admin&path=/',
 				'title'        => __( 'Home', 'woocommerce-admin' ),
 				'url'          => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
 				'is_top_level' => true,
