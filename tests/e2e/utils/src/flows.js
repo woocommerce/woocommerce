@@ -125,7 +125,6 @@ const CustomerFlow = {
 		} );
 	},
 
-
 	goToShop: async () => {
 		await page.goto(SHOP_PAGE, {
 			waitUntil: 'networkidle0',

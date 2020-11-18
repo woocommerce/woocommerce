@@ -132,4 +132,26 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->get_customer()->set_shipping_state( '' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
+
+	/**
+	 * Test adding a variable product without selecting variations.
+	 *
+	 * @see WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_form_handler_add_to_cart_action_with_parent_variable_product() {
+		$this->tearDown();
+
+		$product                 = WC_Helper_Product::create_variation_product();
+		$product_id              = $product->get_id();
+		$url                     = get_permalink( $product_id );
+		$_REQUEST['add-to-cart'] = $product_id;
+
+		WC_Form_Handler::add_to_cart_action();
+
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertRegExp( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
+	}
 }

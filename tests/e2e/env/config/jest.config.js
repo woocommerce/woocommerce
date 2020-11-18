@@ -24,7 +24,7 @@ if (fs.existsSync( localJestSetupFile ) ) {
 let combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
-		'@woocommerce/e2e-tests/(.*)':
+		'@woocommerce/e2e/tests/(.*)':
 			'<rootDir>/tests/e2e/$1',
 	},
 

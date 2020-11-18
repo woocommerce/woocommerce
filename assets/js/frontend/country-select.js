@@ -77,7 +77,7 @@ jQuery( function( $ ) {
 
 	/* State/Country select boxes */
 	var states_json       = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
-		states            = $.parseJSON( states_json ),
+		states            = JSON.parse( states_json ),
 		wrapper_selectors = '.woocommerce-billing-fields,' +
 			'.woocommerce-shipping-fields,' +
 			'.woocommerce-address-fields,' +

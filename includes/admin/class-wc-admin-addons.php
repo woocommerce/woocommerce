@@ -370,9 +370,9 @@ class WC_Admin_Addons {
 
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
-			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
+			'image_alt'   => __( 'WooCommerce Shipping', 'woocommerce' ),
 			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Shipping.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 			'logos'       => array(),
@@ -383,7 +383,7 @@ class WC_Admin_Addons {
 				$local_defaults = array(
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
 					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Shipping.', 'woocommerce' ),
 					'logos'       => array_merge(
 						$defaults['logos'],
 						array(
@@ -440,7 +440,69 @@ class WC_Admin_Addons {
 					self::output_button(
 						$block_data['href'],
 						$block_data['button'],
-						'addons-button-outline-green'
+						'addons-button-outline-purple'
+					);
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of the WooCommerce Pay banner block.
+	 *
+	 * @param object $block Block data.
+	 */
+	public static function output_wcpay_banner_block( $block = array() ) {
+		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
+		$location  = wc_get_base_location();
+
+		if (
+			! in_array( $location['country'], array( 'US' ), true ) ||
+			$is_active ||
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$button_url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'install-addon' => 'woocommerce-payments',
+				)
+			),
+			'install-addon_woocommerce-payments'
+		);
+
+		$defaults = array(
+			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
+			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
+			'title'       => __( 'Payments made simple, with no monthly fees &mdash; exclusively for WooCommerce stores.', 'woocommerce' ),
+			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
+			'button'      => __( 'Free - Install now', 'woocommerce' ),
+			'href'        => $button_url,
+			'logos'       => array(),
+		);
+
+		$block_data = array_merge( $defaults, $block );
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
+				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<?php
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
 					);
 				?>
 			</div>
@@ -476,6 +538,9 @@ class WC_Admin_Addons {
 					break;
 				case 'wcs_banner_block':
 					self::output_wcs_banner_block( (array) $section );
+					break;
+				case 'wcpay_banner_block':
+					self::output_wcpay_banner_block( (array) $section );
 					break;
 			}
 		}
@@ -520,7 +585,7 @@ class WC_Admin_Addons {
 	 * @param string $plugin The plugin the button is promoting.
 	 */
 	public static function output_button( $url, $text, $style, $plugin = '' ) {
-		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $style;
+		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-purple' : $style;
 		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
 		$url   = self::add_in_app_purchase_url_params( $url );
@@ -546,8 +611,18 @@ class WC_Admin_Addons {
 			return;
 		}
 
-		if ( isset( $_GET['install-addon'] ) && 'woocommerce-services' === $_GET['install-addon'] ) {
-			self::install_woocommerce_services_addon();
+		if ( isset( $_GET['install-addon'] ) ) {
+			switch ( $_GET['install-addon'] ) {
+				case 'woocommerce-services':
+					self::install_woocommerce_services_addon();
+					break;
+				case 'woocommerce-payments':
+					self::install_woocommerce_payments_addon();
+					break;
+				default:
+					// Do nothing.
+					break;
+			}
 		}
 
 		$sections        = self::get_sections();
@@ -586,6 +661,26 @@ class WC_Admin_Addons {
 		);
 
 		WC_Install::background_installer( $services_plugin_id, $services_plugin );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
+	 * Install WooCommerce Payments from the Extensions screens.
+	 *
+	 * @return void
+	 */
+	public static function install_woocommerce_payments_addon() {
+		check_admin_referer( 'install-addon_woocommerce-payments' );
+
+		$wcpay_plugin_id = 'woocommerce-payments';
+		$wcpay_plugin    = array(
+			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-payments',
+		);
+
+		WC_Install::background_installer( $services_plugin_id, $wcpay_plugin );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;

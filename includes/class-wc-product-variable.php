@@ -590,7 +590,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function has_options() {
-		return true;
+		return apply_filters( 'woocommerce_product_has_options', true, $this );
 	}
 
 

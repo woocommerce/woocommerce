@@ -137,10 +137,10 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the extensions toggles
 	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
-	expect( extensionsToggles ).toHaveLength( 3 );
+	expect( extensionsToggles ).toHaveLength( 4 );
 
-	// Disable download of the 3 extensions
-	for ( let i = 0; i < 3; i++ ) {
+	// Disable download of the 4 extensions
+	for ( let i = 0; i < 4; i++ ) {
 		await extensionsToggles[i].click();
 	}
 
