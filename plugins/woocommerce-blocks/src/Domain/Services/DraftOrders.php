@@ -40,8 +40,11 @@ class DraftOrders {
 		if ( $this->package->feature()->is_feature_plugin_build() ) {
 			add_filter( 'wc_order_statuses', [ $this, 'register_draft_order_status' ] );
 			add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
+			add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
 			add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ] );
 			add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ] );
+			// Hook into the query to retrieve My Account orders so draft status is excluded.
+			add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
 			add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
 			add_action( 'admin_init', [ $this, 'install' ] );
 		} else {
@@ -128,6 +131,31 @@ class DraftOrders {
 			/* translators: %s: number of orders */
 			'label_count'               => _n_noop( 'Drafts <span class="count">(%s)</span>', 'Drafts <span class="count">(%s)</span>', 'woo-gutenberg-products-block' ),
 		];
+	}
+
+	/**
+	 * Remove draft status from the 'status' argument of an $args array.
+	 *
+	 * @param array $args Array of arguments containing statuses in the status key.
+	 * @internal
+	 * @return array
+	 */
+	public function delete_draft_order_post_status_from_args( $args ) {
+		if ( ! array_key_exists( 'status', $args ) ) {
+			$statuses = [];
+			foreach ( wc_get_order_statuses() as $key => $label ) {
+				if ( self::DB_STATUS !== $key ) {
+					$statuses[] = str_replace( 'wc-', '', $key );
+				}
+			}
+			$args['status'] = $statuses;
+		} elseif ( self::DB_STATUS === $args['status'] ) {
+			$args['status'] = '';
+		} elseif ( is_array( $args['status'] ) ) {
+			$args['status'] = array_diff_key( $args['status'], array( self::STATUS => null ) );
+		}
+
+		return $args;
 	}
 
 	/**
