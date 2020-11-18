@@ -12,8 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Coupon_Usage
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
