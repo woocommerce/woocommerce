@@ -16,18 +16,6 @@ jQuery( function ( $ ) {
 
 	runTipTip();
 
-	// Allow Tabbing
-	$( '#titlediv' ).find( '#title' ).keyup( function( event ) {
-		var code = event.keyCode || event.which;
-
-		// Tab key
-		if ( code === '9' && $( '#woocommerce-coupon-description' ).length > 0 ) {
-			event.stopPropagation();
-			$( '#woocommerce-coupon-description' ).focus();
-			return false;
-		}
-	});
-
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function() {
 		$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
 	});
