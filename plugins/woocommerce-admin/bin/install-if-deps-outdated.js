@@ -28,8 +28,10 @@ if ( needsInstall() ) {
 		shell: true,
 		stdio: 'inherit',
 	} ).status;
+	
 	if ( installResult ) {
 		process.exit( installResult );
 	}
+	
 	fs.utimesSync( 'node_modules', new Date(), new Date() );
 }
