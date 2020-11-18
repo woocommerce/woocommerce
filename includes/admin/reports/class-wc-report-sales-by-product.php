@@ -374,7 +374,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			</table>
 		</div>
 		<script type="text/javascript">
-			jQuery('.section_title').click(function(){
+			jQuery('.section_title').on('click', function(){
 				var next_section = jQuery(this).next('.section');
 
 				if ( jQuery(next_section).is(':visible') )

@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 	$( '.woocommerce form input' ).filter(':password').parent('span').addClass('password-input');
 	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
 
-	$( '.show-password-input' ).click(
+	$( '.show-password-input' ).on( 'click',
 		function() {
 			$( this ).toggleClass( 'display-password' );
 			if ( $( this ).hasClass( 'display-password' ) ) {

@@ -25,7 +25,7 @@ jQuery( function ( $ ) {
 			$( '.js_field-country' ).selectWoo().change( this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
-			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).click(function() {
+			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on('click', function() {
 				window.onbeforeunload = '';
 			});
 			$( 'a.edit_address' ).on( 'click', this.edit_address );
