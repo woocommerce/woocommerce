@@ -26,18 +26,15 @@ jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => (
 
 const registerMockPaymentMethods = () => {
 	[ 'cheque' ].forEach( ( name ) => {
-		registerPaymentMethod(
-			( Config ) =>
-				new Config( {
-					name,
-					label: name,
-					content: <div>A payment method</div>,
-					edit: <div>A payment method</div>,
-					icons: null,
-					canMakePayment: () => true,
-					ariaLabel: name,
-				} )
-		);
+		registerPaymentMethod( {
+			name,
+			label: name,
+			content: <div>A payment method</div>,
+			edit: <div>A payment method</div>,
+			icons: null,
+			canMakePayment: () => true,
+			ariaLabel: name,
+		} );
 	} );
 };
 

@@ -50,11 +50,3 @@ export const assertConfigHasProperties = (
 		throw new TypeError( message + missingProperties.join( ', ' ) );
 	}
 };
-
-export const assertValidPaymentMethodCreator = ( creator, configName ) => {
-	if ( typeof creator !== 'function' ) {
-		throw new TypeError(
-			`A payment method must be registered with a function that creates and returns a ${ configName } instance`
-		);
-	}
-};

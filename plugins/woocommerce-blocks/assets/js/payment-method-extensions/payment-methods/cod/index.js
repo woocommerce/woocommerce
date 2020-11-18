@@ -77,11 +77,8 @@ const cashOnDeliveryPaymentMethod = {
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
-	icons: null,
 	canMakePayment,
 	ariaLabel: label,
 };
 
-registerPaymentMethod(
-	( Config ) => new Config( cashOnDeliveryPaymentMethod )
-);
+registerPaymentMethod( cashOnDeliveryPaymentMethod );

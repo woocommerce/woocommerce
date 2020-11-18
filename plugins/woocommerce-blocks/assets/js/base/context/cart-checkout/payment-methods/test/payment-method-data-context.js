@@ -53,60 +53,52 @@ jest.mock( '@woocommerce/settings', () => {
 
 const registerMockPaymentMethods = () => {
 	[ 'cheque', 'bacs' ].forEach( ( name ) => {
-		registerPaymentMethod(
-			( Config ) =>
-				new Config( {
-					name,
-					label: name,
-					content: <div>A payment method</div>,
-					edit: <div>A payment method</div>,
-					icons: null,
-					canMakePayment: () => true,
-					ariaLabel: name,
-				} )
-		);
+		registerPaymentMethod( {
+			name,
+			label: name,
+			content: <div>A payment method</div>,
+			edit: <div>A payment method</div>,
+			icons: null,
+			canMakePayment: () => true,
+			ariaLabel: name,
+		} );
 	} );
 	[ 'stripe' ].forEach( ( name ) => {
-		registerPaymentMethod(
-			( Config ) =>
-				new Config( {
-					name,
-					label: name,
-					content: <div>A payment method</div>,
-					edit: <div>A payment method</div>,
-					icons: null,
-					canMakePayment: () => true,
-					supports: {
-						savePaymentInfo: true,
-					},
-					ariaLabel: name,
-				} )
-		);
+		registerPaymentMethod( {
+			name,
+			label: name,
+			content: <div>A payment method</div>,
+			edit: <div>A payment method</div>,
+			icons: null,
+			canMakePayment: () => true,
+			supports: {
+				savePaymentInfo: true,
+			},
+			ariaLabel: name,
+		} );
 	} );
 	[ 'express-payment' ].forEach( ( name ) => {
-		registerExpressPaymentMethod( ( Config ) => {
-			const Content = ( {
-				onClose = () => void null,
-				onClick = () => void null,
-			} ) => {
-				return (
-					<>
-						<button onClick={ onClick }>
-							{ name + ' express payment method' }
-						</button>
-						<button onClick={ onClose }>
-							{ name + ' express payment method close' }
-						</button>
-					</>
-				);
-			};
-			return new Config( {
-				name,
-				content: <Content />,
-				edit: <div>An express payment method</div>,
-				canMakePayment: () => true,
-				paymentMethodId: name,
-			} );
+		const Content = ( {
+			onClose = () => void null,
+			onClick = () => void null,
+		} ) => {
+			return (
+				<>
+					<button onClick={ onClick }>
+						{ name + ' express payment method' }
+					</button>
+					<button onClick={ onClose }>
+						{ name + ' express payment method close' }
+					</button>
+				</>
+			);
+		};
+		registerExpressPaymentMethod( {
+			name,
+			content: <Content />,
+			edit: <div>An express payment method</div>,
+			canMakePayment: () => true,
+			paymentMethodId: name,
 		} );
 	} );
 };
