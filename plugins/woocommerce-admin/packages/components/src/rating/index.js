@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import Gridicon from 'gridicons';
+import StarIcon from 'gridicons/dist/star';
 import PropTypes from 'prop-types';
 
 /**
@@ -22,13 +22,7 @@ class Rating extends Component {
 
 		const stars = [];
 		for ( let i = 0; i < totalStars; i++ ) {
-			stars.push(
-				<Gridicon
-					key={ 'star-' + i }
-					icon="star"
-					style={ starStyles }
-				/>
-			);
+			stars.push( <StarIcon key={ 'star-' + i } style={ starStyles } /> );
 		}
 		return stars;
 	}

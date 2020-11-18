@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
-import Gridicon from 'gridicons';
+import InfoIcon from 'gridicons/dist/info';
 import {
 	Button,
 	TabPanel,
@@ -211,8 +211,7 @@ class Theme extends Component {
 								) }
 							>
 								<span>
-									<Gridicon
-										icon="info"
+									<InfoIcon
 										role="img"
 										aria-hidden="true"
 										focusable="false"

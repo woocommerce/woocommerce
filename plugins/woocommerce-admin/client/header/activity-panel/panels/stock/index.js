@@ -6,7 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import Gridicon from 'gridicons';
+import CheckmarkIcon from 'gridicons/dist/checkmark';
 import { EmptyContent, Section } from '@woocommerce/components';
 import { QUERY_DEFAULTS, ITEMS_STORE_NAME } from '@woocommerce/data';
 
@@ -26,7 +26,7 @@ class StockPanel extends Component {
 					'Your stock is in good shape.',
 					'woocommerce-admin'
 				) }
-				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
+				icon={ <CheckmarkIcon size={ 48 } /> }
 			>
 				{ __(
 					'You currently have no products running low on stock.',

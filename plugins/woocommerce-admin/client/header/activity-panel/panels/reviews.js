@@ -6,7 +6,8 @@ import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { withSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import CheckmarkIcon from 'gridicons/dist/checkmark';
+import TimeIcon from 'gridicons/dist/time';
 import interpolateComponents from 'interpolate-components';
 import { get, isNull } from 'lodash';
 import PropTypes from 'prop-types';
@@ -86,7 +87,7 @@ class ReviewsPanel extends Component {
 				<ReviewRating review={ review } />
 				{ review.verified && (
 					<span className="woocommerce-review-activity-card__verified">
-						<Gridicon icon="checkmark" size={ 18 } />
+						<CheckmarkIcon size={ 18 } />
 						{ __( 'Verified customer', 'woocommerce-admin' ) }
 					</span>
 				) }
@@ -234,7 +235,7 @@ class ReviewsPanel extends Component {
 			<ActivityCard
 				className="woocommerce-empty-activity-card"
 				title={ title }
-				icon={ <Gridicon icon="time" size={ 48 } /> }
+				icon={ <TimeIcon size={ 48 } /> }
 				actions={
 					<Button
 						href={ buttonUrl }

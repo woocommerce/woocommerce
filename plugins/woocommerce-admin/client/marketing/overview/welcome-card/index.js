@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Card, CardBody } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import CrossIcon from 'gridicons/dist/cross';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
@@ -36,7 +36,7 @@ const WelcomeCard = ( { isHidden, updateOptions } ) => {
 					onClick={ hide }
 					className="woocommerce-marketing-overview-welcome-card__hide-button"
 				>
-					<Gridicon icon="cross" />
+					<CrossIcon />
 				</Button>
 				<img src={ WelcomeImage } alt="" />
 				<h3>

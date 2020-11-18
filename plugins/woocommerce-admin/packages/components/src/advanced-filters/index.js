@@ -6,7 +6,7 @@ import { Component, createRef } from '@wordpress/element';
 import { SelectControl, Button, Dropdown } from '@wordpress/components';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import Gridicon from 'gridicons';
+import AddOutlineIcon from 'gridicons/dist/add-outline';
 import interpolateComponents from 'interpolate-components';
 
 import {
@@ -307,7 +307,7 @@ class AdvancedFilters extends Component {
 									onClick={ onToggle }
 									aria-expanded={ isOpen }
 								>
-									<Gridicon icon="add-outline" />
+									<AddOutlineIcon />
 									{ __(
 										'Add a Filter',
 										'woocommerce-admin'

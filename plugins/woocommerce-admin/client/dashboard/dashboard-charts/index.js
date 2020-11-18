@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Fragment, useState } from '@wordpress/element';
-import Gridicon from 'gridicons';
+import LineGraphIcon from 'gridicons/dist/line-graph';
+import StatsAltIcon from 'gridicons/dist/stats-alt';
 import PropTypes from 'prop-types';
 import { Button, NavigableMenu, SelectControl } from '@wordpress/components';
 
@@ -221,7 +222,7 @@ const DashboardCharts = ( props ) => {
 						tabIndex={ query.chartType === 'line' ? 0 : -1 }
 						onClick={ handleTypeToggle( 'line' ) }
 					>
-						<Gridicon icon="line-graph" />
+						<LineGraphIcon />
 					</Button>
 					<Button
 						className={ classNames(
@@ -237,7 +238,7 @@ const DashboardCharts = ( props ) => {
 						tabIndex={ query.chartType === 'bar' ? 0 : -1 }
 						onClick={ handleTypeToggle( 'bar' ) }
 					>
-						<Gridicon icon="stats-alt" />
+						<StatsAltIcon />
 					</Button>
 				</NavigableMenu>
 			</SectionHeader>

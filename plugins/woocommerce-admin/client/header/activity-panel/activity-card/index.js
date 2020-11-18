@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { cloneElement, Component } from '@wordpress/element';
-import Gridicon from 'gridicons';
+import NoticeOutline from 'gridicons/dist/notice-outline';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { H, Section } from '@woocommerce/components';
@@ -110,7 +110,7 @@ ActivityCard.propTypes = {
 };
 
 ActivityCard.defaultProps = {
-	icon: <Gridicon icon="notice-outline" size={ 48 } />,
+	icon: <NoticeOutline size={ 48 } />,
 	unread: false,
 };
 

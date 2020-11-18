@@ -6,7 +6,8 @@ import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import { isEqual, partial, without } from 'lodash';
-import Gridicon from 'gridicons';
+import LineGraphIcon from 'gridicons/dist/line-graph';
+import StatsAltIcon from 'gridicons/dist/stats-alt';
 import { Button, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import memoize from 'memoize-one';
@@ -392,7 +393,7 @@ class Chart extends Component {
 									'line'
 								) }
 							>
-								<Gridicon icon="line-graph" />
+								<LineGraphIcon />
 							</Button>
 							<Button
 								className={ classNames(
@@ -411,7 +412,7 @@ class Chart extends Component {
 									'bar'
 								) }
 							>
-								<Gridicon icon="stats-alt" />
+								<StatsAltIcon />
 							</Button>
 						</NavigableMenu>
 					</div>

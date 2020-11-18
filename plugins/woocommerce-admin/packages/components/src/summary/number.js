@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import Gridicon from 'gridicons';
+import ChevronDownIcon from 'gridicons/dist/chevron-down';
 import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
 /**
@@ -140,9 +140,8 @@ const SummaryNumber = ( {
 					</Tooltip>
 				</div>
 				{ onToggle ? (
-					<Gridicon
+					<ChevronDownIcon
 						className="woocommerce-summary__toggle"
-						icon="chevron-down"
 						size={ 24 }
 					/>
 				) : null }

@@ -11,7 +11,7 @@ import {
 	DropZone,
 	FormFileUpload,
 } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import CloudUploadIcon from 'gridicons/dist/cloud-upload';
 import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
@@ -77,7 +77,7 @@ class ThemeUploader extends Component {
 								accept=".zip"
 								onChange={ this.handleFilesUpload }
 							>
-								<Gridicon icon="cloud-upload" />
+								<CloudUploadIcon />
 								<H className="woocommerce-theme-uploader__title">
 									{ __(
 										'Upload a theme',

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import CrossSmallIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
 
 /**
@@ -74,7 +74,7 @@ const AdvancedFilterItem = ( props ) => {
 				label={ labels.remove }
 				onClick={ removeFilter }
 			>
-				<Gridicon icon="cross-small" />
+				<CrossSmallIcon />
 			</Button>
 		</li>
 	);

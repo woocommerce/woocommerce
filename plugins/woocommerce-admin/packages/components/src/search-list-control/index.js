@@ -12,7 +12,7 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import { compose, withInstanceId, withState } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
-import Gridicon from 'gridicons';
+import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import PropTypes from 'prop-types';
 
 /**
@@ -158,8 +158,7 @@ export class SearchListControl extends Component {
 			return (
 				<div className="woocommerce-search-list__list is-not-found">
 					<span className="woocommerce-search-list__not-found-icon">
-						<Gridicon
-							icon="notice-outline"
+						<NoticeOutlineIcon
 							role="img"
 							aria-hidden="true"
 							focusable="false"
