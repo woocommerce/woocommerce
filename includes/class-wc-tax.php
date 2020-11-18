@@ -82,7 +82,13 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
+		// Backwards compatible from WC_Shipping_Rate::get_cost().
+		if ( has_filter( 'woocommerce_shipping_rate_cost' ) ) {
+			$rate  = new WC_Shipping_Rate();
+			$price = $rate->get_cost();
+		}
 		$taxes = self::calc_exclusive_tax( $price, $rates );
+
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
