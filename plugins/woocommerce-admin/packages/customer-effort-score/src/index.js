@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
+import { noop } from 'lodash';
 
 /**
  * Use `CustomerEffortScore` to gather a customer effort score.
@@ -24,7 +25,7 @@ function CustomerEffortScore( {
 	trackCallback,
 	label,
 	createNotice,
-	openedCallback,
+	openedCallback = noop,
 	icon,
 } ) {
 	const [ score, setScore ] = useState( 0 );
@@ -39,13 +40,13 @@ function CustomerEffortScore( {
 					onClick: () => {
 						setVisible( true );
 
-						if ( openedCallback ) {
-							openedCallback();
-						}
+						openedCallback();
 					},
 				},
 			],
 			icon,
+			explicitDismiss: true,
+			onDismiss: openedCallback,
 		} );
 
 		setShouldCreateNotice( false );
