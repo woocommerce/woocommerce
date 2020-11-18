@@ -28,7 +28,7 @@ jQuery( function ( $ ) {
 			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).click(function() {
 				window.onbeforeunload = '';
 			});
-			$( 'a.edit_address' ).click( this.edit_address );
+			$( 'a.edit_address' ).on( 'click', this.edit_address );
 			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );

@@ -25,7 +25,7 @@ jQuery( function( $ ) {
 	}
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
+	$( '.woocommerce-store-notice__dismiss-link' ).on( 'click', function( event ) {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
 		event.preventDefault();
