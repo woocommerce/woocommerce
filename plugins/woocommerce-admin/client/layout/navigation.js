@@ -26,21 +26,23 @@ const NavigationPlugin = () => {
 	if ( ! isWCAdmin( window.location.href ) ) {
 		return null;
 	}
-
+	const pagesWithoutNavigation = [ '/analytics/:report', '/setup-wizard' ];
 	const reports = getReports();
-	const pages = getPages().map( ( page ) => {
-		if ( page.path === '/analytics/settings' ) {
+	const pages = getPages()
+		.filter( ( page ) => ! pagesWithoutNavigation.includes( page.path ) )
+		.map( ( page ) => {
+			if ( page.path === '/analytics/settings' ) {
+				return {
+					...page,
+					id: 'wc-admin&path=' + page.path,
+					breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
+				};
+			}
 			return {
 				...page,
 				id: 'wc-admin&path=' + page.path,
-				breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
 			};
-		}
-		return {
-			...page,
-			id: 'wc-admin&path=' + page.path,
-		};
-	} );
+		} );
 	const persistedQuery = getPersistedQuery( {} );
 	return (
 		<>
