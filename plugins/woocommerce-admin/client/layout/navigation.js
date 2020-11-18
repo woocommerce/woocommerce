@@ -31,17 +31,17 @@ const NavigationPlugin = () => {
 	const pages = getPages()
 		.filter( ( page ) => ! pagesWithoutNavigation.includes( page.path ) )
 		.map( ( page ) => {
-			if ( page.path === '/analytics/settings' ) {
+			const pageWithId = {
+				...page,
+				id: `wc-admin&path=${ page.path }`,
+			};
+			if ( pageWithId.path === '/analytics/settings' ) {
 				return {
-					...page,
-					id: 'wc-admin&path=' + page.path,
+					...pageWithId,
 					breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
 				};
 			}
-			return {
-				...page,
-				id: 'wc-admin&path=' + page.path,
-			};
+			return pageWithId;
 		} );
 	const persistedQuery = getPersistedQuery( {} );
 	return (
@@ -58,7 +58,7 @@ const NavigationPlugin = () => {
 				</WooNavigationItem>
 			) ) }
 			{ reports.map( ( item ) => {
-				const id = 'wc-admin&path=/analytics/' + item.report;
+				const id = `wc-admin&path=/analytics/${ item.report }`;
 				return (
 					<WooNavigationItem item={ id } key={ id }>
 						<Link
