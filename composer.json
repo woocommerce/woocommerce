@@ -47,17 +47,17 @@
       "includes/rest-api"
     ],
     "psr-4": {
-      "Automattic\\WooCommerce\\": "src/"
+      "Automattic\\WooCommerce\\": "src/",
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+    },
+    "psr-0": {
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
     }
   },
   "autoload-dev": {
     "psr-4": {
       "Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
-      "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/",
-      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-    },
-    "psr-0": {
-      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+      "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
     },
     "classmap": [
       "tests/legacy/unit-tests/rest-api/Helpers"
