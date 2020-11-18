@@ -20,8 +20,8 @@ const Header = () => {
 	const siteUrl = getSetting( 'siteUrl', '' );
 	const isScrolled = useIsScrolled();
 	const navClasses = {
-		folded: 'is-folded',
-		expanded: 'is-expanded',
+		folded: 'is-wc-nav-folded',
+		expanded: 'is-wc-nav-expanded',
 	};
 
 	const foldNav = () => {

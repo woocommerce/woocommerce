@@ -45,14 +45,14 @@
 		box-sizing: border-box;
 	}
 
-	&.is-expanded {
+	&.is-wc-nav-expanded {
 		#woocommerce-embedded-navigation {
 			width: $navigation-width;
 			height: 100%;
 		}
 	}
 
-	&.is-folded {
+	&.is-wc-nav-folded {
 		#wpcontent,
 		#wpfooter {
 			margin-left: 0;
