@@ -7,6 +7,9 @@
 
 use \Automattic\WooCommerce\Admin\Features\CustomerEffortScoreTracks;
 
+// CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
+define( 'WP_ADMIN', true );
+
 /**
  * Class WC_Tests_CES_Tracks
  */
@@ -34,7 +37,7 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$ces = $this->ces;
 
-		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME );
+		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
 		$this->assertNotEmpty( $queue_items );
 
 		$expected_queue_item = array_filter(
