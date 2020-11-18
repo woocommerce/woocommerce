@@ -43,7 +43,7 @@ function CustomerEffortScoreTracks( {
 	updateOptions,
 	createNotice,
 } ) {
-	const [ shown, setShown ] = useState( false );
+	const [ modalShown, setModalShown ] = useState( false );
 
 	if ( resolving ) {
 		return null;
@@ -54,18 +54,42 @@ function CustomerEffortScoreTracks( {
 		return null;
 	}
 
-	if ( cesShownForActions.indexOf( action ) !== -1 && ! shown ) {
+	// We only want to return null early if the modal was already shown
+	// for this action *before* this component was initially instantiated.
+	//
+	// We want to make sure we still render CustomerEffortScore below
+	// (we don't want to return null early), if the modal was shown for this
+	// instantiation, so that the component doesn't go away while we are
+	// still showing it.
+	if ( cesShownForActions.indexOf( action ) !== -1 && ! modalShown ) {
 		return null;
 	}
 
-	const openedCallback = () => {
-		// Use the `shown` state value to only update the shown_for_actions
-		// option once.
-		if ( shown ) {
-			return;
-		}
+	const onNoticeShown = () => {
+		recordEvent( 'ces_snackbar_view', {
+			action,
+			store_age: storeAge,
+			...trackProps,
+		} );
+	};
 
-		setShown( true );
+	const onNoticeDismissed = () => {
+		recordEvent( 'ces_snackbar_dismiss', {
+			action,
+			store_age: storeAge,
+			...trackProps,
+		} );
+	};
+
+	const onModalShown = () => {
+		setModalShown( true );
+
+		recordEvent( 'ces_view', {
+			action,
+			store_age: storeAge,
+			...trackProps,
+		} );
+
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				action,
@@ -74,7 +98,7 @@ function CustomerEffortScoreTracks( {
 		} );
 	};
 
-	const trackCallback = ( score ) => {
+	const recordScore = ( score ) => {
 		recordEvent( 'ces_feedback', {
 			action,
 			score,
@@ -86,9 +110,11 @@ function CustomerEffortScoreTracks( {
 
 	return (
 		<CustomerEffortScore
-			trackCallback={ trackCallback }
+			recordScoreCallback={ recordScore }
 			label={ label }
-			openedCallback={ openedCallback }
+			onNoticeShownCallback={ onNoticeShown }
+			onNoticeDismissedCallback={ onNoticeDismissed }
+			onModalShownCallback={ onModalShown }
 			icon={
 				<span
 					style={ { height: 21, width: 21 } }
