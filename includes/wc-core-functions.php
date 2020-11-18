@@ -1054,7 +1054,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 				$name,
 				$value,
 				apply_filters(
-					'woocommerce_set_cookie_options', 
+					'woocommerce_set_cookie_options',
 					array(
 						'expires' => $expire,
 						'secure' => $secure,
