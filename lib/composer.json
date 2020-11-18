@@ -10,14 +10,6 @@
   "require-dev": {
     "league/container": "3.3.3"
   },
-  "autoload": {
-    "psr-4": {
-      "Automattic\\WooCommerce\\Vendor\\": "packages/"
-    },
-    "psr-0": {
-      "Automattic\\WooCommerce\\Vendor\\": "packages/"
-    }
-  },
   "config": {
     "platform": {
       "php": "7.0"
@@ -25,12 +17,10 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "\"../vendor/bin/mozart\" compose",
-      "composer dump-autoload"
+      "\"../vendor/bin/mozart\" compose"
     ],
     "post-update-cmd": [
-      "\"../vendor/bin/mozart\" compose",
-      "composer dump-autoload"
+      "\"../vendor/bin/mozart\" compose"
     ]
   },
   "extra": {
@@ -45,7 +35,7 @@
       ],
       "classmap_directory": "/classes/",
       "classmap_prefix": "WC_Vendor_",
-      "delete_vendor_directories": false
+      "delete_vendor_directories": true
     } 
   }
 }

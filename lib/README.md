@@ -26,6 +26,6 @@ Updating a package is as easy as changing the version in `composer.json` and the
 If you would like to add a package which does not undergo conflict avoidance you must take steps to ensure it appears in
 the root autoloader.
 
-1. Add package to `require` instead of `require-dev` (This allows it to be pulled transitively)
+1. Add package to the `require` section of both the `lib/composer.json` and root `composer.json` file instead of `require-dev`
 2. Add package slug to `extra/mozart/excluded-packages` section of `composer.json`
 3. Run `composer run-script build-lib` from the root directory (You **should not** see the package in `packages/VendorName/PackageName` or `classes`)

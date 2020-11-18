@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf86e77a0dae2549e3e8060ae85f8af7",
+    "content-hash": "ddeda3843bbb8fd35abf1cea951c47df",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -609,60 +609,6 @@
                 "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v3.8.0"
             },
             "time": "2020-11-10T15:07:11+00:00"
-        },
-        {
-            "name": "woocommerce/woocommerce-lib",
-            "version": "dev-use-mozart-to-renamespace-dependencies",
-            "dist": {
-                "type": "path",
-                "url": "lib",
-                "reference": "d9d4733f0ed94289ad50fdf98cb4bc028384f482"
-            },
-            "require": {
-                "php": ">=7.0",
-                "psr/container": "^1.0"
-            },
-            "require-dev": {
-                "league/container": "3.3.3"
-            },
-            "type": "library",
-            "extra": {
-                "mozart": {
-                    "dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
-                    "dep_directory": "/packages/",
-                    "packages": [
-                        "league/container"
-                    ],
-                    "excluded_packages": [
-                        "psr/container"
-                    ],
-                    "classmap_directory": "/classes/",
-                    "classmap_prefix": "WC_",
-                    "delete_vendor_directories": false
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Automattic\\WooCommerce\\Vendor\\": "packages/"
-                },
-                "psr-0": {
-                    "Automattic\\WooCommerce\\Vendor\\": "packages/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "\"../vendor/bin/mozart\" compose",
-                    "composer dump-autoload"
-                ],
-                "post-update-cmd": [
-                    "\"../vendor/bin/mozart\" compose",
-                    "composer dump-autoload"
-                ]
-            },
-            "description": "A package for hiding re-namespaced dependencies and executing them",
-            "transport-options": {
-                "relative": true
-            }
         }
     ],
     "packages-dev": [
@@ -719,9 +665,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "woocommerce/woocommerce-lib": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
