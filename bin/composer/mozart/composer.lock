@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f8c8a5a27836dae880f7d54a6b4234a",
+    "content-hash": "eb3fb853d332b8bc18796e0fe3546427",
     "packages": [],
     "packages-dev": [
         {
             "name": "coenjacobs/mozart",
-            "version": "dev-with-improvements",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/woocommerce/mozart.git",
-                "reference": "14ead9f55aff907fc345fc5df464728400005a26"
+                "url": "https://github.com/coenjacobs/mozart.git",
+                "reference": "b063c0b3c9923fc763e89376e3d671ce450a839a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/mozart/zipball/14ead9f55aff907fc345fc5df464728400005a26",
-                "reference": "14ead9f55aff907fc345fc5df464728400005a26",
+                "url": "https://api.github.com/repos/coenjacobs/mozart/zipball/b063c0b3c9923fc763e89376e3d671ce450a839a",
+                "reference": "b063c0b3c9923fc763e89376e3d671ce450a839a",
                 "shasum": ""
             },
             "require": {
@@ -41,15 +41,7 @@
                     "CoenJacobs\\Mozart\\": "src/"
                 }
             },
-            "scripts": {
-                "lint": [
-                    "composer validate",
-                    "phpcs"
-                ],
-                "test": [
-                    "phpunit"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -60,16 +52,13 @@
                 }
             ],
             "description": "Composes all dependencies as a package inside a WordPress plugin",
-            "support": {
-                "source": "https://github.com/woocommerce/mozart/tree/with-improvements"
-            },
             "funding": [
                 {
-                    "type": "github",
-                    "url": "https://github.com/coenjacobs"
+                    "url": "https://github.com/coenjacobs",
+                    "type": "github"
                 }
             ],
-            "time": "2020-10-30T09:56:44+00:00"
+            "time": "2020-11-16T21:14:14+00:00"
         },
         {
             "name": "league/flysystem",

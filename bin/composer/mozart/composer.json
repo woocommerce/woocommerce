@@ -1,11 +1,5 @@
 {
   "require-dev": {
-    "coenjacobs/mozart": "dev-with-improvements"
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/woocommerce/mozart"
-    }
-  ]
+    "coenjacobs/mozart": "dev-master"
+  }
 }
