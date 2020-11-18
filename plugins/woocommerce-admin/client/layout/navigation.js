@@ -28,17 +28,19 @@ const NavigationPlugin = () => {
 	}
 
 	const reports = getReports();
-	const pages = getPages()
-		.filter( ( page ) => page.id )
-		.map( ( page ) => {
-			if ( page.id === 'woocommerce-analytics-settings' ) {
-				return {
-					...page,
-					breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
-				};
-			}
-			return page;
-		} );
+	const pages = getPages().map( ( page ) => {
+		if ( page.path === '/analytics/settings' ) {
+			return {
+				...page,
+				id: 'wc-admin&path=' + page.path,
+				breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
+			};
+		}
+		return {
+			...page,
+			id: 'wc-admin&path=' + page.path,
+		};
+	} );
 	const persistedQuery = getPersistedQuery( {} );
 	return (
 		<>
@@ -53,21 +55,24 @@ const NavigationPlugin = () => {
 					</Link>
 				</WooNavigationItem>
 			) ) }
-			{ reports.map( ( item ) => (
-				<WooNavigationItem item={ item.id } key={ item.report }>
-					<Link
-						className="components-button"
-						href={ getNewPath(
-							persistedQuery,
-							`/analytics/${ item.report }`,
-							{}
-						) }
-						type="wc-admin"
-					>
-						{ item.title }
-					</Link>
-				</WooNavigationItem>
-			) ) }
+			{ reports.map( ( item ) => {
+				const id = 'wc-admin&path=/analytics/' + item.report;
+				return (
+					<WooNavigationItem item={ id } key={ id }>
+						<Link
+							className="components-button"
+							href={ getNewPath(
+								persistedQuery,
+								`/analytics/${ item.report }`,
+								{}
+							) }
+							type="wc-admin"
+						>
+							{ item.title }
+						</Link>
+					</WooNavigationItem>
+				);
+			} ) }
 		</>
 	);
 };
