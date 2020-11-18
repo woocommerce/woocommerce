@@ -66,6 +66,7 @@ export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 						NAMESPACE + '/taxes',
 						( tax ) => ( {
 							id: tax.id,
+							key: tax.id,
 							label: getTaxCode( tax ),
 						} )
 					),
