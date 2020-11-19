@@ -2433,6 +2433,16 @@ a.reset_variations {
 	}
 
 	/**
+     * Home page
+     */
+	.home #main {
+
+		.wp-block-cover {
+			max-width: none;
+		}
+	}
+
+	/**
 	* Shop page
 	*/
 	.woocommerce-products-header__title.page-title {
