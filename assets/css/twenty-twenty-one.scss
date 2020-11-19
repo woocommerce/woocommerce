@@ -1997,7 +1997,8 @@ a.reset_variations {
 			margin: 0 8px 16px 8px;
 			box-sizing: border-box;
 
-			img.attachment-woocommerce_thumbnail {
+			img.attachment-woocommerce_thumbnail,
+			img.woocommerce-placeholder {
 				height: auto !important;
 			}
 		}
