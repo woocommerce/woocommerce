@@ -2007,7 +2007,7 @@ a.reset_variations {
 		}
 
 		input[type=checkbox] {
-		    width: 25px !important;
+			width: 25px !important;
 		}
 	}
 
@@ -2119,7 +2119,8 @@ a.reset_variations {
 			align-items: flex-start;
 			margin-bottom: 5em;
 
-			img.attachment-woocommerce_thumbnail {
+			img.attachment-woocommerce_thumbnail,
+			img.woocommerce-placeholder {
 				height: auto !important;
 			}
 		}
