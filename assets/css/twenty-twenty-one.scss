@@ -2121,7 +2121,7 @@ a.reset_variations {
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: flex-start;
-			margin-bottom: 5em;
+			margin: 0 8px 16px 8px;
 
 			img.attachment-woocommerce_thumbnail {
 				height: auto !important;
@@ -2135,7 +2135,7 @@ a.reset_variations {
 
 				h2.woocommerce-loop-category__title {
 					font-family: $headings;
-					font-size: 3rem;
+					font-size: 20px;
 				}
 			}
 		}
@@ -2443,6 +2443,12 @@ a.reset_variations {
 
 		.wp-block-cover {
 			max-width: none;
+		}
+
+		[class*="woocommerce columns-"] {
+			max-width: var(--responsive--aligndefault-width);
+			margin-left: auto;
+			margin-right: auto;
 		}
 	}
 
