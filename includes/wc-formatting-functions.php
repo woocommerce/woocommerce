@@ -1190,7 +1190,7 @@ function wc_format_stock_for_display( $product ) {
 
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount':
-			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+			if ( $stock_amount <= wc_get_low_stock_amount( $product ) ) {
 				/* translators: %s: stock amount */
 				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 			}
