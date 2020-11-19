@@ -15,7 +15,7 @@ import './style.scss';
 
 class TransientNotices extends Component {
 	render() {
-		const { className, notices, onRemove } = this.props;
+		const { className, notices, onRemove, onRemove2 } = this.props;
 		const classes = classnames(
 			'woocommerce-transient-notices',
 			'components-notices__snackbar',
@@ -27,6 +27,7 @@ class TransientNotices extends Component {
 				notices={ notices }
 				className={ classes }
 				onRemove={ onRemove }
+				onRemove2={ onRemove2 }
 			/>
 		);
 	}
@@ -55,6 +56,7 @@ export default compose(
 	withDispatch( ( dispatch ) => ( {
 		// NOTE: This uses core/notices2, if this file is copied back upstream
 		// to Gutenberg this needs to be changed back to core/notices.
-		onRemove: dispatch( 'core/notices2' ).removeNotice,
+		onRemove: dispatch( 'core/notices' ).removeNotice,
+		onRemove2: dispatch( 'core/notices2' ).removeNotice,
 	} ) )
 )( TransientNotices );

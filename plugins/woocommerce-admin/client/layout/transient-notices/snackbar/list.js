@@ -18,11 +18,18 @@ import Snackbar from './';
  * @param  {Object}   $0           Props passed to the component.
  * @param  {Array}    $0.notices   Array of notices to render.
  * @param  {Function} $0.onRemove  Function called when a notice should be removed / dismissed.
+ * @param  {Function} $0.onRemove2 Function called when a notice should be removed / dismissed.
  * @param  {Object}   $0.className Name of the class used by the component.
  * @param  {Object}   $0.children  Array of children to be rendered inside the notice list.
  * @return {Object}                The rendered notices list.
  */
-function SnackbarList( { notices, className, children, onRemove = noop } ) {
+function SnackbarList( {
+	notices,
+	className,
+	children,
+	onRemove = noop,
+	onRemove2 = noop,
+} ) {
 	const isReducedMotion = useReducedMotion();
 	const [ refMap ] = useState( () => new WeakMap() );
 	const transitions = useTransition( notices, ( notice ) => notice.id, {
@@ -40,7 +47,11 @@ function SnackbarList( { notices, className, children, onRemove = noop } ) {
 	} );
 
 	className = classnames( 'components-snackbar-list', className );
-	const removeNotice = ( notice ) => () => onRemove( notice.id );
+	const removeNotice = ( notice ) => () => {
+		onRemove( notice.id );
+		// To be removed when we're no longer using core/notices2.
+		onRemove2( notice.id );
+	};
 
 	return (
 		<div className={ className }>
