@@ -97,21 +97,21 @@ jobs:
           script:
               - npm run test:e2e
           env:
-              - WP_VERSION=5.3
+              - WP_VERSION=5.3-branch
               - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.4)
           script:
               - npm run test:e2e
           env:
-              - WP_VERSION=5.4
+              - WP_VERSION=5.4-branch
               - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.5)
           script:
               - npm run test:e2e
           env:
-              - WP_VERSION=5.5
+              - WP_VERSION=5.5-branch
               - E2E_TESTS=1
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests (WP 5.5 with Gutenberg plugin)
@@ -121,7 +121,7 @@ jobs:
               - chmod -R 767 ./
               - npm run test:e2e
           env:
-              - WP_VERSION=5.5
+              - WP_VERSION=5.5-branch
               - E2E_TESTS=1
               - GUTENBERG_LATEST=true
               - WOOCOMMERCE_BLOCKS_PHASE=3
