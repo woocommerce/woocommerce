@@ -32,7 +32,6 @@
                 "phpunit/phpunit": "^8.5",
                 "squizlabs/php_codesniffer": "^3.5"
             },
-            "default-branch": true,
             "bin": [
                 "bin/mozart"
             ],
@@ -696,5 +695,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "1.1.0"
 }

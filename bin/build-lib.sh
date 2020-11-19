@@ -27,9 +27,7 @@ rm -rf lib/packages lib/classes
 mkdir lib/packages lib/classes
 
 # Running update on the lib package will automatically run Mozart
-pushd ./lib
-composer update
-popd
+composer update -d ./lib
 
 output 6 "Updating autoload files"
 
