@@ -220,6 +220,16 @@ class CustomerEffortScoreTracks {
 			array()
 		);
 
+		$has_duplicate = array_filter(
+			$queue,
+			function ( $queue_item ) use ( $item ) {
+				return $queue_item['action'] === $item['action'];
+			}
+		);
+		if ( $has_duplicate ) {
+			return;
+		}
+
 		$queue[] = $item;
 
 		update_option(

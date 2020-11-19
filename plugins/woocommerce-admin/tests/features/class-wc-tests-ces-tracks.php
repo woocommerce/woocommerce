@@ -49,4 +49,28 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $expected_queue_item );
 	}
+
+	/**
+	 * Verify that the queue does not add duplicate item by cehcking
+	 * action and label values.
+	 */
+	public function test_the_queue_does_not_allow_duplicate() {
+		// Fire the action twice to trigger the queueing process twice.
+		do_action( 'woocommerce_update_options' );
+		do_action( 'woocommerce_update_options' );
+
+		$ces = $this->ces;
+
+		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
+		$this->assertNotEmpty( $queue_items );
+
+		$expected_queue_item = array_filter(
+			$queue_items,
+			function ( $item ) use ( $ces ) {
+				return $ces::SETTINGS_CHANGE_ACTION_NAME === $item['action'];
+			}
+		);
+
+		$this->assertCount( 1, $expected_queue_item );
+	}
 }
