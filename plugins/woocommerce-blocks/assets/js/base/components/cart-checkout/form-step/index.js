@@ -49,6 +49,7 @@ const FormStep = ( {
 				'wc-block-components-checkout-step',
 				{
 					'wc-block-components-checkout-step--with-step-number': showStepNumber,
+					'wc-block-components-checkout-step--disabled': disabled,
 				}
 			) }
 			id={ id }

@@ -231,7 +231,7 @@ exports[`FormStep should render step heading content 1`] = `
 
 exports[`FormStep should set disabled prop to the fieldset element when disabled is true 1`] = `
 <fieldset
-  className="wc-block-components-checkout-step wc-block-components-checkout-step--with-step-number"
+  className="wc-block-components-checkout-step wc-block-components-checkout-step--with-step-number wc-block-components-checkout-step--disabled"
   disabled={true}
 >
   <legend
