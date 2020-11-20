@@ -75,30 +75,30 @@ class CoreMenu {
 	public static function get_categories() {
 		return array(
 			array(
-				'title'        => __( 'Analytics', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'analytics',
-				'order'        => 10,
-				'is_top_level' => true,
-			),
-			array(
 				'title'        => __( 'Orders', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
 				'id'           => 'orders',
-				'order'        => 20,
-				'is_top_level' => true,
-			),
-			array(
-				'title'        => __( 'Marketing', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'marketing',
-				'order'        => 30,
+				'order'        => 10,
 				'is_top_level' => true,
 			),
 			array(
 				'title'        => __( 'Products', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
 				'id'           => 'products',
+				'order'        => 20,
+				'is_top_level' => true,
+			),
+			array(
+				'title'        => __( 'Analytics', 'woocommerce-admin' ),
+				'capability'   => 'manage_woocommerce',
+				'id'           => 'analytics',
+				'order'        => 30,
+				'is_top_level' => true,
+			),
+			array(
+				'title'        => __( 'Marketing', 'woocommerce-admin' ),
+				'capability'   => 'manage_woocommerce',
+				'id'           => 'marketing',
 				'order'        => 40,
 				'is_top_level' => true,
 			),
