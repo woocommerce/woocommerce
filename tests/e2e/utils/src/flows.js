@@ -20,6 +20,7 @@ const WP_ADMIN_DASHBOARD = baseUrl + 'wp-admin';
 const WP_ADMIN_PLUGINS = baseUrl + 'wp-admin/plugins.php';
 const WP_ADMIN_SETUP_WIZARD = baseUrl + 'wp-admin/admin.php?page=wc-admin';
 const WP_ADMIN_ALL_ORDERS_VIEW = baseUrl + 'wp-admin/edit.php?post_type=shop_order';
+const WP_ADMIN_SINGLE_ORDER_VIEW = baseUrl + 'wp-admin/post.php?post=';
 const WP_ADMIN_NEW_COUPON = baseUrl + 'wp-admin/post-new.php?post_type=shop_coupon';
 const WP_ADMIN_NEW_ORDER = baseUrl + 'wp-admin/post-new.php?post_type=shop_order';
 const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product';
@@ -277,6 +278,12 @@ const StoreOwnerFlow = {
 
 	openNewProduct: async () => {
 		await page.goto( WP_ADMIN_NEW_PRODUCT, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openOrder: async ( postID ) => {
+		await page.goto( WP_ADMIN_SINGLE_ORDER_VIEW + postID + `&action=edit`, {
 			waitUntil: 'networkidle0',
 		} );
 	},
