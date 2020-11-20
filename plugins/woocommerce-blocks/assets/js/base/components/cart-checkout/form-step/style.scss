@@ -24,16 +24,16 @@
 	}
 }
 
+.wc-block-components-checkout-step--disabled {
+	opacity: 0.6;
+}
+
 .wc-block-components-checkout-step__container {
 	position: relative;
 }
 
 .wc-block-components-checkout-step__content {
 	padding-bottom: em($gap-large);
-}
-
-.wc-block-components-form .wc-block-components-checkout-step:disabled {
-	opacity: 0.6;
 }
 
 .wc-block-components-checkout-step__heading {
