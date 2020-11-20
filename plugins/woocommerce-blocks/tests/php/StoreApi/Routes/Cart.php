@@ -68,7 +68,7 @@ class Cart extends TestCase {
 		$this->assertArrayHasKey( '/wc/store/cart', $routes );
 		$this->assertArrayHasKey( '/wc/store/cart/apply-coupon', $routes );
 		$this->assertArrayHasKey( '/wc/store/cart/remove-coupon', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/update-shipping', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/update-customer', $routes );
 		$this->assertArrayHasKey( '/wc/store/cart/select-shipping-rate/(?P<package_id>[\d]+)', $routes );
 	}
 
@@ -172,18 +172,20 @@ class Cart extends TestCase {
 /**
 	 * Test getting updated shipping.
 	 */
-	public function test_update_shipping() {
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+	public function test_update_customer() {
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
-				'country' => 'US',
+				'shipping_address' => (object) array(
+					'country' => 'US',
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response, true ) );
 		$this->assertArrayHasKey( 'shipping_rates', $data );
 
 		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->address_1 );
@@ -197,18 +199,20 @@ class Cart extends TestCase {
 	/**
 	 * Test shipping address validation.
 	 */
-	public function test_get_items_address_validation() {
+	public function test_update_customer_address() {
 		// US address.
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
-				'address_1' => 'Test address 1',
-				'address_2' => 'Test address 2',
-				'city'      => 'Test City',
-				'state'     => 'AL',
-				'postcode'  => '90210',
-				'country'   => 'US'
+				'shipping_address' => (object) array(
+					'address_1' => 'Test address 1',
+					'address_2' => 'Test address 2',
+					'city'      => 'Test City',
+					'state'     => 'AL',
+					'postcode'  => '90210',
+					'country'   => 'US'
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -222,25 +226,14 @@ class Cart extends TestCase {
 		$this->assertEquals( '90210', $data['shipping_rates'][0]['destination']->postcode );
 		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
 
-		// Address with empty country.
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
-			array(
-				'country' => ''
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 400, $response->get_status() );
-
 		// Address with invalid country.
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
-				'country' => 'ZZZZZZZZ'
+				'shipping_address' => (object) array(
+					'country' => 'ZZZZZZZZ'
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -249,12 +242,14 @@ class Cart extends TestCase {
 		$this->assertEquals( 400, $response->get_status() );
 
 		// US address with named state.
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
-				'state'   =>'Alabama',
-				'country' => 'US'
+				'shipping_address' => (object) array(
+					'state'   =>'Alabama',
+					'country' => 'US'
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -265,12 +260,14 @@ class Cart extends TestCase {
 		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
 
 		// US address with invalid state.
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
-				'state'   =>'ZZZZZZZZ',
-				'country' => 'US'
+				'shipping_address' => (object) array(
+					'state'   =>'ZZZZZZZZ',
+					'country' => 'US'
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );

@@ -9,6 +9,27 @@ import { useEditorContext } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
 import { mapValues } from 'lodash';
 
+const defaultShippingAddress = {
+	first_name: '',
+	last_name: '',
+	company: '',
+	address_1: '',
+	address_2: '',
+	city: '',
+	state: '',
+	postcode: '',
+	country: '',
+};
+
+const defaultBillingAddress = {
+	...defaultShippingAddress,
+	email: '',
+	phone: '',
+};
+
+const decodeAddress = ( address ) =>
+	mapValues( address, ( value ) => decodeEntities( value ) );
+
 /**
  * @constant
  * @type  {StoreCart} Object containing cart data.
@@ -24,17 +45,8 @@ export const defaultCartData = {
 	cartTotals: {},
 	cartIsLoading: true,
 	cartErrors: [],
-	shippingAddress: {
-		first_name: '',
-		last_name: '',
-		company: '',
-		address_1: '',
-		address_2: '',
-		city: '',
-		state: '',
-		postcode: '',
-		country: '',
-	},
+	billingAddress: defaultBillingAddress,
+	shippingAddress: defaultShippingAddress,
 	shippingRates: [],
 	shippingRatesLoading: false,
 	cartHasCalculatedShipping: false,
@@ -76,17 +88,8 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					cartTotals: previewCart.totals,
 					cartIsLoading: false,
 					cartErrors: [],
-					shippingAddress: {
-						first_name: '',
-						last_name: '',
-						company: '',
-						address_1: '',
-						address_2: '',
-						city: '',
-						state: '',
-						postcode: '',
-						country: '',
-					},
+					billingAddress: defaultBillingAddress,
+					shippingAddress: defaultShippingAddress,
 					shippingRates: previewCart.shipping_rates,
 					shippingRatesLoading: false,
 					cartHasCalculatedShipping:
@@ -105,13 +108,12 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			const cartIsLoading = ! store.hasFinishedResolution(
 				'getCartData'
 			);
-			const shippingRatesLoading = store.areShippingRatesLoading();
+			const shippingRatesLoading = store.isCustomerDataUpdating();
 			const { receiveCart } = dispatch( storeKey );
-			const shippingAddress = mapValues(
-				cartData.shippingAddress,
-				( value ) => decodeEntities( value )
-			);
-
+			const billingAddress = decodeAddress( cartData.billingAddress );
+			const shippingAddress = cartData.needsShipping
+				? decodeAddress( cartData.shippingAddress )
+				: defaultShippingAddress;
 			return {
 				cartCoupons: cartData.coupons,
 				cartItems: cartData.items || [],
@@ -123,6 +125,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				cartTotals,
 				cartIsLoading,
 				cartErrors,
+				billingAddress,
 				shippingAddress,
 				shippingRates: cartData.shippingRates || [],
 				shippingRatesLoading,

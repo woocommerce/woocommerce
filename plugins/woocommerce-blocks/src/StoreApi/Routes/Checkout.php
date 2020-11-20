@@ -123,8 +123,10 @@ class Checkout extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
-		$order_object = $this->create_or_update_draft_order();
+		// Update customer first since orders will be created using that data.
+		$this->update_customer_from_request( $request );
 
+		$order_object = $this->create_or_update_draft_order();
 		$this->update_order_from_request( $order_object, $request );
 
 		return $this->prepare_item_for_response(
@@ -144,6 +146,9 @@ class Checkout extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		// Update customer first since orders will be created using that data.
+		$this->update_customer_from_request( $request );
+
 		$order_controller = new OrderController();
 		$order_object     = $this->get_draft_order_object( $this->get_draft_order_id() );
 
@@ -384,28 +389,44 @@ class Checkout extends AbstractRoute {
 	}
 
 	/**
-	 * Update an order using the posted values from the request.
+	 * Updates the current customer session using data from the request (e.g. address data).
 	 *
-	 * @param \WC_Order        $order Object to prepare for the response.
+	 * Address session data is synced to the order itself later on by OrderController::update_order_from_cart()
+	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
-	protected function update_order_from_request( \WC_Order $order, \WP_REST_Request $request ) {
-		$schema = $this->get_item_schema();
+	protected function update_customer_from_request( \WP_REST_Request $request ) {
+		$schema   = $this->get_item_schema();
+		$customer = wc()->customer;
 
 		if ( isset( $request['billing_address'] ) ) {
 			$allowed_billing_values = array_intersect_key( $request['billing_address'], $schema['properties']['billing_address']['properties'] );
 			foreach ( $allowed_billing_values as $key => $value ) {
-				$order->{"set_billing_$key"}( $value );
+				if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
+					$customer->{"set_billing_$key"}( $value );
+				}
 			}
 		}
 
 		if ( isset( $request['shipping_address'] ) ) {
 			$allowed_shipping_values = array_intersect_key( $request['shipping_address'], $schema['properties']['shipping_address']['properties'] );
 			foreach ( $allowed_shipping_values as $key => $value ) {
-				$order->{"set_shipping_$key"}( $value );
+				if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
+					$customer->{"set_shipping_$key"}( $value );
+				}
 			}
 		}
 
+		$customer->save();
+	}
+
+	/**
+	 * Update an order using the posted values from the request.
+	 *
+	 * @param \WC_Order        $order Object to prepare for the response.
+	 * @param \WP_REST_Request $request Full details about the request.
+	 */
+	protected function update_order_from_request( \WC_Order $order, \WP_REST_Request $request ) {
 		if ( isset( $request['customer_note'] ) ) {
 			$order->set_customer_note( $request['customer_note'] );
 		}

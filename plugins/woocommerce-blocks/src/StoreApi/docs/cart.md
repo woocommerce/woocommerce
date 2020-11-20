@@ -13,7 +13,7 @@ All POST endpoints require [Nonce Tokens](nonce-tokens.md) and return the update
 - [Update Item](#update-item)
 - [Apply Coupon](#apply-coupon)
 - [Remove Coupon](#remove-coupon)
-- [Update Shipping](#update-shipping)
+- [Update Customer](#update-customer)
 - [Select Shipping Rate](#select-shipping-rate)
 
 ## Responses
@@ -398,30 +398,38 @@ curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 
-## Update Shipping
+## Update Customer
 
-Update shipping data and return the full cart response, or an error. 
+Update customer data and return the full cart response, or an error. 
 
 This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
-POST /cart/update-shipping
+POST /cart/update-customer
 ```
 
-| Attribute    | Type   | Required | Description                                                                              |
-| :----------- | :----- | :------: | :--------------------------------------------------------------------------------------- |
-| `first_name` | string |    no    | Customer first name.                                                                     |
-| `last_name`  | string |    no    | Customer last name.                                                                      |
-| `address_1`  | string |    no    | First line of the address being shipped to.                                              |
-| `address_2`  | string |    no    | Second line of the address being shipped to.                                             |
-| `city`       | string |    no    | City of the address being shipped to.                                                    |
-| `state`      | string |    no    | ISO code, or name, for the state, province, or district of the address being shipped to. |
-| `postcode`   | string |    no    | Zip or Postcode of the address being shipped to.                                         |
-| `country`    | string |    no    | ISO code for the country of the address being shipped to.                                |
-
-```http
-curl --header "X-WC-Store-API-Nonce: 12345" --request POST /cart/update-shipping?address_1=&address_2=&city=&state=&postcode=90210&country=US
-```
+| Attribute                     | Type   | Required | Description                                                                              |
+| :---------------------------- | :----- | :------: | :--------------------------------------------------------------------------------------- |
+| `billing_address`             | object |    no    | Customer billing address.                                                                |
+| `billing_address.first_name`  | string |    no    | Customer first name.                                                                     |
+| `billing_address.last_name`   | string |    no    | Customer last name.                                                                      |
+| `billing_address.address_1`   | string |    no    | First line of the address being shipped to.                                              |
+| `billing_address.address_2`   | string |    no    | Second line of the address being shipped to.                                             |
+| `billing_address.city`        | string |    no    | City of the address being shipped to.                                                    |
+| `billing_address.state`       | string |    no    | ISO code, or name, for the state, province, or district of the address being shipped to. |
+| `billing_address.postcode`    | string |    no    | Zip or Postcode of the address being shipped to.                                         |
+| `billing_address.country`     | string |    no    | ISO code for the country of the address being shipped to.                                |
+| `billing_address.email`       | string |    no    | Email for the customer.                                                                  |
+| `billing_address.phone`       | string |    no    | Phone number of the customer.                                                            |
+| `shipping_address`            | object |    no    | Customer shipping address.                                                               |
+| `shipping_address.first_name` | string |    no    | Customer first name.                                                                     |
+| `shipping_address.last_name`  | string |    no    | Customer last name.                                                                      |
+| `shipping_address.address_1`  | string |    no    | First line of the address being shipped to.                                              |
+| `shipping_address.address_2`  | string |    no    | Second line of the address being shipped to.                                             |
+| `shipping_address.city`       | string |    no    | City of the address being shipped to.                                                    |
+| `shipping_address.state`      | string |    no    | ISO code, or name, for the state, province, or district of the address being shipped to. |
+| `shipping_address.postcode`   | string |    no    | Zip or Postcode of the address being shipped to.                                         |
+| `shipping_address.country`    | string |    no    | ISO code for the country of the address being shipped to.                                |
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 

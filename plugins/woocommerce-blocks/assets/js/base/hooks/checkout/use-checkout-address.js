@@ -2,13 +2,12 @@
  * External dependencies
  */
 import defaultAddressFields from '@woocommerce/base-components/cart-checkout/address-form/default-address-fields';
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import {
 	useShippingDataContext,
-	useBillingDataContext,
+	useCustomerDataContext,
 	useCheckoutContext,
 } from '@woocommerce/base-context';
-import { isEqual } from 'lodash';
 
 /**
  * Compare two addresses and see if they are the same.
@@ -23,18 +22,17 @@ const isSameAddress = ( address1, address2 ) => {
 };
 
 /**
- * Custom hook for tracking address field state on checkout and persisting it to
- * context globally on change.
+ * Custom hook for exposing address related functionality for the checkout address form.
  */
 export const useCheckoutAddress = () => {
 	const { customerId } = useCheckoutContext();
+	const { needsShipping } = useShippingDataContext();
 	const {
+		billingData,
+		setBillingData,
 		shippingAddress,
 		setShippingAddress,
-		needsShipping,
-	} = useShippingDataContext();
-	const { billingData, setBillingData } = useBillingDataContext();
-	const [ billingFields, updateBillingFields ] = useState( billingData );
+	} = useCustomerDataContext();
 
 	// This tracks the state of the "shipping as billing" address checkbox. It's
 	// initial value is true (if shipping is needed), however, if the user is
@@ -45,55 +43,58 @@ export const useCheckoutAddress = () => {
 			( ! customerId || isSameAddress( shippingAddress, billingData ) )
 	);
 
-	// Pushes to global state when changes are made locally.
-	useEffect( () => {
-		// Uses shipping address or billing fields depending on shippingAsBilling checkbox, but ensures
-		// billing only fields are also included.
-		const newBillingData = {
-			...( shippingAsBilling ? shippingAddress : billingFields ),
-			email: billingFields.email || billingData.email,
-			phone: billingFields.phone || billingData.phone,
-		};
-
-		if ( ! isEqual( newBillingData, billingData ) ) {
-			setBillingData( newBillingData );
-		}
-	}, [
-		billingFields,
-		shippingAsBilling,
-		billingData,
-		shippingAddress,
-		setBillingData,
-		setShippingAddress,
-	] );
+	const currentShippingAsBilling = useRef( shippingAsBilling );
+	const previousBillingData = useRef( billingData );
 
 	/**
-	 * Wrapper for updateBillingFields (from useState) which handles merging.
-	 *
-	 * @param {Object} newValues New values to store to state.
+	 * Sets shipping address data, and also billing if using the same address.
 	 */
-	const setBillingFields = useCallback(
-		( newValues ) =>
-			void updateBillingFields( ( prevState ) => ( {
-				...prevState,
-				...newValues,
-			} ) ),
-		[]
+	const setShippingFields = useCallback(
+		( value ) => {
+			setShippingAddress( value );
+
+			if ( shippingAsBilling ) {
+				setBillingData( value );
+			}
+		},
+		[ shippingAsBilling, setShippingAddress, setBillingData ]
 	);
 
-	const setEmail = ( value ) => void setBillingFields( { email: value } );
-	const setPhone = ( value ) => void setBillingFields( { phone: value } );
+	// When the "Use same address" checkbox is toggled we need to update the current billing address to reflect this;
+	// that is either setting the billing address to the shipping address, or restoring the billing address to it's
+	// previous state.
+	useEffect( () => {
+		if ( currentShippingAsBilling.current !== shippingAsBilling ) {
+			if ( shippingAsBilling ) {
+				previousBillingData.current = billingData;
+				setBillingData( shippingAddress );
+			} else {
+				setBillingData( {
+					...previousBillingData.current,
+					email: undefined,
+					phone: undefined,
+				} );
+			}
+			currentShippingAsBilling.current = shippingAsBilling;
+		}
+	}, [ shippingAsBilling, setBillingData, shippingAddress, billingData ] );
 
+	const setEmail = ( value ) => void setBillingData( { email: value } );
+	const setPhone = ( value ) => void setBillingData( { phone: value } );
+
+	// Note that currentShippingAsBilling is returned rather than the current state of shippingAsBilling--this is so that
+	// the billing fields are not rendered before sync (billing field values are debounced and would be outdated)
 	return {
 		defaultAddressFields,
 		shippingFields: shippingAddress,
-		setShippingFields: setShippingAddress,
-		billingFields,
-		setBillingFields,
+		setShippingFields,
+		billingFields: billingData,
+		setBillingFields: setBillingData,
 		setEmail,
 		setPhone,
 		shippingAsBilling,
 		setShippingAsBilling,
-		showBillingFields: ! needsShipping || ! shippingAsBilling,
+		showBillingFields:
+			! needsShipping || ! currentShippingAsBilling.current,
 	};
 };

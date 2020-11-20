@@ -147,8 +147,8 @@ export const isItemPendingDelete = ( state, cartItemKey ) => {
  * @param {Object} state The current state.
  * @return {boolean} are shipping rates loading.
  */
-export const areShippingRatesLoading = ( state ) => {
-	return !! state.metaData.updatingShipping;
+export const isCustomerDataUpdating = ( state ) => {
+	return !! state.metaData.updatingCustomerData;
 };
 
 /**

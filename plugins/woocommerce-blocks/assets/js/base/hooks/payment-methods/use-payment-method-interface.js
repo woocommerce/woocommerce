@@ -5,7 +5,7 @@ import {
 	useCheckoutContext,
 	usePaymentMethodDataContext,
 	useShippingDataContext,
-	useBillingDataContext,
+	useCustomerDataContext,
 } from '@woocommerce/base-context';
 import { __ } from '@wordpress/i18n';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
@@ -108,15 +108,18 @@ export const usePaymentMethodInterface = () => {
 		selectedRates,
 		setSelectedRates,
 		isSelectingRate,
-		shippingAddress,
-		setShippingAddress,
+
 		onShippingRateSuccess,
 		onShippingRateFail,
 		onShippingRateSelectSuccess,
 		onShippingRateSelectFail,
 		needsShipping,
 	} = useShippingDataContext();
-	const { billingData } = useBillingDataContext();
+	const {
+		billingData,
+		shippingAddress,
+		setShippingAddress,
+	} = useCustomerDataContext();
 	const { cartTotals } = useStoreCart();
 	const { appliedCoupons } = useStoreCartCoupons();
 	const { noticeContexts, responseTypes } = useEmitResponse();

@@ -37,6 +37,19 @@ describe( 'useStoreCart', () => {
 		cartIsLoading: false,
 		cartItemErrors: [],
 		cartErrors: [],
+		billingAddress: {
+			first_name: '',
+			last_name: '',
+			company: '',
+			address_1: '',
+			address_2: '',
+			city: '',
+			state: '',
+			postcode: '',
+			country: '',
+			email: '',
+			phone: '',
+		},
 		shippingAddress: {
 			first_name: '',
 			last_name: '',
@@ -64,6 +77,7 @@ describe( 'useStoreCart', () => {
 		itemsWeight: 10,
 		needsPayment: true,
 		needsShipping: true,
+		billingAddress: {},
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
 		hasCalculatedShipping: true,
@@ -84,6 +98,7 @@ describe( 'useStoreCart', () => {
 		cartTotals: mockCartTotals,
 		cartIsLoading: mockCartIsLoading,
 		cartErrors: mockCartErrors,
+		billingAddress: {},
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
 		shippingRatesLoading: false,
@@ -111,7 +126,7 @@ describe( 'useStoreCart', () => {
 				hasFinishedResolution: jest
 					.fn()
 					.mockReturnValue( ! mockCartIsLoading ),
-				areShippingRatesLoading: jest.fn().mockReturnValue( false ),
+				isCustomerDataUpdating: jest.fn().mockReturnValue( false ),
 			},
 		};
 		registry.registerStore( storeKey, {

@@ -33,12 +33,14 @@ This system is exposed on components by wrapping them in a `<StoreNoticesProvide
 -   The express payments areas (using the `wc/express-payment-area` context value)
 -   The payment methods area (using the `wc/payment-area` context value).
 
-#### Billing Data Context
+#### Customer Data Context
 
-The billing data context exposes the api interfaces for the following things via the `useBillingDataContext` hook:
+The customer data context exposes the api interfaces for the following things via the `useCustomerDataContext` hook:
 
 -   `billingData`: The currently set billing data.
 -   `setBillingData`: A state updated for updating the billing data state with new billing data.
+-   `shippingAddress`: The current set shipping address.
+-   `setShippingAddress`: A function for setting the shipping address. This will trigger shipping rates updates.
 
 #### Shipping Method Data context
 
@@ -81,7 +83,7 @@ The payment method data context exposes the api interfaces for the following thi
 
 #### Checkout Context
 
-This context is the main one. Internally via the `<CheckoutProvider>` it handles wrapping children in `<ShippingMethodDataProvider>`, `<BillingDataProvider>` and `<PaymentMethodDataProvider>`. So the checkout components just need to be wrapped by `<CheckoutProvider>`.
+This context is the main one. Internally via the `<CheckoutProvider>` it handles wrapping children in `<ShippingMethodDataProvider>`, `<CustomerDataProvider>` and `<PaymentMethodDataProvider>`. So the checkout components just need to be wrapped by `<CheckoutProvider>`.
 
 The provider receives the following props:
 
