@@ -647,23 +647,22 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$has_filter_applied = has_filter( 'wc_product_has_unique_sku', '__return_false' );
 
 		if ( ! empty( $has_filter_applied ) && $has_filter_applied > 0 ) {
-			// If a filter is applied we cannot check for SKU uniqueness. Use ID first
-			if ( ! empty ( $posted['variation_id'] ) ) {
+			// If a filter is applied we cannot check for SKU uniqueness. Use ID first.
+			if ( ! empty( $posted['variation_id'] ) ) {
 				$product_id = (int) $posted['variation_id'];
 			} elseif ( ! empty( $posted['product_id'] ) ) {
 				$product_id = (int) $posted['product_id'];
 			} elseif ( ! empty( $posted['sku'] ) ) {
 				$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
-			}  elseif ( 'update' === $action ) {
+			} elseif ( 'update' === $action ) {
 				$product_id = 0;
 			} else {
 				throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 			}
-
 		} else {
 			if ( ! empty( $posted['sku'] ) ) {
-				// Priority should always be SKU (to not break compatibility)
-				if ( ! empty ( $posted['variation_id'] ) ) {
+				// Priority should always be SKU (to not break compatibility).
+				if ( ! empty( $posted['variation_id'] ) ) {
 					$is_unique_sku = wc_product_has_unique_sku( $posted['variation_id'], $posted['sku'] );
 					if ( $is_unique_sku ) {
 						$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
@@ -682,7 +681,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$product_id = (int) $posted['variation_id'];
 			} elseif ( ! empty( $posted['product_id'] ) ) {
 				$product_id = (int) $posted['product_id'];
-			}  elseif ( 'update' === $action ) {
+			} elseif ( 'update' === $action ) {
 				$product_id = 0;
 			} else {
 				throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
