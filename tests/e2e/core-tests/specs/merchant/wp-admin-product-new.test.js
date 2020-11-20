@@ -196,9 +196,8 @@ const runAddVariableProductTest = () => {
 			// Publish product, verify that it was published. Trash product, verify that it was trashed.
 			await verifyPublishAndTrash(
 				'#publish',
-				'.updated.notice',
+				'.notice',
 				'Product published.',
-				'Move to Trash',
 				'1 product moved to the Trash.'
 			);
 /**/

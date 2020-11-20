@@ -24,24 +24,14 @@ The simplest way to use the client is directly:
 import { HTTPClientFactory } from '@woocommerce/api';
 
 // You can create an API client using the client factory with pre-configured middleware for convenience.
-let httpClient = HTTPClientFactory.withBasicAuth(
-    // The base URL of your REST API.
-    'https://example.com/wp-json/',
-    // The username for your WordPress user.
-    'username',
-    // The password for your WordPress user.
-    'password',
-);
+let client = HTTPClientFactory.build( 'https://example.com' )
+    .withBasicAuth( 'username', 'password' )
+    .create();
 
 // You can also create an API client configured for requests using OAuth.
-httpClient = HTTPClientFactory.withOAuth(
-    // The base URL of your REST API.
-    'https://example.com/wp-json/',
-    // The OAuth API Key's consumer secret.
-    'consumer_secret',
-    // The OAuth API Key's consumer password.
-    'consumer_pasword',
-);
+client = HTTPClientFactory.build( 'https://example.com' )
+    .withOAuth( 'consumer_secret', 'consumer_password' )
+    .create();
 
 // You can then use the client to make API requests.
 httpClient.get( '/wc/v3/products' ).then( ( response ) => {
@@ -54,6 +44,7 @@ httpClient.get( '/wc/v3/products' ).then( ( response ) => {
 }, ( error ) => {
   // Handle errors that may have come up.
 } );
+
 ```
 
 ### Repositories
@@ -66,7 +57,9 @@ import { SimpleProduct } from '@woocommerce/api';
 
 // Prepare the HTTP client that will be consumed by the repository.
 // This is necessary so that it can make requests to the REST API.
-const httpClient = HTTPClientFactory.withBasicAuth( 'https://example.com/wp-json/','username','password' );
+const httpClient = HTTPClientFactory.build( 'https://example.com' )
+    .withBasicAuth( 'username', 'password' )
+    .create();
 
 const repository = SimpleProduct.restRepository( httpClient );
 
