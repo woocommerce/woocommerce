@@ -25,6 +25,18 @@ const clickTab = async ( tabName ) => {
 };
 
 /**
+ * Get the value of input field.
+ *
+ * @param {string} selector Selector of the input field that needs to be obtained.
+ */
+const getValueOfInputField = async( selector ) => {
+	await page.focus( selector );
+	const field = await page.$( selector );
+	const fieldValue = ( await ( await field.getProperty( 'value' ) ).jsonValue() );
+	return fieldValue;
+};
+
+/**
  * Save changes on a WooCommerce settings page.
  */
 const settingsPageSaveChanges = async () => {
@@ -82,14 +94,13 @@ const uiUnblocked = async () => {
 };
 
 /**
- * Publish, verify that item was published. Trash, verify that item was trashed.
+ * Publish, verify that item was published.
  *
  * @param {string} button (Publish)
  * @param {string} publishNotice
  * @param {string} publishVerification
- * @param {string} trashVerification
  */
-const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
+const verifyPublish = async ( button, publishNotice, publishVerification ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -99,16 +110,15 @@ const verifyPublishAndTrash = async ( button, publishNotice, publishVerification
 
 	// Verify
 	await expect( page ).toMatchElement( publishNotice, { text: publishVerification } );
-	if ( button === '.order_actions li .save_order' ) {
-		await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
-		await expect( page ).toMatchElement(
-			'#woocommerce-order-notes .note_content',
-			{
-				text: 'Order status changed from Pending payment to Processing.',
-			}
-		);
-	}
+};
 
+/**
+ * Trash, verify that item was trashed.
+ *
+ * @param {string} publishNotice
+ * @param {string} trashVerification
+ */
+const verifyTrash = async ( publishNotice, trashVerification ) => {
 	// Trash
 	await page.focus( 'a.submitdelete' );
 	await expect( page ).toClick( 'a.submitdelete' );
@@ -116,6 +126,23 @@ const verifyPublishAndTrash = async ( button, publishNotice, publishVerification
 
 	// Verify
 	await expect( page ).toMatchElement( publishNotice, { text: trashVerification } );
+};
+
+/**
+ * Publish, verify that item was published. Trash, verify that item was trashed.
+ *
+ * @param {string} button (Publish)
+ * @param {string} publishNotice
+ * @param {string} publishVerification
+ * @param {string} trashVerification
+ */
+const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
+
+	// Publish
+	await verifyPublish( button, publishNotice, publishVerification );
+
+	// Trash
+	await verifyTrash( publishNotice, trashVerification );
 };
 
 /**
@@ -158,11 +185,14 @@ const verifyValueOfInputField = async( selector, value ) => {
 export {
 	clearAndFillInput,
 	clickTab,
+	getValueOfInputField,
 	settingsPageSaveChanges,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	unsetCheckbox,
 	uiUnblocked,
+	verifyPublish,
+	verifyTrash,
 	verifyPublishAndTrash,
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
