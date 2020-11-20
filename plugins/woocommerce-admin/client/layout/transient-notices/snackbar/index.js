@@ -62,9 +62,7 @@ function Snackbar(
 	function onActionClick( event, onClick ) {
 		event.stopPropagation();
 
-		if ( explicitDismiss ) {
-			onRemove();
-		}
+		onRemove();
 
 		if ( onClick ) {
 			onClick( event );
