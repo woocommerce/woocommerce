@@ -12,6 +12,16 @@
 	.is-large & {
 		padding-right: $gap-large;
 	}
+
+	.wc-block-components-checkout-step__heading::after {
+		content: "";
+		border-left: 1px solid;
+		opacity: 0.3;
+		position: absolute;
+		left: -$gap-larger/2;
+		top: 2.5em;
+		bottom: em($gap) * -1;
+	}
 }
 
 .wc-block-components-checkout-step__container {
@@ -33,6 +43,8 @@
 	flex-wrap: wrap;
 	margin: em($gap-small) 0 em($gap);
 	position: relative;
+	align-items: center;
+	gap: em($gap);
 }
 
 .wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
@@ -45,8 +57,6 @@
 
 .wc-block-components-checkout-step__heading-content {
 	@include font-size(smaller);
-	position: absolute;
-	right: 0;
 
 	a {
 		font-weight: bold;
