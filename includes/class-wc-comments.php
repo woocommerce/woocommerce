@@ -22,6 +22,7 @@ class WC_Comments {
 		// Rating posts.
 		add_filter( 'comments_open', array( __CLASS__, 'comments_open' ), 10, 2 );
 		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_rating' ), 0 );
+		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_verified_owner_only' ), 0 );
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
 		add_action( 'comment_moderation_recipients', array( __CLASS__, 'comment_moderation_recipients' ), 10, 2 );
 
@@ -148,6 +149,21 @@ class WC_Comments {
 		// If posting a comment (not trackback etc) and not logged in.
 		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // WPCS: input var ok, CSRF ok.
 			wp_die( esc_html__( 'Please rate the product.', 'woocommerce' ) );
+			exit;
+		}
+		return $comment_data;
+	}
+
+	/**
+	 * Validate the 'Reviews can only be left by "verified owners"'.
+	 *
+	 * @param  array $comment_data Comment data.
+	 * @return array
+	 */
+	public static function check_comment_verified_owner_only( $comment_data ) {
+		// If posting a comment (not trackback etc) and not logged in.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && 'yes' === get_option( 'woocommerce_review_rating_verification_required', 'no' ) && ! wc_customer_bought_product( '', get_current_user_id(), absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+			wp_die( esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) );
 			exit;
 		}
 		return $comment_data;
