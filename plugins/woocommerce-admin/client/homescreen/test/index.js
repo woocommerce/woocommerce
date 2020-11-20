@@ -90,23 +90,7 @@ describe( 'Homescreen Layout', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
-				taskListComplete={ false }
 				taskListHidden
-				query={ {} }
-				updateOptions={ () => {} }
-			/>
-		);
-
-		const taskList = screen.queryByText( '[TaskList]' );
-		expect( taskList ).toBeNull();
-	} );
-
-	it( 'should not show TaskList when it is complete', () => {
-		render(
-			<Layout
-				requestingTaskList={ false }
-				taskListComplete
-				taskListHidden={ false }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -120,7 +104,6 @@ describe( 'Homescreen Layout', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
-				taskListComplete={ false }
 				taskListHidden
 				query={ {} }
 				updateOptions={ () => {} }
@@ -135,7 +118,6 @@ describe( 'Homescreen Layout', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
-				taskListComplete
 				taskListHidden={ false }
 				query={ {} }
 				updateOptions={ () => {} }
