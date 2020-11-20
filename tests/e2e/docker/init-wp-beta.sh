@@ -9,7 +9,7 @@ wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=pas
 # we cannot create API keys for the API, so we using basic auth, this plugin allows that.
 wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate
 
-echo "Updating to WordPress Nightly"
+echo "Updating to WordPress Nightly Point Release"
 
 wp plugin install wordpress-beta-tester --activate
 wp core check-update
