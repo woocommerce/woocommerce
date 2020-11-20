@@ -117,10 +117,7 @@ const reducer = (
 		case SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
 			return {
 				...state,
-				expressPaymentMethods: {
-					...state.expressPaymentMethods,
-					...paymentMethods,
-				},
+				expressPaymentMethods: paymentMethods,
 			};
 		case SET_SHOULD_SAVE_PAYMENT_METHOD:
 			return {

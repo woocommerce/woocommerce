@@ -77,6 +77,7 @@ const usePaymentMethodRegistration = (
 
 	const refreshCanMakePayments = useCallback( async () => {
 		let availablePaymentMethods = {};
+
 		const addAvailablePaymentMethod = ( paymentMethod ) => {
 			availablePaymentMethods = {
 				...availablePaymentMethods,
@@ -137,11 +138,11 @@ const usePaymentMethodRegistration = (
 	] );
 
 	// Determine which payment methods are available initially and whenever
-	// shipping methods change.
+	// shipping methods or cart totals change.
 	// Some payment methods (e.g. COD) can be disabled for specific shipping methods.
 	useEffect( () => {
 		refreshCanMakePayments();
-	}, [ refreshCanMakePayments, selectedShippingMethods ] );
+	}, [ refreshCanMakePayments, cartTotals, selectedShippingMethods ] );
 
 	return isInitialized;
 };
