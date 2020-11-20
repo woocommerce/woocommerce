@@ -43,11 +43,8 @@ export const useInitialization = ( {
 	const [ isFinished, setIsFinished ] = useState( false );
 	const [ isProcessing, setIsProcessing ] = useState( false );
 	const [ canMakePayment, setCanMakePayment ] = useState( false );
-
-	const currentPaymentRequest = useRef( paymentRequest );
-	const currentPaymentRequestType = useRef( '' );
+	const [ paymentRequestType, setPaymentRequestType ] = useState( '' );
 	const currentShipping = useRef( shippingData );
-
 	const {
 		paymentRequestEventHandlers,
 		clearPaymentRequestEventHandler,
@@ -56,41 +53,33 @@ export const useInitialization = ( {
 
 	// Update refs when any change.
 	useEffect( () => {
-		currentPaymentRequest.current = paymentRequest;
 		currentShipping.current = shippingData;
-	}, [ paymentRequest, shippingData ] );
+	}, [ shippingData ] );
 
-	// set paymentRequest.
+	// Create the initial paymentRequest object. Note, we can't do anything if stripe isn't available yet or we have zero total.
 	useEffect( () => {
-		// can't do anything if stripe isn't available yet or we have zero total.
-		if ( ! stripe || ! billing.cartTotal.value ) {
+		if (
+			! stripe ||
+			! billing.cartTotal.value ||
+			isFinished ||
+			isProcessing ||
+			paymentRequest
+		) {
 			return;
 		}
-
-		// if payment request hasn't been set yet then set it.
-		if ( ! currentPaymentRequest.current && ! isFinished ) {
-			setPaymentRequest(
-				getPaymentRequest( {
-					total: billing.cartTotal,
-					currencyCode: billing.currency.code.toLowerCase(),
-					countryCode: getSetting( 'baseLocation', {} )?.country,
-					shippingRequired: shippingData.needsShipping,
-					cartTotalItems: billing.cartTotalItems,
-					stripe,
-				} )
-			);
-		}
-		// otherwise we just update it (but only if payment processing hasn't
-		// already started).
-		if ( ! isProcessing && currentPaymentRequest.current && ! isFinished ) {
-			updatePaymentRequest( {
-				// @ts-ignore
-				paymentRequest: currentPaymentRequest.current,
-				total: billing.cartTotal,
-				currencyCode: billing.currency.code.toLowerCase(),
-				cartTotalItems: billing.cartTotalItems,
-			} );
-		}
+		const pr = getPaymentRequest( {
+			total: billing.cartTotal,
+			currencyCode: billing.currency.code.toLowerCase(),
+			countryCode: getSetting( 'baseLocation', {} )?.country,
+			shippingRequired: shippingData.needsShipping,
+			cartTotalItems: billing.cartTotalItems,
+			stripe,
+		} );
+		canDoPaymentRequest( pr ).then( ( result ) => {
+			setPaymentRequest( pr );
+			setPaymentRequestType( result.requestType || '' );
+			setCanMakePayment( result.canPay );
+		} );
 	}, [
 		billing.cartTotal,
 		billing.currency.code,
@@ -99,28 +88,30 @@ export const useInitialization = ( {
 		stripe,
 		isProcessing,
 		isFinished,
+		paymentRequest,
 	] );
 
-	// whenever paymentRequest changes, then we need to update whether
-	// payment can be made.
-	useEffect( () => {
-		if ( paymentRequest ) {
-			canDoPaymentRequest( paymentRequest ).then( ( result ) => {
-				if ( result.requestType ) {
-					currentPaymentRequestType.current = result.requestType;
-				}
-				setCanMakePayment( result.canPay );
-			} );
-		}
-	}, [ paymentRequest ] );
-
-	// kick off payment processing.
-	const onButtonClick = () => {
+	// When the payment button is clicked, update the request and show it.
+	const onButtonClick = useCallback( () => {
 		setIsProcessing( true );
 		setIsFinished( false );
 		setExpressPaymentError( '' );
+		updatePaymentRequest( {
+			// @ts-ignore
+			paymentRequest,
+			total: billing.cartTotal,
+			currencyCode: billing.currency.code.toLowerCase(),
+			cartTotalItems: billing.cartTotalItems,
+		} );
 		onClick();
-	};
+	}, [
+		onClick,
+		paymentRequest,
+		setExpressPaymentError,
+		billing.cartTotal,
+		billing.currency.code,
+		billing.cartTotalItems,
+	] );
 
 	const abortPayment = useCallback( ( paymentMethod ) => {
 		paymentMethod.complete( 'fail' );
@@ -134,73 +125,83 @@ export const useInitialization = ( {
 		setIsProcessing( false );
 	}, [] );
 
-	// when canMakePayment is true, then we set listeners on payment request for
-	// handling updates.
+	// whenever paymentRequest changes, hook in event listeners.
 	useEffect( () => {
-		const shippingAddressChangeHandler = ( event ) => {
-			const newShippingAddress = normalizeShippingAddressForCheckout(
-				event.shippingAddress
-			);
-			if (
-				isShallowEqual(
-					pluckAddress( newShippingAddress ),
-					pluckAddress( currentShipping.current.shippingAddress )
-				)
-			) {
-				// the address is the same so no change needed.
-				event.updateWith( {
-					status: 'success',
-					shippingOptions: normalizeShippingOptions(
-						currentShipping.current.shippingRates
-					),
-				} );
-			} else {
-				// the address is different so let's set the new address and
-				// register the handler to be picked up by the shipping rate
-				// change event.
-				currentShipping.current.setShippingAddress(
-					normalizeShippingAddressForCheckout( event.shippingAddress )
-				);
-				setPaymentRequestEventHandler( 'shippingAddressChange', event );
-			}
-		};
-		const shippingOptionChangeHandler = ( event ) => {
-			currentShipping.current.setSelectedRates(
-				normalizeShippingOptionSelectionsForCheckout(
-					event.shippingOption
-				)
-			);
-			setPaymentRequestEventHandler( 'shippingOptionChange', event );
-		};
-		const sourceHandler = ( paymentMethod ) => {
-			if (
-				// eslint-disable-next-line no-undef
-				! getStripeServerData().allowPrepaidCard &&
-				paymentMethod.source.card.funding
-			) {
-				setExpressPaymentError(
-					__(
-						"Sorry, we're not accepting prepaid cards at this time.",
-						'woocommerce-gateway-stripe'
-					)
-				);
-				return;
-			}
-			setPaymentRequestEventHandler( 'sourceEvent', paymentMethod );
-			// kick off checkout processing step.
-			onSubmit();
-		};
-		const cancelHandler = () => {
-			setIsFinished( true );
-			setIsProcessing( false );
-			onClose();
-		};
 		const noop = { removeAllListeners: () => void null };
 		let shippingAddressChangeEvent = noop,
 			shippingOptionChangeEvent = noop,
 			sourceChangeEvent = noop,
 			cancelChangeEvent = noop;
-		if ( paymentRequest && canMakePayment && isProcessing ) {
+
+		if ( paymentRequest ) {
+			const cancelHandler = () => {
+				setIsFinished( false );
+				setIsProcessing( false );
+				setPaymentRequest( null );
+				onClose();
+			};
+
+			const shippingAddressChangeHandler = ( event ) => {
+				const newShippingAddress = normalizeShippingAddressForCheckout(
+					event.shippingAddress
+				);
+				if (
+					isShallowEqual(
+						pluckAddress( newShippingAddress ),
+						pluckAddress( currentShipping.current.shippingAddress )
+					)
+				) {
+					// the address is the same so no change needed.
+					event.updateWith( {
+						status: 'success',
+						shippingOptions: normalizeShippingOptions(
+							currentShipping.current.shippingRates
+						),
+					} );
+				} else {
+					// the address is different so let's set the new address and
+					// register the handler to be picked up by the shipping rate
+					// change event.
+					currentShipping.current.setShippingAddress(
+						normalizeShippingAddressForCheckout(
+							event.shippingAddress
+						)
+					);
+					setPaymentRequestEventHandler(
+						'shippingAddressChange',
+						event
+					);
+				}
+			};
+
+			const shippingOptionChangeHandler = ( event ) => {
+				currentShipping.current.setSelectedRates(
+					normalizeShippingOptionSelectionsForCheckout(
+						event.shippingOption
+					)
+				);
+				setPaymentRequestEventHandler( 'shippingOptionChange', event );
+			};
+
+			const sourceHandler = ( paymentMethod ) => {
+				if (
+					// eslint-disable-next-line no-undef
+					! getStripeServerData().allowPrepaidCard &&
+					paymentMethod.source.card.funding
+				) {
+					setExpressPaymentError(
+						__(
+							"Sorry, we're not accepting prepaid cards at this time.",
+							'woocommerce-gateway-stripe'
+						)
+					);
+					return;
+				}
+				setPaymentRequestEventHandler( 'sourceEvent', paymentMethod );
+				// kick off checkout processing step.
+				onSubmit();
+			};
+
 			// @ts-ignore
 			shippingAddressChangeEvent = paymentRequest.on(
 				'shippingaddresschange',
@@ -216,6 +217,7 @@ export const useInitialization = ( {
 			// @ts-ignore
 			cancelChangeEvent = paymentRequest.on( 'cancel', cancelHandler );
 		}
+
 		return () => {
 			if ( paymentRequest ) {
 				shippingAddressChangeEvent.removeAllListeners();
@@ -228,11 +230,12 @@ export const useInitialization = ( {
 		paymentRequest,
 		canMakePayment,
 		isProcessing,
-		onClose,
 		setPaymentRequestEventHandler,
 		setExpressPaymentError,
 		onSubmit,
+		onClose,
 	] );
+
 	return {
 		paymentRequest,
 		paymentRequestEventHandlers,
@@ -242,6 +245,6 @@ export const useInitialization = ( {
 		onButtonClick,
 		abortPayment,
 		completePayment,
-		paymentRequestType: currentPaymentRequestType.current,
+		paymentRequestType,
 	};
 };

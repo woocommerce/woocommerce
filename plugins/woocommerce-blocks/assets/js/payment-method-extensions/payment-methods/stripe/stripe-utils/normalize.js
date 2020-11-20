@@ -20,13 +20,17 @@
  * @return {StripePaymentItem[]} An array of PaymentItems
  */
 const normalizeLineItems = ( cartTotalItems, pending = false ) => {
-	return cartTotalItems.map( ( cartTotalItem ) => {
-		return {
-			amount: cartTotalItem.value,
-			label: cartTotalItem.label,
-			pending,
-		};
-	} );
+	return cartTotalItems
+		.map( ( cartTotalItem ) => {
+			return cartTotalItem.value
+				? {
+						amount: cartTotalItem.value,
+						label: cartTotalItem.label,
+						pending,
+				  }
+				: false;
+		} )
+		.filter( Boolean );
 };
 
 /**
