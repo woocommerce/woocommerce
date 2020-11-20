@@ -26,17 +26,23 @@ import PaymentMethodTab from './payment-method-tab';
  * @return {*} The rendered component.
  */
 const PaymentMethodOptions = () => {
-	const { setActivePaymentMethod } = usePaymentMethodDataContext();
+	const {
+		setActivePaymentMethod,
+		expressPaymentMethods,
+	} = usePaymentMethodDataContext();
 	const { paymentMethods } = usePaymentMethods();
 	const {
 		activePaymentMethod,
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
+	const expressPaymentMethodActive = Object.keys(
+		expressPaymentMethods
+	).includes( activePaymentMethod );
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useStoreNotices();
 	const { isEditor } = useEditorContext();
 
-	return (
+	return expressPaymentMethodActive ? null : (
 		<Tabs
 			className="wc-block-components-checkout-payment-methods"
 			onSelect={ ( tabName ) => {
