@@ -1,7 +1,7 @@
 /**
  * @typedef {import('./billing').BillingData} BillingData
  * @typedef {import('./cart').CartShippingOption} CartShippingOption
- * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('./shipping').ShippingAddress} CartShippingAddress
  * @typedef {import('./cart').CartData} CartData
  * @typedef {import('./checkout').CheckoutDispatchActions} CheckoutDispatchActions
  * @typedef {import('./add-to-cart-form').AddToCartFormDispatchActions} AddToCartFormDispatchActions
@@ -9,10 +9,12 @@
  */
 
 /**
- * @typedef {Object} BillingDataContext
+ * @typedef {Object} CustomerDataContext
  *
- * @property {BillingData} billingData    The current billing data, including address and email.
- * @property {Function}    setBillingData A function for setting billing data.
+ * @property {BillingData}          billingData        The current billing data, including address and email.
+ * @property {CartShippingAddress}  shippingAddress    The current set address for shipping.
+ * @property {Function}             setBillingData     A function for setting billing data.
+ * @property {Function}             setShippingAddress A function for setting shipping address.
  */
 
 /**

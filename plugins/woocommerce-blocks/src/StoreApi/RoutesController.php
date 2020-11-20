@@ -78,7 +78,7 @@ class RoutesController {
 			'cart-remove-item'          => new Routes\CartRemoveItem( $this->schemas->get( 'cart' ) ),
 			'cart-select-shipping-rate' => new Routes\CartSelectShippingRate( $this->schemas->get( 'cart' ) ),
 			'cart-update-item'          => new Routes\CartUpdateItem( $this->schemas->get( 'cart' ) ),
-			'cart-update-shipping'      => new Routes\CartUpdateShipping( $this->schemas->get( 'cart' ) ),
+			'cart-update-customer'      => new Routes\CartUpdateCustomer( $this->schemas->get( 'cart' ), $this->schemas->get( 'shipping-address' ), $this->schemas->get( 'billing-address' ) ),
 			'checkout'                  => new Routes\Checkout( $this->schemas->get( 'checkout' ) ),
 			'product-attributes'        => new Routes\ProductAttributes( $this->schemas->get( 'product-attribute' ) ),
 			'product-attributes-by-id'  => new Routes\ProductAttributesById( $this->schemas->get( 'product-attribute' ) ),

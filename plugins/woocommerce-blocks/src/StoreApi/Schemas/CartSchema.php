@@ -55,6 +55,13 @@ class CartSchema extends AbstractSchema {
 	protected $shipping_address_schema;
 
 	/**
+	 * Billing address schema instance.
+	 *
+	 * @var BillingAddressSchema
+	 */
+	protected $billing_address_schema;
+
+	/**
 	 * Error schema instance.
 	 *
 	 * @var ErrorSchema
@@ -69,6 +76,7 @@ class CartSchema extends AbstractSchema {
 	 * @param CartCouponSchema       $coupon_schema Coupon schema instance.
 	 * @param CartShippingRateSchema $shipping_rate_schema Shipping rates schema instance.
 	 * @param ShippingAddressSchema  $shipping_address_schema Shipping address schema instance.
+	 * @param BillingAddressSchema   $billing_address_schema Billing address schema instance.
 	 * @param ErrorSchema            $error_schema Error schema instance.
 	 */
 	public function __construct(
@@ -77,12 +85,14 @@ class CartSchema extends AbstractSchema {
 		CartCouponSchema $coupon_schema,
 		CartShippingRateSchema $shipping_rate_schema,
 		ShippingAddressSchema $shipping_address_schema,
+		BillingAddressSchema $billing_address_schema,
 		ErrorSchema $error_schema
 	) {
 		$this->item_schema             = $item_schema;
 		$this->coupon_schema           = $coupon_schema;
 		$this->shipping_rate_schema    = $shipping_rate_schema;
 		$this->shipping_address_schema = $shipping_address_schema;
+		$this->billing_address_schema  = $billing_address_schema;
 		$this->error_schema            = $error_schema;
 		parent::__construct( $extend );
 	}
@@ -122,6 +132,16 @@ class CartSchema extends AbstractSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
+				],
+			],
+			'billing_address'         => [
+				'description' => __( 'Current set billing address for the customer.', 'woo-gutenberg-products-block' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( $this->billing_address_schema->get_properties() ),
 				],
 			],
 			'items'                   => [
@@ -292,6 +312,7 @@ class CartSchema extends AbstractSchema {
 			'coupons'                 => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
 			'shipping_rates'          => $has_calculated_shipping ? array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ) : [],
 			'shipping_address'        => $this->shipping_address_schema->get_item_response( wc()->customer ),
+			'billing_address'         => $this->billing_address_schema->get_item_response( wc()->customer ),
 			'items'                   => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),

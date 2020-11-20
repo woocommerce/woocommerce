@@ -81,7 +81,6 @@ class BillingAddressSchema extends AbstractSchema {
 			'email'      => [
 				'description' => __( 'Email', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
-				'format'      => 'email',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'phone'      => [

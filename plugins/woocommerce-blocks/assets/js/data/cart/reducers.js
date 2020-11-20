@@ -116,12 +116,12 @@ const reducer = ( state = defaultCartState, action ) => {
 				},
 			};
 			break;
-		case types.UPDATING_SHIPPING_ADDRESS:
+		case types.UPDATING_CUSTOMER_DATA:
 			state = {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingShipping: action.isResolving,
+					updatingCustomerData: action.isResolving,
 				},
 			};
 			break;

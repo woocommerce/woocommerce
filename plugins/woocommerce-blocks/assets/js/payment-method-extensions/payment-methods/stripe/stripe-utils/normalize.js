@@ -5,7 +5,7 @@
  * @typedef {import('./type-defs').StripePaymentResponse} StripePaymentResponse
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PreparedCartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
- * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('@woocommerce/type-defs/shipping').ShippingAddress} CartShippingAddress
  * @typedef {import('@woocommerce/type-defs/billing').BillingData} CartBillingAddress
  */
 

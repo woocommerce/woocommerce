@@ -3,10 +3,6 @@
  */
 import { ACTION_TYPES } from './constants';
 
-/**
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
- */
-
 const {
 	ERROR,
 	FAILED,

@@ -93,7 +93,7 @@ Available resources in the Store API are listed below, with links to more detail
 |                                                              | [`/wc/store/cart/update-item`](#update-item)                                          |
 |                                                              | [`/wc/store/cart/apply-coupon`](#apply-coupon)                                        |
 |                                                              | [`/wc/store/cart/remove-coupon`](#remove-coupon)                                      |
-|                                                              | [`/wc/store/cart/update-shipping`](#update-shipping)                                  |
+|                                                              | [`/wc/store/cart/update-customer`](#update-customer)                                  |
 |                                                              | [`/wc/store/cart/select-shipping-rate`](#select-shipping-rate)                        |
 | [`Cart Items`](docs/cart-items.md)                           | [`/wc/store/cart/items`](docs/cart-items.md#list-cart-items)                          |
 | [`Cart Coupons`](docs/cart-coupons.md)                       | [`/wc/store/cart/coupons`](docs/cart-coupons.md#list-cart-coupons)                    |

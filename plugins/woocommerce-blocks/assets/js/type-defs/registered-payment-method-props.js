@@ -1,7 +1,7 @@
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
- * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('@woocommerce/type-defs/shipping').ShippingAddress} ShippingAddress
  * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodCurrentStatus} PaymentMethodCurrentStatus
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
@@ -97,10 +97,10 @@
  *                                                       rates (rate ids).
  * @property {Function}             setSelectedRates     A function for setting
  *                                                       selected rates
- *                                                       (recieves id)
+ *                                                       (receives id)
  * @property {boolean}              isSelectingRate      True when rates are
  *                                                       being selected.
- * @property {CartShippingAddress}  shippingAddress      The current set
+ * @property {ShippingAddress}      shippingAddress      The current set
  *                                                       shipping address.
  * @property {Function}             setShippingAddress   A function for setting
  *                                                       the shipping address.

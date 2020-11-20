@@ -1,7 +1,8 @@
 /**
  * @typedef {import('./cart').CartData} CartData
- * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('./shipping').ShippingAddress} CartShippingAddress
  * @typedef {import('./contexts').StoreNoticeObject} StoreNoticeObject
+ * @typedef {import('@woocommerce/type-defs/billing').BillingData} CartBillingAddress
  */
 
 /**
@@ -26,6 +27,8 @@
  *                                                      being loaded.
  * @property {Array}               cartErrors           An array of errors thrown
  *                                                      by the cart.
+ * @property {CartBillingAddress}  billingAddress       Billing address for the
+ *                                                      cart.
  * @property {CartShippingAddress} shippingAddress      Shipping address for the
  *                                                      cart.
  * @property {Array}               shippingRates        array of selected shipping
