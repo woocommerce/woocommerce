@@ -53,6 +53,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $object_type = 'order_item';
 
 	/**
+	 * File path to item invoke template.
+	 *
+	 * @since 4.8.0
+	 * @var string
+	 */
+	protected $invoke_template = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
@@ -284,6 +292,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				continue;
 			}
 
+			if ( strpos( $this->invoke_template, 'email-order-items' ) !== false ) {
+				$order = $this->get_order();
+				// Skip backorder meta for a completed orders.
+				if ( $order && 'completed' === $order->get_status() && 'Backordered' === $meta->key ) {
+					continue;
+				}
+			}
+
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
@@ -405,5 +421,15 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Set item ivoke tempalte property
+	 *
+	 * @since 4.8.0
+	 * @param string $invoke_template File path to item invoke template.
+	 */
+	public function set_item_invoke_template( $invoke_template ) {
+		$this->invoke_template = $invoke_template;
 	}
 }

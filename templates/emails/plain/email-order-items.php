@@ -23,6 +23,8 @@ foreach ( $items as $item_id => $item ) :
 		$sku           = '';
 		$purchase_note = '';
 
+		$item->set_item_invoke_template( __FILE__ );
+
 		if ( is_object( $product ) ) {
 			$sku           = $product->get_sku();
 			$purchase_note = $product->get_purchase_note();
