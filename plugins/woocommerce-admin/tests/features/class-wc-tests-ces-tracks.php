@@ -26,16 +26,15 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
-		$this->ces = new CustomerEffortScoreTracks();
 	}
 
 	/**
 	 * Verify that it adds correct action to the queue on woocommerce_update_options action.
 	 */
 	public function test_updating_options_triggers_ces() {
-		do_action( 'woocommerce_update_options' );
+		$ces = new CustomerEffortScoreTracks();
 
-		$ces = $this->ces;
+		do_action( 'woocommerce_update_options' );
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
 		$this->assertNotEmpty( $queue_items );
@@ -55,11 +54,11 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	 * action and label values.
 	 */
 	public function test_the_queue_does_not_allow_duplicate() {
+		$ces = new CustomerEffortScoreTracks();
+
 		// Fire the action twice to trigger the queueing process twice.
 		do_action( 'woocommerce_update_options' );
 		do_action( 'woocommerce_update_options' );
-
-		$ces = $this->ces;
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
 		$this->assertNotEmpty( $queue_items );
@@ -72,5 +71,20 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $expected_queue_item );
+	}
+
+	/**
+	 * Verify that tasks performed using a mobile device are ignored.
+	 */
+	public function test_disabled_for_mobile() {
+		add_filter( 'wp_is_mobile', '__return_true' );
+
+		$ces = new CustomerEffortScoreTracks();
+
+		do_action( 'woocommerce_update_options' );
+
+		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
+
+		$this->assertEmpty( $queue_items );
 	}
 }

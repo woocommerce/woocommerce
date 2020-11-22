@@ -73,6 +73,11 @@ class CustomerEffortScoreTracks {
 			return;
 		}
 
+		// Do not hook up the action handlers if a mobile device is used.
+		if ( wp_is_mobile() ) {
+			return;
+		}
+
 		// Only enqueue a survey if tracking is allowed.
 		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
 		if ( ! $allow_tracking ) {
