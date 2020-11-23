@@ -442,6 +442,36 @@ class Menu {
 	}
 
 	/**
+	 * Check if a menu item's callback is registered in the menu.
+	 *
+	 * @param array $menu_item Menu item args.
+	 * @return bool
+	 */
+	public static function has_callback( $menu_item ) {
+		if ( ! $menu_item || ! isset( $menu_item[ self::CALLBACK ] ) ) {
+			return false;
+		}
+
+		$callback = $menu_item[ self::CALLBACK ];
+
+		if (
+			isset( self::$callbacks[ $callback ] ) &&
+			self::$callbacks[ $callback ]
+		) {
+			return true;
+		}
+
+		if (
+			isset( self::$callbacks[ self::get_callback_url( $callback ) ] ) &&
+			self::$callbacks[ self::get_callback_url( $callback ) ]
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Hides all WP admin menus items and adds screen IDs to check for new items.
 	 *
 	 * @param array $menu Menu items.
@@ -451,26 +481,22 @@ class Menu {
 		global $submenu;
 
 		foreach ( $menu as $key => $menu_item ) {
-			if (
-				isset( self::$callbacks[ $menu_item[ self::CALLBACK ] ] ) &&
-				self::$callbacks[ $menu_item[ self::CALLBACK ] ]
-			) {
+			if ( self::has_callback( $menu_item ) ) {
+				$menu[ $key ][ self::CSS_CLASSES ] .= ' hide-if-js';
+				continue;
+			}
+
+			// WordPress core menus make the parent item the same URL as the first child.
+			$has_children = isset( $submenu[ $menu_item[ self::CALLBACK ] ] ) && isset( $submenu[ $menu_item[ self::CALLBACK ] ][0] );
+			$first_child  = $has_children ? $submenu[ $menu_item[ self::CALLBACK ] ][0] : null;
+			if ( self::has_callback( $first_child ) ) {
 				$menu[ $key ][ self::CSS_CLASSES ] .= ' hide-if-js';
 			}
 		}
 
 		foreach ( $submenu as $parent_key => $parent ) {
 			foreach ( $parent as $key => $menu_item ) {
-				if (
-					(
-						isset( self::$callbacks[ $menu_item[ self::CALLBACK ] ] ) &&
-						self::$callbacks[ $menu_item[ self::CALLBACK ] ]
-					) ||
-					(
-						isset( self::$callbacks[ self::get_callback_url( $menu_item[ self::CALLBACK ] ) ] ) &&
-						self::$callbacks[ self::get_callback_url( $menu_item[ self::CALLBACK ] ) ]
-					)
-				) {
+				if ( self::has_callback( $menu_item ) ) {
 					// Disable phpcs since we need to override submenu classes.
 					// Note that `phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited` does not work to disable this check.
 					// phpcs:disable
@@ -492,6 +518,13 @@ class Menu {
 		}
 
 		return $menu;
+	}
+
+	/**
+	 * Add a callback to identify and hide pages in the WP menu.
+	 */
+	public static function hide_wp_menu_item( $callback ) {
+		self::$callbacks[ $callback ] = true;
 	}
 
 	/**
