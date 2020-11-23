@@ -127,6 +127,9 @@
 	position: relative;
 	pointer-events: none;
 	outline: none !important;
+	position: absolute;
+	left: 0;
+	top: 0;
 
 	&::-webkit-slider-runnable-track {
 		@include track;
@@ -223,9 +226,6 @@
 	.wc-block-components-price-slider__range-input {
 		height: 24px;
 		pointer-events: auto;
-		position: absolute;
-		left: 0;
-		top: 0;
 
 		&::-ms-track {
 			/*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
@@ -284,4 +284,73 @@
 }
 @supports (-ms-ime-align:auto) {
 	@include ie;
+}
+
+.theme-twentytwentyone {
+	$border-width: 3px;
+
+	.wc-block-components-price-slider__range-input-wrapper {
+		background: transparent;
+		border: $border-width solid currentColor;
+		box-sizing: border-box;
+	}
+
+	.wc-block-components-price-slider__range-input-progress {
+		--range-color: currentColor;
+		margin: -$border-width;
+	}
+
+	.wc-block-price-filter__range-input {
+		background: transparent;
+		margin: -$border-width;
+		width: calc(100% + #{$border-width * 2});
+
+		&:hover,
+		&:focus {
+			&::-webkit-slider-thumb {
+				filter: none;
+			}
+			&::-moz-range-thumb {
+				filter: none;
+			}
+			&::-ms-thumb {
+				filter: none;
+			}
+		}
+
+		&::-webkit-slider-thumb {
+			margin-top: -9px;
+		}
+
+		&.wc-block-components-price-slider__range-input--max::-moz-range-thumb {
+			transform: translate(2px, 1px);
+		}
+
+		&.wc-block-components-price-slider__range-input--min::-moz-range-thumb {
+			transform: translate(-2px, 1px);
+		}
+
+		&::-ms-track {
+			border-color: transparent !important;
+		}
+	}
+
+	@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+		.wc-block-components-price-slider__range-input-wrapper {
+			border: 0;
+			height: auto;
+			position: relative;
+			height: 50px;
+		}
+
+		.wc-block-components-price-slider__range-input-progress {
+			display: none;
+		}
+
+		.wc-block-price-filter__range-input {
+			height: 100%;
+			margin: 0;
+			width: 100%;
+		}
+	}
 }
