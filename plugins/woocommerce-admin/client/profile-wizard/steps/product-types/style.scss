@@ -47,10 +47,12 @@
 			align-items: center;
 			justify-content: flex-end;
 			color: $gray-600;
+			margin-bottom: $gap;
 
 			label {
 				display: inline-flex;
 				align-items: center;
+				margin: auto;
 			}
 
 			.components-form-toggle {

@@ -106,35 +106,6 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
-          >
-            <label
-              for="woocommerce-product-types__pricing-toggle"
-            >
-              <p
-                class="css-1f0yw52-Text e15wbhsk0"
-              >
-                Display monthly prices
-              </p>
-              <span
-                class="components-form-toggle is-checked"
-              >
-                <input
-                  checked=""
-                  class="components-form-toggle__input"
-                  id="woocommerce-product-types__pricing-toggle"
-                  type="checkbox"
-                />
-                <span
-                  class="components-form-toggle__track"
-                />
-                <span
-                  class="components-form-toggle__thumb"
-                />
-              </span>
-            </label>
-          </div>
-          <div
             class="woocommerce-profile-wizard__card-actions"
           >
             <button
@@ -151,6 +122,35 @@ you can purchase and install it later.
     <div
       class="woocommerce-profile-wizard__card-help-text"
     >
+      <div
+        class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
+      >
+        <label
+          for="woocommerce-product-types__pricing-toggle"
+        >
+          <p
+            class="css-1f0yw52-Text e15wbhsk0"
+          >
+            Display monthly prices
+          </p>
+          <span
+            class="components-form-toggle is-checked"
+          >
+            <input
+              checked=""
+              class="components-form-toggle__input"
+              id="woocommerce-product-types__pricing-toggle"
+              type="checkbox"
+            />
+            <span
+              class="components-form-toggle__track"
+            />
+            <span
+              class="components-form-toggle__thumb"
+            />
+          </span>
+        </label>
+      </div>
       <p
         class="css-1qmnemh-Text e15wbhsk0"
       >
@@ -267,35 +267,6 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
-          >
-            <label
-              for="woocommerce-product-types__pricing-toggle"
-            >
-              <p
-                class="css-1f0yw52-Text e15wbhsk0"
-              >
-                Display monthly prices
-              </p>
-              <span
-                class="components-form-toggle"
-              >
-                <input
-                  checked=""
-                  class="components-form-toggle__input"
-                  id="woocommerce-product-types__pricing-toggle"
-                  type="checkbox"
-                />
-                <span
-                  class="components-form-toggle__track"
-                />
-                <span
-                  class="components-form-toggle__thumb"
-                />
-              </span>
-            </label>
-          </div>
-          <div
             class="woocommerce-profile-wizard__card-actions"
           >
             <button
@@ -312,6 +283,35 @@ you can purchase and install it later.
     <div
       class="woocommerce-profile-wizard__card-help-text"
     >
+      <div
+        class="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox"
+      >
+        <label
+          for="woocommerce-product-types__pricing-toggle"
+        >
+          <p
+            class="css-1f0yw52-Text e15wbhsk0"
+          >
+            Display monthly prices
+          </p>
+          <span
+            class="components-form-toggle"
+          >
+            <input
+              checked=""
+              class="components-form-toggle__input"
+              id="woocommerce-product-types__pricing-toggle"
+              type="checkbox"
+            />
+            <span
+              class="components-form-toggle__track"
+            />
+            <span
+              class="components-form-toggle__thumb"
+            />
+          </span>
+        </label>
+      </div>
       <p
         class="css-1qmnemh-Text e15wbhsk0"
       >

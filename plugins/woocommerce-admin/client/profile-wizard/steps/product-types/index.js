@@ -148,25 +148,6 @@ export class ProductTypes extends Component {
 								/>
 							);
 						} ) }
-						<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
-							<label htmlFor="woocommerce-product-types__pricing-toggle">
-								<Text variant="body">
-									{ __(
-										'Display monthly prices',
-										'woocommerce-admin'
-									) }
-								</Text>
-								<FormToggle
-									id="woocommerce-product-types__pricing-toggle"
-									checked={ isMonthlyPricing }
-									onChange={ () =>
-										this.setState( {
-											isMonthlyPricing: ! isMonthlyPricing,
-										} )
-									}
-								/>
-							</label>
-						</div>
 						{ error && (
 							<span className="woocommerce-profile-wizard__error">
 								{ error }
@@ -184,6 +165,25 @@ export class ProductTypes extends Component {
 					</div>
 				</Card>
 				<div className="woocommerce-profile-wizard__card-help-text">
+					<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
+						<label htmlFor="woocommerce-product-types__pricing-toggle">
+							<Text variant="body">
+								{ __(
+									'Display monthly prices',
+									'woocommerce-admin'
+								) }
+							</Text>
+							<FormToggle
+								id="woocommerce-product-types__pricing-toggle"
+								checked={ isMonthlyPricing }
+								onChange={ () =>
+									this.setState( {
+										isMonthlyPricing: ! isMonthlyPricing,
+									} )
+								}
+							/>
+						</label>
+					</div>
 					<Text variant="caption">
 						{ __(
 							'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
