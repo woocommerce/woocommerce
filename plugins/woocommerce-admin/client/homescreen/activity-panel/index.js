@@ -4,6 +4,7 @@
 import { useSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
 import { Accordion, AccordionPanel } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -14,9 +15,14 @@ import { getAllPanels } from './panels';
 
 export const ActivityPanel = () => {
 	const panels = useSelect( ( select ) => {
+		const totalOrderCount = getSetting( 'orderCount', 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const countUnreadOrders = getUnreadOrders( select, orderStatuses );
-		return getAllPanels( { countUnreadOrders, orderStatuses } );
+		return getAllPanels( {
+			countUnreadOrders,
+			orderStatuses,
+			totalOrderCount,
+		} );
 	} );
 	return (
 		<Accordion>

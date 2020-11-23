@@ -16,6 +16,7 @@ describe( 'OrdersPanel', () => {
 				isError={ false }
 				isRequesting={ false }
 				orderStatuses={ [] }
+				totalOrderCount={ 10 }
 			/>
 		);
 		expect(

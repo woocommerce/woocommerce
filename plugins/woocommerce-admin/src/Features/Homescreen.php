@@ -44,6 +44,7 @@ class Homescreen {
 		add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
 		add_filter( 'woocommerce_admin_plugins_whitelist', array( $this, 'get_homescreen_allowed_plugins' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
 	}
 
 	/**
@@ -133,5 +134,22 @@ class Homescreen {
 		$options[] = 'woocommerce_default_homepage_layout';
 
 		return $options;
+	}
+
+	/**
+	 * Add data to the shared component settings.
+	 *
+	 * @param array $settings Shared component settings.
+	 */
+	public function component_settings( $settings ) {
+		$allowed_statuses = Loader::get_order_statuses( wc_get_order_statuses() );
+
+		// Remove the Draft Order status (from the Checkout Block).
+		unset( $allowed_statuses['checkout-draft'] );
+
+		$status_counts          = array_map( 'wc_orders_count', array_keys( $allowed_statuses ) );
+		$settings['orderCount'] = array_sum( $status_counts );
+
+		return $settings;
 	}
 }
