@@ -414,6 +414,22 @@ ul.products {
 		.added_to_cart {
 			margin: 0.5rem;
 		}
+
+		.onsale {
+			top: -17px;
+			right: -3px;
+			left: unset;
+			text-transform: unset;
+			border-radius: 50%;
+			width: 60px;
+			height: 60px;
+			border-style: none;
+			line-height: unset;
+			padding-top: 14px !important;
+			padding-left: 9px !important;
+			font-weight: 600;
+			background: #81A36B;
+		}
 	}
 }
 
@@ -2647,5 +2663,3 @@ a.reset_variations {
 		border-bottom: 3px solid var(--global--color-border);
 	}
 }
-
-
