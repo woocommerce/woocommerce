@@ -248,6 +248,7 @@ class CoreMenu {
 		$excluded_items = array(
 			'woocommerce',
 			'wc-reports',
+			'wc-settings',
 		);
 
 		return apply_filters( 'woocommerce_navigation_core_excluded_items', $excluded_items );
