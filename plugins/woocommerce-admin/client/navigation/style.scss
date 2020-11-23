@@ -96,5 +96,17 @@
 				display: none;
 			}
 		}
+
+		.woocommerce-transient-notices {
+			left: $gap;
+		}
+	}
+
+	.woocommerce-transient-notices {
+		left: $navigation-width + $gap;
+
+		@include breakpoint( '<782px' ) {
+			left: $gap;
+		}
 	}
 }

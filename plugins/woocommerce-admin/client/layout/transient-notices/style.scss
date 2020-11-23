@@ -1,7 +1,9 @@
+@import '../../navigation/stylesheets/variables';
+
 .woocommerce-transient-notices {
 	position: fixed;
 	bottom: $gap-small;
-	left: 176px;
+	left: $admin-menu-width + $gap;
 	z-index: 99999;
 
 	@media ( max-width: 960px ) {
