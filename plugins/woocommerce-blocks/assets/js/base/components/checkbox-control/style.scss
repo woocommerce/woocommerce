@@ -63,12 +63,15 @@
 }
 
 .theme-twentytwentyone {
-	.wc-block-components-checkbox__input[type="checkbox"] {
+	.wc-block-components-checkbox__input[type="checkbox"],
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"] {
+		background-color: #fff;
 		border-color: var(--form--border-color);
 		position: relative;
 	}
 
-	.wc-block-components-checkbox__input[type="checkbox"]:checked {
+	.wc-block-components-checkbox__input[type="checkbox"]:checked,
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
 		background-color: #fff;
 		border-color: var(--form--border-color);
 	}
