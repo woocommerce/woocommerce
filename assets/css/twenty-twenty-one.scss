@@ -2608,3 +2608,95 @@ a.reset_variations {
 		}
 	}
 }
+
+.woocommerce {
+	.woocommerce-notices-wrapper {
+		& > * {
+			max-width: 47rem;
+			margin: auto;
+			background: var(--global--color-light-gray);
+			padding: 15px;
+			list-style: none;
+		}
+	}
+
+	.woocommerce-cart-form {
+		.shop_table_responsive {
+			max-width: 46rem;
+			display: block;
+			margin: auto;
+			margin-top: var(--global--spacing-vertical);
+			margin-bottom: var(--global--spacing-vertical);
+
+			th {
+				border: none;
+			}
+
+			#coupon_code {
+				min-width: 9rem;
+			}
+		}
+	}
+
+	.cart-collaterals {
+		margin: auto;
+		margin-top: var(--global--spacing-vertical);
+		margin-bottom: var(--global--spacing-vertical);
+		max-width: 92rem;
+
+		h2 {
+			margin-bottom: var(--global--spacing-vertical);
+		}
+
+		#shipping_method {
+			list-style: none;
+			padding-left: 0;
+		}
+
+		.shipping-calculator-form {
+
+			p {
+				margin-bottom: 0.5rem;
+			}
+
+			.select2-container {
+
+				.select2-selection {
+					height: auto;
+				}
+
+				.select2-selection__rendered {
+					border: var(--form--border-width) solid var(--form--border-color);
+					border-radius: var(--form--border-radius);
+					color: var(--form--color-text);
+					height: var(--global--line-height-body);
+					padding: var(--form--spacing-unit);
+				}
+
+				.select2-selection__arrow {
+					height: 100%;
+				}
+			}
+		}
+
+		.wc-proceed-to-checkout {
+
+			a.button {
+				margin-top: var(--global--spacing-vertical);
+				float: left;
+			}
+		}
+
+		.cross-sells {
+
+			li {
+				list-style: none;
+			}
+
+			li > em,
+			a {
+				display: inline-block;
+			}
+		}
+	}
+}
