@@ -5,12 +5,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick, uniq } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
-import {
-	Slot,
-	Fill,
-	SlotFillProvider,
-	__experimentalUseSlot as useSlot,
-} from '@wordpress/components';
+import { Slot, Fill } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -193,20 +188,13 @@ WooNavigationItem.Slot = ( { name } ) => (
  * the same `context` as those created in the /client folder. This problem is due
  * to WC Admin bundling @wordpress/components instead of enqueuing and using
  * wp.components from the window.
- *
- * @param {Object} param0
- * @param {Array} param0.children - Node children.
  */
-export const NavSlotFillProvider = ( { children } ) => (
-	<SlotFillProvider>{ children }</SlotFillProvider>
-);
+export { SlotFillProvider as NavSlotFillProvider } from '@wordpress/components';
 
 /**
  * Similar to NavSlotFillProvider above, this is a workaround because components
  * exported from this package do not have the same `context` as those created
  * in the /client folder. This problem is due to WC Admin bundling @wordpress/components
  * instead of enqueuing and using wp.components from the window.
- *
- * @param {string} name - slot name.
  */
-export const useNavSlot = ( name ) => useSlot( name );
+export { __experimentalUseSlot as useNavSlot } from '@wordpress/components';

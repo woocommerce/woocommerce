@@ -375,7 +375,7 @@ class Loader {
 		wp_register_script(
 			'wc-navigation',
 			self::get_url( 'navigation/index', 'js' ),
-			array( 'wp-url', 'wp-hooks' ),
+			array( 'wp-url', 'wp-hooks', 'wp-element', 'wp-data', 'moment' ),
 			$js_file_version,
 			true
 		);
@@ -417,7 +417,7 @@ class Loader {
 		wp_register_script(
 			'wc-store-data',
 			self::get_url( 'data/index', 'js' ),
-			array(),
+			array( 'wp-data' ),
 			$js_file_version,
 			true
 		);
