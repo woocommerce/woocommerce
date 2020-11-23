@@ -18,6 +18,7 @@ import Dinero from 'dinero.js';
 const OrderSummaryItem = ( { cartItem } ) => {
 	const {
 		images,
+		catalog_visibility: catalogVisibility = '',
 		low_stock_remaining: lowStockRemaining = null,
 		show_backorder_badge: showBackorderBadge = false,
 		name,
@@ -37,6 +38,8 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		.multiply( quantity )
 		.convertPrecision( currency.minorUnit )
 		.getAmount();
+	const shouldLinkToProduct =
+		catalogVisibility !== 'hidden' && catalogVisibility !== 'search';
 
 	return (
 		<div className="wc-block-components-order-summary-item">
@@ -55,7 +58,11 @@ const OrderSummaryItem = ( { cartItem } ) => {
 			</div>
 			<div className="wc-block-components-order-summary-item__description">
 				<div className="wc-block-components-order-summary-item__header">
-					<ProductName permalink={ permalink } name={ name } />
+					<ProductName
+						hasLink={ shouldLinkToProduct }
+						permalink={ permalink }
+						name={ name }
+					/>
 					<ProductPrice
 						currency={ currency }
 						price={ linePrice }
