@@ -175,6 +175,9 @@ if [ "$(echo "${DO_WP_DEPLOY:-n}" | tr "[:upper:]" "[:lower:]")" = "y" ]; then
 	else
 		hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH "v${VERSION}"
 	fi
+else
+	git tag "v${VERSION}"
+	git push origin "v${VERSION}"
 fi
 
 git checkout $CURRENTBRANCH
