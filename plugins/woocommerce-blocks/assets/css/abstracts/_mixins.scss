@@ -26,11 +26,13 @@ $fontSizes: (
 // Adds animation to placeholder section
 @mixin placeholder() {
 	animation: loading-fade 1.2s ease-in-out infinite;
-	background-color: $gray-200 !important;
-	border-color: $gray-200 !important;
-	color: $gray-200 !important;
+	background-color: $placeholder-color !important;
+	color: $placeholder-color !important;
+	outline: 0 !important;
+	border: 0 !important;
 	box-shadow: none;
 	pointer-events: none;
+	max-width: 100%;
 
 	// Forces direct descendants to keep layout but lose visibility.
 	> * {
