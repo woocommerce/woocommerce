@@ -46,38 +46,56 @@
 		margin-right: 0.5em;
 	}
 }
-.wc-block-grid__product-add-to-cart {
+.wc-block-grid__product-add-to-cart.wp-block-button {
 	word-break: break-word;
 	white-space: normal;
-	a,
-	button {
+	.wp-block-button__link {
 		word-break: break-word;
 		white-space: normal;
 		margin: 0 auto !important;
 		display: inline-flex;
 		justify-content: center;
+		text-align: center;
+		// Set button font size and padding so it inherits from parent.
+		padding: 0.5em 1em;
+		font-size: 1em;
 
 		&.loading {
 			opacity: 0.25;
 		}
 
-		&::after {
-			margin-left: 0.5em;
-			display: inline-block;
-		}
-
 		&.added::after {
 			font-family: WooCommerce; /* stylelint-disable-line */
 			content: "\e017";
+			margin-left: 0.5em;
+			display: inline-block;
+			width: auto;
+			height: auto;
 		}
 
 		&.loading::after {
 			font-family: WooCommerce; /* stylelint-disable-line */
 			content: "\e031";
 			animation: spin 2s linear infinite;
+			margin-left: 0.5em;
+			display: inline-block;
+			width: auto;
+			height: auto;
 		}
 	}
 }
+// Remove button sugar if unlikely to fit.
+.has-5-columns:not(.alignfull),
+.has-6-columns,
+.has-7-columns,
+.has-8-columns,
+.has-9-columns {
+	.wc-block-grid__product-add-to-cart.wp-block-button .wp-block-button__link::after {
+		content: "";
+		margin: 0;
+	}
+}
+
 .wc-block-grid__product-rating {
 	display: block;
 
