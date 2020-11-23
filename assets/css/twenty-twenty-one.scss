@@ -158,21 +158,28 @@ a.button {
 	position: absolute;
 	top: -0.7rem;
 	right: -0.7rem;
-	display: inline-block;
 	background: $highlights-color;
 	color: #fff;
 	font-family: $headings;
 	font-size: 1.2rem;
 	font-weight: 700;
 	letter-spacing: -0.02em;
-	line-height: 4rem;
 	z-index: 1;
 	border-radius: 50%;
-	height: 4.2rem;
-	width: 4.2rem;
 	text-align: center;
-	padding: 0;
+	padding: 0.8rem;
 	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+	&::after {
+		content: '';
+		display: block;
+		height: 0;
+		width: 100%;
+		padding-bottom: 100%;
+	}
 }
 
 .price {
@@ -2189,9 +2196,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			height: 4.2rem;
-			width: 4.2rem;
-			line-height: 4rem;
 		}
 	}
 }
@@ -2434,9 +2438,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1rem;
-			width: 3.4rem;
-			height: 3.4rem;
-			line-height: 3.2rem;
 		}
 	}
 
@@ -2589,9 +2590,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			height: 4.2rem;
-			width: 4.2rem;
-			line-height: 4rem;
 		}
 	}
 
