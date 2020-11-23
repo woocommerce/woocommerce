@@ -1359,8 +1359,9 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 		global $product;
 
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
+		$image_attributes = apply_filters( 'single_product_archive_image_attributes', [] );
 
-		return $product ? $product->get_image( $image_size ) : '';
+		return $product ? $product->get_image( $image_size, $image_attributes ) : '';
 	}
 }
 
