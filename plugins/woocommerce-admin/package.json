@@ -197,7 +197,6 @@
 		"prettier": "npm:wp-prettier@2.0.5",
 		"promptly": "3.1.0",
 		"prop-types": "15.7.2",
-		"puppeteer": "5.3.1",
 		"raw-loader": "4.0.1",
 		"react-docgen": "5.3.0",
 		"readline-sync": "1.4.10",
