@@ -61,3 +61,19 @@
 		display: none;
 	}
 }
+
+.theme-twentytwentyone {
+	.wc-block-components-checkbox__input[type="checkbox"] {
+		border-color: var(--form--border-color);
+		position: relative;
+	}
+
+	.wc-block-components-checkbox__input[type="checkbox"]:checked {
+		background-color: #fff;
+		border-color: var(--form--border-color);
+	}
+
+	.wc-block-components-checkbox__mark {
+		display: none;
+	}
+}

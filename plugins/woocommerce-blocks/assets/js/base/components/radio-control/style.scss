@@ -110,6 +110,10 @@
 	.wc-block-components-radio-control .wc-block-components-radio-control__input {
 		&:checked {
 			border-width: 2px;
+
+			&::before {
+				background-color: var(--form--color-text);
+			}
 		}
 
 		&::after {
