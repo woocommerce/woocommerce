@@ -20,3 +20,10 @@
 		}
 	}
 }
+
+.theme-twentytwentyone {
+	.has-dark-controls .wc-block-components-textarea {
+		background-color: $input-background-dark;
+		color: $input-text-dark;
+	}
+}
