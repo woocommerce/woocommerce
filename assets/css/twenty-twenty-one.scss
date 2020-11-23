@@ -2011,7 +2011,7 @@ a.reset_variations {
 		}
 
 		input[type=checkbox] {
-		    width: 25px !important;
+			width: 25px !important;
 		}
 	}
 
@@ -2120,32 +2120,37 @@ a.reset_variations {
 		min-width: 12vw;
 
 		&.columns-2 {
+
 			li.product {
-				width: calc( 100% / 2 - 16px ) !important;
+				width: calc(100% / 2 - 16px) !important;
 			}
 		}
 
 		&.columns-3 {
+
 			li.product {
-				width: calc( 100% / 3 - 16px ) !important;
+				width: calc(100% / 3 - 16px) !important;
 			}
 		}
 
 		&.columns-4 {
+
 			li.product {
-				width: calc( 100% / 4 - 16px ) !important;
+				width: calc(100% / 4 - 16px) !important;
 			}
 		}
 
 		&.columns-5 {
+
 			li.product {
-				width: calc( 100% / 5 - 16px ) !important;
+				width: calc(100% / 5 - 16px) !important;
 			}
 		}
 
 		&.columns-6 {
+
 			li.product {
-				width: calc( 100% / 6 - 16px ) !important;
+				width: calc(100% / 6 - 16px) !important;
 			}
 		}
 
@@ -2217,6 +2222,7 @@ a.reset_variations {
 
 		ul.products[class*=columns-] {
 			justify-content: center;
+
 			li.product {
 				width: 50%;
 				padding: 0 2vw 3em 0;
@@ -2477,11 +2483,6 @@ a.reset_variations {
      * Home page
      */
 	.home #main {
-
-		.wp-block-cover {
-			max-width: none;
-		}
-
 		[class*="woocommerce columns-"] {
 			word-break: break-word;
 			max-width: var(--responsive--aligndefault-width);
