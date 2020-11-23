@@ -137,7 +137,7 @@ class Marketing {
 				'path'     => 'wc-admin&path=/marketing',
 				'parent'   => 'woocommerce-marketing',
 				'nav_args' => array(
-					'parent' => 'marketing',
+					'parent' => 'woocommerce-marketing',
 					'order'  => 10,
 				),
 			]

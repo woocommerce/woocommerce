@@ -141,7 +141,7 @@ class Analytics {
 				'path'     => '/analytics/overview',
 				'nav_args' => array(
 					'order'  => 10,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -151,7 +151,7 @@ class Analytics {
 				'path'     => '/analytics/products',
 				'nav_args' => array(
 					'order'  => 20,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -161,7 +161,7 @@ class Analytics {
 				'path'     => '/analytics/revenue',
 				'nav_args' => array(
 					'order'  => 30,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -171,7 +171,7 @@ class Analytics {
 				'path'     => '/analytics/orders',
 				'nav_args' => array(
 					'order'  => 40,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -181,7 +181,7 @@ class Analytics {
 				'path'     => '/analytics/variations',
 				'nav_args' => array(
 					'order'  => 50,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -191,7 +191,7 @@ class Analytics {
 				'path'     => '/analytics/categories',
 				'nav_args' => array(
 					'order'  => 60,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -201,7 +201,7 @@ class Analytics {
 				'path'     => '/analytics/coupons',
 				'nav_args' => array(
 					'order'  => 70,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -211,7 +211,7 @@ class Analytics {
 				'path'     => '/analytics/taxes',
 				'nav_args' => array(
 					'order'  => 80,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			array(
@@ -221,7 +221,7 @@ class Analytics {
 				'path'     => '/analytics/downloads',
 				'nav_args' => array(
 					'order'  => 90,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			),
 			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
@@ -231,7 +231,7 @@ class Analytics {
 				'path'     => '/analytics/stock',
 				'nav_args' => array(
 					'order'  => 100,
-					'parent' => 'analytics',
+					'parent' => 'woocommerce-analytics',
 				),
 			) : null,
 			array(
@@ -251,7 +251,7 @@ class Analytics {
 				'path'     => '/analytics/settings',
 				'nav_args' => array(
 					'title'  => __( 'Analytics', 'woocommerce-admin' ),
-					'parent' => 'settings',
+					'parent' => 'woocommerce-settings',
 				),
 			),
 		);

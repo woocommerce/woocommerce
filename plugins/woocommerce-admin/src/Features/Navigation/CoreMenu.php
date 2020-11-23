@@ -54,10 +54,10 @@ class CoreMenu {
 			$order       += 10;
 			$menu_items[] = (
 				array(
-					'parent'     => 'settings',
+					'parent'     => 'woocommerce-settings',
 					'title'      => $setting,
 					'capability' => 'manage_woocommerce',
-					'id'         => 'settings/' . $key,
+					'id'         => 'settings-' . $key,
 					'url'        => 'admin.php?page=wc-settings&tab=' . $key,
 					'order'      => $order,
 				)
@@ -77,35 +77,35 @@ class CoreMenu {
 			array(
 				'title'        => __( 'Orders', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'orders',
+				'id'           => 'woocommerce-orders',
 				'order'        => 10,
 				'is_top_level' => true,
 			),
 			array(
 				'title'        => __( 'Products', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'products',
+				'id'           => 'woocommerce-products',
 				'order'        => 20,
 				'is_top_level' => true,
 			),
 			array(
 				'title'        => __( 'Analytics', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'analytics',
+				'id'           => 'woocommerce-analytics',
 				'order'        => 30,
 				'is_top_level' => true,
 			),
 			array(
 				'title'        => __( 'Marketing', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'marketing',
+				'id'           => 'woocommerce-marketing',
 				'order'        => 40,
 				'is_top_level' => true,
 			),
 			array(
 				'title'        => __( 'Settings', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'settings',
+				'id'           => 'woocommerce-settings',
 				'menuId'       => 'secondary',
 				'order'        => 10,
 				'url'          => 'admin.php?page=wc-settings',
@@ -114,7 +114,7 @@ class CoreMenu {
 			array(
 				'title'        => __( 'Tools', 'woocommerce-admin' ),
 				'capability'   => 'manage_woocommerce',
-				'id'           => 'tools',
+				'id'           => 'woocommerce-tools',
 				'menuId'       => 'secondary',
 				'order'        => 30,
 				'is_top_level' => true,
@@ -128,9 +128,9 @@ class CoreMenu {
 	 * @return array
 	 */
 	public static function get_items() {
-		$order_items   = Menu::get_post_type_items( 'shop_order', array( 'parent' => 'orders' ) );
-		$product_items = Menu::get_post_type_items( 'product', array( 'parent' => 'products' ) );
-		$coupon_items  = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'marketing' ) );
+		$order_items   = Menu::get_post_type_items( 'shop_order', array( 'parent' => 'woocommerce-orders' ) );
+		$product_items = Menu::get_post_type_items( 'product', array( 'parent' => 'woocommerce-products' ) );
+		$coupon_items  = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'woocommerce-marketing' ) );
 		$setting_items = self::get_setting_items();
 		$wca_items     = array();
 		$wca_pages     = \Automattic\WooCommerce\Admin\PageController::get_instance()->get_pages();
@@ -142,7 +142,7 @@ class CoreMenu {
 
 			$wca_items[] = array_merge(
 				array(
-					'id'         => 'wc_admin/' . $page['path'],
+					'id'         => 'wc_admin-' . $page['path'],
 					'url'        => $page['path'],
 					'title'      => $page['title'][0],
 					'capability' => $page['capability'],
@@ -154,7 +154,7 @@ class CoreMenu {
 		$home_item = array();
 		if ( defined( '\Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG' ) ) {
 			$home_item = array(
-				'id'           => 'wc_admin/wc-admin&path=/',
+				'id'           => 'wc_admin-wc-admin&path=/',
 				'title'        => __( 'Home', 'woocommerce-admin' ),
 				'url'          => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
 				'is_top_level' => true,
@@ -174,7 +174,7 @@ class CoreMenu {
 				array(
 					'title'        => __( 'Marketplace', 'woocommerce-admin' ),
 					'capability'   => 'manage_woocommerce',
-					'id'           => 'woocommerce/marketplace',
+					'id'           => 'woocommerce-marketplace',
 					'url'          => 'wc-addons',
 					'menuId'       => 'secondary',
 					'order'        => 20,
@@ -182,43 +182,43 @@ class CoreMenu {
 				),
 				// Tools category.
 				array(
-					'parent'     => 'tools',
+					'parent'     => 'woocommerce-tools',
 					'title'      => __( 'System status', 'woocommerce-admin' ),
 					'capability' => 'manage_woocommerce',
-					'id'         => 'woocommerce/system-status',
+					'id'         => 'tools-system-status',
 					'url'        => 'wc-status',
 					'order'      => 20,
 				),
 				array(
-					'parent'     => 'tools',
+					'parent'     => 'woocommerce-tools',
 					'title'      => __( 'Import / Export', 'woocommerce-admin' ),
 					'capability' => 'import',
-					'id'         => 'woocommerce/import-export',
+					'id'         => 'tools-import-export',
 					'url'        => 'import.php',
 					'migrate'    => false,
 					'order'      => 10,
 				),
 				array(
-					'parent'     => 'tools',
+					'parent'     => 'woocommerce-tools',
 					'title'      => __( 'Utilities', 'woocommerce-admin' ),
 					'capability' => 'manage_woocommerce',
-					'id'         => 'woocommerce/utilities',
+					'id'         => 'tools-utilities',
 					'url'        => 'admin.php?page=wc-status&tab=tools',
 					'order'      => 30,
 				),
 				array(
-					'parent'     => 'tools',
+					'parent'     => 'woocommerce-tools',
 					'title'      => __( 'Logs', 'woocommerce-admin' ),
 					'capability' => 'manage_woocommerce',
-					'id'         => 'logs',
+					'id'         => 'tools-logs',
 					'url'        => 'admin.php?page=wc-status&tab=logs',
 					'order'      => 40,
 				),
 				array(
-					'parent'     => 'tools',
+					'parent'     => 'woocommerce-tools',
 					'title'      => __( 'Scheduled Actions', 'woocommerce-admin' ),
 					'capability' => 'manage_woocommerce',
-					'id'         => 'scheduled_actions',
+					'id'         => 'tools-scheduled_actions',
 					'url'        => 'admin.php?page=wc-status&tab=action-scheduler',
 					'order'      => 50,
 				),

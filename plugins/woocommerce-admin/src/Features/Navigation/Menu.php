@@ -54,7 +54,7 @@ class Menu {
 	 *
 	 * @var string
 	 */
-	const DEFAULT_PARENT = 'settings';
+	const DEFAULT_PARENT = 'woocommerce-settings';
 
 	/**
 	 * Store menu items.
@@ -429,7 +429,7 @@ class Menu {
 
 			self::add_item(
 				array(
-					'parent'     => 'settings',
+					'parent'     => 'woocommerce-settings',
 					'title'      => $menu_item[0],
 					'capability' => $menu_item[1],
 					'id'         => sanitize_title( $menu_item[0] ),
