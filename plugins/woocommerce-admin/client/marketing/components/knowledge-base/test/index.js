@@ -49,11 +49,11 @@ describe( 'Posts and not loading', () => {
 		);
 	} );
 
-	it( 'should not display the spinner', () => {
+	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 0 );
+			container.querySelector( '.is-loading, .is-placeholder' )
+		).toBeFalsy();
 	} );
 
 	it( 'should display default title and description', () => {
@@ -135,20 +135,31 @@ describe( 'No posts and loading', () => {
 		);
 	} );
 
-	it( 'should display spinner', () => {
+	it( 'should display placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 1 );
+			container.querySelector(
+				'.is-loading.woocommerce-marketing-knowledgebase-card__post'
+			)
+		).toBeTruthy();
 	} );
 
-	it( 'should not display posts wrapper', () => {
+	it( 'should not display slider', () => {
+		const { container } = knowledgeBaseWrapper;
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-marketing-slider__slide'
+			)
+		).toHaveLength( 0 );
+	} );
+
+	it( 'should display posts wrapper', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.getElementsByClassName(
 				'woocommerce-marketing-knowledgebase-card__posts'
 			)
-		).toHaveLength( 0 );
+		).toHaveLength( 1 );
 	} );
 
 	it( 'should not display the empty content component', () => {
@@ -190,11 +201,11 @@ describe( 'Error and not loading', () => {
 		);
 	} );
 
-	it( 'should not display the spinner', () => {
+	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 0 );
+			container.querySelector( '.is-loading, .is-placeholder' )
+		).toBeFalsy();
 	} );
 
 	it( 'should not display posts wrapper', () => {
@@ -244,11 +255,11 @@ describe( 'No posts and not loading', () => {
 		);
 	} );
 
-	it( 'should not display the spinner', () => {
+	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 0 );
+			container.querySelector( '.is-loading, .is-placeholder' )
+		).toBeFalsy();
 	} );
 
 	it( 'should not display posts wrapper', () => {

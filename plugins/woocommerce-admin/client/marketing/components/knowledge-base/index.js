@@ -4,7 +4,6 @@
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Spinner } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
@@ -19,6 +18,7 @@ import { Slider } from '../../components';
 import { STORE_KEY } from '../../data/constants';
 import Card from '../card';
 import ReadBlogMessage from './ReadBlogMessage';
+import KnowledgebaseCardPostPlaceholder from './placeholder';
 
 const KnowledgeBase = ( {
 	posts,
@@ -89,7 +89,8 @@ const KnowledgeBase = ( {
 					<div className="woocommerce-marketing-knowledgebase-card__post-text">
 						<h3>{ post.title }</h3>
 						<p className="woocommerce-marketing-knowledgebase-card__post-meta">
-							By { post.author_name }
+							{ __( 'By', 'woocommerce-admin' ) + ' ' }
+							{ post.author_name }
 							{ post.author_avatar && (
 								<img
 									src={ post.author_avatar.replace(
@@ -159,9 +160,23 @@ const KnowledgeBase = ( {
 		);
 	};
 
+	/**
+	 * Renders two `KnowledgebaseCardPostPlaceholder`s wrapped to mimic {@link renderPosts()} output.
+	 */
+	const renderPlaceholder = () => {
+		return (
+			<div className="woocommerce-marketing-knowledgebase-card__posts">
+				<div className="woocommerce-marketing-knowledgebase-card__page">
+					<KnowledgebaseCardPostPlaceholder />
+					<KnowledgebaseCardPostPlaceholder />
+				</div>
+			</div>
+		);
+	};
+
 	const renderCardBody = () => {
 		if ( isLoading ) {
-			return <Spinner />;
+			return renderPlaceholder();
 		}
 
 		if ( error ) {

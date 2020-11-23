@@ -13,12 +13,15 @@
 		.woocommerce-admin-marketing-product-icon {
 			background: $studio-white;
 			color: $studio-white;
-			border: 1px solid var(--wp-admin-theme-color);
 			overflow: hidden;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			transition: background 0.2s ease;
+
+			&:not(.is-placeholder) {
+				border: 1px solid var(--wp-admin-theme-color);
+			}
 
 			svg {
 				width: 24px;
@@ -29,7 +32,7 @@
 		}
 
 		&:hover {
-			.woocommerce-admin-marketing-product-icon {
+			.woocommerce-admin-marketing-product-icon:not(.is-placeholder) {
 				background: var(--wp-admin-theme-color) !important;
 
 				svg {

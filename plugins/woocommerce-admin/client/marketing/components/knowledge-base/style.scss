@@ -17,12 +17,6 @@
 		}
 	}
 
-	.components-spinner {
-		float: none;
-		margin: 45px auto 50px;
-		display: block;
-	}
-
 	&__post {
 		display: flex;
 		flex-wrap: wrap;
@@ -78,6 +72,7 @@
 
 		&-text {
 			margin: 10px 0 0;
+			flex: 1;
 
 			@include breakpoint( '>960px' ) {
 				margin: 0;
@@ -116,5 +111,17 @@
 				margin: 1px 0 0 5px;
 			}
 		}
+
+		&.is-loading {
+			.is-placeholder {
+				@include placeholder();
+			}
+
+			p {
+				width: 40%;
+			}
+		}
+
 	}
+
 }

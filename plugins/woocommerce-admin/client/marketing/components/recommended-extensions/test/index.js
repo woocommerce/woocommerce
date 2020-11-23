@@ -45,11 +45,13 @@ describe( 'Recommendations and not loading', () => {
 		);
 	} );
 
-	it( 'should not display the spinner', () => {
+	it( 'should not display the placeholder', () => {
 		const { container } = recommendedExtensionsWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 0 );
+			container.querySelector(
+				'.is-loading.woocommerce-marketing-recommended-extensions-item'
+			)
+		).toBeNull();
 	} );
 
 	it( 'should display default title and description', () => {
@@ -93,11 +95,13 @@ describe( 'Recommendations and loading', () => {
 		);
 	} );
 
-	it( 'should display spinner', () => {
+	it( 'should display placeholder', () => {
 		const { container } = recommendedExtensionsWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 1 );
+			container.querySelector(
+				'.is-loading.woocommerce-marketing-recommended-extensions-item'
+			)
+		).toBeTruthy();
 	} );
 
 	it( 'should not display recommendations', () => {
@@ -129,11 +133,13 @@ describe( 'No Recommendations and not loading', () => {
 		);
 	} );
 
-	it( 'should not display spinner', () => {
+	it( 'should not display placeholder', () => {
 		const { container } = recommendedExtensionsWrapper;
 		expect(
-			container.getElementsByClassName( 'components-spinner' )
-		).toHaveLength( 0 );
+			container.querySelector(
+				'.is-loading.woocommerce-marketing-recommended-extensions-item'
+			)
+		).toBeNull();
 	} );
 
 	it( 'should not display recommendations', () => {

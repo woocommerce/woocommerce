@@ -3,36 +3,36 @@
 		padding: $gap-small;
 	}
 
-	.components-spinner {
-		float: none;
-		margin: 45px auto 50px;
-		display: block;
-	}
 
 	&__items {
 		display: flex;
 		flex-wrap: wrap;
 
 		@include breakpoint( '>600px' ) {
-			> a {
+			> a,
+			> .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 50%;
 			}
 		}
 
 		@include breakpoint( '>960px' ) {
-			> a {
+			> a,
+			> .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 33.3%;
 			}
 
-			&--count-1 > a {
+			&--count-1 > a,
+			&--count-1 > .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 100%;
 			}
 
-			&--count-2 > a {
+			&--count-2 > a,
+			&--count-2 > .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 50%;
 			}
 
-			&--count-4 > a {
+			&--count-4 > a,
+			&--count-4 > .is-loading.woocommerce-marketing-recommended-extensions-item {
 				width: 25%;
 			}
 		}
@@ -76,4 +76,22 @@
 		top: 12px;
 		left: 12px;
 	}
+}
+
+.woocommerce-marketing-recommended-extensions-item.is-loading {
+
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		min-height: 16px;
+	}
+
+	h4 {
+		width: 80%;
+	}
+
+	p :last-child {
+		width: 60%;
+	}
+
 }

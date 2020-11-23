@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
-import { Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
@@ -13,6 +12,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import RecommendedExtensionsItem from './item';
+import RecommendedExtensionsPlaceholder from './placeholder';
 import { STORE_KEY } from '../../data/constants';
 import Card from '../card';
 
@@ -30,6 +30,7 @@ const RecommendedExtensions = ( {
 	const categoryClass = category
 		? `woocommerce-marketing-recommended-extensions-card__category-${ category }`
 		: '';
+	const placholdersCount = 5;
 
 	return (
 		<Card
@@ -41,7 +42,16 @@ const RecommendedExtensions = ( {
 			) }
 		>
 			{ isLoading ? (
-				<Spinner />
+				<div
+					className={ classnames(
+						'woocommerce-marketing-recommended-extensions-card__items',
+						`woocommerce-marketing-recommended-extensions-card__items--count-${ placholdersCount }`
+					) }
+				>
+					{ [ ...Array( placholdersCount ).keys() ].map( ( key ) => (
+						<RecommendedExtensionsPlaceholder key={ key } />
+					) ) }
+				</div>
 			) : (
 				<div
 					className={ classnames(
@@ -94,6 +104,7 @@ RecommendedExtensions.defaultProps = {
 };
 
 export { RecommendedExtensions };
+export { default as RecommendedExtensionsPlaceholder } from './placeholder';
 
 export default compose(
 	withSelect( ( select, props ) => {
