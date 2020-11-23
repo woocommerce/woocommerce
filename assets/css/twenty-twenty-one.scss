@@ -8,7 +8,7 @@ $headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-
 $body: nonbreakingspaceoverride, "Hoefler Text", garamond, "Times New Roman", serif;
 
 $body-color: currentColor;
-$highlights-color: #cd2653;
+$highlights-color: #88a171;
 
 /**
  * Fonts
@@ -156,8 +156,8 @@ a.button {
 
 .onsale {
 	position: absolute;
-	top: 0;
-	left: 0;
+	top: -0.7rem;
+	right: -0.7rem;
 	display: inline-block;
 	background: $highlights-color;
 	color: #fff;
@@ -165,10 +165,14 @@ a.button {
 	font-size: 1.2rem;
 	font-weight: 700;
 	letter-spacing: -0.02em;
-	line-height: 1.2;
-	padding: 1rem;
-	text-transform: uppercase;
+	line-height: 4rem;
 	z-index: 1;
+	border-radius: 50%;
+	height: 4.2rem;
+	width: 4.2rem;
+	text-align: center;
+	padding: 0;
+	margin: 0;
 }
 
 .price {
@@ -2157,7 +2161,7 @@ a.reset_variations {
 		ul.products[class*=columns-] {
 
 			li.product {
-				width: 100%;
+				width: auto;
 			}
 		}
 	}
@@ -2185,7 +2189,9 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			padding: 1rem;
+			height: 4.2rem;
+			width: 4.2rem;
+			line-height: 4rem;
 		}
 	}
 }
@@ -2428,7 +2434,9 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1rem;
-			padding: 0.8rem;
+			width: 3.4rem;
+			height: 3.4rem;
+			line-height: 3.2rem;
 		}
 	}
 
@@ -2581,7 +2589,9 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			padding: 1rem;
+			height: 4.2rem;
+			width: 4.2rem;
+			line-height: 4rem;
 		}
 	}
 
