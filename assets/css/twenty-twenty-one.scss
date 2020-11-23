@@ -2124,11 +2124,16 @@ a.reset_variations {
 
 			a {
 				text-align: center;
+				text-decoration: none;
 
 				h2.woocommerce-loop-category__title {
 					font-family: $headings;
-					font-size: 3rem;
+					font-size: 1.5rem;
 				}
+			}
+
+			mark {
+				background-color: initial;
 			}
 		}
 	}
@@ -2141,11 +2146,11 @@ a.reset_variations {
 		.woocommerce-ordering {
 			float: left;
 			clear: both;
-			margin-top: 0px;
+			margin-top: 0;
 		}
 
 		.woocommerce-result-count {
-			margin-top: 0px;
+			margin-top: 0;
 			margin-bottom: 20px;
 		}
 	}
@@ -2611,7 +2616,7 @@ a.reset_variations {
 
 	.woocommerce-products-header {
 		border-bottom: none !important;
-		padding-bottom: 0px;
+		padding-bottom: 0;
 		margin-bottom: 0 !important;
 	}
 }
