@@ -10,14 +10,12 @@ import { decodeEntities } from '@wordpress/html-entities';
 import './style.scss';
 
 const ProductName = ( { name, permalink, disabled = false } ) => {
-	return (
-		// we use tabIndex -1 to prevent the link from being focused, pointer-events
-		// disabled click events, so we get an almost disabled link.
-		<a
-			className="wc-block-components-product-name"
-			href={ permalink }
-			tabIndex={ disabled ? -1 : 0 }
-		>
+	return disabled ? (
+		<span className="wc-block-components-product-name">
+			{ decodeEntities( name ) }
+		</span>
+	) : (
+		<a className="wc-block-components-product-name" href={ permalink }>
 			{ decodeEntities( name ) }
 		</a>
 	);

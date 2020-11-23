@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductName should not render a link if disabled is true 1`] = `
+<span
+  className="wc-block-components-product-name"
+>
+  Test product
+</span>
+`;
+
+exports[`ProductName should render a link if disabled is false 1`] = `
+<a
+  className="wc-block-components-product-name"
+>
+  Test product
+</a>
+`;
+
+exports[`ProductName should render a link if disabled is not defined 1`] = `
+<a
+  className="wc-block-components-product-name"
+>
+  Test product
+</a>
+`;
