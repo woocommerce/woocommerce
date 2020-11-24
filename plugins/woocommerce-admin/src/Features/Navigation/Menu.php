@@ -355,12 +355,14 @@ class Menu {
 			return;
 		}
 
+		$parent = isset( $menu_args['parent'] ) ? $menu_args['parent'] . '-' : '';
+
 		return array(
 			'default' => array_merge(
 				array(
 					'title'      => esc_attr( $post_type_object->labels->menu_name ),
 					'capability' => $post_type_object->cap->edit_posts,
-					'id'         => $post_type,
+					'id'         => $parent . $post_type,
 					'url'        => "edit.php?post_type={$post_type}",
 				),
 				$menu_args
@@ -369,7 +371,7 @@ class Menu {
 				array(
 					'title'      => esc_attr( $post_type_object->labels->all_items ),
 					'capability' => $post_type_object->cap->edit_posts,
-					'id'         => "{$post_type}-all-items",
+					'id'         => "{$parent}{$post_type}-all-items",
 					'url'        => "edit.php?post_type={$post_type}",
 					'order'      => 10,
 				),
@@ -379,7 +381,7 @@ class Menu {
 				array(
 					'title'      => esc_attr( $post_type_object->labels->add_new ),
 					'capability' => $post_type_object->cap->create_posts,
-					'id'         => "{$post_type}-add-new",
+					'id'         => "{$parent}{$post_type}-add-new",
 					'url'        => "post-new.php?post_type={$post_type}",
 					'order'      => 20,
 				),
