@@ -1676,6 +1676,10 @@ a.reset_variations {
 
 .woocommerce-checkout-review-order-table {
 
+	ul li {
+		list-style-type: none;
+	}
+
 	input[type="radio"].shipping_method {
 		display: none;
 
