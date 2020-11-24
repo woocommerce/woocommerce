@@ -2516,6 +2516,37 @@ a.reset_variations {
 	}
 }
 
+.woocommerce-account {
+
+	.entry-header {
+
+		padding-bottom: 20px !important;
+	}
+
+	.woocommerce-MyAccount-content {
+
+		p:first-of-type {
+			margin-bottom: 2rem;
+		}
+	}
+
+	.woocommerce-MyAccount-navigation-link {
+
+		margin-bottom: 20px !important;
+
+		a {
+			color: #444 !important;
+			font-weight: normal !important;
+			font-size: 1.8rem;
+
+			&:hover {
+				color: black !important;
+				text-decoration: underline solid black 1px !important;
+			}
+		}
+	}
+}
+
 .alignwide .woocommerce {
 
 	& > * {
