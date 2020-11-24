@@ -473,4 +473,70 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return $text;
 	}
+
+    /**
+     * Displays the Paypal fee.
+     *
+     * @since 4.1.0
+     *
+     * @param int $order_id the ID of the order
+     */
+    public function display_order_fee($order_id)
+    {
+        $order = wc_get_order($order_id);
+
+        $fee = $order->get_meta('PayPal Transaction Fee', true);
+        $currency = $order->get_currency();
+
+        if (!$fee || !$currency) {
+            return;
+        } ?>
+
+		<tr>
+			<td class="label paypal-fee">
+				<?php echo wc_help_tip(__('This represents the fee Paypal collects for the transaction.', 'woocommerce')); // wpcs: xss ok.?>
+				<?php esc_html_e('Paypal Fee:', 'woocommerce'); ?>
+			</td>
+			<td width="1%"></td>
+			<td class="total">
+				-&nbsp;<?php echo wc_price($fee, ['currency' => $currency]); // wpcs: xss ok.?>
+			</td>
+		</tr>
+
+		<?php
+    }
+
+    /**
+     * Displays the net total of the transaction without the charges of Paypal.
+     *
+     * @since 4.1.0
+     *
+     * @param int $order_id the ID of the order
+     */
+    public function display_order_payout($order_id)
+    {
+        $order = wc_get_order($order_id);
+
+        $fee = $order->get_meta('PayPal Transaction Fee', true);
+        $currency = $order->get_currency();
+
+        $net = ($order->get_total() - (float) $fee);
+
+        if (!$fee || !$currency) {
+            return;
+        } ?>
+
+		<tr>
+			<td class="label paypal-payout">
+				<?php echo wc_help_tip(__('This represents the net total that will be credited to your Paypal account.', 'woocommerce')); // wpcs: xss ok.?>
+				<?php esc_html_e('Paypal Payout:', 'woocommerce'); ?>
+			</td>
+			<td width="1%"></td>
+			<td class="total">
+				<?php echo wc_price($net, ['currency' => $currency]); // wpcs: xss ok.?>
+			</td>
+		</tr>
+
+		<?php
+    }
 }
