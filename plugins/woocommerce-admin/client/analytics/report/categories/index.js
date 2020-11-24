@@ -4,6 +4,7 @@
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,8 +16,9 @@ import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import ProductsReportTable from '../products/table';
 import ReportFilters from '../../components/report-filters';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
-export default class CategoriesReport extends Component {
+class CategoriesReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
 		const isCompareView =
@@ -42,7 +44,12 @@ export default class CategoriesReport extends Component {
 	}
 
 	render() {
-		const { isRequesting, query, path } = this.props;
+		const {
+			isRequesting,
+			query,
+			path,
+			addCesSurveyForAnalytics,
+		} = this.props;
 		const { mode, itemsLabel, isSingleCategoryView } = this.getChartMeta();
 
 		const chartQuery = {
@@ -54,6 +61,10 @@ export default class CategoriesReport extends Component {
 				? 'product'
 				: 'category';
 		}
+
+		filters[ 0 ].filters.find(
+			( item ) => item.value === 'compare-categories'
+		).settings.onClick = addCesSurveyForAnalytics;
 
 		return (
 			<Fragment>
@@ -122,3 +133,8 @@ CategoriesReport.propTypes = {
 	query: PropTypes.object.isRequired,
 	path: PropTypes.string.isRequired,
 };
+
+export default withDispatch( ( dispatch ) => {
+	const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+	return { addCesSurveyForAnalytics };
+} )( CategoriesReport );

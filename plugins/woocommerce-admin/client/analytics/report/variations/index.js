@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table';
 import ReportFilters from '../../components/report-filters';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const getChartMeta = ( { query } ) => {
 	const isCompareView =
@@ -31,7 +33,13 @@ const getChartMeta = ( { query } ) => {
 
 const VariationsReport = ( props ) => {
 	const { itemsLabel, mode } = getChartMeta( props );
-	const { path, query, isError, isRequesting } = props;
+	const {
+		path,
+		query,
+		isError,
+		isRequesting,
+		addCesSurveyForAnalytics,
+	} = props;
 
 	if ( isError ) {
 		return <ReportError isError />;
@@ -44,6 +52,10 @@ const VariationsReport = ( props ) => {
 	if ( mode === 'item-comparison' ) {
 		chartQuery.segmentby = 'variation';
 	}
+
+	filters[ 0 ].filters.find(
+		( item ) => item.value === 'compare-variations'
+	).settings.onClick = addCesSurveyForAnalytics;
 
 	return (
 		<Fragment>
@@ -91,4 +103,7 @@ VariationsReport.propTypes = {
 	query: PropTypes.object.isRequired,
 };
 
-export default VariationsReport;
+export default withDispatch( ( dispatch ) => {
+	const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+	return { addCesSurveyForAnalytics };
+} )( VariationsReport );

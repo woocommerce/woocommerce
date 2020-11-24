@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import CustomerEffortScoreTracks from './customer-effort-score-tracks';
+import { STORE_KEY, QUEUE_OPTION_NAME } from './data/constants';
+import './data';
 
 /**
  * Maps the queue of CES tracks surveys to CustomerEffortScoreTracks
@@ -73,11 +75,9 @@ CustomerEffortScoreTracksContainer.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
-		const queue = getOption( 'woocommerce_ces_tracks_queue' ) || [];
-		const resolving = isResolving( 'getOption', [
-			'woocommerce_ces_tracks_queue',
-		] );
+		const { getCesSurveyQueue, isResolving } = select( STORE_KEY );
+		const queue = getCesSurveyQueue();
+		const resolving = isResolving( 'getOption', [ QUEUE_OPTION_NAME ] );
 
 		return { queue, resolving };
 	} ),

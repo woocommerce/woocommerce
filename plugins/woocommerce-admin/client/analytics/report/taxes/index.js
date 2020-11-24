@@ -4,6 +4,7 @@
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,8 +15,9 @@ import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import TaxesReportTable from './table';
 import ReportFilters from '../../components/report-filters';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
-export default class TaxesReport extends Component {
+class TaxesReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
 		const isCompareTaxView = query.filter === 'compare-taxes';
@@ -29,8 +31,17 @@ export default class TaxesReport extends Component {
 	}
 
 	render() {
-		const { isRequesting, query, path } = this.props;
+		const {
+			isRequesting,
+			query,
+			path,
+			addCesSurveyForAnalytics,
+		} = this.props;
 		const { mode, itemsLabel } = this.getChartMeta();
+
+		filters[ 0 ].filters.find(
+			( item ) => item.value === 'compare-taxes'
+		).settings.onClick = addCesSurveyForAnalytics;
 
 		const chartQuery = {
 			...query,
@@ -82,3 +93,8 @@ export default class TaxesReport extends Component {
 TaxesReport.propTypes = {
 	query: PropTypes.object.isRequired,
 };
+
+export default withDispatch( ( dispatch ) => {
+	const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+	return { addCesSurveyForAnalytics };
+} )( TaxesReport );

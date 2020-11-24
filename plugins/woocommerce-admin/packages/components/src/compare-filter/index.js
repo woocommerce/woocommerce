@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { isEqual } from 'lodash';
+import { isEqual, isFunction } from 'lodash';
 import PropTypes from 'prop-types';
 
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
@@ -27,11 +27,10 @@ export class CompareFilter extends Component {
 		this.state = {
 			selected: [],
 		};
-
 		this.clearQuery = this.clearQuery.bind( this );
 		this.updateQuery = this.updateQuery.bind( this );
 		this.updateLabels = this.updateLabels.bind( this );
-
+		this.onButtonClicked = this.onButtonClicked.bind( this );
 		if ( query[ param ] ) {
 			getLabels( query[ param ], query ).then( this.updateLabels );
 		}
@@ -79,6 +78,13 @@ export class CompareFilter extends Component {
 		updateQueryString( { [ param ]: idList.join( ',' ) }, path, query );
 	}
 
+	onButtonClicked( e ) {
+		this.updateQuery( e );
+		if ( isFunction( this.props.onClick ) ) {
+			this.props.onClick( e );
+		}
+	}
+
 	render() {
 		const { labels, type } = this.props;
 		const { selected } = this.state;
@@ -101,7 +107,7 @@ export class CompareFilter extends Component {
 					<CompareButton
 						count={ selected.length }
 						helpText={ labels.helpText }
-						onClick={ this.updateQuery }
+						onClick={ this.onButtonClicked }
 					>
 						{ labels.update }
 					</CompareButton>

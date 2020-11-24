@@ -35,7 +35,7 @@ function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
 	label,
-	onSubmitLabel,
+	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce-admin' ),
 	cesShownForActions,
 	allowTracking,
 	resolving,
@@ -144,7 +144,7 @@ CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The label for the snackbar that appears upon survey submission.
 	 */
-	onSubmitLabel: PropTypes.string.isRequired,
+	onSubmitLabel: PropTypes.string,
 	/**
 	 * The array of actions that the CES modal has been shown for.
 	 */

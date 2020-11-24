@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
-import { withSelect } from '@wordpress/data';
+import { withSelect, withDispatch } from '@wordpress/data';
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { LOCALE } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -19,36 +20,52 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { CurrencyContext } from '../../../lib/currency-context';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 class ReportFilters extends Component {
 	constructor() {
 		super();
-		this.trackDateSelect = this.trackDateSelect.bind( this );
-		this.trackFilterSelect = this.trackFilterSelect.bind( this );
-		this.trackAdvancedFilterAction = this.trackAdvancedFilterAction.bind(
-			this
-		);
+		this.onDateSelect = this.onDateSelect.bind( this );
+		this.onFilterSelect = this.onFilterSelect.bind( this );
+		this.onAdvancedFilterAction = this.onAdvancedFilterAction.bind( this );
 	}
 
-	trackDateSelect( data ) {
-		const { report } = this.props;
+	onDateSelect( data ) {
+		const { report, addCesSurveyForAnalytics } = this.props;
+		addCesSurveyForAnalytics();
 		recordEvent( 'datepicker_update', {
 			report,
 			...omitBy( data, isUndefined ),
 		} );
 	}
 
-	trackFilterSelect( data ) {
-		const { report } = this.props;
+	onFilterSelect( data ) {
+		const { report, addCesSurveyForAnalytics } = this.props;
+
+		// This event gets triggered in the following cases.
+		// 1. Select "Single Product" and choose a product.
+		// 2. Select "Comparison" or any other filter types.
+		// The comparsion and other filter types require a user to click
+		// a button to execute a query, so this is not a good place to
+		// trigger a CES survey for those.
+		const triggerCesFor = [
+			'single_product',
+			'single_category',
+			'single_coupon',
+			'single_variation',
+		];
+		const filterName = data.filter || data[ 'filter-variations' ];
+		if ( triggerCesFor.includes( filterName ) ) {
+			addCesSurveyForAnalytics();
+		}
 		recordEvent( 'analytics_filter', {
 			report,
 			filter: data.filter || 'all',
 		} );
 	}
 
-	trackAdvancedFilterAction( action, data ) {
-		const { report } = this.props;
-
+	onAdvancedFilterAction( action, data ) {
+		const { report, addCesSurveyForAnalytics } = this.props;
 		switch ( action ) {
 			case 'add':
 				recordEvent( 'analytics_filters_add', {
@@ -70,6 +87,7 @@ class ReportFilters extends Component {
 					},
 					{}
 				);
+				addCesSurveyForAnalytics();
 				recordEvent( 'analytics_filters_filter', {
 					report,
 					...snakeCaseData,
@@ -123,9 +141,9 @@ class ReportFilters extends Component {
 				filters={ filters }
 				advancedFilters={ advancedFilters }
 				showDatePicker={ showDatePicker }
-				onDateSelect={ this.trackDateSelect }
-				onFilterSelect={ this.trackFilterSelect }
-				onAdvancedFilterAction={ this.trackAdvancedFilterAction }
+				onDateSelect={ this.onDateSelect }
+				onFilterSelect={ this.onFilterSelect }
+				onAdvancedFilterAction={ this.onAdvancedFilterAction }
 				dateQuery={ dateQuery }
 				isoDateFormat={ isoDateFormat }
 			/>
@@ -135,12 +153,18 @@ class ReportFilters extends Component {
 
 ReportFilters.contextType = CurrencyContext;
 
-export default withSelect( ( select ) => {
-	const { woocommerce_default_date_range: defaultDateRange } = select(
-		SETTINGS_STORE_NAME
-	).getSetting( 'wc_admin', 'wcAdminSettings' );
-	return { defaultDateRange };
-} )( ReportFilters );
+export default compose(
+	withSelect( ( select ) => {
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		return { defaultDateRange };
+	} ),
+	withDispatch( ( dispatch ) => {
+		const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+		return { addCesSurveyForAnalytics };
+	} )
+)( ReportFilters );
 
 ReportFilters.propTypes = {
 	/**
