@@ -1326,8 +1326,8 @@ a.reset_variations {
 		}
 
 		button[name="update_cart"] {
-			background: #fff;
-			color: #000;
+			background: var(--global--color-white);
+			color: var(--global--color-black);
 		}
 	}
 
@@ -1430,7 +1430,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: var(--form--border-width) solid var(--form--border-color);
-				background: #fff;
+				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -1894,7 +1894,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: var(--form--border-width) solid var(--form--border-color);
-				background: #fff;
+				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -2060,7 +2060,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: var(--form--border-width) solid var(--form--border-color);
-				background: #fff;
+				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
