@@ -765,21 +765,23 @@ a.reset_variations {
 		margin: 0 0 1.5rem;
 		padding: 0;
 		font-family: $headings;
+		border-bottom: var(--button--border-width) solid var(--button--color-background);
 
 		li {
-			margin: 0.5rem 4rem 2rem 0;
-
+			display: inline-flex !important;
 			a {
 				color: $body-color;
 				text-decoration: none;
 				font-weight: 700;
+				padding: var(--button--padding-vertical) var(--button--padding-horizontal);
 			}
 
 			&.active {
 
 				a {
-					color: $highlights-color;
-					box-shadow: 0 2px 0 $highlights-color;
+					color: var(--button--color-text);
+					background-color: var(--button--color-background);
+					border: var(--button--border-width) solid var(--button--color-background);
 				}
 			}
 		}
