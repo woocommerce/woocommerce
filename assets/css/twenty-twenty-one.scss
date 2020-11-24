@@ -1582,19 +1582,7 @@ a.reset_variations {
 
 	button[name="apply_coupon"] {
 		padding: 0.5rem;
-		border: var(--button--border-width) solid var(--button--color-text);
-		background: var(--button--color-text);
-		color: var(--button--color-background);
-
-		&:active {
-			color: var(--button--color-background-active);
-			background: transparent;
-		}
-
-		&:hover {
-			color: var(--button--color-background-active);
-			background: transparent;
-		}
+	
 	}
 }
 
