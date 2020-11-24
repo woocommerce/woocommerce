@@ -425,7 +425,6 @@ class Tax extends Component {
 				</Button>
 				<Button
 					disabled={ isPending }
-					isBusy={ isPending }
 					onClick={ () => {
 						recordEvent( 'tasklist_tax_setup_automated_proceed', {
 							setup_automatically: false,
@@ -440,7 +439,6 @@ class Tax extends Component {
 				</Button>
 				<Button
 					disabled={ isPending }
-					isBusy={ isPending }
 					onClick={ () => this.doNotChargeSalesTax() }
 				>
 					{ __(
