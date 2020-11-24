@@ -173,12 +173,10 @@ a.button {
 	align-items: center;
 	justify-content: center;
 
-	&::after {
+	&::before {
 		content: '';
-		display: block;
-		height: 0;
-		width: 100%;
-		padding-bottom: 100%;
+		float: left;
+		padding-top: 100%;
 	}
 }
 
@@ -1311,7 +1309,7 @@ a.reset_variations {
 
 		}
 	}
-  
+
 	.select2-container .select2-dropdown {
 		border: var(--form--border-width) solid var(--form--border-color);
 		border-radius: var(--form--border-radius);
