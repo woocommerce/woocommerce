@@ -214,7 +214,6 @@ class ProfileWizard extends Component {
 			updateNote,
 			updateProfileItems,
 			connectToJetpack,
-			clearTaskCache,
 		} = this.props;
 		recordEvent( 'storeprofiler_complete' );
 
@@ -232,8 +231,6 @@ class ProfileWizard extends Component {
 		}
 
 		updateProfileItems( { completed: true } ).then( () => {
-			clearTaskCache();
-
 			const homescreenUrl = new URL(
 				getNewPath( {}, '/', {} ),
 				window.location.href
@@ -338,15 +335,8 @@ export default compose(
 		} = dispatch( PLUGINS_STORE_NAME );
 		const { updateNote } = dispatch( NOTES_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-		const {
-			updateProfileItems,
-			invalidateResolutionForStoreSelector,
-		} = dispatch( ONBOARDING_STORE_NAME );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
-
-		const clearTaskCache = () => {
-			invalidateResolutionForStoreSelector( 'getTasksStatus' );
-		};
 
 		const connectToJetpack = ( failureRedirect ) => {
 			connectToJetpackWithFailureRedirect(
@@ -362,7 +352,6 @@ export default compose(
 			updateNote,
 			updateOptions,
 			updateProfileItems,
-			clearTaskCache,
 		};
 	} ),
 	window.wcSettings.plugins
