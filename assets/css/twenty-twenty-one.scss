@@ -200,9 +200,9 @@ a.button {
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
-	margin-bottom: 5rem;
+	margin-bottom: 2rem;
 	margin-left: 0;
-	background: #eee;
+	background: var(--global--color-background);
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
@@ -1429,8 +1429,7 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #6d6d6d;
+				border: var(--form--border-width) solid var(--form--border-color);
 				background: #fff;
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -1442,7 +1441,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: var(--global--color-background);
 			}
 		}
 	}
@@ -1460,11 +1459,9 @@ a.reset_variations {
 #shipping_method {
 	list-style: none;
 	margin: 0;
-	padding: 0 0 1.5rem;
 	font-family: $headings;
 
 	li {
-		margin-bottom: 0.5rem;
 		margin-left: 0;
 
 		input {
@@ -1475,6 +1472,7 @@ a.reset_variations {
 
 		label {
 			line-height: 2.5rem;
+			margin-bottom: 0;
 		}
 	}
 }
@@ -1520,20 +1518,28 @@ a.reset_variations {
 		height: 48px;
 	}
 
+	.select2-container .select2-dropdown {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+		border-top: none;
+	}
+
 	.select2-container .select2-selection--single .select2-selection__rendered {
 		line-height: 48px;
-		font-family: $headings;
-		font-size: 1.6rem;
-		color: #000;
-		padding-left: 1.8rem;
+	}
+
+	.select2-container .select2-selection {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
 	}
 
 	.select2-container--default .select2-selection--single .select2-selection__arrow {
 		height: 46px;
 	}
 
-	.select2-container--focus .select2-selection {
-		border-color: #000;
+	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+		outline-offset: 2px;
+		outline: 2px dotted var(--form--border-color);
 	}
 
 	.select2-results__option {
@@ -1543,7 +1549,7 @@ a.reset_variations {
 	.select2-container {
 
 		.select2-search__field {
-			height: 4rem;
+			height: 3rem;
 			background: #eee;
 		}
 	}
@@ -1559,6 +1565,39 @@ a.reset_variations {
 /**
  * Checkout
  */
+.woocommerce-form-coupon-toggle .woocommerce-info {
+	display: block;
+	margin-bottom: 2rem;
+	padding: 1rem;
+}
+.woocommerce-form-coupon {
+	background: #eee;
+	padding: 1rem;
+	font-size: 0.88889em;
+	color: var(--form--color-text);
+
+	#coupon_code {
+		border: var(--form--border-width) solid var(--form--border-color);
+	}
+
+	button[name="apply_coupon"] {
+		padding: 0.5rem;
+		border: var(--button--border-width) solid var(--button--color-text);
+		background: var(--button--color-text);
+		color: var(--button--color-background);
+
+		&:active {
+			color: var(--button--color-background-active);
+			background: transparent;
+		}
+
+		&:hover {
+			color: var(--button--color-background-active);
+			background: transparent;
+		}
+	}
+}
+
 #ship-to-different-address {
 	font-size: 1em;
 	display: inline-block;
@@ -1579,8 +1618,8 @@ a.reset_variations {
 				display: block;
 				height: 16px;
 				width: 30px;
-				border: 2px solid #bbb;
-				background: #bbb;
+				border: 2px solid var(--form--border-color);
+				background: var(--global--color-primary);
 				border-radius: 13rem;
 				box-sizing: content-box;
 				transition: all ease-in-out 0.3s;
@@ -1594,7 +1633,7 @@ a.reset_variations {
 				display: block;
 				width: 14px;
 				height: 14px;
-				background: #fff;
+				background: var(--global--color-background);
 				position: absolute;
 				top: 3px;
 				right: 17px;
@@ -1609,11 +1648,11 @@ a.reset_variations {
 
 		input[type="checkbox"]:checked + span::after {
 			right: 3px;
+			background: var(--global--color-primary);
 		}
 
 		input[type="checkbox"]:checked + span::before {
-			border-color: #000;
-			background: #000;
+			background: var(--global--color-background);
 		}
 	}
 }
@@ -1681,7 +1720,7 @@ a.reset_variations {
 	.woocommerce-billing-fields {
 
 		h3 {
-			margin-top: 4rem;
+			margin: 2rem 0;
 		}
 	}
 
@@ -1708,10 +1747,6 @@ a.reset_variations {
 				width: 100%;
 			}
 
-			input {
-				border: 1px solid #ddd;
-			}
-
 			label {
 				font-family: $headings;
 				letter-spacing: normal;
@@ -1723,7 +1758,7 @@ a.reset_variations {
 		}
 
 		#order_review_heading {
-			margin-top: 4rem;
+			margin-top: 2rem;
 		}
 
 		#order_review_heading,
@@ -1734,7 +1769,7 @@ a.reset_variations {
 			clear: right;
 
 			.woocommerce-checkout-review-order-table {
-				margin-top: 2.85rem;
+				margin-top: 2rem;
 				border: 0;
 
 				th,
@@ -1746,19 +1781,13 @@ a.reset_variations {
 					display: none;
 				}
 
-				tbody::after {
-					content: "";
-					display: block;
-					height: 2rem;
-				}
-
 				.woocommerce-Price-amount {
 					font-weight: bold;
 				}
 
 				.cart-subtotal,
 				.order-total {
-					border-top: 1px solid #ddd;
+					border-top: 2px solid var(--form--border-color);
 				}
 			}
 		}
@@ -1815,18 +1844,6 @@ a.reset_variations {
 		}
 	}
 
-	input#coupon_code {
-		padding-top: 1.55rem;
-		padding-bottom: 1.59rem;
-		border: 1px solid #ddd;
-	}
-
-	button[name="apply_coupon"] {
-		padding-top: 1.55rem;
-		padding-bottom: 1.8rem;
-		font-size: 1.6rem;
-	}
-
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;
@@ -1842,18 +1859,26 @@ a.reset_variations {
 
 	.select2-container .select2-selection--single .select2-selection__rendered {
 		line-height: 48px;
-		font-family: $headings;
-		font-size: 1.6rem;
-		color: #000;
-		padding-left: 1.8rem;
+	}
+
+	.select2-container .select2-selection {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+	}
+
+	.select2-container .select2-dropdown {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+		border-top: none;
 	}
 
 	.select2-container--default .select2-selection--single .select2-selection__arrow {
 		height: 46px;
 	}
 
-	.select2-container--focus .select2-selection {
-		border-color: #000;
+	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+		outline-offset: 2px;
+		outline: 2px dotted var(--form--border-color);
 	}
 
 	.select2-results__option {
@@ -1863,7 +1888,7 @@ a.reset_variations {
 	.select2-container {
 
 		.select2-search__field {
-			height: 4rem;
+			height: 3rem;
 			background: #eee;
 		}
 	}
@@ -1881,8 +1906,7 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #6d6d6d;
+				border: var(--form--border-width) solid var(--form--border-color);
 				background: #fff;
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -1894,7 +1918,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: var(--global--color-background);
 			}
 		}
 	}
@@ -2048,8 +2072,7 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #6d6d6d;
+				border: var(--form--border-width) solid var(--form--border-color);
 				background: #fff;
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -2061,7 +2084,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: var(--global--color-background);
 			}
 		}
 	}
@@ -2073,7 +2096,6 @@ a.reset_variations {
 
 		p {
 			font-family: $headings;
-			font-size: 1.6rem;
 		}
 	}
 }
@@ -2352,7 +2374,7 @@ a.reset_variations {
 			}
 
 			#order_review_heading {
-				margin-top: 4rem;
+				margin-top: 2rem;
 			}
 
 			#order_review_heading,
