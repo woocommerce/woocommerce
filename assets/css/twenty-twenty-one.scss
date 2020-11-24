@@ -2616,3 +2616,28 @@ a.reset_variations {
 		}
 	}
 }
+
+
+.post-9 {
+
+	.entry-header {
+
+		padding-bottom: 20px !important;
+	}
+
+	.woocommerce-MyAccount-content {
+
+		p:first-of-type {
+			margin-bottom: 2rem;
+		}
+	}
+
+	.woocommerce-MyAccount-navigation-link a {
+		color: #666 !important;
+
+		&:hover {
+			color: black !important;
+			text-decoration: underline solid black 1px !important;
+		}
+	}
+}
