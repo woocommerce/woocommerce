@@ -1441,7 +1441,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: var(--global--color-background);
+				background: var(--global--color-border);
 			}
 		}
 	}
@@ -1582,7 +1582,6 @@ a.reset_variations {
 
 	button[name="apply_coupon"] {
 		padding: 0.5rem;
-	
 	}
 }
 
@@ -1906,7 +1905,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: var(--global--color-background);
+				background: var(--global--color-border);
 			}
 		}
 	}
@@ -2072,7 +2071,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: var(--global--color-background);
+				background: var(--global--color-border);
 			}
 		}
 	}
