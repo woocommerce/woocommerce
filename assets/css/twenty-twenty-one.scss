@@ -505,8 +505,9 @@ dl.variation,
 	}
 
 	.single_add_to_cart_button {
-		padding-top: 1.55rem;
-		padding-bottom: 1.59rem;
+		line-height: var(--global--line-height-body) !important;
+		padding-top: var(--form--spacing-unit) !important;
+		padding-bottom: var(--form--spacing-unit) !important;
 		font-size: 1.6rem;
 	}
 
