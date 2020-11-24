@@ -8,7 +8,7 @@ $headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-
 $body: nonbreakingspaceoverride, "Hoefler Text", garamond, "Times New Roman", serif;
 
 $body-color: currentColor;
-$highlights-color: #cd2653;
+$highlights-color: #88a171;
 
 /**
  * Fonts
@@ -156,19 +156,30 @@ a.button {
 
 .onsale {
 	position: absolute;
-	top: 0;
-	left: 0;
-	display: inline-block;
+	top: -0.7rem;
+	right: -0.7rem;
 	background: $highlights-color;
 	color: #fff;
 	font-family: $headings;
 	font-size: 1.2rem;
 	font-weight: 700;
 	letter-spacing: -0.02em;
-	line-height: 1.2;
-	padding: 1rem;
-	text-transform: uppercase;
 	z-index: 1;
+	border-radius: 50%;
+	text-align: center;
+	padding: 0.8rem;
+	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+	&::after {
+		content: '';
+		display: block;
+		height: 0;
+		width: 100%;
+		padding-bottom: 100%;
+	}
 }
 
 .price {
@@ -183,6 +194,57 @@ a.button {
 	ins {
 		display: inline-block;
 		text-decoration: none;
+	}
+}
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info {
+	margin-bottom: 2rem;
+	margin-left: 0;
+	background: var(--global--color-background);
+	font-size: 0.88889em;
+	font-family: $headings;
+	list-style: none;
+	overflow: hidden;
+}
+
+.woocommerce-message,
+.woocommerce-error li,
+.woocommerce-info {
+	padding: 1.5rem 3rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	.button {
+		order: 2;
+	}
+}
+
+.woocommerce-message {
+	background: #eee;
+	color: $body-color;
+}
+
+.woocommerce-error {
+	color: #fff;
+	background: #b22222;
+
+	a {
+		color: #fff;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&.button {
+			background: #111;
+		}
+	}
+
+	> li {
+		margin: 0;
 	}
 }
 
@@ -1251,14 +1313,21 @@ a.reset_variations {
 
 		}
 	}
-
-	.select2-container .select2-selection--single .select2-selection__rendered {
-		font-family: $headings;
-		color: #000;
+  
+	.select2-container .select2-dropdown {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+		border-top: none;
 	}
 
-	.select2-container--focus .select2-selection {
-		border-color: #000;
+	.select2-container .select2-selection {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+	}
+
+	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+		outline-offset: 2px;
+		outline: 2px dotted var(--form--border-color);
 	}
 
 	.select2-results__option {
@@ -1268,7 +1337,7 @@ a.reset_variations {
 	.select2-container {
 
 		.select2-search__field {
-			height: 4rem;
+			height: 3rem;
 			background: #eee;
 		}
 	}
@@ -1284,6 +1353,35 @@ a.reset_variations {
 /**
  * Checkout
  */
+.woocommerce-form-coupon-toggle .woocommerce-info {
+	display: block;
+	margin-bottom: 2rem;
+	padding: 1rem;
+}
+.woocommerce-form-coupon {
+	background: #eee;
+	padding: 1rem;
+	font-size: 0.88889em;
+	color: var(--form--color-text);
+
+	#coupon_code {
+		border: var(--form--border-width) solid var(--form--border-color);
+	}
+
+	button[name="apply_coupon"] {
+		padding: 0.5rem;
+
+		.is-dark-theme & {
+			border-color: var(--global--color-background);
+
+			&:hover,
+			&:active {
+				background: var(--global--color-background);
+			}
+		}
+	}
+}
+
 #ship-to-different-address {
 	font-size: 1em;
 	display: inline-block;
@@ -1304,8 +1402,8 @@ a.reset_variations {
 				display: block;
 				height: 16px;
 				width: 30px;
-				border: 2px solid #bbb;
-				background: #bbb;
+				border: 2px solid var(--form--border-color);
+				background: var(--global--color-primary);
 				border-radius: 13rem;
 				box-sizing: content-box;
 				transition: all ease-in-out 0.3s;
@@ -1319,7 +1417,7 @@ a.reset_variations {
 				display: block;
 				width: 14px;
 				height: 14px;
-				background: #fff;
+				background: var(--global--color-background);
 				position: absolute;
 				top: 3px;
 				right: 17px;
@@ -1334,11 +1432,11 @@ a.reset_variations {
 
 		input[type="checkbox"]:checked + span::after {
 			right: 3px;
+			background: var(--global--color-primary);
 		}
 
 		input[type="checkbox"]:checked + span::before {
-			border-color: #000;
-			background: #000;
+			background: var(--global--color-background);
 		}
 	}
 }
@@ -1406,7 +1504,7 @@ a.reset_variations {
 	.woocommerce-billing-fields {
 
 		h3 {
-			margin-top: 4rem;
+			margin: 2rem 0;
 		}
 	}
 
@@ -1433,10 +1531,6 @@ a.reset_variations {
 				width: 100%;
 			}
 
-			input {
-				border: 1px solid #ddd;
-			}
-
 			label {
 				font-family: $headings;
 				letter-spacing: normal;
@@ -1448,7 +1542,7 @@ a.reset_variations {
 		}
 
 		#order_review_heading {
-			margin-top: 4rem;
+			margin-top: 2rem;
 		}
 
 		#order_review_heading,
@@ -1459,7 +1553,7 @@ a.reset_variations {
 			clear: right;
 
 			.woocommerce-checkout-review-order-table {
-				margin-top: 2.85rem;
+				margin-top: 2rem;
 				border: 0;
 
 				th,
@@ -1471,19 +1565,13 @@ a.reset_variations {
 					display: none;
 				}
 
-				tbody::after {
-					content: "";
-					display: block;
-					height: 2rem;
-				}
-
 				.woocommerce-Price-amount {
 					font-weight: bold;
 				}
 
 				.cart-subtotal,
 				.order-total {
-					border-top: 1px solid #ddd;
+					border-top: 2px solid var(--form--border-color);
 				}
 			}
 		}
@@ -1540,18 +1628,6 @@ a.reset_variations {
 		}
 	}
 
-	input#coupon_code {
-		padding-top: 1.55rem;
-		padding-bottom: 1.59rem;
-		border: 1px solid #ddd;
-	}
-
-	button[name="apply_coupon"] {
-		padding-top: 1.55rem;
-		padding-bottom: 1.8rem;
-		font-size: 1.6rem;
-	}
-
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;
@@ -1567,18 +1643,26 @@ a.reset_variations {
 
 	.select2-container .select2-selection--single .select2-selection__rendered {
 		line-height: 48px;
-		font-family: $headings;
-		font-size: 1.6rem;
-		color: #000;
-		padding-left: 1.8rem;
+	}
+
+	.select2-container .select2-selection {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+	}
+
+	.select2-container .select2-dropdown {
+		border: var(--form--border-width) solid var(--form--border-color);
+		border-radius: var(--form--border-radius);
+		border-top: none;
 	}
 
 	.select2-container--default .select2-selection--single .select2-selection__arrow {
 		height: 46px;
 	}
 
-	.select2-container--focus .select2-selection {
-		border-color: #000;
+	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+		outline-offset: 2px;
+		outline: 2px dotted var(--form--border-color);
 	}
 
 	.select2-results__option {
@@ -1588,7 +1672,7 @@ a.reset_variations {
 	.select2-container {
 
 		.select2-search__field {
-			height: 4rem;
+			height: 3rem;
 			background: #eee;
 		}
 	}
@@ -1606,9 +1690,8 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #6d6d6d;
-				background: #fff;
+				border: var(--form--border-width) solid var(--form--border-color);
+				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -1619,7 +1702,11 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: var(--global--color-border);
+			}
+
+			.is-dark-theme &::before {
+				background: var(--global--color-background);
 			}
 		}
 	}
@@ -1773,9 +1860,8 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #6d6d6d;
-				background: #fff;
+				border: var(--form--border-width) solid var(--form--border-color);
+				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -1786,7 +1872,11 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: var(--global--color-border);
+			}
+
+			.is-dark-theme &::before {
+				background: var(--global--color-background);
 			}
 		}
 	}
@@ -1798,7 +1888,6 @@ a.reset_variations {
 
 		p {
 			font-family: $headings;
-			font-size: 1.6rem;
 		}
 	}
 }
@@ -1893,7 +1982,7 @@ a.reset_variations {
 		ul.products[class*=columns-] {
 
 			li.product {
-				width: 100%;
+				width: auto;
 			}
 		}
 	}
@@ -1921,7 +2010,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			padding: 1rem;
 		}
 	}
 }
@@ -2078,7 +2166,7 @@ a.reset_variations {
 			}
 
 			#order_review_heading {
-				margin-top: 4rem;
+				margin-top: 2rem;
 			}
 
 			#order_review_heading,
@@ -2164,7 +2252,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1rem;
-			padding: 0.8rem;
 		}
 	}
 
@@ -2317,7 +2404,6 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1.2rem;
-			padding: 1rem;
 		}
 	}
 
