@@ -206,7 +206,18 @@ class Menu {
 	 *    ).
 	 */
 	private static function add_item( $args ) {
-		if ( ! isset( $args['id'] ) || isset( self::$menu_items[ $args['id'] ] ) ) {
+		if ( ! isset( $args['id'] ) ) {
+			return;
+		}
+
+		if ( isset( self::$menu_items[ $args['id'] ] ) ) {
+			error_log(  // phpcs:ignore
+				sprintf(
+					/* translators: 1: Duplicate menu item path. */
+					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce-admin' ),
+					'`' . $args['id'] . '`'
+				)
+			);
 			return;
 		}
 
