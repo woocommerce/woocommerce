@@ -249,7 +249,6 @@ a.button {
 }
 
 #main {
-
 	.woocommerce-error,
 	.woocommerce-info {
 		font-family: $headings;
@@ -1935,13 +1934,52 @@ a.reset_variations {
 		align-items: stretch;
 		flex-direction: row;
 		flex-wrap: wrap;
+		box-sizing: border-box;
+		word-break: break-word;
+		min-width: 12vw;
+
+		&.columns-2 {
+
+			li.product {
+				width: calc(100% / 2 - 16px) !important;
+			}
+		}
+
+		&.columns-3 {
+
+			li.product {
+				width: calc(100% / 3 - 16px) !important;
+			}
+		}
+
+		&.columns-4 {
+
+			li.product {
+				width: calc(100% / 4 - 16px) !important;
+			}
+		}
+
+		&.columns-5 {
+
+			li.product {
+				width: calc(100% / 5 - 16px) !important;
+			}
+		}
+
+		&.columns-6 {
+
+			li.product {
+				width: calc(100% / 6 - 16px) !important;
+			}
+		}
 
 		li.product {
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: flex-start;
-			margin-bottom: 5em;
+			margin: 0 8px 16px 8px;
+			box-sizing: border-box;
 
 			img.attachment-woocommerce_thumbnail {
 				height: auto !important;
@@ -1951,11 +1989,18 @@ a.reset_variations {
 		li.product-category {
 
 			a {
-				text-align: center;
+				text-align: left;
+				text-decoration: none;
 
 				h2.woocommerce-loop-category__title {
+					margin-top: 0.4rem;
 					font-family: $headings;
-					font-size: 3rem;
+					font-size: 1rem;
+
+					.count {
+						background-color: transparent;
+						color: $body-color;
+					}
 				}
 			}
 		}
@@ -1981,7 +2026,9 @@ a.reset_variations {
 		ul.products[class*=columns-] {
 
 			li.product {
-				width: auto;
+				width: auto !important;
+				margin-left: auto;
+				margin-right: auto;
 			}
 		}
 	}
@@ -1993,18 +2040,13 @@ a.reset_variations {
 	.woocommerce-page {
 
 		ul.products[class*=columns-] {
+			justify-content: center;
 
 			li.product {
 				width: 50%;
-			}
-
-			li.product:nth-of-type(2n+1) {
 				padding: 0 2vw 3em 0;
 			}
 
-			li.product:nth-of-type(2n) {
-				padding: 0 0 3em 2vw;
-			}
 		}
 
 		.onsale {
@@ -2251,6 +2293,18 @@ a.reset_variations {
 
 		.onsale {
 			font-size: 1rem;
+		}
+	}
+
+	/**
+     * Home page
+     */
+	.home #main {
+		[class*="woocommerce columns-"] {
+			word-break: break-word;
+			max-width: var(--responsive--aligndefault-width);
+			margin-left: auto;
+			margin-right: auto;
 		}
 	}
 
