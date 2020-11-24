@@ -1443,6 +1443,10 @@ a.reset_variations {
 			&::before {
 				background: var(--global--color-border);
 			}
+
+			.is-dark-theme &::before {
+				background: var(--global--color-background);
+			}
 		}
 	}
 }
@@ -1582,6 +1586,15 @@ a.reset_variations {
 
 	button[name="apply_coupon"] {
 		padding: 0.5rem;
+
+		.is-dark-theme & {
+			border-color: var(--global--color-background);
+
+			&:hover,
+			&:active {
+				background: var(--global--color-background);
+			}
+		}
 	}
 }
 
@@ -1907,6 +1920,10 @@ a.reset_variations {
 			&::before {
 				background: var(--global--color-border);
 			}
+
+			.is-dark-theme &::before {
+				background: var(--global--color-background);
+			}
 		}
 	}
 
@@ -2072,6 +2089,10 @@ a.reset_variations {
 
 			&::before {
 				background: var(--global--color-border);
+			}
+
+			.is-dark-theme &::before {
+				background: var(--global--color-background);
 			}
 		}
 	}
