@@ -2632,12 +2632,19 @@ a.reset_variations {
 		}
 	}
 
-	.woocommerce-MyAccount-navigation-link a {
-		color: #666 !important;
+	.woocommerce-MyAccount-navigation-link {
 
-		&:hover {
-			color: black !important;
-			text-decoration: underline solid black 1px !important;
+		margin-bottom: 20px !important;
+
+		a {
+			color: #444 !important;
+			font-weight: normal !important;
+			font-size: 1.8rem;
+
+			&:hover {
+				color: black !important;
+				text-decoration: underline solid black 1px !important;
+			}
 		}
 	}
 }
