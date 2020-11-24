@@ -242,6 +242,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'options'  => array(
 							'force'     => __( 'Force downloads', 'woocommerce' ),
 							'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
+							'inline'    => __( 'Inline Delivery', 'woocommerce' ),
 							'redirect'  => apply_filters( 'woocommerce_redirect_only_method_is_secure', false ) ? __( 'Redirect only', 'woocommerce' ) : __( 'Redirect only (Insecure)', 'woocommerce' ),
 						),
 						'autoload' => false,
@@ -269,11 +270,11 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 
 					array(
-						'title' => __( 'Filename', 'woocommerce' ),
-						'desc' => __( 'Append a unique string to filename for security', 'woocommerce' ),
-						'id' => 'woocommerce_downloads_add_hash_to_filename',
-						'type' => 'checkbox',
-						'default' => 'yes',
+						'title'    => __( 'Filename', 'woocommerce' ),
+						'desc'     => __( 'Append a unique string to filename for security', 'woocommerce' ),
+						'id'       => 'woocommerce_downloads_add_hash_to_filename',
+						'type'     => 'checkbox',
+						'default'  => 'yes',
 						'desc_tip' => sprintf(
 							// translators: Link to WooCommerce Docs.
 							__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
