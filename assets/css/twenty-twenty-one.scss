@@ -2609,13 +2609,15 @@ a.reset_variations {
 	}
 }
 
-.woocommerce {
-
+.alignwide .woocommerce {
 	& > * {
 		max-width: var( --responsive--alignwide-width );
 		display: block;
 		margin: var(--global--spacing-vertical) auto;
 	}
+}
+
+.woocommerce {
 
 	.woocommerce-notices-wrapper {
 
