@@ -1308,7 +1308,6 @@ a.reset_variations {
 
 		.woocommerce {
 			max-width: var(--responsive--alignwide-width);
-			padding: 0 5vw;
 			margin: 0 auto;
 
 		}
@@ -2458,6 +2457,7 @@ a.reset_variations {
 			margin-top: var(--global--spacing-vertical);
 			float: left;
 			display: inline-block;
+			width: 100%;
 		}
 	}
 
