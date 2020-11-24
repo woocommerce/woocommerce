@@ -342,6 +342,8 @@ a.button {
 		td,
 		th {
 			word-break: normal;
+			border-left: none;
+			border-right: none;
 		}
 	}
 }
@@ -2525,6 +2527,20 @@ a.reset_variations {
 
 			#coupon_code {
 				min-width: 9rem;
+			}
+		}
+
+		button[name="update_cart"],button[name="apply_coupon"] {
+			padding: 0.5rem;
+			color: var(--global--color-primary);
+			background: var(--global--color-background);
+			border: var(--form--border-width) solid var(--global--color-primary);
+
+			&:hover,
+			&:active {
+				color: var(--global--color-background);
+				background: var(--global--color-primary);
+				
 			}
 		}
 	}
