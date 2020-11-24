@@ -422,6 +422,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'title'         => __( 'Content-Disposition', 'woocommerce' ),
+					'desc'          => __( 'Deliver downloadable files inline', 'woocommerce' ),
+					'id'            => 'woocommerce_downloads_deliver_inline',
+					'type'          => 'checkbox',
+					'default'       => false,
+					'desc_tip'      => __( 'Enable this option to have downloadable files open in browser', 'woocommerce' ),
+					'autoload'      => false,
+				),
+
+				array(
 					'title'    => __( 'Filename', 'woocommerce' ),
 					'desc'     => __( 'Append a unique string to filename for security', 'woocommerce' ),
 					'id'       => 'woocommerce_downloads_add_hash_to_filename',

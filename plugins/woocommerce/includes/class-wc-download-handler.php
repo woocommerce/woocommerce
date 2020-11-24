@@ -25,6 +25,7 @@ class WC_Download_Handler {
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
 		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
 		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
+		add_action( 'woocommerce_download_file_inline', array( __CLASS__, 'download_file_inline' ), 10, 2 );
 	}
 
 	/**
@@ -487,6 +488,31 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Inline download - For deliverying the file without downloading
+	 *
+	 * @param string $file_path File path.
+	 * @param string $filename  File name.
+	 */
+	public static function download_file_inline( $file_path, $filename ) {
+		$parsed_file_path = self::parse_file_path( $file_path );
+		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) ); // @codingStandardsIgnoreLine.
+
+		self::inline_download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+
+		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
+		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
+		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
+			if ( $parsed_file_path['remote_file'] ) {
+				self::download_file_redirect( $file_path );
+			} else {
+				self::download_error( __( 'File not found', 'woocommerce' ) );
+			}
+		}
+
+		exit;
+	}
+
+	/**
 	 * Get content type of a download.
 	 *
 	 * @param  string $file_path File path.
@@ -523,6 +549,49 @@ class WC_Download_Handler {
 		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
 		header( 'Content-Description: File Transfer' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
+		header( 'Content-Transfer-Encoding: binary' );
+
+		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		if ( ! $file_size ) {
+			return;
+		}
+
+		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
+			if ( false === $download_range['is_range_valid'] ) {
+				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
+				exit;
+			}
+
+			$start  = $download_range['start'];
+			$end    = $download_range['start'] + $download_range['length'] - 1;
+			$length = $download_range['length'];
+
+			header( 'HTTP/1.1 206 Partial Content' );
+			header( "Accept-Ranges: 0-$file_size" );
+			header( "Content-Range: bytes $start-$end/$file_size" );
+			header( "Content-Length: $length" );
+		} else {
+			header( 'Content-Length: ' . $file_size );
+		}
+	}
+
+	/**
+	 * Set headers for the inline delivery.
+	 *
+	 * @param string $file_path      File path.
+	 * @param string $filename       File name.
+	 * @param array  $download_range Array containing info about range download request (see {@see get_download_range} for structure).
+	 */
+	private static function inline_download_headers( $file_path, $filename, $download_range = array() ) {
+		self::check_server_config();
+		self::clean_buffers();
+		wc_nocache_headers();
+
+		header( 'X-Robots-Tag: noindex, nofollow', true );
+		header( 'Content-Description: File Transfer' );
+		header( 'Content-Type: text/html' );
+		header( 'Content-Disposition: inline' );
 		header( 'Content-Transfer-Encoding: binary' );
 
 		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
