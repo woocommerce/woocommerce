@@ -178,7 +178,7 @@
 		"copy-webpack-plugin": "5.1.1",
 		"cross-env": "7.0.2",
 		"css-loader": "3.6.0",
-		"docsify-cli": "4.4.1",
+		"docsify-cli": "4.4.2",
 		"fs-extra": "8.1.0",
 		"grunt": "1.3.0",
 		"grunt-checktextdomain": "1.0.1",
