@@ -5,7 +5,7 @@
  */
 .woocommerce img.pswp__img,
 .woocommerce-page img.pswp__img {
-	max-width: none; /* 2 */
+	max-width: inherit; /* 2 */
 }
 button.pswp__button {
 	box-shadow: none !important;
