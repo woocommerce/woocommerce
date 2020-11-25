@@ -107,7 +107,7 @@
 		"babel-plugin-transform-react-jsx": "6.24.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"babel-plugin-transform-runtime": "6.23.0",
-		"chalk": "3.0.0",
+		"chalk": "4.1.0",
 		"commander": "6.2.0",
 		"core-js": "3.7.0",
 		"create-file-webpack": "1.0.2",
