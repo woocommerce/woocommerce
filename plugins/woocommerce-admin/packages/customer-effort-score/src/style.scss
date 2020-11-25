@@ -1,8 +1,132 @@
-.customer-effort-score_modal {
-	position: absolute;
-	top: 300px;
-	left: 300px;
-	background: #faa;
-	z-index: 99999;
-	padding: 2em;
+.components-modal__frame.woocommerce-customer-effort-score-comments-transitioning {
+	overflow: hidden;
+}
+
+.woocommerce-customer-effort-score__selection {
+	margin: 1em 0;
+
+	.components-base-control__field {
+		display: flex;
+		flex-direction: column;
+		margin: 0 auto;
+		color: var(--wp-admin-theme-color);
+
+		@include breakpoint( '>600px' ) {
+			flex-direction: row;
+		}
+	}
+
+	.components-radio-control__option {
+		&:not(:last-child) {
+			// Override package component style.
+			margin-bottom: 0;
+		}
+
+		input {
+			// Hide the radio input but keep it accessibile.
+			position: absolute;
+			opacity: 0;
+		}
+
+		label {
+			display: block;
+			text-align: center;
+			box-sizing: border-box;
+			width: 9em;
+			height: 100%;
+			padding: 1em 0.5em;
+			font-size: 0.9em;
+
+			&:hover {
+				background-color: $studio-wordpress-blue-0;
+			}
+		}
+
+		input:focus + label {
+			outline: 2px solid $studio-wordpress-blue;
+			background-color: peach;
+			color: $studio-blue-60;
+		}
+
+		input:checked + label {
+			background-color: $studio-wordpress-blue-0;
+		}
+
+		// Replace the hidden radio input with emoji.
+		label::before {
+			display: block;
+			font-size: 24px;
+			text-align: center;
+			margin: 1em 0;
+			color: $studio-wordpress-blue;
+		}
+
+		input[value='1'] + label::before {
+			content: '😞';
+		}
+
+		input[value='2'] + label::before {
+			content: '🙁';
+		}
+
+		input[value='3'] + label::before {
+			content: '😐';
+		}
+
+		input[value='4'] + label::before {
+			content: '🙂';
+		}
+
+		input[value='5'] + label::before {
+			content: '😁';
+		}
+	}
+}
+
+.woocommerce-customer-effort-score__comments {
+	label {
+		display: block;
+		color: inherit;
+		font-weight: bold;
+	}
+
+	textarea {
+		width: 100%;
+	}
+}
+
+.woocommerce-customer-effort-score__comments-enter {
+	opacity: 0;
+	max-height: 0;
+	transform: translateY(50%);
+}
+
+.woocommerce-customer-effort-score__comments-enter-active {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateY(0%);
+	transition: opacity 250ms ease-out, transform 250ms ease-out,
+		max-height 250ms ease-out;
+}
+
+.woocommerce-customer-effort-score__comments-exit {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateY(0%);
+}
+
+.woocommerce-customer-effort-score__comments-exit-active {
+	opacity: 0;
+	max-height: 0;
+	transform: translateY(50%);
+	transition: opacity 250ms ease-out, transform 250ms ease-out,
+		max-height 250ms ease-out;
+}
+
+.woocommerce-customer-effort-score__buttons {
+	text-align: right;
+
+	.components-button {
+		margin-left: 1em;
+	}
 }

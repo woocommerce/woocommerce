@@ -9,6 +9,11 @@ import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 
 /**
+ * Internal dependencies
+ */
+import CustomerFeedbackModal from './customer-feedback-modal';
+
+/**
  * Use `CustomerEffortScore` to gather a customer effort score.
  *
  * NOTE: This should live in @woocommerce/customer-effort-score to allow
@@ -32,7 +37,6 @@ function CustomerEffortScore( {
 	onModalShownCallback = noop,
 	icon,
 } ) {
-	const [ score, setScore ] = useState( 0 );
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
 
@@ -63,17 +67,11 @@ function CustomerEffortScore( {
 		return null;
 	}
 
-	function close() {
-		setScore( 3 ); // TODO let this happen in the UI
-
-		setVisible( false );
-		recordScoreCallback( score );
-	}
-
 	return (
-		<p className="customer-effort-score_modal">
-			{ label } <button onClick={ close }>Click me</button>
-		</p>
+		<CustomerFeedbackModal
+			label={ label }
+			recordScoreCallback={ recordScoreCallback }
+		/>
 	);
 }
 
