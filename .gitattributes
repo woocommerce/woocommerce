@@ -6,11 +6,15 @@
 
 # Remove files for archives generated using `git archive`.
 /.*                export-ignore
+/packages          export-ignore
 bin                export-ignore
+babel.config.js    export-ignore
 CODE_OF_CONDUCT.md export-ignore
 changelog.txt      export-ignore
 composer.*         export-ignore
+Dockerfile         export-ignore
 Gruntfile.js       export-ignore
+lerna.json         export-ignore
 package.json       export-ignore
 package-lock.json  export-ignore
 phpcs.xml          export-ignore
@@ -18,3 +22,5 @@ phpunit.*          export-ignore
 README.md          export-ignore
 renovate.json      export-ignore
 tests              export-ignore
+tsconfig.*         export-ignore
+webpack.config.js  export-ignore
