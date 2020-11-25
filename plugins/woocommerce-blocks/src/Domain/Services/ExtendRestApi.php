@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartItemSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Throwable;
 use Exception;
 
@@ -31,7 +32,7 @@ class ExtendRestApi {
 	 *
 	 * @var array
 	 */
-	private $endpoints = [ CartItemSchema::IDENTIFIER ];
+	private $endpoints = [ CartItemSchema::IDENTIFIER, CartSchema::IDENTIFIER ];
 
 	/**
 	 * Data to be extended
