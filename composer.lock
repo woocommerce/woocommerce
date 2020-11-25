@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "928d8825a02fc4217b3af36a83c2fbc8",
+    "content-hash": "7e16bf7815e8061d75c13608f893d4fb",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -493,22 +493,27 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.4.46",
+            "version": "v3.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "da3d9da2ce0026771f5fe64cb332158f1bd2bc33"
+                "reference": "4d882dced7b995d5274293039370148e291808f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/da3d9da2ce0026771f5fe64cb332158f1bd2bc33",
-                "reference": "da3d9da2ce0026771f5fe64cb332158f1bd2bc33",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/4d882dced7b995d5274293039370148e291808f2",
+                "reference": "4d882dced7b995d5274293039370148e291808f2",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.5.9|>=7.0.8"
+                "php": ">=5.5.9"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.3-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\CssSelector\\": ""
@@ -523,12 +528,12 @@
             ],
             "authors": [
                 {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
                     "name": "Jean-François Simon",
                     "email": "jeanfrancois.simon@sensiolabs.com"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
                 },
                 {
                     "name": "Symfony Community",
@@ -538,23 +543,9 @@
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/css-selector/tree/v3.4.46"
+                "source": "https://github.com/symfony/css-selector/tree/master"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2020-10-24T10:57:07+00:00"
+            "time": "2017-05-01T15:01:29+00:00"
         },
         {
             "name": "woocommerce/action-scheduler",
@@ -597,16 +588,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.7.0",
+            "version": "1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "14dc0c78ce163ed0d5daf8f83765b65a76f61010"
+                "reference": "efd94d917504fe71bae650233de47344c8d5c005"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/14dc0c78ce163ed0d5daf8f83765b65a76f61010",
-                "reference": "14dc0c78ce163ed0d5daf8f83765b65a76f61010",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/efd94d917504fe71bae650233de47344c8d5c005",
+                "reference": "efd94d917504fe71bae650233de47344c8d5c005",
                 "shasum": ""
             },
             "require": {
@@ -640,22 +631,22 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v1.7.0"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v1.7.2"
             },
-            "time": "2020-11-11T22:56:39+00:00"
+            "time": "2020-11-19T17:48:33+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.8.0",
+            "version": "v3.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "8b7d485ec8d26a6d5c9011dbdb49443cad9beee7"
+                "reference": "e5aef9eddd13c5511ba673eb70ed8cb3e80d828c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/8b7d485ec8d26a6d5c9011dbdb49443cad9beee7",
-                "reference": "8b7d485ec8d26a6d5c9011dbdb49443cad9beee7",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/e5aef9eddd13c5511ba673eb70ed8cb3e80d828c",
+                "reference": "e5aef9eddd13c5511ba673eb70ed8cb3e80d828c",
                 "shasum": ""
             },
             "require": {
@@ -691,9 +682,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v3.8.0"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v3.8.1"
             },
-            "time": "2020-11-10T15:07:11+00:00"
+            "time": "2020-11-23T20:48:39+00:00"
         }
     ],
     "packages-dev": [
@@ -758,7 +749,7 @@
     },
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.1"
+        "php": "7.0"
     },
     "plugin-api-version": "2.0.0"
 }
