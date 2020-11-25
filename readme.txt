@@ -166,6 +166,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Enhancement - Limited the system status report's "not tested with version" warning to major versions. #28114
 * Enhancement - Add shipping, tax, and fee lines to refund REST API response. #28241
+* Enhancement - Added support for Twenty Twenty-One theme. #28134
 * Tweak - Reduced the memory usage of AJAX product searches. #28177
 * Tweak - Replaced deprecated jQuery functionality. #28005, #28058
 * Tweak - Hid "Add to cart" button for out of stock grouped products. #28169
@@ -183,12 +184,21 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Localization - Better display of inclusive taxes during checkout. #28064
 * Localization - Validation for Belgium postcodes. #28145
 
-**WooCommerce Admin - 1.7.0**
+**WooCommerce Admin - 1.7.0 & 1.7.1 & 1.7.2**
 
 * Enhancement - Variations report.  #5167
 * Enhancement - Add ability to toggle homescreen layouts. #5429
 * Enhancement - Accordion component  #5474
 * Enhancement - Badge component #5520
+* Tweak - Remove customer analytics data upon order deletion  #5171
+* Tweak - Updating Stripe key field validation to support test keys  #5201
+* Tweak - Wrap search control selected items in list  #5231
+* Tweak - Update store setup link to redirect to setup wizard  #5200
+* Tweak - Removing breadcrumbs from wc-admin header #5232
+* Tweak - Use consistent markdown headers in navigation readme #5417
+* Tweak - Remove Store Setup Alert #5499
+* Tweak - Customers: Update column heading for date registered #5542
+* Tweak - alter homescreen layout. #5465
 * Fix - Added support for custom actionable statuses. #5550
 * Fix - wrong casing used on the PayPal brand name  #5514 🎉 @rtpHarry
 * Fix - Import @wordpress/base-styles/default-custom-properties #5491
@@ -204,15 +214,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Added support for custom actionable statuses #5550
 * Fix - Display the store management links last on the homescreen #5579
 * Fix - Ensure the "Set up additional payment providers" inbox notification is shown when relevant after completing the OBW. #5547
-* Tweak - Remove customer analytics data upon order deletion  #5171
-* Tweak - Updating Stripe key field validation to support test keys  #5201
-* Tweak - Wrap search control selected items in list  #5231
-* Tweak - Update store setup link to redirect to setup wizard  #5200
-* Tweak - Removing breadcrumbs from wc-admin header #5232
-* Tweak - Use consistent markdown headers in navigation readme #5417
-* Tweak - Remove Store Setup Alert #5499
-* Tweak - Customers: Update column heading for date registered #5542
-* Tweak - alter homescreen layout. #5465
+* Fix - Load wc-tracks in the homepage notice admin script. #5638
+* Fix - Link component prop caused a React warning. #5653
+* Fix - Flickering of order panel while loading. #5655
+* Fix - Tax code duplicated when clicking the button to remove. #5638
+* Fix - Restore Autoloading of WooCommerce Classes in PHP Tests. #5650
+* Fix - Skip WC Payment plugin note if plugin not added through the onboarding process. #5619
 * Dev - Home Screen - migrate orders panel. #5455
 * Dev - Store Profiler - include Creative Mail as a free extension #5543
 * Dev - Add undefined check in intervals data util #5546
@@ -242,7 +249,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Rearrange the store management links under categories add filter woocommerce_admin_homescreen_quicklinks. #5476
 * Dev - Restyle the setup task list header to display incomplete tasks #5520
 
-**WooCommerce Blocks - 3.7.0 & 3.7.1 & 3.8.0**
+**WooCommerce Blocks - 3.7.0 & 3.7.1 & 3.8.0 & 3.8.1**
 
 * Enhancement - Allow shoppers to sign-up for an account from the Checkout block. #3331
 * Enhancement - Standardise & refactor colors scss to align with Gutenberg colors and WooCommerce brand. #3300
@@ -256,6 +263,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix 3D secure payment errors. #3272
 * Fix - Show current selected attributes when re-edit Products by Attribute block. #3185
 * Fix - Ensure that accounts are not created via checkout block request if account registration is disabled for WooCommerce. #3371
+* Fix - radio controls and checkboxes in Twenty Twenty One dark theme. #3446
+* Fix - Twenty Twenty One Price filter, Active filters and radio control styling. #3444
+* Fix - Twenty Twenty One Button and Placeholder Styling. #3443
+* Fix - checkbox and textarea styles in Twenty Twenty One when it has dark controls active. #3450
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
