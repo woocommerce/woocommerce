@@ -334,6 +334,12 @@ a.button {
 	display: table;
 }
 
+.woocommerce-button--previous,
+.woocommerce-button--next {
+
+	@include inversebuttoncolors();
+}
+
 /**
 * Tables
 */
@@ -1234,17 +1240,11 @@ a.reset_variations {
 
 		tbody {
 
-			tr:nth-child(2n) {
-
-				td {
-					background: #eee;
-				}
-			}
-
 			tr:nth-child(2n+1) {
 
 				td {
-					background: #fff;
+
+					background: darken(#D1E4DD, 3%);
 				}
 			}
 		}
@@ -2239,6 +2239,10 @@ a.reset_variations {
 
 		table.shop_table_responsive {
 
+			.button {
+				@include inversebuttoncolors();
+			}
+
 			tr {
 				margin: 0 0 1.5rem;
 
@@ -2253,7 +2257,14 @@ a.reset_variations {
 				&:nth-child(2n) {
 
 					td {
-						background: #fff;
+						background: transparent;
+					}
+				}
+
+				&:nth-child(2n+1) {
+
+					td {
+						background: darken(#D1E4DD, 3%);
 					}
 				}
 
@@ -2489,6 +2500,7 @@ a.reset_variations {
 		table.account-orders-table {
 			margin-top: 0;
 			border: 0;
+			margin-bottom: 1rem;
 
 			tr,
 			td,
@@ -2500,8 +2512,20 @@ a.reset_variations {
 			th,
 			td,
 			td.woocommerce-orders-table__cell-order-actions {
+				width: 1%;
 				padding-right: 0.5rem;
 				padding-left: 0.5rem;
+
+				a {
+					padding-top: 0.3rem !important;
+					padding-bottom: 0.3rem !important;
+					margin-top: 0.5rem !important;
+					margin-bottom: 0.5rem !important;
+				}
+			}
+
+			td.woocommerce-orders-table__cell-order-date {
+				padding-right: 0;
 			}
 
 			thead {
@@ -2513,6 +2537,7 @@ a.reset_variations {
 				padding-right: 0.5em;
 				width: 100%;
 				margin: 1.5rem 0;
+				@include inversebuttoncolors();
 			}
 		}
 	}
