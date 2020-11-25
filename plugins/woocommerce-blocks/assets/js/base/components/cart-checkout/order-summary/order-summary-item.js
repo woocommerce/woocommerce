@@ -38,8 +38,8 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		.multiply( quantity )
 		.convertPrecision( currency.minorUnit )
 		.getAmount();
-	const shouldLinkToProduct =
-		catalogVisibility !== 'hidden' && catalogVisibility !== 'search';
+	const isProductHiddenFromCatalog =
+		catalogVisibility === 'hidden' || catalogVisibility === 'search';
 
 	return (
 		<div className="wc-block-components-order-summary-item">
@@ -59,7 +59,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 			<div className="wc-block-components-order-summary-item__description">
 				<div className="wc-block-components-order-summary-item__header">
 					<ProductName
-						hasLink={ shouldLinkToProduct }
+						disabled={ isProductHiddenFromCatalog }
 						permalink={ permalink }
 						name={ name }
 					/>
