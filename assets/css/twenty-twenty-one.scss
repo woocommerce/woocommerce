@@ -2535,13 +2535,13 @@ a.reset_variations {
 		margin-bottom: 20px !important;
 
 		a {
-			color: #444 !important;
+			color: $body-color !important;
 			font-weight: normal !important;
 			font-size: 1.8rem;
 
 			&:hover {
-				color: black !important;
-				text-decoration: underline solid black 1px !important;
+				color: $body-color !important;
+				text-decoration: underline solid $body-color 1px !important;
 			}
 		}
 	}
