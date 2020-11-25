@@ -80,8 +80,8 @@ ProductImage.propTypes = {
 };
 
 ProductImage.defaultProps = {
-	width: 60,
-	height: 60,
+	width: 33,
+	height: 33,
 	className: '',
 };
 

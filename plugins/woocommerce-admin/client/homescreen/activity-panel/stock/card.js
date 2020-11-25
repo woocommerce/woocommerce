@@ -5,21 +5,19 @@ import { __, sprintf } from '@wordpress/i18n';
 import { BaseControl, Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
 import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
-import { withDispatch } from '@wordpress/data';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { Link, ProductImage } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
+import moment from 'moment';
 
 /**
  * Internal dependencies
  */
-import { ActivityCard } from '../../activity-card';
+import { ActivityCard } from '../../../header/activity-panel/activity-card';
 
-class ProductStockCard extends Component {
+export class ProductStockCard extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -78,7 +76,13 @@ class ProductStockCard extends Component {
 
 	async onSubmit() {
 		const { product, updateProductStock, createNotice } = this.props;
-		const { quantity } = this.state;
+		const quantity = parseInt( this.state.quantity, 10 );
+
+		// Bail on an actual update if the quantity is unchanged.
+		if ( product.stock_quantity === quantity ) {
+			this.setState( { editing: false } );
+			return;
+		}
 
 		this.setState( { editing: false, edited: true } );
 
@@ -88,14 +92,31 @@ class ProductStockCard extends Component {
 			createNotice(
 				'success',
 				sprintf(
+					/* translators: %s = name of the product having stock updated */
 					__( '%s stock updated.', 'woocommerce-admin' ),
 					product.name
-				)
+				),
+				{
+					actions: [
+						{
+							label: __( 'Undo', 'woocommerce-admin' ),
+							onClick: () => {
+								updateProductStock(
+									product,
+									product.stock_quantity
+								);
+
+								this.recordStockEvent( 'undo' );
+							},
+						},
+					],
+				}
 			);
 		} else {
 			createNotice(
 				'error',
 				sprintf(
+					/* translators: %s = name of the product having stock updated */
 					__( '%s stock could not be updated.', 'woocommerce-admin' ),
 					product.name
 				)
@@ -153,8 +174,16 @@ class ProductStockCard extends Component {
 		}
 
 		return (
-			<span className="woocommerce-stock-activity-card__stock-quantity">
+			<span
+				className={ classnames(
+					'woocommerce-stock-activity-card__stock-quantity',
+					{
+						'out-of-stock': product.stock_quantity < 1,
+					}
+				) }
+			>
 				{ sprintf(
+					/* translators: %d = stock quantity of the product being updated */
 					__( '%d in stock', 'woocommerce-admin' ),
 					product.stock_quantity
 				) }
@@ -170,6 +199,13 @@ class ProductStockCard extends Component {
 			? product.low_stock_amount
 			: notifyLowStockAmount;
 		const isLowStock = product.stock_quantity <= lowStockAmount;
+		const lastOrderDate = product.last_order_date
+			? sprintf(
+					/* translators: %s = time since last product order. e.g.: "10 minutes ago" - translated. */
+					__( 'Last ordered %s', 'woocommerce-admin' ),
+					moment.utc( product.last_order_date ).fromNow()
+			  )
+			: null;
 
 		// Hide cards that are not in low stock and have not been edited.
 		// This allows clearing cards which are no longer in low stock after
@@ -226,6 +262,7 @@ class ProductStockCard extends Component {
 				title={ title }
 				subtitle={ subtitle }
 				icon={ icon }
+				date={ lastOrderDate }
 				actions={ this.getActions() }
 			>
 				{ this.getBody() }
@@ -243,15 +280,3 @@ class ProductStockCard extends Component {
 		return activityCard;
 	}
 }
-
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-		const { updateProductStock } = dispatch( ITEMS_STORE_NAME );
-
-		return {
-			updateProductStock,
-			createNotice,
-		};
-	} )
-)( ProductStockCard );

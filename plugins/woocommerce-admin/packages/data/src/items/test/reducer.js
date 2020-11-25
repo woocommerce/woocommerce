@@ -4,6 +4,7 @@
 import reducer from '../reducer';
 import TYPES from '../action-types';
 import { getResourceName } from '../../utils';
+import { getTotalCountResourceName } from '../utils';
 
 const defaultState = {
 	items: {},
@@ -35,12 +36,13 @@ describe( 'items reducer', () => {
 		} );
 
 		const resourceName = getResourceName( itemType, query );
+		const totalResourceName = getTotalCountResourceName( itemType, query );
 
 		expect( state.items[ resourceName ].data ).toHaveLength( 2 );
 		expect( state.items[ resourceName ].data.includes( 1 ) ).toBeTruthy();
 		expect( state.items[ resourceName ].data.includes( 2 ) ).toBeTruthy();
 
-		expect( state.items[ resourceName ].totalCount ).toBe( 45 );
+		expect( state.items[ totalResourceName ] ).toBe( 45 );
 		expect( state.data[ itemType ][ '1' ] ).toBe( items[ 0 ] );
 		expect( state.data[ itemType ][ '2' ] ).toBe( items[ 1 ] );
 	} );

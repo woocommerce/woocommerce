@@ -38,21 +38,10 @@
 		}
 	}
 
-	.woocommerce-activity-card__actions {
-		margin: 0;
-		.components-button {
-			background: $gray-100;
-			border-radius: 12px;
-			height: 24px;
-			padding-left: $gap;
-			width: 65px;
-		}
-	}
-
 	.woocommerce-activity-card {
 		padding: $gap-largest/2 $gutter $gutter;
 		&__header {
-			margin-bottom: $gap-smaller;
+			margin-bottom: $gap-small;
 		}
 	}
 

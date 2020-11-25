@@ -74,6 +74,16 @@ describe( 'ActivityCard', () => {
 		expect( container ).toMatchSnapshot();
 	} );
 
+	test( 'supports a non-date "date" prop on a card', () => {
+		// We should be able to provide any string to the date prop.
+		const { container } = render(
+			<ActivityCard title="Inbox message" date="A long, long time ago">
+				This card has some content
+			</ActivityCard>
+		);
+		expect( container ).toMatchSnapshot();
+	} );
+
 	test( 'should render an action on a card', () => {
 		const noop = () => {};
 		const { container } = render(

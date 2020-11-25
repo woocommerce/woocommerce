@@ -29,7 +29,7 @@ const AccordionPanel = ( {
 	initialOpen,
 	children,
 } ) => {
-	const [ isPanelOpen, setIsPanelOpen ] = useState( initialOpen );
+	const [ isPanelOpen, setIsPanelOpen ] = useState( null );
 	const getTitleAndCount = ( titleText, countUnread ) => {
 		return (
 			<span className="woocommerce-accordion-header">
@@ -40,20 +40,24 @@ const AccordionPanel = ( {
 			</span>
 		);
 	};
+
+	const opened = isPanelOpen === null ? initialOpen : isPanelOpen;
+
 	const onToggle = () => {
-		setIsPanelOpen( ! isPanelOpen );
+		setIsPanelOpen( ! opened );
 	};
+
 	return (
 		<Card
 			size="large"
 			className={ classnames( className, 'woocommerce-accordion-card', {
-				'is-panel-opened': isPanelOpen,
+				'is-panel-opened': opened,
 			} ) }
 		>
 			<PanelBody
 				title={ getTitleAndCount( title, count ) }
-				initialOpen={ initialOpen }
-				onToggle={ () => onToggle() }
+				opened={ opened }
+				onToggle={ onToggle }
 			>
 				<PanelRow> { children } </PanelRow>
 			</PanelBody>

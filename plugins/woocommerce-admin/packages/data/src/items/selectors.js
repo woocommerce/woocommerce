@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
+import { getTotalCountResourceName } from './utils';
 
 export const getItems = ( state, itemType, query ) => {
 	const resourceName = getResourceName( itemType, query );
@@ -20,9 +21,9 @@ export const getItemsTotalCount = (
 	query,
 	defaultValue = 0
 ) => {
-	const resourceName = getResourceName( itemType, query );
-	const totalCount = state.items[ resourceName ]
-		? state.items[ resourceName ].totalCount
+	const resourceName = getTotalCountResourceName( itemType, query );
+	const totalCount = state.items.hasOwnProperty( resourceName )
+		? state.items[ resourceName ]
 		: defaultValue;
 	return totalCount;
 };

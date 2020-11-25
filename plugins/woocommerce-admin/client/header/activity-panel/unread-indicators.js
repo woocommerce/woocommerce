@@ -91,6 +91,6 @@ export function getUnapprovedReviews( select ) {
 	return false;
 }
 
-export function getUnreadStock() {
-	return getSetting( 'hasLowStock', false );
+export function getLowStockCount() {
+	return getSetting( 'lowStockCount', 0 );
 }

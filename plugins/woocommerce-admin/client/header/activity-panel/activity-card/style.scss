@@ -9,15 +9,11 @@
 
 	&:not(.woocommerce-empty-activity-card) {
 		display: grid;
-		grid-template-columns: 84px 1fr;
+		grid-template-columns: 50px 1fr;
 		grid-template-areas:
 			'icon header'
 			'icon body'
 			'icon actions';
-
-		@include breakpoint( '<782px' ) {
-			grid-template-columns: 76px 1fr;
-		}
 	}
 
 	&__button {
@@ -56,12 +52,11 @@
 
 	.woocommerce-activity-card__title {
 		margin: 0;
-		@include font-size( 13 );
+		@include font-size( 14 );
 		order: 2;
 
 		.woocommerce-empty-activity-card & {
 			color: $gray-900;
-			@include font-size( 16 );
 			font-style: normal;
 			line-height: 24px;
 			font-weight: normal;
@@ -70,12 +65,15 @@
 		.woocommerce-activity-card__button & {
 			margin-bottom: $gap-smaller;
 		}
+
+		a {
+			text-decoration: none;
+		}
 	}
 
 	.woocommerce-activity-card__date {
 		color: $gray-700;
-		text-transform: uppercase;
-		@include font-size( 11 );
+		@include font-size( 12 );
 		margin-bottom: $gap-small;
 		order: 1;
 	}
@@ -126,7 +124,7 @@
 		color: $gray-700;
 		font-style: normal;
 		font-weight: normal;
-		@include font-size( 14 );
+		@include font-size( 13 );
 		line-height: 20px;
 	}
 }
@@ -138,6 +136,12 @@
 	// Ensures any immediate child with a sibling has space between the items
 	& > * + * {
 		margin-left: 0.5em;
+	}
+
+	.components-button {
+		height: 24px;
+		padding: 4px 10px;
+		@include font-size( 11 );
 	}
 }
 
@@ -176,18 +180,8 @@
 		margin-right: $gutter;
 
 		.is-placeholder {
-			height: 48px;
-			width: 48px;
-		}
-	}
-
-	&.woocommerce-stock-activity-card,
-	&.woocommerce-review-activity-card {
-		.woocommerce-activity-card__icon {
-			.is-placeholder {
-				height: 60px;
-				width: 60px;
-			}
+			height: 33px;
+			width: 33px;
 		}
 	}
 
@@ -204,7 +198,7 @@
 	.woocommerce-activity-card__actions {
 		.is-placeholder {
 			width: 91px;
-			height: 34px;
+			height: 24px;
 		}
 	}
 }
@@ -318,13 +312,13 @@
 
 .woocommerce-review-activity-card__image-overlay__product,
 .woocommerce-stock-activity-card__image-overlay__product {
-	height: 60px;
+	height: 33px;
 	position: relative;
-	width: 60px;
+	width: 33px;
 
 	&.is-placeholder::before {
 		background-color: $gray-700;
-		border-radius: 50%;
+		border-radius: 2px;
 		content: '';
 		position: absolute;
 		left: 0;
@@ -349,6 +343,10 @@
 		color: $gray-700;
 		padding: 3px $gap-smaller;
 		border-radius: 3px;
+
+		&.out-of-stock {
+			color: $alert-red;
+		}
 	}
 
 	.woocommerce-stock-activity-card__edit-quantity {
@@ -357,8 +355,8 @@
 		margin-right: 10px;
 
 		input {
-			border-radius: 4px;
-			height: 36px;
+			border-radius: 2px;
+			height: 30px;
 
 			&[type='number'] {
 				-moz-appearance: textfield;
@@ -370,16 +368,6 @@
 				}
 			}
 		}
-	}
-
-	.components-button {
-		min-height: 34px;
-		padding: 2px 10px;
-		line-height: 26px;
-	}
-
-	.woocommerce-activity-card__title {
-		@include font-size( 15 );
 	}
 
 	.woocommerce-activity-card__subtitle {

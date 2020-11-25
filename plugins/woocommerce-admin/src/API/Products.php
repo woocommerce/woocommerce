@@ -24,6 +24,13 @@ class Products extends \WC_REST_Products_Controller {
 	protected $namespace = 'wc-analytics';
 
 	/**
+	 * Local cache of last order dates by ID.
+	 *
+	 * @var array
+	 */
+	protected $last_order_dates = array();
+
+	/**
 	 * Adds properties that can be embed via ?_embed=1.
 	 *
 	 * @return array
@@ -44,6 +51,13 @@ class Products extends \WC_REST_Products_Controller {
 		foreach ( $properties_to_embed as $property ) {
 			$schema['properties'][ $property ]['context'][] = 'embed';
 		}
+
+		$schema['properties']['last_order_date'] = array(
+			'description' => __( "The date the last order for this product was placed, in the site's timezone.", 'woocommerce-admin' ),
+			'type'        => 'date-time',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
 
 		return $schema;
 	}
@@ -111,6 +125,19 @@ class Products extends \WC_REST_Products_Controller {
 	}
 
 	/**
+	 * Hang onto last order date since it will get removed by wc_get_product().
+	 *
+	 * @param stdClass $object_data Single row from query results.
+	 * @return WC_Data
+	 */
+	public function get_object( $object_data ) {
+		if ( isset( $object_data->last_order_date ) ) {
+			$this->last_order_dates[ $object_data->ID ] = $object_data->last_order_date;
+		}
+		return parent::get_object( $object_data );
+	}
+
+	/**
 	 * Add `low_stock_amount` property to product data
 	 *
 	 * @param WC_Data         $object  Object data.
@@ -120,9 +147,15 @@ class Products extends \WC_REST_Products_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$data        = parent::prepare_object_for_response( $object, $request );
 		$object_data = $object->get_data();
+		$product_id  = $object_data['id'];
 
-		if ( $request->get_param( 'low_in_stock' ) && is_numeric( $object_data['low_stock_amount'] ) ) {
-			$data->data['low_stock_amount'] = $object_data['low_stock_amount'];
+		if ( $request->get_param( 'low_in_stock' ) ) {
+			if ( is_numeric( $object_data['low_stock_amount'] ) ) {
+				$data->data['low_stock_amount'] = $object_data['low_stock_amount'];
+			}
+			if ( isset( $this->last_order_dates[ $product_id ] ) ) {
+				$data->data['last_order_date'] = wc_rest_prepare_date_response( $this->last_order_dates[ $product_id ] );
+			}
 		}
 		$data->data['name'] = wp_strip_all_tags( $data->data['name'] );
 
@@ -138,7 +171,11 @@ class Products extends \WC_REST_Products_Controller {
 	 */
 	public static function add_wp_query_fields( $select, $wp_query ) {
 		if ( $wp_query->get( 'low_in_stock' ) ) {
-			$select .= ', low_stock_amount_meta.meta_value AS low_stock_amount';
+			$fields  = array(
+				'low_stock_amount_meta.meta_value AS low_stock_amount',
+				'MAX( product_lookup.date_created ) AS last_order_date',
+			);
+			$select .= ', ' . implode( ', ', $fields );
 		}
 
 		return $select;
@@ -199,8 +236,14 @@ class Products extends \WC_REST_Products_Controller {
 		}
 
 		if ( $wp_query->get( 'low_in_stock' ) ) {
+			$product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+
 			$join  = self::append_product_sorting_table_join( $join );
 			$join .= " LEFT JOIN {$wpdb->postmeta} AS low_stock_amount_meta ON {$wpdb->posts}.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount' ";
+			$join .= " LEFT JOIN {$product_lookup_table} product_lookup ON {$wpdb->posts}.ID = CASE
+				WHEN {$wpdb->posts}.post_type = 'product' THEN product_lookup.product_id
+				WHEN {$wpdb->posts}.post_type = 'product_variation' THEN product_lookup.variation_id
+			END";
 		}
 
 		return $join;

@@ -3,6 +3,7 @@
  */
 import TYPES from './action-types';
 import { getResourceName } from '../utils';
+import { getTotalCountResourceName } from './utils';
 
 const reducer = (
 	state = {
@@ -21,11 +22,16 @@ const reducer = (
 				return result;
 			}, {} );
 			const resourceName = getResourceName( itemType, query );
+			const totalResourceName = getTotalCountResourceName(
+				itemType,
+				query
+			);
 			return {
 				...state,
 				items: {
 					...state.items,
-					[ resourceName ]: { data: ids, totalCount },
+					[ resourceName ]: { data: ids },
+					[ totalResourceName ]: totalCount,
 				},
 				data: {
 					...state.data,
