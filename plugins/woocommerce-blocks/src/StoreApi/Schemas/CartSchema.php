@@ -288,6 +288,7 @@ class CartSchema extends AbstractSchema {
 					'properties' => $this->force_schema_readonly( $this->error_schema->get_properties() ),
 				],
 			],
+			self::EXTENDING_KEY       => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
 
@@ -338,6 +339,7 @@ class CartSchema extends AbstractSchema {
 				]
 			),
 			'errors'                  => $cart_errors,
+			self::EXTENDING_KEY       => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}
 
