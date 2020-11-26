@@ -364,14 +364,15 @@ class CustomerEffortScoreTracks {
 
 		$this->enqueue_to_ces_tracks(
 			array(
-				'action'    => self::SETTINGS_CHANGE_ACTION_NAME,
-				'label'     => __(
+				'action'         => self::SETTINGS_CHANGE_ACTION_NAME,
+				'label'          => __(
 					'How easy was it to update your settings?',
 					'woocommerce-admin'
 				),
-				'pagenow'   => 'woocommerce_page_wc-settings',
-				'adminpage' => 'woocommerce_page_wc-settings',
-				'props'     => array(),
+				'onsubmit_label' => $this->onsubmit_label,
+				'pagenow'        => 'woocommerce_page_wc-settings',
+				'adminpage'      => 'woocommerce_page_wc-settings',
+				'props'          => (object) array(),
 			)
 		);
 	}

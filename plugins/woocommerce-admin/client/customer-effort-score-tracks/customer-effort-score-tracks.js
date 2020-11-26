@@ -98,10 +98,11 @@ function CustomerEffortScoreTracks( {
 		} );
 	};
 
-	const recordScore = ( score ) => {
+	const recordScore = ( score, comments ) => {
 		recordEvent( 'ces_feedback', {
 			action,
 			score,
+			comments: comments || '',
 			store_age: storeAge,
 			...trackProps,
 		} );
@@ -153,7 +154,6 @@ CustomerEffortScoreTracks.propTypes = {
 	 * Whether tracking is allowed or not.
 	 */
 	allowTracking: PropTypes.bool,
-
 	/**
 	 * Whether props are still being resolved.
 	 */
