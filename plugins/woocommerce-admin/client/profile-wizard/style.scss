@@ -474,30 +474,6 @@
 	cursor: help;
 }
 
-.components-modal__frame.woocommerce-profile-wizard__usage-modal {
-	width: 600px;
-	max-width: 100%;
-
-	.components-modal__header {
-		border-bottom: 0;
-		margin-bottom: 0;
-	}
-
-	.woocommerce-profile-wizard__usage-wrapper {
-		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
-
-		a {
-			color: $studio-gray-60;
-		}
-
-		button.is-primary {
-			align-self: flex-end;
-		}
-	}
-}
-
 .woocommerce-business-extensions {
 	margin-left: -$gap;
 	margin-right: -$gap;

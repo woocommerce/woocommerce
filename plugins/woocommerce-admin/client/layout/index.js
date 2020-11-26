@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { get, isFunction, identity } from 'lodash';
 import { parse } from 'qs';
 import { Spinner } from '@woocommerce/components';
-import { getHistory } from '@woocommerce/navigation';
+import { getHistory, getQuery } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	PLUGINS_STORE_NAME,
@@ -30,6 +30,12 @@ import './navigation';
 
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
+);
+
+const WCPayUsageModal = lazy( () =>
+	import(
+		/* webpackChunkName: "wcpay-usage-modal" */ '../task-list/tasks/payments/wcpay-usage-modal'
+	)
 );
 
 export class PrimaryLayout extends Component {
@@ -121,6 +127,15 @@ class _Layout extends Component {
 		return parse( search );
 	}
 
+	isWCPaySettingsPage() {
+		const { page, section, tab } = getQuery();
+		return (
+			page === 'wc-settings' &&
+			tab === 'checkout' &&
+			section === 'woocommerce_payments'
+		);
+	}
+
 	render() {
 		const { isEmbedded, ...restProps } = this.props;
 		const { location, page } = this.props;
@@ -145,6 +160,12 @@ class _Layout extends Component {
 							<Controller { ...restProps } query={ query } />
 						</div>
 					</PrimaryLayout>
+				) }
+
+				{ isEmbedded && this.isWCPaySettingsPage() && (
+					<Suspense fallback={ null }>
+						<WCPayUsageModal />
+					</Suspense>
 				) }
 			</div>
 		);

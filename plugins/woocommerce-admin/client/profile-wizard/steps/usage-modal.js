@@ -6,12 +6,7 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import interpolateComponents from 'interpolate-components';
-import {
-	Button,
-	CheckboxControl,
-	FormToggle,
-	Modal,
-} from '@wordpress/components';
+import { Button, Modal } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -19,17 +14,9 @@ class UsageModal extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			allowTracking: props.allowTracking,
 			isLoadingScripts: false,
+			isRequestStarted: false,
 		};
-
-		this.onTrackingChange = this.onTrackingChange.bind( this );
-	}
-
-	onTrackingChange() {
-		this.setState( {
-			allowTracking: ! this.state.allowTracking,
-		} );
 	}
 
 	async componentDidUpdate( prevProps, prevState ) {
@@ -40,7 +27,13 @@ class UsageModal extends Component {
 			onContinue,
 			createNotice,
 		} = this.props;
-		const { isLoadingScripts } = this.state;
+		const { isLoadingScripts, isRequestStarted } = this.state;
+
+		// We can't rely on isRequesting props only because option update might be triggered by other component.
+		if ( ! isRequestStarted ) {
+			return;
+		}
+
 		const isRequestSuccessful =
 			! isRequesting &&
 			! isLoadingScripts &&
@@ -66,13 +59,17 @@ class UsageModal extends Component {
 		}
 	}
 
-	updateTracking() {
-		const { allowTracking } = this.state;
+	updateTracking( { allowTracking } ) {
 		const { updateOptions } = this.props;
 
 		if ( allowTracking && typeof window.wcTracks.enable === 'function' ) {
 			this.setState( { isLoadingScripts: true } );
 			window.wcTracks.enable( () => {
+				// Don't update state if component is unmounted already
+				if ( ! this._isMounted ) {
+					return;
+				}
+
 				this.setState( { isLoadingScripts: false } );
 			} );
 		} else if ( ! allowTracking ) {
@@ -80,9 +77,18 @@ class UsageModal extends Component {
 		}
 
 		const trackingValue = allowTracking ? 'yes' : 'no';
+		this.setState( { isRequestStarted: true } );
 		updateOptions( {
 			woocommerce_allow_tracking: trackingValue,
 		} );
+	}
+
+	componentDidMount() {
+		this._isMounted = true;
+	}
+
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 	render() {
@@ -94,64 +100,63 @@ class UsageModal extends Component {
 			return null;
 		}
 
-		const { allowTracking } = this.state;
-		const { isRequesting } = this.props;
-		const trackingMessage = interpolateComponents( {
-			mixedString: __(
-				'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
-					'that shows us how WooCommerce is used. No personal data is tracked or stored.',
-				'woocommerce-admin'
-			),
-			components: {
-				link: (
-					<Link
-						href="https://woocommerce.com/usage-tracking"
-						target="_blank"
-						type="external"
-					/>
+		const {
+			isRequesting,
+			title = __( 'Build a better WooCommerce', 'woocommerce-admin' ),
+			message = interpolateComponents( {
+				mixedString: __(
+					'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
+						'that shows us how WooCommerce is used. No personal data is tracked or stored.',
+					'woocommerce-admin'
 				),
-			},
-		} );
+				components: {
+					link: (
+						<Link
+							href="https://woocommerce.com/usage-tracking"
+							target="_blank"
+							type="external"
+						/>
+					),
+				},
+			} ),
+			dismissActionText = __( 'No thanks', 'woocommerce-admin' ),
+			acceptActionText = __( 'Yes, count me in!', 'woocommerce-admin' ),
+		} = this.props;
+
+		const { isRequestStarted } = this.state;
+		const isBusy = isRequestStarted && isRequesting;
 
 		return (
 			<Modal
-				title={ __(
-					'Build a better WooCommerce',
-					'woocommerce-admin'
-				) }
+				title={ title }
+				isDismissible={ this.props.isDismissible }
 				onRequestClose={ () => this.props.onClose() }
-				className="woocommerce-profile-wizard__usage-modal"
+				className="woocommerce-usage-modal"
 			>
-				<div className="woocommerce-profile-wizard__usage-wrapper">
-					<div className="woocommerce-profile-wizard__usage-modal-message">
-						{ trackingMessage }
+				<div className="woocommerce-usage-modal__wrapper">
+					<div className="woocommerce-usage-modal__message">
+						{ message }
 					</div>
-					<div className="woocommerce-profile-wizard__tracking">
-						<CheckboxControl
-							className="woocommerce-profile-wizard__tracking-checkbox"
-							checked={ allowTracking }
-							label={ __(
-								'Yes, count me in!',
-								'woocommerce-admin'
-							) }
-							onChange={ this.onTrackingChange }
-						/>
-
-						<FormToggle
-							aria-hidden="true"
-							checked={ allowTracking }
-							onChange={ this.onTrackingChange }
-							onClick={ ( e ) => e.stopPropagation() }
-							tabIndex="-1"
-						/>
+					<div className="woocommerce-usage-modal__actions">
+						<Button
+							isSecondary
+							isBusy={ isBusy }
+							onClick={ () =>
+								this.updateTracking( { allowTracking: false } )
+							}
+						>
+							{ dismissActionText }
+						</Button>
+						<Button
+							isPrimary
+							isBusy={ isBusy }
+							onClick={ () =>
+								this.updateTracking( { allowTracking: true } )
+							}
+						>
+							{ acceptActionText }
+						</Button>
 					</div>
-					<Button
-						isPrimary
-						isBusy={ isRequesting }
-						onClick={ () => this.updateTracking() }
-					>
-						{ __( 'Continue', 'woocommerce-admin' ) }
-					</Button>
 				</div>
 			</Modal>
 		);

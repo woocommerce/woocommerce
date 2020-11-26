@@ -141,6 +141,69 @@
 	}
 }
 
+.components-modal__frame.woocommerce-usage-modal {
+	width: 600px;
+	max-width: 100%;
+
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.woocommerce-usage-modal__wrapper {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+
+		a {
+			color: $studio-gray-60;
+		}
+
+		button.is-primary {
+			align-self: flex-end;
+		}
+	}
+
+	.woocommerce-usage-modal__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}
+
+.woocommerce-payments__usage-modal {
+	.components-modal__header {
+		height: auto;
+		padding: 24px 24px 0 24px;
+
+		.components-modal__header-heading {
+			font-size: 24px;
+			line-height: 32px;
+			margin: 0 0 24px 0;
+		}
+	}
+
+	.woocommerce-payments__usage-modal-message {
+		padding: $gap 0;
+		font-size: 16px;
+		line-height: 24px;
+	}
+
+	.woocommerce-payments__usage-footer {
+		display: flex;
+		justify-content: flex-end;
+		padding: $gap 0;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}
+
 .components-modal__frame.woocommerce-cart-modal {
 	width: 600px;
 	max-width: 100%;

@@ -73,13 +73,13 @@ export async function completeStoreDetailsSection( storeDetails = {} ) {
 		text: 'Build a better WooCommerce',
 	} );
 
-	// Query for "Continue" buttons
-	const continueButtons = await page.$$( 'button.is-primary' );
-	expect( continueButtons ).toHaveLength( 2 );
+	// Query for primary buttons: "Continue" and "Yes, count me in"
+	const primaryButtons = await page.$$( 'button.is-primary' );
+	expect( primaryButtons ).toHaveLength( 2 );
 
 	await Promise.all( [
-		// Click on "Continue" button of the usage pop-up window to move to the next step
-		continueButtons[ 1 ].click(),
+		// Click on "No thanks" button of the usage pop-up window to move to the next step
+		await page.click( 'button.is-secondary', { text: 'No thanks' } ),
 
 		// Wait for "In which industry does the store operate?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),

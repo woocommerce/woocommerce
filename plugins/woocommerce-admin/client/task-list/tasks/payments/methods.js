@@ -28,6 +28,7 @@ import PayPal from './paypal';
 import Klarna from './klarna';
 import PayFast from './payfast';
 import EWay from './eway';
+import WCPayUsageModal from './wcpay-usage-modal';
 
 export function installActivateAndConnectWcpay(
 	resolve,
@@ -147,6 +148,7 @@ export function getPaymentMethods( {
 					{ wcPayIsConnected && wcPaySettingsLink }
 					{ ! wcPayIsConnected && <p>{ tosPrompt }</p> }
 					{ profileItems.setup_client && <p>{ wcPayDocPrompt }</p> }
+					<WCPayUsageModal />
 				</Fragment>
 			),
 			before: <WCPayIcon />,
