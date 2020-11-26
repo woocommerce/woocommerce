@@ -146,6 +146,11 @@ jQuery( function( $ ) {
 		}
 		if ( is_virtual ) {
 			$( '.show_if_virtual' ).show();
+
+			// If user enables virtual while on shipping tab, switch to general tab.
+			if ( $( '.shipping_options.shipping_tab' ).hasClass( 'active' ) ) {
+				$( '.general_options.general_tab > a' ).trigger( 'click' );
+			}
 		}
 
         $( '.show_if_' + product_type ).show();
