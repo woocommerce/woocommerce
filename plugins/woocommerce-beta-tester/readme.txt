@@ -1,8 +1,8 @@
 === WooCommerce Beta Tester ===
-Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley, peterfabian1000, rodrigosprimo
+Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley, peterfabian1000, rodrigosprimo, wpmuguru
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
-Tested up to: 5.2
+Tested up to: 5.6
 Stable tag: 2.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -52,6 +52,14 @@ Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/).
 See our [contributing guidelines here](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md).
 
 == Changelog ==
+
+= 2.0.2 =
+
+* Fix notice for undefined `item`
+* Fix auto_update_plugin filter reference
+* Fix including SSR in bug report
+* Fix style in version modal header
+* Add check for WooCommerce installed in default location
 
 = 2.0.1 =
 * Changes to make this plugin compatible with the upcoming WooCommerce 3.6
