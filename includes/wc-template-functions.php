@@ -3004,7 +3004,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( false === $args['selected'] && $args['attribute'] && $args['product'] instanceof WC_Product ) {
 			$selected_key = 'attribute_' . sanitize_title( $args['attribute'] );
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] );
+			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( wp_unslash( urldecode( $_REQUEST[ $selected_key ] ) ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] );
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 
