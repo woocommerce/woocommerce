@@ -19,7 +19,7 @@ jQuery( function ( $ ) {
 				)
 			) {
 				/* State/Country select boxes */
-				this.states = $.parseJSON( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
+				this.states = JSON.parse( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
 
 			$( '.js_field-country' ).selectWoo().change( this.change_country );

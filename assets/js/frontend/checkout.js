@@ -191,7 +191,7 @@ jQuery( function( $ ) {
 		},
 		is_valid_json: function( raw_json ) {
 			try {
-				var json = $.parseJSON( raw_json );
+				var json = JSON.parse( raw_json );
 
 				return ( json && 'object' === typeof json );
 			} catch ( e ) {
@@ -507,9 +507,8 @@ jQuery( function( $ ) {
 				$.ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
-					data:		new FormData( this ),
-					contentType: false,
-					processData: false,
+					data:		$form.serialize(),
+					dataType:   'json',
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();

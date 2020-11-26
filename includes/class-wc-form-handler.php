@@ -906,12 +906,9 @@ class WC_Form_Handler {
 		}
 
 		// Prevent parent variable product from being added to cart.
-		if ( empty( $variation_id ) && $product->is_type( 'variable' ) ) {
-			$url          = get_permalink( $product_id );
-			$product_name = $product->get_name();
-
-			/* translators: %1$s: Product link, %2$s: Product title, %3$s: Product name. */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%3$s</a>.', 'woocommerce' ), esc_url( $url ), esc_html( $product_name ), esc_html( $product_name ) ), 'error' );
+		if ( empty( $variation_id ) && $product && $product->is_type( 'variable' ) ) {
+			/* translators: 1: product link, 2: product name */
+			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
 
 			return false;
 		}

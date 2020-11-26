@@ -71,7 +71,7 @@ function wc_get_orders( $args ) {
  *
  * @since  2.2
  *
- * @param  mixed $the_order Post object or post ID of the order.
+ * @param mixed $the_order       Post object or post ID of the order.
  *
  * @return bool|WC_Order|WC_Order_Refund
  */

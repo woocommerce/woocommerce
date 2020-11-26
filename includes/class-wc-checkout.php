@@ -1158,7 +1158,16 @@ class WC_Checkout {
 
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
-				if ( $order->needs_payment() ) {
+				/**
+				 * Note that woocommerce_cart_needs_payment is only used in
+				 * WC_Checkout::process_checkout() to keep backwards compatibility.
+				 * Use woocommerce_order_needs_payment instead.
+				 *
+				 * Note that at this point you can't rely on the Cart Object anymore,
+				 * since it could be empty see:
+				 * https://github.com/woocommerce/woocommerce/issues/24631
+				 */
+				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
 					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 				} else {
 					$this->process_order_without_payment( $order_id );

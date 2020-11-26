@@ -360,7 +360,7 @@
 	}
 
 	.addons-button-solid {
-		background-color: #955a89;
+		background-color:#674399;
 		color: #fff;
 	}
 
@@ -376,6 +376,16 @@
 
 	.addons-button-outline-green:hover {
 		color: #73ae39;
+		opacity: 0.8;
+	}
+
+	.addons-button-outline-purple {
+		border: 1px solid #674399;
+		color: #674399;
+	}
+
+	.addons-button-outline-purple:hover {
+		color: #674399;
 		opacity: 0.8;
 	}
 
