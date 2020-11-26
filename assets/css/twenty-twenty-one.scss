@@ -1215,6 +1215,23 @@ a.reset_variations {
 				margin-top: 0;
 			}
 		}
+
+		.woocommerce-Addresses {
+			margin-top: -1rem;
+
+			.woocommerce-Address-title {
+				h3 {
+					display: inline-block;
+					margin-right: 1rem;
+					font-size: 1.8rem;
+					margin-top: 2rem;
+				}
+			}
+
+			address {
+				line-height: 1.8rem;
+			}
+		}
 	}
 
 	table.account-orders-table {
