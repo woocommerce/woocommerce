@@ -174,7 +174,7 @@ a.button {
 	justify-content: center;
 
 	&::before {
-		content: '';
+		content: "";
 		float: left;
 		padding-top: 100%;
 	}
@@ -242,6 +242,7 @@ a.button {
 }
 
 #main {
+
 	.woocommerce-error,
 	.woocommerce-info {
 		font-family: $headings;
@@ -783,6 +784,7 @@ a.reset_variations {
 
 		li {
 			display: inline-flex !important;
+
 			a {
 				color: $body-color;
 				text-decoration: none;
@@ -1220,6 +1222,7 @@ a.reset_variations {
 			margin-top: -1rem;
 
 			.woocommerce-Address-title {
+
 				h3 {
 					display: inline-block;
 					margin-right: 1rem;
@@ -1230,6 +1233,54 @@ a.reset_variations {
 
 			address {
 				line-height: 1.8rem;
+			}
+		}
+
+		.woocommerce-address-fields {
+
+			label {
+				font-size: 1.5rem;
+				margin-bottom: 0.1rem;
+			}
+
+			input,
+			.selection {
+				font-size: 1.5rem;
+				padding-top: 0.3rem;
+				padding-bottom: 0.3rem;
+			}
+
+			input {
+				border: 3px solid black;
+			}
+
+			.form-row {
+				margin-top: 1.5rem !important;
+				margin-bottom: 0 !important;
+			}
+
+			#billing_company_field {
+				padding-top: 1.5rem !important;
+			}
+
+			.select2-selection {
+				border: 2px solid black;
+				height: 3rem;
+				padding-top: 0.5rem;
+				margin-top: -1rem;
+			}
+
+			.select2-selection__arrow {
+				position: absolute;
+				top: -0.2rem;
+			}
+
+			.select2-dropdown {
+				border: 2px solid black !important;
+			}
+
+			.woocommerce-address-fields__field-wrapper {
+				margin-bottom: 2rem;
 			}
 		}
 	}
@@ -1352,7 +1403,8 @@ a.reset_variations {
 		border-radius: var(--form--border-radius);
 	}
 
-	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+	.select2-container--focus .select2-selection,
+	.select2-container--open .select2-selection {
 		outline-offset: 2px;
 		outline: 2px dotted var(--form--border-color);
 	}
@@ -1385,6 +1437,7 @@ a.reset_variations {
 	margin-bottom: 2rem;
 	padding: 1rem;
 }
+
 .woocommerce-form-coupon {
 	background: #eee;
 	padding: 1rem;
@@ -1687,7 +1740,8 @@ a.reset_variations {
 		height: 46px;
 	}
 
-	.select2-container--focus .select2-selection,.select2-container--open .select2-selection {
+	.select2-container--focus .select2-selection,
+	.select2-container--open .select2-selection {
 		outline-offset: 2px;
 		outline: 2px dotted var(--form--border-color);
 	}
@@ -2349,6 +2403,7 @@ a.reset_variations {
      * Home page
      */
 	.home #main {
+
 		[class*="woocommerce columns-"] {
 			word-break: break-word;
 			max-width: var(--responsive--aligndefault-width);
@@ -2610,7 +2665,8 @@ a.reset_variations {
 			}
 		}
 
-		button[name="update_cart"],button[name="apply_coupon"] {
+		button[name="update_cart"],
+		button[name="apply_coupon"] {
 			padding: 0.5rem;
 			color: var(--global--color-primary);
 			background: var(--global--color-background);
@@ -2620,7 +2676,6 @@ a.reset_variations {
 			&:active {
 				color: var(--global--color-background);
 				background: var(--global--color-primary);
-
 			}
 		}
 	}
