@@ -42,7 +42,7 @@ const runCreateCouponTest = () => {
 			// Publish coupon, verify that it was published. Trash coupon, verify that it was trashed.
 			await verifyPublishAndTrash(
 				'#publish',
-				'#message',
+				'.notice',
 				'Coupon updated.',
 				'1 coupon moved to the Trash.'
 			);

@@ -2,6 +2,9 @@ import { AxiosResponse } from 'axios';
 import { AxiosInterceptor } from './axios-interceptor';
 import { HTTPResponse } from '../http-client';
 
+/**
+ * An interceptor for transforming the responses from axios into a consistent format for package consumers.
+ */
 export class AxiosResponseInterceptor extends AxiosInterceptor {
 	/**
 	 * Transforms the Axios response into our HTTP response.
