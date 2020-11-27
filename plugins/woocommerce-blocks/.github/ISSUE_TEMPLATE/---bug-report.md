@@ -21,7 +21,7 @@ A clear and concise description of what you expected to happen.
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
 
-## Enviroment
+## Environment
 ### WordPress (please complete the following information):
 * Core version: [e.g. 5.0.3]
 * Gutenberg version (if installed): [e.g. 4.8.0]
