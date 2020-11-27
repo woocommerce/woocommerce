@@ -2,6 +2,7 @@
  * External dependencies
  */
 const { pressKeyWithModifier } = require( '@wordpress/e2e-test-utils' );
+const config = require( 'config' );
 
 /**
  * Internal dependencies
@@ -22,6 +23,12 @@ const {
 	SHOP_PAGE,
 	SHOP_PRODUCT_PAGE
 } = require( './constants' );
+
+const gotoMyAccount = async () => {
+	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
+		waitUntil: 'networkidle0',
+	} );
+};
 
 const shopper = {
 	addToCart: async () => {
@@ -157,14 +164,10 @@ const shopper = {
 		} );
 	},
 
-	gotoMyAccount: async () => {
-		await page.goto( SHOP_MY_ACCOUNT_PAGE, {
-			waitUntil: 'networkidle0',
-		} );
-	},
+	gotoMyAccount: gotoMyAccount,
 
 	login: async () => {
-		await this.gotoMyAccount();
+		await gotoMyAccount();
 
 		await expect( page.title() ).resolves.toMatch( 'My account' );
 
