@@ -91,6 +91,8 @@ describe( 'Cart page', () => {
 | `verifyCheckboxIsSet` | `selector` | Verify that a checkbox is checked |
 | `verifyCheckboxIsUnset` | `selector` | Verify that a checkbox is unchecked |
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
+| `clickFilter` | `selector` | Click on a list page filter |
+| `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 |----------|------------|-------------|
 
 ### Test Utilities

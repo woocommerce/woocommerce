@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+- Merchant Order Status Filter tests
+
 ## Fixed
 
 - Flaky Create Product, Coupon, and Order tests
