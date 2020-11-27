@@ -2528,6 +2528,59 @@ a.reset_variations {
 		p:first-of-type {
 			margin-bottom: 2rem;
 		}
+
+		#add_payment_method {
+			ul {
+				list-style-type: none !important;
+			}
+
+			.woocommerce-PaymentMethod {
+				margin-bottom: 1.5rem;
+			}
+		}
+
+		input[type=radio] {
+			float: left;
+			margin-top: 0.5rem;
+			margin-right: 0.5rem;
+		}
+
+		label {
+			font-size: 1.5rem;
+			display: flex;
+			justify-content: flex-end;
+
+			img {
+				margin-left: 10px !important;
+			}
+
+			img:first-child {
+				margin-left: auto !important;
+			}
+
+			img:last-child {
+				margin-right: 5px !important;
+			}
+		}
+
+		.woocommerce-PaymentBox {
+			p, label {
+				font-size: 1.3rem;
+			}
+
+			p {
+				margin-bottom: 1.5rem;
+			}
+
+			br {
+				display: none;
+			}
+
+			.woocommerce_error {
+				margin-top: 1rem;
+				margin-bottom: 0;
+			}
+		}
 	}
 
 	.woocommerce-MyAccount-navigation-link {
@@ -2603,7 +2656,7 @@ a.reset_variations {
 			&:active {
 				color: var(--global--color-background);
 				background: var(--global--color-primary);
-				
+
 			}
 		}
 	}
