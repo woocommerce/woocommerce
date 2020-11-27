@@ -1232,6 +1232,52 @@ a.reset_variations {
 				line-height: 1.8rem;
 			}
 		}
+
+		.woocommerce-address-fields {
+			label {
+				font-size: 1.5rem;
+				margin-bottom: 0.1rem;
+			}
+
+			input, .selection {
+				font-size: 1.5rem;
+				padding-top: 0.3rem;
+				padding-bottom: 0.3rem;
+			}
+
+			input {
+				border: 3px solid black;
+			}
+
+			.form-row {
+				margin-top: 1.5rem !important;
+				margin-bottom: 0 !important;
+			}
+
+			#billing_company_field {
+				padding-top: 1.5rem !important;
+			}
+
+			.select2-selection {
+				border: 2px solid black;
+				height: 3rem;
+				padding-top: 0.5rem;
+				margin-top: -1rem;
+			}
+
+			.select2-selection__arrow {
+				position: absolute;
+				top: -0.2rem;
+			}
+
+			.select2-dropdown {
+				border: 2px solid black !important;
+			}
+
+			.woocommerce-address-fields__field-wrapper {
+				margin-bottom: 2rem;
+			}
+		}
 	}
 
 	table.account-orders-table {
@@ -2620,7 +2666,6 @@ a.reset_variations {
 			&:active {
 				color: var(--global--color-background);
 				background: var(--global--color-primary);
-				
 			}
 		}
 	}
