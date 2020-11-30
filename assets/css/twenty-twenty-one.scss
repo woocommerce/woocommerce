@@ -2231,6 +2231,7 @@ a.reset_variations {
 		.onsale {
 			font-size: 1.2rem;
 		}
+
 	}
 }
 
@@ -2278,6 +2279,18 @@ a.reset_variations {
 		.onsale {
 			right: auto;
 			left: -1rem;
+		}
+
+		.woocommerce-tabs {
+			ul {
+				li {
+					font-size: 1rem;
+
+					a {
+						padding: calc( 0.75 * var(--button--padding-vertical) ) calc( 0.75 * var(--button--padding-horizontal) );
+					}
+				}
+			}
 		}
 
 		table.shop_table_responsive {
