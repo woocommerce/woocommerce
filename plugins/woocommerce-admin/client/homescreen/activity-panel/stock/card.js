@@ -86,9 +86,9 @@ export class ProductStockCard extends Component {
 
 		this.setState( { editing: false, edited: true } );
 
-		const results = await updateProductStock( product, quantity );
+		const success = await updateProductStock( product, quantity );
 
-		if ( results.success ) {
+		if ( success ) {
 			createNotice(
 				'success',
 				sprintf(

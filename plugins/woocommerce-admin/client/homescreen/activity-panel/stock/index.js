@@ -42,14 +42,14 @@ export class StockPanel extends Component {
 	async updateStock( product, quantity ) {
 		const { invalidateResolution, updateProductStock } = this.props;
 
-		const result = await updateProductStock( product, quantity );
+		const success = await updateProductStock( product, quantity );
 
-		if ( result.success ) {
+		if ( success ) {
 			// Request more low stock products.
 			invalidateResolution( 'getItems', [ 'products', productsQuery ] );
 		}
 
-		return result;
+		return success;
 	}
 
 	renderProducts() {

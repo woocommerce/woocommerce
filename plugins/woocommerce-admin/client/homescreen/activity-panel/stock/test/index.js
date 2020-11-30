@@ -30,9 +30,7 @@ describe( 'StockPanel', () => {
 	it( 'should request more products when one is updated', async () => {
 		const createNotice = jest.fn();
 		const invalidateResolution = jest.fn();
-		const updateProductStock = jest
-			.fn()
-			.mockResolvedValue( { success: true } );
+		const updateProductStock = jest.fn().mockResolvedValue( true );
 
 		const { getByRole } = render(
 			<StockPanel
