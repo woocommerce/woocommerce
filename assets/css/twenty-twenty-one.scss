@@ -1906,6 +1906,46 @@ a.reset_variations {
 	}
 }
 
+.account-payment-methods-table {
+	padding-top: 0 !important;
+	margin-bottom: 1rem;
+
+	table,
+	tr {
+		border-style: hidden;
+	}
+
+	tr:nth-child(2n+1) {
+
+		td {
+
+			background: darken(#D1E4DD, 3%);
+		}
+	}
+
+	td.payment-method-actions {
+		padding-right: 0.5rem;
+		padding-left: 0.5rem;
+		padding-top: 0.3rem;
+		padding-bottom: 0.3rem;
+
+		display: grid;
+		border: none;
+
+		font-size: 0;
+
+		a {
+			width: 100%;
+			padding-top: 0.3rem !important;
+			padding-bottom: 0.3rem !important;
+			margin-top: 0.5rem !important;
+			margin-bottom: 0.5rem !important;
+
+			@include inversebuttoncolors();
+		}
+	}
+}
+
 
 .woocommerce-terms-and-conditions-wrapper {
 	margin-bottom: 5rem;
