@@ -299,11 +299,22 @@ class Controller extends \WC_REST_Reports_Controller {
 
 	/**
 	 * Get order statuses without prefixes.
+	 * Includes unregistered statuses that have been marked "actionable".
 	 *
 	 * @return array
 	 */
-	public function get_order_statuses() {
-		return array_keys( $this->get_order_status_labels() );
+	public static function get_order_statuses() {
+		// Allow all statuses selected as "actionable" - this may include unregistered statuses.
+		// See: https://github.com/woocommerce/woocommerce-admin/issues/5592.
+		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', array() );
+
+		// See WC_REST_Orders_V2_Controller::get_collection_params() re: any/trash statuses.
+		$registered_statuses = array_merge( array( 'any', 'trash' ), array_keys( self::get_order_status_labels() ) );
+
+		// Merge the status arrays (using flip to avoid array_unique()).
+		$allowed_statuses = array_keys( array_merge( array_flip( $registered_statuses ), array_flip( $actionable_statuses ) ) );
+
+		return $allowed_statuses;
 	}
 
 	/**
@@ -311,7 +322,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_order_status_labels() {
+	public static function get_order_status_labels() {
 		$order_statuses = array();
 
 		foreach ( wc_get_order_statuses() as $key => $label ) {

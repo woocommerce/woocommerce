@@ -6,6 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 
 /**
  * WC Tests API Orders
@@ -30,6 +31,24 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Test the order status (it should allow all actionable statuses).
+	 */
+	public function test_order_status() {
+		// Add a status to the actionable list.
+		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', array() );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'test-status' ) );
+
+		// Ideally this would be a test using an endpoint, but the option value is used
+		// at `rest_api_init` time to create the collection param schema. It's too late
+		// here to test with the actual endpoint code. Instantiating a new WP_REST_Server
+		// didn't seem to work either.
+		$this->assertContains( 'test-status', ReportsController::get_order_statuses() );
+
+		// Restore the actionable statuses.
+		update_option( 'woocommerce_actionable_order_statuses', $actionable_statuses );
 	}
 
 	/**

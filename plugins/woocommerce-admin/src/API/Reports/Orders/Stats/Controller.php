@@ -403,7 +403,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 			'default'           => null,
 			'items'             => array(
-				'enum' => $this->get_order_statuses(),
+				'enum' => self::get_order_statuses(),
 				'type' => 'string',
 			),
 		);
@@ -413,7 +413,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'enum' => $this->get_order_statuses(),
+				'enum' => self::get_order_statuses(),
 				'type' => 'string',
 			),
 		);

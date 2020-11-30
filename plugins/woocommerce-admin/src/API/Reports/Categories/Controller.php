@@ -285,7 +285,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'enum' => $this->get_order_statuses(),
+				'enum' => self::get_order_statuses(),
 				'type' => 'string',
 			),
 		);
@@ -295,7 +295,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'enum' => $this->get_order_statuses(),
+				'enum' => self::get_order_statuses(),
 				'type' => 'string',
 			),
 		);
