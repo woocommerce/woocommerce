@@ -2275,6 +2275,11 @@ a.reset_variations {
 	.woocommerce,
 	.woocommerce-page {
 
+		.onsale {
+			right: auto;
+			left: -1rem;
+		}
+
 		table.shop_table_responsive {
 
 			.button {
@@ -2490,8 +2495,6 @@ a.reset_variations {
 		}
 
 		.onsale {
-			right: auto;
-			left: -1rem;
 			font-size: 1rem;
 		}
 	}
