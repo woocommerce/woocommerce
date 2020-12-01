@@ -126,7 +126,7 @@ class CartModal extends Component {
 		return (
 			<Modal
 				title={ __(
-					'Would you like to purchase and install the following features now?',
+					'Would you like to add the following paid features to your store now?',
 					'woocommerce-admin'
 				) }
 				onRequestClose={ () => this.onClose() }
@@ -155,7 +155,7 @@ class CartModal extends Component {
 						isBusy={ purchaseNowButtonBusy }
 						onClick={ () => this.onClickPurchaseNow() }
 					>
-						{ __( 'Purchase & install now', 'woocommerce-admin' ) }
+						{ __( 'Buy now', 'woocommerce-admin' ) }
 					</Button>
 				</div>
 			</Modal>
