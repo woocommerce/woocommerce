@@ -583,6 +583,7 @@ return array(
 		'JH' => __( 'Jharkhand', 'woocommerce' ),
 		'KA' => __( 'Karnataka', 'woocommerce' ),
 		'KL' => __( 'Kerala', 'woocommerce' ),
+		'LA' => __( 'Ladakh', 'woocommerce' ),
 		'MP' => __( 'Madhya Pradesh', 'woocommerce' ),
 		'MH' => __( 'Maharashtra', 'woocommerce' ),
 		'MN' => __( 'Manipur', 'woocommerce' ),
