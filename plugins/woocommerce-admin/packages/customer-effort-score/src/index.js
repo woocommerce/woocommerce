@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { noop } from 'lodash';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
@@ -12,6 +11,8 @@ import { withDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import CustomerFeedbackModal from './customer-feedback-modal';
+
+const noop = () => {};
 
 /**
  * Use `CustomerEffortScore` to gather a customer effort score.
@@ -40,7 +41,11 @@ function CustomerEffortScore( {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
 
-	if ( shouldCreateNotice ) {
+	useEffect( () => {
+		if ( ! shouldCreateNotice ) {
+			return;
+		}
+
 		createNotice( 'success', label, {
 			actions: [
 				{
@@ -59,7 +64,9 @@ function CustomerEffortScore( {
 		setShouldCreateNotice( false );
 
 		onNoticeShownCallback();
+	}, [ shouldCreateNotice ] );
 
+	if ( shouldCreateNotice ) {
 		return null;
 	}
 

@@ -367,7 +367,14 @@ class Loader {
 		wp_register_script(
 			'wc-customer-effort-score',
 			self::get_url( 'customer-effort-score/index', 'js' ),
-			array(),
+			array(
+				'wp-components',
+				'wp-compose',
+				'wp-data',
+				'wp-element',
+				'wp-i18n',
+				'wp-notices',
+			),
 			$js_file_version,
 			true
 		);
