@@ -353,6 +353,7 @@ export default compose(
 			'woocommerce_bacs_settings',
 			'woocommerce_bacs_accounts',
 			'woocommerce_eway_settings',
+			'woocommerce_razorpay_settings',
 		];
 
 		const options = optionNames.reduce( ( result, name ) => {

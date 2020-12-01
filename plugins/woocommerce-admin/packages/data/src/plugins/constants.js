@@ -52,4 +52,5 @@ export const pluginNames = {
 		'woocommerce-admin'
 	),
 	'kliken-marketing-for-google': __( 'Google Ads', 'woocommerce-admin' ),
+	'woo-razorpay': __( 'Razorpay', 'woocommerce-admin' ),
 };
