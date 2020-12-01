@@ -56,7 +56,7 @@
 
 // Hack to hide the check mark in IE11
 // See comment: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2320/#issuecomment-621936576
-@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+@include ie11() {
 	.wc-block-components-checkbox__mark {
 		display: none;
 	}
