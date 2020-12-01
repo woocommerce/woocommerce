@@ -1502,7 +1502,7 @@ return array(
 		'TZ30' => __( 'Simiyu', 'woocommerce' ),
 	),
 	'LK' => array(),
-	'RS' => array( // Serbia districts. Ref: https://github.com/unicode-org/cldr/blob/release-37/common/subdivisions/en.xml#L4251-L4283
+	'RS' => array( // Serbia districts. Ref: https://github.com/unicode-org/cldr/blob/release-37/common/subdivisions/en.xml#L4251-L4283.
 		'RS00' => _x( 'Belgrade', 'district', 'woocommerce' ),
 		'RS14' => _x( 'Bor', 'district', 'woocommerce' ),
 		'RS11' => _x( 'Braničevo', 'district', 'woocommerce' ),
