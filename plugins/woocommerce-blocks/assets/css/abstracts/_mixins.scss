@@ -145,6 +145,13 @@ $fontSizes: (
 	}
 }
 
+// Wraps the content with a media query specially targeting IE11.
+@mixin ie11() {
+	@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+		@content;
+	}
+}
+
 // Converts a px unit to em.
 @function em($size, $base: 16px) {
 	@return $size / $base * 1em;
