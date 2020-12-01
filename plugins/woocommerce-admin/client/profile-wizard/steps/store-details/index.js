@@ -172,7 +172,7 @@ class StoreDetails extends Component {
 			isStoreDetailsPopoverVisible,
 			isSkipSetupPopoverVisible,
 		} = this.state;
-		const { skipProfiler } = this.props;
+		const { skipProfiler, isUpdatingProfileItems } = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
@@ -290,7 +290,10 @@ class StoreDetails extends Component {
 										<Button
 											isPrimary
 											onClick={ handleSubmit }
-											disabled={ ! isValidForm }
+											disabled={
+												! isValidForm ||
+												isUpdatingProfileItems
+											}
 										>
 											{ __(
 												'Continue',
@@ -357,10 +360,16 @@ StoreDetails.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getSettings, getSettingsError } = select( SETTINGS_STORE_NAME );
-		const { getOnboardingError, getProfileItems } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			getSettings,
+			getSettingsError,
+			isUpdateSettingsRequesting,
+		} = select( SETTINGS_STORE_NAME );
+		const {
+			getOnboardingError,
+			getProfileItems,
+			isOnboardingRequesting,
+		} = select( ONBOARDING_STORE_NAME );
 
 		const profileItems = getProfileItems();
 		const isProfileItemsError = Boolean(
@@ -369,11 +378,14 @@ export default compose(
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
-
+		const isUpdatingProfileItems =
+			isOnboardingRequesting( 'updateProfileItems' ) ||
+			isUpdateSettingsRequesting( 'general' );
 		return {
 			isProfileItemsError,
 			isSettingsError,
 			profileItems,
+			isUpdatingProfileItems,
 			settings,
 		};
 	} ),

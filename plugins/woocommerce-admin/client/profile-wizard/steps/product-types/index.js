@@ -102,6 +102,7 @@ export class ProductTypes extends Component {
 	render() {
 		const { productTypes = {} } = getSetting( 'onboarding', {} );
 		const { error, isMonthlyPricing, selected } = this.state;
+		const { isProfileItemsRequesting } = this.props;
 
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
@@ -157,7 +158,10 @@ export class ProductTypes extends Component {
 							<Button
 								isPrimary
 								onClick={ this.onContinue }
-								disabled={ ! selected.length }
+								disabled={
+									! selected.length ||
+									isProfileItemsRequesting
+								}
 							>
 								{ __( 'Continue', 'woocommerce-admin' ) }
 							</Button>
@@ -198,13 +202,18 @@ export class ProductTypes extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getOnboardingError } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			getProfileItems,
+			getOnboardingError,
+			isOnboardingRequesting,
+		} = select( ONBOARDING_STORE_NAME );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
+			isProfileItemsRequesting: isOnboardingRequesting(
+				'updateProfileItems'
+			),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

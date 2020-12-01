@@ -198,7 +198,7 @@ class Benefits extends Component {
 		const {
 			activePlugins,
 			isInstallingActivating,
-			isRequesting,
+			isUpdatingProfileItems,
 		} = this.props;
 
 		const pluginNamesString = this.pluginsToInstall
@@ -238,15 +238,15 @@ class Benefits extends Component {
 					<Button
 						isPrimary
 						isBusy={ isInstallAction }
-						disabled={ isRequesting || isInstallAction }
+						disabled={ isUpdatingProfileItems || isInstallAction }
 						onClick={ this.startPluginInstall }
 					>
 						{ __( 'Yes please!', 'woocommerce-admin' ) }
 					</Button>
 					<Button
 						isSecondary
-						isBusy={ isRequesting && ! isInstallAction }
-						disabled={ isRequesting || isInstallAction }
+						isBusy={ isUpdatingProfileItems && ! isInstallAction }
+						disabled={ isUpdatingProfileItems || isInstallAction }
 						className="woocommerce-profile-wizard__skip"
 						onClick={ this.skipPluginInstall }
 					>
@@ -307,7 +307,9 @@ export default compose(
 				getOnboardingError( 'updateProfileItems' )
 			),
 			profileItems: getProfileItems(),
-			isRequesting: isOnboardingRequesting( 'updateProfileItems' ),
+			isUpdatingProfileItems: isOnboardingRequesting(
+				'updateProfileItems'
+			),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ) ||

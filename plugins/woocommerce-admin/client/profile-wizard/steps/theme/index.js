@@ -229,6 +229,7 @@ class Theme extends Component {
 								isPrimary
 								onClick={ () => this.onChoose( theme, 'card' ) }
 								isBusy={ chosen === slug }
+								disabled={ chosen === slug }
 							>
 								{ __(
 									'Continue with my active theme',
@@ -240,6 +241,7 @@ class Theme extends Component {
 								isSecondary
 								onClick={ () => this.onChoose( theme, 'card' ) }
 								isBusy={ chosen === slug }
+								disabled={ chosen === slug }
 							>
 								{ __( 'Choose', 'woocommerce-admin' ) }
 							</Button>

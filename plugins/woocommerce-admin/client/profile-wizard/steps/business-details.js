@@ -658,6 +658,7 @@ class BusinessDetails extends Component {
 			goToNextStep,
 			isInstallingActivating,
 			hasInstallActivateError,
+			isUpdatingProfileItems,
 		} = this.props;
 		const { formatAmount } = this.context;
 		const productCountOptions = [
@@ -920,7 +921,11 @@ class BusinessDetails extends Component {
 										<Button
 											isPrimary
 											onClick={ handleSubmit }
-											disabled={ ! isValidForm }
+											disabled={
+												! isValidForm ||
+												isUpdatingProfileItems ||
+												isInstallingActivating
+											}
 											isBusy={ isInstallingActivating }
 										>
 											{ ! hasInstallActivateError
@@ -960,10 +965,16 @@ BusinessDetails.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getSettings, getSettingsError } = select( SETTINGS_STORE_NAME );
-		const { getProfileItems, getOnboardingError } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			getSettings,
+			getSettingsError,
+			isUpdateSettingsRequesting,
+		} = select( SETTINGS_STORE_NAME );
+		const {
+			getProfileItems,
+			getOnboardingError,
+			isOnboardingRequesting,
+		} = select( ONBOARDING_STORE_NAME );
 		const { getPluginsError, isPluginsRequesting } = select(
 			PLUGINS_STORE_NAME
 		);
@@ -977,6 +988,9 @@ export default compose(
 			profileItems: getProfileItems(),
 			isSettingsError: Boolean( getSettingsError( 'general' ) ),
 			settings,
+			isUpdatingProfileItems:
+				isOnboardingRequesting( 'updateProfileItems' ) ||
+				isUpdateSettingsRequesting( 'general' ),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ) ||

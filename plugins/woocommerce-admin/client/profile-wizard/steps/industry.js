@@ -158,7 +158,7 @@ class Industry extends Component {
 	render() {
 		const { industries } = onboarding;
 		const { error, selected, textInputListContent } = this.state;
-		const { locationSettings } = this.props;
+		const { locationSettings, isProfileItemsRequesting } = this.props;
 		const region = getCurrencyRegion(
 			locationSettings.woocommerce_default_country
 		);
@@ -239,7 +239,9 @@ class Industry extends Component {
 						<Button
 							isPrimary
 							onClick={ this.onContinue }
-							disabled={ ! selected.length }
+							disabled={
+								! selected.length || isProfileItemsRequesting
+							}
 						>
 							{ __( 'Continue', 'woocommerce-admin' ) }
 						</Button>
@@ -252,9 +254,11 @@ class Industry extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getOnboardingError } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			getProfileItems,
+			getOnboardingError,
+			isOnboardingRequesting,
+		} = select( ONBOARDING_STORE_NAME );
 		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { general: locationSettings = {} } = getSettings( 'general' );
 
@@ -262,6 +266,9 @@ export default compose(
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 			locationSettings,
+			isProfileItemsRequesting: isOnboardingRequesting(
+				'updateProfileItems'
+			),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
