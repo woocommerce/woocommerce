@@ -75,49 +75,43 @@ class CoreMenu {
 	public static function get_categories() {
 		return array(
 			array(
-				'title'        => __( 'Orders', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-orders',
-				'order'        => 10,
-				'is_top_level' => true,
+				'title'      => __( 'Orders', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-orders',
+				'order'      => 10,
 			),
 			array(
-				'title'        => __( 'Products', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-products',
-				'order'        => 20,
-				'is_top_level' => true,
+				'title'      => __( 'Products', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-products',
+				'order'      => 20,
 			),
 			array(
-				'title'        => __( 'Analytics', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-analytics',
-				'order'        => 30,
-				'is_top_level' => true,
+				'title'      => __( 'Analytics', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-analytics',
+				'order'      => 30,
 			),
 			array(
-				'title'        => __( 'Marketing', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-marketing',
-				'order'        => 40,
-				'is_top_level' => true,
+				'title'      => __( 'Marketing', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-marketing',
+				'order'      => 40,
 			),
 			array(
-				'title'        => __( 'Settings', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-settings',
-				'menuId'       => 'secondary',
-				'order'        => 10,
-				'url'          => 'admin.php?page=wc-settings',
-				'is_top_level' => true,
+				'title'      => __( 'Settings', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-settings',
+				'menuId'     => 'secondary',
+				'order'      => 10,
+				'url'        => 'admin.php?page=wc-settings',
 			),
 			array(
-				'title'        => __( 'Tools', 'woocommerce-admin' ),
-				'capability'   => 'manage_woocommerce',
-				'id'           => 'woocommerce-tools',
-				'menuId'       => 'secondary',
-				'order'        => 30,
-				'is_top_level' => true,
+				'title'      => __( 'Tools', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'woocommerce-tools',
+				'menuId'     => 'secondary',
+				'order'      => 30,
 			),
 		);
 	}
@@ -140,31 +134,49 @@ class CoreMenu {
 				continue;
 			}
 
-			$wca_items[] = array_merge(
+			$path = isset( $page['path'] ) ? $page['path'] : null;
+			$item = array_merge(
 				array(
-					'id'         => 'wc_admin-' . $page['path'],
-					'url'        => $page['path'],
+					'id'         => 'wc_admin-' . $path,
+					'url'        => $path,
 					'title'      => $page['title'][0],
-					'capability' => $page['capability'],
+					'capability' => isset( $page['capability'] ) ? $page['capability'] : 'manage_woocommerce',
 				),
 				$page['nav_args']
 			);
+
+			// Don't allow top-level items to be added to the primary menu.
+			if ( ! isset( $item['parent'] ) || 'woocommerce' === $item['parent'] ) {
+				$item['menuId'] = 'plugins';
+			}
+
+			$wca_items[] = $item;
 		}
 
 		$home_item = array();
 		if ( defined( '\Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG' ) ) {
 			$home_item = array(
-				'id'           => 'wc_admin-wc-admin&path=/',
-				'title'        => __( 'Home', 'woocommerce-admin' ),
-				'url'          => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
-				'is_top_level' => true,
-				'order'        => 0,
+				'id'    => 'wc_admin-wc-admin&path=/',
+				'title' => __( 'Home', 'woocommerce-admin' ),
+				'url'   => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
+				'order' => 0,
+			);
+		}
+
+		$customers_item = array();
+		if ( class_exists( '\Automattic\WooCommerce\Admin\Features\Analytics' ) ) {
+			$customers_item = array(
+				'id'    => 'woocommerce-analytics-customers',
+				'title' => __( 'Customers', 'woocommerce-admin' ),
+				'url'   => wc_admin_url( '/customers' ),
+				'order' => 50,
 			);
 		}
 
 		return array_merge(
 			array(
 				$home_item,
+				$customers_item,
 				$order_items['all'],
 				$order_items['new'],
 				$product_items['all'],
@@ -172,13 +184,12 @@ class CoreMenu {
 				$coupon_items['default'],
 				// Marketplace category.
 				array(
-					'title'        => __( 'Marketplace', 'woocommerce-admin' ),
-					'capability'   => 'manage_woocommerce',
-					'id'           => 'woocommerce-marketplace',
-					'url'          => 'wc-addons',
-					'menuId'       => 'secondary',
-					'order'        => 20,
-					'is_top_level' => true,
+					'title'      => __( 'Marketplace', 'woocommerce-admin' ),
+					'capability' => 'manage_woocommerce',
+					'id'         => 'woocommerce-marketplace',
+					'url'        => 'wc-addons',
+					'menuId'     => 'secondary',
+					'order'      => 20,
 				),
 				// Tools category.
 				array(

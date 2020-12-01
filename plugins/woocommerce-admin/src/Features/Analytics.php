@@ -235,14 +235,10 @@ class Analytics {
 				),
 			) : null,
 			array(
-				'id'       => 'woocommerce-analytics-customers',
-				'title'    => __( 'Customers', 'woocommerce-admin' ),
-				'parent'   => 'woocommerce',
-				'path'     => '/customers',
-				'nav_args' => array(
-					'is_top_level' => true,
-					'order'        => 50,
-				),
+				'id'     => 'woocommerce-analytics-customers',
+				'title'  => __( 'Customers', 'woocommerce-admin' ),
+				'parent' => 'woocommerce',
+				'path'   => '/customers',
 			),
 			array(
 				'id'       => 'woocommerce-analytics-settings',
