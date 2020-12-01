@@ -14,6 +14,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( false ),
@@ -34,6 +35,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
@@ -54,6 +56,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
@@ -74,6 +77,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					woocommerce_meta: {
 						dashboard_chart_type: '"line"',
@@ -116,6 +120,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					id: 1,
 				} ),
@@ -174,6 +179,7 @@ describe( 'useUserPreferences() hook', () => {
 		registerStore( 'core', {
 			reducer: () => ( {} ),
 			selectors: {
+				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					id: 1,
 				} ),

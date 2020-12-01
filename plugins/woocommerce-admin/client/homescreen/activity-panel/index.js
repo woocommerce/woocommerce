@@ -18,21 +18,24 @@ import {
 import { getAllPanels } from './panels';
 
 export const ActivityPanel = () => {
-	const panels = useSelect( ( select ) => {
+	const panelsData = useSelect( ( select ) => {
 		const totalOrderCount = getSetting( 'orderCount', 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const countUnreadOrders = getUnreadOrders( select, orderStatuses );
 		const manageStock = getSetting( 'manageStock', 'no' );
 		const countLowStockProducts = getLowStockCount( select );
 
-		return getAllPanels( {
+		return {
 			countLowStockProducts,
 			countUnreadOrders,
 			manageStock,
 			orderStatuses,
 			totalOrderCount,
-		} );
+		};
 	} );
+
+	const panels = getAllPanels( panelsData );
+
 	return (
 		<Accordion>
 			<Fragment>
