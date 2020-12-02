@@ -130,11 +130,11 @@ export class Plugins extends Component {
 				>
 					{ __( 'Install & enable', 'woocommerce-admin' ) }
 				</Button>
-				<Button onClick={ this.skipInstaller }>
+				<Button isTertiary onClick={ this.skipInstaller }>
 					{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
 				</Button>
 				{ onAbort && (
-					<Button onClick={ onAbort }>
+					<Button isTertiary onClick={ onAbort }>
 						{ abortText || __( 'Abort', 'woocommerce-admin' ) }
 					</Button>
 				) }

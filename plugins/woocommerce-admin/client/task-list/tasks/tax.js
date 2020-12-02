@@ -258,12 +258,12 @@ class Tax extends Component {
 								this.manuallyConfigureTaxRates();
 							} }
 							skipText={ __(
-								'Set up tax rates manually',
+								'Set up manually',
 								'woocommerce-admin'
 							) }
 							onAbort={ () => this.doNotChargeSalesTax() }
 							abortText={ __(
-								"My business doesn't charge sales tax",
+								"I don't charge sales tax",
 								'woocommerce-admin'
 							) }
 						/>
@@ -425,6 +425,7 @@ class Tax extends Component {
 				</Button>
 				<Button
 					disabled={ isPending }
+					isTertiary
 					onClick={ () => {
 						recordEvent( 'tasklist_tax_setup_automated_proceed', {
 							setup_automatically: false,
@@ -433,18 +434,16 @@ class Tax extends Component {
 					} }
 				>
 					{ __(
-						"No thanks, I'll configure taxes manually",
+						"No thanks, I'll set up manually",
 						'woocommerce-admin'
 					) }
 				</Button>
 				<Button
 					disabled={ isPending }
+					isTertiary
 					onClick={ () => this.doNotChargeSalesTax() }
 				>
-					{ __(
-						"My business doesn't charge sales tax",
-						'woocommerce-admin'
-					) }
+					{ __( "I don't charge sales tax", 'woocommerce-admin' ) }
 				</Button>
 			</div>
 		);

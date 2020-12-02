@@ -309,6 +309,7 @@ class Appearance extends Component {
 							{ __( 'Create homepage', 'woocommerce-admin' ) }
 						</Button>
 						<Button
+							isTertiary
 							onClick={ () => {
 								recordEvent(
 									'tasklist_appearance_create_homepage',
