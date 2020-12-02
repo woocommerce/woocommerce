@@ -47,7 +47,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$response = null;
@@ -70,15 +70,49 @@ abstract class AbstractRoute implements RouteInterface {
 					$response = $this->get_route_response( $request );
 					break;
 			}
-			if ( 'GET' !== $request->get_method() && ! is_wp_error( $response ) ) {
-				$response->header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
-			}
 		} catch ( RouteException $error ) {
 			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
 			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
 		}
+
+		if ( is_wp_error( $response ) ) {
+			$response = $this->error_to_response( $response );
+		}
+
+		$response->header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response->header( 'X-WC-Store-API-User', get_current_user_id() );
 		return $response;
+	}
+
+	/**
+	 * Converts an error to a response object. Based on \WP_REST_Server.
+	 *
+	 * @param WP_Error $error WP_Error instance.
+	 * @return WP_REST_Response List of associative arrays with code and message keys.
+	 */
+	protected function error_to_response( $error ) {
+		$error_data = $error->get_error_data();
+		$status     = isset( $error_data, $error_data['status'] ) ? $error_data['status'] : 500;
+		$errors     = [];
+
+		foreach ( (array) $error->errors as $code => $messages ) {
+			foreach ( (array) $messages as $message ) {
+				$errors[] = array(
+					'code'    => $code,
+					'message' => $message,
+					'data'    => $error->get_error_data( $code ),
+				);
+			}
+		}
+
+		$data = array_shift( $errors );
+
+		if ( count( $errors ) ) {
+			$data['additional_errors'] = $errors;
+		}
+
+		return new \WP_REST_Response( $data, $status );
 	}
 
 	/**
