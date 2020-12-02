@@ -45,6 +45,21 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * If there is a draft order, releases stock.
+	 *
+	 * @return void
+	 */
+	protected function maybe_release_stock() {
+		$draft_order = wc()->session->get( 'store_api_draft_order', 0 );
+
+		if ( ! $draft_order ) {
+			return;
+		}
+
+		wc_release_stock_for_order( $draft_order );
+	}
+
+	/**
 	 * Get route response when something went wrong.
 	 *
 	 * @param string $error_code String based error code.

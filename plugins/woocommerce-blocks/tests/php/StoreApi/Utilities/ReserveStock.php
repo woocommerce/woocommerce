@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 use PHPUnit\Framework\TestCase;
 use \WC_Helper_Order as OrderHelper;
 use \WC_Helper_Product as ProductHelper;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ReserveStock;
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 
 /**
  * ReserveStock Utility Tests.
@@ -45,7 +45,7 @@ class ReserveStockTests extends TestCase {
 	/**
 	 * Test that trying to reserve stock too much throws an exception.
 	 *
-	 * @expectedException Automattic\WooCommerce\Blocks\StoreApi\Utilities\ReserveStockException
+	 * @expectedException Automattic\WooCommerce\Checkout\Helpers\ReserveStockException
 	 */
 	public function test_reserve_stock_for_order_throws_exception() {
 		$class = new ReserveStock();
