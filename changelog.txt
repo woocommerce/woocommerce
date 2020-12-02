@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 4.7.1 - 2020-11-24 =
+
+**WooCommerce**
+
+* Fix - Prevent variable product to be added to cart until a valid variation is selected first. #28103
+* Fix - Restored support for custom `taxonomy-product_cat-<SLUG>.php` and `taxonomy-product_tag-<SLUG>.php` templates. #28377
+* Fix - Display overrides of `taxonomy-product_<cat|tag>.php` and `content-product_cat.php` templates in Status page. #28378
+* Dev - Apply `woocommerce_cart_needs_payment` filter in `WC_Checkout::process_checkout()` to make backwards compatible. #28281
+
 = 4.7.0 - 2020-11-10 =
 
 **WooCommerce**

@@ -1041,6 +1041,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$override_files     = array();
 		$outdated_templates = false;
 		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+
+		// Include *-product_<cat|tag> templates for backwards compatibility.
+		$scan_files[] = 'content-product_cat.php';
+		$scan_files[] = 'taxonomy-product_cat.php';
+		$scan_files[] = 'taxonomy-product_tag.php';
+
 		foreach ( $scan_files as $file ) {
 			$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
 
@@ -1059,7 +1065,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			}
 
 			if ( ! empty( $theme_file ) ) {
-				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$core_file = $file;
+
+				// Update *-product_<cat|tag> template name before searching in core.
+				if ( false !== strpos( $core_file, '-product_cat' ) || false !== strpos( $core_file, '-product_tag' ) ) {
+					$core_file = str_replace( '_', '-', $core_file );
+				}
+
+				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
 				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
 					if ( ! $outdated_templates ) {
