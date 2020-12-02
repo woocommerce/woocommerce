@@ -137,7 +137,7 @@ class CoreMenu {
 			$path = isset( $page['path'] ) ? $page['path'] : null;
 			$item = array_merge(
 				array(
-					'id'         => 'wc_admin-' . $path,
+					'id'         => $page['id'],
 					'url'        => $path,
 					'title'      => $page['title'][0],
 					'capability' => isset( $page['capability'] ) ? $page['capability'] : 'manage_woocommerce',
@@ -156,7 +156,7 @@ class CoreMenu {
 		$home_item = array();
 		if ( defined( '\Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG' ) ) {
 			$home_item = array(
-				'id'    => 'wc_admin-wc-admin&path=/',
+				'id'    => 'woocommerce-home',
 				'title' => __( 'Home', 'woocommerce-admin' ),
 				'url'   => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
 				'order' => 0,

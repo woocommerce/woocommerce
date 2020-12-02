@@ -26,28 +26,26 @@ const NavigationPlugin = () => {
 	if ( ! isWCAdmin( window.location.href ) ) {
 		return null;
 	}
-	const pagesWithoutNavigation = [ '/analytics/:report', '/setup-wizard' ];
-	const reports = getReports();
+	const reports = getReports().filter( ( item ) => item.navArgs );
 	const pages = getPages()
-		.filter( ( page ) => ! pagesWithoutNavigation.includes( page.path ) )
+		.filter( ( page ) => page.navArgs )
 		.map( ( page ) => {
-			const pageWithId = {
-				...page,
-				id: `wc_admin-wc-admin&path=${ page.path }`,
-			};
-			if ( pageWithId.path === '/analytics/settings' ) {
+			if ( page.path === '/analytics/settings' ) {
 				return {
-					...pageWithId,
+					...page,
 					breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
 				};
 			}
-			return pageWithId;
+			return page;
 		} );
 	const persistedQuery = getPersistedQuery( {} );
 	return (
 		<>
 			{ pages.map( ( page ) => (
-				<WooNavigationItem item={ page.id } key={ page.id }>
+				<WooNavigationItem
+					item={ page.navArgs.id }
+					key={ page.navArgs.id }
+				>
 					<Link
 						className="components-button"
 						href={ getNewPath( persistedQuery, page.path, {} ) }
@@ -57,24 +55,24 @@ const NavigationPlugin = () => {
 					</Link>
 				</WooNavigationItem>
 			) ) }
-			{ reports.map( ( item ) => {
-				const id = `wc_admin-wc-admin&path=/analytics/${ item.report }`;
-				return (
-					<WooNavigationItem item={ id } key={ id }>
-						<Link
-							className="components-button"
-							href={ getNewPath(
-								persistedQuery,
-								`/analytics/${ item.report }`,
-								{}
-							) }
-							type="wc-admin"
-						>
-							{ item.title }
-						</Link>
-					</WooNavigationItem>
-				);
-			} ) }
+			{ reports.map( ( item ) => (
+				<WooNavigationItem
+					item={ item.navArgs.id }
+					key={ item.navArgs.id }
+				>
+					<Link
+						className="components-button"
+						href={ getNewPath(
+							persistedQuery,
+							`/analytics/${ item.report }`,
+							{}
+						) }
+						type="wc-admin"
+					>
+						{ item.title }
+					</Link>
+				</WooNavigationItem>
+			) ) }
 		</>
 	);
 };
