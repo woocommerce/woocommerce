@@ -328,12 +328,6 @@ a.button {
 	display: table;
 }
 
-.woocommerce-button--previous,
-.woocommerce-button--next {
-
-	@include inversebuttoncolors();
-}
-
 /**
 * Tables
 */
