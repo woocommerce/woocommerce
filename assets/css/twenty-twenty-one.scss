@@ -1237,10 +1237,13 @@ a.reset_variations {
 			tr:nth-child(2n+1) {
 
 				td {
-
-					background: darken(#D1E4DD, 3%);
+					background: var(--global--color-background);
+					filter: brightness(88%);
+					.is-dark-theme & {
+						filter:	brightness(112%);
+					}
 				}
-			}
+			} 
 		}
 	}
 
@@ -2258,7 +2261,11 @@ a.reset_variations {
 				&:nth-child(2n+1) {
 
 					td {
-						background: darken(#D1E4DD, 3%);
+						background: var(--global--color-background);
+						filter: brightness(88%);
+						.is-dark-theme & {
+							filter:	brightness(112%);
+						}
 					}
 				}
 
