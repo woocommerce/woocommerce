@@ -574,7 +574,11 @@ class Onboarding {
 		}
 
 		foreach ( $themes as $theme ) {
-			$directory = new \RecursiveDirectoryIterator( $theme->theme_root . '/' . $theme->stylesheet );
+			$stylesheet_file = $theme->theme_root . '/' . $theme->stylesheet;
+			if ( ! file_exists( $stylesheet_file ) ) {
+				continue;
+			}
+			$directory = new \RecursiveDirectoryIterator( $stylesheet_file );
 			$iterator  = new \RecursiveIteratorIterator( $directory );
 			$files     = new \RegexIterator( $iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH );
 
