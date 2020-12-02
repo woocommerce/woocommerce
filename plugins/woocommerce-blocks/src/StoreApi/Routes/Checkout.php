@@ -183,7 +183,7 @@ class Checkout extends AbstractRoute {
 	/**
 	 * Update and process an order.
 	 *
-	 * 1. Obtain Draft Order.
+	 * 1. Obtain Draft Order
 	 * 2. Process Request
 	 * 3. Process Customer
 	 * 4. Validate Order

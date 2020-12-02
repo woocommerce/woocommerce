@@ -191,6 +191,11 @@ const CheckoutProcessor = () => {
 				// Update nonce.
 				triggerFetch.setNonce( fetchResponse.headers );
 
+				// Update user using headers.
+				dispatchActions.setCustomerId(
+					fetchResponse.headers.get( 'X-WC-Store-API-User' )
+				);
+
 				// Handle response.
 				fetchResponse.json().then( function ( response ) {
 					if ( ! fetchResponse.ok ) {
@@ -221,7 +226,14 @@ const CheckoutProcessor = () => {
 					// Update nonce.
 					triggerFetch.setNonce( errorResponse.headers );
 
-					// If updated cart state was returned, also update that.
+					// If new customer ID returned, update the store.
+					if ( errorResponse.headers?.get( 'X-WC-Store-API-User' ) ) {
+						dispatchActions.setCustomerId(
+							errorResponse.headers.get( 'X-WC-Store-API-User' )
+						);
+					}
+
+					// If updated cart state was returned, update the store.
 					if ( response.data?.cart ) {
 						receiveCart( response.data.cart );
 					}
