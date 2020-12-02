@@ -368,7 +368,7 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true.
-		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
 			$messages = wc_print_notices( true );
 		} else {
