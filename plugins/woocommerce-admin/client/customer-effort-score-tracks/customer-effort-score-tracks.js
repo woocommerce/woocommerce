@@ -73,12 +73,23 @@ function CustomerEffortScoreTracks( {
 		} );
 	};
 
+	const addActionToShownOption = () => {
+		updateOptions( {
+			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+				action,
+				...cesShownForActions,
+			],
+		} );
+	};
+
 	const onNoticeDismissed = () => {
 		recordEvent( 'ces_snackbar_dismiss', {
 			action,
 			store_age: storeAge,
 			...trackProps,
 		} );
+
+		addActionToShownOption();
 	};
 
 	const onModalShown = () => {
@@ -90,12 +101,7 @@ function CustomerEffortScoreTracks( {
 			...trackProps,
 		} );
 
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				action,
-				...cesShownForActions,
-			],
-		} );
+		addActionToShownOption();
 	};
 
 	const recordScore = ( score, comments ) => {
