@@ -11,7 +11,7 @@ import { uniqueId, find } from 'lodash';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
 import { Icon, help as helpIcon } from '@wordpress/icons';
-import { getSetting, getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section, Spinner } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -21,7 +21,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  */
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
-import { getUnreadNotes, getUnapprovedReviews } from './unread-indicators';
+import { getUnreadNotes } from './unread-indicators';
 import { isWCAdmin } from '../../dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
@@ -37,11 +37,6 @@ const InboxPanel = lazy( () =>
 	)
 );
 
-const ReviewsPanel = lazy( () =>
-	import( /* webpackChunkName: "activity-panels-inbox" */ './panels/reviews' )
-);
-
-const reviewsEnabled = getSetting( 'reviewsEnabled', 'no' );
 export class ActivityPanel extends Component {
 	constructor( props ) {
 		super( props );
@@ -132,7 +127,6 @@ export class ActivityPanel extends Component {
 	getTabs() {
 		const {
 			hasUnreadNotes,
-			hasUnapprovedReviews,
 			isEmbedded,
 			taskListComplete,
 			taskListHidden,
@@ -149,9 +143,6 @@ export class ActivityPanel extends Component {
 
 		const showDisplayOptions =
 			! isEmbedded && this.isHomescreen() && ! isPerformingSetupTask;
-
-		const showReviews =
-			( taskListComplete || taskListHidden ) && ! isPerformingSetupTask;
 
 		const showStoreSetup =
 			! taskListComplete && ! taskListHidden && ! isPerformingSetupTask;
@@ -173,20 +164,6 @@ export class ActivityPanel extends Component {
 			  }
 			: null;
 
-		const reviews =
-			showReviews && reviewsEnabled === 'yes'
-				? {
-						name: 'reviews',
-						title: __( 'Reviews', 'woocommerce-admin' ),
-						icon: (
-							<i className="material-icons-outlined">
-								star_border
-							</i>
-						),
-						unread: hasUnapprovedReviews,
-				  }
-				: null;
-
 		const help = showHelp
 			? {
 					name: 'help',
@@ -201,24 +178,16 @@ export class ActivityPanel extends Component {
 			  }
 			: null;
 
-		return [ inbox, reviews, setup, displayOptions, help ].filter(
-			Boolean
-		);
+		return [ inbox, setup, displayOptions, help ].filter( Boolean );
 	}
 
 	getPanelContent( tab ) {
-		const { query, hasUnapprovedReviews } = this.props;
+		const { query } = this.props;
 		const { task } = query;
 
 		switch ( tab ) {
 			case 'inbox':
 				return <InboxPanel />;
-			case 'reviews':
-				return (
-					<ReviewsPanel
-						hasUnapprovedReviews={ hasUnapprovedReviews }
-					/>
-				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
 			default:
@@ -378,7 +347,6 @@ ActivityPanel.defaultProps = {
 export default compose(
 	withSelect( ( select ) => {
 		const hasUnreadNotes = getUnreadNotes( select );
-		const hasUnapprovedReviews = getUnapprovedReviews( select );
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 
 		const taskListComplete =
@@ -391,7 +359,6 @@ export default compose(
 
 		return {
 			hasUnreadNotes,
-			hasUnapprovedReviews,
 			requestingTaskListOptions,
 			taskListComplete,
 			taskListHidden,

@@ -50,4 +50,22 @@ describe( 'Accordion', () => {
 		expect( screen.queryByText( '10000' ) ).toBeInTheDocument();
 		expect( screen.queryByText( '20000' ) ).toBeInTheDocument();
 	} );
+
+	it( 'should only render title if collapsible is false', () => {
+		render(
+			<Accordion>
+				{ ' ' }
+				<AccordionPanel
+					title="empty title"
+					initialOpen={ false }
+					collapsible={ false }
+				>
+					<span>Custom panel 1</span>
+				</AccordionPanel>
+			</Accordion>
+		);
+		expect( screen.queryByText( 'empty title' ) ).toBeInTheDocument();
+		expect( screen.queryByRole( 'button' ) ).toBeNull();
+		expect( screen.queryByText( 'Custom panel 1' ) ).toBeNull();
+	} );
 } );

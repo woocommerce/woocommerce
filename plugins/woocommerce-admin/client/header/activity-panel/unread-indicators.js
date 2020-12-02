@@ -3,7 +3,6 @@
  */
 import {
 	NOTES_STORE_NAME,
-	REVIEWS_STORE_NAME,
 	USER_STORE_NAME,
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
@@ -55,40 +54,6 @@ export function getUnreadNotes( select ) {
 	const unreadNotesCount = getUnreadNotesCount( latestNotes, lastRead );
 
 	return unreadNotesCount > 0;
-}
-
-export function getUnapprovedReviews( select ) {
-	const { getReviewsTotalCount, getReviewsError, isResolving } = select(
-		REVIEWS_STORE_NAME
-	);
-	const reviewsEnabled = getSetting( 'reviewsEnabled' );
-	if ( reviewsEnabled === 'yes' ) {
-		const actionableReviewsQuery = {
-			page: 1,
-			// @todo we are not using this review, so when the endpoint supports it,
-			// it could be replaced with `per_page: 0`
-			per_page: 1,
-			status: 'hold',
-		};
-		const totalActionableReviews = getReviewsTotalCount(
-			actionableReviewsQuery
-		);
-
-		const isActionableReviewsError = Boolean(
-			getReviewsError( actionableReviewsQuery )
-		);
-
-		const isActionableReviewsRequesting = isResolving(
-			'getReviewsTotalCount',
-			[ actionableReviewsQuery ]
-		);
-
-		if ( ! isActionableReviewsError && ! isActionableReviewsRequesting ) {
-			return totalActionableReviews > 0;
-		}
-	}
-
-	return false;
 }
 
 export function getLowStockCount() {

@@ -62,4 +62,50 @@ describe( 'reviews reducer', () => {
 		const stringifiedQuery = JSON.stringify( query );
 		expect( state.errors[ stringifiedQuery ] ).toBe( error );
 	} );
+
+	it( 'should handle SET_REVIEW', () => {
+		const state = reducer(
+			{
+				...defaultState,
+				data: {
+					4: { title: 'test' },
+				},
+			},
+			{
+				type: TYPES.SET_REVIEW,
+				reviewId: 4,
+				reviewData: {
+					title: 'test updated',
+				},
+			}
+		);
+
+		expect( state.data[ 4 ].title ).toEqual( 'test updated' );
+	} );
+
+	it( 'should handle SET_REVIEW_IS_UPDATING', () => {
+		const state = reducer(
+			{
+				...defaultState,
+				data: {
+					4: { title: 'test' },
+				},
+			},
+			{
+				type: TYPES.SET_REVIEW_IS_UPDATING,
+				reviewId: 4,
+				isUpdating: true,
+			}
+		);
+
+		expect( state.data[ 4 ].isUpdating ).toEqual( true );
+
+		const newstate = reducer( state, {
+			type: TYPES.SET_REVIEW_IS_UPDATING,
+			reviewId: 4,
+			isUpdating: false,
+		} );
+
+		expect( newstate.data[ 4 ].isUpdating ).toEqual( false );
+	} );
 } );

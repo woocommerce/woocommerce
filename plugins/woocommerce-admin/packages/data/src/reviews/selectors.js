@@ -10,9 +10,8 @@ export const getReviews = ( state, query ) => {
 export const getReviewsTotalCount = ( state, query ) => {
 	const stringifiedQuery = JSON.stringify( query );
 	return (
-		( state.reviews[ stringifiedQuery ] &&
-			state.reviews[ stringifiedQuery ].totalCount ) ||
-		0
+		state.reviews[ stringifiedQuery ] &&
+		state.reviews[ stringifiedQuery ].totalCount
 	);
 };
 
