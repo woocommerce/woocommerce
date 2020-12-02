@@ -221,6 +221,9 @@ const webpackConfig = {
 			name: false,
 		},
 	},
+	node: {
+		crypto: 'empty',
+	},
 };
 
 if ( webpackConfig.mode !== 'production' && WC_ADMIN_PHASE !== 'core' ) {

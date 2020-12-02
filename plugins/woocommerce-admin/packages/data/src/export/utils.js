@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import crypto from 'crypto';
+import md5 from 'md5';
 
 /**
  * Internal dependencies
@@ -9,8 +9,5 @@ import crypto from 'crypto';
 import { getResourceName } from '../utils';
 
 export const hashExportArgs = ( args ) => {
-	return crypto
-		.createHash( 'md5' )
-		.update( getResourceName( 'export', args ) )
-		.digest( 'hex' );
+	return md5( getResourceName( 'export', args ) );
 };
