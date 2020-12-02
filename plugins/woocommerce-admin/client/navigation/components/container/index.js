@@ -12,6 +12,7 @@ import {
 } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -108,6 +109,12 @@ const Container = ( { menuItems } ) => {
 
 	const navDomRef = useRef( null );
 
+	const trackBackClick = ( id ) => {
+		recordEvent( 'navigation_back_click', {
+			category: id,
+		} );
+	};
+
 	return (
 		<div className="woocommerce-navigation">
 			<Header />
@@ -131,6 +138,7 @@ const Container = ( { menuItems } ) => {
 								'WordPress Dashboard',
 								'woocommerce-navigation'
 							) }
+							onClick={ () => trackBackClick( 'woocommerce' ) }
 						></NavigationBackButton>
 					) }
 					{ categories.map( ( category ) => {
@@ -147,6 +155,9 @@ const Container = ( { menuItems } ) => {
 								parentMenu={ category.parent }
 								backButtonLabel={
 									category.backButtonLabel || null
+								}
+								onBackButtonClick={ () =>
+									trackBackClick( category.id )
 								}
 							>
 								{ !! primaryItems && (
@@ -175,7 +186,11 @@ const Container = ( { menuItems } ) => {
 									</NavigationGroup>
 								) }
 								{ !! secondaryItems && (
-									<NavigationGroup>
+									<NavigationGroup
+										onBackButtonClick={ () =>
+											trackBackClick( category.id )
+										}
+									>
 										{ secondaryItems.map( ( item ) => (
 											<Item
 												key={ item.id }
