@@ -1978,6 +1978,55 @@ a.reset_variations {
 	}
 }
 
+.account-payment-methods-table {
+	padding-top: 0 !important;
+	margin-bottom: 1rem;
+
+	table,
+	tr {
+		border-style: hidden;
+	}
+
+	tr:nth-child(2n) {
+		td {
+			background: transparent !important;
+		}
+	}
+
+	tr:nth-child(2n+1) {
+
+		td {
+			background: var(--global--color-background);
+			filter: brightness(88%);
+			.is-dark-theme & {
+				filter:	brightness(112%);
+			}
+		}
+	}
+
+	td.payment-method-actions {
+		padding-right: 0.5rem;
+		padding-left: 0.5rem;
+		padding-top: 0.3rem;
+		padding-bottom: 0.3rem;
+
+		display: grid;
+		border: none;
+
+		font-size: 0;
+
+		a {
+			width: 100%;
+			padding-top: 0.3rem !important;
+			padding-bottom: 0.3rem !important;
+			margin-top: 0.5rem !important;
+			margin-bottom: 0.5rem !important;
+
+			@include inversebuttoncolors();
+		}
+	}
+}
+
 
 .woocommerce-terms-and-conditions-wrapper {
 	margin-bottom: 5rem;
@@ -2685,6 +2734,59 @@ a.reset_variations {
 
 		p:first-of-type {
 			margin-bottom: 2rem;
+		}
+
+		#add_payment_method {
+			ul {
+				list-style-type: none !important;
+			}
+
+			.woocommerce-PaymentMethod {
+				margin-bottom: 1.5rem;
+			}
+		}
+
+		input[type=radio] {
+			float: left;
+			margin-top: 0.5rem;
+			margin-right: 0.5rem;
+		}
+
+		label {
+			font-size: 1.5rem;
+			display: flex;
+			justify-content: flex-end;
+
+			img {
+				margin-left: 10px !important;
+			}
+
+			img:first-child {
+				margin-left: auto !important;
+			}
+
+			img:last-child {
+				margin-right: 5px !important;
+			}
+		}
+
+		.woocommerce-PaymentBox {
+			p, label {
+				font-size: 1.3rem;
+			}
+
+			p {
+				margin-bottom: 1.5rem;
+			}
+
+			br {
+				display: none;
+			}
+
+			.woocommerce_error {
+				margin-top: 1rem;
+				margin-bottom: 0;
+			}
 		}
 	}
 
