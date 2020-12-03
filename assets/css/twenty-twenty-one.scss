@@ -1334,7 +1334,7 @@ a.reset_variations {
 		}
 
 		input {
-			border: 3px solid black;
+			border: var(--form--border-width) solid var(--form--border-color);
 			font-size: 1.5rem;
 		}
 
