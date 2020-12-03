@@ -1191,8 +1191,10 @@ class WC_Tax {
 	public static function get_rates_for_tax_class( $tax_class ) {
 		global $wpdb;
 
+		$tax_class = self::format_tax_rate_class( $tax_class );
+
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) );
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", $tax_class ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		if ( ! empty( $rates ) ) {
