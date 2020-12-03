@@ -2815,3 +2815,54 @@ a.reset_variations {
 		}
 	}
 }
+
+/**
+ * Downloads
+ */
+
+.woocommerce-order-downloads {
+
+	padding-top: 0 !important;
+
+	table,
+	tr {
+		border-style: hidden;
+
+		td.download-remaining {
+			text-align: center !important;
+		}
+	}
+
+	tr:nth-child(2n) {
+		td {
+			background: transparent !important;
+		}
+	}
+
+	tr:nth-child(2n+1) {
+		td {
+			background: var(--global--color-background);
+			filter: brightness(88%);
+			.is-dark-theme & {
+				filter:	brightness(112%);
+			}
+		}
+	}
+
+	td.download-file {
+		padding-right: 0.5rem;
+		padding-left: 0.5rem;
+		padding-top: 0.3rem;
+		padding-bottom: 0.3rem;
+
+		a {
+			width: 100%;
+			padding-top: 0.3rem !important;
+			padding-bottom: 0.3rem !important;
+			margin-top: 0.5rem !important;
+			margin-bottom: 0.5rem !important;
+
+			@include inversebuttoncolors();
+		}
+	}
+}
