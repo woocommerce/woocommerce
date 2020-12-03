@@ -232,45 +232,13 @@ abstract class AbstractSchema {
 	}
 
 	/**
-	 * Prepares a list of store currency data to return in responses.
+	 * Adds currency data to an array of monetary values.
 	 *
-	 * @todo Core could use a more defined currency object format, making use of
-	 * constants for currency format rather than strings, and holding this type
-	 * of information instead of plugins/blocks needed to normalize things
-	 * themselves.
-	 *
-	 * @return array
+	 * @param array $values Monetary amounts.
+	 * @return array Monetary amounts with currency data appended.
 	 */
-	protected function get_store_currency_response() {
-		$position = get_option( 'woocommerce_currency_pos' );
-		$symbol   = html_entity_decode( get_woocommerce_currency_symbol() );
-		$prefix   = '';
-		$suffix   = '';
-
-		switch ( $position ) {
-			case 'left_space':
-				$prefix = $symbol . ' ';
-				break;
-			case 'left':
-				$prefix = $symbol;
-				break;
-			case 'right_space':
-				$suffix = ' ' . $symbol;
-				break;
-			case 'right':
-				$suffix = $symbol;
-				break;
-		}
-
-		return [
-			'currency_code'               => get_woocommerce_currency(),
-			'currency_symbol'             => $symbol,
-			'currency_minor_unit'         => wc_get_price_decimals(),
-			'currency_decimal_separator'  => wc_get_price_decimal_separator(),
-			'currency_thousand_separator' => wc_get_price_thousand_separator(),
-			'currency_prefix'             => $prefix,
-			'currency_suffix'             => $suffix,
-		];
+	protected function prepare_currency_response( $values ) {
+		return $this->extend->get_formatter( 'currency' )->format( $values );
 	}
 
 	/**
@@ -283,28 +251,22 @@ abstract class AbstractSchema {
 	 * @return string      The new amount.
 	 */
 	protected function prepare_money_response( $amount, $decimals = 2, $rounding_mode = PHP_ROUND_HALF_UP ) {
-		return (string) intval(
-			round(
-				( (float) wc_format_decimal( $amount ) ) * ( 10 ** $decimals ),
-				0,
-				absint( $rounding_mode )
-			)
+		return $this->extend->get_formatter( 'money' )->format(
+			$amount,
+			[
+				'decimals'      => $decimals,
+				'rounding_mode' => $rounding_mode,
+			]
 		);
 	}
 
 	/**
 	 * Prepares HTML based content, such as post titles and content, for the API response.
 	 *
-	 * The wptexturize, convert_chars, and trim functions are also used in the `the_title` filter.
-	 * The function wp_kses_post removes disallowed HTML tags.
-	 *
 	 * @param string|array $response Data to format.
 	 * @return string|array Formatted data.
 	 */
 	protected function prepare_html_response( $response ) {
-		if ( is_array( $response ) ) {
-			return array_map( [ $this, 'prepare_html_response' ], $response );
-		}
-		return is_scalar( $response ) ? wp_kses_post( trim( convert_chars( wptexturize( $response ) ) ) ) : $response;
+		return $this->extend->get_formatter( 'html' )->format( $response );
 	}
 }

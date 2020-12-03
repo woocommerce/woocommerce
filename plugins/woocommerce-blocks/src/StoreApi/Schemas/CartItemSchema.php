@@ -296,8 +296,7 @@ class CartItemSchema extends ProductSchema {
 			'images'               => $this->get_images( $product ),
 			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
 			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
-			'totals'               => (object) array_merge(
-				$this->get_store_currency_response(),
+			'totals'               => (object) $this->prepare_currency_response(
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
 					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], wc_get_price_decimals() ),

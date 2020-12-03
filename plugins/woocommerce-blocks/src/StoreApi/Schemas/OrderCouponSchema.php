@@ -69,8 +69,7 @@ class OrderCouponSchema extends AbstractSchema {
 	public function get_item_response( \WC_Order_Item_Coupon $coupon ) {
 		return [
 			'code'   => $coupon->get_code(),
-			'totals' => (object) array_merge(
-				$this->get_store_currency_response(),
+			'totals' => (object) $this->prepare_currency_response(
 				[
 					'total_discount'     => $this->prepare_money_response( $coupon->get_discount(), wc_get_price_decimals() ),
 					'total_discount_tax' => $this->prepare_money_response( $coupon->get_discount_tax(), wc_get_price_decimals(), PHP_ROUND_HALF_DOWN ),
