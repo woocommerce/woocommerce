@@ -2676,11 +2676,19 @@ a.reset_variations {
 		}
 	}
 
-	tr:nth-child(2n+1) {
-
+	tr:nth-child(2n) {
 		td {
+			background: transparent !important;
+		}
+	}
 
-			background: darken(#D1E4DD, 3%);
+	tr:nth-child(2n+1) {
+		td {
+			background: var(--global--color-background);
+			filter: brightness(88%);
+			.is-dark-theme & {
+				filter:	brightness(112%);
+			}
 		}
 	}
 
