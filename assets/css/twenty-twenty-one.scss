@@ -1915,6 +1915,12 @@ a.reset_variations {
 		border-style: hidden;
 	}
 
+	tr:nth-child(2n) {
+		td {
+			background: transparent !important;
+		}
+	}
+
 	tr:nth-child(2n+1) {
 
 		td {
