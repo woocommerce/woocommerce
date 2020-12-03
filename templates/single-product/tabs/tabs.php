@@ -26,6 +26,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @see woocommerce_default_product_tabs()
  */
+
+add_filter( 'woocommerce_product_tabs', 'custom_remove_product_tabs', 99 );
+function custom_remove_product_tabs( $tabs ) {
+	
+  if ( isset( $tabs['additional_information'] ) ) {
+    unset( $tabs['additional_information'] );
+  }
+  return $tabs;
+}
+
 $product_tabs = apply_filters( 'woocommerce_product_tabs', array() );
 
 if ( ! empty( $product_tabs ) ) : ?>
