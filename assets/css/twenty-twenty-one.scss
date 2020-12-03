@@ -103,13 +103,13 @@ a.button {
 			border: 0;
 
 			tbody {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid $body-color;
 			}
 
 			tfoot {
 
 				tr:last-of-type {
-					border-top: 1px solid #ddd;
+					border-top: 1px solid $body-color;
 
 					.woocommerce-Price-amount {
 						font-weight: 700;
@@ -2429,7 +2429,7 @@ a.reset_variations {
 			}
 
 			thead {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid $body-color;
 			}
 
 			.button {
