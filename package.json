@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "4.8.0",
+  "version": "4.9.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -34,10 +34,10 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "@babel/cli": "7.12.1",
-    "@babel/core": "7.12.3",
+    "@babel/cli": "7.12.8",
+    "@babel/core": "7.12.9",
     "@babel/polyfill": "7.12.1",
-    "@babel/preset-env": "7.12.1",
+    "@babel/preset-env": "7.12.7",
     "@babel/register": "7.12.1",
     "@typescript-eslint/eslint-plugin": "3.10.1",
     "@typescript-eslint/experimental-utils": "3.10.1",
@@ -73,7 +73,7 @@
     "grunt-postcss": "0.9.0",
     "grunt-rtlcss": "2.0.2",
     "grunt-sass": "3.1.0",
-    "grunt-stylelint": "0.15.0",
+    "grunt-stylelint": "0.16.0",
     "gruntify-eslint": "5.0.0",
     "husky": "4.3.0",
     "istanbul": "1.0.0-alpha.2",

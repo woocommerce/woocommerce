@@ -59,7 +59,8 @@ tests/cli/vendor
 
 # Composer
 /vendor/
-/bin/composer/**/vendor
+/bin/composer/**/vendor/
+/lib/vendor/
 contributors.md
 contributors.html
 
