@@ -106,9 +106,9 @@ exports[`RemovableChip should render custom aria label 1`] = `
     onKeyDown={[Function]}
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"
@@ -148,9 +148,9 @@ exports[`RemovableChip should render default aria label if text is a node 1`] = 
     onKeyDown={[Function]}
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"
@@ -188,9 +188,9 @@ exports[`RemovableChip should render screen reader text aria label 1`] = `
     onKeyDown={[Function]}
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"
@@ -223,9 +223,9 @@ exports[`RemovableChip should render text and the remove button 1`] = `
     onKeyDown={[Function]}
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"
@@ -258,9 +258,9 @@ exports[`RemovableChip should render with disabled remove button 1`] = `
     onKeyDown={[Function]}
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"
@@ -294,9 +294,9 @@ exports[`RemovableChip with removeOnAnyClick should be a button when removeOnAny
     className="wc-block-components-chip__remove"
   >
     <svg
-      aria-hidden="true"
+      aria-hidden={true}
       className="wc-block-components-chip__remove-icon"
-      focusable="false"
+      focusable={false}
       height={16}
       role="img"
       viewBox="0 0 20 20"

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { compose } from '@wordpress/compose';
 import withFilteredAttributes from '@woocommerce/base-hocs/with-filtered-attributes';
 
 /**
@@ -10,4 +9,4 @@ import withFilteredAttributes from '@woocommerce/base-hocs/with-filtered-attribu
 import Block from './block';
 import attributes from './attributes';
 
-export default compose( withFilteredAttributes( attributes ) )( Block );
+export default withFilteredAttributes( attributes )( Block );
