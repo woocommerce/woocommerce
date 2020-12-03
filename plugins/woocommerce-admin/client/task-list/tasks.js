@@ -108,6 +108,7 @@ export function getAllTasks( {
 			completed: profilerCompleted,
 			visible: true,
 			time: __( '4 minutes', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'purchase',
@@ -123,6 +124,7 @@ export function getAllTasks( {
 			completed: products.length && ! remainingProducts.length,
 			time: __( '2 minutes', 'woocommerce-admin' ),
 			isDismissable: true,
+			type: 'setup',
 		},
 		{
 			key: 'products',
@@ -137,6 +139,7 @@ export function getAllTasks( {
 			completed: hasProducts,
 			visible: true,
 			time: __( '1 minute per product', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'woocommerce-payments',
@@ -179,6 +182,7 @@ export function getAllTasks( {
 				'woocommerce-admin'
 			),
 			time: __( '2 minutes', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'payments',
@@ -193,6 +197,7 @@ export function getAllTasks( {
 			},
 			visible: ! woocommercePaymentsInstalled || countryCode !== 'US',
 			time: __( '2 minutes', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'tax',
@@ -207,6 +212,7 @@ export function getAllTasks( {
 			completed: isTaxComplete,
 			visible: true,
 			time: __( '1 minute', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'shipping',
@@ -223,6 +229,7 @@ export function getAllTasks( {
 				( productTypes && productTypes.includes( 'physical' ) ) ||
 				hasPhysicalProducts,
 			time: __( '1 minute', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 		{
 			key: 'appearance',
@@ -237,6 +244,7 @@ export function getAllTasks( {
 			completed: isAppearanceComplete,
 			visible: true,
 			time: __( '2 minutes', 'woocommerce-admin' ),
+			type: 'setup',
 		},
 	];
 

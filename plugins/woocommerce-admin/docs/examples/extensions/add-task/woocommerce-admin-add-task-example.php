@@ -38,5 +38,6 @@ function add_task_register_script() {
 	);
 	wp_localize_script( 'add-task', 'addTaskData', $client_data );
 	wp_enqueue_script( 'add-task' );
+	do_action( 'add_woocommerce_extended_task_list_item', 'woocommerce_admin_add_task_example_name' );
 }
 add_action( 'admin_enqueue_scripts', 'add_task_register_script' );

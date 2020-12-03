@@ -76,6 +76,8 @@ class Install {
 		'woocommerce_admin_report_export_status'   => 'wc_admin_report_export_status',
 		'woocommerce_task_list_complete'           => 'woocommerce_task_list_complete',
 		'woocommerce_task_list_hidden'             => 'woocommerce_task_list_hidden',
+		'woocommerce_extended_task_list_complete'  => 'woocommerce_extended_task_list_complete',
+		'woocommerce_extended_task_list_hidden'    => 'woocommerce_extended_task_list_hidden',
 	);
 
 	/**

@@ -196,12 +196,18 @@ export default compose(
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			taskListHidden:
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes' &&
+				getOption( 'woocommerce_extended_task_list_hidden' ) !== 'no',
 			requestingTaskList:
 				isResolving( 'getOption', [
 					'woocommerce_task_list_complete',
 				] ) ||
-				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] ),
+				isResolving( 'getOption', [
+					'woocommerce_task_list_hidden',
+				] ) ||
+				isResolving( 'getOption', [
+					'woocommerce_extended_task_list_hidden',
+				] ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {
