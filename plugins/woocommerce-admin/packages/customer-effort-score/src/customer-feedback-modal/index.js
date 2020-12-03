@@ -11,8 +11,6 @@ import {
 	TextareaControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import classnames from 'classnames';
 
 /**
  * Provides a modal requesting customer feedback.
@@ -57,9 +55,6 @@ function CustomerFeedbackModal( { recordScoreCallback, label } ) {
 	const [ comments, setComments ] = useState();
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
-	const [ isCommentsTransitioning, setCommentsTransitioning ] = useState(
-		false
-	);
 
 	const closeModal = () => setOpen( false );
 
@@ -78,23 +73,13 @@ function CustomerFeedbackModal( { recordScoreCallback, label } ) {
 		recordScoreCallback( score, comments );
 	};
 
-	const onCommentsTransitionStart = () => {
-		setCommentsTransitioning( true );
-	};
-
-	const onCommentsTransitionEnd = () => {
-		setCommentsTransitioning( false );
-	};
-
 	if ( ! isOpen ) {
 		return null;
 	}
 
 	return (
 		<Modal
-			className={ classnames( 'woocommerce-customer-effort-score', {
-				'woocommerce-customer-effort-score-comments-transitioning': isCommentsTransitioning,
-			} ) }
+			className="woocommerce-customer-effort-score"
 			title={ __( 'Please share your feedback', 'woocommerce-admin' ) }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
@@ -111,35 +96,23 @@ function CustomerFeedbackModal( { recordScoreCallback, label } ) {
 				/>
 			</div>
 
-			<TransitionGroup>
-				{ ( score === 1 || score === 2 ) && (
-					<CSSTransition
-						key={ 'woocommerce-customer-effort-score__comments' }
-						timeout={ 250 }
-						classNames="woocommerce-customer-effort-score__comments"
-						onEnter={ onCommentsTransitionStart }
-						onEntered={ onCommentsTransitionEnd }
-						onExit={ onCommentsTransitionStart }
-						onExited={ onCommentsTransitionEnd }
-					>
-						<div className="woocommerce-customer-effort-score__comments">
-							<TextareaControl
-								label={ __(
-									'Comments (Optional)',
-									'woocommerce-admin'
-								) }
-								help={ __(
-									'Your feedback will go to the WooCommerce development team',
-									'woocommerce-admin'
-								) }
-								value={ comments }
-								onChange={ ( value ) => setComments( value ) }
-								rows="5"
-							/>
-						</div>
-					</CSSTransition>
-				) }
-			</TransitionGroup>
+			{ ( score === 1 || score === 2 ) && (
+				<div className="woocommerce-customer-effort-score__comments">
+					<TextareaControl
+						label={ __(
+							'Comments (Optional)',
+							'woocommerce-admin'
+						) }
+						help={ __(
+							'Your feedback will go to the WooCommerce development team',
+							'woocommerce-admin'
+						) }
+						value={ comments }
+						onChange={ ( value ) => setComments( value ) }
+						rows="5"
+					/>
+				</div>
+			) }
 
 			{ showNoScoreMessage && (
 				<div
