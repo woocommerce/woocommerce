@@ -1335,16 +1335,50 @@ a.reset_variations {
 
 	.woocommerce-EditAccountForm {
 
+		label {
+			font-size: 1.5rem;
+		}
+
 		input {
-			border: 1px solid #ddd;
+			border: var(--form--border-width) solid var(--form--border-color);
+			font-size: 1.5rem;
 		}
 
 		fieldset {
-			border: 0.2rem solid #ddd;
+			border: none;
+			padding-left: 0;
+			padding-right: 0;
+			margin-top: 30px;
+
+			legend {
+				display: contents;
+				font-size: 2rem;
+			}
+
+			p {
+				margin-top: 20px;
+				margin-bottom: 0 !important;
+			}
+
+			.show-password-input {
+				display: inherit;
+			}
 		}
 
 		button {
-			margin-top: 3rem;
+			margin-top: 0;
+		}
+
+		#account_display_name + span {
+			font-size: 1.5rem;
+		}
+
+		p {
+			margin-top: 20px;
+
+			&:nth-of-type(4) {
+				margin-top: 30px;
+			}
 		}
 	}
 }
