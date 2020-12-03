@@ -243,7 +243,7 @@ class Menu {
 	 * @return string
 	 */
 	public static function get_item_menu_id( $item ) {
-		if ( isset( self::$menu_items[ $item['parent'] ] ) ) {
+		if ( isset( $item['parent'] ) && isset( self::$menu_items[ $item['parent'] ] ) ) {
 			return self::$menu_items[ $item['parent'] ]['menuId'];
 		}
 

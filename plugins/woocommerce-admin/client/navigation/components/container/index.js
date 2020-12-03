@@ -172,10 +172,14 @@ const Container = ( { menuItems } ) => {
 								) }
 								{ !! pluginItems && (
 									<NavigationGroup
-										title={ __(
-											'Extensions',
-											'woocommerce-admin'
-										) }
+										title={
+											category.id === 'woocommerce'
+												? __(
+														'Extensions',
+														'woocommerce-admin'
+												  )
+												: null
+										}
 									>
 										{ pluginItems.map( ( item ) => (
 											<Item
