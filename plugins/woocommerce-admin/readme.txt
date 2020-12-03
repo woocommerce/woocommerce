@@ -19,12 +19,14 @@ WooCommerce Admin has a host of new reports that are optimized for speed and hav
 - Revenue Report
 - Orders Report
 - Products Report
+- Variations Report
 - Categories Report
 - Coupons Report
 - Taxes Report
 - Downloads Report
 - Stock Report
 - Customers Report
+
 
 **Customizable Dashboard**
 
