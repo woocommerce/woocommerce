@@ -1230,10 +1230,10 @@ class WC_Countries {
 					),
 					'RS' => array(
 						'city'     => array(
-							'required' => false,
+							'required' => true,
 						),
 						'postcode' => array(
-							'required' => false,
+							'required' => true,
 						),
 						'state'    => array(
 							'label' => __( 'District', 'woocommerce' ),
