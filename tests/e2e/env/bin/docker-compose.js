@@ -8,18 +8,20 @@ const { getAppRoot, getAppName, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
+let customInitFile = '';
 
 program
     .command( 'up', 'Start and build the Docker container' )
     .command( 'down', 'Stop the Docker container and remove volumes' )
     .action( ( cmd, options ) => {
-        arg = options.args ? options.args[ 0 ] : options[ 0 ];
-        if ( 'up' === arg ) {
+        args = options.args ? options.args : options;
+        if ( 'up' === args[0] ) {
             command = 'up';
             dockerArgs.push( 'up', '--build', '-d' );
+            customInitFile = args[1] ? args[1] : '';
         }
 
-        if ( 'down' === arg ) {
+        if ( 'down' === args[0] ) {
             command = 'down';
             dockerArgs.push( 'down', '-v' );
         }
@@ -32,8 +34,17 @@ const envVars = {};
 if ( appPath ) {
     if ( 'up' === command ) {
         // Look for an initialization script in the dependent app.
-        const appInitFile = path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
-
+        if ( customInitFile ) {
+            const possibleInitFile = customInitFile;
+            customInitFile = path.resolve( possibleInitFile );
+            if ( ! fs.existsSync( customInitFile ) ) {
+                customInitFile = path.resolve( appPath, possibleInitFile );
+            }
+            if ( ! fs.existsSync( customInitFile ) ) {
+                customInitFile = '';
+            }
+        }
+        const appInitFile = customInitFile ? customInitFile : path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
         // If found, copy it into the wp-cli Docker context so
         // it gets picked up by the entrypoint script.
         if ( fs.existsSync( appInitFile ) ) {
@@ -41,6 +52,7 @@ if ( appPath ) {
                 appInitFile,
                 path.resolve( __dirname, '../docker/wp-cli/initialize.sh' )
             );
+            console.log('Initializing ' + appInitFile );
         }
     }
 

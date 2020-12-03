@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );
 					if ( is_object( $product ) ) {
-						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . htmlspecialchars( wp_kses_post( $product->get_formatted_name() ) ) . '</option>';
+						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . esc_html( wp_strip_all_tags( $product->get_formatted_name() ) ) . '</option>';
 					}
 				}
 				?>
@@ -37,7 +37,7 @@ defined( 'ABSPATH' ) || exit;
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );
 					if ( is_object( $product ) ) {
-						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . htmlspecialchars( wp_kses_post( $product->get_formatted_name() ) ) . '</option>';
+						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . esc_html( wp_strip_all_tags( $product->get_formatted_name() ) ) . '</option>';
 					}
 				}
 				?>
@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );
 					if ( is_object( $product ) ) {
-						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . htmlspecialchars( wp_kses_post( $product->get_formatted_name() ) ) . '</option>';
+						echo '<option value="' . esc_attr( $product_id ) . '"' . selected( true, true, false ) . '>' . esc_html( wp_strip_all_tags( $product->get_formatted_name() ) ) . '</option>';
 					}
 				}
 				?>
