@@ -56,38 +56,43 @@ export function getOrderStatuses( select ) {
 	return orderStatuses;
 }
 
+export const getLowStockCountQuery = {
+	page: 1,
+	per_page: 1,
+	low_in_stock: true,
+	status: 'publish',
+	_fields: [ 'id' ],
+};
+
 export function getLowStockCount( select ) {
 	const { getItemsTotalCount, getItemsError, isResolving } = select(
 		ITEMS_STORE_NAME
 	);
 
-	const productsQuery = {
-		page: 1,
-		per_page: 1,
-		low_in_stock: true,
-		status: 'publish',
-		_fields: [ 'id' ],
-	};
-
-	const defaultValue = 0;
+	const defaultValue = null;
 
 	// Disable eslint rule requiring `totalLowStockProducts` to be defined below because the next two statements
 	// depend on `getItemsTotalCount` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalLowStockProducts = getItemsTotalCount(
 		'products',
-		productsQuery,
+		getLowStockCountQuery,
 		defaultValue
 	);
 
-	const isError = Boolean( getItemsError( 'products', productsQuery ) );
+	const isError = Boolean(
+		getItemsError( 'products', getLowStockCountQuery )
+	);
 	const isRequesting = isResolving( 'getItemsTotalCount', [
 		'products',
-		productsQuery,
+		getLowStockCountQuery,
 		defaultValue,
 	] );
 
-	if ( isError || isRequesting ) {
+	if (
+		isError ||
+		( isRequesting && totalLowStockProducts === defaultValue )
+	) {
 		return null;
 	}
 

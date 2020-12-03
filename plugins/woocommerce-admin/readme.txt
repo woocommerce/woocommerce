@@ -69,6 +69,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 2. Activity Panels
 3. Analytics
 
+== unreleased ==
+
+- Fix: Invalidate product count if the last product was updated in the list. #5790
+
 == Changelog ==
 
 = 1.7.0 11/11/2020 =

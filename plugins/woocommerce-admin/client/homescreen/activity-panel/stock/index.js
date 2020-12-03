@@ -14,6 +14,7 @@ import { ITEMS_STORE_NAME } from '@woocommerce/data';
  */
 import { ActivityCardPlaceholder } from '../../../header/activity-panel/activity-card';
 import { ProductStockCard } from './card';
+import { getLowStockCountQuery } from '../orders/utils';
 
 const productsQuery = {
 	page: 1,
@@ -40,13 +41,24 @@ export class StockPanel extends Component {
 	}
 
 	async updateStock( product, quantity ) {
-		const { invalidateResolution, updateProductStock } = this.props;
+		const {
+			invalidateResolution,
+			updateProductStock,
+			products,
+		} = this.props;
 
 		const success = await updateProductStock( product, quantity );
 
 		if ( success ) {
 			// Request more low stock products.
 			invalidateResolution( 'getItems', [ 'products', productsQuery ] );
+			if ( products.length < 2 ) {
+				invalidateResolution( 'getItemsTotalCount', [
+					'products',
+					getLowStockCountQuery,
+					null,
+				] );
+			}
 		}
 
 		return success;
