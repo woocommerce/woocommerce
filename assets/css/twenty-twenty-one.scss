@@ -180,6 +180,15 @@ a.button {
 	}
 }
 
+.onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
+	top: 2.2em;
+	right: 2.2em;
+}
+
+.single-product .type-product.sale > .onsale {
+	right: calc( 52% - 0.7rem );
+}
+
 .price {
 	font-family: $headings;
 	font-size: 1rem;
@@ -2081,6 +2090,11 @@ a.reset_variations {
 			font-size: 1rem;
 		}
 
+		.onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
+			top: 1.8em;
+			right: 1.8em;
+		}
+
 	}
 }
 
@@ -2126,8 +2140,7 @@ a.reset_variations {
 	.woocommerce-page {
 
 		.onsale {
-			right: auto;
-			left: -1rem;
+			right: -0.7rem !important;
 		}
 
 		.woocommerce-tabs {
@@ -2344,6 +2357,7 @@ a.reset_variations {
 		.onsale {
 			font-size: 1rem;
 		}
+
 	}
 
 	/**
