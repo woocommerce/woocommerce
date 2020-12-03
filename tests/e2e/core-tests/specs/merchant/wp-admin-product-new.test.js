@@ -175,6 +175,10 @@ const runAddVariableProductTest = () => {
 				expect(page).toMatchElement('select[name="attribute_attr-3[7]"]', {text: 'val2'}),
 			]);
 
+			/*
+			Puppeteer seems unable to find the individual variation fields in headless mode on MacOS
+			This section of the test runs fine in both Travis and non-headless mode on Mac
+			Disabling temporarily to allow the test to be re-enabled without local testing headache
 			await waitAndClick( page, '.variations-pagenav .expand_all');
 			await page.waitFor( 2000 );
 			await setCheckbox('input[name="variable_is_virtual[0]"]');
@@ -192,6 +196,7 @@ const runAddVariableProductTest = () => {
 
 			await page.focus('button.save-variation-changes');
 			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
+			/**/
 
 			// Publish product, verify that it was published. Trash product, verify that it was trashed.
 			await verifyPublishAndTrash(
@@ -200,7 +205,6 @@ const runAddVariableProductTest = () => {
 				'Product published.',
 				'1 product moved to the Trash.'
 			);
-/**/
 		});
 	});
 };
