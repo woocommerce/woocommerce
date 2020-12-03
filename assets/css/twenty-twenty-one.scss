@@ -347,11 +347,6 @@ a.button {
 /**
  * Shop page
  */
-.woocommerce-products-header__title.page-title {
-	font-size: 3rem;
-	text-align: center;
-}
-
 .woocommerce-result-count,
 .woocommerce-ordering {
 	margin: 0 0 1rem;
@@ -376,7 +371,7 @@ ul.products {
 		.woocommerce-loop-product__title {
 			margin: 0.5rem 0 0.5rem;
 			font-size: 1.5rem;
-			font-weight: 700;
+			font-weight: 400;
 
 			&::before {
 				content: none;
@@ -408,9 +403,17 @@ ul.products {
 
 		.button {
 			vertical-align: middle;
+			background-color: transparent;
+			color: var(--button--color-text-hover);
+			text-decoration: none !important;
 
 			&.loading {
 				opacity: 0.5;
+			}
+
+			&:hover {
+				background-color: var(--button--color-background);
+				color: var(--button--color-text);
 			}
 		}
 
@@ -2012,13 +2015,17 @@ a.reset_variations {
 				h2.woocommerce-loop-category__title {
 					margin-top: 0.4rem;
 					font-family: $headings;
-					font-size: 1rem;
+					font-size: 1.5rem;
 
 					.count {
 						background-color: transparent;
 						color: $body-color;
 					}
 				}
+			}
+
+			mark {
+				background-color: initial;
 			}
 		}
 	}
@@ -2031,6 +2038,12 @@ a.reset_variations {
 		.woocommerce-ordering {
 			float: left;
 			clear: both;
+			margin-top: 0;
+		}
+
+		.woocommerce-result-count {
+			margin-top: 0;
+			margin-bottom: 20px;
 		}
 	}
 }
@@ -2343,10 +2356,6 @@ a.reset_variations {
 	/**
 	* Shop page
 	*/
-	.woocommerce-products-header__title.page-title {
-		font-size: 4.2rem;
-		font-weight: 800;
-	}
 
 	.woocommerce-pagination {
 
@@ -2513,6 +2522,34 @@ a.reset_variations {
 				padding-left: 1.5rem;
 			}
 		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+
+	.woocommerce-products-header {
+		border-bottom: none !important;
+		padding-bottom: 0;
+		margin-bottom: 0 !important;
+	}
+}
+
+@media only screen and (min-width: 600px) {
+
+	.woocommerce-products-header {
+		padding-bottom: 1.5vw;
+	}
+
+	.woocommerce-ordering,
+	.woocommerce-result-count {
+		margin-top: 0 !important;
+	}
+}
+
+@media only screen and (min-width: 690px) {
+
+	.woocommerce-products-header {
+		border-bottom: 3px solid var(--global--color-border);
 	}
 }
 
