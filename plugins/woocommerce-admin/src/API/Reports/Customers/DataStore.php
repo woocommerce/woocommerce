@@ -127,6 +127,46 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Sync customers data after an order was updated.
+	 *
+	 * Only updates customer if it is the customers last order.
+	 *
+	 * @param int $post_id of order.
+	 */
+	public static function sync_order_customer( $post_id ) {
+		global $wpdb;
+
+		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+			return -1;
+		}
+
+		$order       = wc_get_order( $post_id );
+		$customer_id = self::get_existing_customer_id_from_order( $order );
+		if ( ! $customer_id ) {
+			return -1;
+		}
+		$customer   = new \WC_Customer( $customer_id );
+		$last_order = $customer->get_last_order();
+
+		if ( ! $last_order || $order->get_id() !== $last_order->get_id() ) {
+			return -1;
+		}
+
+		list($data, $format) = self::get_customer_order_data_and_format( $order );
+
+		$result = $wpdb->update( self::get_db_table_name(), $data, array( 'customer_id' => $customer_id ), $format );
+
+		/**
+		 * Fires when a customer is updated.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
+		do_action( 'woocommerce_analytics_update_customer', $customer_id );
+
+		return 1 === $result;
+	}
+
+	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @param string $order_by Sorting criterion.
@@ -484,6 +524,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return $returning_customer_id;
 		}
 
+		list($data, $format) = self::get_customer_order_data_and_format( $order );
+
+		$result      = $wpdb->insert( self::get_db_table_name(), $data, $format );
+		$customer_id = $wpdb->insert_id;
+
+		/**
+		 * Fires when a new report customer is created.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
+		do_action( 'woocommerce_analytics_new_customer', $customer_id );
+
+		return $result ? $customer_id : false;
+	}
+
+	/**
+	 * Returns a data object and format object of the customers data coming from the order.
+	 *
+	 * @param object      $order         WC_Order where we get customer info from.
+	 * @param object|null $customer_user WC_Customer registered customer WP user.
+	 * @return array ($data, $format)
+	 */
+	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
 		$data   = array(
 			'first_name'       => $order->get_customer_first_name(),
 			'last_name'        => $order->get_customer_last_name(),
@@ -507,27 +570,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// Add registered customer data.
 		if ( 0 !== $order->get_user_id() ) {
-			$user_id                 = $order->get_user_id();
-			$customer                = new \WC_Customer( $user_id );
+			$user_id = $order->get_user_id();
+			if ( is_null( $customer_user ) ) {
+				$customer_user = new \WC_Customer( $user_id );
+			}
 			$data['user_id']         = $user_id;
-			$data['username']        = $customer->get_username( 'edit' );
-			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null;
+			$data['username']        = $customer_user->get_username( 'edit' );
+			$data['date_registered'] = $customer_user->get_date_created( 'edit' ) ? $customer_user->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null;
 			$format[]                = '%d';
 			$format[]                = '%s';
 			$format[]                = '%s';
 		}
-
-		$result      = $wpdb->insert( self::get_db_table_name(), $data, $format );
-		$customer_id = $wpdb->insert_id;
-
-		/**
-		 * Fires when a new report customer is created.
-		 *
-		 * @param int $customer_id Customer ID.
-		 */
-		do_action( 'woocommerce_analytics_new_customer', $customer_id );
-
-		return $result ? $customer_id : false;
+		return array( $data, $format );
 	}
 
 	/**

@@ -475,4 +475,84 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $customers );
 	}
+
+	/**
+	 * Test sync order update with customer info.
+	 */
+	public function test_sync_order_customer() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		// update order info.
+		$order->set_billing_city( 'Random' );
+		$order->set_billing_state( 'FL' );
+		$order->set_billing_postcode( '54321' );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$result = CustomersDataStore::sync_order_customer( $order->get_id() );
+
+		WC_Helper_Queue::run_all_pending();
+
+		$this->assertTrue( $result );
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( 'Random' === $reports[0]['city'] );
+		$this->assertTrue( 'FL' === $reports[0]['state'] );
+		$this->assertTrue( '54321' === $reports[0]['postcode'] );
+	}
+
+	/**
+	 * Test sync order update with customer latest order info.
+	 */
+	public function test_sync_latest_order_customer() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+		$order2 = WC_Helper_Order::create_order( 0 );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 100 );
+		$order2->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$customer_id  = CustomersDataStore::get_existing_customer_id_from_order( $order );
+		$customer2_id = CustomersDataStore::get_existing_customer_id_from_order( $order2 );
+		$this->assertEquals( $customer_id, $customer2_id );
+		// update order info.
+		$order->set_billing_city( 'Random' );
+		$order->set_billing_state( 'FL' );
+		$order->set_billing_postcode( '54321' );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$result = CustomersDataStore::sync_order_customer( $order->get_id() );
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Didn't update anything.
+		$this->assertEquals( -1, $result );
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( 'Random' === $reports[0]['city'] );
+		$this->assertFalse( 'FL' === $reports[0]['state'] );
+		$this->assertFalse( '54321' === $reports[0]['postcode'] );
+	}
 }

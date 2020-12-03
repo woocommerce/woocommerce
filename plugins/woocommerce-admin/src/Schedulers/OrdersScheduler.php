@@ -11,6 +11,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataSt
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use \Automattic\WooCommerce\Admin\Schedulers\CustomersScheduler;
 
@@ -86,7 +87,7 @@ class OrdersScheduler extends ImportScheduler {
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 			{$where_clause}"
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore unprepared SQL ok.
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -161,6 +162,7 @@ class OrdersScheduler extends ImportScheduler {
 			ProductsDataStore::sync_order_products( $order_id ),
 			CouponsDataStore::sync_order_coupons( $order_id ),
 			TaxesDataStore::sync_order_taxes( $order_id ),
+			CustomersDataStore::sync_order_customer( $order_id ),
 		);
 
 		ReportsCache::invalidate();
