@@ -103,13 +103,13 @@ a.button {
 			border: 0;
 
 			tbody {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid $body-color;
 			}
 
 			tfoot {
 
 				tr:last-of-type {
-					border-top: 1px solid #ddd;
+					border-top: 1px solid $body-color;
 
 					.woocommerce-Price-amount {
 						font-weight: 700;
@@ -1320,19 +1320,16 @@ a.reset_variations {
 
 		tbody {
 
-			tr:nth-child(2n) {
-
-				td {
-					background: #eee;
-				}
-			}
-
 			tr:nth-child(2n+1) {
 
 				td {
-					background: #fff;
+					background: var(--global--color-background);
+					filter: brightness(88%);
+					.is-dark-theme & {
+						filter:	brightness(112%);
+					}
 				}
-			}
+			} 
 		}
 	}
 
@@ -2233,6 +2230,10 @@ a.reset_variations {
 
 		table.shop_table_responsive {
 
+			.button {
+				@include inversebuttoncolors();
+			}
+
 			tr {
 				margin: 0 0 1.5rem;
 
@@ -2247,7 +2248,18 @@ a.reset_variations {
 				&:nth-child(2n) {
 
 					td {
-						background: #fff;
+						background: transparent;
+					}
+				}
+
+				&:nth-child(2n+1) {
+
+					td {
+						background: var(--global--color-background);
+						filter: brightness(88%);
+						.is-dark-theme & {
+							filter:	brightness(112%);
+						}
 					}
 				}
 
@@ -2492,6 +2504,7 @@ a.reset_variations {
 		table.account-orders-table {
 			margin-top: 0;
 			border: 0;
+			margin-bottom: 1rem;
 
 			tr,
 			td,
@@ -2503,12 +2516,24 @@ a.reset_variations {
 			th,
 			td,
 			td.woocommerce-orders-table__cell-order-actions {
+				width: 1%;
 				padding-right: 0.5rem;
 				padding-left: 0.5rem;
+
+				a {
+					padding-top: 0.3rem !important;
+					padding-bottom: 0.3rem !important;
+					margin-top: 0.5rem !important;
+					margin-bottom: 0.5rem !important;
+				}
+			}
+
+			td.woocommerce-orders-table__cell-order-date {
+				padding-right: 0;
 			}
 
 			thead {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid $body-color;
 			}
 
 			.button {
@@ -2516,6 +2541,7 @@ a.reset_variations {
 				padding-right: 0.5em;
 				width: 100%;
 				margin: 1.5rem 0;
+				@include inversebuttoncolors();
 			}
 		}
 	}
