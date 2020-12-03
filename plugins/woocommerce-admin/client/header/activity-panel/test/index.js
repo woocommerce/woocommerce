@@ -159,4 +159,38 @@ describe( 'Activity Panel', () => {
 
 		expect( queryByText( 'Store Setup' ) ).toBeNull();
 	} );
+
+	it( 'should not render the store setup link when on the home screen and TaskList is not complete', () => {
+		const { queryByText } = render(
+			<ActivityPanel
+				requestingTaskListOptions={ false }
+				taskListComplete={ false }
+				taskListHidden={ false }
+				getHistory={ () => ( {
+					location: {
+						pathname: '/',
+					},
+				} ) }
+				query={ {
+					task: '',
+				} }
+			/>
+		);
+
+		expect( queryByText( 'Store Setup' ) ).toBeNull();
+	} );
+
+	it( 'should render the store setup link when on embedded pages and TaskList is not complete', () => {
+		const { queryByText } = render(
+			<ActivityPanel
+				requestingTaskListOptions={ false }
+				taskListComplete={ false }
+				taskListHidden={ false }
+				isEmbedded
+				query={ {} }
+			/>
+		);
+
+		expect( queryByText( 'Store Setup' ) ).toBeDefined();
+	} );
 } );
