@@ -12,6 +12,10 @@ use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
 
 /**
  * Cart Controller Tests.
@@ -28,7 +32,11 @@ class CartItems extends TestCase {
 
 		parent::setUp();
 
-		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ) );
+		$this->mock_formatters = new Formatters();
+		$this->mock_formatters->register( 'money', MoneyFormatter::class );
+		$this->mock_formatters->register( 'html', HtmlFormatter::class );
+		$this->mock_formatters->register( 'currency', CurrencyFormatter::class );
+		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ), $this->mock_formatters );
 
 		wp_set_current_user( 0 );
 

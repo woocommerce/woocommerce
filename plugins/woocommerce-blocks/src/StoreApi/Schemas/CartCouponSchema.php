@@ -101,8 +101,7 @@ class CartCouponSchema extends AbstractSchema {
 		return [
 			'code'          => $coupon_code,
 			'discount_type' => $coupon->get_discount_type(),
-			'totals'        => (object) array_merge(
-				$this->get_store_currency_response(),
+			'totals'        => (object) $this->prepare_currency_response(
 				[
 					'total_discount'     => $this->prepare_money_response( isset( $total_discounts[ $coupon_code ] ) ? $total_discounts[ $coupon_code ] : 0, wc_get_price_decimals() ),
 					'total_discount_tax' => $this->prepare_money_response( isset( $total_discount_taxes[ $coupon_code ] ) ? $total_discount_taxes[ $coupon_code ] : 0, wc_get_price_decimals(), PHP_ROUND_HALF_DOWN ),

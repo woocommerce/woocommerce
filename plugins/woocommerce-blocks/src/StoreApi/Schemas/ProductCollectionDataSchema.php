@@ -109,8 +109,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $data ) {
 		return [
-			'price_range'      => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? (object) array_merge(
-				$this->get_store_currency_response(),
+			'price_range'      => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? (object) $this->prepare_currency_response(
 				[
 					'min_price' => $this->prepare_money_response( $data['min_price'], wc_get_price_decimals() ),
 					'max_price' => $this->prepare_money_response( $data['max_price'], wc_get_price_decimals() ),

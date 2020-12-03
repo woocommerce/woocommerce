@@ -672,7 +672,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function prepare_product_price_response( \WC_Product $product, $tax_display_mode = '' ) {
-		$prices           = $this->get_store_currency_response();
+		$prices           = [];
 		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
 		$price_function   = $this->get_price_function_from_tax_display_mode( $tax_display_mode );
 
@@ -681,7 +681,7 @@ class ProductSchema extends AbstractSchema {
 		$prices['sale_price']    = $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_sale_price() ] ), wc_get_price_decimals() );
 		$prices['price_range']   = $this->get_price_range( $product, $tax_display_mode );
 
-		return $prices;
+		return $this->prepare_currency_response( $prices );
 	}
 
 	/**

@@ -299,7 +299,7 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_rate_response( $rate, $selected_rate = '' ) {
-		return array_merge(
+		return $this->prepare_currency_response(
 			[
 				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
 				'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
@@ -311,8 +311,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
 				'meta_data'     => $this->get_rate_meta_data( $rate ),
 				'selected'      => $selected_rate === $this->get_rate_prop( $rate, 'id' ),
-			],
-			$this->get_store_currency_response()
+			]
 		);
 	}
 

@@ -21,6 +21,10 @@ use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -194,9 +198,19 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			Formatters::class,
+			function( Container $container ) {
+				$formatters = new Formatters();
+				$formatters->register( 'money', MoneyFormatter::class );
+				$formatters->register( 'html', HtmlFormatter::class );
+				$formatters->register( 'currency', CurrencyFormatter::class );
+				return $formatters;
+			}
+		);
+		$this->container->register(
 			ExtendRestApi::class,
 			function( Container $container ) {
-				return new ExtendRestApi( $container->get( Package::class ) );
+				return new ExtendRestApi( $container->get( Package::class ), $container->get( Formatters::class ) );
 			}
 		);
 	}

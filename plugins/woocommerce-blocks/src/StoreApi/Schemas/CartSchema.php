@@ -320,8 +320,7 @@ class CartSchema extends AbstractSchema {
 			'needs_payment'           => $cart->needs_payment(),
 			'needs_shipping'          => $cart->needs_shipping(),
 			'has_calculated_shipping' => $has_calculated_shipping,
-			'totals'                  => (object) array_merge(
-				$this->get_store_currency_response(),
+			'totals'                  => (object) $this->prepare_currency_response(
 				[
 					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
 					'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),
