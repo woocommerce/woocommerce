@@ -168,7 +168,7 @@ class CoreMenu {
 			$customers_item = array(
 				'id'    => 'woocommerce-analytics-customers',
 				'title' => __( 'Customers', 'woocommerce-admin' ),
-				'url'   => wc_admin_url( '/customers' ),
+				'url'   => 'wc-admin&path=/customers',
 				'order' => 50,
 			);
 		}
