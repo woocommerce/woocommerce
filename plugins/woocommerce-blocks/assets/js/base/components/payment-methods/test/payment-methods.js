@@ -53,10 +53,12 @@ describe( 'PaymentMethods', () => {
 		);
 
 		await waitFor( () => {
-			const noPaymentMethods = screen.queryByText(
+			const noPaymentMethods = screen.queryAllByText(
 				/no payment methods available/
 			);
-			expect( noPaymentMethods ).not.toBeNull();
+			// We might get more than one match because the `speak()` function
+			// creates an extra `div` with the notice contents used for a11y.
+			expect( noPaymentMethods.length ).toBeGreaterThanOrEqual( 1 );
 		} );
 	} );
 

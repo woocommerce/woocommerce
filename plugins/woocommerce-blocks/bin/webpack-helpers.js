@@ -6,6 +6,14 @@ const path = require( 'path' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FORCE_MAP = process.env.FORCE_MAP || false;
 
+// Some packages are not available in legacy versions of WordPress, so we don't
+// want to extract them.
+const requiredPackagesInWPLegacy = [
+	'@wordpress/compose', // WP 5.3 version doesn't include `useResizeObserver`.
+	'@wordpress/primitives', // Not included in WP 5.3.
+	'@wordpress/warning', // Not included in WP 5.3.
+];
+
 const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
@@ -93,12 +101,18 @@ function findModuleMatch( module, match ) {
 }
 
 const requestToExternal = ( request ) => {
+	if ( requiredPackagesInWPLegacy.includes( request ) ) {
+		return false;
+	}
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
 	}
 };
 
 const requestToHandle = ( request ) => {
+	if ( requiredPackagesInWPLegacy.includes( request ) ) {
+		return false;
+	}
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
 	}
