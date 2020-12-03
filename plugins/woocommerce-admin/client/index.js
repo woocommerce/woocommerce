@@ -83,12 +83,19 @@ if ( navigationRoot ) {
 	render( <Navigation />, navigationRoot );
 }
 
-// Set up customer effort score survey.
-( function () {
-	const root = appRoot || embeddedRoot;
+// Render the CustomerEffortScoreTracksContainer only if
+// the feature flag is enabled.
+if (
+	window.wcAdminFeatures &&
+	window.wcAdminFeatures[ 'customer-effort-score-tracks' ] === true
+) {
+	// Set up customer effort score survey.
+	( function () {
+		const root = appRoot || embeddedRoot;
 
-	render(
-		<CustomerEffortScoreTracksContainer />,
-		root.insertBefore( document.createElement( 'div' ), null )
-	);
-} )();
+		render(
+			<CustomerEffortScoreTracksContainer />,
+			root.insertBefore( document.createElement( 'div' ), null )
+		);
+	} )();
+}
