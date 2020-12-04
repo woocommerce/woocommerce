@@ -133,7 +133,6 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	 * Test filtering by product attribute(s).
 	 */
 	public function test_product_attributes_filter() {
-		global $wpdb;
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -232,5 +231,94 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $response_orders ) );
 		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_2->get_id() );
+	}
+
+	/**
+	 * Test filtering by product/variation exclusion.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce-admin/issues/5803#issuecomment-738403405.
+	 */
+	public function test_product_variation_exclusion_filter() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a variable product.
+		$variable_product     = WC_Helper_Product::create_variation_product();
+		$product_variations   = $variable_product->get_children();
+		$variation_to_exclude = wc_get_product( $product_variations[2] ); // Variation: size = huge, colour = red, number = 0.
+
+		// Create a simple product.
+		$simple_product = WC_Helper_Product::create_simple_product();
+
+		// Create a simple product to exclude.
+		$simple_product_to_exclude = WC_Helper_Product::create_simple_product();
+
+		// Create an order with several products, including the ones we'd like to exclude.
+		$order_to_be_excluded  = WC_Helper_Order::create_order( $this->user, $variation_to_exclude );
+		$excluded_product_item = new WC_Order_Item_Product();
+		$excluded_product_item->set_props(
+			array(
+				'product'  => $simple_product_to_exclude,
+				'quantity' => 1,
+				'subtotal' => wc_get_price_excluding_tax( $simple_product_to_exclude, array( 'qty' => 1 ) ),
+				'total'    => wc_get_price_excluding_tax( $simple_product_to_exclude, array( 'qty' => 1 ) ),
+			)
+		);
+		$excluded_product_item->save();
+		$order_to_be_excluded->add_item( $excluded_product_item );
+		$order_to_be_excluded->set_status( 'completed' );
+		$order_to_be_excluded->save();
+
+		// Create an order that doesn't have the excluded products.
+		$order_to_be_included = WC_Helper_Order::create_order( $this->user, $simple_product );
+		$order_to_be_included->set_status( 'completed' );
+		$order_to_be_included->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Test product exclusion.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'product_excludes' => array( $simple_product_to_exclude->get_id() ),
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		// Verify only the second order is in the response.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $order_to_be_included->get_id() );
+
+		// Test variation exclusion.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'variation_excludes' => array( $variation_to_exclude->get_id() ),
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		// Verify only the second order is in the response.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $order_to_be_included->get_id() );
+
+		// Sanity check - test the opposite.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'product_excludes' => array( $simple_product->get_id() ),
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		// Verify only the first order is in the response.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $order_to_be_excluded->get_id() );
 	}
 }

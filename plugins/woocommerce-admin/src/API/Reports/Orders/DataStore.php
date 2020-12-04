@@ -140,27 +140,31 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );
 		if ( $included_products || $excluded_products ) {
-			$have_joined_products_table = true;
-			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_product_lookup_table} product_lookup" );
+			$this->subquery->add_sql_clause( 'join', "ON {$order_stats_lookup_table}.order_id = product_lookup.order_id" );
 		}
 		if ( $included_products ) {
-			$where_subquery[] = "{$order_product_lookup_table}.product_id IN ({$included_products})";
+			$this->subquery->add_sql_clause( 'join', "AND product_lookup.product_id IN ({$included_products})" );
+			$where_subquery[] = 'product_lookup.order_id IS NOT NULL';
 		}
 		if ( $excluded_products ) {
-			$where_subquery[] = "{$order_product_lookup_table}.product_id NOT IN ({$excluded_products})";
+			$this->subquery->add_sql_clause( 'join', "AND product_lookup.product_id IN ({$excluded_products})" );
+			$where_subquery[] = 'product_lookup.order_id IS NULL';
 		}
 
 		$included_variations = $this->get_included_variations( $query_args );
 		$excluded_variations = $this->get_excluded_variations( $query_args );
-		if ( ! $have_joined_products_table && ( $included_variations || $excluded_variations ) ) {
-			$have_joined_products_table = true;
-			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
+		if ( $included_variations || $excluded_variations ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_product_lookup_table} variation_lookup" );
+			$this->subquery->add_sql_clause( 'join', "ON {$order_stats_lookup_table}.order_id = variation_lookup.order_id" );
 		}
 		if ( $included_variations ) {
-			$where_subquery[] = "{$order_product_lookup_table}.variation_id IN ({$included_variations})";
+			$this->subquery->add_sql_clause( 'join', "AND variation_lookup.variation_id IN ({$included_variations})" );
+			$where_subquery[] = 'variation_lookup.order_id IS NOT NULL';
 		}
 		if ( $excluded_variations ) {
-			$where_subquery[] = "{$order_product_lookup_table}.variation_id NOT IN ({$excluded_variations})";
+			$this->subquery->add_sql_clause( 'join', "AND variation_lookup.variation_id IN ({$excluded_variations})" );
+			$where_subquery[] = 'variation_lookup.order_id IS NULL';
 		}
 
 		$included_tax_rates = ! empty( $query_args['tax_rate_includes'] ) ? implode( ',', $query_args['tax_rate_includes'] ) : false;
@@ -177,11 +181,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
-			// JOIN on product lookup if we haven't already.
-			if ( ! $have_joined_products_table ) {
-				$have_joined_products_table = true;
-				$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
-			}
+			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
+
 			// Add JOINs for matching attributes.
 			foreach ( $attribute_subqueries['join'] as $attribute_join ) {
 				$this->subquery->add_sql_clause( 'join', $attribute_join );
