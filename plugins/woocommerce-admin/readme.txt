@@ -78,8 +78,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 1.7.0 11/11/2020 =
+= vnext =
+- Fix: Add Customer Type column to the Orders report table. #5820
 
+= 1.7.0 11/11/2020 =
 - Enhancement: Variations report.  #5167
 - Enhancement: Add ability to toggle homescreen layouts. #5429
 - Enhancement: Accordion component  #5474

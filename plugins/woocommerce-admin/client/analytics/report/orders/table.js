@@ -17,6 +17,9 @@ import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 import './style.scss';
 
+const capitalizeFirstLetter = ( expr ) =>
+	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
+
 class OrdersReportTable extends Component {
 	constructor() {
 		super();
@@ -51,6 +54,12 @@ class OrdersReportTable extends Component {
 			{
 				label: __( 'Customer', 'woocommerce-admin' ),
 				key: 'customer_id',
+				required: false,
+				isSortable: false,
+			},
+			{
+				label: __( 'Customer Type', 'woocommerce-admin' ),
+				key: 'customer_type',
 				required: false,
 				isSortable: false,
 			},
@@ -112,6 +121,7 @@ class OrdersReportTable extends Component {
 				order_number: orderNumber,
 				parent_id: parentId,
 				status,
+				customer_type: customerType,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const { coupons, customer, products } = extendedInfo;
@@ -174,6 +184,10 @@ class OrdersReportTable extends Component {
 				{
 					display: this.getCustomerName( customer ),
 					value: this.getCustomerName( customer ),
+				},
+				{
+					display: capitalizeFirstLetter( customerType ),
+					value: customerType,
 				},
 				{
 					display: this.renderList(
