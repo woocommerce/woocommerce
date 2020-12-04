@@ -1,0 +1,1 @@
+../../bin/composer/wp/vendor/wp-cli/wp-cli/bin/wp.bat
