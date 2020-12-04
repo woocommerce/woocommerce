@@ -47,6 +47,7 @@ export {
 	MINUTE,
 	HOUR,
 	DAY,
+	WEEK,
 	MONTH,
 } from './constants';
 

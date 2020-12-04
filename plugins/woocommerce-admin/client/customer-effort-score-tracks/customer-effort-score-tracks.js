@@ -7,7 +7,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import CustomerEffortScore from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, MONTH } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 
 const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
@@ -27,7 +27,7 @@ const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
  * @param {Array}    props.cesShownForActions The array of actions that the CES modal has been shown for.
  * @param {boolean}  props.allowTracking      Whether tracking is allowed or not.
  * @param {boolean}  props.resolving          Are values still being resolved.
- * @param {number}   props.storeAge           The age of the store in months.
+ * @param {number}   props.storeAgeInWeeks    The age of the store in weeks.
  * @param {Function} props.updateOptions      Function to update options.
  * @param {Function} props.createNotice       Function to create a snackbar.
  */
@@ -39,7 +39,7 @@ function CustomerEffortScoreTracks( {
 	cesShownForActions,
 	allowTracking,
 	resolving,
-	storeAge,
+	storeAgeInWeeks,
 	updateOptions,
 	createNotice,
 } ) {
@@ -68,7 +68,7 @@ function CustomerEffortScoreTracks( {
 	const onNoticeShown = () => {
 		recordEvent( 'ces_snackbar_view', {
 			action,
-			store_age: storeAge,
+			store_age: storeAgeInWeeks,
 			...trackProps,
 		} );
 	};
@@ -85,7 +85,7 @@ function CustomerEffortScoreTracks( {
 	const onNoticeDismissed = () => {
 		recordEvent( 'ces_snackbar_dismiss', {
 			action,
-			store_age: storeAge,
+			store_age: storeAgeInWeeks,
 			...trackProps,
 		} );
 
@@ -97,7 +97,7 @@ function CustomerEffortScoreTracks( {
 
 		recordEvent( 'ces_view', {
 			action,
-			store_age: storeAge,
+			store_age: storeAgeInWeeks,
 			...trackProps,
 		} );
 
@@ -109,7 +109,7 @@ function CustomerEffortScoreTracks( {
 			action,
 			score,
 			comments: comments || '',
-			store_age: storeAge,
+			store_age: storeAgeInWeeks,
 			...trackProps,
 		} );
 		createNotice( 'success', onSubmitLabel );
@@ -165,9 +165,9 @@ CustomerEffortScoreTracks.propTypes = {
 	 */
 	resolving: PropTypes.bool.isRequired,
 	/**
-	 * The age of the store in months.
+	 * The age of the store in weeks.
 	 */
-	storeAge: PropTypes.number,
+	storeAgeInWeeks: PropTypes.number,
 	/**
 	 * Function to update options.
 	 */
@@ -190,7 +190,7 @@ export default compose(
 		// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
 		// seconds since Unix epoch.
 		const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
-		const storeAge = Math.round( storeAgeInMs / MONTH );
+		const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
 
 		const allowTrackingOption =
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
@@ -206,7 +206,7 @@ export default compose(
 		return {
 			cesShownForActions,
 			allowTracking,
-			storeAge,
+			storeAgeInWeeks,
 			resolving,
 		};
 	} ),
