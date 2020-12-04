@@ -1963,12 +1963,12 @@ a.reset_variations {
 
 		input[type=radio] {
 			& + label::before {
-				background: #000 !important;
+				background: #fff !important;
 				border: var(--form--border-width) solid #000 !important;
 			}
 
 			&:checked + label::before {
-				background: #fff !important;
+				background: #000 !important;
 			}
 		}
 	}
