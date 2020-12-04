@@ -2,7 +2,7 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.3
-Tested up to: 5.5
+Tested up to: 5.6
 Requires PHP: 7.0
 Stable tag: 4.7.1
 License: GPLv3
@@ -177,14 +177,16 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - PayPal response emptying uninitialized cart. #28027
 * Fix - Display of visual feedback after pressing "Place Order" in `Twenty Twenty` and `Twenty Nineteen` themes #27997
 * Fix - Category and tag bulk deletion message. #27856
+* Fix - Corrected Puerto Rico address validation. #28465
 * Dev - Filter: `woocommerce_product_has_options` to products. #27514
 * Dev - Added error message to `checkout_error` JS event. #28101
 * Dev - Replaced usage of deprecated `woocommerce_reset_loop()` in product category shortcodes. #28242
+* Dev - Set "Tested up to" header to WordPress 5.6. #28388
 * Localization - Jamaican currency, states, and address structure. #27723
 * Localization - Better display of inclusive taxes during checkout. #28064
 * Localization - Validation for Belgium postcodes. #28145
 
-**WooCommerce Admin - 1.7.0 & 1.7.1 & 1.7.2**
+**WooCommerce Admin - 1.7.0 & 1.7.1 & 1.7.2 & 1.7.3**
 
 * Enhancement - Variations report.  #5167
 * Enhancement - Add ability to toggle homescreen layouts. #5429
@@ -220,6 +222,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Tax code duplicated when clicking the button to remove. #5638
 * Fix - Restore Autoloading of WooCommerce Classes in PHP Tests. #5650
 * Fix - Skip WC Payment plugin note if plugin not added through the onboarding process. #5619
+* Fix - Use error_log() to log the deprecated class calls instead of `_deprecated_function()`. #5802
+* Fix - Don't show the Orders panel on the homescreen with the Task List. #5552
+* Fix - Home Screen: Do not show store setup activity panel. #5801
 * Dev - Home Screen - migrate orders panel. #5455
 * Dev - Store Profiler - include Creative Mail as a free extension #5543
 * Dev - Add undefined check in intervals data util #5546
