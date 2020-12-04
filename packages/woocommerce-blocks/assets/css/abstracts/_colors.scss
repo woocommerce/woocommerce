@@ -1,0 +1,32 @@
+@import "node_modules/@wordpress/base-styles/colors";
+@import "node_modules/@automattic/color-studio/dist/color-variables";
+
+// @todo remove when `@woocommerce/base-styles` is updated.
+// Greys
+$black: #000;			// Use only when you truly need pure black. For UI, use $gray-900.
+$gray-100: #f0f0f0;		// Used for light gray backgrounds.
+$gray-200: #e0e0e0;		// Used sparingly for light borders.
+$gray-300: #ddd;		// Used for most borders.
+$gray-400: #ccc;
+$gray-600: #949494;		// Meets 3:1 UI or large text contrast against white.
+$gray-700: #757575;		// Meets 4.6:1 text contrast against white.
+$gray-900: #1e1e1e;
+$white: #fff;
+
+// Bright colors
+$no-stock-color: $alert-red;
+$low-stock-color: $alert-yellow;
+$in-stock-color: $alert-green;
+
+$placeholder-color: var(--global--color-primary, $gray-200);
+$input-border-gray: #8d96a0;
+$input-border-dark: rgba(255, 255, 255, 0.4);
+$input-disabled-dark: rgba(255, 255, 255, 0.3);
+$controls-border-dark: rgba(255, 255, 255, 0.6);
+$input-text-active: #2b2d2f;
+$input-placeholder-dark: rgba(255, 255, 255, 0.6);
+$input-text-dark: #fff;
+$input-background-dark: rgba(0, 0, 0, 0.1);
+$select-dropdown-dark: #1e1e1e;
+$select-dropdown-light: #fff;
+$select-item-dark: rgba(0, 0, 0, 0.4);
