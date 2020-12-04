@@ -177,9 +177,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - PayPal response emptying uninitialized cart. #28027
 * Fix - Display of visual feedback after pressing "Place Order" in `Twenty Twenty` and `Twenty Nineteen` themes #27997
 * Fix - Category and tag bulk deletion message. #27856
+* Fix - Corrected Puerto Rico address validation. #28465
 * Dev - Filter: `woocommerce_product_has_options` to products. #27514
 * Dev - Added error message to `checkout_error` JS event. #28101
 * Dev - Replaced usage of deprecated `woocommerce_reset_loop()` in product category shortcodes. #28242
+* Dev - Set "Tested up to" header to WordPress 5.6. #28388
 * Localization - Jamaican currency, states, and address structure. #27723
 * Localization - Better display of inclusive taxes during checkout. #28064
 * Localization - Validation for Belgium postcodes. #28145
