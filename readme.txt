@@ -184,7 +184,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Localization - Better display of inclusive taxes during checkout. #28064
 * Localization - Validation for Belgium postcodes. #28145
 
-**WooCommerce Admin - 1.7.0 & 1.7.1 & 1.7.2**
+**WooCommerce Admin - 1.7.0 & 1.7.1 & 1.7.2 & 1.7.3**
 
 * Enhancement - Variations report.  #5167
 * Enhancement - Add ability to toggle homescreen layouts. #5429
@@ -220,6 +220,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Tax code duplicated when clicking the button to remove. #5638
 * Fix - Restore Autoloading of WooCommerce Classes in PHP Tests. #5650
 * Fix - Skip WC Payment plugin note if plugin not added through the onboarding process. #5619
+* Fix - Use error_log() to log the deprecated class calls instead of `_deprecated_function()`. #5802
+* Fix - Don't show the Orders panel on the homescreen with the Task List. #5552
+* Fix - Home Screen: Do not show store setup activity panel. #5801
 * Dev - Home Screen - migrate orders panel. #5455
 * Dev - Store Profiler - include Creative Mail as a free extension #5543
 * Dev - Add undefined check in intervals data util #5546
