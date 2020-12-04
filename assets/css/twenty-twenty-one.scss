@@ -2899,6 +2899,12 @@ a.reset_variations {
 				background: var(--global--color-primary);
 			}
 		}
+
+		.product-thumbnail {
+			.attachment-woocommerce_thumbnail {
+				height: auto !important;
+			}
+		}
 	}
 
 	.cart-collaterals {
