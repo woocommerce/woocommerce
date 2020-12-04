@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPersistedQuery, getSearchWords } from '../index';
+import { getPersistedQuery, getSearchWords, getNewPath } from '../index';
 
 jest.mock( '../index', () => ( {
 	...require.requireActual( '../index' ),
@@ -106,5 +106,32 @@ describe( 'getSearchWords', () => {
 		};
 
 		expect( () => getSearchWords( query ) ).toThrow( Error );
+	} );
+} );
+
+describe( 'getNewPath', () => {
+	it( 'should have default page as "wc-admin"', () => {
+		const path = getNewPath( {}, '', {} );
+
+		expect( path ).toEqual( 'admin.php?page=wc-admin&path=' );
+	} );
+
+	it( 'should override default page when page parameter is specified', () => {
+		const path = getNewPath( {}, '', {}, 'custom-page' );
+
+		expect( path ).toEqual( 'admin.php?page=custom-page&path=' );
+	} );
+
+	it( 'should override default page by query parameter over page parameter', () => {
+		const path = getNewPath(
+			{
+				page: 'custom-page',
+			},
+			'',
+			{},
+			'default-page'
+		);
+
+		expect( path ).toEqual( 'admin.php?page=custom-page&path=' );
 	} );
 } );
