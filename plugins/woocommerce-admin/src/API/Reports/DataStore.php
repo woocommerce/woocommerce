@@ -692,6 +692,8 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['before']->date( TimeInterval::$sql_datetime_format );
 			} else {
 				$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
+				$datetime_str = TimeInterval::convert_local_datetime_to_gmt( $datetime_str )
+											->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
 				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$datetime_str'" );
@@ -705,6 +707,8 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['after']->date( TimeInterval::$sql_datetime_format );
 			} else {
 				$datetime_str = $query_args['after']->format( TimeInterval::$sql_datetime_format );
+				$datetime_str = TimeInterval::convert_local_datetime_to_gmt( $datetime_str )
+											->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
 				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$datetime_str'" );
