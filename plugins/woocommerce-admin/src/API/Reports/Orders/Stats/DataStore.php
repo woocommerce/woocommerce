@@ -280,7 +280,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'coupon_excludes'   => array(),
 			'tax_rate_includes' => array(),
 			'tax_rate_excludes' => array(),
-			'customer'          => '',
+			'customer_type'     => '',
 			'category_includes' => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );

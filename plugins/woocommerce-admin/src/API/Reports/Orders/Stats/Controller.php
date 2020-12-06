@@ -59,12 +59,17 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$args['coupon_excludes']    = (array) $request['coupon_excludes'];
 		$args['tax_rate_includes']  = (array) $request['tax_rate_includes'];
 		$args['tax_rate_excludes']  = (array) $request['tax_rate_excludes'];
-		$args['customer']           = $request['customer'];
+		$args['customer_type']      = $request['customer_type'];
 		$args['refunds']            = $request['refunds'];
 		$args['attribute_is']       = (array) $request['attribute_is'];
 		$args['attribute_is_not']   = (array) $request['attribute_is_not'];
 		$args['category_includes']  = (array) $request['categories'];
 		$args['segmentby']          = $request['segmentby'];
+
+		// For backwards compatibility, `customer` is aliased to `customer_type`.
+		if ( empty( $request['customer_type'] ) && ! empty( $request['customer'] ) ) {
+			$args['customer_type'] = $request['customer'];
+		}
 
 		return $args;
 	}
@@ -495,7 +500,16 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['customer']           = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce-admin' ),
+			'description'       => __( 'Alias for customer_type (deprecated).', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'new',
+				'returning',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['customer_type']      = array(
+			'description'       => __( 'Limit result set to orders that have the specified customer_type', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'enum'              => array(
 				'new',

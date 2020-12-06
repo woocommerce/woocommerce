@@ -1196,10 +1196,10 @@ class DataStore extends SqlQuery {
 		global $wpdb;
 
 		$customer_filter = '';
-		if ( isset( $query_args['customer'] ) ) {
-			if ( 'new' === strtolower( $query_args['customer'] ) ) {
+		if ( isset( $query_args['customer_type'] ) ) {
+			if ( 'new' === strtolower( $query_args['customer_type'] ) ) {
 				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
-			} elseif ( 'returning' === strtolower( $query_args['customer'] ) ) {
+			} elseif ( 'returning' === strtolower( $query_args['customer_type'] ) ) {
 				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 1";
 			}
 		}
