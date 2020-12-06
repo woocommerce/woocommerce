@@ -71,5 +71,14 @@
       "zoneregions": "United States (US)",
       "shippingmethod": "Free shipping"
     }
+  },
+  "orderstatuses": {
+    "pendingpayment": "Pending payment",
+    "processing": "Processing",
+    "onhold": "On hold",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded",
+    "failed": "Failed"
   }
 }
