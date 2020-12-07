@@ -28,7 +28,7 @@ For some debugging tools/help [see here](./CONTRIBUTING.md#debugging)
 
 ### Testing
 #### End-to-end tests
-Tests live in `./tests/e2e`. E2E tests have their own Docker container to run the WordPress server. Start
+Tests live in `./tests/e2e`. An existing build is required prior running, please refer to the section above for steps. E2E tests have their own Docker container to run the WordPress server. Start
 the server using:
 ```
 npm run docker:up
@@ -45,6 +45,9 @@ Run a single test by adding the file name:
 ```
 npm run test:e2e-dev complete-onboarding-wizard.test.js
 ```
+
+## Common Issues
+If you're encountering any issue setting things up, chances are we have been there too. Please have a look at our [wiki](https://github.com/woocommerce/woocommerce-admin/wiki/Common-Issues) for a list of common problems.
 
 ## Privacy
 
