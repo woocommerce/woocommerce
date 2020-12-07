@@ -7,6 +7,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\PageController;
 use \Automattic\WooCommerce\Admin\PluginsHelper;
 use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
 
@@ -507,9 +508,8 @@ class Onboarding {
 			$active_theme     = get_option( 'stylesheet' );
 
 			foreach ( $installed_themes as $slug => $theme ) {
-				$theme_data       = self::get_theme_data( $theme );
-				$installed_themes = wp_get_themes();
-				$themes[ $slug ]  = $theme_data;
+				$theme_data      = self::get_theme_data( $theme );
+				$themes[ $slug ] = $theme_data;
 			}
 
 			// Add the WooCommerce support tag for default themes that don't explicitly declare support.
@@ -649,9 +649,26 @@ class Onboarding {
 	}
 
 	/**
+	 * Determine if the current page is home or setup wizard.
+	 *
+	 * @return bool
+	 */
+	protected function is_home_or_setup_wizard_page() {
+		$allowed_paths = array( 'wc-admin', 'wc-admin&path=/setup-wizard' );
+		$current_page  = PageController::get_instance()->get_current_page();
+		if ( ! $current_page ) {
+			return false;
+		}
+
+		return in_array( $current_page['path'], $allowed_paths );
+	}
+
+	/**
 	 * Add profiler items to component settings.
 	 *
 	 * @param array $settings Component settings.
+	 *
+	 * @return array
 	 */
 	public function component_settings( $settings ) {
 		$profile                = (array) get_option( self::PROFILE_DATA_OPTION, array() );
@@ -659,8 +676,14 @@ class Onboarding {
 			'profile' => $profile,
 		);
 
-		// Only fetch if the onboarding wizard OR the task list is incomplete or currently shown.
-		if ( ! self::should_show_profiler() && ! self::should_show_tasks() ) {
+		// Only fetch if the onboarding wizard OR the task list is incomplete or currently shown
+		// or the current page is one of the WooCommerce Admin pages.
+		if (
+			( ! self::should_show_profiler() && ! self::should_show_tasks()
+			||
+			! $this->is_home_or_setup_wizard_page()
+		)
+		) {
 			return $settings;
 		}
 
