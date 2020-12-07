@@ -192,6 +192,24 @@ class Tax extends Component {
 			updateOptions,
 		} = this.props;
 		const { cachedPluginsToActivate } = this.state;
+		let step2Label, agreementText;
+
+		if ( cachedPluginsToActivate.includes( 'woocommerce-services' ) ) {
+			step2Label = __(
+				'Install Jetpack and WooCommerce Tax',
+				'woocommerce-admin'
+			);
+			agreementText = __(
+				'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
+				'woocommerce-admin'
+			);
+		} else {
+			step2Label = __( 'Install Jetpack', 'woocommerce-admin' );
+			agreementText = __(
+				'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
+				'woocommerce-admin'
+			);
+		}
 
 		const steps = [
 			{
@@ -221,10 +239,7 @@ class Tax extends Component {
 			},
 			{
 				key: 'plugins',
-				label: __(
-					'Install Jetpack and WooCommerce Tax',
-					'woocommerce-admin'
-				),
+				label: step2Label,
 				description: __(
 					'Jetpack and WooCommerce Tax allow you to automate sales tax calculations',
 					'woocommerce-admin'
@@ -273,10 +288,7 @@ class Tax extends Component {
 								className="woocommerce-task__caption"
 							>
 								{ interpolateComponents( {
-									mixedString: __(
-										'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-										'woocommerce-admin'
-									),
+									mixedString: agreementText,
 									components: {
 										link: (
 											<Link
