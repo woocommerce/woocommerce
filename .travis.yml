@@ -33,7 +33,7 @@ jobs:
     install:
      - nvm install
      - npm install
-     - composer install
+     - composer install --no-dev
     script:
       - npm run build:assets
       - npm run docker:up

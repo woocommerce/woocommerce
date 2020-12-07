@@ -235,7 +235,7 @@
 			$( this ).focus();
 		} );
 
-		$( '.wc_input_table .remove_rows' ).click( function() {
+		$( '.wc_input_table .remove_rows' ).on( 'click', function() {
 			var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
 			if ( $tbody.find( 'tr.current' ).length > 0 ) {
 				var $current = $tbody.find( 'tr.current' );

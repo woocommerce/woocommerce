@@ -293,7 +293,7 @@ class WC_Shortcode_My_Account {
 
 		$errors = new WP_Error();
 
-		do_action( 'lostpassword_post', $errors );
+		do_action( 'lostpassword_post', $errors, $user_data );
 
 		if ( $errors->get_error_code() ) {
 			wc_add_notice( $errors->get_error_message(), 'error' );
