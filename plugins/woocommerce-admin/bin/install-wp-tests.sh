@@ -108,6 +108,9 @@ install_test_suite() {
 		local ioption='-i'
 	fi
 
+	# removes testing suite
+	rm -rf $WP_TESTS_DIR
+
 	# set up testing suite if it doesn't yet exist
 	if [ ! -d $WP_TESTS_DIR ]; then
 		# set up testing suite
@@ -151,6 +154,9 @@ install_db() {
 		fi
 	fi
 
+	# drop existing database
+	mysqladmin drop -f $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA 2>/dev/null || true
+
 	# create database
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
@@ -166,6 +172,11 @@ install_deps() {
 	cd "$WP_CORE_DIR"
 
 	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+
+	# delete existing wp-config and woocommerce repository
+	rm -f wp-config.php
+	rm -rf wp-content/plugins/woocommerce
+
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
