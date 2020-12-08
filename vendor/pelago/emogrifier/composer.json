@@ -1,0 +1,97 @@
+{
+    "name": "pelago/emogrifier",
+    "description": "Converts CSS styles into inline style attributes in your HTML code",
+    "keywords": [
+        "email",
+        "css",
+        "pre-processing"
+    ],
+    "homepage": "https://www.myintervals.com/emogrifier.php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oliver Klee",
+            "email": "github@oliverklee.de"
+        },
+        {
+            "name": "Zoli Szabó",
+            "email": "zoli.szabo+github@gmail.com"
+        },
+        {
+            "name": "John Reeve",
+            "email": "jreeve@pelagodesign.com"
+        },
+        {
+            "name": "Jake Hotson",
+            "email": "jake@qzdesign.co.uk"
+        },
+        {
+            "name": "Cameron Brooks"
+        },
+        {
+            "name": "Jaime Prado"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/MyIntervals/emogrifier/issues",
+        "source": "https://github.com/MyIntervals/emogrifier"
+    },
+    "require": {
+        "php": "^5.6 || ~7.0 || ~7.1 || ~7.2 || ~7.3 || ~7.4",
+        "ext-dom": "*",
+        "ext-libxml": "*",
+        "symfony/css-selector": "^2.8 || ^3.0 || ^4.0 || ^5.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.15.3",
+        "squizlabs/php_codesniffer": "^3.5.0",
+        "phpmd/phpmd": "^2.7.0",
+        "phpunit/phpunit": "^5.7.27"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pelago\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pelago\\Tests\\": "tests/"
+        }
+    },
+    "prefer-stable": true,
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        }
+    },
+    "scripts": {
+        "php:version": "php -v | grep -Po 'PHP\\s++\\K(?:\\d++\\.)*+\\d++(?:-\\w++)?+'",
+        "php:fix": "php-cs-fixer --config=config/php-cs-fixer.php fix config/ src/ tests/",
+        "ci:php:lint": "find config src tests -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l",
+        "ci:php:sniff": "phpcs config src tests",
+        "ci:php:fixer": "php-cs-fixer --config=config/php-cs-fixer.php fix --dry-run -v --show-progress=dots --diff-format=udiff config/ src/ tests/",
+        "ci:php:md": "phpmd src text config/phpmd.xml",
+        "ci:tests:unit": "phpunit tests/",
+        "ci:tests": [
+            "@ci:tests:unit"
+        ],
+        "ci:dynamic": [
+            "@ci:tests"
+        ],
+        "ci:static": [
+            "@ci:php:lint",
+            "@ci:php:sniff",
+            "@ci:php:fixer",
+            "@ci:php:md"
+        ],
+        "ci": [
+            "@ci:static",
+            "@ci:dynamic"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0.x-dev"
+        }
+    }
+}
