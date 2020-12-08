@@ -251,40 +251,6 @@ class Menu {
 	}
 
 	/**
-	 * Adds a plugin item.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'         => (string) The unique ID of the menu item. Required.
-	 *      'title'      => (string) Title of the menu item. Required.
-	 *      'parent'     => (string) Parent menu item ID.
-	 *      'capability' => (string) Capability to view this menu item.
-	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'      => (int) Menu item order.
-	 *    ).
-	 */
-	public static function add_plugin_item( $args ) {
-		if ( ! isset( $args['parent'] ) ) {
-			unset( $args['order'] );
-		}
-
-		$item_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'plugins',
-			)
-		);
-
-		$menu_id = self::get_item_menu_id( $item_args );
-		if ( 'plugins' !== $menu_id ) {
-			return;
-		}
-
-		self::add_item( $item_args );
-	}
-
-	/**
 	 * Adds a plugin category.
 	 *
 	 * @param array $args Array containing the necessary arguments.
@@ -316,6 +282,79 @@ class Menu {
 
 		self::add_category( $category_args );
 	}
+
+	/**
+	 * Adds a plugin item.
+	 *
+	 * @param array $args Array containing the necessary arguments.
+	 *    $args = array(
+	 *      'id'         => (string) The unique ID of the menu item. Required.
+	 *      'title'      => (string) Title of the menu item. Required.
+	 *      'parent'     => (string) Parent menu item ID.
+	 *      'capability' => (string) Capability to view this menu item.
+	 *      'url'        => (string) URL or callback to be used. Required.
+	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
+	 *      'order'      => (int) Menu item order.
+	 *    ).
+	 */
+	public static function add_plugin_item( $args ) {
+		if ( ! isset( $args['parent'] ) ) {
+			unset( $args['order'] );
+		}
+
+		$item_args = array_merge(
+			$args,
+			array(
+				'menuId' => 'plugins',
+			)
+		);
+
+		$menu_id = self::get_item_menu_id( $item_args );
+
+		if ( 'plugins' !== $menu_id ) {
+			return;
+		}
+
+		self::add_item( $item_args );
+	}
+
+	/**
+	 * Adds a plugin setting item.
+	 *
+	 * @param array $args Array containing the necessary arguments.
+	 *    $args = array(
+	 *      'id'         => (string) The unique ID of the menu item. Required.
+	 *      'title'      => (string) Title of the menu item. Required.
+	 *      'capability' => (string) Capability to view this menu item.
+	 *      'url'        => (string) URL or callback to be used. Required.
+	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
+	 *    ).
+	 */
+	public static function add_setting_item( $args ) {
+		unset( $args['order'] );
+
+		if ( isset( $args['parent'] ) || isset( $args['menuId'] ) ) {
+			error_log(  // phpcs:ignore
+				sprintf(
+					/* translators: 1: Duplicate menu item path. */
+					esc_html__( 'The item ID %1$s attempted to register using an invalid option. The arguments `menuId` and `parent` are not allowed for add_setting_item()', 'woocommerce-admin' ),
+					'`' . $args['id'] . '`'
+				)
+			);
+		}
+
+		$item_args = array_merge(
+			$args,
+			array(
+				'menuId' => 'secondary',
+				'parent' => 'woocommerce-settings',
+			)
+		);
+
+		self::add_item( $item_args );
+	}
+
+
 
 	/**
 	 * Get menu item templates for a given post type.
