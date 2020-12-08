@@ -11,15 +11,37 @@ const {
 
 const statusColumnTextSelector = 'mark.order-status > span';
 
-// Order Statuses to filter against
-const config = require( 'config' );
-const pendingPayment = config.get( 'orderstatuses.pendingpayment' );
-const processing = config.get( 'orderstatuses.processing' );
-const onHold = config.get( 'orderstatuses.onhold' );
-const completed = config.get( 'orderstatuses.completed' );
-const cancelled = config.get( 'orderstatuses.cancelled' );
-const refunded = config.get( 'orderstatuses.refunded' );
-const failed = config.get( 'orderstatuses.failed' );
+// Define order statuses to filter against
+const orderStatus = {
+	pending: {
+		name: 'wc-pending',
+		description: { text: 'Pending payment' },
+	},
+	processing: {
+		name: 'wc-processing',
+		description: { text: 'Processing' },
+	},
+	onHold: {
+		name: 'wc-on-hold',
+		description: { text: 'On hold' },
+	},
+	completed: {
+		name: 'wc-completed',
+		description: { text: 'Completed' },
+	},
+	cancelled: {
+		name: 'wc-cancelled',
+		description: { text: 'Cancelled' },
+	},
+	refunded: {
+		name: 'wc-refunded',
+		description: { text: 'Refunded' },
+	},
+	failed: {
+		name: 'wc-failed',
+		description: { text: 'Failed' },
+	}
+};
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
@@ -28,13 +50,13 @@ const runOrderStatusFiltersTest = () => {
 			await StoreOwnerFlow.login();
 
 			// Next, let's create some orders we can filter against
-			await createSimpleOrder(pendingPayment);
-			await createSimpleOrder(processing);
-			await createSimpleOrder(onHold);
-			await createSimpleOrder(completed);
-			await createSimpleOrder(cancelled);
-			await createSimpleOrder(refunded);
-			await createSimpleOrder(failed);
+			await createSimpleOrder(orderStatus.pending.description.text);
+			await createSimpleOrder(orderStatus.processing.description.text);
+			await createSimpleOrder(orderStatus.onHold.description.text);
+			await createSimpleOrder(orderStatus.completed.description.text);
+			await createSimpleOrder(orderStatus.cancelled.description.text);
+			await createSimpleOrder(orderStatus.refunded.description.text);
+			await createSimpleOrder(orderStatus.failed.description.text);
 		}, 40000);
 
 		afterAll( async () => {
@@ -45,113 +67,113 @@ const runOrderStatusFiltersTest = () => {
 
 		it('should filter by Pending payment', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-pending');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: pendingPayment });
+			await clickFilter('.' + orderStatus.pending.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by Processing', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-processing');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: processing });
+			await clickFilter('.' + orderStatus.processing.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by On hold', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-on-hold');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: onHold });
+			await clickFilter('.' + orderStatus.onHold.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by Completed', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-completed');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: completed });
+			await clickFilter('.' + orderStatus.completed.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by Cancelled', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-cancelled');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: cancelled });
+			await clickFilter('.' + orderStatus.cancelled.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by Refunded', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-refunded');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: refunded });
+			await clickFilter('.' + orderStatus.refunded.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 		it('should filter by Failed', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
-			await clickFilter('.wc-failed');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: failed });
+			await clickFilter('.' + orderStatus.failed.name);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).not.toMatchElement(statusColumnTextSelector, { text: onHold });
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
 		});
 
 		it('should filter by All', async () => {
 			await StoreOwnerFlow.openAllOrdersView();
 			// Make sure all the order statuses that were created show in this list
 			await clickFilter('.all');
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: pendingPayment });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: processing });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: completed });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: cancelled });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: refunded });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: onHold });
-			await expect(page).toMatchElement(statusColumnTextSelector, { text: failed });
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 		});
 
 	});
