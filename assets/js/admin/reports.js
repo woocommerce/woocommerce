@@ -130,7 +130,7 @@ jQuery(function( $ ) {
 	}
 
 	// Export
-	$( '.export_csv' ).click( function() {
+	$( '.export_csv' ).on( 'click', function() {
 		var exclude_series = $( this ).data( 'exclude_series' ) || '';
 		exclude_series    = exclude_series.toString();
 		exclude_series    = exclude_series.split( ',' );
