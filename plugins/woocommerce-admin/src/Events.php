@@ -40,6 +40,7 @@ use \Automattic\WooCommerce\Admin\Notes\PerformanceOnMobile;
 use \Automattic\WooCommerce\Admin\Notes\ManageOrdersOnTheGo;
 use \Automattic\WooCommerce\Admin\Notes\NavigationFeedback;
 use \Automattic\WooCommerce\Admin\Notes\NavigationFeedbackFollowUp;
+use \Automattic\WooCommerce\Admin\Notes\FilterByProductVariationsInReports;
 
 /**
  * Events Class.
@@ -113,6 +114,7 @@ class Events {
 		ManageOrdersOnTheGo::possibly_add_note();
 		NavigationFeedback::possibly_add_note();
 		NavigationFeedbackFollowUp::possibly_add_note();
+		FilterByProductVariationsInReports::possibly_add_note();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::read_specs_from_data_sources();
