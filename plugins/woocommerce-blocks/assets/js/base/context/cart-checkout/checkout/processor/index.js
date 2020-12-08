@@ -222,17 +222,17 @@ const CheckoutProcessor = () => {
 				} );
 			} )
 			.catch( ( errorResponse ) => {
+				// Update nonce.
+				triggerFetch.setNonce( errorResponse.headers );
+
+				// If new customer ID returned, update the store.
+				if ( errorResponse.headers?.get( 'X-WC-Store-API-User' ) ) {
+					dispatchActions.setCustomerId(
+						errorResponse.headers.get( 'X-WC-Store-API-User' )
+					);
+				}
+
 				errorResponse.json().then( function ( response ) {
-					// Update nonce.
-					triggerFetch.setNonce( errorResponse.headers );
-
-					// If new customer ID returned, update the store.
-					if ( errorResponse.headers?.get( 'X-WC-Store-API-User' ) ) {
-						dispatchActions.setCustomerId(
-							errorResponse.headers.get( 'X-WC-Store-API-User' )
-						);
-					}
-
 					// If updated cart state was returned, update the store.
 					if ( response.data?.cart ) {
 						receiveCart( response.data.cart );
