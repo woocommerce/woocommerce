@@ -10,7 +10,8 @@
   "license": "GPL-3.0+",
   "main": "index.js",
   "dependencies": {
-    "@jest/globals": "^26.4.2"
+    "@jest/globals": "^26.4.2",
+    "config": "3.3.3"
   },
   "peerDependencies": {
     "@woocommerce/e2e-utils": "^0.1.1"
