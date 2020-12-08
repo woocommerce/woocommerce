@@ -1,0 +1,161 @@
+$fontSizes: (
+	"smaller": 0.75,
+	"small": 0.875,
+	"regular": 1,
+	"large": 1.25,
+	"larger": 2,
+);
+
+// Maps a named font-size to its em equivalent.
+@mixin font-size($sizeName) {
+	font-size: map-get($fontSizes, $sizeName) * 1em;
+}
+
+@keyframes loading-fade {
+	0% {
+		opacity: 0.7;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.7;
+	}
+}
+
+// Adds animation to placeholder section
+@mixin placeholder() {
+	animation: loading-fade 1.2s ease-in-out infinite;
+	background-color: $placeholder-color !important;
+	color: $placeholder-color !important;
+	outline: 0 !important;
+	border: 0 !important;
+	box-shadow: none;
+	pointer-events: none;
+	max-width: 100%;
+
+	// Forces direct descendants to keep layout but lose visibility.
+	> * {
+		visibility: hidden;
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+@mixin force-content() {
+	&::after {
+		content: "\00a0";
+	}
+}
+
+// Hide an element from sighted users, but available to screen reader users.
+@mixin visually-hidden() {
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	overflow: hidden;
+	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
+	overflow-wrap: normal !important;
+	word-wrap: normal !important;
+}
+
+@mixin reset-box() {
+	border: 0;
+	border-radius: 0;
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+}
+
+@mixin reset-typography() {
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+}
+
+// Reset <h1>, <h2>, etc. styles as if they were text. Useful for elements that must be headings for a11y but don't need those styles.
+@mixin text-heading() {
+	@include reset-box();
+	@include reset-typography();
+	box-shadow: none;
+	display: inline;
+
+	background: transparent;
+}
+
+// Reset <button> style as if it was text. Useful for elements that must be `<button>` for a11y but don't need those styles.
+@mixin text-button() {
+	@include reset-box();
+	@include reset-typography();
+	background: transparent;
+	box-shadow: none;
+	display: inline;
+
+	&:hover,
+	&:focus,
+	&:active {
+		background: transparent;
+	}
+}
+
+// Reset <button> style so we can use link style for action buttons.
+@mixin link-button() {
+	@include text-button();
+	text-decoration: underline;
+}
+
+// Makes sure long words are broken if they overflow the container.
+@mixin wrap-break-word() {
+	// This is the current standard, works in most browsers.
+	overflow-wrap: anywhere;
+	// Safari supports word-break.
+	word-break: break-word;
+	// IE11 doesn't support overflow-wrap neither word-break: break-word, so we fallback to -ms-work-break: break-all.
+	-ms-word-break: break-all;
+}
+
+// Shows a border with the current color and a custom opacity. That can't be achieved
+// with normal border because `currentColor` doesn't allow tweaking the opacity, and
+// setting the opacity of the entire element would change the children's opacity too.
+@mixin with-translucent-border($border-width: 1px, $opacity: 0.3) {
+	position: relative;
+
+	&::after {
+		border-style: solid;
+		border-width: $border-width;
+		bottom: 0;
+		content: "";
+		display: block;
+		left: 0;
+		opacity: $opacity;
+		pointer-events: none;
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+}
+
+// Converts a px unit to em.
+@function em($size, $base: 16px) {
+	@return $size / $base * 1em;
+}
+
+// Encodes hex colors so they can be used in URL content.
+@function encode-color($color) {
+	@if type-of($color) != "color" or str-index(#{$color}, "#") != 1 {
+		@return $color;
+	}
+
+	$hex: str-slice(ie-hex-str($color), 4);
+	@return "%23" + unquote("#{$hex}");
+}

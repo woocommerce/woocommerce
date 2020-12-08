@@ -1,0 +1,45 @@
+.wc-block-components-notices {
+	display: block;
+	margin-bottom: 2em;
+	.wc-block-components-notices__notice {
+		margin: 0;
+		display: flex;
+		flex-wrap: nowrap;
+		.components-notice__dismiss {
+			background: transparent none;
+			padding: 0;
+			margin: 0 0 0 0.5em;
+			border: 0;
+			outline: 0;
+			color: #fff;
+			svg {
+				fill: #fff;
+				vertical-align: text-top;
+			}
+		}
+	}
+	.wc-block-components-notices__notice + .wc-block-components-notices__notice {
+		margin-top: 1em;
+	}
+}
+
+.wc-block-components-notices__snackbar {
+	position: fixed;
+	bottom: 20px;
+	left: 16px;
+	width: auto;
+
+	@include breakpoint( "<782px" ) {
+		position: fixed;
+		top: 10px;
+		left: 0;
+		bottom: auto;
+	}
+
+	.components-snackbar-list__notice-container {
+		@include breakpoint( "<782px" ) {
+			margin-left: 10px;
+			margin-right: 10px;
+		}
+	}
+}

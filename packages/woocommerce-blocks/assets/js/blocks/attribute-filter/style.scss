@@ -1,0 +1,42 @@
+.wc-block-attribute-filter {
+	margin-bottom: $gap-large;
+
+	.wc-block-attribute-filter-list-count {
+		&::before {
+			content: " (";
+		}
+		&::after {
+			content: ")";
+		}
+	}
+
+	.wc-block-attribute-filter-list {
+		margin: 0;
+
+		li {
+			text-decoration: underline;
+
+			label {
+				cursor: pointer;
+			}
+
+			input {
+				cursor: pointer;
+				display: inline-block;
+			}
+		}
+
+		.wc-block-attribute-filter-list-count {
+			float: right;
+		}
+	}
+
+	.is-single .wc-block-attribute-filter-list-count,
+	.wc-block-dropdown-selector .wc-block-dropdown-selector__list .wc-block-attribute-filter-list-count {
+		opacity: 0.6;
+	}
+
+	.wc-block-attribute-filter__button {
+		margin-top: $gap-smaller;
+	}
+}

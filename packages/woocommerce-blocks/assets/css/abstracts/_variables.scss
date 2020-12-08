@@ -1,0 +1,14 @@
+@import "node_modules/@wordpress/base-styles/variables";
+
+// @todo replace with $grid-unit values when `@woocommerce/base-styles` is updated.
+// see: https://github.com/WordPress/gutenberg/blob/master/packages/base-styles/_variables.scss#L23-L36
+$gap-largest: 40px; // $grid-unit-50
+$gap-larger: 36px;
+$gap-large: 24px; // $grid-unit-30
+$gap: 16px; // $grid-unit-20
+$gap-small: 12px; // $grid-unit-15
+$gap-smaller: 8px; // $grid-unit-10
+$gap-smallest: 4px; // $grid-unit-05
+
+// Cart block
+$cart-image-width: 5rem;
