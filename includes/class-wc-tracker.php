@@ -113,7 +113,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_tracking_data() {
+	public static function get_tracking_data() {
 		$data = array();
 
 		// General site info.
@@ -165,6 +165,9 @@ class WC_Tracker {
 
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
+
+		// WooCommerce Admin info.
+		$data['wc_admin_disabled'] = apply_filters( 'woocommerce_admin_disabled', false ) ? 'yes' : 'no';
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
