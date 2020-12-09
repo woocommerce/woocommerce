@@ -9,7 +9,7 @@ import {
 
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 
-if ( process.env.WP_VERSION < 5.3 || process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 )
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 )
 	// eslint-disable-next-line jest/no-focused-tests
 	test.only( 'skipping all other things', () => {} );
 
