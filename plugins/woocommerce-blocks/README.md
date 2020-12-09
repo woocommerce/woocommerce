@@ -30,10 +30,6 @@ If you want to see what we're working on for future versions, or want to help ou
 - [Editor Components](assets/js/editor-components)
 - [Other Docs](./docs)
 
-### Contributing
-
-- [Publishing a release](docs/releases/readme.md)
-
 ## Installing the plugin version
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.

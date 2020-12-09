@@ -2,25 +2,28 @@ The release pull request has been created! This checklist is a guide to follow f
 
 * [ ] Checkout the release branch locally.
 
-## Initial Prep - changelog and meta data changes.
+## Initial Preparation
 
-The below only needs done if this patch release is the **_latest_** release of the plugin.
-
-* [ ] Copy the changelog from the pull request description into the `readme.txt` file to the top of the changelog section. Create a new section here for this release, eg. `= {{version}} - 2020-01-20 =`.
-* [ ] Make any other changes to plugin metadata as necessary (no version changes needed, that's handled by script later in the process).
-  * [ ] `readme.txt` - support versions changing, reference new blocks if necessary.
-  * [ ] `woocommerce-gutenberg-products-block.php` - requirements/tested up to versions etc.
+* [ ] Add the changelog to `readme.txt`
+  * [ ] Add the version and date to the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
+  * [ ] Copy the changelog from the pull request description above into this new section
+* [ ] Update compatibility sections (if applicable). __Note:__ Do not change the stable tag or plugin version; this is automated.
+  * [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`.
+  * [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`
 * [ ] Push above changes to the release branch.
 
-## Testing Notes and Testing
+## Write Testing Notes
 
 When creating testing notes, please write them from the perspective of a "user" (merchant) familiar with WooCommerce. So you don't have to spell out exact steps for common setup scenarios (eg. "Create a product"), but do be specific about the thing being tested. Include screenshots demonstrating expectations where that will be helpful.
 
-* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. Add the notes to `docs/testing/releases` and update the `docs/testing/releases/README.md` index.
-  * Note, make sure to differentiate between things in the testing notes that only apply to the feature plugin and things that apply when included in WooCommerce core as there may be variations there.
+Additionally, make sure to differentiate between things in the testing notes that only apply to the feature plugin and things that apply when included in WooCommerce core as there may be variations there.
+
 * [ ] Run `npm ci`
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
-* [ ] Copy a link to the release zip into the testing notes you created earlier. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
+* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. 
+  * [ ] Add the notes to `docs/testing/releases`
+  * [ ] Update the `docs/testing/releases/README.md` file index.
+* [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
 * [ ] Commit and push the testing docs to the release branch.
 * [ ] Smoke test built release zip using the testing instructions you created:
   * At least one other person should test the built zip - ask a teammate to help out.
