@@ -80,9 +80,17 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 				$version = wc()->api->get_rest_api_package_version();
 
 				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Status is good:', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text"><span> ' . esc_html__( 'Good', 'woocommerce' ) . '</span></span> - ';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span>' . esc_html( $version );
+					echo ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'There\'s an error:', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text"><span> ' . esc_html__( 'Error', 'woocommerce' ) . '</span></span> - ';
+					echo esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark> ';
 				}
 				?>
 			</td>
