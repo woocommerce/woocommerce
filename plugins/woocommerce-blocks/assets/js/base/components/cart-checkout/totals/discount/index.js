@@ -10,10 +10,10 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import TotalsItem from '../totals-item';
+import TotalsItem from '../item';
 import './style.scss';
 
-const TotalsDiscountItem = ( {
+const TotalsDiscount = ( {
 	cartCoupons = [],
 	currency,
 	isRemovingCoupon,
@@ -92,7 +92,7 @@ const TotalsDiscountItem = ( {
 	);
 };
 
-TotalsDiscountItem.propTypes = {
+TotalsDiscount.propTypes = {
 	cartCoupons: PropTypes.arrayOf(
 		PropTypes.shape( {
 			code: PropTypes.string.isRequired,
@@ -107,4 +107,4 @@ TotalsDiscountItem.propTypes = {
 	} ).isRequired,
 };
 
-export default TotalsDiscountItem;
+export default TotalsDiscount;

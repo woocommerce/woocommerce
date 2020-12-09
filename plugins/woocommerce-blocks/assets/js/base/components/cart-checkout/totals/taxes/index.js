@@ -11,10 +11,10 @@ import {
 /**
  * Internal dependencies
  */
-import TotalsItem from '../totals-item';
+import TotalsItem from '../item';
 import './style.scss';
 
-const TotalsTaxesItem = ( { currency, values } ) => {
+const TotalsTaxes = ( { currency, values } ) => {
 	const { total_tax: totalTax, tax_lines: taxLines } = values;
 
 	if ( ! TAXES_ENABLED ) {
@@ -47,11 +47,11 @@ const TotalsTaxesItem = ( { currency, values } ) => {
 	);
 };
 
-TotalsTaxesItem.propTypes = {
+TotalsTaxes.propTypes = {
 	currency: PropTypes.object.isRequired,
 	values: PropTypes.shape( {
 		total_tax: PropTypes.string,
 	} ).isRequired,
 };
 
-export default TotalsTaxesItem;
+export default TotalsTaxes;

@@ -14,7 +14,7 @@ import { useStoreCart } from '@woocommerce/base-hooks';
 /**
  * Internal dependencies
  */
-import TotalsItem from '../totals-item';
+import TotalsItem from '../item';
 import ShippingRateSelector from './shipping-rate-selector';
 import hasShippingRate from './has-shipping-rate';
 import './style.scss';
@@ -28,7 +28,7 @@ import './style.scss';
  * @param {boolean} props.showRateSelector Whether to display the rate selector below the shipping total.
  * @param {boolean} props.showCalculator Whether to show shipping calculator or not.
  */
-const TotalsShippingItem = ( {
+const TotalsShipping = ( {
 	currency,
 	values,
 	showCalculator = true,
@@ -164,7 +164,7 @@ const CalculatorButton = ( {
 	);
 };
 
-TotalsShippingItem.propTypes = {
+TotalsShipping.propTypes = {
 	currency: PropTypes.object.isRequired,
 	values: PropTypes.shape( {
 		total_shipping: PropTypes.string,
@@ -174,4 +174,4 @@ TotalsShippingItem.propTypes = {
 	showCalculator: PropTypes.bool,
 };
 
-export default TotalsShippingItem;
+export default TotalsShipping;

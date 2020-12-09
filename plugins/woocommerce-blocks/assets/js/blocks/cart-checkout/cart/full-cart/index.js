@@ -5,13 +5,13 @@
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import {
-	SubtotalsItem,
-	TotalsFeesItem,
-	TotalsCouponCodeInput,
-	TotalsDiscountItem,
+	Subtotal,
+	TotalsFees,
+	TotalsCoupon,
+	TotalsDiscount,
 	TotalsFooterItem,
-	TotalsShippingItem,
-	TotalsTaxesItem,
+	TotalsShipping,
+	TotalsTaxes,
 } from '@woocommerce/base-components/cart-checkout';
 import {
 	COUPONS_ENABLED,
@@ -112,15 +112,9 @@ const Cart = ( { attributes } ) => {
 				<Title headingLevel="2" className="wc-block-cart__totals-title">
 					{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
 				</Title>
-				<SubtotalsItem
-					currency={ totalsCurrency }
-					values={ cartTotals }
-				/>
-				<TotalsFeesItem
-					currency={ totalsCurrency }
-					values={ cartTotals }
-				/>
-				<TotalsDiscountItem
+				<Subtotal currency={ totalsCurrency } values={ cartTotals } />
+				<TotalsFees currency={ totalsCurrency } values={ cartTotals } />
+				<TotalsDiscount
 					cartCoupons={ appliedCoupons }
 					currency={ totalsCurrency }
 					isRemovingCoupon={ isRemovingCoupon }
@@ -128,7 +122,7 @@ const Cart = ( { attributes } ) => {
 					values={ cartTotals }
 				/>
 				{ cartNeedsShipping && (
-					<TotalsShippingItem
+					<TotalsShipping
 						showCalculator={ isShippingCalculatorEnabled }
 						showRateSelector={ true }
 						values={ cartTotals }
@@ -136,13 +130,13 @@ const Cart = ( { attributes } ) => {
 					/>
 				) }
 				{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
-					<TotalsTaxesItem
+					<TotalsTaxes
 						currency={ totalsCurrency }
 						values={ cartTotals }
 					/>
 				) }
 				{ COUPONS_ENABLED && (
-					<TotalsCouponCodeInput
+					<TotalsCoupon
 						onSubmit={ applyCoupon }
 						isLoading={ isApplyingCoupon }
 					/>

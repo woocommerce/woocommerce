@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import TotalsItem from '../totals-item';
+import TotalsItem from '../item';
 
-const TotalsFeesItem = ( { currency, values } ) => {
+const TotalsFees = ( { currency, values } ) => {
 	const { needsShipping } = useShippingDataContext();
 	if ( ! needsShipping ) {
 		return null;
@@ -39,7 +39,7 @@ const TotalsFeesItem = ( { currency, values } ) => {
 	);
 };
 
-TotalsFeesItem.propTypes = {
+TotalsFees.propTypes = {
 	currency: PropTypes.object.isRequired,
 	values: PropTypes.shape( {
 		total_fees: PropTypes.string,
@@ -47,4 +47,4 @@ TotalsFeesItem.propTypes = {
 	} ).isRequired,
 };
 
-export default TotalsFeesItem;
+export default TotalsFees;
