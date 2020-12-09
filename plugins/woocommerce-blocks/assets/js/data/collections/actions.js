@@ -1,13 +1,7 @@
 /**
- * External dependencies
- */
-import { apiFetch, select } from '@wordpress/data-controls';
-
-/**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
-import { STORE_KEY as SCHEMA_STORE_KEY } from '../schema/constants';
 
 let Headers = window.Headers || null;
 Headers = Headers
@@ -60,50 +54,6 @@ export function receiveCollection(
 		ids,
 		response,
 	};
-}
-
-export function* __experimentalPersistItemToCollection(
-	namespace,
-	resourceName,
-	currentCollection,
-	data = {}
-) {
-	const newCollection = [ ...currentCollection ];
-	const route = yield select(
-		SCHEMA_STORE_KEY,
-		'getRoute',
-		namespace,
-		resourceName
-	);
-	if ( ! route ) {
-		return;
-	}
-
-	try {
-		const item = yield apiFetch( {
-			path: route,
-			method: 'POST',
-			data,
-			cache: 'no-store',
-		} );
-
-		if ( item ) {
-			newCollection.push( item );
-			yield receiveCollection(
-				namespace,
-				resourceName,
-				'',
-				[],
-				{
-					items: newCollection,
-					headers: Headers,
-				},
-				true
-			);
-		}
-	} catch ( error ) {
-		yield receiveCollectionError( namespace, resourceName, '', [], error );
-	}
 }
 
 export function receiveCollectionError(
