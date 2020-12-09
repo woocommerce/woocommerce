@@ -52,6 +52,7 @@ export const ActivityPanel = () => {
 						initialOpen,
 						panel,
 						title,
+						collapsible,
 					} = panelData;
 					return (
 						<AccordionPanel
@@ -60,7 +61,7 @@ export const ActivityPanel = () => {
 							count={ count }
 							initialOpen={ initialOpen }
 							title={ title }
-							collapsible={ count !== 0 }
+							collapsible={ collapsible }
 						>
 							{ panel }
 						</AccordionPanel>

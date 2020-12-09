@@ -23,6 +23,7 @@ export function getAllPanels( {
 		totalOrderCount > 0 && {
 			className: 'woocommerce-homescreen-card',
 			count: countUnreadOrders,
+			collapsible: true,
 			id: 'orders-panel',
 			initialOpen: true,
 			panel: (
@@ -38,6 +39,7 @@ export function getAllPanels( {
 			count: countLowStockProducts,
 			id: 'stock-panel',
 			initialOpen: false,
+			collapsible: countLowStockProducts !== 0,
 			panel: (
 				<StockPanel countLowStockProducts={ countLowStockProducts } />
 			),
@@ -48,6 +50,7 @@ export function getAllPanels( {
 			id: 'reviews-panel',
 			count: countUnapprovedReviews,
 			initialOpen: false,
+			collapsible: countUnapprovedReviews !== 0,
 			panel: (
 				<ReviewsPanel
 					hasUnapprovedReviews={ countUnapprovedReviews > 0 }

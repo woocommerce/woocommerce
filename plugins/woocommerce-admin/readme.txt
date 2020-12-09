@@ -73,6 +73,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Fix: Move collapsible config to panels object, to allow for more control. #5855
 - Tweak: Fix inconsistent REST API paramater name for customer type filtering.
 - Enhancement: Tasks extensibility in Home Screen. #5794
 - Enhancement: Add page parameter to override default wc-admin page in Navigation API. #5821
