@@ -3,13 +3,13 @@
  */
 import {
 	OrderSummary,
-	SubtotalsItem,
-	TotalsFeesItem,
-	TotalsCouponCodeInput,
-	TotalsDiscountItem,
+	Subtotal,
+	TotalsFees,
+	TotalsCoupon,
+	TotalsDiscount,
 	TotalsFooterItem,
-	TotalsShippingItem,
-	TotalsTaxesItem,
+	TotalsShipping,
+	TotalsTaxes,
 } from '@woocommerce/base-components/cart-checkout';
 import { useShippingDataContext } from '@woocommerce/base-context';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
@@ -37,9 +37,9 @@ const CheckoutSidebar = ( {
 	return (
 		<>
 			<OrderSummary cartItems={ cartItems } />
-			<SubtotalsItem currency={ totalsCurrency } values={ cartTotals } />
-			<TotalsFeesItem currency={ totalsCurrency } values={ cartTotals } />
-			<TotalsDiscountItem
+			<Subtotal currency={ totalsCurrency } values={ cartTotals } />
+			<TotalsFees currency={ totalsCurrency } values={ cartTotals } />
+			<TotalsDiscount
 				cartCoupons={ cartCoupons }
 				currency={ totalsCurrency }
 				isRemovingCoupon={ isRemovingCoupon }
@@ -47,7 +47,7 @@ const CheckoutSidebar = ( {
 				values={ cartTotals }
 			/>
 			{ needsShipping && (
-				<TotalsShippingItem
+				<TotalsShipping
 					showCalculator={ false }
 					showRateSelector={ false }
 					values={ cartTotals }
@@ -55,13 +55,13 @@ const CheckoutSidebar = ( {
 				/>
 			) }
 			{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
-				<TotalsTaxesItem
+				<TotalsTaxes
 					currency={ totalsCurrency }
 					values={ cartTotals }
 				/>
 			) }
 			{ COUPONS_ENABLED && (
-				<TotalsCouponCodeInput
+				<TotalsCoupon
 					onSubmit={ applyCoupon }
 					initialOpen={ false }
 					isLoading={ isApplyingCoupon }

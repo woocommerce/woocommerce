@@ -18,7 +18,7 @@ import Panel from '@woocommerce/base-components/panel';
  */
 import './style.scss';
 
-const TotalsCouponCodeInput = ( {
+const TotalsCoupon = ( {
 	instanceId,
 	isLoading = false,
 	initialOpen = false,
@@ -113,9 +113,9 @@ const TotalsCouponCodeInput = ( {
 	);
 };
 
-TotalsCouponCodeInput.propTypes = {
+TotalsCoupon.propTypes = {
 	onSubmit: PropTypes.func,
 	isLoading: PropTypes.bool,
 };
 
-export default withInstanceId( TotalsCouponCodeInput );
+export default withInstanceId( TotalsCoupon );
