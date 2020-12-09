@@ -58,6 +58,7 @@ Adding an item, much like a category, can be added directly to the menu or to an
 * `capability` - (string) Capability to view this menu item.
 * `url` - (string) URL or callback to be used. Required.
 * `migrate` - (bool) Whether or not to hide the item in the wp admin menu.
+* `matchExpression` - (string) An optional regex string to compare against the current location and mark the item active.
 
 ```php
 \Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(

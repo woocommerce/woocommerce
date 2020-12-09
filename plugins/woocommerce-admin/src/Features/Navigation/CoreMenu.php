@@ -156,10 +156,11 @@ class CoreMenu {
 		$home_item = array();
 		if ( defined( '\Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG' ) ) {
 			$home_item = array(
-				'id'    => 'woocommerce-home',
-				'title' => __( 'Home', 'woocommerce-admin' ),
-				'url'   => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
-				'order' => 0,
+				'id'              => 'woocommerce-home',
+				'title'           => __( 'Home', 'woocommerce-admin' ),
+				'url'             => \Automattic\WooCommerce\Admin\Features\AnalyticsDashboard::MENU_SLUG,
+				'order'           => 0,
+				'matchExpression' => 'page=wc-admin((?!path=).)*$',
 			);
 		}
 

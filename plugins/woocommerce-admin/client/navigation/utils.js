@@ -4,24 +4,6 @@
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
- * Get the params from a location as a key/value pair object.
- *
- * @param {Object} location Window location
- * @return {Object} Params
- */
-export const getParams = ( location ) => {
-	const params = {};
-	if ( location.search ) {
-		new URLSearchParams( location.search.substring( 1 ) ).forEach(
-			( value, key ) => {
-				params[ key ] = value;
-			}
-		);
-	}
-	return params;
-};
-
-/**
  * Get the full URL if a relative path is passed.
  *
  * @param {string} url URL
@@ -42,55 +24,47 @@ export const getFullUrl = ( url ) => {
 };
 
 /**
- * Check to see if a URL matches a given window location.
+ * Get a match score for a menu item given a location.
  *
  * @param {Object} location Window location
- * @param {string} url URL to compare
+ * @param {string} itemUrl	 URL to compare
+ * @param {string} itemExpression Custom match expression
  * @return {number} Number of matches or 0 if not matched.
  */
-export const getMatchScore = ( location, url ) => {
-	if ( ! url ) {
+export const getMatchScore = ( location, itemUrl, itemExpression = null ) => {
+	if ( ! itemUrl ) {
 		return;
 	}
 
-	const fullUrl = getFullUrl( url );
-	const urlLocation = new URL( fullUrl );
-	const { origin: urlOrigin, pathname: urlPathname } = urlLocation;
-	const { hash, origin, pathname, search } = location;
+	const fullUrl = getFullUrl( itemUrl );
+	const { href } = location;
 
-	// Exact match found.
-	if ( origin + pathname + search + hash === fullUrl ) {
+	// Return highest possible score for exact match.
+	if ( fullUrl === href ) {
 		return Number.MAX_SAFE_INTEGER;
 	}
 
-	// Matched URL without hash.
-	if ( hash.length && origin + pathname + search === fullUrl ) {
-		return Number.MAX_SAFE_INTEGER - 1;
-	}
+	const defaultExpression = getDefaultMatchExpression( fullUrl );
+	const regexp = new RegExp( itemExpression || defaultExpression, 'i' );
+	return ( decodeURIComponent( href ).match( regexp ) || [] ).length;
+};
 
-	const urlParams = getParams( urlLocation );
-
-	// Post type match.
-	if (
-		window.wcNavigation.postType === urlParams.post_type &&
-		urlPathname.indexOf( 'edit.php' ) >= 0 &&
-		origin === urlOrigin
-	) {
-		return Number.MAX_SAFE_INTEGER - 2;
-	}
-
-	// Add points for each matching param.
-	let matchingParamCount = 0;
-	const locationParams = getParams( location );
-	Object.keys( urlParams ).forEach( ( key ) => {
-		if ( urlParams[ key ] === locationParams[ key ] ) {
-			matchingParamCount++;
-		}
-	} );
-
-	return origin === urlOrigin && pathname === urlPathname
-		? matchingParamCount
-		: 0;
+/**
+ * Get a default expression to match the path and provided params.
+ *
+ * @param {string} url URL to match.
+ * @return {string} Regex expression.
+ */
+export const getDefaultMatchExpression = ( url ) => {
+	const escapedUrl = url.replace( /[-\/\\^$*+?.()|[\]{}]/gi, '\\$&' );
+	const [ path, args, hash ] = escapedUrl.split( /\\\?|#/ );
+	const hashExpression = hash ? `(.*#${ hash }$)` : '';
+	const argsExpression = args
+		? args.split( '&' ).reduce( ( acc, param ) => {
+				return `${ acc }(?=.*[?|&]${ param }(&|$|#))`;
+		  }, '' )
+		: '';
+	return '^' + path + argsExpression + hashExpression;
 };
 
 /**
@@ -142,16 +116,17 @@ export const addHistoryListener = ( listener ) => {
  */
 export const getMatchingItem = ( items ) => {
 	let matchedItem = null;
-	let highestMatch = 0;
+	let highestMatchScore = 0;
 
 	items.forEach( ( item ) => {
 		const score = getMatchScore(
 			window.location,
-			getAdminLink( item.url )
+			getAdminLink( item.url ),
+			item.matchExpression
 		);
-		if ( score >= highestMatch && score > 0 ) {
+		if ( score > 0 && score >= highestMatchScore ) {
+			highestMatchScore = score;
 			matchedItem = item;
-			highestMatch = score;
 		}
 	} );
 

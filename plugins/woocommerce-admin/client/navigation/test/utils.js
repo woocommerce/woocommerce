@@ -8,10 +8,10 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
  */
 import {
 	addHistoryListener,
+	getDefaultMatchExpression,
 	getFullUrl,
 	getMatchingItem,
 	getMatchScore,
-	getParams,
 } from '../utils';
 
 const originalLocation = window.location;
@@ -39,7 +39,93 @@ const sampleMenuItems = [
 		title: 'Page with multiple arguments',
 		url: 'admin.php?page=wc-admin&path=/test-path&section=section-name',
 	},
+	{
+		id: 'multiple-args-plus-one',
+		title: 'Page with same multiple arguments plus an additional one',
+		url:
+			'admin.php?page=wc-admin&path=/test-path&section=section-name&version=22',
+	},
+	{
+		id: 'hash-and-multiple-args',
+		title: 'Page with multiple arguments and a hash',
+		url:
+			'admin.php?page=wc-admin&path=/test-path&section=section-name#anchor',
+	},
 ];
+
+const runGetMatchingItemTests = ( items ) => {
+	it( 'should get the closest matched item', () => {
+		window.location = new URL( getAdminLink( 'admin.php?page=wc-admin' ) );
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'main' );
+	} );
+
+	it( 'should match the item without hash if a better match does not exist', () => {
+		window.location = new URL(
+			getAdminLink( 'admin.php?page=wc-admin#hash' )
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'main' );
+	} );
+
+	it( 'should exactly match the item with a hash if it exists', () => {
+		window.location = new URL(
+			getAdminLink( 'admin.php?page=wc-admin&path=/test-path#anchor' )
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'hash' );
+	} );
+
+	it( 'should roughly match the item if all menu item arguments exist', () => {
+		window.location = new URL(
+			getAdminLink(
+				'admin.php?page=wc-admin&path=/test-path&section=section-name'
+			)
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'multiple-args' );
+	} );
+
+	it( 'should match an item with irrelevant query parameters', () => {
+		window.location = new URL(
+			getAdminLink(
+				'admin.php?page=wc-admin&path=/test-path&section=section-name&foo=bar'
+			)
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'multiple-args' );
+	} );
+
+	it( 'should match an item with similar query args plus one additional arg', () => {
+		window.location = new URL(
+			getAdminLink(
+				'admin.php?page=wc-admin&path=/test-path&section=section-name&version=22'
+			)
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'multiple-args-plus-one' );
+	} );
+
+	it( 'should match an item with query parameters in mixed order', () => {
+		window.location = new URL(
+			getAdminLink(
+				'admin.php?foo=bar&page=wc-admin&path=/test-path&section=section-name'
+			)
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'multiple-args' );
+	} );
+
+	it( 'should match an item with query parameters and a hash', () => {
+		window.location = new URL(
+			getAdminLink(
+				'admin.php?foo=bar&page=wc-admin&path=/test-path&section=section-name#anchor'
+			)
+		);
+		const matchingItem = getMatchingItem( items );
+		expect( matchingItem.id ).toBe( 'hash-and-multiple-args' );
+	} );
+};
 
 describe( 'getMatchingItem', () => {
 	beforeAll( () => {
@@ -50,36 +136,36 @@ describe( 'getMatchingItem', () => {
 		window.location = originalLocation;
 	} );
 
-	it( 'should get the closest matched item', () => {
-		window.location = new URL( getAdminLink( 'admin.php?page=wc-admin' ) );
-		const matchingItem = getMatchingItem( sampleMenuItems );
-		expect( matchingItem.id ).toBe( 'main' );
-	} );
+	runGetMatchingItemTests( sampleMenuItems );
+	// re-run the tests with sampleMenuItems in reverse order.
+	runGetMatchingItemTests( sampleMenuItems.reverse() );
+} );
 
-	it( 'should match the item without hash if a better match does not exist', () => {
-		window.location = new URL(
-			getAdminLink( 'admin.php?page=wc-admin#hash' )
+describe( 'getDefaultMatchExpression', () => {
+	it( 'should return the regex for the path without query args', () => {
+		expect( getDefaultMatchExpression( 'http://wordpress.org' ) ).toBe(
+			'^http:\\/\\/wordpress\\.org'
 		);
-		const matchingItem = getMatchingItem( sampleMenuItems );
-		expect( matchingItem.id ).toBe( 'main' );
 	} );
 
-	it( 'should exactly match the item with a hash if it exists', () => {
-		window.location = new URL(
-			getAdminLink( 'admin.php?page=wc-admin&path=/test-path#anchor' )
-		);
-		const matchingItem = getMatchingItem( sampleMenuItems );
-		expect( matchingItem.id ).toBe( 'hash' );
-	} );
-
-	it( 'should roughly match the item with the highest number of matching arguments', () => {
-		window.location = new URL(
-			getAdminLink(
-				'admin.php?page=wc-admin&path=/test-path&section=section-name'
+	it( 'should return the regex for the path and query args', () => {
+		expect(
+			getDefaultMatchExpression(
+				'http://wordpress.org?param1=a&param2=b'
 			)
+		).toBe(
+			'^http:\\/\\/wordpress\\.org(?=.*[?|&]param1=a(&|$|#))(?=.*[?|&]param2=b(&|$|#))'
 		);
-		const matchingItem = getMatchingItem( sampleMenuItems );
-		expect( matchingItem.id ).toBe( 'multiple-args' );
+	} );
+
+	it( 'should return the regex with hash if present', () => {
+		expect(
+			getDefaultMatchExpression(
+				'http://wordpress.org?param1=a&param2=b#hash'
+			)
+		).toBe(
+			'^http:\\/\\/wordpress\\.org(?=.*[?|&]param1=a(&|$|#))(?=.*[?|&]param2=b(&|$|#))(.*#hash$)'
+		);
 	} );
 } );
 
@@ -93,7 +179,7 @@ describe( 'getMatchScore', () => {
 		window.location = originalLocation;
 	} );
 
-	it( 'should return the largest integer for an exact match', () => {
+	it( 'should return max safe integer if the url is an exact match', () => {
 		expect(
 			getMatchScore(
 				new URL( getAdminLink( 'admin.php?page=testpage' ) ),
@@ -102,48 +188,70 @@ describe( 'getMatchScore', () => {
 		).toBe( Number.MAX_SAFE_INTEGER );
 	} );
 
-	it( 'should return the largest integer for an exact match with a partial URL', () => {
+	it( 'should return matching path and parameter count', () => {
 		expect(
 			getMatchScore(
-				new URL( getFullUrl( '/wp-admin/admin.php?page=testpage' ) ),
+				new URL(
+					getFullUrl(
+						'/wp-admin/admin.php?page=testpage&extra_param=a'
+					)
+				),
 				'/wp-admin/admin.php?page=testpage'
 			)
-		).toBe( Number.MAX_SAFE_INTEGER );
+		).toBe( 2 );
 	} );
 
-	it( 'should return the largest integer - 1 for an exact match without a hash', () => {
+	it( 'should return 0 if the URL does not meet match criteria', () => {
 		expect(
 			getMatchScore(
-				new URL( getAdminLink( 'admin.php?page=testpage#hash' ) ),
+				new URL( getAdminLink( 'admin.php?page=different-page' ) ),
 				getAdminLink( 'admin.php?page=testpage' )
 			)
-		).toBe( Number.MAX_SAFE_INTEGER - 1 );
+		).toBe( 0 );
 	} );
 
-	it( 'should return a score equal to the number of arguments matched', () => {
+	it( 'should return match count for a custom match expression', () => {
 		expect(
 			getMatchScore(
 				new URL(
-					getAdminLink(
-						'admin.php?page=testpage&param1=a&param2=b&param3=c'
-					)
+					getAdminLink( 'admin.php?page=different-page&param1=a' )
 				),
-				getAdminLink( 'admin.php?page=testpage&param1=a&param2=b' )
+				getAdminLink( 'admin.php?page=testpage' ),
+				'param1=a'
 			)
-		).toBe( 3 );
+		).toBe( 1 );
 	} );
 
-	it( "should return 0 for paths that don't match", () => {
+	it( 'should return 0 for custom match expression that does not match', () => {
 		expect(
 			getMatchScore(
 				new URL(
-					getAdminLink(
-						'admin.php?page=testpage&param1=a&param2=b&param3=c'
-					)
+					getAdminLink( 'admin.php?page=different-page&param1=b' )
 				),
-				getAdminLink( 'plugins.php?page=testpage&param1=a&param2=b' )
+				getAdminLink( 'admin.php?page=testpage' ),
+				'param1=a'
 			)
 		).toBe( 0 );
+	} );
+
+	it( 'should return match count if params match but are out of order', () => {
+		expect(
+			getMatchScore(
+				new URL( getAdminLink( 'admin.php?param1=a&page=testpage' ) ),
+				getAdminLink( 'admin.php?page=testpage' )
+			)
+		).toBe( 2 );
+	} );
+
+	it( 'should return match count if multiple params match but are out of order', () => {
+		expect(
+			getMatchScore(
+				new URL(
+					getAdminLink( 'admin.php?param1=a&page=testpage&param2=b' )
+				),
+				getAdminLink( 'admin.php?page=testpage&param1=a' )
+			)
+		).toBe( 3 );
 	} );
 } );
 
@@ -169,18 +277,6 @@ describe( 'getFullUrl', () => {
 		expect( getFullUrl( getAdminLink( 'admin.php?page=testpage' ) ) ).toBe(
 			getAdminLink( 'admin.php?page=testpage' )
 		);
-	} );
-} );
-
-describe( 'getParams', () => {
-	it( 'should get the params from a location', () => {
-		const location = new URL(
-			getAdminLink( 'admin.php?page=testpage&param1=a' )
-		);
-		const params = getParams( location );
-		expect( Object.keys( params ).length ).toBe( 2 );
-		expect( params.page ).toBe( 'testpage' );
-		expect( params.param1 ).toBe( 'a' );
 	} );
 } );
 
