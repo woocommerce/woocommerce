@@ -1,0 +1,22 @@
+name: "Close stale issues"
+
+on:
+  schedule:
+  # Runs daily at 9am UTC
+  - cron: "0 9 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        days-before-stale: 60
+        days-before-close: 10
+        remove-stale-when-updated: true
+        exempt-issue-labels: 'priority: critical,priority: high'
+        stale-issue-message: 'This issue has been marked as `stale` because it has not seen any activity within the past 60 days. Remove the `stale` label or post a comment, otherwise it will be closed in 10 days.'
+        stale-pr-message: 'This PR has been marked as `stale` because it has not seen any activity within the past 60 days. Is it still relevant? Please remove the `stale` label or post a comment, otherwise it will be closed in 10 days.'
+        stale-issue-label: 'stale'
+        stale-pr-label: 'stale'
