@@ -1,7 +1,7 @@
 === WooCommerce Blocks ===
 Contributors: automattic, woocommerce, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia, aljullu, mikejolley, nerrad, joshuawold, assassinateur, haszari
 Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
-Requires at least: 5.3
+Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 7.0
 Stable tag: 4.0.0
@@ -44,7 +44,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 
 = Minimum Requirements =
 
-* WordPress 5.3 or greater
+* WordPress 5.4 or greater
 * WooCommerce 4.3 or greater
 * PHP version 7.0 or greater (PHP 7.4 or greater is recommended)
 * MySQL version 5.6 or greater
