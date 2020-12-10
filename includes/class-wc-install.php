@@ -221,16 +221,17 @@ class WC_Install {
 	/**
 	 * Run an update callback when triggered by ActionScheduler.
 	 *
+	 * @param string $update_callback Callback name.
+	 *
 	 * @since 3.6.0
-	 * @param string $callback Callback name.
 	 */
-	public static function run_update_callback( $callback ) {
+	public static function run_update_callback( $update_callback ) {
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
-		if ( is_callable( $callback ) ) {
-			self::run_update_callback_start( $callback );
-			$result = (bool) call_user_func( $callback );
-			self::run_update_callback_end( $callback, $result );
+		if ( is_callable( $update_callback ) ) {
+			self::run_update_callback_start( $update_callback );
+			$result = (bool) call_user_func( $update_callback );
+			self::run_update_callback_end( $update_callback, $result );
 		}
 	}
 
