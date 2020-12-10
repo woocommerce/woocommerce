@@ -63,11 +63,10 @@ Used implicitly by `SearchListControl` when the `renderItem` prop is omitted.
 Name | Type | Default | Description
 --- | --- | --- | ---
 `className` | String | `null` | Additional CSS classes
-`countLabel` | ReactNode | `null` | Label to display if `showCount` is set to true. If undefined, it will use `item.count`
+`countLabel` | ReactNode | `null` | Label to display in the count bubble. Takes preference over `item.count`.
 `depth` | Number | `0` | Depth, non-zero if the list is hierarchical
 `item` | Object | `null` | Current item to display
 `isSelected` | Boolean | `null` | Whether this item is selected
 `isSingle` | Boolean | `null` | Whether this should only display a single item (controls radio vs checkbox icon)
 `onSelect` | Function | `null` | Callback for selecting the item
 `search` | String | `''` | Search string, used to highlight the substring in the item name
-`showCount` | Boolean | `false` | Toggles the "count" bubble on/off

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { boolean } from '@storybook/addon-knobs';
 import { SearchListControl } from '@woocommerce/components';
 import { withState } from '@wordpress/compose';
 
@@ -8,7 +9,8 @@ const SearchListControlExample = withState( {
 	selected: [],
 	loading: true,
 } )( ( { selected, loading, setState } ) => {
-	const list = [
+	const showCount = boolean( 'Show count', false );
+	let list = [
 		{ id: 1, name: 'Apricots' },
 		{ id: 2, name: 'Clementine' },
 		{ id: 3, name: 'Elderberry' },
@@ -16,6 +18,11 @@ const SearchListControlExample = withState( {
 		{ id: 5, name: 'Lychee' },
 		{ id: 6, name: 'Mulberry' },
 	];
+	const counts = [ 3, 1, 1, 5, 2, 0 ];
+
+	if ( showCount ) {
+		list = list.map( ( item, i ) => ( { ...item, count: counts[ i ] } ) );
+	}
 
 	return (
 		<div>

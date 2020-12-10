@@ -182,6 +182,12 @@
 			}
 		}
 
+		&.has-count {
+			> .components-menu-item__item {
+				width: 100%;
+			}
+		}
+
 		.woocommerce-search-list__item-count {
 			flex: 0 1 auto;
 			padding: $gap-smallest/2 $gap-smaller;

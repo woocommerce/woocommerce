@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { escapeRegExp, first, last } from 'lodash';
+import { escapeRegExp, first, last, isNil } from 'lodash';
 import { MenuItem } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -50,13 +50,16 @@ const SearchListItem = ( {
 	isSingle,
 	onSelect,
 	search = '',
-	showCount = false,
 	...props
 } ) => {
+	const showCount = ! isNil( countLabel ) || ! isNil( item.count );
 	const classes = [ className, 'woocommerce-search-list__item' ];
 	classes.push( `depth-${ depth }` );
 	if ( isSingle ) {
 		classes.push( 'is-radio-button' );
+	}
+	if ( showCount ) {
+		classes.push( 'has-count' );
 	}
 	const hasBreadcrumbs = item.breadcrumbs && item.breadcrumbs.length;
 
@@ -101,7 +104,7 @@ SearchListItem.propTypes = {
 	 */
 	className: PropTypes.string,
 	/**
-	 * Label to display if `showCount` is set to true. If undefined, it will use `item.count`.
+	 * Label to display in the count bubble. Takes preference over `item.count`.
 	 */
 	countLabel: PropTypes.node,
 	/**
@@ -128,10 +131,6 @@ SearchListItem.propTypes = {
 	 * Search string, used to highlight the substring in the item name.
 	 */
 	search: PropTypes.string,
-	/**
-	 * Toggles the "count" bubble on/off.
-	 */
-	showCount: PropTypes.bool,
 };
 
 export default SearchListItem;

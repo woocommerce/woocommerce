@@ -2,6 +2,8 @@
 
 -   Change styling of `<ProductImage />`
 -   Add new `<Accordion>` component.
+-   Remove the `showCount` prop from `<SearchListItem>`. Count will always be displayed if any of those props is not undefined/null: `countLabel` and `item.count`.
+-   Fix alignment of `<SearchListItem>` count bubble in newest versions of `@wordpress/components`.
 
 # 5.1.2
 
