@@ -358,7 +358,6 @@ class WC_Countries {
 
 		if ( 'eu_vat' === $type ) {
 			$countries[] = 'MC';
-			$countries[] = 'IM';
 		}
 
 		return apply_filters( 'woocommerce_european_union_countries', $countries, $type );
