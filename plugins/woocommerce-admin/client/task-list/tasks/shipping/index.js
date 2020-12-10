@@ -23,7 +23,7 @@ import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { createNoticesFromResponse } from '../../../lib/notices';
 
-class Shipping extends Component {
+export class Shipping extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -168,7 +168,7 @@ class Shipping extends Component {
 	}
 
 	getSteps() {
-		const { countryCode, isJetpackConnected } = this.props;
+		const { countryCode, isJetpackConnected, settings } = this.props;
 		const pluginsToActivate = this.getPluginsToActivate();
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
@@ -217,7 +217,10 @@ class Shipping extends Component {
 						{ ...this.props }
 					/>
 				),
-				visible: true,
+				visible:
+					settings.woocommerce_ship_to_countries === 'disabled'
+						? false
+						: true,
 			},
 			{
 				key: 'label_printing',
