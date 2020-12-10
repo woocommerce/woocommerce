@@ -79,19 +79,13 @@ before_install:
 
 install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - |
-    # Remove Xdebug for a huge performance increase:
-    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
-      phpenv config-rm xdebug.ini
-    else
-      echo "xdebug.ini does not exist"
-    fi
+  # Remove Xdebug for a huge performance increase:
+  - phpenv config-rm xdebug.ini
   - composer install
   - |
-    # Install WP Test suite:
-    if [[ ! -z "$WP_VERSION" ]]; then
-      bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-    fi
+    # Install WP Test suite
+    test -n "$WP_VERSION"
+    bash tests/bin/install.sh woocommerce_test root "" localhost "$WP_VERSION"
 
 script:
   - bash tests/bin/phpunit.sh
