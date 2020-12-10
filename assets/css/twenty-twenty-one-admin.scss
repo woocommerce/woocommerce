@@ -1,0 +1,18 @@
+/**
+ * Admin
+ */
+.wp-admin.woocommerce-page {
+
+	table.wp-list-table {
+
+		tr.type-product {
+
+			td.thumb {
+
+				img {
+					max-width: 40px !important;
+				}
+			}
+		}
+	}
+}

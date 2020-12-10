@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </form>
 <?php
 wc_enqueue_js(
-	"jQuery( '#flush-logs' ).click( function() {
+	"jQuery( '#flush-logs' ).on( 'click', function() {
 		if ( window.confirm('" . esc_js( __( 'Are you sure you want to clear all logs from the database?', 'woocommerce' ) ) . "') ) {
 			return true;
 		}

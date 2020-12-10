@@ -80,7 +80,7 @@
 				}
 			});
 
-			$( '.submit :input' ).click( function() {
+			$( '.submit :input' ).on( 'click', function() {
 				window.onbeforeunload = '';
 			});
 		});
