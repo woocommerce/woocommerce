@@ -178,6 +178,19 @@ CustomerEffortScoreTracks.propTypes = {
 	createNotice: PropTypes.func,
 };
 
+function getStoreAgeInWeeks( adminInstallTimestamp ) {
+	if ( adminInstallTimestamp === 0 ) {
+		return null;
+	}
+
+	// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
+	// seconds since Unix epoch.
+	const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
+	const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
+
+	return storeAgeInWeeks;
+}
+
 export default compose(
 	withSelect( ( select ) => {
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
@@ -187,10 +200,7 @@ export default compose(
 
 		const adminInstallTimestamp =
 			getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-		// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
-		// seconds since Unix epoch.
-		const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
-		const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
+		const storeAgeInWeeks = getStoreAgeInWeeks( adminInstallTimestamp );
 
 		const allowTrackingOption =
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
@@ -198,6 +208,7 @@ export default compose(
 
 		const resolving =
 			isResolving( 'getOption', [ SHOWN_FOR_ACTIONS_OPTION_NAME ] ) ||
+			storeAgeInWeeks === null ||
 			isResolving( 'getOption', [
 				ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 			] ) ||
