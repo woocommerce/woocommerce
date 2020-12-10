@@ -132,6 +132,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Only updates customer if it is the customers last order.
 	 *
 	 * @param int $post_id of order.
+	 * @return true|-1
 	 */
 	public static function sync_order_customer( $post_id ) {
 		global $wpdb;
@@ -142,11 +143,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$order       = wc_get_order( $post_id );
 		$customer_id = self::get_existing_customer_id_from_order( $order );
-		if ( ! $customer_id ) {
+		if ( false === $customer_id ) {
 			return -1;
 		}
-		$customer   = new \WC_Customer( $customer_id );
-		$last_order = $customer->get_last_order();
+		$last_order = self::get_last_order( $customer_id );
 
 		if ( ! $last_order || $order->get_id() !== $last_order->get_id() ) {
 			return -1;
@@ -624,6 +624,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		return $customer_id ? (int) $customer_id : false;
+	}
+
+	/**
+	 * Retrieve the last order made by a customer.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return object WC_Order|false.
+	 */
+	public static function get_last_order( $customer_id ) {
+		global $wpdb;
+		$orders_table = $wpdb->prefix . 'wc_order_stats';
+
+		$last_order = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT order_id, date_created_gmt FROM {$orders_table}
+				WHERE customer_id = %d
+				ORDER BY date_created_gmt DESC, order_id DESC LIMIT 1",
+				// phpcs:enable
+				$customer_id
+			)
+		);
+		if ( ! $last_order ) {
+			return false;
+		}
+		return wc_get_order( absint( $last_order ) );
 	}
 
 	/**

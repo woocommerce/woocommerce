@@ -78,6 +78,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Enhancement: Tasks extensibility in Home Screen. #5794
 - Enhancement: Add page parameter to override default wc-admin page in Navigation API. #5821
 - Fix: Invalidate product count if the last product was updated in the list. #5790
+- Fix: Updating (non wordpress user) customer with order data
 
 == Changelog ==
 

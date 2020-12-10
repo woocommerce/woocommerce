@@ -545,14 +545,115 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Didn't update anything.
-		$this->assertEquals( -1, $result );
+		$this->assertTrue( -1 === $result );
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$customer_index = array_search( 'admin@example.org', array_column( $reports, 'email' ), true );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotEquals( 'Random', $reports[ $customer_index ]['city'] );
+		$this->assertNotEquals( 'FL', $reports[ $customer_index ]['state'] );
+		$this->assertNotEquals( '54321', $reports[ $customer_index ]['postcode'] );
+	}
+
+	/**
+	 * Test sync order update with customer latest order info.
+	 */
+	public function test_sync_latest_order_customer_with_multiple_customers() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+		$order2 = WC_Helper_Order::create_order( 0 );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 100 );
+		$order2->save();
+		$order3 = WC_Helper_Order::create_order( 0 );
+		$order3->set_status( 'completed' );
+		$order3->set_total( 100 );
+		$order3->set_billing_email( 'different@example.org' );
+		$order3->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$customer_id  = CustomersDataStore::get_existing_customer_id_from_order( $order );
+		$customer2_id = CustomersDataStore::get_existing_customer_id_from_order( $order2 );
+		$customer3_id = CustomersDataStore::get_existing_customer_id_from_order( $order3 );
+		$this->assertEquals( $customer_id, $customer2_id );
+		$this->assertNotEquals( $customer_id, $customer3_id );
+		// update order info.
+		$order3->set_billing_city( 'Random' );
+		$order3->set_billing_state( 'FL' );
+		$order3->set_billing_postcode( '54321' );
+		$order3->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$result = CustomersDataStore::sync_order_customer( $order3->get_id() );
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Didn't update anything.
+		$this->assertTrue( $result );
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertFalse( 'Random' === $reports[0]['city'] );
-		$this->assertFalse( 'FL' === $reports[0]['state'] );
-		$this->assertFalse( '54321' === $reports[0]['postcode'] );
+		$first_customer_index  = array_search( 'admin@example.org', array_column( $reports, 'email' ), true );
+		$second_customer_index = array_search( 'different@example.org', array_column( $reports, 'email' ), true );
+		// First customer.
+		$this->assertEquals( 'admin@example.org', $reports[ $first_customer_index ]['email'] );
+		$this->assertNotEquals( 'Random', $reports[ $first_customer_index ]['city'] );
+		$this->assertNotEquals( 'FL', $reports[ $first_customer_index ]['state'] );
+		$this->assertNotEquals( '54321', $reports[ $first_customer_index ]['postcode'] );
+		// Latest customer that should be updated.
+		$this->assertEquals( 'different@example.org', $reports[ $second_customer_index ]['email'] );
+		$this->assertEquals( 'Random', $reports[ $second_customer_index ]['city'] );
+		$this->assertEquals( 'FL', $reports[ $second_customer_index ]['state'] );
+		$this->assertEquals( '54321', $reports[ $second_customer_index ]['postcode'] );
+	}
+
+	/**
+	 * Test get_last_order.
+	 */
+	public function test_get_last_order() {
+		wp_set_current_user( $this->user );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+		$order2 = WC_Helper_Order::create_order( 0 );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 100 );
+		$order2->save();
+		$order3 = WC_Helper_Order::create_order( 0 );
+		$order3->set_status( 'completed' );
+		$order3->set_total( 100 );
+		$order3->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$customer_id  = CustomersDataStore::get_existing_customer_id_from_order( $order );
+		$customer2_id = CustomersDataStore::get_existing_customer_id_from_order( $order2 );
+		$customer3_id = CustomersDataStore::get_existing_customer_id_from_order( $order3 );
+		$this->assertEquals( $customer_id, $customer2_id );
+		$this->assertEquals( $customer_id, $customer3_id );
+
+		$latest_order = CustomersDataStore::get_last_order( $customer_id );
+
+		$this->assertEquals( $latest_order->get_id(), $order3->get_id() );
+
+		$order->set_date_created( time() + 60 );
+		$order->save();
+		WC_Helper_Queue::run_all_pending();
+
+		$latest_order = CustomersDataStore::get_last_order( $customer_id );
+
+		$this->assertEquals( $latest_order->get_id(), $order->get_id() );
 	}
 }
