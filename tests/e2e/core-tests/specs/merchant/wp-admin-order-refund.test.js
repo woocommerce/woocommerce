@@ -46,7 +46,7 @@ const runRefundOrderTest = () => {
 			await Promise.all([
 				verifyValueOfInputField('.refund_line_total', '9.99'),
 				verifyValueOfInputField('#refund_amount', '9.99'),
-				expect(page).toMatchElement('.do-manual-refund', { text: 'Refund £9.99 manually' }),
+				expect(page).toMatchElement('.do-manual-refund', { text: 'Refund $9.99 manually' }),
 			]);
 
 			await expect(page).toClick('.do-manual-refund');
@@ -56,11 +56,11 @@ const runRefundOrderTest = () => {
 			await Promise.all([
 				// Verify the product line item shows the refunded quantity and amount
 				expect(page).toMatchElement('.quantity .refunded', { text: '-1' }),
-				expect(page).toMatchElement('.line_cost .refunded', { text: '-£9.99' }),
+				expect(page).toMatchElement('.line_cost .refunded', { text: '-$9.99' }),
 
 				// Verify the refund shows in the list with the amount
 				expect(page).toMatchElement('.refund .description', { text: 'No longer wanted' }),
-				expect(page).toMatchElement('.refund > .line_cost', { text: '-£9.99' }),
+				expect(page).toMatchElement('.refund > .line_cost', { text: '-$9.99' }),
 			]);
 		});
 
