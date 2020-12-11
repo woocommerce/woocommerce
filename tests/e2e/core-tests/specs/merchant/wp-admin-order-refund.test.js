@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
+/* eslint-disable jest/no-export, jest/no-disabled-tests, */
 
 /**
  * Internal dependencies
