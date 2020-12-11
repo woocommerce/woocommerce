@@ -426,7 +426,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_base_data() {
 		return array_merge(
-			array( 'id'     => $this->get_id() ),
+			array( 'id' => $this->get_id() ),
 			$this->data,
 			array( 'number' => $this->get_order_number() )
 		);
@@ -983,7 +983,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value Value of the prop.
 	 */
-	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+	protected function set_address_prop( $prop, $address, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
 			if ( true === $this->object_read ) {
 				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {

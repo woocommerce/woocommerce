@@ -49,9 +49,25 @@ class WC_Form_Handler {
 				$user_id = absint( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 
-			$value = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
+			// If the reset token is not for the current user, ignore the reset request (don't redirect).
+			$logged_in_user_id = get_current_user_id();
+			if ( $logged_in_user_id && $logged_in_user_id !== $user_id ) {
+				wc_add_notice( __( 'This password reset key is for a different user account. Please log out and try again.', 'woocommerce' ), 'error' );
+				return;
+			}
+
+			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+			$value   = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
-			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'show-reset-form' => 'true',
+						'action'          => $action,
+					),
+					wc_lostpassword_url()
+				)
+			);
 			exit;
 		}
 	}
@@ -869,9 +885,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_variable( $product_id ) {
-		$variation_id = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$variation_id = empty( $_REQUEST['variation_id'] ) ? '' : absint( wp_unslash( $_REQUEST['variation_id'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$variations   = array();
+
+		$product      = wc_get_product( $product_id );
 
 		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {
@@ -883,7 +901,19 @@ class WC_Form_Handler {
 
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
+		if ( ! $passed_validation ) {
+			return false;
+		}
+
+		// Prevent parent variable product from being added to cart.
+		if ( empty( $variation_id ) && $product && $product->is_type( 'variable' ) ) {
+			/* translators: 1: product link, 2: product name */
+			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
+
+			return false;
+		}
+
+		if ( false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}

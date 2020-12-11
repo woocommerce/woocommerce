@@ -62,8 +62,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			array(
 				'name'              => $post_object->post_title,
 				'slug'              => $post_object->post_name,
-				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'      => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified'     => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'            => $post_object->post_status,
 				'menu_order'        => $post_object->menu_order,
 				'reviews_allowed'   => 'open' === $post_object->comment_status,
@@ -495,21 +495,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			foreach ( $delete_attribute_keys as $key ) {
 				delete_post_meta( $product_id, $key );
 			}
-
-			// Set the attributes as regular taxonomy terms too...
-			$variation_attributes = array_keys( $product->get_variation_attributes( false ) );
-			foreach ( $attributes as $name => $value ) {
-				$value = strval( $value );
-				if ( '' !== $value && in_array( $name, $variation_attributes, true ) && term_exists( $value, $name ) ) {
-					wp_set_post_terms( $product_id, array( $value ), $name );
-				} elseif ( taxonomy_exists( $name ) ) {
-					wp_delete_object_term_relationships( $product_id, $name );
-				}
-			}
-
-			// ...and remove old taxonomy terms.
-			$attributes_to_delete = array_diff( wc_get_attribute_taxonomy_names(), array_keys( $attributes ) );
-			wp_delete_object_term_relationships( $product_id, $attributes_to_delete );
 		}
 	}
 

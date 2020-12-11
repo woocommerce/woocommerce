@@ -93,7 +93,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 * @param string $output            Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
-	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
+	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
 		if ( ! $element || ( 0 === $element->count && ! empty( $args[0]['hide_empty'] ) ) ) {
 			return;
 		}

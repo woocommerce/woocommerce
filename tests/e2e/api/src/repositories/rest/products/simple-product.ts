@@ -1,43 +1,43 @@
 import { HTTPClient } from '../../../http';
-import { CreateFn, CreatesModels, ModelRepository } from '../../../framework/model-repository';
+import { ModelRepository } from '../../../framework/model-repository';
 import { SimpleProduct } from '../../../models';
-
-/**
- * Creates a callback for REST model creation.
- *
- * @param {HTTPClient} httpClient The HTTP client for requests.
- * @return {CreateFn} The callback for creating models via the REST API.
- */
-function restCreate( httpClient: HTTPClient ): CreateFn< SimpleProduct > {
-	return async ( properties ) => {
-		const response = await httpClient.post(
-			'/wc/v3/products',
-			{
-				type: 'simple',
-				name: properties.name,
-				regular_price: properties.regularPrice,
-			},
-		);
-
-		return Promise.resolve( new SimpleProduct( {
-			id: response.data.id,
-			name: response.data.name,
-			regularPrice: response.data.regular_price,
-		} ) );
-	};
-}
+import {
+	CreatesSimpleProducts,
+	DeletesSimpleProducts,
+	ListsSimpleProducts,
+	ReadsSimpleProducts,
+	SimpleProductRepositoryParams,
+	UpdatesSimpleProducts,
+} from '../../../models/products/simple-product';
+import { createProductTransformer } from './shared';
+import { restCreate, restDelete, restList, restRead, restUpdate } from '../shared';
+import { ModelID } from '../../../models/model';
 
 /**
  * Creates a new ModelRepository instance for interacting with models via the REST API.
  *
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
- * @return {CreatesModels} A repository for interacting with models via the REST API.
+ * @return {
+ * 	ListsSimpleProducts|
+ * 	CreatesSimpleProducts|
+ * 	ReadsSimpleProducts|
+ * 	UpdatesSimpleProducts|
+ * 	DeletesSimpleProducts
+ * } The created repository.
  */
-export function simpleProductRESTRepository( httpClient: HTTPClient ): CreatesModels< SimpleProduct > {
+export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimpleProducts
+	& CreatesSimpleProducts
+	& ReadsSimpleProducts
+	& UpdatesSimpleProducts
+	& DeletesSimpleProducts {
+	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
+	const transformer = createProductTransformer( 'simple' );
+
 	return new ModelRepository(
-		restCreate( httpClient ),
-		null,
-		null,
-		null,
+		restList< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
+		restCreate< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
+		restRead< SimpleProductRepositoryParams >( buildURL, SimpleProduct, httpClient, transformer ),
+		restUpdate< SimpleProductRepositoryParams >( buildURL, SimpleProduct, httpClient, transformer ),
+		restDelete< SimpleProductRepositoryParams >( buildURL, httpClient ),
 	);
 }

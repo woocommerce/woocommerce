@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -98,7 +100,7 @@ class WC_Tax {
 	 * @return float
 	 */
 	public static function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, wc_get_rounding_precision() ), $in );
+		return apply_filters( 'woocommerce_tax_round', NumberUtil::round( $in, wc_get_rounding_precision() ), $in );
 	}
 
 	/**
@@ -403,7 +405,7 @@ class WC_Tax {
 
 		$criteria_string = implode( ' AND ', $criteria );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$found_rates = $wpdb->get_results(
 			"
 			SELECT tax_rates.*, COUNT( locations.location_id ) as postcode_count, COUNT( locations2.location_id ) as city_count
@@ -1189,8 +1191,10 @@ class WC_Tax {
 	public static function get_rates_for_tax_class( $tax_class ) {
 		global $wpdb;
 
+		$tax_class = self::format_tax_rate_class( $tax_class );
+
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", sanitize_title( $tax_class ) ) );
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s;", $tax_class ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		if ( ! empty( $rates ) ) {

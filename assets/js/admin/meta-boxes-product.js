@@ -49,14 +49,14 @@ jQuery( function( $ ) {
 	});
 
 	// Catalog Visibility.
-	$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).click( function() {
+	$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).on( 'click', function() {
 		if ( $( '#catalog-visibility-select' ).is( ':hidden' ) ) {
 			$( '#catalog-visibility-select' ).slideDown( 'fast' );
 			$( this ).hide();
 		}
 		return false;
 	});
-	$( '#catalog-visibility' ).find( '.save-post-visibility' ).click( function() {
+	$( '#catalog-visibility' ).find( '.save-post-visibility' ).on( 'click', function() {
 		$( '#catalog-visibility-select' ).slideUp( 'fast' );
 		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
 
@@ -70,7 +70,7 @@ jQuery( function( $ ) {
 		$( '#catalog-visibility-display' ).text( label );
 		return false;
 	});
-	$( '#catalog-visibility' ).find( '.cancel-post-visibility' ).click( function() {
+	$( '#catalog-visibility' ).find( '.cancel-post-visibility' ).on( 'click', function() {
 		$( '#catalog-visibility-select' ).slideUp( 'fast' );
 		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
 
@@ -146,6 +146,11 @@ jQuery( function( $ ) {
 		}
 		if ( is_virtual ) {
 			$( '.show_if_virtual' ).show();
+
+			// If user enables virtual while on shipping tab, switch to general tab.
+			if ( $( '.shipping_options.shipping_tab' ).hasClass( 'active' ) ) {
+				$( '.general_options.general_tab > a' ).trigger( 'click' );
+			}
 		}
 
         $( '.show_if_' + product_type ).show();

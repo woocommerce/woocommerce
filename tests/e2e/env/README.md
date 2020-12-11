@@ -18,19 +18,16 @@ The `@woocommerce/e2e-environment` package exports configuration objects that ca
 Make sure you `npm install @babel/preset-env --save` if you have not already done so. Afterwards, extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
-const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EBabelConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = function( api ) {
 	api.cache( true );
 
-	return {
-		...e2eBabelConfig,
+	return useE2EBabelConfig( {
 		presets: [
-			...e2eBabelConfig.presets,
 			'@wordpress/babel-preset-default',
 		],
-		....
-	};
+	} );
 };
 ```
 
@@ -39,34 +36,22 @@ module.exports = function( api ) {
 The E2E environment uses Puppeteer for headless browser testing, which uses certain globals variables. Avoid ES Lint errors by extending the config.
 
 ```js
-const { esLintConfig: baseConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EEsLintConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseConfig,
+module.exports = useE2EEsLintConfig( {
 	root: true,
-	parser: 'babel-eslint',
-	extends: [
-		...baseConfig.extends,
-		'wpcalypso/react',
-		'plugin:jsx-a11y/recommended',
-	],
-	plugins: [
-		...baseConfig.plugins,
-		'jsx-a11y',
-	],
 	env: {
-		...baseConfig.env,
 		browser: true,
-		node: true,
+		es6: true,
+		node: true
 	},
 	globals: {
-		...baseConfig.globals,
 		wp: true,
 		wpApiSettings: true,
 		wcSettings: true,
+		es6: true
 	},
-	....
-};
+} );
 ```
 
 ### Jest Config
@@ -103,6 +88,7 @@ The test sequencer uses the following default Puppeteer configuration:
 		launch: {
 			...jestPuppeteerConfig.launch, // @automattic/puppeteer-utils
 			ignoreHTTPSErrors: true,
+			headless: false,
 			args: [ '--window-size=1920,1080', '--user-agent=chrome' ],
 			devtools: true,
 			defaultViewport: {
@@ -131,31 +117,13 @@ module.exports = puppeteerConfig;
 
 Jest provides setup and teardown functions similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
 
-### Webpack Config
-
-The E2E environment provides a `@woocommerce/e2e-utils` alias for easy use of the WooCommerce E2E test helpers.
-
-```js
-const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-environment' );
-
-module.exports = {
-	....
-	resolve: {
-		alias: {
-			...coreE2EAlias,
-			....
-		},
-	},
-};
-```
-
 ### Container Setup
 
 Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` container supports using either the built in container or an external container. See the the appropriate readme for  details:
 
-- [Built In Container](./builtin.md)
-- [External Container](./external.md)
+- [Built In Container](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/builtin.md)
+- [External Container](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/external.md)
 
 ## Additional information
 
-Refer to [`tests/e2e/specs`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/specs) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) for general information on e2e tests.
+Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) for general information on e2e tests.

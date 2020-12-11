@@ -147,6 +147,92 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests line items have the expected meta_data properties when getting a single order.
+	 */
+	public function test_get_item_with_line_items_meta_data() {
+		wp_set_current_user( $this->user );
+
+		$attribute_name = 'Site Level Type';
+		$site_level_attribute_id = wc_create_attribute( array( 'name' => $attribute_name ) );
+		$site_level_attribute_slug = wc_attribute_taxonomy_name_by_id( $site_level_attribute_id );
+
+		// Register the attribute so that wp_insert_term will be successful.
+		register_taxonomy( $site_level_attribute_slug, array( 'product' ), array() );
+
+		$term_name = 'Site Level Value - Wood';
+		$site_level_term_insertion_result = wp_insert_term( $term_name, $site_level_attribute_slug );
+		$site_level_term = get_term( $site_level_term_insertion_result['term_id'] );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+		$line_item->set_props(
+			array( 'variation' => array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug ) )
+		);
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		$size_meta_data = $last_line_item['meta_data'][0];
+		$this->assertEquals( $line_item->get_meta_data()[0]->id, $size_meta_data['id'] );
+		$this->assertEquals( 'pa_size', $size_meta_data['key'] );
+		$this->assertEquals( 'size', $size_meta_data['display_key'] );
+		$this->assertEquals( 'small', $size_meta_data['value'] );
+		$this->assertEquals( 'small', $size_meta_data['display_value'] );
+
+		$color_meta_data = $last_line_item['meta_data'][1];
+		$this->assertEquals( $line_item->get_meta_data()[1]->id, $color_meta_data['id'] );
+		$this->assertEquals( $site_level_attribute_slug, $color_meta_data['key'] );
+		$this->assertEquals( $attribute_name, $color_meta_data['display_key'] );
+		$this->assertEquals( $site_level_term->slug, $color_meta_data['value'] );
+		$this->assertEquals( $term_name, $color_meta_data['display_value'] );
+	}
+
+	/**
+	 * Tests that line items for variations includes the parent product name.
+	 */
+	public function test_get_item_with_variation_parent_name() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		// The name property contains the parent product name and the attribute value (ex. "Dummy Variable Product - small").
+		$this->assertEquals( $variation->get_name(), $last_line_item['name'] );
+		$this->assertTrue( false !== strpos( $last_line_item['name'], $variation->get_attribute( 'pa_size' ) ) );
+		// The parent_name property only contains the parent product name (ex. "Dummy Variable Product").
+		$this->assertEquals( $product->get_name(), $last_line_item['parent_name'] );
+		$this->assertNotEquals( $variation->get_name(), $last_line_item['parent_name'] );
+		$this->assertTrue( false === strpos( $last_line_item['parent_name'], $variation->get_attribute( 'pa_size' ) ) );
+	}
+
+	/**
 	 * Tests getting an order with an invalid ID.
 	 * @since 3.5.0
 	 */
@@ -265,8 +351,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
+
 		$shipping = current( $order->get_items( 'shipping' ) );
-		$expected = array(
+		$expected_shipping_line = array(
 			'id'           => $shipping->get_id(),
 			'method_title' => $shipping->get_method_title(),
 			'method_id'    => $shipping->get_method_id(),
@@ -274,9 +361,20 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'total'        => wc_format_decimal( $shipping->get_total(), '' ),
 			'total_tax'    => wc_format_decimal( $shipping->get_total_tax(), '' ),
 			'taxes'        => array(),
-			'meta_data'    => $shipping->get_meta_data(),
 		);
-		$this->assertEquals( $expected, $data['shipping_lines'][0] );
+		foreach ( $expected_shipping_line as $key => $value ) {
+			$this->assertEquals( $value, $data['shipping_lines'][0][ $key ] );
+		}
+
+		$actual_shipping_line_meta_data = $data['shipping_lines'][0]['meta_data'];
+		$this->assertCount( 3, $actual_shipping_line_meta_data );
+		foreach ( $shipping->get_meta_data() as $index => $expected_meta_item ) {
+			$this->assertEquals( $expected_meta_item->id, $actual_shipping_line_meta_data[ $index ]['id'] );
+			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['key'] );
+			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['value'] );
+			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['display_key'] );
+			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['display_value'] );
+		}
 	}
 
 	/**
@@ -547,6 +645,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'meta_data'    => array(),
 			'sku'          => null,
 			'price'        => 4,
+			'parent_name'  => null,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -799,5 +898,27 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
+	}
+
+	/**
+	 * Test the order line items schema.
+	 */
+	public function test_order_line_items_schema() {
+		wp_set_current_user( $this->user );
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/orders/' . $order->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+
+		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
+		$this->assertEquals( 15, count( $line_item_properties ) );
+		$this->assertArrayHasKey( 'id', $line_item_properties );
+		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
+		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
+
+		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
+		$this->assertEquals( 5, count( $meta_data_item_properties ) );
+		$this->assertEquals( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $meta_data_item_properties ) );
 	}
 }

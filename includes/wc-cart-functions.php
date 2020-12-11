@@ -198,7 +198,7 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
  * Get the subtotal.
  */
 function wc_cart_totals_subtotal_html() {
-	echo WC()->cart->get_cart_subtotal(); // WPCS: XSS ok.
+	echo WC()->cart->get_cart_subtotal(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -244,7 +244,7 @@ function wc_cart_totals_shipping_html() {
  * Get taxes total.
  */
 function wc_cart_totals_taxes_total_html() {
-	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) ); // WPCS: XSS ok.
+	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -264,7 +264,7 @@ function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', sprintf( esc_html__( 'Coupon: %s', 'woocommerce' ), $coupon->get_code() ), $coupon );
 
 	if ( $echo ) {
-		echo $label; // WPCS: XSS ok.
+		echo $label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	} else {
 		return $label;
 	}
@@ -316,19 +316,20 @@ function wc_cart_totals_order_total_html() {
 
 		if ( ! empty( $tax_string_array ) ) {
 			$taxable_address = WC()->customer->get_taxable_address();
-			/* translators: %s: country name */
-			$estimated_text = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping() ? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] ) : '';
-			$value .= '<small class="includes_tax">('
-						/* translators: includes tax information */
-						. esc_html__( 'includes', 'woocommerce' )
-						. ' '
-						. wp_kses_post( implode( ', ', $tax_string_array ) )
-						. esc_html( $estimated_text )
-						. ')</small>';
+			if ( WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping() ) {
+				$country = WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ];
+				/* translators: 1: tax amount 2: country name */
+				$tax_text = wp_kses_post( sprintf( __( '(includes %1$s estimated for %2$s)', 'woocommerce' ), implode( ', ', $tax_string_array ), $country ) );
+			} else {
+				/* translators: %s: tax amount */
+				$tax_text = wp_kses_post( sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) );
+			}
+
+			$value .= '<small class="includes_tax">' . $tax_text . '</small>';
 		}
 	}
 
-	echo apply_filters( 'woocommerce_cart_totals_order_total_html', $value ); // WPCS: XSS ok.
+	echo apply_filters( 'woocommerce_cart_totals_order_total_html', $value ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -339,7 +340,7 @@ function wc_cart_totals_order_total_html() {
 function wc_cart_totals_fee_html( $fee ) {
 	$cart_totals_fee_html = WC()->cart->display_prices_including_tax() ? wc_price( $fee->total + $fee->tax ) : wc_price( $fee->total );
 
-	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee ); // WPCS: XSS ok.
+	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**

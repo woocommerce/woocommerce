@@ -6,22 +6,29 @@
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
   "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "lib"
+    }
+  ],
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "2.2.0",
-    "automattic/jetpack-constants": "1.4.0",
-    "composer/installers": "1.7.0",
+    "automattic/jetpack-autoloader": "2.6.0",
+    "automattic/jetpack-constants": "1.5.1",
+    "composer/installers": "~1.7",
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "3.1.0",
     "psr/container": "1.0.0",
     "woocommerce/action-scheduler": "3.1.6",
-    "woocommerce/woocommerce-admin": "1.6.0-rc.3",
-    "woocommerce/woocommerce-blocks": "3.4.0"
+    "woocommerce/woocommerce-admin": "1.7.3",
+    "woocommerce/woocommerce-blocks": "3.8.1"
   },
   "require-dev": {
     "phpunit/phpunit": "dev-add-compatibility-with-php8-to-phpunit-7",
     "woocommerce/woocommerce-sniffs": "0.1.0",
-    "wp-cli/i18n-command": "2.2.5"
+    "wp-cli/i18n-command": "2.2.5",
+    "bamarni/composer-bin-plugin": "^1.4"
   },
   "repositories": [
     {
@@ -31,7 +38,7 @@
   ],
   "config": {
     "platform": {
-      "php": "7.1"
+      "php": "7.0"
     },
     "preferred-install": {
         "woocommerce/action-scheduler": "dist",
@@ -49,7 +56,11 @@
       "includes/rest-api"
     ],
     "psr-4": {
-      "Automattic\\WooCommerce\\": "src/"
+      "Automattic\\WooCommerce\\": "src/",
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+    },
+    "psr-0": {
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
     }
   },
   "autoload-dev": {
@@ -63,9 +74,11 @@
   },
   "scripts": {
     "post-install-cmd": [
+      "@composer bin all install --ansi",
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
+      "@composer bin all update --ansi",
       "sh ./bin/package-update.sh"
     ],
     "test": [
@@ -85,14 +98,21 @@
     ],
     "makepot": [
       "@makepot-audit --skip-audit"
+    ],
+    "bin": [
+      "echo 'bin not installed'"
+    ],
+    "build-lib": [
+      "sh ./bin/build-lib.sh"
     ]
   },
   "extra": {
     "installer-paths": {
-      "packages/action-scheduler": ["woocommerce/action-scheduler"],
-      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
-      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"],
-      "packages/woocommerce-admin": ["woocommerce/woocommerce-admin"]
+      "packages/{$name}": [
+        "woocommerce/action-scheduler",
+        "woocommerce/woocommerce-blocks",
+        "woocommerce/woocommerce-admin"
+      ]
     },
     "scripts-description": {
       "test": "Run unit tests",
@@ -100,6 +120,9 @@
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
       "makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
       "makepot": "Generate i18n/languages/woocommerce.pot file"
+    },
+    "bamarni-bin": {
+      "target-directory": "bin/composer"
     }
   }
 }

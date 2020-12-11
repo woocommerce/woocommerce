@@ -57,6 +57,10 @@ class WC_Helper_Updater {
 				'upgrade_notice' => $data['upgrade_notice'],
 			);
 
+			if ( isset( $data['requires_php'] ) ) {
+				$item['requires_php'] = $data['requires_php'];
+			}
+
 			// We don't want to deliver a valid upgrade package when their subscription has expired.
 			// To avoid the generic "no_package" error that empty strings give, we will store an
 			// indication of expiration for the `upgrader_pre_download` filter to error on.

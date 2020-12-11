@@ -286,7 +286,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	/**
 	 * Returns the tax class.
 	 *
-	 * Does not use get_prop so it can handle 'parent' Inheritance correctly.
+	 * Does not use get_prop so it can handle 'parent' inheritance correctly.
 	 *
 	 * @param  string $context view, edit, or unfiltered.
 	 * @return string
@@ -598,7 +598,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 			return false;
 		}
 
-		wp_delete_object_term_relationships( $variation_id, wc_get_attribute_taxonomy_names() );
 		return true;
 	}
 }

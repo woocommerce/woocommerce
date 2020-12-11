@@ -9,7 +9,7 @@ jQuery( function ( $ ) {
 		init: function() {
 			if ( typeof wc_users_params.countries !== 'undefined' ) {
 				/* State/Country select boxes */
-				this.states = $.parseJSON( wc_users_params.countries.replace( /&quot;/g, '"' ) );
+				this.states = JSON.parse( wc_users_params.countries.replace( /&quot;/g, '"' ) );
 			}
 
 			$( '.js_field-country' ).selectWoo().change( this.change_country );

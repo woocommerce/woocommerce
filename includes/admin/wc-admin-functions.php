@@ -210,13 +210,21 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 
-	if ( ! $product || ! $product->managing_stock() || ! $already_reduced_stock || $item_quantity === $already_reduced_stock ) {
+	if ( ! $product || ! $product->managing_stock() ) {
 		return false;
 	}
 
 	$order                  = $item->get_order();
 	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
 	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
+
+	/*
+	 * 0 as $item_quantity usually indicates we're deleting the order item.
+	 * We need to perform different calculations for this case.
+	 */
+	if ( 0 === $item_quantity ) {
+		$diff = min( absint( $refunded_item_quantity ), $already_reduced_stock ) * -1;
+	}
 
 	if ( $diff < 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff * -1, 'increase' );

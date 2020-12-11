@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -367,7 +368,7 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true.
-		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
 			$messages = wc_print_notices( true );
 		} else {
@@ -545,7 +546,7 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$order = wc_get_order( absint( $_GET['order_id'] ) ); // WPCS: sanitization ok.
+		$order = wc_get_order( absint( $_GET['order_id'] ) );
 
 		if ( $order ) {
 			include_once __DIR__ . '/admin/list-tables/class-wc-admin-list-table-orders.php';
@@ -925,6 +926,7 @@ class WC_AJAX {
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
+					/* translators: %s: error message */
 					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
 				}
 				$item_id                 = $order->add_product( $product, $qty );
@@ -1570,10 +1572,15 @@ class WC_AJAX {
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
-		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
-		$products        = array();
+		$products = array();
 
-		foreach ( $product_objects as $product_object ) {
+		foreach ( $ids as $id ) {
+			$product_object = wc_get_product( $id );
+
+			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+				continue;
+			}
+
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
 
@@ -1582,12 +1589,12 @@ class WC_AJAX {
 			}
 
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$stock_amount    = $product_object->get_stock_quantity();
+				$stock_amount = $product_object->get_stock_quantity();
 				/* Translators: %d stock amount */
 				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
 			}
 
-			$products[ $product_object->get_id() ] = rawurldecode( $formatted_name );
+			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
@@ -1861,8 +1868,8 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order       = wc_get_order( $order_id );
-			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
+			$order      = wc_get_order( $order_id );
+			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new Exception( __( 'Invalid refund amount', 'woocommerce' ) );
@@ -2465,7 +2472,7 @@ class WC_AJAX {
 
 			if ( '%' === substr( $value, -1 ) ) {
 				$percent      = wc_format_decimal( substr( $value, 0, -1 ) );
-				$field_value += round( ( $field_value / 100 ) * $percent, wc_get_price_decimals() ) * "{$operator}1";
+				$field_value += NumberUtil::round( ( $field_value / 100 ) * $percent, wc_get_price_decimals() ) * "{$operator}1";
 			} else {
 				$field_value += $value * "{$operator}1";
 			}

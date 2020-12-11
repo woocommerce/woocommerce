@@ -190,7 +190,7 @@ class WC_Emails {
 		$this->init();
 
 		// Email Header, Footer and content hooks.
-		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
+		add_action( 'woocommerce_email_header', array( $this, 'email_header' ), 10, 2 );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_downloads' ), 10, 4 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
@@ -263,17 +263,26 @@ class WC_Emails {
 	/**
 	 * Get the email header.
 	 *
-	 * @param mixed $email_heading Heading for the email.
+	 * @param mixed    $email_heading Heading for the email.
+	 * @param WC_Email $email         Email object for the email.
 	 */
-	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+	public function email_header( $email_heading, $email ) {
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'email'         => $email,
+			)
+		);
 	}
 
 	/**
 	 * Get the email footer.
+	 *
+	 * @param WC_Email $email Email object for the email.
 	 */
-	public function email_footer() {
-		wc_get_template( 'emails/email-footer.php' );
+	public function email_footer( $email ) {
+		wc_get_template( 'emails/email-footer.php', array( 'email' => $email ) );
 	}
 
 	/**
@@ -608,6 +617,17 @@ class WC_Emails {
 	 */
 	public function low_stock( $product ) {
 		if ( 'no' === get_option( 'woocommerce_notify_low_stock', 'yes' ) ) {
+			return;
+		}
+
+		/**
+		 * Determine if the current product should trigger a low stock notification
+		 *
+		 * @param int $product_id - The low stock product id
+		 *
+		 * @since 4.7.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_low_stock_notification', true, $product->get_id() ) ) {
 			return;
 		}
 

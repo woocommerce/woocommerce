@@ -436,8 +436,7 @@ class WC_Install {
 	 * Update WC version to current.
 	 */
 	private static function update_wc_version() {
-		delete_option( 'woocommerce_version' );
-		add_option( 'woocommerce_version', WC()->version );
+		update_option( 'woocommerce_version', WC()->version );
 	}
 
 	/**
@@ -480,8 +479,7 @@ class WC_Install {
 	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		delete_option( 'woocommerce_db_version' );
-		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
+		update_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
 	}
 
 	/**
@@ -750,7 +748,7 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" ); // WPCS: unprepared SQL ok.
+			$fk_result = $wpdb->get_row( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log" );
 			if ( false === strpos( $fk_result->{'Create Table'}, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
@@ -1375,7 +1373,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 		);
 
 		if ( WCConnectionHelper::is_connected() ) {
-			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
+			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
 		}
 
 		return array_merge( $links, $row_meta );

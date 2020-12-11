@@ -35,7 +35,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',			
+			'city'       => '',
 			'postcode'   => '',
 			'country'    => '',
 			'state'      => '',
@@ -48,7 +48,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',			
+			'city'       => '',
 			'postcode'   => '',
 			'country'    => '',
 			'state'      => '',
@@ -859,7 +859,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value   Value of the prop.
 	 */
-	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+	protected function set_address_prop( $prop, $address, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
 			if ( true === $this->object_read ) {
 				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {

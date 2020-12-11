@@ -172,6 +172,17 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 		}
 
+		// Add parent_name if the product is a variation.
+		if ( is_callable( array( $item, 'get_product' ) ) ) {
+			$product = $item->get_product();
+
+			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
+				$data['parent_name'] = $product->get_title();
+			} else {
+				$data['parent_name'] = null;
+			}
+		}
+
 		// Format taxes.
 		if ( ! empty( $data['taxes']['total'] ) ) {
 			$taxes = array();
@@ -197,7 +208,44 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		unset( $data['order_id'] );
 		unset( $data['type'] );
 
+		// Expand meta_data to include user-friendly values.
+		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
+		$data['meta_data'] = array_map(
+			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
+			$data['meta_data'],
+			array_fill( 0, count( $data['meta_data'] ), $formatted_meta_data )
+		);
+
 		return $data;
+	}
+
+	/**
+	 * Merge the `$formatted_meta_data` `display_key` and `display_value` attribute values into the corresponding
+	 * {@link WC_Meta_Data}. Returns the merged array.
+	 *
+	 * @param WC_Meta_Data $meta_item           An object from {@link WC_Order_Item::get_meta_data()}.
+	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 * The keys are the IDs of {@link WC_Meta_Data}.
+	 *
+	 * @return array
+	 */
+	private function merge_meta_item_with_formatted_meta_display_attributes( $meta_item, $formatted_meta_data ) {
+		$result = array(
+			'id'            => $meta_item->id,
+			'key'           => $meta_item->key,
+			'value'         => $meta_item->value,
+			'display_key'   => $meta_item->key,   // Default to original key, in case a formatted key is not available.
+			'display_value' => $meta_item->value, // Default to original value, in case a formatted value is not available.
+		);
+
+		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
+			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
+
+			$result['display_key'] = wc_clean( $formatted_meta_item->display_key );
+			$result['display_value'] = wc_clean( $formatted_meta_item->display_value );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -590,8 +638,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Gets the product ID from the SKU or posted ID.
 	 *
 	 * @throws WC_REST_Exception When SKU or ID is not valid.
-	 * @param array           $posted Request data.
-	 * @param string          $action 'create' to add line item or 'update' to update it.
+	 * @param array  $posted Request data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @return int
 	 */
 	protected function get_product_id( $posted, $action = 'create' ) {
@@ -1194,6 +1242,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
+							'parent_name'  => array(
+								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 							'product_id'   => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
 								'type'        => 'mixed',
@@ -1269,20 +1322,30 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
-										'id'    => array(
+										'id'            => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
-										'key'   => array(
+										'key'           => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 										),
-										'value' => array(
+										'value'         => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
+											'context'     => array( 'view', 'edit' ),
+										),
+										'display_key'   => array(
+											'description' => __( 'Meta key for UI display.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+										),
+										'display_value' => array(
+											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
+											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),

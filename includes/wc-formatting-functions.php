@@ -8,6 +8,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -228,11 +230,11 @@ function wc_round_tax_total( $value, $precision = null ) {
 	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
+		$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
 		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
 	} else {
-		$rounded_tax = round( $value, $precision );
+		$rounded_tax = NumberUtil::round( $value, $precision );
 	}
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
@@ -259,7 +261,7 @@ function wc_legacy_round_half_down( $value, $precision ) {
 		$value = implode( '.', $value );
 	}
 
-	return round( floatval( $value ), $precision );
+	return NumberUtil::round( floatval( $value ), $precision );
 }
 
 /**
@@ -636,7 +638,12 @@ function wc_let_to_num( $size ) {
  * @return string
  */
 function wc_date_format() {
-	return apply_filters( 'woocommerce_date_format', get_option( 'date_format' ) );
+	$date_format = get_option( 'date_format' );
+	if ( empty( $date_format ) ) {
+		// Return default date format if the option is empty.
+		$date_format = 'F j, Y';
+	}
+	return apply_filters( 'woocommerce_date_format', $date_format );
 }
 
 /**
@@ -645,7 +652,12 @@ function wc_date_format() {
  * @return string
  */
 function wc_time_format() {
-	return apply_filters( 'woocommerce_time_format', get_option( 'time_format' ) );
+	$time_format = get_option( 'time_format' );
+	if ( empty( $time_format ) ) {
+		// Return default time format if the option is empty.
+		$time_format = 'g:i a';
+	}
+	return apply_filters( 'woocommerce_time_format', $time_format );
 }
 
 /**
@@ -820,7 +832,7 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 		foreach ( $base as $k => $v ) {
 			$amount      = $v / 100;
-			$amount      = round( $amount * $factor );
+			$amount      = NumberUtil::round( $amount * $factor );
 			$new_decimal = $v - $amount;
 
 			$new_hex_component = dechex( $new_decimal );
@@ -851,7 +863,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 		foreach ( $base as $k => $v ) {
 			$amount      = 255 - $v;
 			$amount      = $amount / 100;
-			$amount      = round( $amount * $factor );
+			$amount      = NumberUtil::round( $amount * $factor );
 			$new_decimal = $v + $amount;
 
 			$new_hex_component = dechex( $new_decimal );
@@ -950,6 +962,7 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'PT':
 			$postcode = substr_replace( $postcode, '-', 4, 0 );
 			break;
+		case 'PR':
 		case 'US':
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
@@ -1188,7 +1201,7 @@ function wc_format_stock_for_display( $product ) {
 
 	switch ( get_option( 'woocommerce_stock_format' ) ) {
 		case 'low_amount':
-			if ( $stock_amount <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+			if ( $stock_amount <= wc_get_low_stock_amount( $product ) ) {
 				/* translators: %s: stock amount */
 				$display = sprintf( __( 'Only %s left in stock', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product ) );
 			}
