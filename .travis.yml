@@ -19,6 +19,7 @@ php:
   - "7.2"
   - "7.3"
   - "7.4"
+  - "8.0"
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -87,6 +88,11 @@ install:
       echo "xdebug.ini does not exist"
     fi
   - composer install
+  - |
+    if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+      composer bin phpunit config repositories.phpunit vcs https://github.com/woocommerce/phpunit
+      composer bin phpunit require --dev -W phpunit/phpunit:dev-add-compatibility-with-php8-to-phpunit-7 --ignore-platform-reqs
+    fi
   - |
     # Install WP Test suite:
     if [[ ! -z "$WP_VERSION" ]]; then
