@@ -3169,6 +3169,12 @@ table.wc_input_table {
 	}
 }
 
+table.wc_tax_rates {
+	td.country {
+		position: relative;
+	}
+}
+
 table.wc_gateways,
 table.wc_emails,
 table.wc_shipping {
