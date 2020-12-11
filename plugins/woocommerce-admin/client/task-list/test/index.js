@@ -17,49 +17,52 @@ jest.mock( '../tasks' );
 
 describe( 'TaskDashboard and TaskList', () => {
 	afterEach( () => jest.clearAllMocks() );
-
-	const tasks = [
-		{
-			key: 'optional',
-			title: 'This task is optional',
-			container: null,
-			completed: false,
-			visible: true,
-			time: '1 minute',
-			isDismissable: true,
-			type: 'setup',
-		},
-		{
-			key: 'required',
-			title: 'This task is required',
-			container: null,
-			completed: false,
-			visible: true,
-			time: '1 minute',
-			isDismissable: false,
-			type: 'setup',
-		},
-		{
-			key: 'completed',
-			title: 'This task is completed',
-			container: null,
-			completed: true,
-			visible: true,
-			time: '1 minute',
-			isDismissable: true,
-			type: 'setup',
-		},
-		{
-			key: 'extension',
-			title: 'This task is an extension',
-			container: null,
-			completed: false,
-			visible: true,
-			time: '1 minute',
-			isDismissable: true,
-			type: 'extension',
-		},
-	];
+	const tasks = {
+		setup: [
+			{
+				key: 'optional',
+				title: 'This task is optional',
+				container: null,
+				completed: false,
+				visible: true,
+				time: '1 minute',
+				isDismissable: true,
+				type: 'setup',
+			},
+			{
+				key: 'required',
+				title: 'This task is required',
+				container: null,
+				completed: false,
+				visible: true,
+				time: '1 minute',
+				isDismissable: false,
+				type: 'setup',
+			},
+			{
+				key: 'completed',
+				title: 'This task is completed',
+				container: null,
+				completed: true,
+				visible: true,
+				time: '1 minute',
+				isDismissable: true,
+				type: 'setup',
+			},
+		],
+		extension: [
+			{
+				key: 'extension',
+				title: 'This task is an extension',
+				container: null,
+				completed: false,
+				visible: true,
+				time: '1 minute',
+				isDismissable: true,
+				type: 'extension',
+			},
+		],
+	};
 	const shorterTasksList = [
 		{
 			key: 'completed-1',
@@ -141,8 +144,7 @@ describe( 'TaskDashboard and TaskList', () => {
 				query={ {} }
 				trackedCompletedTasks={ shorterTasksList }
 				updateOptions={ updateOptions }
-				allTasks={ shorterTasksList }
-				specificTasks={ shorterTasksList }
+				tasks={ { setup: shorterTasksList } }
 			/>
 		);
 
@@ -167,8 +169,7 @@ describe( 'TaskDashboard and TaskList', () => {
 					query={ {} }
 					trackedCompletedTasks={ shorterTasksList }
 					updateOptions={ updateOptions }
-					allTasks={ shorterTasksList }
-					specificTasks={ shorterTasksList }
+					tasks={ { setup: shorterTasksList } }
 				/>
 			);
 		} );
@@ -191,8 +192,7 @@ describe( 'TaskDashboard and TaskList', () => {
 					query={ {} }
 					trackedCompletedTasks={ shorterTasksList }
 					updateOptions={ updateOptions }
-					allTasks={ shorterTasksList }
-					specificTasks={ shorterTasksList }
+					tasks={ { extension: shorterTasksList } }
 				/>
 			);
 		} );
@@ -208,14 +208,13 @@ describe( 'TaskDashboard and TaskList', () => {
 		act( () => {
 			render(
 				<TaskList
-					allTasks={ tasks }
+					tasks={ tasks }
 					dismissedTasks={ [] }
 					isTaskListComplete={ true }
 					profileItems={ {} }
 					query={ {} }
 					trackedCompletedTasks={ shorterTasksList }
 					updateOptions={ updateOptions }
-					specificTasks={ shorterTasksList }
 				/>
 			);
 		} );

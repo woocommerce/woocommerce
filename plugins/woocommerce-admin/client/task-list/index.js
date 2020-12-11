@@ -60,14 +60,6 @@ export class TaskDashboard extends Component {
 		} );
 	}
 
-	groupBy( array, key ) {
-		return array.reduce( ( result, currentValue ) => {
-			( result[ currentValue[ key ] ] =
-				result[ currentValue[ key ] ] || [] ).push( currentValue );
-			return result;
-		}, {} );
-	}
-
 	toggleCartModal() {
 		const { isCartModalOpen } = this.state;
 
@@ -90,34 +82,29 @@ export class TaskDashboard extends Component {
 		} = this.props;
 		const { isCartModalOpen } = this.state;
 		const allTasks = this.getAllTasks();
-		const { extension: extensionTasks, setup: setupTasks } = this.groupBy(
-			allTasks,
-			'type'
-		);
+		const { extension: extensionTasks, setup: setupTasks } = allTasks;
 
 		return (
 			<>
 				{ setupTasks && ! isSetupTaskListHidden && (
 					<TaskList
-						allTasks={ allTasks }
 						dismissedTasks={ dismissedTasks }
 						isTaskListComplete={ isTaskListComplete }
 						isExtended={ false }
 						query={ query }
-						specificTasks={ setupTasks }
+						tasks={ allTasks }
 						trackedCompletedTasks={ trackedCompletedTasks }
 					/>
 				) }
 				{ extensionTasks && ! isExtendedTaskListHidden && (
 					<TaskList
-						allTasks={ allTasks }
 						dismissedTasks={ dismissedTasks }
 						isExtendedTaskListComplete={
 							isExtendedTaskListComplete
 						}
 						isExtended={ true }
 						query={ query }
-						specificTasks={ extensionTasks }
+						tasks={ allTasks }
 						trackedCompletedTasks={ trackedCompletedTasks }
 					/>
 				) }

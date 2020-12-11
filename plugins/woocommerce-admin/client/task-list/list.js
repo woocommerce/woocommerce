@@ -54,6 +54,20 @@ export class TaskList extends Component {
 		this.possiblyTrackCompletedTasks();
 	}
 
+	getUngroupedTasks() {
+		const { tasks: groupedTasks } = this.props;
+		return Object.values( groupedTasks ).flat();
+	}
+
+	getSpecificTasks() {
+		const { isExtended, tasks: groupedTasks } = this.props;
+		const { extension, setup } = groupedTasks;
+		if ( isExtended ) {
+			return extension;
+		}
+		return setup;
+	}
+
 	possiblyCompleteTaskList() {
 		const {
 			isExtended,
@@ -61,8 +75,8 @@ export class TaskList extends Component {
 			isExtendedTaskListComplete,
 			updateOptions,
 		} = this.props;
-		const isSetupTaskListInComplete = ! isExtended && ! isTaskListComplete;
-		const isExtendedTaskListInComplete =
+		const isSetupTaskListIncomplete = ! isExtended && ! isTaskListComplete;
+		const isExtendedTaskListIncomplete =
 			isExtended && ! isExtendedTaskListComplete;
 		const taskListToComplete = isExtended
 			? { woocommerce_extended_task_list_complete: 'yes' }
@@ -73,7 +87,7 @@ export class TaskList extends Component {
 
 		if (
 			! this.getIncompleteTasks().length &&
-			( isSetupTaskListInComplete || isExtendedTaskListInComplete )
+			( isSetupTaskListIncomplete || isExtendedTaskListIncomplete )
 		) {
 			updateOptions( {
 				...taskListToComplete,
@@ -88,8 +102,8 @@ export class TaskList extends Component {
 	}
 
 	getIncompleteTasks() {
-		const { dismissedTasks, specificTasks } = this.props;
-		return specificTasks.filter(
+		const { dismissedTasks } = this.props;
+		return this.getSpecificTasks().filter(
 			( task ) =>
 				task.visible &&
 				! task.completed &&
@@ -169,8 +183,9 @@ export class TaskList extends Component {
 	}
 
 	getVisibleTasks( type ) {
-		const { allTasks, specificTasks, dismissedTasks } = this.props;
-		const tasks = type === 'all' ? allTasks : specificTasks;
+		const { dismissedTasks } = this.props;
+		const tasks =
+			type === 'all' ? this.getUngroupedTasks() : this.getSpecificTasks();
 
 		return tasks.filter(
 			( task ) => task.visible && ! dismissedTasks.includes( task.key )
@@ -235,9 +250,11 @@ export class TaskList extends Component {
 	}
 
 	getCurrentTask() {
-		const { specificTasks, query } = this.props;
+		const { query } = this.props;
 		const { task } = query;
-		const currentTask = specificTasks.find( ( s ) => s.key === task );
+		const currentTask = this.getSpecificTasks().find(
+			( s ) => s.key === task
+		);
 
 		if ( ! currentTask ) {
 			return null;

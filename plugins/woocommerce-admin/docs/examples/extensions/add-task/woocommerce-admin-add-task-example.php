@@ -8,7 +8,7 @@
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 
 /**
- * Register the JS.
+ * Register the task list item and the JS.
  */
 function add_task_register_script() {
 
@@ -41,3 +41,12 @@ function add_task_register_script() {
 	do_action( 'add_woocommerce_extended_task_list_item', 'woocommerce_admin_add_task_example_name' );
 }
 add_action( 'admin_enqueue_scripts', 'add_task_register_script' );
+
+/**
+ * Unregister task list item.
+ */
+function pluginprefix_deactivate() {
+	do_action( 'remove_woocommerce_extended_task_list_item', 'woocommerce_admin_add_task_example_name' );
+}
+
+register_deactivation_hook( __FILE__, 'pluginprefix_deactivate' );

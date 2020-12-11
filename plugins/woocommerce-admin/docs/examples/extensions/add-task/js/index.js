@@ -87,7 +87,6 @@ addFilter(
 				time: __( '2 minutes', 'woocommerce-admin' ),
 				isDismissable: true,
 				onDismiss: () => console.log( "The task was dismissed" ),
-				type: 'extension'
 			},
 		];
 	}

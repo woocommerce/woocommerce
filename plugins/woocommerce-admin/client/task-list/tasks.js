@@ -22,6 +22,7 @@ import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import { installActivateAndConnectWcpay } from './tasks/payments/methods';
+import { groupListOfObjectsBy } from '../lib/lists';
 
 export function recordTaskViewEvent(
 	taskName,
@@ -247,10 +248,9 @@ export function getAllTasks( {
 			type: 'setup',
 		},
 	];
-
-	return applyFilters(
-		'woocommerce_admin_onboarding_task_list',
-		tasks,
-		query
+	return groupListOfObjectsBy(
+		applyFilters( 'woocommerce_admin_onboarding_task_list', tasks, query ),
+		'type',
+		'extension'
 	);
 }
