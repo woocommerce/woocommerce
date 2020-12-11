@@ -25,17 +25,8 @@
     "woocommerce/woocommerce-blocks": "3.8.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "dev-add-compatibility-with-php8-to-phpunit-7",
-    "woocommerce/woocommerce-sniffs": "0.1.0",
-    "wp-cli/i18n-command": "2.2.5",
     "bamarni/composer-bin-plugin": "^1.4"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/woocommerce/phpunit"
-    }
-  ],
   "config": {
     "platform": {
       "php": "7.0"

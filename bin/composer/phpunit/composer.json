@@ -2,11 +2,17 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require-dev": {
-    "phpunit/phpunit": "6.5.14"
+    "phpunit/phpunit": "dev-add-compatibility-with-php8-to-phpunit-7"
   },
   "config": {
     "platform": {
-      "php": "7.0"
+      "php": "7.1"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/woocommerce/phpunit"
+    }
+  ]
 }
