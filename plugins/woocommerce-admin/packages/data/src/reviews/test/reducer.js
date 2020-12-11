@@ -46,8 +46,43 @@ describe( 'reviews reducer', () => {
 		).toBeTruthy();
 
 		expect( state.reviews[ stringifiedQuery ].totalCount ).toBe( 45 );
-		expect( state.data[ '1' ] ).toBe( reviews[ 0 ] );
-		expect( state.data[ '2' ] ).toBe( reviews[ 1 ] );
+		expect( state.data[ '1' ] ).toEqual( reviews[ 0 ] );
+		expect( state.data[ '2' ] ).toEqual( reviews[ 1 ] );
+	} );
+
+	it( 'should handle UPDATE_REVIEWS with _fields, only update updated fields', () => {
+		const reviews = [ { id: 1 }, { id: 2 } ];
+		const totalCount = 45;
+		const query = { status: 'flavortown', _fields: [ 'id' ] };
+		const state = reducer(
+			{
+				...defaultState,
+				data: {
+					1: { id: 1, review: 'Yum!' },
+					2: { id: 2, review: 'Dynamite!' },
+				},
+			},
+			{
+				type: TYPES.UPDATE_REVIEWS,
+				reviews,
+				query,
+				totalCount,
+			}
+		);
+
+		const stringifiedQuery = JSON.stringify( query );
+
+		expect( state.reviews[ stringifiedQuery ].data ).toHaveLength( 2 );
+		expect(
+			state.reviews[ stringifiedQuery ].data.includes( 1 )
+		).toBeTruthy();
+		expect(
+			state.reviews[ stringifiedQuery ].data.includes( 2 )
+		).toBeTruthy();
+
+		expect( state.reviews[ stringifiedQuery ].totalCount ).toBe( 45 );
+		expect( state.data[ '1' ].review ).toEqual( 'Yum!' );
+		expect( state.data[ '2' ].review ).toEqual( 'Dynamite!' );
 	} );
 
 	it( 'should handle SET_ERROR', () => {

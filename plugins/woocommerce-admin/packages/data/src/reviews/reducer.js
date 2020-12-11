@@ -25,7 +25,10 @@ const reducer = (
 			const ids = [];
 			const nextReviews = reviews.reduce( ( result, review ) => {
 				ids.push( review.id );
-				result[ review.id ] = review;
+				result[ review.id ] = {
+					...( state.data[ review.id ] || {} ),
+					...review,
+				};
 				return result;
 			}, {} );
 			return {

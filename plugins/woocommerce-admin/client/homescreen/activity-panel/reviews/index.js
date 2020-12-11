@@ -149,7 +149,7 @@ class ReviewsPanel extends Component {
 				review._embedded.up[ 0 ] ) ||
 			null;
 
-		if ( review.isUpdating || this.props.isRequesting ) {
+		if ( review.isUpdating ) {
 			return (
 				<ActivityCardPlaceholder
 					key={ review.id }
@@ -160,7 +160,7 @@ class ReviewsPanel extends Component {
 				/>
 			);
 		}
-		if ( isNull( product ) ) {
+		if ( isNull( product ) || review.status !== reviewsQuery.status ) {
 			return null;
 		}
 
@@ -292,14 +292,15 @@ class ReviewsPanel extends Component {
 	}
 
 	renderReviews( reviews ) {
-		if ( reviews.length === 0 ) {
+		const renderedReviews = reviews.map( ( review ) =>
+			this.renderReview( review, this.props )
+		);
+		if ( renderedReviews.filter( Boolean ).length === 0 ) {
 			return <></>;
 		}
 		return (
 			<>
-				{ reviews.map( ( review ) =>
-					this.renderReview( review, this.props )
-				) }
+				{ renderedReviews }
 				<Link
 					href={ getAdminLink(
 						'edit-comments.php?comment_type=review'
@@ -351,7 +352,7 @@ class ReviewsPanel extends Component {
 							lines={ 1 }
 						/>
 					) : (
-						<>{ this.renderReviews( reviews, this.props ) }</>
+						<>{ this.renderReviews( reviews ) }</>
 					) }
 				</Section>
 			</Fragment>
