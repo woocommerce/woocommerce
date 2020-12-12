@@ -11,6 +11,7 @@ import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.get( 'products.simple.price' );
 
 const verifyAndPublish = async () => {
 	// Wait for auto save
@@ -208,7 +209,7 @@ const completeOnboardingWizard = async () => {
 const createSimpleProduct = async () => {
 	const product = await factories.products.simple.create( {
 		name: simpleProductName,
-		regularPrice: '9.99'
+		regularPrice: simpleProductPrice
 	} );
 	return product.id;
 } ;

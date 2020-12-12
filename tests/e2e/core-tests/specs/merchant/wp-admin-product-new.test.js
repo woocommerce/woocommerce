@@ -19,6 +19,7 @@ const {
 const config = require( 'config' );
 
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.get( 'products.simple.price' );
 
 const verifyPublishAndTrash = async () => {
 	// Wait for auto save
@@ -57,7 +58,7 @@ const runAddSimpleProductTest = () => {
 			await expect(page).toFill('#title', simpleProductName);
 			await expect(page).toClick('#_virtual');
 			await clickTab('General');
-			await expect(page).toFill('#_regular_price', '9.99');
+			await expect(page).toFill('#_regular_price', simpleProductPrice);
 
 			// Publish product, verify that it was published. Trash product, verify that it was trashed.
 			await verifyPublishAndTrash(
