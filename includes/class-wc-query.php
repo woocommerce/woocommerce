@@ -872,6 +872,7 @@ class WC_Query {
 					}
 				}
 			}
+			self::$chosen_attributes = apply_filters( 'woocommerce_layered_nav_chosen_attributes', self::$chosen_attributes );
 		}
 		return self::$chosen_attributes;
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
