@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Enhancement: Add page parameter to override default wc-admin page in Navigation API. #5821
 - Fix: Invalidate product count if the last product was updated in the list. #5790
 - Fix: Updating (non wordpress user) customer with order data
+- Dev: Add documentation for filter `woocommerce_admin_pages_list` and `wc_admin_register_page` #5844
 
 == Changelog ==
 
