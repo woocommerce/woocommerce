@@ -22,6 +22,7 @@ const runUpdateGeneralSettingsTest = require( './merchant/wp-admin-settings-gene
 const runProductSettingsTest = require( './merchant/wp-admin-settings-product.test' );
 const runTaxSettingsTest = require( './merchant/wp-admin-settings-tax.test' );
 const runOrderStatusFiltersTest = require( './merchant/wp-admin-order-status-filters.test' );
+const runAddNewShippingZoneTest = require("./merchant/wp-admin-settings-shiping-add-new-shiping-zone.test");
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -68,4 +69,5 @@ module.exports = {
 	runTaxSettingsTest,
 	runOrderStatusFiltersTest,
 	runMerchantTests,
+	runAddNewShippingZoneTest
 };
