@@ -142,7 +142,7 @@
 		"@testing-library/jest-dom": "5.11.6",
 		"@testing-library/react": "11.2.2",
 		"@testing-library/react-hooks": "3.7.0",
-		"@testing-library/user-event": "12.3.0",
+		"@testing-library/user-event": "12.5.0",
 		"@woocommerce/components": "file:packages/components",
 		"@woocommerce/csv-export": "file:packages/csv-export",
 		"@woocommerce/customer-effort-score": "file:packages/customer-effort-score",
