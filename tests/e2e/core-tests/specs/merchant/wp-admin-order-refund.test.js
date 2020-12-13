@@ -72,6 +72,27 @@ const runRefundOrderTest = () => {
 			]);
 		});
 
+		it('can delete an issued refund', async () => {
+			// We need to use this here as `expect(page).toClick()` was unable to find the element
+			// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
+			page.$eval('a.delete_refund', elem => elem.click());
+
+			await uiUnblocked();
+
+			// Verify the refunded row item is no longer showing
+			await page.waitForSelector('tr.refund', { visible: false });
+
+			await Promise.all([
+				// Verify the product line item shows the refunded quantity and amount
+				expect(page).not.toMatchElement('.quantity .refunded', { text: '-1' }),
+				expect(page).not.toMatchElement('.line_cost .refunded', { text: `-${currencySymbol}9.99` }),
+
+				// Verify the refund shows in the list with the amount
+				expect(page).not.toMatchElement('.refund .description', { text: 'No longer wanted' }),
+				expect(page).not.toMatchElement('.refund > .line_cost', { text: `-${currencySymbol}9.99` }),
+			]);
+		});
+
 	});
 
 };
