@@ -13,7 +13,8 @@ import {
 import TotalsCoupon from '../';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/TotalsCoupon',
+	title:
+		'WooCommerce Blocks/@base-components/cart-checkout/totals/TotalsCoupon',
 	component: TotalsCoupon,
 };
 
