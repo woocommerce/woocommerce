@@ -152,6 +152,32 @@ const ReportTable = ( props ) => {
 		} ) );
 	};
 
+	const applyTableFilters = ( data, totals, totalResults ) => {
+		const summary = getSummary ? getSummary( totals, totalResults ) : null;
+
+		/**
+		 * Filter report table for the CSV download.
+		 *
+		 * Enables manipulation of data used to create the report CSV.
+		 *
+		 * @param {Object} reportTableData - data used to create the table.
+		 * @param {string} reportTableData.endpoint - table api endpoint.
+		 * @param {Array} reportTableData.headers - table headers data.
+		 * @param {Array} reportTableData.rows - table rows data.
+		 * @param {Object} reportTableData.totals - total aggregates for request.
+		 * @param {Array} reportTableData.summary - summary numbers data.
+		 * @param {Object} reportTableData.items - response from api requerst.
+		 */
+		return applyFilters( TABLE_FILTER, {
+			endpoint,
+			headers: getHeadersContent(),
+			rows: getRowsContent( data ),
+			totals,
+			summary,
+			items,
+		} );
+	};
+
 	const onClickDownload = () => {
 		const { createNotice, startExport, title } = props;
 		const params = Object.assign( {}, query );
@@ -165,12 +191,11 @@ const ReportTable = ( props ) => {
 		}
 
 		if ( data && data.length === totalResults ) {
+			const { headers, rows } = applyTableFilters( data, totalResults );
+
 			downloadCSVFile(
 				generateCSVFileName( title, params ),
-				generateCSVDataFromTable(
-					getHeadersContent(),
-					getRowsContent( data )
-				)
+				generateCSVDataFromTable( headers, rows )
 			);
 		} else {
 			downloadType = 'email';
@@ -308,29 +333,14 @@ const ReportTable = ( props ) => {
 		label: v,
 	} ) );
 
-	/**
-	 * Filter report table.
-	 *
-	 * Enables manipulation of data used to create a report table.
-	 *
-	 * @param {Object} reportTableData - data used to create the table.
-	 * @param {string} reportTableData.endpoint - table api endpoint.
-	 * @param {Array} reportTableData.headers - table headers data.
-	 * @param {Array} reportTableData.rows - table rows data.
-	 * @param {Object} reportTableData.totals - total aggregates for request.
-	 * @param {Array} reportTableData.summary - summary numbers data.
-	 * @param {Object} reportTableData.items - response from api requerst.
-	 */
-	const filteredTableProps = applyFilters( TABLE_FILTER, {
-		endpoint,
-		headers: getHeadersContent(),
-		rows: getRowsContent( items.data ),
+	const { data } = items;
+	const applyTableFiltersResult = applyTableFilters(
+		data,
 		totals,
-		summary: getSummary ? getSummary( totals, totalResults ) : null,
-		items,
-	} );
-	let { headers, rows } = filteredTableProps;
-	const { summary } = filteredTableProps;
+		totalResults
+	);
+	let { headers, rows } = applyTableFiltersResult;
+	const { summary } = applyTableFiltersResult;
 
 	const onColumnsChange = ( shownColumns, toggledColumn ) => {
 		const columns = headers.map( ( header ) => header.key );

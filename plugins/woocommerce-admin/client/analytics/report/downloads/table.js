@@ -19,7 +19,7 @@ import { getCurrentDates, defaultTableDateFormat } from '@woocommerce/date';
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 
-class CouponsReportTable extends Component {
+class DownloadsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -203,11 +203,11 @@ class CouponsReportTable extends Component {
 	}
 }
 
-CouponsReportTable.contextType = CurrencyContext;
+DownloadsReportTable.contextType = CurrencyContext;
 
 export default withSelect( ( select ) => {
 	const { woocommerce_default_date_range: defaultDateRange } = select(
 		SETTINGS_STORE_NAME
 	).getSetting( 'wc_admin', 'wcAdminSettings' );
 	return { defaultDateRange };
-} )( CouponsReportTable );
+} )( DownloadsReportTable );
