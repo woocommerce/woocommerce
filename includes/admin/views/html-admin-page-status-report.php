@@ -177,19 +177,30 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 
 				if ( ! is_null( $version ) ) {
 					if ( ! isset( $wc_admin_path ) ) {
+						$wc_admin_path = __( 'Active Plugin', 'woocommerce' );
 						if ( defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 							$wc_admin_path = dirname( WC_ADMIN_PLUGIN_FILE );
-						} else {
-							$wc_admin_path = __( 'Active Plugin', 'woocommerce' );
 						}
 					}
 					if ( WC()->is_wc_admin_active() ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
+						echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+						echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+						echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span>' . esc_html( $version );
+						echo ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
 					} else {
-						echo '<span class="dashicons dashicons-no-alt"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code> ';
+						// TODO - Yes seems inappropriate here.
+						echo '<mark class="yes"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span>';
+						echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+						echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span>' . esc_html( $version );
+						echo ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
 					}
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+					echo esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark> ';
 				}
 				?>
 			</td>
