@@ -371,11 +371,12 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_orders() {
-		$order_dates  = self::get_order_dates();
-		$order_counts = self::get_order_counts();
-		$order_totals = self::get_order_totals();
+		$order_dates           = self::get_order_dates();
+		$order_counts          = self::get_order_counts();
+		$order_totals          = self::get_order_totals();
+		$order_payment_methods = self::get_order_counts_by_payment_method();
 
-		return array_merge( $order_dates, $order_counts, $order_totals );
+		return array_merge( $order_dates, $order_counts, $order_totals, $order_payment_methods );
 	}
 
 	/**
@@ -538,6 +539,47 @@ class WC_Tracker {
 	 */
 	private static function get_admin_user_agents() {
 		return array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+	}
+
+	/**
+	 * Get order counts by payment method
+	 *
+	 * @return array
+	 */
+	public static function get_order_counts_by_payment_method() {
+		global $wpdb;
+
+		$orders_by_payment_method = $wpdb->get_results(
+			"
+			SELECT
+			    order_gateway.payment_method AS payment_method,
+			    COUNT( id ) AS orders_count
+			FROM (
+				SELECT
+					orders.ID AS id,
+				    MAX(
+				        CASE
+				            WHEN meta_key = '_payment_method'
+				            THEN meta_value
+				        END
+				    ) AS payment_method
+				FROM {$wpdb->prefix}posts AS orders
+				LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+				WHERE orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+				GROUP BY orders.ID
+			) AS order_gateway
+			WHERE payment_method IS NOT NULL
+			GROUP BY payment_method
+			ORDER BY orders_count DESC
+		"
+		);
+
+		foreach ( $orders_by_payment_method as $orders_count ) {
+			$method                                  = 'gateway_' . $orders_count->payment_method;
+			$order_counts_by_payment_method[ $method ] = $orders_count->orders_count;
+		}
+
+		return $order_counts_by_payment_method;
 	}
 
 	/**
