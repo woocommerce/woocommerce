@@ -26,6 +26,25 @@ none
 # Minified JS
 /assets/js/admin/*.min.js
 /assets/js/frontend/*.min.js
+/assets/js/accounting/*.min.js
+/assets/js/flexslider/*.min.js
+/assets/js/jquery-blockui/*.min.js
+/assets/js/jquery-cookie/*.min.js
+/assets/js/jquery-flot/*.min.js
+/assets/js/jquery-payment/*.min.js
+/assets/js/jquery-qrcode/*.min.js
+/assets/js/jquery-serializejson/*.min.js
+/assets/js/jquery-tiptip/*.min.js
+/assets/js/jquery-ui-touch-punch/*.min.js
+/assets/js/js-cookie/*.min.js
+/assets/js/photoswipe/*.min.js
+/assets/js/prettyPhoto/*.min.js
+/assets/js/round/*.min.js
+/assets/js/select2/*.min.js
+/assets/js/selectWoo/*.min.js
+/assets/js/stupidtable/*.min.js
+/assets/js/zeroclipboard/*.min.js
+/assets/js/zoom/*.min.js
 
 # OS X metadata
 .DS_Store
