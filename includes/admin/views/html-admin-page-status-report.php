@@ -277,11 +277,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td data-export-label="WP Debug Mode"><?php esc_html_e( 'WordPress debug mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
-				<?php if ( $environment['wp_debug_mode'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
-				<?php else : ?>
-					<mark class="no">&ndash;</mark>
-				<?php endif; ?>
+				<?php
+				if ( true || $environment['wp_debug_mode'] ) :
+					// We'll consider debug something to warn about.
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
+				else :
+					echo '<mark class="no">';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span>' . esc_html__( '&ndash;', 'woocommerce' ) . '</span></span>';
+					echo '</mark>';
+				endif;
+				?>
 			</td>
 		</tr>
 		<tr>
