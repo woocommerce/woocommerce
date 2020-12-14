@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import {
 	Placeholder,
@@ -377,7 +377,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	return Object.keys( ATTRIBUTES ).length === 0 ? (
 		noAttributesPlaceholder()
 	) : (
-		<Fragment>
+		<>
 			{ getBlockControls() }
 			{ getInspectorControls() }
 			{ isEditing ? (
@@ -396,7 +396,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 					</Disabled>
 				</div>
 			) }
-		</Fragment>
+		</>
 	);
 };
 

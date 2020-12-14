@@ -110,7 +110,7 @@ const CheckboxList = ( {
 		const optionCount = options.length;
 		const shouldTruncateOptions = optionCount > limit + 5;
 		return (
-			<Fragment>
+			<>
 				{ options.map( ( option, index ) => (
 					<Fragment key={ option.value }>
 						<li
@@ -138,7 +138,7 @@ const CheckboxList = ( {
 					</Fragment>
 				) ) }
 				{ shouldTruncateOptions && renderedShowLess }
-			</Fragment>
+			</>
 		);
 	}, [
 		options,

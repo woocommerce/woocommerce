@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Icon, discussion } from '@woocommerce/icons';
 
@@ -62,7 +61,7 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 	};
 
 	return (
-		<Fragment>
+		<>
 			{ getInspectorControls() }
 			<EditorContainerBlock
 				attributes={ attributes }
@@ -75,7 +74,7 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 				name={ __( 'All Reviews', 'woo-gutenberg-products-block' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
-		</Fragment>
+		</>
 	);
 };
 

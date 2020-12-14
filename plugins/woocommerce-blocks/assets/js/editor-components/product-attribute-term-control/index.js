@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
@@ -134,7 +133,7 @@ const ProductAttributeTermControl = ( {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<SearchListControl
 				className="woocommerce-product-attributes"
 				list={ currentList }
@@ -184,7 +183,7 @@ const ProductAttributeTermControl = ( {
 					/>
 				</div>
 			) }
-		</Fragment>
+		</>
 	);
 };
 

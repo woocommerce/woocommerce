@@ -7,7 +7,7 @@ import {
 	useCollectionData,
 	usePrevious,
 } from '@woocommerce/base-hooks';
-import { Fragment, useCallback, useState, useEffect } from '@wordpress/element';
+import { useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
@@ -149,7 +149,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const TagName = `h${ attributes.headingLevel }`;
 
 	return (
-		<Fragment>
+		<>
 			{ ! isEditor && attributes.heading && (
 				<TagName>{ attributes.heading }</TagName>
 			) }
@@ -167,7 +167,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 					isLoading={ isLoading }
 				/>
 			</div>
-		</Fragment>
+		</>
 	);
 };
 

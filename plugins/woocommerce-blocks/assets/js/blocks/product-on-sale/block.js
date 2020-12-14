@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { Disabled, PanelBody, Placeholder } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { ServerSideRender } from '@wordpress/editor';
@@ -107,7 +107,7 @@ class ProductOnSaleBlock extends Component {
 		}
 
 		return (
-			<Fragment>
+			<>
 				{ this.getInspectorControls() }
 				<Disabled>
 					<ServerSideRender
@@ -116,7 +116,7 @@ class ProductOnSaleBlock extends Component {
 						EmptyResponsePlaceholder={ EmptyPlaceholder }
 					/>
 				</Disabled>
-			</Fragment>
+			</>
 		);
 	}
 }

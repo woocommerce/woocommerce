@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from 'react';
 import { InspectorControls } from '@wordpress/block-editor';
 import { ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
@@ -180,14 +179,14 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 	};
 
 	return (
-		<Fragment>
+		<>
 			{ getInspectorControls() }
 			<ServerSideRender
 				block={ name }
 				attributes={ attributes }
 				EmptyResponsePlaceholder={ EmptyPlaceholder }
 			/>
-		</Fragment>
+		</>
 	);
 };
 

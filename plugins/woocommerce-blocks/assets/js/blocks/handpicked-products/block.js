@@ -14,7 +14,7 @@ import {
 	withSpokenMessages,
 	ToggleControl,
 } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
@@ -162,7 +162,7 @@ class ProductsBlock extends Component {
 		}
 
 		return (
-			<Fragment>
+			<>
 				<BlockControls>
 					<Toolbar
 						controls={ [
@@ -187,7 +187,7 @@ class ProductsBlock extends Component {
 						/>
 					</Disabled>
 				) }
-			</Fragment>
+			</>
 		);
 	}
 }

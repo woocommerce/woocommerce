@@ -20,5 +20,6 @@ module.exports = {
 	rules: {
 		'woocommerce/feature-flag': 'off',
 		'react-hooks/exhaustive-deps': 'error',
+		'react/jsx-fragments': [ 'error', 'syntax' ],
 	},
 };
