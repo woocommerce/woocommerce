@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\HistoricalData;
 
 /**
  * Install Class.
@@ -171,7 +170,6 @@ class Install {
 		self::create_tables();
 		self::create_events();
 		self::delete_obsolete_notes();
-		self::create_notes();
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_admin_installing' );
@@ -479,6 +477,7 @@ class Install {
 			'wc-admin-store-notice-giving-feedback',
 			'wc-admin-learn-more-about-product-settings',
 			'wc-admin-onboarding-profiler-reminder',
+			'wc-admin-historical-data',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
@@ -494,13 +493,6 @@ class Install {
 		}
 
 		Notes::delete_notes_with_name( $obsolete_notes_names );
-	}
-
-	/**
-	 * Create notes.
-	 */
-	protected static function create_notes() {
-		HistoricalData::possibly_add_note();
 	}
 
 	/**

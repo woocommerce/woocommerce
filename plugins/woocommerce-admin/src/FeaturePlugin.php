@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\HistoricalData;
 use \Automattic\WooCommerce\Admin\Notes\OrderMilestones;
 use \Automattic\WooCommerce\Admin\Notes\WooSubscriptionsNotes;
 use \Automattic\WooCommerce\Admin\Notes\TrackingOptIn;
@@ -183,7 +182,6 @@ class FeaturePlugin {
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
 		new WooSubscriptionsNotes();
-		new HistoricalData();
 		new OrderMilestones();
 		new TrackingOptIn();
 		new WooCommercePayments();
