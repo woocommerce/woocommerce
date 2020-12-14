@@ -156,6 +156,7 @@
 		"@wordpress/deprecated": "2.9.0",
 		"@wordpress/notices": "2.9.1",
 		"@wordpress/plugins": "^2.23.0",
+		"@wordpress/server-side-render": "^1.19.3",
 		"@wordpress/wordcount": "2.11.0",
 		"classnames": "2.2.6",
 		"compare-versions": "3.6.0",
