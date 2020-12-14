@@ -122,12 +122,26 @@ class CoreMenu {
 	 * @return array
 	 */
 	public static function get_items() {
-		$order_items   = Menu::get_post_type_items( 'shop_order', array( 'parent' => 'woocommerce-orders' ) );
-		$product_items = Menu::get_post_type_items( 'product', array( 'parent' => 'woocommerce-products' ) );
-		$coupon_items  = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'woocommerce-marketing' ) );
-		$setting_items = self::get_setting_items();
-		$wca_items     = array();
-		$wca_pages     = \Automattic\WooCommerce\Admin\PageController::get_instance()->get_pages();
+		$order_items       = Menu::get_post_type_items( 'shop_order', array( 'parent' => 'woocommerce-orders' ) );
+		$product_items     = Menu::get_post_type_items( 'product', array( 'parent' => 'woocommerce-products' ) );
+		$product_tag_items = Menu::get_taxonomy_items(
+			'product_tag',
+			array(
+				'parent' => 'woocommerce-products',
+				'order'  => 30,
+			)
+		);
+		$product_cat_items = Menu::get_taxonomy_items(
+			'product_cat',
+			array(
+				'parent' => 'woocommerce-products',
+				'order'  => 20,
+			)
+		);
+		$coupon_items      = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'woocommerce-marketing' ) );
+		$setting_items     = self::get_setting_items();
+		$wca_items         = array();
+		$wca_pages         = \Automattic\WooCommerce\Admin\PageController::get_instance()->get_pages();
 
 		foreach ( $wca_pages as $page ) {
 			if ( ! isset( $page['nav_args'] ) ) {
@@ -181,7 +195,18 @@ class CoreMenu {
 				$order_items['all'],
 				$order_items['new'],
 				$product_items['all'],
-				$product_items['new'],
+				$product_cat_items['default'],
+				$product_tag_items['default'],
+				array(
+					'id'              => 'woocommerce-product-attributes',
+					'title'           => __( 'Attributes', 'woocommerce-admin' ),
+					'url'             => 'edit.php?post_type=product&page=product_attributes',
+					'capability'      => 'manage_product_terms',
+					'order'           => 40,
+					'parent'          => 'woocommerce-products',
+					'matchExpression' => 'edit.php(?=.*[?|&]page=product_attributes(&|$|#))|edit-tags.php(?=.*[?|&]taxonomy=pa_)(?=.*[?|&]post_type=product(&|$|#))',
+				),
+				array_merge( $product_items['new'], array( 'order' => 50 ) ),
 				$coupon_items['default'],
 				// Marketplace category.
 				array(

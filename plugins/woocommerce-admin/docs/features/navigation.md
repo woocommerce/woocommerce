@@ -75,11 +75,12 @@ Adding an item, much like a category, can be added directly to the menu or to an
 
 In order to show the new navigation in place of the traditional WordPress menu on a given page, the screen ID must be registered to identify a page as supporting the new WooCommerce navigation.
 
-When adding items, the navigation will automatically add support for the screen via the URL or callback provided with an item.  However, custom post types need to be registered with the navigation to work on the custom post type page.
+When adding items, the navigation will automatically add support for the screen via the URL or callback provided with an item.  However, custom post types and taxonomies need to be registered with the navigation to work on the custom post type page.
 
 
 ```php
 \Automattic\WooCommerce\Admin\Features\Navigation\Screen::register_post_type( 'my-custom-post-type' );
+\Automattic\WooCommerce\Admin\Features\Navigation\Screen::register_taxonomy( 'my-custom-taxonomy' );
 ```
 
 You can also manually add a screen without registering an item.

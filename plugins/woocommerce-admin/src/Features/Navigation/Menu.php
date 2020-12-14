@@ -413,6 +413,56 @@ class Menu {
 	}
 
 	/**
+	 * Get menu item templates for a given taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy to add.
+	 * @param array  $menu_args Arguments merged with the returned menu items.
+	 * @return array
+	 */
+	public static function get_taxonomy_items( $taxonomy, $menu_args = array() ) {
+		$taxonomy_object = get_taxonomy( $taxonomy );
+
+		if ( ! $taxonomy_object || ! $taxonomy_object->show_in_menu ) {
+			return;
+		}
+
+		$parent             = isset( $menu_args['parent'] ) ? $menu_args['parent'] . '-' : '';
+		$product_type_query = ! empty( $taxonomy_object->object_type )
+			? "&post_type={$taxonomy_object->object_type[0]}"
+			: '';
+		$match_expression   = 'term.php';                               // Match term.php pages.
+		$match_expression  .= "(?=.*[?|&]taxonomy=${taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
+		$match_expression  .= '|';                                      // Or.
+		$match_expression  .= 'edit-tags.php';                          // Match edit-tags.php pages.
+		$match_expression  .= "(?=.*[?|&]taxonomy=${taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
+
+		return array(
+			'default' => array_merge(
+				array(
+					'title'           => esc_attr( $taxonomy_object->labels->menu_name ),
+					'capability'      => $taxonomy_object->cap->edit_terms,
+					'id'              => $parent . $taxonomy,
+					'url'             => "edit-tags.php?taxonomy={$taxonomy}{$product_type_query}",
+					'matchExpression' => $match_expression,
+				),
+				$menu_args
+			),
+			'all'     => array_merge(
+				array(
+					'title'           => esc_attr( $taxonomy_object->labels->all_items ),
+					'capability'      => $taxonomy_object->cap->edit_terms,
+					'id'              => "{$parent}{$taxonomy}-all-items",
+					'url'             => "edit-tags.php?taxonomy={$taxonomy}{$product_type_query}",
+					'matchExpression' => $match_expression,
+					'order'           => 10,
+				),
+				$menu_args
+			),
+
+		);
+	}
+
+	/**
 	 * Add core menu items.
 	 */
 	public function add_core_items() {
