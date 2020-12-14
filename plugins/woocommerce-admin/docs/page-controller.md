@@ -138,7 +138,7 @@ Alternatively, register a regular page with the controller.
 
 ```php
 function add_extension_register_page() {
-    if ( ! function_exists( 'wc_admin_register_page' ) {
+    if ( ! function_exists( 'wc_admin_register_page' ) ) {
         return;
 	}
 
