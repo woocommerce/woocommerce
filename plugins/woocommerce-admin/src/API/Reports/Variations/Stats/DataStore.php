@@ -34,7 +34,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'variatons_stats';
+	protected $context = 'variations_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
