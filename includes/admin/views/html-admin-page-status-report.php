@@ -125,17 +125,23 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Action Scheduler package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
+				$version = null;
 				if ( class_exists( 'ActionScheduler_Versions' ) && class_exists( 'ActionScheduler' ) ) {
 					$version = ActionScheduler_Versions::instance()->latest_version();
 					$path    = ActionScheduler::plugin_path( '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				} else {
-					$version = null;
 				}
 
 				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span>' . esc_html( $version );
+					echo ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+					echo esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark> ';
 				}
 				?>
 			</td>
