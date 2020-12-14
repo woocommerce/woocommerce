@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	Placeholder,
@@ -152,7 +151,7 @@ export default function ( { attributes, setAttributes } ) {
 	);
 
 	return (
-		<Fragment>
+		<>
 			{ PRODUCT_COUNT === 0 ? (
 				noProductsPlaceholder()
 			) : (
@@ -170,6 +169,6 @@ export default function ( { attributes, setAttributes } ) {
 					</Disabled>
 				</div>
 			) }
-		</Fragment>
+		</>
 	);
 }

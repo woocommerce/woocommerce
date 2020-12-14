@@ -11,7 +11,6 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import { SearchListItem } from '@woocommerce/components';
-import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import { Icon, review } from '@woocommerce/icons';
@@ -175,7 +174,7 @@ const ReviewsByCategoryEditor = ( {
 	}
 
 	return (
-		<Fragment>
+		<>
 			{ getBlockControls( editMode, setAttributes ) }
 			{ getInspectorControls() }
 			<EditorContainerBlock
@@ -192,7 +191,7 @@ const ReviewsByCategoryEditor = ( {
 				) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
-		</Fragment>
+		</>
 	);
 };
 

@@ -12,7 +12,7 @@ import {
 	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { HAS_TAGS } from '@woocommerce/block-settings';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
@@ -260,51 +260,42 @@ class ProductsByTagBlock extends Component {
 			return gridBlockPreview;
 		}
 
-		return (
-			<Fragment>
-				{ HAS_TAGS ? (
-					<Fragment>
-						<BlockControls>
-							<Toolbar
-								controls={ [
-									{
-										icon: 'edit',
-										title: __( 'Edit' ),
-										onClick: () =>
-											isEditing
-												? this.stopEditing()
-												: this.startEditing(),
-										isActive: isEditing,
-									},
-								] }
-							/>
-						</BlockControls>
-						{ this.getInspectorControls() }
-						{ isEditing
-							? this.renderEditMode()
-							: this.renderViewMode() }
-					</Fragment>
-				) : (
-					<Placeholder
-						icon={
-							<Icon
-								icon={ more }
-								className="block-editor-block-icon"
-							/>
-						}
-						label={ __(
-							'Products by Tag',
-							'woo-gutenberg-products-block'
-						) }
-						className="wc-block-products-grid wc-block-product-tag"
-					>
-						{ __(
-							"This block displays products from selected tags. In order to preview this you'll first need to create a product and assign it some tags.",
-							'woo-gutenberg-products-block'
-						) }
-					</Placeholder>
+		return HAS_TAGS ? (
+			<>
+				<BlockControls>
+					<Toolbar
+						controls={ [
+							{
+								icon: 'edit',
+								title: __( 'Edit' ),
+								onClick: () =>
+									isEditing
+										? this.stopEditing()
+										: this.startEditing(),
+								isActive: isEditing,
+							},
+						] }
+					/>
+				</BlockControls>
+				{ this.getInspectorControls() }
+				{ isEditing ? this.renderEditMode() : this.renderViewMode() }
+			</>
+		) : (
+			<Placeholder
+				icon={
+					<Icon icon={ more } className="block-editor-block-icon" />
+				}
+				label={ __(
+					'Products by Tag',
+					'woo-gutenberg-products-block'
 				) }
-			</Fragment>
+				className="wc-block-products-grid wc-block-product-tag"
+			>
+				{ __(
+					"This block displays products from selected tags. In order to preview this you'll first need to create a product and assign it some tags.",
+					'woo-gutenberg-products-block'
+				) }
+			</Placeholder>
 		);
 	}
 }

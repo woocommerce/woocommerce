@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { clamp, isNaN } from 'lodash';
-import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { RangeControl, ToggleControl } from '@wordpress/components';
 import {
@@ -29,7 +28,7 @@ const GridLayoutControl = ( {
 	alignButtons,
 } ) => {
 	return (
-		<Fragment>
+		<>
 			<RangeControl
 				label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 				value={ columns }
@@ -75,7 +74,7 @@ const GridLayoutControl = ( {
 					setAttributes( { alignButtons: ! alignButtons } )
 				}
 			/>
-		</Fragment>
+		</>
 	);
 };
 

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { _n, sprintf } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import Label from '@woocommerce/base-components/label';
 
 /**
@@ -14,7 +13,7 @@ import Label from '@woocommerce/base-components/label';
  */
 const AttributeFilterLabel = ( { name, count } ) => {
 	return (
-		<Fragment>
+		<>
 			{ name }
 			{ Number.isFinite( count ) && (
 				<Label
@@ -35,7 +34,7 @@ const AttributeFilterLabel = ( { name, count } ) => {
 					} }
 				/>
 			) }
-		</Fragment>
+		</>
 	);
 };
 

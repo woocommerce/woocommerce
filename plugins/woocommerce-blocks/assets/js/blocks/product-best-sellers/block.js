@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { Disabled, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { ServerSideRender } from '@wordpress/editor';
@@ -82,7 +82,7 @@ class ProductBestSellersBlock extends Component {
 		}
 
 		return (
-			<Fragment>
+			<>
 				{ this.getInspectorControls() }
 				<Disabled>
 					<ServerSideRender
@@ -90,7 +90,7 @@ class ProductBestSellersBlock extends Component {
 						attributes={ attributes }
 					/>
 				</Disabled>
-			</Fragment>
+			</>
 		);
 	}
 }
