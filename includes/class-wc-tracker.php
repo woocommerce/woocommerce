@@ -565,7 +565,9 @@ class WC_Tracker {
 				    ) AS payment_method
 				FROM {$wpdb->prefix}posts AS orders
 				LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-				WHERE orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+				WHERE
+					orders.post_type = 'shop_order' AND
+					orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
 				GROUP BY orders.ID
 			) AS order_gateway
 			WHERE payment_method IS NOT NULL
@@ -575,7 +577,7 @@ class WC_Tracker {
 		);
 
 		foreach ( $orders_by_payment_method as $orders_count ) {
-			$method                                  = 'gateway_' . $orders_count->payment_method;
+			$method                                    = 'gateway_' . $orders_count->payment_method;
 			$order_counts_by_payment_method[ $method ] = $orders_count->orders_count;
 		}
 
