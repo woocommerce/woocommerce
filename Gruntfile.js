@@ -143,7 +143,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/**/*.js',
 					'!<%= dirs.js %>/**/*.min.js'
 				],
-				tasks: ['eslint','uglify']
+				tasks: ['eslint','newer:uglify']
 			}
 		},
 
@@ -193,6 +193,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-newer' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [

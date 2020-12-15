@@ -69,6 +69,7 @@
     "grunt-contrib-cssmin": "3.0.0",
     "grunt-contrib-uglify": "4.0.1",
     "grunt-contrib-watch": "1.1.0",
+    "grunt-newer": "^1.3.0",
     "grunt-phpcs": "0.4.0",
     "grunt-postcss": "0.9.0",
     "grunt-rtlcss": "2.0.2",
