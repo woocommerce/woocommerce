@@ -532,10 +532,17 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td>
 				<?php
 				if ( $environment['soapclient_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
 				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
 					/* Translators: %s classname and link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' ) . '</mark>';
+					echo sprintf( esc_html__( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
+					echo '</mark>';
 				}
 				?>
 			</td>
