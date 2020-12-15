@@ -383,22 +383,29 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( version_compare( $environment['php_version'], '7.2', '>=' ) ) {
-					echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>';
+				if ( false && version_compare( $environment['php_version'], '7.2', '>=' ) ) {
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+					echo esc_html( $environment['php_version'] ) . '</mark>';
 				} else {
 					$update_link = ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version', 'woocommerce' ) . '</a>';
 					$class       = 'error';
-
+					$label       = __( 'No', 'woocommerce' );
 					if ( version_compare( $environment['php_version'], '5.4', '<' ) ) {
-						$notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'WooCommerce will run under this version of PHP, however, some features such as geolocation are not compatible. Support for this version will be dropped in the next major release. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
+						$notice = __( 'WooCommerce will run under this version of PHP, however, some features such as geolocation are not compatible. Support for this version will be dropped in the next major release. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 					} elseif ( version_compare( $environment['php_version'], '5.6', '<' ) ) {
-						$notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'WooCommerce will run under this version of PHP, however, it has reached end of life. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
+						$notice = __( 'WooCommerce will run under this version of PHP, however, it has reached end of life. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 					} elseif ( version_compare( $environment['php_version'], '7.2', '<' ) ) {
 						$notice = __( 'We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 						$class  = 'recommendation';
+						$label  = __( 'Recommendation', 'woocommerce' );
 					}
-
-					echo '<mark class="' . esc_attr( $class ) . '">' . esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ) . '</mark>';
+					echo '<mark class="' . esc_attr( $class ) . '"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html( $label ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html( $label ) . '</span></span> - ';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span>';
+					echo esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ) . '</mark>';
 				}
 				?>
 			</td>
