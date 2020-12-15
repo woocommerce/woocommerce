@@ -349,11 +349,19 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td data-export-label="External object cache"><?php esc_html_e( 'External object cache', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is using an external object cache.', 'woocommerce' ) ); ?></td>
 			<td>
-				<?php if ( $environment['external_object_cache'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
-				<?php else : ?>
-					<mark class="no">&ndash;</mark>
-				<?php endif; ?>
+				<?php
+				if ( $environment['external_object_cache'] ) :
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
+				else :
+					echo '<mark class="no">';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span>' . esc_html__( '&ndash;', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
+				endif;
+				?>
 			</td>
 		</tr>
 	</tbody>
