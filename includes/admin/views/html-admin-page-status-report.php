@@ -654,25 +654,27 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 		</tr>
 		<?php
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
-		foreach ( $rows as $row ) {
-			if ( ! empty( $row['success'] ) ) {
-				$css_class = 'yes';
-				$icon      = '<span class="dashicons dashicons-yes"></span>';
-			} else {
-				$css_class = 'error';
-				$icon      = '<span class="dashicons dashicons-no-alt"></span>';
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				if ( ! empty( $row['success'] ) ) {
+					$css_class = 'yes';
+					$icon      = '<span class="dashicons dashicons-yes"></span>';
+				} else {
+					$css_class = 'error';
+					$icon      = '<span class="dashicons dashicons-no-alt"></span>';
+				}
+				?>
+				<tr>
+					<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
+					<td class="help"><?php echo esc_html( isset( $row['help'] ) ? $row['help'] : '' ); ?></td>
+					<td>
+						<mark class="<?php echo esc_attr( $css_class ); ?>">
+							<?php echo wp_kses_post( $icon ); ?> <?php echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' ); ?>
+						</mark>
+					</td>
+				</tr>
+				<?php
 			}
-			?>
-			<tr>
-				<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
-				<td class="help"><?php echo esc_html( isset( $row['help'] ) ? $row['help'] : '' ); ?></td>
-				<td>
-					<mark class="<?php echo esc_attr( $css_class ); ?>">
-						<?php echo wp_kses_post( $icon ); ?> <?php echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' ); ?>
-					</mark>
-				</td>
-			</tr>
-			<?php
 		}
 		?>
 	</tbody>
