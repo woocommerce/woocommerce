@@ -434,7 +434,21 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php esc_html_e( 'SUHOSIN installed', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td><?php echo $environment['suhosin_installed'] ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
+				<td>
+					<?php
+					if ( $environment['suhosin_installed'] ) :
+						echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+						echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+						echo '</mark> ';
+					else :
+						echo '<mark class="no">';
+						echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+						echo '<span class="no-text" aria-hidden="true"><span>' . esc_html__( '&ndash;', 'woocommerce' ) . '</span></span>';
+						echo '</mark> ';
+					endif;
+					?>
+			</td>
 			</tr>
 		<?php endif; ?>
 
