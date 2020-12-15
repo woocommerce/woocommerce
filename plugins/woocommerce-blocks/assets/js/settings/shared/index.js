@@ -23,13 +23,13 @@ import '../../filters/exclude-draft-status-from-analytics';
  * For the purpose of these comparisons all pre-release versions are normalized
  * to `rc`.
  *
- * @param {string} version Version to compare.
  * @param {string} setting Setting name (e.g. wpVersion or wcVersion).
+ * @param {string} version Version to compare.
  * @param {string} operator Comparison operator.
  */
 const compareVersionSettingIgnorePrerelease = (
-	version,
 	setting,
+	version,
 	operator
 ) => {
 	let replacement = getSetting( setting, '' ).replace(
@@ -39,21 +39,41 @@ const compareVersionSettingIgnorePrerelease = (
 	replacement = replacement.endsWith( '.' )
 		? replacement.substring( 0, replacement.length - 1 )
 		: replacement;
-	return compareVersions.compare( version, replacement, operator );
+	return compareVersions.compare( replacement, version, operator );
 };
 
-export const compareWithWpVersion = ( version, operator ) => {
+/**
+ * Compare the current WP version with the provided `version` param using the
+ * `operator`.
+ *
+ * For example `isWpVersion( '5.6', '<=' )` returns true if the site WP version
+ * is smaller or equal than `5.6` .
+ *
+ * @param {string} version Version to use to compare against the current wpVersion.
+ * @param {string} [operator='='] Operator to use in the comparison.
+ */
+export const isWpVersion = ( version, operator = '=' ) => {
 	return compareVersionSettingIgnorePrerelease(
-		version,
 		'wpVersion',
+		version,
 		operator
 	);
 };
 
-export const compareWithWooVersion = ( version, operator ) => {
+/**
+ * Compare the current WC version with the provided `version` param using the
+ * `operator`.
+ *
+ * For example `isWcVersion( '4.9.0', '<=' )` returns true if the site WC version
+ * is smaller or equal than `4.9`.
+ *
+ * @param {string} version Version to use to compare against the current wcVersion.
+ * @param {string} [operator='='] Operator to use in the comparison.
+ */
+export const isWcVersion = ( version, operator = '=' ) => {
 	return compareVersionSettingIgnorePrerelease(
-		version,
 		'wcVersion',
+		version,
 		operator
 	);
 };

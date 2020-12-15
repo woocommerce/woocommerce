@@ -27,7 +27,7 @@ import {
 	CHECKOUT_ALLOWS_GUEST,
 	CHECKOUT_ALLOWS_SIGNUP,
 } from '@woocommerce/block-settings';
-import { compareWithWooVersion, getSetting } from '@woocommerce/settings';
+import { isWcVersion, getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -88,7 +88,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 	// uses updated my-account/lost-password screen from 4.7+ for
 	// setting initial password.
 	const allowCreateAccount =
-		attributes.allowCreateAccount && compareWithWooVersion( '4.7.0', '<=' );
+		attributes.allowCreateAccount && isWcVersion( '4.7.0', '>=' );
 
 	useEffect( () => {
 		if ( hasErrorsToDisplay ) {
