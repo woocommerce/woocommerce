@@ -2,6 +2,7 @@
 
 ## Added
 - Merchant Order Status Filter tests
+- Merchant Order Refund tests
 
 ## Fixed
 
