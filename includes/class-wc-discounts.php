@@ -631,7 +631,14 @@ class WC_Discounts {
 			$data_store  = $coupon->get_data_store();
 			$usage_count = $data_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
-				throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
+				if ( $data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $user_id ) ) > 0 ) {
+					$error_message = $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK );
+					$error_code    = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK;
+				} else {
+					$error_message = $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+					$error_code    = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED;
+				}
+				throw new Exception( $error_message, $error_code );
 			}
 		}
 
