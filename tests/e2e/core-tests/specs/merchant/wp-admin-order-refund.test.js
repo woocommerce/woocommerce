@@ -28,9 +28,9 @@ const runRefundOrderTest = () => {
 			await addProductToOrder(orderId, simpleProductName);
 
 			// Get the currency symbol for the store's selected currency
-			await page.waitForSelector('.woocommerce-Price-currencySymbol')
-			let currencyElement = await page.$('.woocommerce-Price-currencySymbol')
-			currencySymbol = await page.evaluate(el => el.textContent, currencyElement)
+			await page.waitForSelector('.woocommerce-Price-currencySymbol');
+			let currencyElement = await page.$('.woocommerce-Price-currencySymbol');
+			currencySymbol = await page.evaluate(el => el.textContent, currencyElement);
 
 			// Update order status to `Completed` so we can issue a refund
 			await StoreOwnerFlow.updateOrderStatus(orderId, 'Completed');
