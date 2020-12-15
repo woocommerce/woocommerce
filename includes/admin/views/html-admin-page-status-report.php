@@ -383,7 +383,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( false && version_compare( $environment['php_version'], '7.2', '>=' ) ) {
+				if ( version_compare( $environment['php_version'], '7.2', '>=' ) ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
 					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
 					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
