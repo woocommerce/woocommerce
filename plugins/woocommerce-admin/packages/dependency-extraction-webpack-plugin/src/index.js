@@ -19,16 +19,32 @@ function camelCaseDash( string ) {
 
 const wooRequestToExternal = ( request ) => {
 	if ( packages.includes( request ) ) {
-		return [
-			'wc',
-			camelCaseDash( request.substring( WOOCOMMERCE_NAMESPACE.length ) ),
-		];
+		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
+		const irregularExternalMap = {
+			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
+		};
+
+		if ( irregularExternalMap[ handle ] ) {
+			return irregularExternalMap[ handle ];
+		}
+
+		return [ 'wc', camelCaseDash( handle ) ];
 	}
 };
 
 const wooRequestToHandle = ( request ) => {
 	if ( packages.includes( request ) ) {
-		return 'wc-' + request.substring( WOOCOMMERCE_NAMESPACE.length );
+		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
+		const irregularHandleMap = {
+			data: 'wc-store-data',
+			'csv-export': 'wc-csv',
+		};
+
+		if ( irregularHandleMap[ handle ] ) {
+			return irregularHandleMap[ handle ];
+		}
+
+		return 'wc-' + handle;
 	}
 };
 
