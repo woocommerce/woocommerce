@@ -56,6 +56,6 @@
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
   },
   "bin": {
-    "wc-scripts": "bin/wc-scripts.js"
+    "wc-e2e": "bin/wc-e2e.sh"
   }
 }
