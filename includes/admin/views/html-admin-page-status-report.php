@@ -616,10 +616,17 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td>
 				<?php
 				if ( $environment['remote_post_successful'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
 				} else {
-					/* Translators: %s: function name. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+					/* Translators: %s classname and link. */
+					echo sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] );
+					echo '</mark>';
 				}
 				?>
 			</td>
