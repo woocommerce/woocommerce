@@ -45,68 +45,17 @@ module.exports = function( grunt ) {
 					comments : /@license|@preserve|^!/
 				}
 			},
-			admin: {
+			js_assets: {
 				files: [{
 					expand: true,
-					cwd: '<%= dirs.js %>/admin/',
+					cwd: '<%= dirs.js %>/',
 					src: [
-						'*.js',
-						'!*.min.js'
+						'**/*.js',
+						'!**/*.min.js'
 					],
-					dest: '<%= dirs.js %>/admin/',
+					extDot: 'last',
+					dest: '<%= dirs.js %>',
 					ext: '.min.js'
-				}]
-			},
-			vendor: {
-				files: {
-					'<%= dirs.js %>/accounting/accounting.min.js': ['<%= dirs.js %>/accounting/accounting.js'],
-					'<%= dirs.js %>/jquery-blockui/jquery.blockUI.min.js': ['<%= dirs.js %>/jquery-blockui/jquery.blockUI.js'],
-					'<%= dirs.js %>/jquery-cookie/jquery.cookie.min.js': ['<%= dirs.js %>/jquery-cookie/jquery.cookie.js'],
-					'<%= dirs.js %>/js-cookie/js.cookie.min.js': ['<%= dirs.js %>/js-cookie/js.cookie.js'],
-					'<%= dirs.js %>/jquery-flot/jquery.flot.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.js'],
-					'<%= dirs.js %>/jquery-flot/jquery.flot.pie.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.pie.js'],
-					'<%= dirs.js %>/jquery-flot/jquery.flot.resize.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.resize.js'],
-					'<%= dirs.js %>/jquery-flot/jquery.flot.stack.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.stack.js'],
-					'<%= dirs.js %>/jquery-flot/jquery.flot.time.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.time.js'],
-					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
-					'<%= dirs.js %>/jquery-qrcode/jquery.qrcode.min.js': ['<%= dirs.js %>/jquery-qrcode/jquery.qrcode.js'],
-					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': [
-						'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'
-					],
-					'<%= dirs.js %>/jquery-tiptip/jquery.tipTip.min.js': ['<%= dirs.js %>/jquery-tiptip/jquery.tipTip.js'],
-					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': [
-						'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'
-					],
-					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.js'],
-					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.js'],
-					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js'],
-					'<%= dirs.js %>/zoom/jquery.zoom.min.js': ['<%= dirs.js %>/zoom/jquery.zoom.js'],
-					'<%= dirs.js %>/photoswipe/photoswipe.min.js': ['<%= dirs.js %>/photoswipe/photoswipe.js'],
-					'<%= dirs.js %>/photoswipe/photoswipe-ui-default.min.js': ['<%= dirs.js %>/photoswipe/photoswipe-ui-default.js'],
-					'<%= dirs.js %>/round/round.min.js': ['<%= dirs.js %>/round/round.js'],
-					'<%= dirs.js %>/select2/select2.full.min.js': ['<%= dirs.js %>/select2/select2.full.js'],
-					'<%= dirs.js %>/select2/select2.min.js': ['<%= dirs.js %>/select2/select2.js'],
-					'<%= dirs.js %>/selectWoo/selectWoo.full.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.full.js'],
-					'<%= dirs.js %>/selectWoo/selectWoo.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.js'],
-					'<%= dirs.js %>/stupidtable/stupidtable.min.js': ['<%= dirs.js %>/stupidtable/stupidtable.js'],
-					'<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.min.js': ['<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.js']
-				}
-			},
-			frontend: {
-				files: [{
-					expand: true,
-					cwd: '<%= dirs.js %>/frontend/',
-					src: [
-						'*.js',
-						'!*.min.js'
-					],
-					dest: '<%= dirs.js %>/frontend/',
-					ext: '.min.js'
-				}]
-			},
-			flexslider: {
-				files: [{
-					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js']
 				}]
 			}
 		},
@@ -191,10 +140,8 @@ module.exports = function( grunt ) {
 			js: {
 				files: [
 					'GruntFile.js',
-					'<%= dirs.js %>/admin/*js',
-					'<%= dirs.js %>/frontend/*js',
-					'!<%= dirs.js %>/admin/*.min.js',
-					'!<%= dirs.js %>/frontend/*.min.js'
+					'<%= dirs.js %>/**/*.js',
+					'!<%= dirs.js %>/**/*.min.js'
 				],
 				tasks: ['eslint','uglify']
 			}
@@ -255,8 +202,7 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'js', [
 		'eslint',
-		'uglify:admin',
-		'uglify:frontend'
+		'uglify:js_assets'
 	]);
 
 	grunt.registerTask( 'css', [
@@ -273,9 +219,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'e2e-build', [
-		'uglify:admin',
-		'uglify:frontend',
-		'uglify:flexslider',
+		'uglify:js_assets',
 		'css'
 	]);
 
