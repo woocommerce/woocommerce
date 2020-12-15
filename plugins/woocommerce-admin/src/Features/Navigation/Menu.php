@@ -651,14 +651,12 @@ class Menu {
 	 * @return array
 	 */
 	public function enqueue_data( $menu ) {
-		global $submenu, $parent_file, $typenow, $self;
-
 		$data = array(
-			'menuItems' => self::get_prepared_menu_item_data(),
+			'menuItems'     => self::get_prepared_menu_item_data(),
+			'rootBackUrl'   => apply_filters( 'woocommerce_navigation_root_back_url', get_dashboard_url() ),
+			'rootBackLabel' => apply_filters( 'woocommerce_navigation_root_back_label', __( 'WordPress Dashboard', 'woocommerce-admin' ) ),
 		);
 
-		$paul = wp_add_inline_script( WC_ADMIN_APP, 'window.wcNavigation = ' . wp_json_encode( $data ), 'before' );
-
-		return $menu;
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcNavigation = ' . wp_json_encode( $data ), 'before' );
 	}
 }
