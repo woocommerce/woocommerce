@@ -769,15 +769,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 					</td>
 				</tr>
 			<?php } ?>
+			<tr><td><hr></td><td></td></tr>
 
 			<?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
 				<tr>
 					<td><?php echo esc_html( $table ); ?></td>
 					<td class="help">&nbsp;</td>
-					<td>
+					<td> 
 						<?php
+							echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+							echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+							echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
 							/* Translators: %1$f: Table size, %2$f: Index size, %3$s Engine. */
 							printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB + Engine %3$s', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ), esc_html( $table_data['engine'] ) );
+							echo '</mark> ';
 						?>
 					</td>
 				</tr>
