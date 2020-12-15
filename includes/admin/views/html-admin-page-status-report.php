@@ -656,21 +656,26 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
 		if ( is_array( $rows ) ) {
 			foreach ( $rows as $row ) {
-				if ( ! empty( $row['success'] ) ) {
-					$css_class = 'yes';
-					$icon      = '<span class="dashicons dashicons-yes"></span>';
-				} else {
-					$css_class = 'error';
-					$icon      = '<span class="dashicons dashicons-no-alt"></span>';
-				}
 				?>
 				<tr>
 					<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
 					<td class="help"><?php echo esc_html( isset( $row['help'] ) ? $row['help'] : '' ); ?></td>
 					<td>
-						<mark class="<?php echo esc_attr( $css_class ); ?>">
-							<?php echo wp_kses_post( $icon ); ?> <?php echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' ); ?>
-						</mark>
+						<?php
+						if ( ! empty( $row['success'] ) ) {
+							echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+							echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+							echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+							echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' );
+							echo '</mark> ';
+						} else {
+							echo '<mark class="error"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span>';
+							echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+							echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+							echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' );
+							echo '</mark>';
+						}
+						?>
 					</td>
 				</tr>
 				<?php
