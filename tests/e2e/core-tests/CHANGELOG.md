@@ -5,6 +5,7 @@
 - View Single Order test
 - Update Order Status test
 - Update Order Details test
+- Merchant Order Status Filter tests
 
 ## Fixed
 

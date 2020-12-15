@@ -220,7 +220,7 @@ const createVariableProduct = async () => {
 	// Go to "add product" page
 	await StoreOwnerFlow.openNewProduct();
 
-	// Make sure we're on the add order page
+	// Make sure we're on the add product page
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 	// Set product data
@@ -344,9 +344,36 @@ const createVariableProduct = async () => {
 	return variablePostIdValue;
 };
 
+/**
+ * Create a basic order with the provided order status.
+ *
+ * @param orderStatus Status of the new order. Defaults to `Pending payment`.
+ */
+const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
+	// Go to 'Add new order' page
+	await StoreOwnerFlow.openNewOrder();
+
+	// Make sure we're on the add order page
+	await expect( page.title() ).resolves.toMatch( 'Add new order' );
+
+	// Set order status
+	await expect( page ).toSelect( '#order_status', orderStatus );
+
+	// Wait for auto save
+	await page.waitFor( 2000 );
+
+	// Create the order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '#message' );
+
+	// Verify
+	await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createSimpleOrder,
 	verifyAndPublish,
 };

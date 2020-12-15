@@ -406,8 +406,9 @@ class WC_Post_Data {
 					$customer->save();
 				}
 
-				// Delete order count meta.
+				// Delete order count and last order meta.
 				delete_user_meta( $customer_id, '_order_count' );
+				delete_user_meta( $customer_id, '_last_order' );
 			}
 
 			// Clean up items.
