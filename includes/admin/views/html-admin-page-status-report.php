@@ -279,10 +279,17 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 			<td>
 				<?php
 				if ( $environment['wp_memory_limit'] < 67108864 ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
 					/* Translators: %1$s: Memory limit, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
-					echo '<mark class="yes">' . esc_html( size_format( $environment['wp_memory_limit'] ) ) . '</mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Current WordPress memory limit', 'woocommerce' ) . '</span>' . esc_html( size_format( $environment['wp_memory_limit'] ) );
+					echo '</mark> ';
 				}
 				?>
 			</td>
