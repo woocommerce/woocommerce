@@ -981,7 +981,21 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="Force SSL"><?php esc_html_e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['force_ssl'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td>
+			<?php
+			if ( $settings['force_ssl'] ) :
+				echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+				echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+				echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+				echo '</mark> ';
+			else :
+				echo '<mark class="no">';
+				echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+				echo '<span class="no-text" aria-hidden="true"><span>' . esc_html__( '&ndash;', 'woocommerce' ) . '</span></span>';
+				echo '</mark> ';
+			endif;
+			?>
+		</td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency"><?php esc_html_e( 'Currency', 'woocommerce' ); ?></td>
