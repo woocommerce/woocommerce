@@ -1046,7 +1046,9 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				foreach ( $settings['product_visibility_terms'] as $slug => $name ) {
 					$display_terms[] = strtolower( $name ) . ' (' . $slug . ')';
 				}
-				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+				if ( ! empty( $display_terms ) ) {
+					echo '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $display_terms ) ) . '</li></ul>';
+				}
 				?>
 			</td>
 		</tr>
