@@ -1141,7 +1141,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				<?php
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
 					/* translators: 1: current version. 2: latest version */
-					echo esc_html( sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $theme['version'], $theme['version_latest'] ) );
+					echo '<mark class="error"><strong>' . esc_html( sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $theme['version'], $theme['version_latest'] ) ) . '</strong></mark>';
 				} else {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
 					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
