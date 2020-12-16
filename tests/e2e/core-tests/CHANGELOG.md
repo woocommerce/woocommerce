@@ -2,6 +2,7 @@
 
 ## Added
 - Merchant Order Status Filter tests
+- Merchant Settings Add Shipping Zones
 
 ## Fixed
 

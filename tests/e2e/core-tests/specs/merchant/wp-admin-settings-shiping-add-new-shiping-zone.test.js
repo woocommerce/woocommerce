@@ -15,17 +15,19 @@ const {
 	describe,
 	afterEach,
 } = require( '@jest/globals' );
+const config = require( 'config' );
 
 const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
-		const zone_name = `test zone name`
+		const zone_name = config.get( 'settings.shipping.zonename');
 
 		it('Add new shipping zone', async () => {
 
-			const zone_name_input_field = '#zone_name'
-			const zone_location_dropdown = '#zone_locations'
-			const zone_location = '     Belgrade, Serbia'
-			const shipping_method = 'Flat rate'
+			const zone_name_input_field = '#zone_name';
+			const zone_location_dropdown = '#zone_locations';
+			const zone_location = config.get( 'settings.shipping.zoneregions');
+			//
+			const shipping_method = config.get( 'settings.shipping.shippingmethod');
 
 			// Go to general settings page
 			await StoreOwnerFlow.openSettings('shipping');
@@ -43,10 +45,8 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toFill(zone_name_input_field, zone_name);
 
 			// Set zone regions
-			await expect(page).toSelect(zone_location_dropdown, zone_location);
+			await expect(page).toSelect(zone_location_dropdown, "   " + zone_location);
 
-
-			debugger;
 			// Open shipping method pop up
 			await expect(page).toClick('button.button.wc-shipping-zone-add-method');
 
@@ -65,7 +65,7 @@ const runAddNewShippingZoneTest = () => {
 			// Verify that settings have been saved
 			await Promise.all([
 				verifyValueOfInputField(zone_name_input_field, zone_name),
-				expect(page).toMatchElement('li.select2-selection__choice', {text: 'Belgrade, Serbia'}),
+				expect(page).toMatchElement('li.select2-selection__choice', {text: zone_name}),
 				expect(page).toMatchElement('a.wc-shipping-zone-method-settings', {text: shipping_method})
 
 			]);
@@ -80,8 +80,7 @@ const runAddNewShippingZoneTest = () => {
 			await Promise.all([
 				expect(page).toMatchElement('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-name', {text: zone_name}),
 				expect(page).toMatchElement('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-methods', {text: shipping_method}),
-				expect(page).toMatchElement('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-region', {text: 'Belgrade'}),
-
+				expect(page).toMatchElement('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-region', {text: zone_location}),
 			]);
 		});
 
@@ -91,8 +90,8 @@ const runAddNewShippingZoneTest = () => {
 			// Go to general settings page
 			await StoreOwnerFlow.openSettings('shipping');
 
-			// Hover over shipping zone
-			page.hover('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-name', {text: zone_name});
+			// Click on sort button so delete button is displayed
+			page.click('tbody.wc-shipping-zone-rows tr td.wc-shipping-zone-sort');
 
 			// Wait until delete button is displayed
 			await page.waitForSelector('a.wc-shipping-zone-delete',{visible:true});

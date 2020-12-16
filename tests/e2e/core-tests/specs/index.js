@@ -47,6 +47,7 @@ const runMerchantTests = () => {
 	runProductSettingsTest();
 	runTaxSettingsTest();
 	runOrderStatusFiltersTest();
+	runAddNewShippingZoneTest();
 }
 
 module.exports = {
