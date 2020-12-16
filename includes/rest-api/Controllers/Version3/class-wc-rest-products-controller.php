@@ -517,6 +517,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				$product->set_manage_stock( $request['manage_stock'] );
 			}
 
+			// Low stock threshold.
+			if ( isset( $request['low_stock_amount'] ) ) {
+				$product->set_low_stock_amount( $request['low_stock_amount'] );
+			}
+
 			// Backorders.
 			if ( isset( $request['backorders'] ) ) {
 				$product->set_backorders( $request['backorders'] );
@@ -934,6 +939,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 				),
+				'low_stock_amount'        => array(
+					'description' => __( 'Low stock threshold.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+				),
 				'backorders'            => array(
 					'description' => __( 'If managing stock, this controls if backorders are allowed.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1331,11 +1341,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	protected function get_product_data( $product, $context = 'view' ) {
 		$data = parent::get_product_data( $product, $context );
 
-		// Replace in_stock with stock_status.
+		// Replace in_stock with stock_status and add low_stock_amount data.
 		$pos             = array_search( 'in_stock', array_keys( $data ), true );
 		$array_section_1 = array_slice( $data, 0, $pos, true );
 		$array_section_2 = array_slice( $data, $pos + 1, null, true );
+		$new_data        = array(
+			'stock_status'     => $product->get_stock_status( $context ),
+			'low_stock_amount' => $product->get_low_stock_amount( $context ),
+		);
 
-		return $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
+		return $array_section_1 + $new_data + $array_section_2;
 	}
 }
