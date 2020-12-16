@@ -1206,7 +1206,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 					/* translators: 1: theme author_url. */
 					echo wp_kses_post( sprintf( __( '<a href="%1$s" target="_blank">%1$s</a>', 'woocommerce' ), $theme['parent_author_url'] ) );
 					?>
-				</td>
+					</td>
 			</tr>
 		<?php endif ?>
 		<tr>
@@ -1215,9 +1215,16 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td>
 				<?php
 				if ( ! $theme['has_woocommerce_support'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not declared', 'woocommerce' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+					echo esc_html__( 'Not declared', 'woocommerce' );
+					echo '</mark>';
 				} else {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
 				}
 				?>
 			</td>
