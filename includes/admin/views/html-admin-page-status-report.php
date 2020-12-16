@@ -1168,7 +1168,10 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td>
 				<?php
 				if ( $theme['is_child_theme'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span>';
+					echo '</mark> ';
 				} else {
 					/* Translators: %s docs link. */
 					echo '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) );
@@ -1198,7 +1201,12 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<tr>
 				<td data-export-label="Parent Theme Author URL"><?php esc_html_e( 'Parent theme author URL', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'The parent theme developers URL.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td><?php echo esc_html( $theme['parent_author_url'] ); ?></td>
+				<td>
+					<?php
+					/* translators: 1: theme author_url. */
+					echo wp_kses_post( sprintf( __( '<a href="%1$s" target="_blank">%1$s</a>', 'woocommerce' ), $theme['parent_author_url'] ) );
+					?>
+				</td>
 			</tr>
 		<?php endif ?>
 		<tr>
