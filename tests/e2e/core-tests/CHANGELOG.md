@@ -6,6 +6,7 @@
 - Update Order Status test
 - Update Order Details test
 - Merchant Order Status Filter tests
+- Merchant Order Refund tests
 
 ## Fixed
 
