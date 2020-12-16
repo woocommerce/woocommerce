@@ -1193,7 +1193,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 					echo esc_html( $theme['parent_version'] );
 					if ( version_compare( $theme['parent_version'], $theme['parent_version_latest'], '<' ) ) {
 						/* translators: %s: parent theme latest version */
-						echo ' &ndash; <strong style="color:red;">' . sprintf( esc_html__( '%s is available', 'woocommerce' ), esc_html( $theme['parent_version_latest'] ) ) . '</strong>';
+						echo ' &ndash; <mark class="error"><strong>' . sprintf( esc_html__( '%s is available', 'woocommerce' ), esc_html( $theme['parent_version_latest'] ) ) . '</strong></mark>';
 					}
 					?>
 				</td>
