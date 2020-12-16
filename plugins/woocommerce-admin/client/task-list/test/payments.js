@@ -10,10 +10,56 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { PayPal } from '../tasks/payments/paypal';
+import { getPaymentMethods } from '../tasks/payments/methods';
 
 jest.mock( '@wordpress/api-fetch' );
 
 describe( 'TaskList > Payments', () => {
+	describe( 'Methods', () => {
+		const params = {
+			activePlugins: [],
+			countryCode: 'SE',
+			onboardingStatus: {},
+			options: [],
+			profileItems: {},
+		};
+
+		it( 'includes Klarna Checkout for SE, NO, and FI', () => {
+			[ 'SE', 'NO', 'FI' ].forEach( ( countryCode ) => {
+				params.countryCode = countryCode;
+				const methods = getPaymentMethods( params );
+				expect(
+					methods.some(
+						( method ) => method.key === 'klarna_checkout'
+					)
+				).toBe( true );
+			} );
+		} );
+
+		it( 'includes Klarna Payment for EU countries', () => {
+			const supportedCountryCodes = [
+				'DK',
+				'DE',
+				'AT',
+				'NL',
+				'CH',
+				'BE',
+				'SP',
+				'PL',
+				'FR',
+				'IT',
+				'UK',
+			];
+			supportedCountryCodes.forEach( ( countryCode ) => {
+				params.countryCode = countryCode;
+				const methods = getPaymentMethods( params );
+				expect(
+					methods.some( ( e ) => e.key === 'klarna_payments' )
+				).toBe( true );
+			} );
+		} );
+	} );
+
 	describe( 'PayPal', () => {
 		afterEach( () => jest.clearAllMocks() );
 

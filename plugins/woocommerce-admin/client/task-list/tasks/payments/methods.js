@@ -249,7 +249,7 @@ export function getPaymentMethods( {
 				<img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />
 			),
 			visible:
-				[ 'SE', 'FI', 'NO', 'NL' ].includes( countryCode ) &&
+				[ 'SE', 'FI', 'NO' ].includes( countryCode ) &&
 				! hasCbdIndustry,
 			plugins: [ 'klarna-checkout-for-woocommerce' ],
 			container: <Klarna plugin={ 'checkout' } />,
@@ -273,8 +273,19 @@ export function getPaymentMethods( {
 				<img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />
 			),
 			visible:
-				[ 'DK', 'DE', 'AT' ].includes( countryCode ) &&
-				! hasCbdIndustry,
+				[
+					'DK',
+					'DE',
+					'AT',
+					'NL',
+					'CH',
+					'BE',
+					'SP',
+					'PL',
+					'FR',
+					'IT',
+					'UK',
+				].includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'klarna-payments-for-woocommerce' ],
 			container: <Klarna plugin={ 'payments' } />,
 			// @todo This should check actual Klarna connection information.
