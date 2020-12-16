@@ -379,6 +379,15 @@ class WC_Shortcode_My_Account {
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}
+		/**
+		 * Fires after the user's password is reset.
+		 *
+		 * @since 4.9.0-dev
+		 *
+		 * @param WP_User $user     The user.
+		 * @param string  $new_pass New user password.
+		 */
+		do_action( 'after_password_reset', $user, $new_pass );
 	}
 
 	/**
