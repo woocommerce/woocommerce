@@ -1260,7 +1260,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 								/* Translators: %1$s: Template name, %2$s: Template version, %3$s: Core version. */
 								esc_html__( '%1$s version %2$s is out of date. The core version is %3$s', 'woocommerce' ),
 								'<code>' . esc_html( $override['file'] ) . '</code>',
-								'<strong style="color:red">' . esc_html( $current_version ) . '</strong>',
+								'<mark class="error"><strong>' . esc_html( $current_version ) . '</strong></mark>',
 								esc_html( $override['core_version'] )
 							);
 						} else {
