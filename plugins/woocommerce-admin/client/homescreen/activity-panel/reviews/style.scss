@@ -16,16 +16,18 @@
 		}
 	}
 
+	$icon-size: 18px;
 	.woocommerce-review-activity-card__verified {
-		margin-left: $gap-small;
 		display: inline-flex;
+		margin-left: $gap-smallest;
 		position: relative;
 		top: $gap-smallest;
 		color: $valid-green;
 		@include font-size( 12 );
 
-		.gridicon {
-			margin-right: $gap-smallest;
+		svg {
+			width: $icon-size;
+			height: $icon-size;
 			fill: $valid-green;
 		}
 	}

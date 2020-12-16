@@ -54,6 +54,10 @@ jest.mock( '@woocommerce/components', () => ( {
 	},
 } ) );
 
+jest.mock( '../checkmark-circle-icon', () =>
+	jest.fn().mockImplementation( () => '[checkmark-circle-icon]' )
+);
+
 describe( 'ReviewsPanel', () => {
 	it( 'should render an empty review card', () => {
 		render(
@@ -77,6 +81,19 @@ describe( 'ReviewsPanel', () => {
 			/>
 		);
 		expect( screen.getByText( 'Reviewer reviewed Cap' ) ).not.toBeNull();
+	} );
+
+	it( 'should render checkmark circle icon in the review title, if review is verfied owner', () => {
+		render(
+			<ReviewsPanel
+				hasUnapprovedReviews={ true }
+				isError={ false }
+				isRequesting={ false }
+				reviews={ [ { ...REVIEW, verified: true } ] }
+			/>
+		);
+		const header = screen.getByRole( 'heading', { level: 3 } );
+		expect( header.innerHTML ).toMatch( /\[checkmark-circle-icon\]/ );
 	} );
 
 	describe( 'review actions', () => {
