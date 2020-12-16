@@ -1069,7 +1069,6 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<?php
 		$alt = 1;
 		foreach ( $wp_pages as $_page ) {
-			$found_error = false;
 
 			if ( $_page['page_id'] ) {
 				/* Translators: %s: page name. */
@@ -1082,31 +1081,42 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			/* Translators: %s: page name. */
 			echo '<td class="help">' . wc_help_tip( sprintf( esc_html__( 'The URL of your %s page (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
 
+			$found_error = true;
 			// Page ID check.
 			if ( ! $_page['page_set'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Page not set', 'woocommerce' ) . '</mark>';
-				$found_error = true;
+				$error_msg = __( 'Page not set', 'woocommerce' );
 			} elseif ( ! $_page['page_exists'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
-				$found_error = true;
+				$error_msg = __( 'Page ID is set, but the page does not exist', 'woocommerce' );
+			} elseif ( ! $_page['page_visible'] && $_page['shortcode_required'] && ! $_page['shortcode_present'] ) {
+				/* Translators: %s: docs link. */
+				$error_msg = sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' );
+				$error_msg .= '. ' . __( 'Also, page does not contain the shortcode.', 'woocommerce' ) . ' ' . $_page['shortcode'];
 			} elseif ( ! $_page['page_visible'] ) {
 				/* Translators: %s: docs link. */
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
-				$found_error = true;
-			} else {
+				$error_msg = sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' );
+			} elseif ( $_page['shortcode_required'] && ! $_page['shortcode_present'] ) {
 				// Shortcode check.
-				if ( $_page['shortcode_required'] ) {
-					if ( ! $_page['shortcode_present'] ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page does not contain the shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) . '</mark>';
-						$found_error = true;
-					}
-				}
+				$error_msg = __( 'Page does not contain the shortcode.', 'woocommerce' ) . ' ' . $_page['shortcode'];
+			} else {
+				// No errors.
+				$found_error = false;
 			}
-
-			if ( ! $found_error ) {
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>';
+			if ( $found_error ) {
+				echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span>';
+				echo '<span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+				echo '<span class="no-text" aria-hidden="true"><span> ' . esc_html__( 'No', 'woocommerce' ) . '</span></span> - ';
+				echo wp_kses_post( $error_msg );
+				echo '</mark>';
+			} else {
+				echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span>';
+				echo '<span class="screen-reader-text">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+				echo '<span class="yes-text" aria-hidden="true"><span> ' . esc_html__( 'Yes', 'woocommerce' ) . '</span></span> - ';
+				echo esc_html__( 'Page ID: ', 'woocommerce' ) . absint( $_page['page_id'] ) . ' ';
+				echo esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . ' - ';
+				/* Translators: %s: page name. */
+				echo '<a href="' . esc_url( get_edit_post_link( $_page['page_id'] ) ) . '" aria-label="' . sprintf( esc_html__( 'Edit %s page', 'woocommerce' ), esc_html( $_page['page_name'] ) ) . '">(' . esc_html__( 'Edit', 'woocommerce' ) . ')</a>';
+				echo '</mark> ';
 			}
-
 			echo '</td></tr>';
 		}
 		?>
