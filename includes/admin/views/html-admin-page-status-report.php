@@ -1155,7 +1155,12 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="Author URL"><?php esc_html_e( 'Author URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The theme developers URL.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( $theme['author_url'] ); ?></td>
+			<td>
+				<?php
+				/* translators: 1: theme author_url. */
+				echo wp_kses_post( sprintf( __( '<a href="%1$s" target="_blank">%1$s</a>', 'woocommerce' ), $theme['author_url'] ) );
+				?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="Child Theme"><?php esc_html_e( 'Child theme', 'woocommerce' ); ?>:</td>
