@@ -1005,7 +1005,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				}
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST:
-				$err = __( 'Coupon usage limit has been reached. If you were trying to use this coupon just now, please try again after some time or contact us for help.', 'woocommerce' );
+				$err = __( 'Coupon usage limit has been reached. Please try again after some time, or contact us for help.', 'woocommerce' );
 				break;
 			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
 				// Store excluded products that are in cart in $products.
