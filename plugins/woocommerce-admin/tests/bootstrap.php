@@ -32,6 +32,9 @@ class WC_Admin_Unit_Tests_Bootstrap {
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 
+		// Ensure theme install tests use direct filesystem method.
+		define( 'FS_METHOD', 'direct' );
+
 		// Ensure server variable is set for WP email functions.
 		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
@@ -41,7 +44,7 @@ class WC_Admin_Unit_Tests_Bootstrap {
 
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
-		$this->wc_core_dir  = dirname( $this->plugin_dir ) . '/woocommerce';
+		$this->wc_core_dir  = getenv( 'WC_CORE_DIR' ) ? getenv( 'WC_CORE_DIR' ) : dirname( $this->plugin_dir ) . '/woocommerce';
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 
 		$wc_tests_framework_base_dir = $this->wc_core_dir . '/tests';

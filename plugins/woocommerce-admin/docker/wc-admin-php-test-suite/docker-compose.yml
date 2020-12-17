@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  phpunit:
+    build: "."
+    volumes:
+      - "test-suite:/tmp"
+      - "../../:/app"
+    environment:
+      - WC_CORE_DIR=/tmp/wordpress/wp-content/plugins/woocommerce
+      - DB_USER=root
+      - DB_PASS=password
+      - DB_NAME=wordpress_test
+      - DB_HOST=phpunit-db
+    depends_on:
+      - phpunit-db
+
+  phpunit-db:
+    image: mysql:5.7
+    hostname: "phpunit-db"
+    environment:
+      MYSQL_DATABASE: "wordpress_test"
+      MYSQL_ROOT_PASSWORD: "password"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", '-u', 'root', '-ppassword' ]
+      interval: 10s
+      timeout: 5s
+
+volumes:
+  test-suite: {}
