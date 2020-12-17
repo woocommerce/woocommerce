@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { useRef } from '@wordpress/element';
+import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,8 +14,8 @@ export const withOnboardingHydration = ( data ) => {
 	let hydratedProfileItems = false;
 	let hydratedTasksStatus = false;
 
-	return ( OriginalComponent ) => {
-		return ( props ) => {
+	return createHigherOrderComponent(
+		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
 			useSelect( ( select, registry ) => {
@@ -62,6 +63,7 @@ export const withOnboardingHydration = ( data ) => {
 			}, [] );
 
 			return <OriginalComponent { ...props } />;
-		};
-	};
+		},
+		'withOnboardingHydration'
+	);
 };
