@@ -16,8 +16,8 @@ export const pluckAddress = ( {
 	city = '',
 	postcode = '',
 } ) => ( {
-	country,
-	state,
-	city,
+	country: country.trim(),
+	state: state.trim(),
+	city: city.trim(),
 	postcode: postcode ? postcode.replace( ' ', '' ).toUpperCase() : '',
 } );

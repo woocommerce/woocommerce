@@ -18,6 +18,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
+import { formatStoreApiErrorMessage } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -200,21 +201,12 @@ const CheckoutProcessor = () => {
 				fetchResponse.json().then( function ( response ) {
 					if ( ! fetchResponse.ok ) {
 						// We received an error response.
-						if ( response.body && response.body.message ) {
-							addErrorNotice( response.body.message, {
+						addErrorNotice(
+							formatStoreApiErrorMessage( response ),
+							{
 								id: 'checkout',
-							} );
-						} else {
-							addErrorNotice(
-								__(
-									'Something went wrong. Please contact us to get assistance.',
-									'woo-gutenberg-products-block'
-								),
-								{
-									id: 'checkout',
-								}
-							);
-						}
+							}
+						);
 						dispatchActions.setHasError();
 					}
 					dispatchActions.setAfterProcessing( response );
@@ -237,6 +229,9 @@ const CheckoutProcessor = () => {
 					if ( response.data?.cart ) {
 						receiveCart( response.data.cart );
 					}
+					addErrorNotice( formatStoreApiErrorMessage( response ), {
+						id: 'checkout',
+					} );
 					dispatchActions.setHasError();
 					dispatchActions.setAfterProcessing( response );
 					setIsProcessingOrder( false );

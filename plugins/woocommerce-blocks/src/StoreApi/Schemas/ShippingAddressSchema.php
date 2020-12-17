@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\RestApi\Routes;
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @since 2.5.0
  */
-class ShippingAddressSchema extends AbstractSchema {
+class ShippingAddressSchema extends AbstractAddressSchema {
 	/**
 	 * The schema item name.
 	 *
@@ -25,61 +25,6 @@ class ShippingAddressSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'shipping-address';
-
-	/**
-	 * Term properties.
-	 *
-	 * @return array
-	 */
-	public function get_properties() {
-		return [
-			'first_name' => [
-				'description' => __( 'First name', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'last_name'  => [
-				'description' => __( 'Last name', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'company'    => [
-				'description' => __( 'Company', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'address_1'  => [
-				'description' => __( 'Address', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'address_2'  => [
-				'description' => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'city'       => [
-				'description' => __( 'City', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'state'      => [
-				'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'postcode'   => [
-				'description' => __( 'Postal code', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'country'    => [
-				'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-		];
-	}
 
 	/**
 	 * Convert a term object into an object suitable for the response.
