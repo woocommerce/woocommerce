@@ -39,4 +39,4 @@ if [[ $1 ]]; then
 fi
 #
 # Run Docker
-./bin/docker-compose.js $1
+./bin/docker-compose.js $@

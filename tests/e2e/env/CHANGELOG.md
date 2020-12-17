@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Insert a 12 hour delay in using new docker image tags
+
 ## Fixed
 
 - Remove redundant `puppeteer` dependency

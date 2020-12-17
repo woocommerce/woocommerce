@@ -11,7 +11,10 @@
   "main": "index.js",
   "dependencies": {
     "@jest/globals": "^26.4.2",
-    "@woocommerce/e2e-utils": "file:../utils"
+    "config": "3.3.3"
+  },
+  "peerDependencies": {
+    "@woocommerce/e2e-utils": "^0.1.1"
   },
   "publishConfig": {
     "access": "public"
