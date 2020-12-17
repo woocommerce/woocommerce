@@ -1233,34 +1233,42 @@ class DataStore extends SqlQuery {
 				continue;
 			}
 			foreach ( $query_args[ $arg ] as $attribute_term ) {
-				// We expect tuples of IDs.
+				// We expect tuples.
 				if ( ! is_array( $attribute_term ) || 2 !== count( $attribute_term ) ) {
 					continue;
 				}
 
-				$attribute_id = intval( $attribute_term[0] );
-				$term_id      = intval( $attribute_term[1] );
+				// If the tuple is numeric, assume these are IDs.
+				if ( is_numeric( $attribute_term[0] ) && is_numeric( $attribute_term[1] ) ) {
+					$attribute_id = intval( $attribute_term[0] );
+					$term_id      = intval( $attribute_term[1] );
 
-				// Tuple, but non-numeric.
-				if ( 0 === $attribute_id || 0 === $term_id ) {
-					continue;
+					// Invalid IDs.
+					if ( 0 === $attribute_id || 0 === $term_id ) {
+						continue;
+					}
+
+					// @todo: Use wc_get_attribute() instead ?
+					$attr_taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					// Invalid attribute ID.
+					if ( empty( $attr_taxonomy ) ) {
+						continue;
+					}
+
+					$attr_term = get_term_by( 'id', $term_id, $attr_taxonomy );
+					// Invalid term ID.
+					if ( false === $attr_term ) {
+						continue;
+					}
+
+					$meta_key   = wc_variation_attribute_name( $attr_taxonomy );
+					$meta_value = $attr_term->slug;
+				} else {
+					// Assume these are a custom attribute slug/value pair.
+					$meta_key   = 'attribute_' . esc_sql( $attribute_term[0] );
+					$meta_value = esc_sql( $attribute_term[1] );
 				}
 
-				// @todo: Use wc_get_attribute() instead ?
-				$attr_taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
-				// Invalid attribute ID.
-				if ( empty( $attr_taxonomy ) ) {
-					continue;
-				}
-
-				$attr_term = get_term_by( 'id', $term_id, $attr_taxonomy );
-				// Invalid term ID.
-				if ( false === $attr_term ) {
-					continue;
-				}
-
-				$meta_key   = wc_variation_attribute_name( $attr_taxonomy );
-				$meta_value = $attr_term->slug;
 				$join_alias = 'wpm1';
 
 				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
@@ -1322,7 +1330,7 @@ class DataStore extends SqlQuery {
 		 * @param string $field      The object type.
 		 * @param string $context    The data store context.
 		 */
-		$ids = apply_filters( 'woocommerce_analytics_ ' . $field, $ids, $query_args, $field, $this->context );
+		$ids = apply_filters( 'woocommerce_analytics_' . $field, $ids, $query_args, $field, $this->context );
 
 		if ( ! empty( $ids ) ) {
 			$ids_str = implode( $separator, $ids );

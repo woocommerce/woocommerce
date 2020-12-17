@@ -11,6 +11,7 @@ import classnames from 'classnames';
  */
 import SelectControl from '../select-control';
 import {
+	attributes,
 	countries,
 	coupons,
 	customers,
@@ -42,6 +43,8 @@ export class Search extends Component {
 
 	getAutocompleter() {
 		switch ( this.props.type ) {
+			case 'attributes':
+				return attributes;
 			case 'categories':
 				return productCategory;
 			case 'countries':
@@ -151,6 +154,7 @@ export class Search extends Component {
 			showClearButton,
 			staticResults,
 			disabled,
+			multiple,
 		} = this.props;
 		const { options } = this.state;
 		const inputType = autocompleter.inputType
@@ -167,9 +171,8 @@ export class Search extends Component {
 					hideBeforeSearch
 					inlineTags={ inlineTags }
 					isSearchable
-					label={ placeholder }
 					getSearchExpression={ autocompleter.getSearchExpression }
-					multiple
+					multiple={ multiple }
 					placeholder={ placeholder }
 					onChange={ this.updateSelected }
 					onFilter={ this.appendFreeTextSearch }
@@ -202,6 +205,7 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [
+		'attributes',
 		'categories',
 		'countries',
 		'coupons',
@@ -225,17 +229,22 @@ Search.propTypes = {
 	 */
 	placeholder: PropTypes.string,
 	/**
-	 * An array of objects describing selected values. If the label of the selected
-	 * value is omitted, the Tag of that value will not be rendered inside the
-	 * search box.
+	 * An array of objects describing selected values or optionally a string for a single value.
+	 * If the label of the selected value is omitted, the Tag of that value will not
+	 * be rendered inside the search box.
 	 */
-	selected: PropTypes.arrayOf(
-		PropTypes.shape( {
-			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
-				.isRequired,
-			label: PropTypes.string,
-		} )
-	),
+	selected: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.arrayOf(
+			PropTypes.shape( {
+				key: PropTypes.oneOfType( [
+					PropTypes.number,
+					PropTypes.string,
+				] ).isRequired,
+				label: PropTypes.string,
+			} )
+		),
+	] ),
 	/**
 	 * Render tags inside input, otherwise render below input.
 	 */
@@ -262,6 +271,7 @@ Search.defaultProps = {
 	showClearButton: false,
 	staticResults: false,
 	disabled: false,
+	multiple: true,
 };
 
 export default Search;

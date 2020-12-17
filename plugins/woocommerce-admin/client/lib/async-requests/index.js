@@ -38,6 +38,14 @@ export function getRequestByIdString( path, handleData = identity ) {
 	};
 }
 
+export const getAttributeLabels = getRequestByIdString(
+	NAMESPACE + '/products/attributes',
+	( attribute ) => ( {
+		key: attribute.id,
+		label: attribute.name,
+	} )
+);
+
 export const getCategoryLabels = getRequestByIdString(
 	NAMESPACE + '/products/categories',
 	( category ) => ( {

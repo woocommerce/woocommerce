@@ -88,6 +88,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Add Customer Type column to the Orders report table. #5820
 - Fix: Product exclusion filter on Orders Report.
 - Fix: Typo in Variation Stats DataStore context filter value.
+- Fix: support custom attributes in Attribute advanced report filter.
 
 = 1.7.0 11/11/2020 =
 - Enhancement: Variations report.  #5167

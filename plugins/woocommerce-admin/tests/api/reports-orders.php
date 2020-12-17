@@ -130,7 +130,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test filtering by product attribute(s).
+	 * Test filtering by taxonomy-backed product attribute(s).
 	 */
 	public function test_product_attributes_filter() {
 		wp_set_current_user( $this->user );
@@ -139,8 +139,9 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		// Create a variable product.
 		$variable_product   = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
 		$product_variations = $variable_product->get_children();
-		$order_variation_1  = wc_get_product( $product_variations[0] ); // Variation: size = small.
-		$order_variation_2  = wc_get_product( $product_variations[2] ); // Variation: size = huge, colour = red, number = 0.
+
+		$order_variation_1 = wc_get_product( $product_variations[0] ); // Variation: size = small.
+		$order_variation_2 = wc_get_product( $product_variations[2] ); // Variation: size = huge, colour = red, number = 0.
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
@@ -177,8 +178,6 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$bad_args = array(
 			'not an array!',                   // Not an array.
 			array( 1, 2, 3 ),                  // Not a tuple.
-			array( 'a', 1 ),                   // Non-numeric attribute ID.
-			array( 1, 'a' ),                   // Non-numeric term ID.
 			array( -1, $small_term->term_id ), // Invaid attribute ID.
 			array( $size_attr_id, -1 ),        // Invaid term ID.
 		);
@@ -223,6 +222,82 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 					array( $size_attr_id, $small_term->term_id ),
 				),
 				'per_page'         => 15,
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_orders ) );
+		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_2->get_id() );
+	}
+
+	/**
+	 * Test filtering by custom product attribute(s).
+	 */
+	public function test_custom_product_attributes_filter() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a variable product.
+		$variable_product = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
+
+		// Add a custom attribute.
+		$attributes  = $variable_product->get_attributes();
+		$custom_attr = new WC_Product_Attribute();
+		$custom_attr->set_name( 'Numeric Size' );
+		$custom_attr->set_options( array( '1', '2', '3', '4', '5' ) );
+		$custom_attr->set_visible( true );
+		$custom_attr->set_variation( true );
+		$attributes[] = $custom_attr;
+		$variable_product->set_attributes( $attributes );
+		$variable_product->save();
+
+		// Custom attribute terms can only be found once assigned to variations.
+		$data_store = $variable_product->get_data_store();
+		$data_store->create_all_product_variations( $variable_product );
+
+		// Fetch the product to get new variations.
+		$variable_product   = wc_get_product( $variable_product->get_id() );
+		$product_variations = $variable_product->get_children();
+
+		$order_variation_1 = wc_get_product( $product_variations[0] ); // Variation: size = small.
+		$order_variation_2 = wc_get_product( end( $product_variations ) ); // Variation: size = huge, colour = blue, number = 1, numeric-size = 5.
+
+		// Create orders for variations.
+		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
+		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->save();
+
+		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
+		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->save();
+
+		// Create more orders for simple products.
+		for ( $i = 0; $i < 10; $i++ ) {
+			$order = WC_Helper_Order::create_order( $this->user );
+			$order->set_status( 'completed' );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 15 ) );
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		// Sanity check before filtering by attribute.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 12, count( $response_orders ) );
+
+		// Filter by the "Numeric Size" custom attribute, with value "1".
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'attribute_is' => array(
+					array( 'numeric-size', '5' ),
+				),
 			)
 		);
 		$response        = $this->server->dispatch( $request );

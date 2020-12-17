@@ -156,6 +156,7 @@ class Control extends Component {
 
 	getInputValue() {
 		const {
+			inlineTags,
 			isFocused,
 			isSearchable,
 			multiple,
@@ -165,7 +166,7 @@ class Control extends Component {
 		const selectedValue = selected.length ? selected[ 0 ].label : '';
 
 		// Show the selected value for simple select dropdowns.
-		if ( ! multiple && ! isFocused ) {
+		if ( ! multiple && ! isFocused && ! inlineTags ) {
 			return selectedValue;
 		}
 

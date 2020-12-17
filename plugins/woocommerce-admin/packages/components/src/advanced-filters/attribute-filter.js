@@ -13,11 +13,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import Search from '../search';
 import SelectControl from '../select-control';
 import { textContent } from './utils';
 
 const getScreenReaderText = ( {
-	attributes,
 	attributeTerms,
 	config,
 	filter,
@@ -25,11 +25,10 @@ const getScreenReaderText = ( {
 	selectedAttributeTerm,
 } ) => {
 	if (
-		! attributes ||
-		attributes.length === 0 ||
 		! attributeTerms ||
 		attributeTerms.length === 0 ||
-		selectedAttribute === '' ||
+		! selectedAttribute ||
+		selectedAttribute.length === 0 ||
 		selectedAttributeTerm === ''
 	) {
 		return '';
@@ -41,11 +40,11 @@ const getScreenReaderText = ( {
 		  ) || {}
 		: {};
 
-	const { label: attributeName } =
-		attributes.find( ( attr ) => attr.key === selectedAttribute ) || {};
-	const { label: attributeTerm } =
-		attributeTerms.find( ( term ) => term.key === selectedAttributeTerm ) ||
-		{};
+	const attributeName = selectedAttribute[ 0 ].label;
+	const termObject = attributeTerms.find(
+		( { key } ) => key === selectedAttributeTerm
+	);
+	const attributeTerm = termObject && termObject.label;
 
 	if ( ! attributeName || ! attributeTerm ) {
 		return '';
@@ -82,43 +81,38 @@ const AttributeFilter = ( props ) => {
 	const { rule, value } = filter;
 	const { labels, rules } = config;
 
-	const [ attributes, setAttributes ] = useState( [] );
-
-	// Fetch all product attributes on mount.
-	useEffect( () => {
-		apiFetch( {
-			path: '/wc/v3/products/attributes',
-		} )
-			.then( ( attrs ) =>
-				attrs.map( ( { id, name } ) => ( {
-					key: id.toString(),
-					label: name,
-				} ) )
-			)
-			.then( setAttributes );
-	}, [] );
-
-	const [ selectedAttribute, setSelectedAttribute ] = useState(
-		Array.isArray( value ) ? value[ 0 ] : ''
-	);
+	const [ selectedAttribute, setSelectedAttribute ] = useState( [] );
 
 	// Set selected attribute from filter value (in query string).
 	useEffect( () => {
-		if ( Array.isArray( value ) ) {
-			setSelectedAttribute( value[ 0 ] );
+		if (
+			! selectedAttribute.length &&
+			Array.isArray( value ) &&
+			value[ 0 ]
+		) {
+			apiFetch( {
+				path: `/wc-analytics/products/attributes/${ value[ 0 ] }`,
+			} )
+				.then( ( { id, name } ) => [
+					{
+						key: id.toString(),
+						label: name,
+					},
+				] )
+				.then( setSelectedAttribute );
 		}
-	}, [ value ] );
+	}, [ value, selectedAttribute ] );
 
-	const [ attributeTerms, setAttributeTerms ] = useState( false );
+	const [ attributeTerms, setAttributeTerms ] = useState( [] );
 
 	// Fetch all product attributes on mount.
 	useEffect( () => {
-		if ( ! selectedAttribute ) {
+		if ( ! selectedAttribute.length ) {
 			return;
 		}
 		setAttributeTerms( false );
 		apiFetch( {
-			path: `/wc/v3/products/attributes/${ selectedAttribute }/terms`,
+			path: `/wc-analytics/products/attributes/${ selectedAttribute[ 0 ].key }/terms`,
 		} )
 			.then( ( terms ) =>
 				terms.map( ( { id, name } ) => ( {
@@ -134,7 +128,6 @@ const AttributeFilter = ( props ) => {
 	);
 
 	const screenReaderText = getScreenReaderText( {
-		attributes,
 		attributeTerms,
 		config,
 		filter,
@@ -180,44 +173,54 @@ const AttributeFilter = ( props ) => {
 									'woocommerce-filters-advanced__attribute-fieldset'
 								) }
 							>
-								{ attributes.length > 0 ? (
-									<SelectControl
+								{ ! Array.isArray( value ) ||
+								! value.length ||
+								selectedAttribute.length ? (
+									<Search
 										className="woocommerce-filters-advanced__input woocommerce-search"
-										label={ __(
+										onChange={ ( [ attr ] ) => {
+											setSelectedAttribute(
+												attr ? [ attr ] : []
+											);
+											setSelectedAttributeTerm( '' );
+											onFilterChange(
+												'value',
+												[ attr && attr.key ].filter(
+													Boolean
+												)
+											);
+										} }
+										type="attributes"
+										placeholder={ __(
 											'Attribute name',
 											'woocommerce-admin'
 										) }
-										isSearchable
-										showAllOnFocus
-										options={ attributes }
+										multiple={ false }
 										selected={ selectedAttribute }
-										onChange={ ( attr ) => {
-											// Clearing the input using delete/backspace causes an empty array to be passed here.
-											if ( typeof attr !== 'string' ) {
-												attr = '';
-											}
-											setSelectedAttribute( attr );
-											setSelectedAttributeTerm( '' );
-											onFilterChange( 'value', [ attr ] );
-										} }
+										inlineTags
+										aria-label={ __(
+											'Attribute name',
+											'woocommerce-admin'
+										) }
 									/>
 								) : (
 									<Spinner />
 								) }
-								{ attributes.length > 0 &&
-									selectedAttribute !== '' &&
-									( attributeTerms !== false ? (
+								{ selectedAttribute.length > 0 &&
+									( attributeTerms.length ? (
 										<Fragment>
 											<span className="woocommerce-filters-advanced__attribute-field-separator">
 												=
 											</span>
 											<SelectControl
 												className="woocommerce-filters-advanced__input woocommerce-search"
-												label={ __(
+												placeholder={ __(
 													'Attribute value',
 													'woocommerce-admin'
 												) }
+												inlineTags
 												isSearchable
+												multiple={ false }
 												showAllOnFocus
 												options={ attributeTerms }
 												selected={
@@ -233,10 +236,14 @@ const AttributeFilter = ( props ) => {
 													setSelectedAttributeTerm(
 														term
 													);
-													onFilterChange( 'value', [
-														selectedAttribute,
-														term,
-													] );
+													onFilterChange(
+														'value',
+														[
+															selectedAttribute[ 0 ]
+																.key,
+															term,
+														].filter( Boolean )
+													);
 												} }
 											/>
 										</Fragment>

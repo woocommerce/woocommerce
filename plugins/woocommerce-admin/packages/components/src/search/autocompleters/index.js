@@ -1,6 +1,7 @@
 /**
  * Export all autocompleters
  */
+export { default as attributes } from './attributes';
 export { default as productCategory } from './categories';
 export { default as countries } from './countries';
 export { default as coupons } from './coupons';
