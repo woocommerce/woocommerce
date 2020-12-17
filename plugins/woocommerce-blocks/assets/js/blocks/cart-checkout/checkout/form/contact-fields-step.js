@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
-import { DebouncedValidatedTextInput } from '@woocommerce/base-components/text-input';
+import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import {
 	CHECKOUT_ALLOWS_GUEST,
@@ -56,7 +56,7 @@ const ContactFieldsStep = ( {
 			) }
 			stepHeadingContent={ () => <LoginPrompt /> }
 		>
-			<DebouncedValidatedTextInput
+			<ValidatedTextInput
 				id="email"
 				type="email"
 				label={ __( 'Email address', 'woo-gutenberg-products-block' ) }

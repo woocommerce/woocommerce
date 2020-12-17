@@ -93,12 +93,22 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->billing_address_schema->get_properties(),
+				'arg_options' => [
+					'sanitize_callback' => [ $this->billing_address_schema, 'sanitize_callback' ],
+					'validate_callback' => [ $this->billing_address_schema, 'validate_callback' ],
+				],
+				'required'    => true,
 			],
 			'shipping_address' => [
 				'description' => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->shipping_address_schema->get_properties(),
+				'arg_options' => [
+					'sanitize_callback' => [ $this->shipping_address_schema, 'sanitize_callback' ],
+					'validate_callback' => [ $this->shipping_address_schema, 'validate_callback' ],
+				],
+				'required'    => true,
 			],
 			'payment_method'   => [
 				'description' => __( 'The ID of the payment method being used to process the payment.', 'woo-gutenberg-products-block' ),

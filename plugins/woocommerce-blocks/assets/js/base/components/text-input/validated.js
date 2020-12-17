@@ -42,13 +42,20 @@ const ValidatedTextInput = ( {
 
 	const validateInput = useCallback(
 		( errorsHidden = true ) => {
-			if ( inputRef.current.checkValidity() ) {
+			const inputObject = inputRef.current || null;
+			if ( ! inputObject ) {
+				return;
+			}
+			// Trim white space before validation.
+			inputObject.value = inputObject.value.trim();
+			const inputIsValid = inputObject.checkValidity();
+			if ( inputIsValid ) {
 				clearValidationError( errorId );
 			} else {
 				setValidationErrors( {
 					[ errorId ]: {
 						message:
-							inputRef.current.validationMessage ||
+							inputObject.validationMessage ||
 							__(
 								'Invalid value.',
 								'woo-gutenberg-products-block'

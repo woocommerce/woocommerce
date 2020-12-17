@@ -74,12 +74,6 @@ class Checkout extends AbstractRoute {
 				],
 			],
 			[
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => '__return_true',
-				'args'                => $this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			],
-			[
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
@@ -95,7 +89,7 @@ class Checkout extends AbstractRoute {
 										'type' => 'string',
 									],
 									'value' => [
-										'type' => 'string',
+										'type' => [ 'string', 'boolean' ],
 									],
 								],
 							],
@@ -103,6 +97,12 @@ class Checkout extends AbstractRoute {
 					],
 					$this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE )
 				),
+			],
+			[
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'get_response' ),
+				'permission_callback' => '__return_true',
+				'args'                => $this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
@@ -261,6 +261,17 @@ class Checkout extends AbstractRoute {
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
 		switch ( $http_status_code ) {
+			case 400:
+				return new WP_Error(
+					$error_code,
+					$error_message,
+					array_merge(
+						$additional_data,
+						[
+							'status' => $http_status_code,
+						]
+					)
+				);
 			case 409:
 				// If there was a conflict, return the cart so the client can resolve it.
 				$controller = new CartController();
@@ -378,12 +389,10 @@ class Checkout extends AbstractRoute {
 	 * @param WP_REST_Request $request Full details about the request.
 	 */
 	private function update_customer_from_request( WP_REST_Request $request ) {
-		$schema   = $this->get_item_schema();
 		$customer = wc()->customer;
 
 		if ( isset( $request['billing_address'] ) ) {
-			$allowed_billing_values = array_intersect_key( $request['billing_address'], $schema['properties']['billing_address']['properties'] );
-			foreach ( $allowed_billing_values as $key => $value ) {
+			foreach ( $request['billing_address'] as $key => $value ) {
 				if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 					$customer->{"set_billing_$key"}( $value );
 				}
@@ -391,8 +400,7 @@ class Checkout extends AbstractRoute {
 		}
 
 		if ( isset( $request['shipping_address'] ) ) {
-			$allowed_shipping_values = array_intersect_key( $request['shipping_address'], $schema['properties']['shipping_address']['properties'] );
-			foreach ( $allowed_shipping_values as $key => $value ) {
+			foreach ( $request['shipping_address'] as $key => $value ) {
 				if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 					$customer->{"set_shipping_$key"}( $value );
 				}

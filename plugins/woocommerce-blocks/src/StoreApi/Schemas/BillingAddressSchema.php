@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\RestApi\Routes;
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
-class BillingAddressSchema extends AbstractSchema {
+class BillingAddressSchema extends AbstractAddressSchema {
 	/**
 	 * The schema item name.
 	 *
@@ -32,63 +32,69 @@ class BillingAddressSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_properties() {
-		return [
-			'first_name' => [
-				'description' => __( 'First name', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'last_name'  => [
-				'description' => __( 'Last name', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'company'    => [
-				'description' => __( 'Company', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'address_1'  => [
-				'description' => __( 'Address', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'address_2'  => [
-				'description' => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'city'       => [
-				'description' => __( 'City', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'state'      => [
-				'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'postcode'   => [
-				'description' => __( 'Postal code', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'country'    => [
-				'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'email'      => [
-				'description' => __( 'Email', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'phone'      => [
-				'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-		];
+		$properties = parent::get_properties();
+		return array_merge(
+			$properties,
+			[
+				'email' => [
+					'description' => __( 'Email', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'phone' => [
+					'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+			]
+		);
+	}
+
+	/**
+	 * Sanitize and format the given address object.
+	 *
+	 * @param array            $address Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @param string           $param The param being sanitized.
+	 * @return array
+	 */
+	public function sanitize_callback( $address, $request, $param ) {
+		$address          = parent::sanitize_callback( $address, $request, $param );
+		$address['email'] = wc_clean( wp_unslash( $address['email'] ) );
+		$address['phone'] = wc_clean( wp_unslash( $address['phone'] ) );
+		return $address;
+	}
+
+	/**
+	 * Validate the given address object.
+	 *
+	 * @param array            $address Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @param string           $param The param being sanitized.
+	 * @return true|\WP_Error
+	 */
+	public function validate_callback( $address, $request, $param ) {
+		$errors  = parent::validate_callback( $address, $request, $param );
+		$address = $this->sanitize_callback( $address, $request, $param );
+		$errors  = is_wp_error( $errors ) ? $errors : new \WP_Error();
+
+		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {
+			$errors->add(
+				'invalid_email',
+				__( 'The provided email address is not valid', 'woo-gutenberg-products-block' )
+			);
+		}
+
+		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'] ) ) {
+			$errors->add(
+				'invalid_phone',
+				__( 'The provided phone number is not valid', 'woo-gutenberg-products-block' )
+			);
+		}
+
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 
 	/**

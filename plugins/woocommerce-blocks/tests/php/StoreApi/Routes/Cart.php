@@ -176,7 +176,7 @@ class Cart extends TestCase {
 		$this->assertEquals( '11000', $data['totals']->total_items );
 	}
 
-/**
+	/**
 	 * Test getting updated shipping.
 	 */
 	public function test_update_customer() {
@@ -213,6 +213,8 @@ class Cart extends TestCase {
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
+					'first_name' => 'Han',
+					'last_name' => 'Solo',
 					'address_1' => 'Test address 1',
 					'address_2' => 'Test address 2',
 					'city'      => 'Test City',
@@ -239,7 +241,14 @@ class Cart extends TestCase {
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
-					'country' => 'ZZZZZZZZ'
+					'first_name' => 'Han',
+					'last_name' => 'Solo',
+					'address_1' => 'Test address 1',
+					'address_2' => 'Test address 2',
+					'city'      => 'Test City',
+					'state'     => 'AL',
+					'postcode'  => '90210',
+					'country' => 'ZZZZZZZZ',
 				)
 			)
 		);
@@ -254,7 +263,13 @@ class Cart extends TestCase {
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
+					'first_name' => 'Han',
+					'last_name' => 'Solo',
+					'address_1' => 'Test address 1',
+					'address_2' => 'Test address 2',
+					'city'      => 'Test City',
 					'state'   =>'Alabama',
+					'postcode'  => '90210',
 					'country' => 'US'
 				)
 			)
@@ -272,7 +287,35 @@ class Cart extends TestCase {
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
+					'first_name' => 'Han',
+					'last_name' => 'Solo',
+					'address_1' => 'Test address 1',
+					'address_2' => 'Test address 2',
+					'city'      => 'Test City',
 					'state'   =>'ZZZZZZZZ',
+					'postcode'  => '90210',
+					'country' => 'US'
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		// US address with invalid postcode.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'shipping_address' => (object) array(
+					'first_name' => 'Han',
+					'last_name' => 'Solo',
+					'address_1' => 'Test address 1',
+					'address_2' => 'Test address 2',
+					'city'      => 'Test City',
+					'state'   =>'AL',
+					'postcode'  => 'ABCDE',
 					'country' => 'US'
 				)
 			)

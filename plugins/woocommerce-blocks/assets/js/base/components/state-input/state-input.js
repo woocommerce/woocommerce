@@ -10,7 +10,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { DebouncedValidatedTextInput } from '../text-input';
+import { ValidatedTextInput } from '../text-input';
 import { ValidatedSelect } from '../select';
 import './style.scss';
 
@@ -100,7 +100,7 @@ const StateInput = ( {
 		);
 	}
 	return (
-		<DebouncedValidatedTextInput
+		<ValidatedTextInput
 			className={ className }
 			id={ id }
 			label={ label }
