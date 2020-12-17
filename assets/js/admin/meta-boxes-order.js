@@ -19,16 +19,16 @@ jQuery( function ( $ ) {
 				)
 			) {
 				/* State/Country select boxes */
-				this.states = $.parseJSON( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
+				this.states = JSON.parse( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
 
 			$( '.js_field-country' ).selectWoo().change( this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
-			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).click(function() {
+			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
 				window.onbeforeunload = '';
 			});
-			$( 'a.edit_address' ).click( this.edit_address );
+			$( 'a.edit_address' ).on( 'click', this.edit_address );
 			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );

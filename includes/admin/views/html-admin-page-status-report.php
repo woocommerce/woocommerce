@@ -9,6 +9,11 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
+if ( ! defined( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
+	// Define if we're checking against major or minor versions.
+	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'major' );
+}
+
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
@@ -21,7 +26,7 @@ $security           = $report['security'];
 $settings           = $report['settings'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
-$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
+$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE );
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
