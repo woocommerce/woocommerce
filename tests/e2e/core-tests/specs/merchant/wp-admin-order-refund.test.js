@@ -4,7 +4,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	createSimpleProduct,
 	createSimpleOrder,
 	verifyCheckboxIsSet,
@@ -22,7 +22,7 @@ let currencySymbol;
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			await createSimpleProduct();
 			orderId = await createSimpleOrder();
 			await addProductToOrder(orderId, simpleProductName);
@@ -33,7 +33,7 @@ const runRefundOrderTest = () => {
 			currencySymbol = await page.evaluate(el => el.textContent, currencyElement);
 
 			// Update order status to `Completed` so we can issue a refund
-			await StoreOwnerFlow.updateOrderStatus(orderId, 'Completed');
+			await merchant.updateOrderStatus(orderId, 'Completed');
 		});
 
 		it('can issue a refund by quantity', async () => {

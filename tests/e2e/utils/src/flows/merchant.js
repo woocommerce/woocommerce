@@ -20,6 +20,9 @@ const {
 	WP_ADMIN_WC_SETTINGS
 } = require( './constants' );
 
+const baseUrl = config.get( 'url' );
+const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
+
 const merchant = {
 	login: async () => {
 		await page.goto( WP_ADMIN_LOGIN, {
@@ -109,6 +112,24 @@ const merchant = {
 		await page.goto( WP_ADMIN_SETUP_WIZARD, {
 			waitUntil: 'networkidle0',
 		} );
+	},
+
+
+	goToOrder: async ( orderId ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	updateOrderStatus: async ( orderId, status ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
+			waitUntil: 'networkidle0',
+		} );
+		await expect( page ).toSelect( '#order_status', status );
+		await page.waitFor( 2000 );
+		await expect( page ).toClick( 'button.save_order' );
+		await page.waitForSelector( '#message' );
+		await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
 	},
 };
 
