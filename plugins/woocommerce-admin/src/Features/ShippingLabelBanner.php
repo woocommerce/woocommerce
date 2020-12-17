@@ -59,9 +59,14 @@ class ShippingLabelBanner {
 			$wcs_tos_accepted  = null;
 
 			if ( class_exists( '\Jetpack_Data' ) ) {
-				$user_token = \Jetpack_Data::get_access_token( JETPACK_MASTER_USER );
 
-				$jetpack_connected = isset( $user_token->external_user_id );
+				if ( defined( 'JETPACK_MASTER_USER' ) ) {
+					$user_token = \Jetpack_Data::get_access_token( JETPACK_MASTER_USER );
+					$jetpack_connected = isset( $user_token->external_user_id );
+				} else {
+					$jetpack_connected = apply_filters( 'woocommerce_admin_is_jetpack_connected', false );
+				}
+
 				$jetpack_version   = JETPACK__VERSION;
 			}
 
