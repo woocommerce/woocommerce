@@ -303,3 +303,11 @@
 		}
 	}
 }
+
+// Default screen-reader styles. Included as a fallback for themes that don't have support.
+.screen-reader-text {
+	@include visually-hidden();
+}
+.screen-reader-text:focus {
+	@include visually-hidden-focus-reveal();
+}
