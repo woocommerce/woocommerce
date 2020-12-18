@@ -39,6 +39,7 @@ class WC_Tracks {
 				'blog_lang'      => get_user_locale( $user_id ),
 				'blog_id'        => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 				'products_count' => self::get_products_count(),
+				'wc_version'     => WC()->version,
 			);
 			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
 		}
