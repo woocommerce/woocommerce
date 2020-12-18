@@ -114,7 +114,7 @@ export class ProductTypes extends Component {
 						) }
 					</Text>
 					<Text variant="body">
-						{ __( 'Choose any that apply' ) }
+						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
 					</Text>
 				</div>
 
