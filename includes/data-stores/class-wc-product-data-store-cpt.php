@@ -1636,7 +1636,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				// Variations should also search the parent's meta table for fallback fields.
 				if ( $include_variations ) {
-					$variation_query = $wpdb->prepare( ' OR ( wc_product_meta_lookup.sku = "" AND parent_wc_product_meta_lookup.sku LIKE %s ) ', $like );
+					$variation_query = $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s ) ", $like );
 				} else {
 					$variation_query = '';
 				}

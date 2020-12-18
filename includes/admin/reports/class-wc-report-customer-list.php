@@ -62,6 +62,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 			delete_user_meta( $user_id, '_money_spent' );
 			delete_user_meta( $user_id, '_order_count' );
+			delete_user_meta( $user_id, '_last_order' );
 			/* translators: User display name */
 			echo '<div class="updated"><p>' . sprintf( esc_html__( 'Refreshed stats for %s', 'woocommerce' ), esc_html( $user->display_name ) ) . '</p></div>';
 		}

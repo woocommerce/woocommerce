@@ -236,7 +236,7 @@ class WC_Admin {
 					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" aria-label="' . esc_attr__( 'five star', 'woocommerce' ) . '" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
 				);
 				wc_enqueue_js(
-					"jQuery( 'a.wc-rating-link' ).click( function() {
+					"jQuery( 'a.wc-rating-link' ).on( 'click', function() {
 						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
 						jQuery( this ).parent().text( jQuery( this ).data( 'rated' ) );
 					});"

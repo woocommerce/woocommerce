@@ -1,24 +1,24 @@
 version: ~> 1.0
 
+# Specifies that Travis should create builds for master and release branches and also tags.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^release\//
+
 language: php
+os:
+  - linux
 dist: xenial
-
-cache:
-  directories:
-    - $HOME/.composer/cache
-
-# Since Xenial services are not started by default, we need to instruct it below to start.
-services:
-  - mysql
-  - docker
 
 # Test main supported versions of PHP against latest WP.
 php:
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-  - 7.4
+  - "7.0"
+  - "7.1"
+  - "7.2"
+  - "7.3"
+  - "7.4"
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -33,31 +33,49 @@ jobs:
     install:
      - nvm install
      - npm install
-     - composer install
+     - composer install --no-dev
     script:
-      - npm run build:assets
-      - npm run docker:up
-      - npm run test:e2e
+      - travis_retry npm run build:assets
+      - travis_retry npm run docker:up
+      - travis_retry npm run test:e2e
     after_script:
       - npm run docker:down
   - name: "WP Nightly"
-    php: 7.4
+    php: "7.4"
     env: WP_VERSION=nightly WP_MULTISITE=0
   - name: "WP Latest - 1"
-    php: 7.2
+    php: "7.2"
     env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "WP Latest - 2"
-    php: 7.2
+    php: "7.2"
     env: WP_VERSION=5.3 WP_MULTISITE=0
   - name: "Code Standards"
-    php: 7.4
+    php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "Code Coverage"
-    php: 7.4
+    php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
-  - php: 7.4
+  - php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+
+# Git clone depth
+# By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
+git:
+  depth: 1
+
+# Since Xenial services are not started by default, we need to instruct it below to start.
+services:
+  - mysql
+  - docker
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+# Composer 2.0.7 introduced a change that broke the jetpack autoloader in PHP 7.0 - 7.3.
+before_install:
+  - composer self-update 2.0.6
 
 install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -81,20 +99,3 @@ script:
 
 after_script:
   - bash tests/bin/travis.sh after
-
-# Specifies that Travis should create builds for master and release branches and also tags.
-branches:
-  only:
-    - master
-    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
-    - /^release\//
-
-# Composer 2.0.7 introduced a change that broke the jetpack autoloader in PHP 7.0 - 7.3.
-before_install:
-  - composer self-update 2.0.6
-
-# Git clone depth
-# By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
-git:
-  depth: 1
-

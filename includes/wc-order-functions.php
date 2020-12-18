@@ -456,11 +456,12 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		delete_transient( $transient );
 	}
 
-	// Clear money spent for user associated with order.
+	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
 		delete_user_meta( $order->get_customer_id(), '_money_spent' );
 		delete_user_meta( $order->get_customer_id(), '_order_count' );
+		delete_user_meta( $order->get_customer_id(), '_last_order' );
 	} else {
 		$order_id = 0;
 	}

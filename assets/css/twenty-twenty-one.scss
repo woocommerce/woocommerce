@@ -1816,7 +1816,7 @@ a.reset_variations {
 			&::before {
 				content: "";
 				display: inline-block;
-				width: 14px;
+				width: 14px !important;
 				height: 14px;
 				border: var(--form--border-width) solid var(--form--border-color);
 				background: var(--global--color-white);
@@ -1960,6 +1960,18 @@ a.reset_variations {
 		input[type=checkbox] {
 			width: 25px !important;
 		}
+
+		input[type=radio] {
+
+			& + label::before {
+				background: #fff !important;
+				border: var(--form--border-width) solid #000 !important;
+			}
+
+			&:checked + label::before {
+				background: #000 !important;
+			}
+		}
 	}
 
 	> label:first-of-type {
@@ -1977,7 +1989,7 @@ a.reset_variations {
 		cursor: pointer;
 	}
 
-	input.input-radio[name="payment_method"] {
+	input[type="radio"] {
 		display: none;
 
 		& + label {
@@ -1995,6 +2007,7 @@ a.reset_variations {
 				border-radius: 100%;
 				transform: translateY(2px);
 			}
+
 		}
 
 		&:checked + label {
