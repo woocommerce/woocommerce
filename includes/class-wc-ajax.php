@@ -1300,6 +1300,8 @@ class WC_AJAX {
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
 
+			do_action( 'woocommerce_ajax_order_items_removed', $item_id, $item, $changed_stock, $order );
+
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
