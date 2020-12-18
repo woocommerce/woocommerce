@@ -56,6 +56,8 @@ async function updateUserPrefs(
 		'homepage_layout',
 		'homepage_stats',
 		'android_app_banner_dismissed',
+		'task_list_tracked_started_tasks',
+		'help_panel_highlight_shown',
 	];
 
 	// Prep valid fields for update.
@@ -130,14 +132,12 @@ export const useUserPreferences = () => {
 			hasFinishedResolution,
 		} = select( STORE_NAME );
 
-		// Use getCurrentUser() to get WooCommerce meta values.
-		const user = getCurrentUser();
-
 		return {
 			isRequesting:
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
-			user,
+			user: getCurrentUser(),
+			getCurrentUser,
 			getEntity,
 			getEntityRecord,
 			getLastEntitySaveError,
@@ -175,9 +175,11 @@ export const useUserPreferences = () => {
 				);
 			};
 		}
+		// Get most recent user before update.
+		const currentUser = userData.getCurrentUser();
 		return updateUserPrefs(
 			receiveCurrentUser,
-			userData.user,
+			currentUser,
 			saveUser,
 			userData.getLastEntitySaveError,
 			userPrefs

@@ -113,7 +113,7 @@ export const Layout = ( {
 
 		return (
 			<Suspense fallback={ <TaskListPlaceholder /> }>
-				<TaskList query={ query } />
+				<TaskList query={ query } userPreferences={ userPrefs } />
 			</Suspense>
 		);
 	};

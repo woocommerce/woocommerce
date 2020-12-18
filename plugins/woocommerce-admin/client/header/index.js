@@ -80,7 +80,14 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				{ decodeEntities( pageTitle ) }
 			</Text>
 			{ window.wcAdminFeatures[ 'activity-panels' ] && (
-				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
+				<ActivityPanel
+					isEmbedded={ isEmbedded }
+					query={ query }
+					userPreferencesData={ {
+						...userData,
+						updateUserPreferences,
+					} }
+				/>
 			) }
 		</div>
 	);

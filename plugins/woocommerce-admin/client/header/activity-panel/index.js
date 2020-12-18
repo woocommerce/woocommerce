@@ -15,6 +15,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section, Spinner } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -26,6 +27,7 @@ import { isWCAdmin } from '../../dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
+import { HighlightTooltip } from './highlight-tooltip';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -277,6 +279,43 @@ export class ActivityPanel extends Component {
 		}
 	}
 
+	closedHelpPanelHighlight() {
+		const { userPreferencesData } = this.props;
+		recordEvent( 'help_tooltip_click' );
+		if (
+			userPreferencesData &&
+			userPreferencesData.updateUserPreferences
+		) {
+			userPreferencesData.updateUserPreferences( {
+				help_panel_highlight_shown: 'yes',
+			} );
+		}
+	}
+
+	shouldShowHelpTooltip() {
+		const {
+			userPreferencesData,
+			trackedCompletedTasks,
+			query,
+		} = this.props;
+		const { task } = query;
+		const startedTasks =
+			userPreferencesData &&
+			userPreferencesData.task_list_tracked_started_tasks;
+		const highlightShown =
+			userPreferencesData &&
+			userPreferencesData.help_panel_highlight_shown;
+		if (
+			task &&
+			highlightShown !== 'yes' &&
+			( startedTasks || {} )[ task ] > 1 &&
+			! trackedCompletedTasks.includes( task )
+		) {
+			return true;
+		}
+		return false;
+	}
+
 	render() {
 		const tabs = this.getTabs();
 		const { mobileOpen, currentTab, isPanelOpen } = this.state;
@@ -285,6 +324,7 @@ export class ActivityPanel extends Component {
 			'is-mobile-open': this.state.mobileOpen,
 		} );
 
+		const showHelpHighlightTooltip = this.shouldShowHelpTooltip();
 		const hasUnread = tabs.some( ( tab ) => tab.unread );
 		const viewLabel = hasUnread
 			? __(
@@ -338,6 +378,23 @@ export class ActivityPanel extends Component {
 						{ this.renderPanel() }
 					</div>
 				</Section>
+				{ showHelpHighlightTooltip ? (
+					<HighlightTooltip
+						delay={ 1000 }
+						title={ __(
+							"We're here for help",
+							'woocommerce-admin'
+						) }
+						content={ __(
+							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+							'woocommerce-admin'
+						) }
+						closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
+						id="activity-panel-tab-help"
+						onClose={ () => this.closedHelpPanelHighlight() }
+						onShow={ () => recordEvent( 'help_tooltip_view' ) }
+					/>
+				) : null }
 			</div>
 		);
 	}
@@ -359,12 +416,16 @@ export default compose(
 		const requestingTaskListOptions =
 			isResolving( 'getOption', [ 'woocommerce_task_list_complete' ] ) ||
 			isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
+		const trackedCompletedTasks = getOption(
+			'woocommerce_task_list_tracked_completed_tasks'
+		);
 
 		return {
 			hasUnreadNotes,
 			requestingTaskListOptions,
 			taskListComplete,
 			taskListHidden,
+			trackedCompletedTasks,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

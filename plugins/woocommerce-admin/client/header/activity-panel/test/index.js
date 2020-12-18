@@ -20,6 +20,10 @@ jest.mock( '../display-options', () => ( {
 	DisplayOptions: jest.fn().mockReturnValue( '[DisplayOptions]' ),
 } ) );
 
+jest.mock( '../highlight-tooltip', () => ( {
+	HighlightTooltip: jest.fn().mockReturnValue( '[HighlightTooltip]' ),
+} ) );
+
 describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
 		render( <ActivityPanel isEmbedded query={ {} } /> );
@@ -181,7 +185,7 @@ describe( 'Activity Panel', () => {
 	} );
 
 	it( 'should render the store setup link when on embedded pages and TaskList is not complete', () => {
-		const { queryByText } = render(
+		const { getByText } = render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
 				taskListComplete={ false }
@@ -191,6 +195,98 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Store Setup' ) ).toBeDefined();
+		expect( getByText( 'Store Setup' ) ).toBeInTheDocument();
+	} );
+
+	describe( 'help panel tooltip', () => {
+		it( 'should render highlight tooltip when task count is at-least 2, task is not completed, and tooltip not shown yet', () => {
+			const { getByText } = render(
+				<ActivityPanel
+					requestingTaskListOptions={ false }
+					taskListComplete={ false }
+					taskListHidden={ false }
+					userPreferencesData={ {
+						task_list_tracked_started_tasks: { payment: 2 },
+					} }
+					trackedCompletedTasks={ [] }
+					helpPanelHighlightShown="no"
+					isEmbedded
+					query={ { task: 'payment' } }
+				/>
+			);
+
+			expect( getByText( '[HighlightTooltip]' ) ).toBeInTheDocument();
+		} );
+
+		it( 'should not render highlight tooltip when task is not visited more then once', () => {
+			render(
+				<ActivityPanel
+					requestingTaskListOptions={ false }
+					taskListComplete={ false }
+					taskListHidden={ false }
+					userPreferencesData={ {
+						task_list_tracked_started_tasks: { payment: 1 },
+					} }
+					trackedCompletedTasks={ [] }
+					isEmbedded
+					query={ { task: 'payment' } }
+				/>
+			);
+
+			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
+
+			render(
+				<ActivityPanel
+					requestingTaskListOptions={ false }
+					taskListComplete={ false }
+					taskListHidden={ false }
+					userPreferencesData={ {
+						task_list_tracked_started_tasks: {},
+					} }
+					trackedCompletedTasks={ [] }
+					isEmbedded
+					query={ { task: 'payment' } }
+				/>
+			);
+
+			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
+		} );
+
+		it( 'should not render highlight tooltip when task is visited twice, but completed already', () => {
+			const { queryByText } = render(
+				<ActivityPanel
+					requestingTaskListOptions={ false }
+					taskListComplete={ false }
+					taskListHidden={ false }
+					userPreferencesData={ {
+						task_list_tracked_started_tasks: { payment: 2 },
+					} }
+					trackedCompletedTasks={ [ 'payment' ] }
+					isEmbedded
+					query={ { task: 'payment' } }
+				/>
+			);
+
+			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
+		} );
+
+		it( 'should not render highlight tooltip when task is visited twice, not completed, but already shown', () => {
+			const { queryByText } = render(
+				<ActivityPanel
+					requestingTaskListOptions={ false }
+					taskListComplete={ false }
+					taskListHidden={ false }
+					userPreferencesData={ {
+						task_list_tracked_started_tasks: { payment: 2 },
+						help_panel_highlight_shown: 'yes',
+					} }
+					trackedCompletedTasks={ [] }
+					isEmbedded
+					query={ { task: 'payment' } }
+				/>
+			);
+
+			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
+		} );
 	} );
 } );

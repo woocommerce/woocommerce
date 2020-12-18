@@ -51,6 +51,7 @@ export function getAllTasks( {
 	profileItems,
 	query,
 	toggleCartModal,
+	onTaskSelect,
 } ) {
 	const {
 		hasPaymentGateway,
@@ -101,9 +102,7 @@ export function getAllTasks( {
 			title: __( 'Store details', 'woocommerce-admin' ),
 			container: null,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'store_details',
-				} );
+				onTaskSelect( 'store_details' );
 				getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
 			},
 			completed: profilerCompleted,
@@ -116,9 +115,7 @@ export function getAllTasks( {
 			title: purchaseAndInstallText,
 			container: null,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'purchase',
-				} );
+				onTaskSelect( 'purchase' );
 				return remainingProducts.length ? toggleCartModal() : null;
 			},
 			visible: products.length,
@@ -132,9 +129,7 @@ export function getAllTasks( {
 			title: __( 'Add my products', 'woocommerce-admin' ),
 			container: <Products />,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'products',
-				} );
+				onTaskSelect( 'products' );
 				updateQueryString( { task: 'products' } );
 			},
 			completed: hasProducts,
@@ -163,9 +158,7 @@ export function getAllTasks( {
 						activePlugins,
 						installedPlugins
 					);
-					recordEvent( 'tasklist_click', {
-						task_name: 'woocommerce-payments',
-					} );
+					onTaskSelect( 'woocommerce-payments' );
 					return installActivateAndConnectWcpay(
 						resolve,
 						reject,
@@ -191,9 +184,7 @@ export function getAllTasks( {
 			container: <Payments />,
 			completed: hasPaymentGateway,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'payments',
-				} );
+				onTaskSelect( 'payments' );
 				updateQueryString( { task: 'payments' } );
 			},
 			visible: ! woocommercePaymentsInstalled || countryCode !== 'US',
@@ -205,9 +196,7 @@ export function getAllTasks( {
 			title: __( 'Set up tax', 'woocommerce-admin' ),
 			container: <Tax />,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'tax',
-				} );
+				onTaskSelect( 'tax' );
 				updateQueryString( { task: 'tax' } );
 			},
 			completed: isTaxComplete,
@@ -220,9 +209,7 @@ export function getAllTasks( {
 			title: __( 'Set up shipping', 'woocommerce-admin' ),
 			container: <Shipping />,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'shipping',
-				} );
+				onTaskSelect( 'shipping' );
 				updateQueryString( { task: 'shipping' } );
 			},
 			completed: shippingZonesCount > 0,
@@ -237,9 +224,7 @@ export function getAllTasks( {
 			title: __( 'Personalize my store', 'woocommerce-admin' ),
 			container: <Appearance />,
 			onClick: () => {
-				recordEvent( 'tasklist_click', {
-					task_name: 'appearance',
-				} );
+				onTaskSelect( 'appearance' );
 				updateQueryString( { task: 'appearance' } );
 			},
 			completed: isAppearanceComplete,
