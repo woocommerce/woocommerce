@@ -1273,7 +1273,6 @@ class WC_AJAX {
 			}
 
 			if ( ! empty( $order_item_ids ) ) {
-				$order_notes = array();
 
 				foreach ( $order_item_ids as $item_id ) {
 					$item_id = absint( $item_id );
