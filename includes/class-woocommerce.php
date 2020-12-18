@@ -602,13 +602,7 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		if ( function_exists( 'determine_locale' ) ) {
-			$locale = determine_locale();
-		} else {
-			// @todo Remove when start supporting WP 5.0 or later.
-			$locale = is_admin() ? get_user_locale() : get_locale();
-		}
-
+		$locale = determine_locale();
 		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
 
 		unload_textdomain( 'woocommerce' );

@@ -7,7 +7,7 @@
 
 	&::before,
 	&::after {
-		content: ' ';
+		content: " ";
 		display: table;
 	}
 
@@ -127,10 +127,14 @@
 }
 
 @mixin darkorlighttextshadow($a, $opacity: 0.8) {
+
 	@if lightness($a) >= 65% {
+
 		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
 	}
+
 	@else {
+
 		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
 	}
 }
@@ -139,6 +143,7 @@
  * Objects
  */
 @mixin menu() {
+
 	@include clearfix();
 
 	li {
@@ -147,6 +152,7 @@
 }
 
 @mixin mediaright() {
+
 	@include clearfix();
 
 	img {
@@ -156,6 +162,7 @@
 }
 
 @mixin medialeft() {
+
 	@include clearfix();
 
 	img {
@@ -172,8 +179,8 @@
 	width: 1em;
 }
 
-@mixin icon( $glyph: '\e001' ) {
-	font-family: 'WooCommerce';
+@mixin icon( $glyph: "\e001" ) {
+	font-family: "WooCommerce";
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -190,8 +197,8 @@
 	content: $glyph;
 }
 
-@mixin icon_dashicons( $glyph: '\f333' ) {
-	font-family: 'Dashicons';
+@mixin icon_dashicons( $glyph: "\f333" ) {
+	font-family: "Dashicons";
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -209,8 +216,8 @@
 	content: $glyph;
 }
 
-@mixin iconbefore( $glyph: '\e001' ) {
-	font-family: 'WooCommerce';
+@mixin iconbefore( $glyph: "\e001" ) {
+	font-family: "WooCommerce";
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -222,8 +229,8 @@
 	text-decoration: none;
 }
 
-@mixin iconbeforedashicons( $glyph: '\f333' ) {
-	font-family: 'Dashicons';
+@mixin iconbeforedashicons( $glyph: "\f333" ) {
+	font-family: "Dashicons";
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -234,8 +241,8 @@
 	text-decoration: none;
 }
 
-@mixin iconafter( $glyph: '\e001' ) {
-	font-family: 'WooCommerce';
+@mixin iconafter( $glyph: "\e001" ) {
+	font-family: "WooCommerce";
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -248,6 +255,7 @@
 }
 
 @mixin loader() {
+
 	&::before {
 		height: 1em;
 		width: 1em;
@@ -257,9 +265,9 @@
 		left: 50%;
 		margin-left: -0.5em;
 		margin-top: -0.5em;
-		content: '';
+		content: "";
 		animation: spin 1s ease-in-out infinite;
-		background: url('../images/icons/loader.svg') center center;
+		background: url("../images/icons/loader.svg") center center;
 		background-size: cover;
 		line-height: 1;
 		text-align: center;

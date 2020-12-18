@@ -1962,6 +1962,7 @@ a.reset_variations {
 		}
 
 		input[type=radio] {
+
 			& + label::before {
 				background: #fff !important;
 				border: var(--form--border-width) solid #000 !important;
@@ -2010,6 +2011,7 @@ a.reset_variations {
 		}
 
 		&:checked + label {
+
 			&::before {
 				background: var(--global--color-border);
 			}

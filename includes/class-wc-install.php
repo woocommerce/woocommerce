@@ -1373,7 +1373,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 		);
 
 		if ( WCConnectionHelper::is_connected() ) {
-			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/tickets/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
+			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
 		}
 
 		return array_merge( $links, $row_meta );

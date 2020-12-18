@@ -12,6 +12,7 @@
   "module": "build-module/index.js",
   "dependencies": {
     "@wordpress/e2e-test-utils": "^4.6.0",
+    "config": "3.3.3",
     "faker": "^5.1.0",
     "fishery": "^1.0.1"
   },
