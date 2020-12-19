@@ -1,0 +1,83 @@
+/* eslint-disable jest/no-export, jest/no-disabled-tests */
+/**
+ * Internal dependencies
+ */
+const {
+	StoreOwnerFlow,
+	createSimpleOrder,
+	moveAllItemsToTrash
+} = require( '@woocommerce/e2e-utils' );
+
+let orderId;
+
+const runEditOrderTest = () => {
+	describe('WooCommerce Orders > Edit order', () => {
+		beforeAll(async () => {
+			await StoreOwnerFlow.login();
+			orderId = await createSimpleOrder('Processing');
+		});
+
+		afterAll( async () => {
+			// Make sure we're on the all orders view and cleanup the orders we created
+			await StoreOwnerFlow.openAllOrdersView();
+			await moveAllItemsToTrash();
+		});
+		
+		it('can view single order', async () => {
+			// Go to "orders" page
+			await StoreOwnerFlow.openAllOrdersView();
+
+			// Make sure we're on the orders page
+			await expect(page.title()).resolves.toMatch('Orders');
+
+			//Open order we created
+			await StoreOwnerFlow.goToOrder(orderId);
+
+			// Make sure we're on the order details page
+			await expect(page.title()).resolves.toMatch('Edit order');
+        });
+        
+        it('can update order status', async () => {
+			//Open order we created
+			await StoreOwnerFlow.goToOrder(orderId);
+
+			// Make sure we're still on the order details page
+			await expect(page.title()).resolves.toMatch('Edit order');
+
+			// Update order status to `Completed` 
+			await StoreOwnerFlow.updateOrderStatus(orderId, 'Completed');
+
+			// Verify order status changed note added
+			await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Completed' } );
+			await expect( page ).toMatchElement(
+				'#woocommerce-order-notes .note_content',
+				{
+					text: 'Order status changed from Processing to Completed.',
+				}
+			);
+        });
+        
+        it('can update order details', async () => {
+			//Open order we created
+			await StoreOwnerFlow.goToOrder(orderId);
+
+			// Make sure we're still on the order details page
+			await expect(page.title()).resolves.toMatch('Edit order');
+
+			// Update order details
+			await expect(page).toFill('input[name=order_date]', '2018-12-14');
+
+				// Wait for auto save
+			await page.waitFor( 2000 );
+
+			// Create the order
+			await expect( page ).toClick( 'button.save_order' );
+			await page.waitForSelector( '#message' );
+
+			// Verify
+			await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+		});
+	});
+}
+
+module.exports = runEditOrderTest;
