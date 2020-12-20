@@ -3,6 +3,7 @@
 ## Added
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
+- Merchant Apply Coupon tests
 
 ## Fixed
 
