@@ -2,6 +2,7 @@
 
 ## Added
 - Merchant Order Status Filter tests
+- Merchant Import Products CSV test
 
 ## Fixed
 
