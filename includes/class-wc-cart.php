@@ -1621,7 +1621,11 @@ class WC_Cart extends WC_Legacy_Cart {
 					$coupon_data_store = $coupon->get_data_store();
 					$billing_email     = strtolower( sanitize_email( $billing_email ) );
 					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
-						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $billing_email ) ) ) {
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST );
+						} else {
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+						}
 					}
 				}
 			}
