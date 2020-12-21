@@ -2111,7 +2111,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_query_for_stock( $product_id ) {
 		global $wpdb;
-		return $wpdb->prepare(
+		$query = $wpdb->prepare(
 			"
 			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
 			WHERE meta_table.meta_key = '_stock'
@@ -2119,5 +2119,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			",
 			$product_id
 		);
+
+		return apply_filters( 'woocommerce_query_for_stock', $query, $product_id );
 	}
 }
