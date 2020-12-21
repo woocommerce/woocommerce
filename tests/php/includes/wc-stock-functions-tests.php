@@ -5,9 +5,9 @@
  * @package WooCommerce\Tests\Functions\Stock
  */
 
- /**
-  * Class WC_Stock_Functions_Tests.
-  */
+/**
+ * Class WC_Stock_Functions_Tests.
+ */
 class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
@@ -53,7 +53,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$checkout = WC_Checkout::instance();
-		$order = new WC_Order();
+		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
 		$order->set_status( $status );
 		$order->save();
