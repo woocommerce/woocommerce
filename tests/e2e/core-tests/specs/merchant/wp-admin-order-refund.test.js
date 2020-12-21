@@ -70,10 +70,10 @@ const runRefundOrderTest = () => {
 				// Verify system note was added
 				expect(page).toMatchElement('.system-note', { text: 'Order status changed from Completed to Refunded.' }),
 			]);
+			page.waitForNavigation( { waitUntil: 'networkidle0' } );
 		});
 
 		it('can delete an issued refund', async () => {
-			page.waitForNavigation( { waitUntil: 'networkidle0' } );
 			// We need to use this here as `expect(page).toClick()` was unable to find the element
 			// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
 			page.$eval('a.delete_refund', elem => elem.click());
