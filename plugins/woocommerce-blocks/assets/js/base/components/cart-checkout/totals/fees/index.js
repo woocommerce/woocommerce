@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
-import { useShippingDataContext } from '@woocommerce/base-context';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,10 +11,6 @@ import PropTypes from 'prop-types';
 import TotalsItem from '../item';
 
 const TotalsFees = ( { currency, values } ) => {
-	const { needsShipping } = useShippingDataContext();
-	if ( ! needsShipping ) {
-		return null;
-	}
 	const { total_fees: totalFees, total_fees_tax: totalFeesTax } = values;
 	const feesValue = parseInt( totalFees, 10 );
 
