@@ -121,7 +121,7 @@ class WC_Post_Data {
 	/**
 	 * Handle type changes.
 	 *
-	 * @since 4.9.0
+	 * @since 3.0.0
 	 *
 	 * @param WC_Product $product Product data.
 	 * @param string     $from    Origin type.
