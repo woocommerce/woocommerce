@@ -16,7 +16,6 @@ import {
 import {
 	Button,
 	FocalPointPicker,
-	IconButton,
 	PanelBody,
 	Placeholder,
 	RangeControl,
@@ -105,7 +104,7 @@ const FeaturedCategory = ( {
 							allowedTypes={ [ 'image' ] }
 							value={ mediaId }
 							render={ ( { open } ) => (
-								<IconButton
+								<Button
 									className="components-toolbar__control"
 									label={ __( 'Edit media' ) }
 									icon="format-image"
