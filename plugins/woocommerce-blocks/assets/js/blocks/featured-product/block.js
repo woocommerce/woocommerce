@@ -7,8 +7,7 @@ import {
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,
-	MediaUpload,
-	MediaUploadCheck,
+	MediaReplaceFlow,
 	PanelColorSettings,
 	withColors,
 	RichText,
@@ -60,7 +59,7 @@ import {
  * @param {Object} props.product Product object.
  * @param {function(any):any} props.setAttributes Setter for attributes.
  * @param {function(any):any} props.setOverlayColor Setter for overlay color.
- * @param {function(any):any} props.triggerUrlUpdate Function for triggering a url update for product.
+ * @param {function():any} props.triggerUrlUpdate Function for triggering a url update for product.
  */
 const FeaturedProduct = ( {
 	attributes,
@@ -134,7 +133,7 @@ const FeaturedProduct = ( {
 	};
 
 	const getBlockControls = () => {
-		const { contentAlign, editMode } = attributes;
+		const { contentAlign, editMode, mediaSrc } = attributes;
 		const mediaId = attributes.mediaId || getImageIdFromProduct( product );
 
 		return (
@@ -145,29 +144,19 @@ const FeaturedProduct = ( {
 						setAttributes( { contentAlign: nextAlign } );
 					} }
 				/>
-				<MediaUploadCheck>
-					<ToolbarGroup>
-						<MediaUpload
-							onSelect={ ( media ) => {
-								setAttributes( {
-									mediaId: media.id,
-									mediaSrc: media.url,
-								} );
-							} }
-							allowedTypes={ [ 'image' ] }
-							value={ mediaId }
-							render={ ( { open } ) => (
-								<Button
-									className="components-toolbar__control"
-									label={ __( 'Edit media' ) }
-									icon="format-image"
-									onClick={ open }
-									disabled={ ! product }
-								/>
-							) }
-						/>
-					</ToolbarGroup>
-				</MediaUploadCheck>
+				<MediaReplaceFlow
+					mediaId={ mediaId }
+					mediaURL={ mediaSrc }
+					accept="image/*"
+					onSelect={ ( media ) => {
+						setAttributes( {
+							mediaId: media.id,
+							mediaSrc: media.url,
+						} );
+					} }
+					allowedTypes={ [ 'image' ] }
+				/>
+
 				<ToolbarGroup
 					controls={ [
 						{

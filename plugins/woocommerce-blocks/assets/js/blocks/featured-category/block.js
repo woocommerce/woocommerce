@@ -7,8 +7,7 @@ import {
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,
-	MediaUpload,
-	MediaUploadCheck,
+	MediaReplaceFlow,
 	PanelColorSettings,
 	withColors,
 	RichText,
@@ -22,7 +21,6 @@ import {
 	ResizableBox,
 	Spinner,
 	ToggleControl,
-	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import classnames from 'classnames';
@@ -81,7 +79,7 @@ const FeaturedCategory = ( {
 	);
 
 	const getBlockControls = () => {
-		const { contentAlign } = attributes;
+		const { contentAlign, mediaSrc } = attributes;
 		const mediaId = attributes.mediaId || getCategoryImageId( category );
 
 		return (
@@ -92,29 +90,18 @@ const FeaturedCategory = ( {
 						setAttributes( { contentAlign: nextAlign } );
 					} }
 				/>
-				<MediaUploadCheck>
-					<ToolbarGroup>
-						<MediaUpload
-							onSelect={ ( media ) => {
-								setAttributes( {
-									mediaId: media.id,
-									mediaSrc: media.url,
-								} );
-							} }
-							allowedTypes={ [ 'image' ] }
-							value={ mediaId }
-							render={ ( { open } ) => (
-								<Button
-									className="components-toolbar__control"
-									label={ __( 'Edit media' ) }
-									icon="format-image"
-									onClick={ open }
-									disabled={ ! category }
-								/>
-							) }
-						/>
-					</ToolbarGroup>
-				</MediaUploadCheck>
+				<MediaReplaceFlow
+					mediaId={ mediaId }
+					mediaURL={ mediaSrc }
+					accept="image/*"
+					onSelect={ ( media ) => {
+						setAttributes( {
+							mediaId: media.id,
+							mediaSrc: media.url,
+						} );
+					} }
+					allowedTypes={ [ 'image' ] }
+				/>
 			</BlockControls>
 		);
 	};
