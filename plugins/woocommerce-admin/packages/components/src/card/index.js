@@ -3,6 +3,7 @@
  */
 import { Component } from '@wordpress/element';
 import classnames from 'classnames';
+import deprecated from '@wordpress/deprecated';
 import PropTypes from 'prop-types';
 
 /**
@@ -14,8 +15,20 @@ import { validateComponent } from '../lib/proptype-validator';
 
 /**
  * A basic card component with a header. The header can contain a title, an action, and an `EllipsisMenu` menu.
+ *
+ * @deprecated
  */
 class Card extends Component {
+	constructor() {
+		super();
+		deprecated( 'Card', {
+			version: '5.2.0',
+			alternative: '@wordpress/components Card',
+			plugin: 'WooCommerce',
+			hint: 'Use `import { Card } from "@wordpress/components"`',
+		} );
+	}
+
 	render() {
 		const {
 			action,

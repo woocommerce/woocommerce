@@ -8,6 +8,7 @@
 -   Add product attributes support to `<Search />`.
 -   Allow single-selection support to `<Search />`.
 -   Improve handling of `multiple` and `inlineTags` in `<SelectControl />`.
+-   Deprecate use of `<Card>` in favor of the `<Card>` component in `@wordpress/components`.
 
 # 5.1.2
 
