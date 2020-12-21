@@ -2,11 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import {
+	Card,
+	CardBody,
+	CardHeader,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { EmptyTable, TableCard } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { Card, EmptyTable, TableCard } from '@woocommerce/components';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import {
 	getFilterQuery,
@@ -63,13 +69,20 @@ export class Leaderboard extends Component {
 
 		if ( ! isRequesting && rows.length === 0 ) {
 			return (
-				<Card title={ title } className={ classes }>
-					<EmptyTable>
-						{ __(
-							'No data recorded for the selected time period.',
-							'woocommerce-admin'
-						) }
-					</EmptyTable>
+				<Card className={ classes }>
+					<CardHeader>
+						<Text variant="title.small" as="h3">
+							{ title }
+						</Text>
+					</CardHeader>
+					<CardBody size={ null }>
+						<EmptyTable>
+							{ __(
+								'No data recorded for the selected time period.',
+								'woocommerce-admin'
+							) }
+						</EmptyTable>
+					</CardBody>
 				</Card>
 			);
 		}

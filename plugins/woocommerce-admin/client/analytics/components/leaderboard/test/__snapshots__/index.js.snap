@@ -255,11 +255,17 @@ exports[`Leaderboard should render correct data in the table 1`] = `
 exports[`Leaderboard should render empty message when there are no rows 1`] = `
 <div>
   <div
-    class="woocommerce-card woocommerce-leaderboard"
+    class="components-card is-size-medium woocommerce-leaderboard css-1xs3c37-CardUI e1q7k77g0"
   >
-    
     <div
-      class="woocommerce-card__body"
+      class="components-flex components-card__header is-size-medium e1q7k77g1 css-jsa6v9-Flex-HeaderUI eboqfv50"
+    >
+      <h3
+        class="css-1ahfdc3-Text e15wbhsk0"
+      />
+    </div>
+    <div
+      class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
     >
       <div
         class="woocommerce-table is-empty"
