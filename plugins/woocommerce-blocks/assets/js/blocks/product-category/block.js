@@ -9,7 +9,7 @@ import {
 	Disabled,
 	PanelBody,
 	Placeholder,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
@@ -281,7 +281,7 @@ class ProductByCategoryBlock extends Component {
 		return (
 			<>
 				<BlockControls>
-					<Toolbar
+					<ToolbarGroup
 						controls={ [
 							{
 								icon: 'edit',

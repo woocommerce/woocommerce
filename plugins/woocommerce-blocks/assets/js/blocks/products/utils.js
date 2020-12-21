@@ -33,7 +33,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 		</p>
 		<Button
 			className="wc-block-products__add-product-button"
-			isDefault
+			isSecondary
 			href={ ADMIN_URL + 'post-new.php?post_type=product' }
 		>
 			{ __( 'Add new product', 'woo-gutenberg-products-block' ) + ' ' }

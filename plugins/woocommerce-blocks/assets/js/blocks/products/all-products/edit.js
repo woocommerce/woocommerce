@@ -14,7 +14,7 @@ import {
 	withSpokenMessages,
 	Placeholder,
 	Button,
-	Toolbar,
+	ToolbarGroup,
 	Disabled,
 	Tip,
 } from '@wordpress/components';
@@ -139,7 +139,7 @@ class Editor extends Component {
 
 		return (
 			<BlockControls>
-				<Toolbar
+				<ToolbarGroup
 					controls={ [
 						{
 							icon: 'edit',

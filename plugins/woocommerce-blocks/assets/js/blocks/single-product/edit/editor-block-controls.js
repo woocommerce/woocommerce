@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
-import { Toolbar } from '@wordpress/components';
+import { ToolbarGroup } from '@wordpress/components';
 
 /**
  * Adds controls to the editor toolbar.
@@ -15,7 +15,7 @@ import { Toolbar } from '@wordpress/components';
 const EditorBlockControls = ( { isEditing, setIsEditing } ) => {
 	return (
 		<BlockControls>
-			<Toolbar
+			<ToolbarGroup
 				controls={ [
 					{
 						icon: 'edit',

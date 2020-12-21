@@ -22,7 +22,7 @@ import {
 	ResizableBox,
 	Spinner,
 	ToggleControl,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import classnames from 'classnames';
@@ -93,7 +93,7 @@ const FeaturedCategory = ( {
 					} }
 				/>
 				<MediaUploadCheck>
-					<Toolbar>
+					<ToolbarGroup>
 						<MediaUpload
 							onSelect={ ( media ) => {
 								setAttributes( {
@@ -113,7 +113,7 @@ const FeaturedCategory = ( {
 								/>
 							) }
 						/>
-					</Toolbar>
+					</ToolbarGroup>
 				</MediaUploadCheck>
 			</BlockControls>
 		);

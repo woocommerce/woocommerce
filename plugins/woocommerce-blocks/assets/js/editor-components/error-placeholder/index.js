@@ -28,7 +28,7 @@ const ErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 				{ isLoading ? (
 					<Spinner />
 				) : (
-					<Button isDefault onClick={ onRetry }>
+					<Button isSecondary onClick={ onRetry }>
 						{ __( 'Retry', 'woo-gutenberg-products-block' ) }
 					</Button>
 				) }

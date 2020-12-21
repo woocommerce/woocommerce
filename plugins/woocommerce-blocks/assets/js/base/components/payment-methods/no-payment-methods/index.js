@@ -43,7 +43,7 @@ const NoPaymentMethodsPlaceholder = () => {
 				) }
 			</span>
 			<Button
-				isDefault
+				isSecondary
 				href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
 				target="_blank"
 				rel="noopener noreferrer"
