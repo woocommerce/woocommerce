@@ -404,7 +404,7 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param couponAmount Amount to be applied. Defaults to 5.
  */
 const createCoupon = async ( couponAmount = '5' ) => {
-	await StoreOwnerFlow.openNewCoupon();
+	await merchant.openNewCoupon();
 
 	// Fill in coupon code
 	let couponCode = 'code-' + new Date().getTime().toString();
