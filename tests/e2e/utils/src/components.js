@@ -398,6 +398,33 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
 }
 
+/**
+ * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
+ *
+ * @param couponAmount Amount to be applied. Defaults to 5.
+ */
+const createCoupon = async ( couponAmount = '5' ) => {
+	await StoreOwnerFlow.openNewCoupon();
+
+	// Fill in coupon code
+	let couponCode = 'code-' + new Date().getTime().toString();
+	await expect(page).toFill( '#title', couponCode );
+
+	// Set general coupon data
+	await clickTab( 'General' );
+	await expect(page).toSelect( '#discount_type', 'Fixed cart discount' );
+	await expect(page).toFill( '#coupon_amount', couponAmount );
+
+	// Publish coupon
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+
+	return couponCode;
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -405,4 +432,5 @@ export {
 	createSimpleOrder,
 	verifyAndPublish,
 	addProductToOrder,
+	createCoupon,
 };
