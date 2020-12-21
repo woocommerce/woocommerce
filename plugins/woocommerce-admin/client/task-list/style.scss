@@ -52,12 +52,6 @@
 		font-size: 12px;
 	}
 
-	.woocommerce-card.is-narrow {
-		max-width: 680px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-
 	#wpbody-content {
 		position: relative;
 	}
@@ -202,13 +196,11 @@
 }
 
 .woocommerce-task-payment {
-	.woocommerce-card__body {
-		display: flex;
-		padding: $gap-large $gap-larger;
-		align-items: center;
-		position: relative;
-		overflow: hidden;
-	}
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	position: relative;
+	overflow: hidden;
 
 	.woocommerce-task-payment__recommended-ribbon {
 		position: absolute;
@@ -244,7 +236,7 @@
 		}
 	}
 
-	.woocommerce-task-payment__before {
+	.components-card__header {
 		margin-right: $gap-larger;
 
 		img {
@@ -275,7 +267,7 @@
 		}
 	}
 
-	.woocommerce-task-payment__after {
+	.components-card__footer {
 		margin-left: auto;
 
 		.components-button.is-button {
@@ -284,9 +276,7 @@
 	}
 
 	@include breakpoint( '<600px' ) {
-		.woocommerce-card__body {
-			flex-direction: column;
-		}
+		flex-direction: column;
 
 		.woocommerce-task-payment__recommended-ribbon {
 			display: none;
@@ -296,13 +286,13 @@
 			display: none;
 		}
 
-		.woocommerce-task-payment__before {
+		.components-card__header {
 			order: 1;
 			margin-right: auto;
 			margin-bottom: $gap-large;
 		}
 
-		.woocommerce-task-payment__after {
+		.components-card__footer {
 			position: absolute;
 			right: $gap-larger;
 			top: $gap-large;
@@ -312,7 +302,7 @@
 			}
 		}
 
-		.woocommerce-task-payment__text {
+		.components-card__body {
 			order: 3;
 			margin-top: $gap;
 		}
@@ -320,21 +310,17 @@
 }
 
 .woocommerce-task-payment-method {
-	.woocommerce-card__body {
-		padding: $gap-large;
+	> h3 {
+		margin: 0;
+		color: $studio-gray-90;
+	}
 
-		> h3 {
-			margin: 0;
-			color: $studio-gray-90;
-		}
-
-		p {
-			font-size: 14px;
-			color: $studio-gray-50;
-			font-weight: 400;
-			margin-top: 16px;
-			margin-bottom: $gap-smaller;
-		}
+	p {
+		font-size: 14px;
+		color: $studio-gray-50;
+		font-weight: 400;
+		margin-top: 16px;
+		margin-bottom: $gap-smaller;
 	}
 }
 

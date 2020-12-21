@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Card, List } from '@woocommerce/components';
+import { Card, CardBody } from '@wordpress/components';
+import { List } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -61,7 +62,9 @@ export default class Products extends Component {
 		return (
 			<Fragment>
 				<Card className="woocommerce-task-card">
-					<List items={ subTasks } />
+					<CardBody size={ null }>
+						<List items={ subTasks } />
+					</CardBody>
 				</Card>
 			</Fragment>
 		);

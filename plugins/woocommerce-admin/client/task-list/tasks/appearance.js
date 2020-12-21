@@ -3,18 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Button } from '@wordpress/components';
+import { Button, Card, CardBody } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { filter } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
 
-import {
-	Card,
-	Stepper,
-	TextControl,
-	ImageUpload,
-} from '@woocommerce/components';
+import { Stepper, TextControl, ImageUpload } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
@@ -403,15 +398,17 @@ class Appearance extends Component {
 
 		return (
 			<div className="woocommerce-task-appearance">
-				<Card className="is-narrow">
-					<Stepper
-						isPending={
-							isUpdatingNotice || isUpdatingLogo || isPending
-						}
-						isVertical
-						currentStep={ currentStep }
-						steps={ this.getSteps() }
-					/>
+				<Card className="woocommerce-task-card">
+					<CardBody>
+						<Stepper
+							isPending={
+								isUpdatingNotice || isUpdatingLogo || isPending
+							}
+							isVertical
+							currentStep={ currentStep }
+							steps={ this.getSteps() }
+						/>
+					</CardBody>
 				</Card>
 			</div>
 		);

@@ -48,7 +48,7 @@ const markTaskIncomplete = () => {
 
 const Task = () => {
 	return (
-		<Card className="is-narrow">
+		<Card className="woocommerce-task-card">
 			{ __( 'Example task card content.', 'plugin-domain' ) }
 			<br />
 			<br />

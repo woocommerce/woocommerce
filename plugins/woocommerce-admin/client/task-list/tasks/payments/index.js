@@ -5,9 +5,16 @@ import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { cloneElement, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, FormToggle } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
+	FormToggle,
+} from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Card, H, Plugins } from '@woocommerce/components';
+import { H, Plugins } from '@woocommerce/components';
 import {
 	getHistory,
 	getNewPath,
@@ -199,13 +206,15 @@ class Payments extends Component {
 
 		if ( currentMethod ) {
 			return (
-				<Card className="woocommerce-task-payment-method is-narrow">
-					{ cloneElement( currentMethod.container, {
-						query,
-						installStep: this.getInstallStep(),
-						markConfigured: this.markConfigured,
-						hasCbdIndustry: currentMethod.hasCbdIndustry,
-					} ) }
+				<Card className="woocommerce-task-payment-method woocommerce-task-card">
+					<CardBody>
+						{ cloneElement( currentMethod.container, {
+							query,
+							installStep: this.getInstallStep(),
+							markConfigured: this.markConfigured,
+							hasCbdIndustry: currentMethod.hasCbdIndustry,
+						} ) }
+					</CardBody>
 				</Card>
 			);
 		}
@@ -229,7 +238,7 @@ class Payments extends Component {
 
 					const classes = classnames(
 						'woocommerce-task-payment',
-						'is-narrow',
+						'woocommerce-task-card',
 						! isConfigured &&
 							'woocommerce-task-payment-not-configured',
 						'woocommerce-task-payment-' + key
@@ -244,7 +253,7 @@ class Payments extends Component {
 
 					return (
 						<Card key={ key } className={ classes }>
-							<div className="woocommerce-task-payment__before">
+							<CardHeader isBorderless>
 								{ showRecommendedRibbon && (
 									<div className="woocommerce-task-payment__recommended-ribbon">
 										<span>
@@ -256,8 +265,8 @@ class Payments extends Component {
 									</div>
 								) }
 								{ before }
-							</div>
-							<div className="woocommerce-task-payment__text">
+							</CardHeader>
+							<CardBody>
 								<H className="woocommerce-task-payment__title">
 									{ title }
 									{ showRecommendedPill && (
@@ -272,8 +281,8 @@ class Payments extends Component {
 								<div className="woocommerce-task-payment__content">
 									{ content }
 								</div>
-							</div>
-							<div className="woocommerce-task-payment__after">
+							</CardBody>
+							<CardFooter isBorderless>
 								{ container && ! isConfigured ? (
 									<Button
 										isPrimary={ key === recommendedMethod }
@@ -297,7 +306,7 @@ class Payments extends Component {
 										onClick={ ( e ) => e.stopPropagation() }
 									/>
 								) }
-							</div>
+							</CardFooter>
 						</Card>
 					);
 				} ) }

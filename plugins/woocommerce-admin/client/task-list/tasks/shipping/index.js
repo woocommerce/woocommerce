@@ -4,11 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
+import { Card, CardBody } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Card, Link, Stepper, Plugins } from '@woocommerce/components';
+import { Link, Stepper, Plugins } from '@woocommerce/components';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
@@ -310,13 +311,17 @@ export class Shipping extends Component {
 
 		return (
 			<div className="woocommerce-task-shipping">
-				<Card className="is-narrow">
-					<Stepper
-						isPending={ isPending || isUpdateSettingsRequesting }
-						isVertical
-						currentStep={ step }
-						steps={ this.getSteps() }
-					/>
+				<Card className="woocommerce-task-card">
+					<CardBody>
+						<Stepper
+							isPending={
+								isPending || isUpdateSettingsRequesting
+							}
+							isVertical
+							currentStep={ step }
+							steps={ this.getSteps() }
+						/>
+					</CardBody>
 				</Card>
 			</div>
 		);
