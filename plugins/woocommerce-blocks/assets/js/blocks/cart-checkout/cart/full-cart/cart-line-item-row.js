@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
+import ProductName from '@woocommerce/base-components/product-name';
 import { getCurrency } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
@@ -14,7 +15,6 @@ import {
 	ProductImage,
 	ProductLowStockBadge,
 	ProductMetadata,
-	ProductName,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
 import Dinero from 'dinero.js';
@@ -116,9 +116,9 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			</td>
 			<td className="wc-block-cart-item__product">
 				<ProductName
-					permalink={ permalink }
-					name={ name }
 					disabled={ isPendingDelete || isProductHiddenFromCatalog }
+					name={ name }
+					permalink={ permalink }
 				/>
 				{ showBackorderBadge ? (
 					<ProductBackorderBadge />

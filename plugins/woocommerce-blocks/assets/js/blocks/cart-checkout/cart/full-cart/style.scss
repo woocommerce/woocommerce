@@ -74,6 +74,10 @@ table.wc-block-cart-items {
 				display: none;
 			}
 		}
+		.wc-block-components-product-name {
+			display: block;
+			max-width: max-content;
+		}
 		.wc-block-cart-item__total {
 			@include font-size(regular);
 			text-align: right;
