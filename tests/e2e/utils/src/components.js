@@ -368,6 +368,61 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 
 	// Verify
 	await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+
+	const variablePostId = await page.$( '#post_ID' );
+	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
+	return variablePostIdValue;
+};
+
+/**
+ * Adds a product to an order in the StoreOwnerFlow.
+ *
+ * @param orderId ID of the order to add the product to.
+ * @param productName Name of the product being added to the order.
+ */
+const addProductToOrder = async ( orderId, productName ) => {
+	await StoreOwnerFlow.goToOrder( orderId );
+
+	// Add a product to the order
+	await expect( page ).toClick( 'button.add-line-item' );
+	await expect( page ).toClick( 'button.add-order-item' );
+	await page.waitForSelector( '.wc-backbone-modal-header' );
+	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
+	await expect( page ).toFill( '#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName );
+	await expect( page ).toClick( 'li[aria-selected="true"]' );
+	await page.click( '.wc-backbone-modal-content #btn-ok' );
+
+	await uiUnblocked();
+
+	// Verify the product we added shows as a line item now
+	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
+}
+
+/**
+ * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
+ *
+ * @param couponAmount Amount to be applied. Defaults to 5.
+ */
+const createCoupon = async ( couponAmount = '5' ) => {
+	await StoreOwnerFlow.openNewCoupon();
+
+	// Fill in coupon code
+	let couponCode = 'code-' + new Date().getTime().toString();
+	await expect(page).toFill( '#title', couponCode );
+
+	// Set general coupon data
+	await clickTab( 'General' );
+	await expect(page).toSelect( '#discount_type', 'Fixed cart discount' );
+	await expect(page).toFill( '#coupon_amount', couponAmount );
+
+	// Publish coupon
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+
+	return couponCode;
 };
 
 export {
@@ -376,4 +431,6 @@ export {
 	createVariableProduct,
 	createSimpleOrder,
 	verifyAndPublish,
+	addProductToOrder,
+	createCoupon,
 };

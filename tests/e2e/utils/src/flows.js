@@ -25,6 +25,7 @@ const WP_ADMIN_NEW_ORDER = baseUrl + 'wp-admin/post-new.php?post_type=shop_order
 const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product';
 const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=';
 const WP_ADMIN_PERMALINK_SETTINGS = baseUrl + 'wp-admin/options-permalink.php';
+const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
 
 const SHOP_PAGE = baseUrl + 'shop';
 const SHOP_PRODUCT_PAGE = baseUrl + '?p=';
@@ -310,6 +311,23 @@ const StoreOwnerFlow = {
 			waitUntil: 'networkidle0',
 		} );
 	},
+
+	goToOrder: async ( orderId ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	updateOrderStatus: async ( orderId, status ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
+			waitUntil: 'networkidle0',
+		} );
+		await expect( page ).toSelect( '#order_status', status );
+		await page.waitFor( 2000 );
+		await expect( page ).toClick( 'button.save_order' );
+		await page.waitForSelector( '#message' );
+		await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+	}
 };
 
 export { CustomerFlow, StoreOwnerFlow };
