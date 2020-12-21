@@ -1,12 +1,13 @@
 .woocommerce-filters-advanced {
 	margin: $gap-large 0;
 
-	.woocommerce-card__header {
-		padding: $gap-smaller $gap;
-	}
+	.components-card__body {
+		background-color: $gray-100;
 
-	.woocommerce-card__body {
-		padding: 0;
+		&.is-size-small:hover,
+		ul li:hover {
+			background-color: $gray-200;
+		}
 	}
 
 	.components-select-control__input {
@@ -15,8 +16,10 @@
 		margin: 0;
 	}
 
-	.components-base-control__field {
-		margin-bottom: 0;
+	.components-card__header {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
 	}
 
 	@include breakpoint( '<782px' ) {
@@ -43,7 +46,6 @@
 	margin: 0;
 	display: grid;
 	grid-template-columns: 1fr 40px;
-	background-color: $gray-100;
 	border-bottom: 1px solid $gray-400;
 
 	&:hover {
@@ -84,16 +86,8 @@
 }
 
 .woocommerce-filters-advanced__add-filter {
-	padding: $gap-small;
 	margin: 0;
-	color: $studio-woocommerce-purple;
 	display: block;
-	background-color: $gray-100;
-	border-bottom: 1px solid $gray-400;
-
-	&:hover {
-		background-color: $gray-200;
-	}
 
 	div div {
 		display: inline-block;
@@ -180,22 +174,9 @@
 		fill: currentColor;
 		margin: 0 6px 0 0;
 	}
-
-	&.components-icon-button:not(:disabled):not([aria-disabled='true']):not(.is-default):hover {
-		color: $studio-woocommerce-purple-30;
-	}
-
-	&:not(:disabled):not([aria-disabled='true']):focus {
-		color: $studio-woocommerce-purple;
-		background-color: transparent;
-	}
 }
 
 .woocommerce-filters-advanced__controls {
-	padding: $gap-smaller $gap;
-	display: flex;
-	align-items: center;
-
 	.components-button {
 		margin-right: $gap;
 	}

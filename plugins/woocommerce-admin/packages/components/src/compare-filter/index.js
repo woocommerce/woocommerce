@@ -3,7 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { isEqual, isFunction } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -12,7 +19,6 @@ import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import Card from '../card';
 import CompareButton from './button';
 import Search from '../search';
 
@@ -89,11 +95,11 @@ export class CompareFilter extends Component {
 		const { labels, type } = this.props;
 		const { selected } = this.state;
 		return (
-			<Card
-				title={ labels.title }
-				className="woocommerce-filters__compare woocommerce-analytics__card"
-			>
-				<div className="woocommerce-filters__compare-body">
+			<Card className="woocommerce-filters__compare">
+				<CardHeader>
+					<Text variant="subtitle.small">{ labels.title }</Text>
+				</CardHeader>
+				<CardBody>
 					<Search
 						type={ type }
 						selected={ selected }
@@ -102,8 +108,8 @@ export class CompareFilter extends Component {
 							this.setState( { selected: value } );
 						} }
 					/>
-				</div>
-				<div className="woocommerce-filters__compare-footer">
+				</CardBody>
+				<CardFooter justify="flex-start">
 					<CompareButton
 						count={ selected.length }
 						helpText={ labels.helpText }
@@ -116,7 +122,7 @@ export class CompareFilter extends Component {
 							{ __( 'Clear all', 'woocommerce-admin' ) }
 						</Button>
 					) }
-				</div>
+				</CardFooter>
 			</Card>
 		);
 	}

@@ -3,8 +3,9 @@
 
 	i.material-icons-outlined {
 		position: absolute;
-		top: 9px;
+		top: 50%;
 		left: 10px;
+		transform: translateY(-50%);
 		color: $gray-400;
 		font-size: 20px;
 	}

@@ -22,6 +22,18 @@
 	}
 }
 
+.woocommerce-filters__advanced-filters {
+	.components-card__body {
+		background-color: $gray-100;
+	}
+
+	.components-card__footer {
+		.components-button {
+			margin-right: $gap;
+		}
+	}
+}
+
 .woocommerce-filters-filter {
 	width: 25%;
 	padding: 0 $gap-small;
@@ -80,26 +92,6 @@
 			height: 100%;
 			border: none;
 		}
-	}
-}
-
-.woocommerce-filters__compare .woocommerce-card__body {
-	padding: 0;
-}
-
-.woocommerce-filters__compare-body {
-	padding: $gap;
-	background-color: $gray-100;
-	border-bottom: 1px solid $gray-100;
-}
-
-.woocommerce-filters__compare-footer {
-	padding: $gap;
-	display: flex;
-	align-items: center;
-
-	.components-button {
-		margin-right: $gap;
 	}
 }
 

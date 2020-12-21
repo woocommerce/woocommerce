@@ -2,8 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
+	Dropdown,
+	SelectControl,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { Component, createRef } from '@wordpress/element';
-import { SelectControl, Button, Dropdown } from '@wordpress/components';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
@@ -20,7 +29,6 @@ import {
 /**
  * Internal dependencies
  */
-import Card from '../card';
 import Link from '../link';
 import AdvancedFilterItem from './item';
 
@@ -265,105 +273,115 @@ class AdvancedFilters extends Component {
 			activeFilters.length === 0;
 		const isEnglish = this.isEnglish();
 		return (
-			<Card
-				className="woocommerce-filters-advanced woocommerce-analytics__card"
-				title={ this.getTitle() }
-			>
-				<ul
-					className="woocommerce-filters-advanced__list"
-					ref={ this.filterListRef }
-				>
-					{ activeFilters
-						.sort( this.orderFilters )
-						.map( ( filter, idx ) => {
-							const { instance, key } = filter;
-							return (
-								<AdvancedFilterItem
-									key={ key + ( instance || '' ) }
-									config={ config }
-									currency={ currency }
-									filter={ filter }
-									isEnglish={ isEnglish }
-									onFilterChange={ partial(
-										this.onFilterChange,
-										idx
-									) }
-									query={ query }
-									removeFilter={ () =>
-										this.removeFilter( idx )
-									}
-								/>
-							);
-						} ) }
-				</ul>
-				{ availableFilterKeys.length > 0 && (
-					<div className="woocommerce-filters-advanced__add-filter">
-						<Dropdown
-							className="woocommerce-filters-advanced__add-filter-dropdown"
-							position="bottom center"
-							renderToggle={ ( { isOpen, onToggle } ) => (
-								<Button
-									className="woocommerce-filters-advanced__add-button"
-									onClick={ onToggle }
-									aria-expanded={ isOpen }
-								>
-									<AddOutlineIcon />
-									{ __(
-										'Add a Filter',
-										'woocommerce-admin'
-									) }
-								</Button>
-							) }
-							renderContent={ ( { onClose } ) => (
-								<ul className="woocommerce-filters-advanced__add-dropdown">
-									{ availableFilterKeys.map( ( key ) => (
-										<li key={ key }>
-											<Button
-												onClick={ partial(
-													this.addFilter,
-													key,
-													onClose
-												) }
-											>
-												{
-													config.filters[ key ].labels
-														.add
-												}
-											</Button>
-										</li>
-									) ) }
-								</ul>
-							) }
-						/>
-					</div>
+			<Card className="woocommerce-filters-advanced" size="small">
+				<CardHeader justify="flex-start">
+					<Text variant="subtitle.small">{ this.getTitle() }</Text>
+				</CardHeader>
+				{ !! activeFilters.length && (
+					<CardBody size={ null }>
+						<ul
+							className="woocommerce-filters-advanced__list"
+							ref={ this.filterListRef }
+						>
+							{ activeFilters
+								.sort( this.orderFilters )
+								.map( ( filter, idx ) => {
+									const { instance, key } = filter;
+									return (
+										<AdvancedFilterItem
+											key={ key + ( instance || '' ) }
+											config={ config }
+											currency={ currency }
+											filter={ filter }
+											isEnglish={ isEnglish }
+											onFilterChange={ partial(
+												this.onFilterChange,
+												idx
+											) }
+											query={ query }
+											removeFilter={ () =>
+												this.removeFilter( idx )
+											}
+										/>
+									);
+								} ) }
+						</ul>
+					</CardBody>
 				) }
-
-				<div className="woocommerce-filters-advanced__controls">
-					{ updateDisabled && (
-						<Button isPrimary disabled>
-							{ __( 'Filter', 'woocommerce-admin' ) }
-						</Button>
-					) }
-					{ ! updateDisabled && (
-						<Link
-							className="components-button is-primary is-button"
-							type="wc-admin"
-							href={ updateHref }
-							onClick={ this.onFilter }
-						>
-							{ __( 'Filter', 'woocommerce-admin' ) }
-						</Link>
-					) }
-					{ activeFilters.length > 0 && (
-						<Link
-							type="wc-admin"
-							href={ this.getUpdateHref( [] ) }
-							onClick={ this.clearFilters }
-						>
-							{ __( 'Clear all filters', 'woocommerce-admin' ) }
-						</Link>
-					) }
-				</div>
+				{ availableFilterKeys.length > 0 && (
+					<CardBody>
+						<div className="woocommerce-filters-advanced__add-filter">
+							<Dropdown
+								className="woocommerce-filters-advanced__add-filter-dropdown"
+								position="bottom center"
+								renderToggle={ ( { isOpen, onToggle } ) => (
+									<Button
+										className="woocommerce-filters-advanced__add-button"
+										onClick={ onToggle }
+										aria-expanded={ isOpen }
+									>
+										<AddOutlineIcon />
+										{ __(
+											'Add a Filter',
+											'woocommerce-admin'
+										) }
+									</Button>
+								) }
+								renderContent={ ( { onClose } ) => (
+									<ul className="woocommerce-filters-advanced__add-dropdown">
+										{ availableFilterKeys.map( ( key ) => (
+											<li key={ key }>
+												<Button
+													onClick={ partial(
+														this.addFilter,
+														key,
+														onClose
+													) }
+												>
+													{
+														config.filters[ key ]
+															.labels.add
+													}
+												</Button>
+											</li>
+										) ) }
+									</ul>
+								) }
+							/>
+						</div>
+					</CardBody>
+				) }
+				<CardFooter align="center">
+					<div className="woocommerce-filters-advanced__controls">
+						{ updateDisabled && (
+							<Button isPrimary disabled>
+								{ __( 'Filter', 'woocommerce-admin' ) }
+							</Button>
+						) }
+						{ ! updateDisabled && (
+							<Link
+								className="components-button is-primary is-button"
+								type="wc-admin"
+								href={ updateHref }
+								onClick={ this.onFilter }
+							>
+								{ __( 'Filter', 'woocommerce-admin' ) }
+							</Link>
+						) }
+						{ activeFilters.length > 0 && (
+							<Link
+								type="wc-admin"
+								href={ this.getUpdateHref( [] ) }
+								onClick={ this.clearFilters }
+							>
+								{ __(
+									'Clear all filters',
+									'woocommerce-admin'
+								) }
+							</Link>
+						) }
+					</div>
+				</CardFooter>
 			</Card>
 		);
 	}
