@@ -9,12 +9,15 @@ import { decodeEntities } from '@wordpress/html-entities';
 import InfoIcon from 'gridicons/dist/info';
 import {
 	Button,
+	Card,
+	CardBody,
+	CardFooter,
 	TabPanel,
 	Tooltip,
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Card, H } from '@woocommerce/components';
+import { H } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -192,15 +195,17 @@ class Theme extends Component {
 
 		return (
 			<Card className="woocommerce-profile-wizard__theme" key={ slug }>
-				{ image && (
-					<div
-						className="woocommerce-profile-wizard__theme-image"
-						style={ { backgroundImage: `url(${ image })` } }
-						role="img"
-						aria-label={ title }
-					/>
-				) }
-				<div className="woocommerce-profile-wizard__theme-details">
+				<CardBody size={ null }>
+					{ image && (
+						<div
+							className="woocommerce-profile-wizard__theme-image"
+							style={ { backgroundImage: `url(${ image })` } }
+							role="img"
+							aria-label={ title }
+						/>
+					) }
+				</CardBody>
+				<CardBody className="woocommerce-profile-wizard__theme-details">
 					<H className="woocommerce-profile-wizard__theme-name">
 						{ title }
 						{ ! hasSupport && (
@@ -223,39 +228,39 @@ class Theme extends Component {
 					<p className="woocommerce-profile-wizard__theme-status">
 						{ this.getThemeStatus( theme ) }
 					</p>
-					<div className="woocommerce-profile-wizard__theme-actions">
-						{ slug === activeTheme ? (
-							<Button
-								isPrimary
-								onClick={ () => this.onChoose( theme, 'card' ) }
-								isBusy={ chosen === slug }
-								disabled={ chosen === slug }
-							>
-								{ __(
-									'Continue with my active theme',
-									'woocommerce-admin'
-								) }
-							</Button>
-						) : (
-							<Button
-								isSecondary
-								onClick={ () => this.onChoose( theme, 'card' ) }
-								isBusy={ chosen === slug }
-								disabled={ chosen === slug }
-							>
-								{ __( 'Choose', 'woocommerce-admin' ) }
-							</Button>
-						) }
-						{ demoUrl && (
-							<Button
-								isTertiary
-								onClick={ () => this.openDemo( theme ) }
-							>
-								{ __( 'Live demo', 'woocommerce-admin' ) }
-							</Button>
-						) }
-					</div>
-				</div>
+				</CardBody>
+				<CardFooter>
+					{ slug === activeTheme ? (
+						<Button
+							isPrimary
+							onClick={ () => this.onChoose( theme, 'card' ) }
+							isBusy={ chosen === slug }
+							disabled={ chosen === slug }
+						>
+							{ __(
+								'Continue with my active theme',
+								'woocommerce-admin'
+							) }
+						</Button>
+					) : (
+						<Button
+							isSecondary
+							onClick={ () => this.onChoose( theme, 'card' ) }
+							isBusy={ chosen === slug }
+							disabled={ chosen === slug }
+						>
+							{ __( 'Choose', 'woocommerce-admin' ) }
+						</Button>
+					) }
+					{ demoUrl && (
+						<Button
+							isTertiary
+							onClick={ () => this.openDemo( theme ) }
+						>
+							{ __( 'Live demo', 'woocommerce-admin' ) }
+						</Button>
+					) }
+				</CardFooter>
 			</Card>
 		);
 	}

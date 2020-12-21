@@ -6,6 +6,9 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
 	Button,
+	Card,
+	CardBody,
+	CardFooter,
 	CheckboxControl,
 	FormToggle,
 	Popover,
@@ -16,7 +19,6 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { keys, get, pickBy } from 'lodash';
 import {
 	H,
-	Card,
 	Link,
 	SelectControl,
 	Form,
@@ -462,7 +464,7 @@ class BusinessDetails extends Component {
 		];
 
 		return (
-			<Fragment>
+			<div>
 				{ extensionBenefits.map( ( benefit ) => (
 					<div
 						className="woocommerce-profile-wizard__benefit"
@@ -488,7 +490,7 @@ class BusinessDetails extends Component {
 						</div>
 					</div>
 				) ) }
-			</Fragment>
+			</div>
 		);
 	}
 
@@ -816,6 +818,16 @@ class BusinessDetails extends Component {
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {
+					const businessExtensions = this.bundleInstall
+						? this.renderBusinessExtensionsBundle(
+								values,
+								getInputProps
+						  )
+						: this.renderBusinessExtensions(
+								values,
+								getInputProps
+						  );
+
 					return (
 						<Fragment>
 							<div className="woocommerce-profile-wizard__step-header">
@@ -833,7 +845,7 @@ class BusinessDetails extends Component {
 								</Text>
 							</div>
 							<Card>
-								<Fragment>
+								<CardBody>
 									<SelectControl
 										label={ __(
 											'How many products do you plan to display?',
@@ -906,50 +918,44 @@ class BusinessDetails extends Component {
 											</div>
 										</Fragment>
 									) }
-
-									{ this.bundleInstall
-										? this.renderBusinessExtensionsBundle(
-												values,
-												getInputProps
-										  )
-										: this.renderBusinessExtensions(
-												values,
-												getInputProps
-										  ) }
-
-									<div className="woocommerce-profile-wizard__card-actions">
-										<Button
-											isPrimary
-											onClick={ handleSubmit }
-											disabled={
-												! isValidForm ||
-												isUpdatingProfileItems ||
-												isInstallingActivating
-											}
-											isBusy={ isInstallingActivating }
-										>
-											{ ! hasInstallActivateError
-												? __(
-														'Continue',
-														'woocommerce-admin'
-												  )
-												: __(
-														'Retry',
-														'woocommerce-admin'
-												  ) }
-										</Button>
-										{ hasInstallActivateError && (
-											<Button
-												onClick={ () => goToNextStep() }
-											>
-												{ __(
-													'Continue without installing',
+								</CardBody>
+								{ businessExtensions && (
+									<CardFooter>
+										{ businessExtensions }
+									</CardFooter>
+								) }
+								<CardFooter justify="center">
+									<Button
+										isPrimary
+										onClick={ handleSubmit }
+										disabled={
+											! isValidForm ||
+											isUpdatingProfileItems ||
+											isInstallingActivating
+										}
+										isBusy={ isInstallingActivating }
+									>
+										{ ! hasInstallActivateError
+											? __(
+													'Continue',
 													'woocommerce-admin'
-												) }
-											</Button>
-										) }
-									</div>
-								</Fragment>
+											  )
+											: __(
+													'Retry',
+													'woocommerce-admin'
+											  ) }
+									</Button>
+									{ hasInstallActivateError && (
+										<Button
+											onClick={ () => goToNextStep() }
+										>
+											{ __(
+												'Continue without installing',
+												'woocommerce-admin'
+											) }
+										</Button>
+									) }
+								</CardFooter>
 							</Card>
 
 							{ this.renderBusinessExtensionHelpText( values ) }

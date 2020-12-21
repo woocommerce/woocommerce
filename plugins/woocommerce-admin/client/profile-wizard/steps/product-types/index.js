@@ -6,13 +6,15 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
 	Button,
+	Card,
+	CardBody,
+	CardFooter,
 	CheckboxControl,
 	FormToggle,
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { Card } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
@@ -119,7 +121,7 @@ export class ProductTypes extends Component {
 				</div>
 
 				<Card>
-					<div className="woocommerce-profile-wizard__checkbox-group">
+					<CardBody size={ null }>
 						{ Object.keys( productTypes ).map( ( slug ) => {
 							return (
 								<CheckboxControl
@@ -154,21 +156,20 @@ export class ProductTypes extends Component {
 								{ error }
 							</span>
 						) }
-						<div className="woocommerce-profile-wizard__card-actions">
-							<Button
-								isPrimary
-								onClick={ this.onContinue }
-								disabled={
-									! selected.length ||
-									isProfileItemsRequesting
-								}
-							>
-								{ __( 'Continue', 'woocommerce-admin' ) }
-							</Button>
-						</div>
-					</div>
+					</CardBody>
+					<CardFooter isBorderless justify="center">
+						<Button
+							isPrimary
+							onClick={ this.onContinue }
+							disabled={
+								! selected.length || isProfileItemsRequesting
+							}
+						>
+							{ __( 'Continue', 'woocommerce-admin' ) }
+						</Button>
+					</CardFooter>
 				</Card>
-				<div className="woocommerce-profile-wizard__card-help-text">
+				<div className="woocommerce-profile-wizard__card-help-footnote">
 					<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
 						<label htmlFor="woocommerce-product-types__pricing-toggle">
 							<Text variant="body">

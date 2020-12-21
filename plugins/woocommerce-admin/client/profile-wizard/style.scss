@@ -20,45 +20,6 @@
 		}
 	}
 
-	.woocommerce-card {
-		margin-top: $gap;
-
-		h1,
-		h2,
-		h3 {
-			color: $gray-900;
-		}
-		color: $gray-700;
-		text-align: left;
-
-		button.is-button {
-			display: flex;
-			margin: $gap-smaller auto 0;
-			width: 310px;
-			max-width: 100%;
-			justify-content: center;
-		}
-
-		.business-competitors .woocommerce-select-control__listbox {
-			max-height: unset;
-		}
-	}
-
-	.woocommerce-profile-wizard__card-actions {
-		text-align: center;
-
-		.components-button {
-			margin-top: $gap-small;
-		}
-	}
-
-	.woocommerce-card + .woocommerce-profile-wizard__card-help-text {
-		font-size: 14px;
-		color: $gray-600;
-		text-align: center;
-		margin-top: $gap;
-	}
-
 	.woocommerce-profile-wizard__header {
 		height: $header-height;
 		border-bottom: 1px solid $studio-gray-5;
@@ -118,11 +79,6 @@
 			}
 		}
 
-		.woocommerce-card ~ p {
-			color: $gray-600;
-			text-align: center;
-		}
-
 		.woocommerce-profile-wizard__footer {
 			margin: 34px auto;
 			display: flex;
@@ -135,6 +91,9 @@
 		}
 
 		.woocommerce-profile-wizard__footnote {
+			margin-top: $gap;
+			text-align: center;
+
 			p {
 				color: $gray-700;
 				text-align: left;
@@ -155,7 +114,7 @@
 
 	.woocommerce-profile-wizard__error {
 		display: block;
-		padding: $gap;
+		padding: $gap $gap-large;
 		font-size: 12px;
 		color: $studio-red-50;
 	}
@@ -217,6 +176,7 @@
 	.woocommerce-profile-wizard__benefit-card {
 		display: flex;
 		flex-direction: column;
+		justify-self: center;
 		background: $studio-gray-0;
 		width: 100%;
 		max-width: 295px;
@@ -284,52 +244,41 @@
 		margin: $gap-smaller 0;
 	}
 
-	.woocommerce-profile-wizard__checkbox-group {
-		margin: #{-$gap} #{-$gap} 0 -#{$gap};
+	.woocommerce-profile-wizard__checkbox {
+		margin-top: 0;
+		margin-bottom: 0;
+		position: relative;
+		padding: $gap-small $gap-large;
+		min-height: 62px;
+		border-bottom: 1px solid $gray-100;
+		display: flex;
+		align-items: center;
 
-		.woocommerce-profile-wizard__checkbox {
-			margin-top: 0;
-			margin-bottom: 0;
+		.components-base-control {
 			position: relative;
-			padding: $gap-small $gap-large;
-			min-height: 46px;
-			border-bottom: 1px solid $gray-100;
-
-			.components-base-control {
-				position: relative;
-			}
-
-			.components-base-control__field {
-				margin: 0;
-			}
-
-			label.components-checkbox-control__label {
-				font-size: $gap;
-				margin-left: 0;
-			}
-
-			.components-base-control__help {
-				margin-left: $gap-largest + $gap-smaller;
-				font-style: normal;
-			}
-
-			.components-base-control__help {
-				color: $gray-600;
-				font-size: 14px;
-				line-height: 20px;
-				margin-top: 3px;
-				margin-bottom: 0;
-			}
-
-			&:last-of-type {
-				&::after {
-					display: none;
-				}
-			}
 		}
 
-		.woocommerce-profile-wizard__text {
-			margin: 0 16px 10px;
+		.components-base-control__field {
+			width: 100%;
+			margin: 0;
+		}
+
+		label.components-checkbox-control__label {
+			font-size: $gap;
+			margin-left: 0;
+		}
+
+		.components-base-control__help {
+			margin-left: $gap-largest + $gap-smaller;
+			font-style: normal;
+		}
+
+		.components-base-control__help {
+			color: $gray-600;
+			font-size: 14px;
+			line-height: 20px;
+			margin-top: 3px;
+			margin-bottom: 0;
 		}
 
 		svg.dashicon.components-checkbox-control__checked {
@@ -393,31 +342,12 @@
 	}
 }
 
-.woocommerce-profile-wizard__benefits-card.woocommerce-card {
+.woocommerce-profile-wizard__benefits-card.components-card {
 	display: inline-block;
 	max-width: 100%;
 	text-align: center;
 
-	.woocommerce-card__body {
-		padding: $gap-large * 2;
-	}
-
-	.woocommerce-profile-wizard__card-actions {
-		margin-top: $gap;
-		display: inline-flex;
-
-		.components-button {
-			width: auto;
-
-			&:first-child {
-				margin-right: $gap;
-			}
-		}
-	}
-
 	.woocommerce-profile-wizard__benefits-install-notice {
-		margin-top: $gap-large;
-		margin-bottom: 0;
 		font-size: 14px;
 		color: $studio-gray-40;
 	}
@@ -462,10 +392,6 @@
 	}
 }
 
-.woocommerce-profile-wizard__submit {
-	margin-bottom: $gap-small;
-}
-
 .woocommerce-profile-wizard__tooltip-icon {
 	color: $studio-gray-60;
 	display: flex;
@@ -475,13 +401,9 @@
 }
 
 .woocommerce-business-extensions {
-	margin-left: -$gap;
-	margin-right: -$gap;
-	padding: $gap $gap-large;
-	border-top: 1px solid $gray-100;
-	border-bottom: 1px solid $gray-100;
 	display: flex;
 	align-items: center;
+	width: 100%;
 
 	label {
 		display: flex;

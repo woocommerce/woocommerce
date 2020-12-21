@@ -44,18 +44,11 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 	text-align: center;
 }
 
-.woocommerce-profile-wizard__body .woocommerce-profile-wizard__theme.woocommerce-card {
+.woocommerce-profile-wizard__body .woocommerce-profile-wizard__theme.components-card {
 	overflow: hidden;
 
 	@include breakpoint( '>782px' ) {
 		margin: 0;
-	}
-
-	.woocommerce-card__body {
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		height: 100%;
 	}
 
 	.woocommerce-profile-wizard__theme-image {
@@ -81,13 +74,6 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 		}
 	}
 
-	.woocommerce-profile-wizard__theme-details {
-		padding: $gap;
-		display: flex;
-		flex-direction: column;
-		margin-top: auto;
-	}
-
 	.woocommerce-profile-wizard__theme-status {
 		margin: 0;
 		font-size: 14px;
@@ -96,35 +82,11 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 	.woocommerce-profile-wizard__theme-learn-more {
 		display: inline-block;
 	}
-
-	.woocommerce-profile-wizard__theme-actions {
-		button.components-button {
-			margin: 13px auto 0 auto;
-			display: block;
-			width: auto;
-			min-width: 106px;
-			height: 40px;
-			line-height: 1;
-
-			&.is-primary {
-				color: $studio-white;
-			}
-
-			&.is-tertiary {
-				font-size: 14px;
-				font-weight: 500;
-			}
-		}
-	}
 }
 
-.woocommerce-profile-wizard__body .woocommerce-theme-uploader.woocommerce-card {
+.woocommerce-profile-wizard__body .woocommerce-theme-uploader.components-card {
 	margin: 0;
 	position: relative;
-
-	.woocommerce-card__body {
-		height: 100%;
-	}
 
 	&.is-uploading .components-drop-zone__provider {
 		min-height: 382px;

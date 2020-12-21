@@ -5,6 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import {
 	Button,
+	Card,
+	CardBody,
+	CardFooter,
 	CheckboxControl,
 	__experimentalText as Text,
 } from '@wordpress/components';
@@ -13,7 +16,7 @@ import { filter, find, findIndex, get } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
-import { Card, TextControl } from '@woocommerce/components';
+import { TextControl } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -155,9 +158,34 @@ class Industry extends Component {
 		} );
 	}
 
+	renderIndustryLabel( slug, industry, selectedIndustry ) {
+		const { textInputListContent } = this.state;
+
+		return (
+			<>
+				{ industry.label }
+				{ industry.use_description && selectedIndustry && (
+					<TextControl
+						key={ `text-control-${ slug }` }
+						label={ industry.description_label }
+						value={
+							selectedIndustry.detail ||
+							textInputListContent[ slug ] ||
+							''
+						}
+						onChange={ ( value ) =>
+							this.onDetailChange( value, slug )
+						}
+						className="woocommerce-profile-wizard__text"
+					/>
+				) }
+			</>
+		);
+	}
+
 	render() {
 		const { industries } = onboarding;
-		const { error, selected, textInputListContent } = this.state;
+		const { error, selected } = this.state;
 		const { locationSettings, isProfileItemsRequesting } = this.props;
 		const region = getCurrencyRegion(
 			locationSettings.woocommerce_default_country
@@ -185,57 +213,37 @@ class Industry extends Component {
 					</Text>
 				</div>
 				<Card>
-					<div className="woocommerce-profile-wizard__checkbox-group">
-						{ filteredIndustryKeys.map( ( slug ) => {
-							const selectedIndustry = find( selected, { slug } );
+					<CardBody size={ null }>
+						<div className="woocommerce-profile-wizard__checkbox-group">
+							{ filteredIndustryKeys.map( ( slug ) => {
+								const selectedIndustry = find( selected, {
+									slug,
+								} );
 
-							return (
-								<div key={ `div-${ slug }` }>
+								return (
 									<CheckboxControl
 										key={ `checkbox-control-${ slug }` }
-										label={ industries[ slug ].label }
+										label={ this.renderIndustryLabel(
+											slug,
+											industries[ slug ],
+											selectedIndustry
+										) }
 										onChange={ () =>
 											this.onIndustryChange( slug )
 										}
 										checked={ selectedIndustry || false }
 										className="woocommerce-profile-wizard__checkbox"
 									/>
-									{ industries[ slug ].use_description &&
-										selectedIndustry && (
-											<TextControl
-												key={ `text-control-${ selectedIndustry.slug }` }
-												label={
-													industries[
-														selectedIndustry.slug
-													].description_label
-												}
-												value={
-													selectedIndustry.detail ||
-													textInputListContent[
-														slug
-													] ||
-													''
-												}
-												onChange={ ( value ) =>
-													this.onDetailChange(
-														value,
-														selectedIndustry.slug
-													)
-												}
-												className="woocommerce-profile-wizard__text"
-											/>
-										) }
-								</div>
-							);
-						} ) }
-						{ error && (
-							<span className="woocommerce-profile-wizard__error">
-								{ error }
-							</span>
-						) }
-					</div>
-
-					<div className="woocommerce-profile-wizard__card-actions">
+								);
+							} ) }
+							{ error && (
+								<span className="woocommerce-profile-wizard__error">
+									{ error }
+								</span>
+							) }
+						</div>
+					</CardBody>
+					<CardFooter isBorderless justify="center">
 						<Button
 							isPrimary
 							onClick={ this.onContinue }
@@ -245,7 +253,7 @@ class Industry extends Component {
 						>
 							{ __( 'Continue', 'woocommerce-admin' ) }
 						</Button>
-					</div>
+					</CardFooter>
 				</Card>
 			</Fragment>
 		);

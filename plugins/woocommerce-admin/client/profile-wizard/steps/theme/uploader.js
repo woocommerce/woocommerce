@@ -7,6 +7,7 @@ import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
+	Card,
 	DropZoneProvider,
 	DropZone,
 	FormFileUpload,
@@ -15,7 +16,7 @@ import CloudUploadIcon from 'gridicons/dist/cloud-upload';
 import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
-import { Card, H, Spinner } from '@woocommerce/components';
+import { H, Spinner } from '@woocommerce/components';
 
 class ThemeUploader extends Component {
 	constructor() {

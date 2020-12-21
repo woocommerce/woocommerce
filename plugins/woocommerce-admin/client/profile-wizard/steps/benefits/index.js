@@ -2,13 +2,19 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, __experimentalText as Text } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardFooter,
+	__experimentalText as Text,
+} from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
-import { Card, H, Link } from '@woocommerce/components';
+import { H, Link } from '@woocommerce/components';
 import {
 	pluginNames,
 	ONBOARDING_STORE_NAME,
@@ -219,22 +225,23 @@ class Benefits extends Component {
 
 		return (
 			<Card className="woocommerce-profile-wizard__benefits-card">
-				<Logo />
-				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
-						{ sprintf(
-							__(
-								'Enhance your store with %s',
-								'woocommerce-admin'
-							),
-							pluginNamesString
-						) }
-					</Text>
-				</div>
+				<CardBody justify="center">
+					<Logo />
+					<div className="woocommerce-profile-wizard__step-header">
+						<Text variant="title.small" as="h2">
+							{ sprintf(
+								__(
+									'Enhance your store with %s',
+									'woocommerce-admin'
+								),
+								pluginNamesString
+							) }
+						</Text>
+					</div>
 
-				{ this.renderBenefits() }
-
-				<div className="woocommerce-profile-wizard__card-actions">
+					{ this.renderBenefits() }
+				</CardBody>
+				<CardFooter isBorderless justify="center">
 					<Button
 						isPrimary
 						isBusy={ isInstallAction }
@@ -252,38 +259,40 @@ class Benefits extends Component {
 					>
 						{ __( 'No thanks', 'woocommerce-admin' ) }
 					</Button>
-				</div>
+				</CardFooter>
 
-				<p className="woocommerce-profile-wizard__benefits-install-notice">
-					{ isAcceptingTos
-						? interpolateComponents( {
-								mixedString: sprintf(
+				<CardFooter isBorderless justify="center">
+					<p className="woocommerce-profile-wizard__benefits-install-notice">
+						{ isAcceptingTos
+							? interpolateComponents( {
+									mixedString: sprintf(
+										__(
+											'%s %s will be installed & activated for free, and you agree to our {{link}}Terms of Service{{/link}}.',
+											'woocommerce-admin'
+										),
+										pluginNamesString,
+										pluralizedPlugins
+									),
+									components: {
+										link: (
+											<Link
+												href="https://wordpress.com/tos/"
+												target="_blank"
+												type="external"
+											/>
+										),
+									},
+							  } )
+							: sprintf(
 									__(
-										'%s %s will be installed & activated for free, and you agree to our {{link}}Terms of Service{{/link}}.',
+										'%s %s will be installed & activated for free.',
 										'woocommerce-admin'
 									),
 									pluginNamesString,
 									pluralizedPlugins
-								),
-								components: {
-									link: (
-										<Link
-											href="https://wordpress.com/tos/"
-											target="_blank"
-											type="external"
-										/>
-									),
-								},
-						  } )
-						: sprintf(
-								__(
-									'%s %s will be installed & activated for free.',
-									'woocommerce-admin'
-								),
-								pluginNamesString,
-								pluralizedPlugins
-						  ) }
-				</p>
+							  ) }
+					</p>
+				</CardFooter>
 			</Card>
 		);
 	}

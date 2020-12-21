@@ -296,23 +296,15 @@ class StoreDetails extends Component {
 							</CardFooter>
 
 							<CardFooter justify="center">
-								<FlexItem align="center">
-									<div className="woocommerce-profile-wizard__submit">
-										<Button
-											isPrimary
-											onClick={ handleSubmit }
-											disabled={
-												! isValidForm ||
-												isUpdatingProfileItems
-											}
-										>
-											{ __(
-												'Continue',
-												'woocommerce-admin'
-											) }
-										</Button>
-									</div>
-								</FlexItem>
+								<Button
+									isPrimary
+									onClick={ handleSubmit }
+									disabled={
+										! isValidForm || isUpdatingProfileItems
+									}
+								>
+									{ __( 'Continue', 'woocommerce-admin' ) }
+								</Button>
 							</CardFooter>
 						</Card>
 					) }
