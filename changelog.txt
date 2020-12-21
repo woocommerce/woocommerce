@@ -24,6 +24,8 @@
 * Fix - Add `postbox` class to `woocommerce_attribute wc-metabox` for proper targeting. #28351
 * Fix - Error tooltip misaligned on tax country field. #28565
 * Fix - Prevent meta_data from overwriting column data in customer's read. #28102
+* Fix - Also count comment types with '' and 'comment' in the review count query. #28624
+* Fix - Better error messages when usage limit are reached. #28592
 * Dev - Hook for intializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
