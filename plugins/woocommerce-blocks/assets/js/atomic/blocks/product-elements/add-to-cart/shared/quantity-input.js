@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * Quantity Input Component.
  *
  * @param {Object}         props          Incoming props for component
@@ -11,7 +16,10 @@
 const QuantityInput = ( { disabled, min, max, value, onChange } ) => {
 	return (
 		<input
-			className="wc-block-components-product-add-to-cart-quantity"
+			className={ classnames(
+				'wc-block-components-product-add-to-cart-quantity',
+				{ hidden: max === 1 }
+			) }
 			type="number"
 			value={ value }
 			min={ min }
