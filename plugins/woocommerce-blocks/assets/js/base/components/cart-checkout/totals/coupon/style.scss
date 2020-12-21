@@ -10,7 +10,7 @@
 	}
 
 	.wc-block-components-totals-coupon__button {
-		height: 48px;
+		height: em(48px);
 		flex-shrink: 0;
 		margin-left: $gap-smaller;
 		padding-left: $gap-large;
