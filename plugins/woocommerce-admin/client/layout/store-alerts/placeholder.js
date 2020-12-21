@@ -3,36 +3,32 @@
  */
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { Card, CardBody, CardFooter, CardHeader } from '@wordpress/components';
 
 class StoreAlertsPlaceholder extends Component {
 	render() {
 		const { hasMultipleAlerts } = this.props;
 
 		return (
-			<div
-				className="woocommerce-card woocommerce-store-alerts is-loading"
+			<Card
+				className="woocommerce-store-alerts is-loading"
 				aria-hidden
+				size={ null }
 			>
-				<div className="woocommerce-card__header">
-					<div className="woocommerce-card__title woocommerce-card__header-item">
-						<span className="is-placeholder" />
-					</div>
-					{ hasMultipleAlerts && (
-						<div className="woocommerce-card__action woocommerce-card__header-item">
-							<span className="is-placeholder" />
-						</div>
-					) }
-				</div>
-				<div className="woocommerce-card__body">
+				<CardHeader isBorderless>
+					<span className="is-placeholder" />
+					{ hasMultipleAlerts && <span className="is-placeholder" /> }
+				</CardHeader>
+				<CardBody>
 					<div className="woocommerce-store-alerts__message">
 						<span className="is-placeholder" />
 						<span className="is-placeholder" />
 					</div>
-					<div className="woocommerce-store-alerts__actions">
-						<span className="is-placeholder" />
-					</div>
-				</div>
-			</div>
+				</CardBody>
+				<CardFooter isBorderless>
+					<span className="is-placeholder" />
+				</CardFooter>
+			</Card>
 		);
 	}
 }
