@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { InspectorControls, PlainText } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -39,11 +40,13 @@ const Edit = ( {
 		className
 	);
 
-	if ( ! formId ) {
-		setAttributes( {
-			formId: `wc-block-product-search-${ instanceId }`,
-		} );
-	}
+	useEffect( () => {
+		if ( ! formId ) {
+			setAttributes( {
+				formId: `wc-block-product-search-${ instanceId }`,
+			} );
+		}
+	}, [ formId, setAttributes, instanceId ] );
 
 	return (
 		<>
