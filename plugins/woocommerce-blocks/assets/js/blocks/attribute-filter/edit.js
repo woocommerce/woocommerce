@@ -10,7 +10,7 @@ import {
 	PanelBody,
 	ToggleControl,
 	Button,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Icon, server, external } from '@woocommerce/icons';
@@ -48,7 +48,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	const getBlockControls = () => {
 		return (
 			<BlockControls>
-				<Toolbar
+				<ToolbarGroup
 					controls={ [
 						{
 							icon: 'edit',
@@ -238,7 +238,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			</p>
 			<Button
 				className="wc-block-attribute-filter__add-attribute-button"
-				isDefault
+				isSecondary
 				href={ getAdminLink(
 					'edit.php?post_type=product&page=product_attributes'
 				) }

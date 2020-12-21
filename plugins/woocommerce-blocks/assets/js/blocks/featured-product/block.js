@@ -23,7 +23,7 @@ import {
 	ResizableBox,
 	Spinner,
 	ToggleControl,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import classnames from 'classnames';
@@ -146,7 +146,7 @@ const FeaturedProduct = ( {
 					} }
 				/>
 				<MediaUploadCheck>
-					<Toolbar>
+					<ToolbarGroup>
 						<MediaUpload
 							onSelect={ ( media ) => {
 								setAttributes( {
@@ -166,9 +166,9 @@ const FeaturedProduct = ( {
 								/>
 							) }
 						/>
-					</Toolbar>
+					</ToolbarGroup>
 				</MediaUploadCheck>
-				<Toolbar
+				<ToolbarGroup
 					controls={ [
 						{
 							icon: 'edit',

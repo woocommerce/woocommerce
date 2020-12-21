@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import ProductControl from '@woocommerce/editor-components/product-control';
-import { Placeholder, Button, Toolbar } from '@wordpress/components';
+import { Placeholder, Button, ToolbarGroup } from '@wordpress/components';
 import { BlockControls } from '@wordpress/block-editor';
 import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 import { useProductDataContext } from '@woocommerce/shared-context';
@@ -55,7 +55,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 								} }
 							/>
 							<Button
-								isDefault
+								isSecondary
 								disabled={ ! productId }
 								onClick={ () => {
 									setIsEditing( false );
@@ -68,7 +68,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 				) : (
 					<>
 						<BlockControls>
-							<Toolbar>
+							<ToolbarGroup>
 								<TextToolbarButton
 									onClick={ () => setIsEditing( true ) }
 								>
@@ -77,7 +77,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 										'woo-gutenberg-products-block'
 									) }
 								</TextToolbarButton>
-							</Toolbar>
+							</ToolbarGroup>
 						</BlockControls>
 						<OriginalComponent { ...props } />
 					</>

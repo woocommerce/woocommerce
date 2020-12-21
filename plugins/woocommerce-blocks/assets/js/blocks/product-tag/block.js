@@ -9,7 +9,7 @@ import {
 	Disabled,
 	PanelBody,
 	Placeholder,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
@@ -263,7 +263,7 @@ class ProductsByTagBlock extends Component {
 		return HAS_TAGS ? (
 			<>
 				<BlockControls>
-					<Toolbar
+					<ToolbarGroup
 						controls={ [
 							{
 								icon: 'edit',

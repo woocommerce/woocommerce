@@ -10,7 +10,7 @@ import {
 	PanelBody,
 	Placeholder,
 	RangeControl,
-	Toolbar,
+	ToolbarGroup,
 	withSpokenMessages,
 	ToggleControl,
 } from '@wordpress/components';
@@ -164,7 +164,7 @@ class ProductsBlock extends Component {
 		return (
 			<>
 				<BlockControls>
-					<Toolbar
+					<ToolbarGroup
 						controls={ [
 							{
 								icon: 'edit',

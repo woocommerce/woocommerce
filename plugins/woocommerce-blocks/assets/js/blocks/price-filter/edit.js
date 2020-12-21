@@ -133,7 +133,7 @@ export default function ( { attributes, setAttributes } ) {
 			</p>
 			<Button
 				className="wc-block-price-slider__add-product-button"
-				isDefault
+				isSecondary
 				href={ getAdminLink( 'post-new.php?post_type=product' ) }
 			>
 				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +
