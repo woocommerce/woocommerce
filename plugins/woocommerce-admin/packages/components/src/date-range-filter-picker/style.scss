@@ -14,6 +14,10 @@
 			overflow: auto;
 		}
 	}
+
+	&.components-dropdown__content .components-popover__content > div {
+		padding: 0;
+	}
 }
 
 .woocommerce-filters-date__tabs {

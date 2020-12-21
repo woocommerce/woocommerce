@@ -382,7 +382,7 @@ class Loader {
 		wp_register_script(
 			'wc-navigation',
 			self::get_url( 'navigation/index', 'js' ),
-			array( 'wp-url', 'wp-hooks', 'wp-element', 'wp-data', 'moment' ),
+			array( 'wp-url', 'wp-hooks', 'wp-element', 'wp-data', 'moment', 'wp-components' ),
 			$js_file_version,
 			true
 		);
@@ -454,6 +454,7 @@ class Loader {
 				'wc-notices',
 				'wc-number',
 				'wc-store-data',
+				'wp-components',
 			),
 			$js_file_version,
 			true
@@ -490,6 +491,7 @@ class Loader {
 			self::get_url( 'app/index', 'js' ),
 			array(
 				'wp-core-data',
+				'wp-components',
 				'wc-components',
 				'wp-date',
 				'wp-plugins',
@@ -516,7 +518,7 @@ class Loader {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( "app/style{$rtl}", 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score' ),
+			array( 'wc-components', 'wc-customer-effort-score', 'wp-components' ),
 			$css_file_version
 		);
 

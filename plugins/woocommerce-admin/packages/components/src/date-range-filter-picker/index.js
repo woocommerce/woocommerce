@@ -5,6 +5,8 @@ import { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
+import { withViewportMatch } from '@wordpress/viewport';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -122,13 +124,21 @@ class DateRangeFilterPicker extends Component {
 			afterError,
 			beforeError,
 		} = this.state;
+
+		const { isViewportMobile } = this.props;
+		const contentClasses = classnames(
+			'woocommerce-filters-date__content',
+			{
+				'is-mobile': isViewportMobile,
+			}
+		);
 		return (
 			<div className="woocommerce-filters-filter">
 				<span className="woocommerce-filters-label">
 					{ __( 'Date Range', 'woocommerce-admin' ) }:
 				</span>
 				<Dropdown
-					contentClassName="woocommerce-filters-date__content"
+					contentClassName={ contentClasses }
 					position="bottom"
 					expandOnMobile
 					renderToggle={ ( { isOpen, onToggle } ) => (
@@ -187,4 +197,6 @@ DateRangeFilterPicker.propTypes = {
 	} ).isRequired,
 };
 
-export default DateRangeFilterPicker;
+export default withViewportMatch( {
+	isViewportMobile: '< medium',
+} )( DateRangeFilterPicker );

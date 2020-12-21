@@ -1,5 +1,3 @@
-
-
 // Import our wp-admin reset.
 @import './shared/_reset.scss';
 
@@ -30,5 +28,6 @@
 // Import the embed-specific styles.
 @import './shared/_embed.scss';
 
-// Import gutenberg SCSS so that we can apply our theme colors.
-@import './shared/gutenberg-components.scss';
+:root {
+	@include admin-scheme( #007cba );
+}

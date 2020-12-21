@@ -8,7 +8,7 @@ import {
 	CardBody,
 	CardFooter,
 	CheckboxControl,
-	FlexItem,
+	FlexItem as MaybeFlexItem,
 	__experimentalText as Text,
 	Popover,
 } from '@wordpress/components';
@@ -31,6 +31,17 @@ import {
 import UsageModal from '../usage-modal';
 import { CurrencyContext } from '../../../lib/currency-context';
 import './style.scss';
+
+// FlexItem is not available until WP version 5.5. This code is safe to remove
+// once the minimum WP supported version becomes 5.5.
+const FlextItemSubstitute = ( { children, align } ) => {
+	const style = {
+		display: 'flex',
+		'justify-content': align ? 'center' : 'flex-start',
+	};
+	return <div style={ style }>{ children }</div>;
+};
+const FlexItem = MaybeFlexItem || FlextItemSubstitute;
 
 class StoreDetails extends Component {
 	constructor( props ) {
@@ -271,7 +282,7 @@ class StoreDetails extends Component {
 							</CardBody>
 
 							<CardFooter>
-								<FlexItem align="center">
+								<FlexItem>
 									<div className="woocommerce-profile-wizard__client">
 										<CheckboxControl
 											label={ __(
@@ -285,7 +296,7 @@ class StoreDetails extends Component {
 							</CardFooter>
 
 							<CardFooter justify="center">
-								<FlexItem>
+								<FlexItem align="center">
 									<div className="woocommerce-profile-wizard__submit">
 										<Button
 											isPrimary

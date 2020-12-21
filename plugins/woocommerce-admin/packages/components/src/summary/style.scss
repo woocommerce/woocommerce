@@ -36,6 +36,7 @@ $border: $gray-200;
 	border-color: $border;
 	background-color: $gray-100;
 	box-shadow: inset -1px -1px 0 $border;
+	width: 100%;
 
 	@include breakpoint( '<782px' ) {
 		& {

@@ -1,8 +1,8 @@
 === WooCommerce Admin ===
 Contributors: woocommerce, automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
-Requires at least: 5.3.0
-Tested up to: 5.4.2
+Requires at least: 5.4.0
+Tested up to: 5.6.0
 Requires PHP: 5.6.20
 Stable tag: 1.8.0-dev
 License: GPLv3
