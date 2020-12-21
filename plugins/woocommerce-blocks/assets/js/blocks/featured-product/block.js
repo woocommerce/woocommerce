@@ -17,7 +17,6 @@ import { withSelect } from '@wordpress/data';
 import {
 	Button,
 	FocalPointPicker,
-	IconButton,
 	PanelBody,
 	Placeholder,
 	RangeControl,
@@ -158,7 +157,7 @@ const FeaturedProduct = ( {
 							allowedTypes={ [ 'image' ] }
 							value={ mediaId }
 							render={ ( { open } ) => (
-								<IconButton
+								<Button
 									className="components-toolbar__control"
 									label={ __( 'Edit media' ) }
 									icon="format-image"
