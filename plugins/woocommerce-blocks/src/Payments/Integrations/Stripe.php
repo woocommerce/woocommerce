@@ -84,6 +84,7 @@ final class Stripe extends AbstractPaymentMethodType {
 			'stripeTotalLabel'    => $this->get_total_label(),
 			'publicKey'           => $this->get_publishable_key(),
 			'allowPrepaidCard'    => $this->get_allow_prepaid_card(),
+			'title'               => $this->get_title(),
 			'button'              => [
 				'type'   => $this->get_button_type(),
 				'theme'  => $this->get_button_theme(),
@@ -138,6 +139,15 @@ final class Stripe extends AbstractPaymentMethodType {
 	 */
 	private function get_allow_prepaid_card() {
 		return apply_filters( 'wc_stripe_allow_prepaid_card', true );
+	}
+
+	/**
+	 * Returns the title string to use in the UI (customisable via admin settings screen).
+	 *
+	 * @return string Title / label string
+	 */
+	private function get_title() {
+		return isset( $this->settings['title'] ) ? $this->settings['title'] : __( 'Credit / Debit Card', 'woo-gutenberg-products-block' );
 	}
 
 	/**
