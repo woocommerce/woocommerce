@@ -17,7 +17,6 @@
 		right: 14px;
 		width: 32px;
 		height: 48px;
-		@include animate-transform;
 	}
 
 	&.is-open {
@@ -30,6 +29,7 @@
 	&:active,
 	&.is-open {
 		background-color: $gray-100;
+		border-color: $gray-700;
 	}
 
 	&.is-multi-line .woocommerce-dropdown-button__labels {
