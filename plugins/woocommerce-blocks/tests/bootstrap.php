@@ -48,7 +48,7 @@ function wc_dir() {
  * Install WC Blocks
  */
 function wc_blocks_install() {
-	echo esc_html( 'Loading WooCommerce Gutenberg Products Block plugin' . PHP_EOL );
+	echo esc_html( 'Loading WooCommerce Blocks plugin' . PHP_EOL );
 	require dirname( __DIR__ ) . '/woocommerce-gutenberg-products-block.php';
 }
 
