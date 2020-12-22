@@ -42,9 +42,7 @@ const Panel = ( {
 				</button>
 			</TitleTag>
 			<div
-				className={ classNames( 'wc-blocks-components-panel__content', {
-					hidden: ! isOpen,
-				} ) }
+				className="wc-blocks-components-panel__content"
 				hidden={ ! isOpen }
 			>
 				{ children }
