@@ -404,7 +404,7 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param discountType Type of a coupon. Defaults to Fixed cart discount.
  * @param couponAmount Amount to be applied. Defaults to 5.
  */
-const createCoupon = async ( couponAmount = '5' ) => {
+const createCoupon = async ( discountType = 'Fixed cart discount', couponAmount = '5' ) => {
 	await merchant.openNewCoupon();
 
 	// Fill in coupon code
