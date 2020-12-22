@@ -41,6 +41,12 @@
 .wc-blocks-components-panel__content {
 	padding-bottom: em($gap);
 	overflow: auto;
+
+	// Ensures the panel contents are not visible for any theme that tweaked the
+	// `display` property of div elements.
+	&[hidden] {
+		display: none;
+	}
 }
 
 .theme-twentytwenty .wc-blocks-components-panel__button,

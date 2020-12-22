@@ -59,6 +59,10 @@ WooCommerce Blocks uses HTML elements according to their semantic meaning, not t
 
 In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `<button>` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
 
+### Hidden elements
+
+WC Blocks use the [`hidden` HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) to hide some elements from the UI so they are not displayed in screens neither read by assistive technologies. If your theme has some generic styles that tweak the CSS display property of blocks elements (ie: `div { display: block; }`), make sure you correctly handle the hidden attribute: `div[hidden] { display: none; }`.
+
 ### Legacy classes from WooCommerce (.price, .star-rating, .button...)
 
 WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. However, you might find some of them that have been added for backwards compatibility. We still encourage themes to use the prefixed classes when possible, this avoids conflicts with other plugins, the editor, etc.
