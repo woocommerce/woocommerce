@@ -14,6 +14,7 @@ import { compose, withInstanceId, withState } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
 import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -226,11 +227,15 @@ export class SearchListControl extends Component {
 	}
 
 	render() {
-		const { className = '', search, setState } = this.props;
+		const { className = '', isCompact, search, setState } = this.props;
 		const messages = { ...defaultMessages, ...this.props.messages };
 
 		return (
-			<div className={ `woocommerce-search-list ${ className }` }>
+			<div
+				className={ classnames( 'woocommerce-search-list', className, {
+					'is-compact': isCompact,
+				} ) }
+			>
 				{ this.renderSelectedSection() }
 
 				<div className="woocommerce-search-list__search">
@@ -253,6 +258,10 @@ SearchListControl.propTypes = {
 	 * Additional CSS classes.
 	 */
 	className: PropTypes.string,
+	/**
+	 * Whether it should be displayed in a compact way, so it occupies less space.
+	 */
+	isCompact: PropTypes.bool,
 	/**
 	 * Whether the list of items is hierarchical or not. If true, each list item is expected to
 	 * have a parent property.
