@@ -111,18 +111,22 @@ export class TaskList extends Component {
 		);
 	}
 
-	isTrackingListUpdated( list, subList ) {
-		if ( subList.length === 0 ) {
+	shouldUpdateCompletedTasks( tasks, completedTasks ) {
+		if ( completedTasks.length === 0 ) {
 			return false;
 		}
-		return subList.every( ( taskName ) => list.indexOf( taskName ) >= 0 );
+		return ! completedTasks.every(
+			( taskName ) => tasks.indexOf( taskName ) >= 0
+		);
 	}
 
-	getIncludedTasks( list, subList ) {
-		if ( ! subList ) {
+	getTrackedCompletedTasks( completedTasks, trackedTasks ) {
+		if ( ! trackedTasks ) {
 			return [];
 		}
-		return list.filter( ( taskName ) => subList.includes( taskName ) );
+		return completedTasks.filter( ( taskName ) =>
+			trackedTasks.includes( taskName )
+		);
 	}
 
 	possiblyTrackCompletedTasks() {
@@ -131,13 +135,13 @@ export class TaskList extends Component {
 			updateOptions,
 		} = this.props;
 		const completedTaskKeys = this.getCompletedTaskKeys();
-		const trackedCompletedTasks = this.getIncludedTasks(
+		const trackedCompletedTasks = this.getTrackedCompletedTasks(
 			completedTaskKeys,
 			totalTrackedCompletedTasks
 		);
 
 		if (
-			! this.isTrackingListUpdated(
+			this.shouldUpdateCompletedTasks(
 				trackedCompletedTasks,
 				completedTaskKeys
 			)
