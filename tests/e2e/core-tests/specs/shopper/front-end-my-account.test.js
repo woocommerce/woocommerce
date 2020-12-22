@@ -3,15 +3,15 @@
  * Internal dependencies
  */
 const {
-	CustomerFlow,
-	StoreOwnerFlow
+	shopper,
+	merchant
 } = require( '@woocommerce/e2e-utils' );
 
 const runMyAccountPageTest = () => {
 	describe('My account page', () => {
 		it('allows customer to login', async () => {
-			await StoreOwnerFlow.logout();
-			await CustomerFlow.login();
+			await merchant.logout();
+			await shopper.login();
 			await expect(page).toMatch('Hello');
 			await expect(page).toMatchElement('.woocommerce-MyAccount-navigation-link', {text: 'Dashboard'});
 			await expect(page).toMatchElement('.woocommerce-MyAccount-navigation-link', {text: 'Orders'});
@@ -22,25 +22,25 @@ const runMyAccountPageTest = () => {
 		});
 
 		it('allows customer to see orders', async () => {
-			await CustomerFlow.goToOrders();
+			await shopper.goToOrders();
 			await expect(page.url()).toMatch('my-account/orders');
 			await expect(page).toMatchElement('h1', {text: 'Orders'});
 		});
 
 		it('allows customer to see downloads', async () => {
-			await CustomerFlow.goToDownloads();
+			await shopper.goToDownloads();
 			expect(page.url()).toMatch('my-account/downloads');
 			await expect(page).toMatchElement('h1', {text: 'Downloads'});
 		});
 
 		it('allows customer to see addresses', async () => {
-			await CustomerFlow.goToAddresses();
+			await shopper.goToAddresses();
 			expect(page.url()).toMatch('my-account/edit-address');
 			await expect(page).toMatchElement('h1', {text: 'Addresses'});
 		});
 
 		it('allows customer to see account details', async () => {
-			await CustomerFlow.goToAccountDetails();
+			await shopper.goToAccountDetails();
 			expect(page.url()).toMatch('my-account/edit-account');
 			await expect(page).toMatchElement('h1', {text: 'Account details'});
 		});

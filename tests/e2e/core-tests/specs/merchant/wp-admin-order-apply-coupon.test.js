@@ -4,7 +4,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	createSimpleProduct,
 	createSimpleOrder,
 	createCoupon,
@@ -23,7 +23,7 @@ let orderId;
 const runOrderApplyCouponTest = () => {
 	describe('WooCommerce Orders > Apply coupon', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			await Promise.all([
 				await createSimpleProduct(),
 				couponCode = await createCoupon(),

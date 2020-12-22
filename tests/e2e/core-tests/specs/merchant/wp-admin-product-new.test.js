@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	clickTab,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
@@ -43,12 +43,12 @@ const verifyPublishAndTrash = async () => {
 const runAddSimpleProductTest = () => {
 	describe('Add New Simple Product Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can create simple virtual product titled "Simple Product" with regular price $9.99', async () => {
 			// Go to "add product" page
-			await StoreOwnerFlow.openNewProduct();
+			await merchant.openNewProduct();
 
 			// Make sure we're on the add order page
 			await expect(page.title()).resolves.toMatch('Add new product');
@@ -75,7 +75,7 @@ const runAddVariableProductTest = () => {
 	describe.skip('Add New Variable Product Page', () => {
 		it('can create product with variations', async () => {
 			// Go to "add product" page
-			await StoreOwnerFlow.openNewProduct();
+			await merchant.openNewProduct();
 
 			// Make sure we're on the add order page
 			await expect(page.title()).resolves.toMatch('Add new product');
