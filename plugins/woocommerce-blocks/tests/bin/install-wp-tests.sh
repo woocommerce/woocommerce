@@ -150,7 +150,7 @@ install_db() {
 
 install_woocommerce() {
 	# get built plugin from .org
-	download https://downloads.wordpress.org/plugin/woocommerce.zip "$TMPDIR/woocommerce.zip"
+	download https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip "$TMPDIR/woocommerce.zip"
 	unzip -q $TMPDIR/woocommerce.zip -d "$WP_CORE_DIR/wp-content/plugins"
 
 	# Script Variables
