@@ -366,17 +366,50 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Combine all order data.
+	 * Get all order data.
 	 *
 	 * @return array
 	 */
 	private static function get_orders() {
-		$order_dates           = self::get_order_dates();
-		$order_counts          = self::get_order_counts();
-		$order_totals          = self::get_order_totals();
-		$order_payment_methods = self::get_order_counts_by_payment_method();
+		$orders = wc_get_orders(
+			array(
+				'type'           => array( 'shop_order', 'shop_order_refund' ),
+				'customer'       => '',
+				'posts_per_page' => -1,
+			)
+		);
 
-		return array_merge( $order_dates, $order_counts, $order_totals, $order_payment_methods );
+		$first            = current_time( 'timestamp', true );
+		$last             = 0;
+		$processing_first = current_time( 'timestamp', true );
+		$processing_last  = 0;
+
+		foreach ( $orders as $order ) {
+			$date_created = (int) $order->get_date_created()->getTimestamp();
+			$type         = $order->get_type();
+			$status       = $order->get_status();
+
+			if ( 'shop_order' == $type ) {
+				if ( "completed" == $status and $date_created < $first ) {
+					$first = $date_created;
+				}
+				if ( "completed" == $status and $date_created > $last ) {
+					$last = $date_created;
+				}
+				if ( "processing" == $status and $date_created < $processing_first ) {
+					$processing_first = $date_created;
+				}
+				if ( "processing" == $status and $date_created > $processing_last ) {
+					$processing_last = $date_created;
+				}
+			}
+		}
+		$order_data['first']            = gmdate( 'Y-m-d H:i:s', $first );
+		$order_data['last']             = gmdate( 'Y-m-d H:i:s', $last );
+		$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
+		$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
+
+		return $order_data;
 	}
 
 	/**
