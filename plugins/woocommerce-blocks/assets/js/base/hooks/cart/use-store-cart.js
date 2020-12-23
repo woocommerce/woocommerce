@@ -113,7 +113,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			const billingAddress = decodeAddress( cartData.billingAddress );
 			const shippingAddress = cartData.needsShipping
 				? decodeAddress( cartData.shippingAddress )
-				: defaultShippingAddress;
+				: billingAddress;
 			return {
 				cartCoupons: cartData.coupons,
 				cartItems: cartData.items || [],

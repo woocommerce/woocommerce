@@ -60,6 +60,20 @@ export const useCheckoutAddress = () => {
 		[ shippingAsBilling, setShippingAddress, setBillingData ]
 	);
 
+	/**
+	 * Sets billing address data, and also shipping if shipping is disabled.
+	 */
+	const setBillingFields = useCallback(
+		( value ) => {
+			setBillingData( value );
+
+			if ( ! needsShipping ) {
+				setShippingAddress( value );
+			}
+		},
+		[ needsShipping, setShippingAddress, setBillingData ]
+	);
+
 	// When the "Use same address" checkbox is toggled we need to update the current billing address to reflect this;
 	// that is either setting the billing address to the shipping address, or restoring the billing address to it's
 	// previous state.
@@ -79,8 +93,14 @@ export const useCheckoutAddress = () => {
 		}
 	}, [ shippingAsBilling, setBillingData, shippingAddress, billingData ] );
 
-	const setEmail = ( value ) => void setBillingData( { email: value } );
-	const setPhone = ( value ) => void setBillingData( { phone: value } );
+	const setEmail = ( value ) =>
+		void setBillingData( {
+			email: value,
+		} );
+	const setPhone = ( value ) =>
+		void setBillingData( {
+			phone: value,
+		} );
 
 	// Note that currentShippingAsBilling is returned rather than the current state of shippingAsBilling--this is so that
 	// the billing fields are not rendered before sync (billing field values are debounced and would be outdated)
@@ -89,7 +109,7 @@ export const useCheckoutAddress = () => {
 		shippingFields: shippingAddress,
 		setShippingFields,
 		billingFields: billingData,
-		setBillingFields: setBillingData,
+		setBillingFields,
 		setEmail,
 		setPhone,
 		shippingAsBilling,
