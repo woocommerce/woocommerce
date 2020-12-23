@@ -413,6 +413,18 @@ class WC_Tracker {
 				} else {
 					$order_data[ $status ] += 1;
 				}
+
+				$gateway = $order->get_payment_method();
+
+				if ( ! empty( $gateway ) and in_array( $status, array( 'wc-completed', 'wc-refunded', 'wc-processing' ) ) ) {
+					$gateway = "gateway_" . $gateway;
+
+					if ( ! isset( $order_data[ $gateway ] ) ) {
+						$order_data[ $gateway ]  = 1;
+					} else {
+						$order_data[ $gateway ] += 1;
+					}
+				}
 			}
 		}
 		$order_data['first']            = gmdate( 'Y-m-d H:i:s', $first );
