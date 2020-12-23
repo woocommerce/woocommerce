@@ -50,7 +50,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await page.waitForSelector('.order-total .amount', {text: '$4.99'});
 			
 			// Remove coupon
-			await expect(page).toClick('.coupon-code-fixed-cart-discount .woocommerce-remove-coupon', {text: '[Remove]'});
+			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
 			
             // Apply Percentage discount coupon
@@ -62,7 +62,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await page.waitForSelector('.order-total .amount', {text: '$5.00'});
 			
 			// Remove coupon
-			await expect(page).toClick('.coupon-code-percentage-discount .woocommerce-remove-coupon', {text: '[Remove]'});
+			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
 
             // Apply Fixed product discount coupon
@@ -87,9 +87,9 @@ const runCheckoutApplyCouponsTest = () => {
 			await page.waitForSelector('.order-total .amount', {text: '$0.00'});
 
 			// Remove coupon
-            await expect(page).toClick('.coupon-code-fixed-cart-discount .woocommerce-remove-coupon', {text: '[Remove]'});
+            await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
             await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
-            await expect(page).toClick('.coupon-code-fixed-product-discount .woocommerce-remove-coupon', {text: '[Remove]'});
+            await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
             await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
             
             // Verify the total amount after all coupons removal
