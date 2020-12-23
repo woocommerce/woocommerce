@@ -390,6 +390,8 @@ class WC_Tracker {
 			$status       = $order->get_status();
 
 			if ( 'shop_order' == $type ) {
+
+				// Find the first and last order dates for completed and processing statuses
 				if ( "completed" == $status and $date_created < $first ) {
 					$first = $date_created;
 				}
@@ -401,6 +403,15 @@ class WC_Tracker {
 				}
 				if ( "processing" == $status and $date_created > $processing_last ) {
 					$processing_last = $date_created;
+				}
+
+				// Get order counts by status
+				$status = "wc-" . $status;
+
+				if ( ! isset( $order_data[ $status ] ) ) {
+					$order_data[ $status ]  = 1;
+				} else {
+					$order_data[ $status ] += 1;
 				}
 			}
 		}
