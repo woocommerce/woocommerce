@@ -91,6 +91,52 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Typo in Variation Stats DataStore context filter value.
 - Fix: support custom attributes in Attribute advanced report filter.
 
+== 1.8.2 12/22/2020 ==
+
+- Fix: Completed tasks tracking causing infinite loop #5941
+- Fix: Remove Navigation access #5940
+
+== 1.8.1 12/15/2020 ==
+
+- Fix: Product exclusion filter on Orders Report.
+- Fix: Typo in Variation Stats DataStore context filter value. #5784
+
+== 1.8.0 12/7/2020 ==
+
+- Enhancement: Add "filter by variations in reports" inbox note. #5208
+- Tweak: Fix inconsistent REST API parameter name for customer type filtering. #5823
+- Fix: Move collapsible config to panels object, to allow for more control. #5855
+- Enhancement: Tasks extensibility in Home Screen. #5794
+- Enhancement: Add page parameter to override default wc-admin page in Navigation API. #5821
+- Fix: Invalidate product count if the last product was updated in the list. #5790
+- Fix: Add Customer Type column to the Orders report table. #5820
+- Fix: Product exclusion filter on Orders Report. #5822
+- Enhancement: Introduce the customer effort score (CES) feature.
+- Enhancement: Rework task extensibility in the homescreen. #5794
+- Enhancement: Migrate the reviews panel to the homescreen. #5706
+- Tweak: Improve styles of the tax task. #5709
+- Tweak: Do not show store setup link on the homescreen. #5801
+- Tweak: Revert the #5001 work to order tasks by completion. #5721
+- Tweak: Revert the smart tax defaults work. #5720
+- Fix: Show the customer type column in Orders report table. #5820
+- Fix: make sure 'Customers' page updates after order update. #5776
+- Tweak: Do not show store setup activity panel on the homescreen. #5801
+- Fix: Fix fatal errors when child themes are installed in a subdirectory. #5783
+- Enhancement: Migrate reviews panel to home screen. #5706
+- Enhancement: Add Razorpay to payment task for stores in India - #5775
+- Fix: Allow actionable statuses in orders endpoint(s) filters. #5733
+- Enhancement: Migrate Stock Panel to Homescreen. #5729
+- Tweak: Don't show the Orders panel on the homescreen with the Task List. #5552
+- Enhancement: Add enhanced placeholders for Marketing components. #5611
+- Tweak:  Continue showing tasklist even if list is complete, only hide if set to hidden. #5673
+- Enhancement: Allow switching on/off the navigation feature in plugin and core builds. #5697
+- Fix: snackbar dismissal bug. #5696
+- Tweak: Remove check for Jetpack and WCS from Stripe onboarding task. #4933
+- Fix: Only import the Gridicons we need, to reduce package size. #5668
+- Fix: Stop order panels flickering on load. #5655
+- Fix: Load wc-tracks to avoid fatal errors. #5645 #5638
+- Fix: Preventing desktop-sized navigation placeholder from appearing on mobile during load. #5616
+
 = 1.7.0 11/11/2020 =
 - Enhancement: Variations report.  #5167
 - Enhancement: Add ability to toggle homescreen layouts. #5429
