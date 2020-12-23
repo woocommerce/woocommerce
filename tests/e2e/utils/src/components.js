@@ -408,7 +408,7 @@ const createCoupon = async ( discountType = 'Fixed cart discount', couponAmount 
 	await merchant.openNewCoupon();
 
 	// Fill in coupon code
-	let couponCode = 'code-' + new Date().getTime().toString();
+	let couponCode = 'Code-' + discountType;
 	await expect(page).toFill( '#title', couponCode );
 
 	// Set general coupon data
