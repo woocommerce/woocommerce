@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	createSimpleOrder,
 	clickFilter,
 	moveAllItemsToTrash,
@@ -47,7 +47,7 @@ const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
 		beforeAll(async () => {
 			// First, let's login
-			await StoreOwnerFlow.login();
+			await merchant.login();
 
 			// Next, let's create some orders we can filter against
 			await createSimpleOrder(orderStatus.pending.description.text);
@@ -61,12 +61,12 @@ const runOrderStatusFiltersTest = () => {
 
 		afterAll( async () => {
 			// Make sure we're on the all orders view and cleanup the orders we created
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await moveAllItemsToTrash();
 		});
 
 		it('should filter by Pending payment', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.pending.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
 
@@ -80,7 +80,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by Processing', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.processing.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
 
@@ -94,7 +94,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by On hold', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.onHold.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
 
@@ -108,7 +108,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by Completed', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.completed.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
 
@@ -122,7 +122,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by Cancelled', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.cancelled.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
 
@@ -136,7 +136,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by Refunded', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.refunded.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
 
@@ -150,7 +150,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by Failed', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await clickFilter('.' + orderStatus.failed.name);
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
 
@@ -164,7 +164,7 @@ const runOrderStatusFiltersTest = () => {
 		});
 
 		it('should filter by All', async () => {
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			// Make sure all the order statuses that were created show in this list
 			await clickFilter('.all');
 			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);

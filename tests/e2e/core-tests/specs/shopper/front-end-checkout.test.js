@@ -3,8 +3,8 @@
  * Internal dependencies
  */
 const {
-	CustomerFlow,
-	StoreOwnerFlow,
+	shopper,
+	merchant,
 	createSimpleProduct,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -25,11 +25,11 @@ let orderId;
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			await createSimpleProduct();
 
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Set base location with state CA.
 			await expect(page).toSelect('select[name="woocommerce_default_country"]', 'United States (US) — California');
@@ -50,7 +50,7 @@ const runCheckoutPageTest = () => {
 			]);
 
 			// Enable BACS payment method
-			await StoreOwnerFlow.openSettings('checkout', 'bacs');
+			await merchant.openSettings('checkout', 'bacs');
 			await setCheckbox('#woocommerce_bacs_enabled');
 			await settingsPageSaveChanges();
 
@@ -58,7 +58,7 @@ const runCheckoutPageTest = () => {
 			await verifyCheckboxIsSet('#woocommerce_bacs_enabled');
 
 			// Enable COD payment method
-			await StoreOwnerFlow.openSettings('checkout', 'cod');
+			await merchant.openSettings('checkout', 'cod');
 			await setCheckbox('#woocommerce_cod_enabled');
 			await settingsPageSaveChanges();
 
@@ -66,28 +66,28 @@ const runCheckoutPageTest = () => {
 			await verifyCheckboxIsSet('#woocommerce_cod_enabled');
 
 			// Enable PayPal payment method
-			await StoreOwnerFlow.openSettings('checkout', 'paypal');
+			await merchant.openSettings('checkout', 'paypal');
 			await setCheckbox('#woocommerce_paypal_enabled');
 			await settingsPageSaveChanges();
 
 			// Verify that settings have been saved
 			await verifyCheckboxIsSet('#woocommerce_paypal_enabled');
 
-			await StoreOwnerFlow.logout();
+			await merchant.logout();
 		});
 
 		it('should display cart items in order review', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
-			await CustomerFlow.goToCheckout();
-			await CustomerFlow.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
 		});
 
 		it('allows customer to choose available payment methods', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
-			await CustomerFlow.goToCheckout();
-			await CustomerFlow.productIsInCheckout(simpleProductName, `2`, twoProductPrice, twoProductPrice);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `2`, twoProductPrice, twoProductPrice);
 
 			await expect(page).toClick('.wc_payment_method label', {text: 'PayPal'});
 			await expect(page).toClick('.wc_payment_method label', {text: 'Direct bank transfer'});
@@ -95,18 +95,18 @@ const runCheckoutPageTest = () => {
 		});
 
 		it('allows customer to fill billing details', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
-			await CustomerFlow.goToCheckout();
-			await CustomerFlow.productIsInCheckout(simpleProductName, `3`, threeProductPrice, threeProductPrice);
-			await CustomerFlow.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `3`, threeProductPrice, threeProductPrice);
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 		});
 
 		it('allows customer to fill shipping details', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
-			await CustomerFlow.goToCheckout();
-			await CustomerFlow.productIsInCheckout(simpleProductName, `4`, fourProductPrice, fourProductPrice);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `4`, fourProductPrice, fourProductPrice);
 
 			// Select checkbox to ship to a different address
 			await page.evaluate(() => {
@@ -114,22 +114,22 @@ const runCheckoutPageTest = () => {
 			});
 			await uiUnblocked();
 
-			await CustomerFlow.fillShippingDetails(config.get('addresses.customer.shipping'));
+			await shopper.fillShippingDetails(config.get('addresses.customer.shipping'));
 		});
 
 		it('allows guest customer to place order', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
-			await CustomerFlow.goToCheckout();
-			await CustomerFlow.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
-			await CustomerFlow.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 
 			await uiUnblocked();
 
 			await expect(page).toClick('.wc_payment_method label', {text: 'Cash on delivery'});
 			await expect(page).toMatchElement('.payment_method_cod', {text: 'Pay with cash upon delivery.'});
 			await uiUnblocked();
-			await CustomerFlow.placeOrder();
+			await shopper.placeOrder();
 
 			await expect(page).toMatch('Order received');
 
@@ -140,8 +140,8 @@ const runCheckoutPageTest = () => {
 		});
 
 		it('store owner can confirm the order was received', async () => {
-			await StoreOwnerFlow.login();
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.login();
+			await merchant.openAllOrdersView();
 
 			// Click on the order which was placed in the previous step
 			await Promise.all([

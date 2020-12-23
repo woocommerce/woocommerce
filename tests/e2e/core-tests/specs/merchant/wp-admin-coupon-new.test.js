@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	clickTab,
 	verifyPublishAndTrash
 } = require( '@woocommerce/e2e-utils' );
@@ -20,12 +20,12 @@ const {
 const runCreateCouponTest = () => {
 	describe('Add New Coupon Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can create new coupon', async () => {
 			// Go to "add coupon" page
-			await StoreOwnerFlow.openNewCoupon();
+			await merchant.openNewCoupon();
 
 			// Make sure we're on the add coupon page
 			await expect(page.title()).resolves.toMatch('Add new coupon');

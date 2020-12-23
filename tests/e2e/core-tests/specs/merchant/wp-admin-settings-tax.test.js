@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	clearAndFillInput,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -24,12 +24,12 @@ const {
 const runTaxSettingsTest = () => {
 	describe('WooCommerce Tax Settings', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can enable tax calculation', async () => {
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Make sure the general tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'General'});
@@ -50,7 +50,7 @@ const runTaxSettingsTest = () => {
 
 		it('can set tax options', async () => {
 			// Go to tax settings page
-			await StoreOwnerFlow.openSettings('tax');
+			await merchant.openSettings('tax');
 
 			// Make sure the tax tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'Tax'});
@@ -85,7 +85,7 @@ const runTaxSettingsTest = () => {
 
 		it('can add tax classes', async () => {
 			// Go to tax settings page
-			await StoreOwnerFlow.openSettings('tax');
+			await merchant.openSettings('tax');
 
 			// Make sure the tax tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'Tax'});
@@ -113,7 +113,7 @@ const runTaxSettingsTest = () => {
 
 		it('can set rate settings', async () => {
 			// Go to "fancy" rates tax settings page
-			await StoreOwnerFlow.openSettings('tax', 'fancy');
+			await merchant.openSettings('tax', 'fancy');
 
 			// Make sure the tax tab is active, with the "fancy" subsection
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'Tax'});
@@ -158,7 +158,7 @@ const runTaxSettingsTest = () => {
 
 		it('can remove tax classes', async () => {
 			// Go to tax settings page
-			await StoreOwnerFlow.openSettings('tax');
+			await merchant.openSettings('tax');
 
 			// Make sure the tax tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'Tax'});

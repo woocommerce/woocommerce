@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from './flows';
+import { merchant } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 import factories from './factories';
 
@@ -219,7 +219,7 @@ const createSimpleProduct = async () => {
  */
 const createVariableProduct = async () => {
 	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
+	await merchant.openNewProduct();
 
 	// Make sure we're on the add product page
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
@@ -352,7 +352,7 @@ const createVariableProduct = async () => {
  */
 const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	// Go to 'Add new order' page
-	await StoreOwnerFlow.openNewOrder();
+	await merchant.openNewOrder();
 
 	// Make sure we're on the add order page
 	await expect( page.title() ).resolves.toMatch( 'Add new order' );
@@ -376,13 +376,13 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 };
 
 /**
- * Adds a product to an order in the StoreOwnerFlow.
+ * Adds a product to an order in the merchant.
  *
  * @param orderId ID of the order to add the product to.
  * @param productName Name of the product being added to the order.
  */
 const addProductToOrder = async ( orderId, productName ) => {
-	await StoreOwnerFlow.goToOrder( orderId );
+	await merchant.goToOrder( orderId );
 
 	// Add a product to the order
 	await expect( page ).toClick( 'button.add-line-item' );
@@ -405,7 +405,7 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param couponAmount Amount to be applied. Defaults to 5.
  */
 const createCoupon = async ( couponAmount = '5' ) => {
-	await StoreOwnerFlow.openNewCoupon();
+	await merchant.openNewCoupon();
 
 	// Fill in coupon code
 	let couponCode = 'code-' + new Date().getTime().toString();

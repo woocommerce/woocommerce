@@ -3,8 +3,8 @@
  * Internal dependencies
  */
 const {
-	CustomerFlow,
-	StoreOwnerFlow,
+	shopper,
+	merchant,
 	createSimpleProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
@@ -26,58 +26,58 @@ const twoProductPrice = singleProductPrice * 2;
 const runCartPageTest = () => {
 	describe('Cart page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			await createSimpleProduct();
-			await StoreOwnerFlow.logout();
+			await merchant.logout();
 		});
 
 		it('should display no item in the cart', async () => {
-			await CustomerFlow.goToCart();
+			await shopper.goToCart();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 
 		it('should add the product to the cart when "Add to cart" is clicked', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
 
-			await CustomerFlow.goToCart();
-			await CustomerFlow.productIsInCart(simpleProductName);
+			await shopper.goToCart();
+			await shopper.productIsInCart(simpleProductName);
 		});
 
 		it('should increase item qty when "Add to cart" of the same product is clicked', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
 
-			await CustomerFlow.goToCart();
-			await CustomerFlow.productIsInCart(simpleProductName, 2);
+			await shopper.goToCart();
+			await shopper.productIsInCart(simpleProductName, 2);
 		});
 
 		it('should update qty when updated via qty input', async () => {
-			await CustomerFlow.goToCart();
-			await CustomerFlow.setCartQuantity(simpleProductName, 4);
+			await shopper.goToCart();
+			await shopper.setCartQuantity(simpleProductName, 4);
 			await expect(page).toClick('button', {text: 'Update cart'});
 			await uiUnblocked();
 
-			await CustomerFlow.productIsInCart(simpleProductName, 4);
+			await shopper.productIsInCart(simpleProductName, 4);
 		});
 
 		it('should remove the item from the cart when remove is clicked', async () => {
-			await CustomerFlow.goToCart();
-			await CustomerFlow.removeFromCart(simpleProductName);
+			await shopper.goToCart();
+			await shopper.removeFromCart(simpleProductName);
 			await uiUnblocked();
 
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 
 		it('should update subtotal in cart totals when adding product to the cart', async () => {
-			await CustomerFlow.goToShop();
-			await CustomerFlow.addToCartFromShopPage(simpleProductName);
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
 
-			await CustomerFlow.goToCart();
-			await CustomerFlow.productIsInCart(simpleProductName, 1);
+			await shopper.goToCart();
+			await shopper.productIsInCart(simpleProductName, 1);
 			await expect(page).toMatchElement('.cart-subtotal .amount', {text: `$${ singleProductPrice }`});
 
-			await CustomerFlow.setCartQuantity(simpleProductName, 2);
+			await shopper.setCartQuantity(simpleProductName, 2);
 			await expect(page).toClick('button', {text: 'Update cart'});
 			await uiUnblocked();
 
@@ -85,7 +85,7 @@ const runCartPageTest = () => {
 		});
 
 		it('should go to the checkout page when "Proceed to Checkout" is clicked', async () => {
-			await CustomerFlow.goToCart();
+			await shopper.goToCart();
 			await Promise.all([
 				page.waitForNavigation({waitUntil: 'networkidle0'}),
 				expect(page).toClick('.checkout-button', {text: 'Proceed to checkout'}),
