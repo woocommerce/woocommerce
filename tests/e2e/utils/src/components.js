@@ -401,18 +401,19 @@ const addProductToOrder = async ( orderId, productName ) => {
 /**
  * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
  *
+ * @param discountType Type of a coupon. Defaults to Fixed cart discount.
  * @param couponAmount Amount to be applied. Defaults to 5.
  */
-const createCoupon = async ( couponAmount = '5' ) => {
+const createCoupon = async ( discountType = 'Fixed cart discount', couponAmount = '5' ) => {
 	await merchant.openNewCoupon();
 
 	// Fill in coupon code
-	let couponCode = 'code-' + new Date().getTime().toString();
+	let couponCode = 'Code-' + discountType;
 	await expect(page).toFill( '#title', couponCode );
 
 	// Set general coupon data
 	await clickTab( 'General' );
-	await expect(page).toSelect( '#discount_type', 'Fixed cart discount' );
+	await expect(page).toSelect( '#discount_type', discountType );
 	await expect(page).toFill( '#coupon_amount', couponAmount );
 
 	// Publish coupon
