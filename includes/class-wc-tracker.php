@@ -414,6 +414,7 @@ class WC_Tracker {
 					$order_data[ $status ] += 1;
 				}
 
+				// Count number of orders by gateway used
 				$gateway = $order->get_payment_method();
 
 				if ( ! empty( $gateway ) and in_array( $status, array( 'wc-completed', 'wc-refunded', 'wc-processing' ) ) ) {
@@ -426,7 +427,30 @@ class WC_Tracker {
 					}
 				}
 			}
+			else {
+				// If it is a refunded order (shop_order_refunnd type), add the prefix as this prefix gets
+				// added midway in the if clause
+				$status = "wc-" . $status;
+			}
+
+			// Calculate the gross total for 'completed' and 'processing' orders
+			$total = $order->get_total();
+
+			if ( in_array( $status, array( 'wc-completed', 'wc-refunded' ) ) ) {
+				if ( ! isset( $order_data['gross'] ) )	{
+					$order_data['gross']  = $total;
+				} else {
+					$order_data['gross'] += $total;
+				}
+			} elseif ( 'wc-processing' == $status ) {
+				if ( ! isset( $order_data['processing_gross'] ) )	{
+					$order_data['processing_gross']  = $total;
+				} else {
+					$order_data['processing_gross'] += $total;
+				}
+			}
 		}
+
 		$order_data['first']            = gmdate( 'Y-m-d H:i:s', $first );
 		$order_data['last']             = gmdate( 'Y-m-d H:i:s', $last );
 		$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
