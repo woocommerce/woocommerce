@@ -335,27 +335,25 @@ function wc_body_class( $classes ) {
 
 	$classes[] = 'woocommerce-no-js';
 
-	add_action( 'wp_footer', 'wc_no_js' );
-
 	return array_unique( $classes );
 }
 
 /**
  * NO JS handling.
  *
+ * @param  array $classes Body Classes.
+ * @return array
+ *
  * @since 3.4.0
  */
-function wc_no_js() {
-	?>
-	<script type="text/javascript">
-		(function () {
-			var c = document.body.className;
-			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
-			document.body.className = c;
-		})()
-	</script>
-	<?php
+function wc_no_js( $classes ) {
+	if ( in_array( 'woocommerce-no-js', $classes, true ) ) {
+		$classes   = array_diff( $classes, array( 'woocommerce-no-js' ) );
+		$classes[] = 'woocommerce-js';
+	}
+	return array_values( $classes );
 }
+add_filter( 'body_class', 'wc_no_js', 10, 1 );
 
 /**
  * Display the classes for the product cat div.
