@@ -4,6 +4,7 @@
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
+- Shopper Cart Apply Coupon
 
 ## Fixed
 
