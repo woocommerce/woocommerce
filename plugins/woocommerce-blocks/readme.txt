@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 7.0
-Stable tag: 4.0.0
+Stable tag: 4.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,36 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 4.1.0 - 2020-12-24 =
+
+#### Enhancements
+
+- Add the ability to directly upload an image in Featured Category and Featured Product blocks. ([3579](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3579))
+- Fix coupon code button height not adapting to the font size. ([3575](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3575))
+- Fixed Coupon Code panel not expanding/contracting in some themes. ([3569](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3569))
+- Fix: Added fallback styling for screen reader text. ([3557](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3557))
+
+#### Bug Fixes
+
+- Fix nonce issues when adding product to cart from All Products. ([3598](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3598))
+- Fix bug inside Product Search in the editor. ([3578](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3578))
+- Fix console warnings in WordPress 5.6. ([3577](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3577))
+- Fixed text visibility in select inputs when using Twenty Twenty-One theme's dark mode. ([3554](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3554))
+- Fix product list images skewed in Widgets editor. ([3553](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3553))
+- Add address validation to values posted to the Checkout via StoreApi. ([3552](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3552))
+- Fix Fees not visible in Cart & Checkout blocks when order doesn't need shipping. ([3521](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3521))
+
+#### compatibility
+
+- Fix All Products block edit screen. ([3547](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3547))
+
+#### wp dependency
+
+- Removed compatibility with packages in WordPress 5.3. ([3541](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3541))
+- Bumped the minimum WP required version to 5.4. ([3537](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3537))
+
+
 
 = 4.0.0 - 2020-12-07 =
 
