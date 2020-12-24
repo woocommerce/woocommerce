@@ -55,6 +55,7 @@ export const controls = {
 						} );
 				} )
 				.catch( ( errorResponse ) => {
+					triggerFetch.setNonce( errorResponse.headers );
 					if ( typeof errorResponse.json === 'function' ) {
 						// Parse error response before rejecting it.
 						errorResponse

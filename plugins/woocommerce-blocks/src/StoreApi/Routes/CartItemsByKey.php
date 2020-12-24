@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
-class CartItemsByKey extends AbstractRoute {
+class CartItemsByKey extends AbstractCartRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
