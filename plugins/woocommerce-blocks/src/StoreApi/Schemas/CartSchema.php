@@ -129,20 +129,14 @@ class CartSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-				'items'       => [
-					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
-				],
+				'properties'  => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
 			],
 			'billing_address'         => [
 				'description' => __( 'Current set billing address for the customer.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-				'items'       => [
-					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( $this->billing_address_schema->get_properties() ),
-				],
+				'properties'  => $this->force_schema_readonly( $this->billing_address_schema->get_properties() ),
 			],
 			'items'                   => [
 				'description' => __( 'List of cart items.', 'woo-gutenberg-products-block' ),
