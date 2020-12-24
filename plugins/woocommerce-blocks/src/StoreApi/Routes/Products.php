@@ -44,6 +44,8 @@ class Products extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
+		// we load so that we have the same session, this is done so that Add to Cart can function.
+		$this->maybe_load_cart();
 		$response      = new \WP_REST_Response();
 		$product_query = new ProductQuery();
 
