@@ -17,6 +17,7 @@
 
 - Deprecated `StoreOwnerFlow`, `CustomerFlow` in favour of `merchant`,`shopper`
 - `createSimpleOrder( status )` returns the ID of the order that was created
+- Updated `createCoupon( couponAmount )` component to be more dynamic in functioning, now you can use any coupon discount type in tests
 
 # 0.1.1
 
