@@ -14,7 +14,7 @@ const {
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
-const singleProductPrice = config.get( 'products.simple.price' );
+const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 const twoProductPrice = singleProductPrice * 2;
 const threeProductPrice = singleProductPrice * 3;
 const fourProductPrice = singleProductPrice * 4;

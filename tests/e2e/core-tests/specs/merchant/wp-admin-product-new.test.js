@@ -19,7 +19,7 @@ const {
 const config = require( 'config' );
 
 const simpleProductName = config.get( 'products.simple.name' );
-const simpleProductPrice = config.get( 'products.simple.price' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyPublishAndTrash = async () => {
 	// Wait for auto save
