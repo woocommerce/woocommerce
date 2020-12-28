@@ -3,8 +3,8 @@
  * Internal dependencies
  */
 const {
-	CustomerFlow,
-	StoreOwnerFlow,
+	shopper,
+	merchant,
 	createSimpleProduct,
 	createVariableProduct,
 	uiUnblocked
@@ -18,24 +18,24 @@ const simpleProductName = config.get( 'products.simple.name' );
 const runSingleProductPageTest = () => {
 	describe('Single Product Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
-			await StoreOwnerFlow.logout();
+			await merchant.logout();
 		});
 
 		it('should be able to add simple products to the cart', async () => {
 			// Add 5 simple products to cart
-			await CustomerFlow.goToProduct(simplePostIdValue);
+			await shopper.goToProduct(simplePostIdValue);
 			await expect(page).toFill('div.quantity input.qty', '5');
-			await CustomerFlow.addToCart();
+			await shopper.addToCart();
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'have been added to your cart.'});
 
 			// Verify cart contents
-			await CustomerFlow.goToCart();
-			await CustomerFlow.productIsInCart(simpleProductName, 5);
+			await shopper.goToCart();
+			await shopper.productIsInCart(simpleProductName, 5);
 
 			// Remove items from cart
-			await CustomerFlow.removeFromCart(simpleProductName);
+			await shopper.removeFromCart(simpleProductName);
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
@@ -43,26 +43,26 @@ const runSingleProductPageTest = () => {
 
 	describe.skip('Variable Product Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			variablePostIdValue = await createVariableProduct();
-			await StoreOwnerFlow.logout();
+			await merchant.logout();
 		});
 
 		it('should be able to add variation products to the cart', async () => {
 			// Add a product with one set of variations to cart
-			await CustomerFlow.goToProduct(variablePostIdValue);
+			await shopper.goToProduct(variablePostIdValue);
 			await expect(page).toSelect('#attr-1', 'val1');
 			await expect(page).toSelect('#attr-2', 'val1');
 			await expect(page).toSelect('#attr-3', 'val1');
-			await CustomerFlow.addToCart();
+			await shopper.addToCart();
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'has been added to your cart.'});
 
 			// Verify cart contents
-			await CustomerFlow.goToCart();
-			await CustomerFlow.productIsInCart('Variable Product with Three Variations');
+			await shopper.goToCart();
+			await shopper.productIsInCart('Variable Product with Three Variations');
 
 			// Remove items from cart
-			await CustomerFlow.removeFromCart('Variable Product with Three Variations');
+			await shopper.removeFromCart('Variable Product with Three Variations');
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});

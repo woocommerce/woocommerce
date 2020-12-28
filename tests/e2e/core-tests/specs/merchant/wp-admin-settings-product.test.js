@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	setCheckbox,
 	settingsPageSaveChanges,
 	unsetCheckbox,
@@ -14,12 +14,12 @@ const {
 const runProductSettingsTest = () => {
 	describe('WooCommerce Products > Downloadable Products Settings', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can update settings', async () => {
 			// Go to downloadable products settings page
-			await StoreOwnerFlow.openSettings('products', 'downloadable');
+			await merchant.openSettings('products', 'downloadable');
 
 			// Make sure the product tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'Products'});

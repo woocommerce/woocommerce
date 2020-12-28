@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	completeOnboardingWizard,
 } = require( '@woocommerce/e2e-utils' );
 
@@ -19,7 +19,7 @@ const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
-			await StoreOwnerFlow.runSetupWizard();
+			await merchant.runSetupWizard();
 			await completeOnboardingWizard();
 		});
 	});
