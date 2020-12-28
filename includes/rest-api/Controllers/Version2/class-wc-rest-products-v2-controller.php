@@ -627,16 +627,15 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param WC_Product      $product Product instance.
 	 * @param string          $context Request context. Options: 'view' and 'edit'.
-	 * @param WP_REST_Request $request Current request object. For backward compatibility, we pass this argument silently.
 	 *
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$fields = array();
-		$request = func_get_arg( 2 );
-		if ( $request instanceof WP_REST_Request ) {
-			$fields = $this->get_fields_for_response( $request );
-		}
+		/* @param WP_REST_Request $request Current request object. For backward compatibility, we pass this argument silently. */
+		// TODO: Refactor to fix this behavior when DI gets included to make it obvious and clean.
+		$request = func_num_args() >= 2 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
+		$fields  = $this->get_fields_for_response( $request );
+
 		$base_data = array();
 		foreach ( $fields as $field ) {
 			switch ( $field ) {
@@ -649,7 +648,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'slug':
 					$base_data['slug'] = $product->get_slug( $context );
 					break;
-
 				case 'permalink':
 					$base_data['permalink'] = $product->get_permalink();
 					break;
