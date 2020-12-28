@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Icon, wordpress } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { useSelect } from '@wordpress/data';
@@ -109,7 +110,7 @@ const Header = () => {
 				className="woocommerce-navigation-header__site-title"
 				as="span"
 			>
-				{ siteTitle }
+				{ decodeEntities( siteTitle ) }
 			</Button>
 		</div>
 	);
