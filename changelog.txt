@@ -27,6 +27,7 @@
 * Fix - Also count comment types with '' and 'comment' in the review count query. #28624
 * Fix - Better error messages when usage limit are reached. #28592
 * Fix - Adjust stock items only for statuses which reduces the stock. #28620
+* Fix - Named parameter to fix DB update routine on PHP8. #28537
 * Dev - Hook for intializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
@@ -67,6 +68,8 @@
 * Fix - Stop order panels flickering on load. #5655
 * Fix - Load wc-tracks to avoid fatal errors. #5645 #5638
 * Fix - Preventing desktop-sized navigation placeholder from appearing on mobile during load. #5616
+* Fix - Completed tasks tracking causing infinite loop #5941
+* Fix - Remove Navigation access #5940
 * Tweak - Fix inconsistent REST API parameter name for customer type filtering. #5823
 * Tweak - Improve styles of the tax task. #5709
 * Tweak - Do not show store setup link on the homescreen. #5801
