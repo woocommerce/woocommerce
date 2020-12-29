@@ -37,7 +37,7 @@ const runOrderApplyCouponTest = () => {
 			]);
 
 			// Make sure the simple product price is greater than the coupon amount
-			await expect(simpleProductPrice).toBeGreaterThan(5.00);
+			await expect(Number(simpleProductPrice)).toBeGreaterThan(5.00);
 		} );
 
 		it('can apply a coupon', async () => {
