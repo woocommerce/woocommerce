@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export */
+/* eslint-disable jest/no-export, jest/no-standalone-expect */
 
 /**
  * Internal dependencies
@@ -35,6 +35,9 @@ const runOrderApplyCouponTest = () => {
 				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
 				page.removeAllListeners('dialog'),
 			]);
+
+			// Make sure the simple product price is greater than the coupon amount
+			await expect(simpleProductPrice).toBeGreaterThan(5.00);
 		} );
 
 		it('can apply a coupon', async () => {
