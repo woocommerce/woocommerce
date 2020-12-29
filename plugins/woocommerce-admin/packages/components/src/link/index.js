@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { partial } from 'lodash';
 import { getHistory } from '@woocommerce/navigation';
@@ -10,11 +9,22 @@ import { getHistory } from '@woocommerce/navigation';
  * Use `Link` to create a link to another resource. It accepts a type to automatically
  * create wp-admin links, wc-admin links, and external links.
  */
-class Link extends Component {
+
+function Link( { children, href, type, ...props } ) {
 	// @todo Investigate further if we can use <Link /> directly.
 	// With React Router 5+, <RouterLink /> cannot be used outside of the main <Router /> elements,
 	// which seems to include components imported from @woocommerce/components. For now, we can use the history object directly.
-	wcAdminLinkHandler( onClick, event ) {
+	const wcAdminLinkHandler = ( onClick, event ) => {
+		// If cmd, ctrl, alt, or shift are used, use default behavior to allow opening in a new tab.
+		if (
+			event.ctrlKey ||
+			event.metaKey ||
+			event.altKey ||
+			event.shiftKey
+		) {
+			return;
+		}
+
 		event.preventDefault();
 
 		// If there is an onclick event, execute it.
@@ -26,29 +36,22 @@ class Link extends Component {
 		}
 
 		getHistory().push( event.target.closest( 'a' ).getAttribute( 'href' ) );
+	};
+
+	const passProps = {
+		...props,
+		'data-link-type': type,
+	};
+
+	if ( type === 'wc-admin' ) {
+		passProps.onClick = partial( wcAdminLinkHandler, passProps.onClick );
 	}
 
-	render() {
-		const { children, href, type, ...props } = this.props;
-
-		const passProps = {
-			...props,
-			'data-link-type': type,
-		};
-
-		if ( type === 'wc-admin' ) {
-			passProps.onClick = partial(
-				this.wcAdminLinkHandler,
-				passProps.onClick
-			);
-		}
-
-		return (
-			<a href={ href } { ...passProps }>
-				{ children }
-			</a>
-		);
-	}
+	return (
+		<a href={ href } { ...passProps }>
+			{ children }
+		</a>
+	);
 }
 
 Link.propTypes = {
