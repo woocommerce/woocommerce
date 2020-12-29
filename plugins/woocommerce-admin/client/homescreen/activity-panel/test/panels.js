@@ -4,16 +4,45 @@
 import { getAllPanels } from '../panels';
 
 describe( 'ActivityPanel', () => {
-	it( 'should exclude the orders panel when there are no orders', () => {
+	it( 'should exclude the orders and stock panels when there are no orders', () => {
 		const panels = getAllPanels( {
 			countUnreadOrders: 0,
 			orderStatuses: [],
 			totalOrderCount: 0,
+			publishedProductCount: 1,
+			manageStock: 'yes',
 		} );
 
 		expect( panels ).toEqual(
 			expect.not.arrayContaining( [
 				expect.objectContaining( { id: 'orders-panel' } ),
+			] )
+		);
+		expect( panels ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { id: 'stock-panel' } ),
+			] )
+		);
+	} );
+
+	it( 'should exclude the reviews and stock panels when there are no published products', () => {
+		const panels = getAllPanels( {
+			countUnreadOrders: 0,
+			orderStatuses: [],
+			totalOrderCount: 1, // Yes, I realize this isn't "possible".
+			publishedProductCount: 0,
+			manageStock: 'yes',
+			reviewsEnabled: 'yes',
+		} );
+
+		expect( panels ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { id: 'reviews-panel' } ),
+			] )
+		);
+		expect( panels ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { id: 'stock-panel' } ),
 			] )
 		);
 	} );
@@ -28,6 +57,35 @@ describe( 'ActivityPanel', () => {
 		expect( panels ).toEqual(
 			expect.arrayContaining( [
 				expect.objectContaining( { id: 'orders-panel' } ),
+			] )
+		);
+	} );
+
+	it( 'should include the stock panel when there are orders, products, and inventory management is enabled', () => {
+		const panels = getAllPanels( {
+			countUnreadOrders: 1,
+			orderStatuses: [],
+			totalOrderCount: 10,
+			publishedProductCount: 2,
+			manageStock: 'yes',
+		} );
+
+		expect( panels ).toEqual(
+			expect.arrayContaining( [
+				expect.objectContaining( { id: 'stock-panel' } ),
+			] )
+		);
+	} );
+
+	it( 'should include the reviews panel when there are products and reviews are enabled', () => {
+		const panels = getAllPanels( {
+			publishedProductCount: 5,
+			reviewsEnabled: 'yes',
+		} );
+
+		expect( panels ).toEqual(
+			expect.arrayContaining( [
+				expect.objectContaining( { id: 'reviews-panel' } ),
 			] )
 		);
 	} );

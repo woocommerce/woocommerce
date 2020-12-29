@@ -90,6 +90,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Product exclusion filter on Orders Report.
 - Fix: Typo in Variation Stats DataStore context filter value.
 - Fix: support custom attributes in Attribute advanced report filter.
+- Fix: Don't show Stock and Reviews Homescreen panels too early.
 
 == 1.8.2 12/22/2020 ==
 

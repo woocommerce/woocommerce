@@ -27,6 +27,7 @@ export const ActivityPanel = () => {
 		const manageStock = getSetting( 'manageStock', 'no' );
 		const countLowStockProducts = getLowStockCount( select );
 		const countUnapprovedReviews = getUnapprovedReviews( select );
+		const publishedProductCount = getSetting( 'publishedProductCount', 0 );
 
 		return {
 			countLowStockProducts,
@@ -36,10 +37,15 @@ export const ActivityPanel = () => {
 			totalOrderCount,
 			reviewsEnabled,
 			countUnapprovedReviews,
+			publishedProductCount,
 		};
 	} );
 
 	const panels = getAllPanels( panelsData );
+
+	if ( panels.length === 0 ) {
+		return null;
+	}
 
 	return (
 		<Accordion>
