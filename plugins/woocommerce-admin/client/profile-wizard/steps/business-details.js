@@ -31,6 +31,7 @@ import {
 	PLUGINS_STORE_NAME,
 	pluginNames,
 	SETTINGS_STORE_NAME,
+	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -100,6 +101,25 @@ class BusinessDetails extends Component {
 		this.validate = this.validate.bind( this );
 		this.getNumberRangeString = this.getNumberRangeString.bind( this );
 		this.numberFormat = this.numberFormat.bind( this );
+	}
+
+	onCreativeMailInstallAndActivated() {
+		const { updateOptions } = this.props;
+		updateOptions( {
+			ce4wp_referred_by: {
+				plugin: 'woocommerce',
+				version: getSetting( 'wcVersion' ),
+				time: Math.floor( new Date().getTime() / 1000 ),
+				source: 'onboarding',
+			},
+		} );
+	}
+
+	onPostInstallAndActivePlugins( response ) {
+		const activated = response.data.activated;
+		if ( activated.includes( 'creative-mail-by-constant-contact' ) ) {
+			this.onCreativeMailInstallAndActivated();
+		}
 	}
 
 	async onContinue( values ) {
@@ -176,6 +196,7 @@ class BusinessDetails extends Component {
 				installAndActivatePlugins( businessExtensions )
 					.then( ( response ) => {
 						createNoticesFromResponse( response );
+						this.onPostInstallAndActivePlugins( response );
 					} )
 					.catch( ( error ) => {
 						createNoticesFromResponse( error );
@@ -1007,11 +1028,13 @@ export default compose(
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 
 		return {
 			createNotice,
 			installAndActivatePlugins,
 			updateProfileItems,
+			updateOptions,
 		};
 	} )
 )( BusinessDetails );
