@@ -11,6 +11,7 @@ const {
 	verifyValueOfInputField,
 	uiUnblocked,
 	addProductToOrder,
+	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -74,10 +75,7 @@ const runRefundOrderTest = () => {
 		});
 
 		it('can delete an issued refund', async () => {
-			// We need to use this here as `expect(page).toClick()` was unable to find the element
-			// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
-			page.$eval('a.delete_refund', elem => elem.click());
-
+			await evalAndClick( 'a.delete_refund' );
 			await uiUnblocked();
 
 			// Verify the refunded row item is no longer showing

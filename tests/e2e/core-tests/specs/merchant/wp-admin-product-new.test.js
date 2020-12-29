@@ -5,7 +5,8 @@
 const {
 	merchant,
 	clickTab,
-	uiUnblocked
+	uiUnblocked,
+	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -113,9 +114,7 @@ const runAddVariableProductTest = () => {
 			await expect(page).toSelect('select.variation_actions', 'Create variations from all attributes');
 
 			const firstDialog = await expect(page).toDisplayDialog(async () => {
-				// Using this technique since toClick() isn't working.
-				// See: https://github.com/GoogleChrome/puppeteer/issues/1805#issuecomment-464802876
-				page.$eval('a.do_variation_action', elem => elem.click());
+				await evalAndClick( 'a.do_variation_action' );
 			});
 
 			expect(firstDialog.message()).toMatch('Are you sure you want to link all variations?');
