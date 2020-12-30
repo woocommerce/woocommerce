@@ -15,6 +15,7 @@ const {
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 let orderId;
 let currencySymbol;
@@ -49,9 +50,9 @@ const runRefundOrderTest = () => {
 			await expect(page).toFill('#refund_reason', 'No longer wanted');
 
 			await Promise.all([
-				verifyValueOfInputField('.refund_line_total', '9.99'),
-				verifyValueOfInputField('#refund_amount', '9.99'),
-				expect(page).toMatchElement('.do-manual-refund', { text: `Refund ${currencySymbol}9.99 manually` }),
+				verifyValueOfInputField('.refund_line_total', simpleProductPrice),
+				verifyValueOfInputField('#refund_amount', simpleProductPrice),
+				expect(page).toMatchElement('.do-manual-refund', { text: `Refund ${currencySymbol + simpleProductPrice} manually` }),
 			]);
 
 			await expect(page).toClick('.do-manual-refund');
@@ -61,11 +62,11 @@ const runRefundOrderTest = () => {
 			await Promise.all([
 				// Verify the product line item shows the refunded quantity and amount
 				expect(page).toMatchElement('.quantity .refunded', { text: '-1' }),
-				expect(page).toMatchElement('.line_cost .refunded', { text: `-${currencySymbol}9.99` }),
+				expect(page).toMatchElement('.line_cost .refunded', { text: `-${currencySymbol + simpleProductPrice}` }),
 
 				// Verify the refund shows in the list with the amount
 				expect(page).toMatchElement('.refund .description', { text: 'No longer wanted' }),
-				expect(page).toMatchElement('.refund > .line_cost', { text: `-${currencySymbol}9.99` }),
+				expect(page).toMatchElement('.refund > .line_cost', { text: `-${currencySymbol + simpleProductPrice}` }),
 
 				// Verify system note was added
 				expect(page).toMatchElement('.system-note', { text: 'Order status changed from Completed to Refunded.' }),
@@ -86,11 +87,11 @@ const runRefundOrderTest = () => {
 			await Promise.all([
 				// Verify the product line item shows the refunded quantity and amount
 				expect(page).not.toMatchElement('.quantity .refunded', { text: '-1' }),
-				expect(page).not.toMatchElement('.line_cost .refunded', { text: `-${currencySymbol}9.99` }),
+				expect(page).not.toMatchElement('.line_cost .refunded', { text: `-${currencySymbol + simpleProductPrice}` }),
 
 				// Verify the refund shows in the list with the amount
 				expect(page).not.toMatchElement('.refund .description', { text: 'No longer wanted' }),
-				expect(page).not.toMatchElement('.refund > .line_cost', { text: `-${currencySymbol}9.99` }),
+				expect(page).not.toMatchElement('.refund > .line_cost', { text: `-${currencySymbol + simpleProductPrice}` }),
 			]);
 		});
 
