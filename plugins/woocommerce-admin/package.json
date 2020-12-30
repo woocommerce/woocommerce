@@ -202,7 +202,7 @@
 		"raw-loader": "4.0.2",
 		"react-docgen": "5.3.1",
 		"readline-sync": "1.4.10",
-		"recast": "0.20.3",
+		"recast": "0.20.4",
 		"replace": "1.2.0",
 		"request-promise": "4.2.6",
 		"rimraf": "3.0.2",
