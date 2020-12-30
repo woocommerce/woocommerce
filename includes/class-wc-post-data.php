@@ -41,6 +41,7 @@ class WC_Post_Data {
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
+		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
 
 		// Status transitions.
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -488,6 +489,22 @@ class WC_Post_Data {
 				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
 			}
 		}
+	}
+
+	/**
+	 * Ensure statuses are correctly reassigned when restoring orders.
+	 *
+	 * @param string $new_status      The new status of the post being restored.
+	 * @param int    $post_id         The ID of the post being restored.
+	 * @param string $previous_status The status of the post at the point where it was trashed.
+	 * @return string
+	 */
+	public function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
+		if ( in_array( get_post_type( $post_id ), wc_get_order_types(), true ) ) {
+			$new_status = $previous_status;
+		}
+
+		return $new_status;
 	}
 
 	/**
