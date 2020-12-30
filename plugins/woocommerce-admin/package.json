@@ -140,7 +140,7 @@
 		"@storybook/addon-viewport": "6.0.26",
 		"@storybook/addons": "6.0.26",
 		"@storybook/react": "6.0.26",
-		"@testing-library/jest-dom": "5.11.6",
+		"@testing-library/jest-dom": "5.11.8",
 		"@testing-library/react": "11.2.2",
 		"@testing-library/react-hooks": "3.7.0",
 		"@testing-library/user-event": "12.6.0",
