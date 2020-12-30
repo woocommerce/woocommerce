@@ -16,6 +16,7 @@
 		&:not(:last-child) {
 			// Override package component style.
 			margin-bottom: 0;
+			margin-right: 4px;
 		}
 
 		input {
@@ -45,6 +46,7 @@
 		}
 
 		input:checked + label {
+			outline: 2px solid $studio-wordpress-blue;
 			background-color: $studio-wordpress-blue-0;
 		}
 
