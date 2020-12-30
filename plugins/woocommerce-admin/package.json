@@ -216,7 +216,7 @@
 		"webpack": "4.43.0",
 		"webpack-bundle-analyzer": "3.6.1",
 		"webpack-cli": "3.3.11",
-		"webpack-fix-style-only-entries": "0.4.0",
+		"webpack-fix-style-only-entries": "0.6.0",
 		"webpack-rtl-plugin": "2.0.0",
 		"zenhub-api": "0.2.0"
 	},
