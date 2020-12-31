@@ -891,15 +891,30 @@ class WC_Admin_Post_Types {
 			if ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
 				// Stock status is determined by children.
 				foreach ( $product->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
+					$child          = wc_get_product( $child_id );
+					$child_is_dirty = false;
+
 					if ( ! $product->get_manage_stock() ) {
 						$child->set_stock_status( $stock_status );
+						$child_is_dirty = true;
+					}
+					// setting outofstock on managed stock items should set stock to 0.
+					if ( $child->get_manage_stock() && 'outofstock' === $stock_status ) {
+						$child->set_stock_quantity( 0 );
+						$child_is_dirty = true;
+					}
+
+					if ( $child_is_dirty ) {
 						$child->save();
 					}
 				}
 				$product = WC_Product_Variable::sync( $product, false );
 			} else {
 				$product->set_stock_status( $stock_status );
+				// setting outofstock on managed stock items should set stock to 0.
+				if ( $product->get_manage_stock() && 'outofstock' === $stock_status ) {
+					$product->set_stock_quantity( 0 );
+				}
 			}
 		}
 
