@@ -52,7 +52,13 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_type_of_file_path( $file_path = '' ) {
 		$file_path = $file_path ? $file_path : $this->get_file();
-		if ( 0 === strpos( $file_path, 'http' ) || 0 === strpos( $file_path, '//' ) ) {
+		if (
+			0 === strpos( $file_path, 'http' ) ||
+			(
+				0 === strpos( $file_path, '//' ) &&
+				substr( $file_path, 0, 3 ) !== '///' // This will prevent local file paths to be treated as "absolute".
+			)
+		) {
 			return 'absolute';
 		} elseif ( '[' === substr( $file_path, 0, 1 ) && ']' === substr( $file_path, -1 ) ) {
 			return 'shortcode';
@@ -164,6 +170,11 @@ class WC_Product_Download implements ArrayAccess {
 	 * @param string $value File URL/Path.
 	 */
 	public function set_file( $value ) {
+		// A `///` is recognized as an "absolute", but on the filesystem, so it bypasses the mime check in `self::is_allowed_filetype`.
+		// This will change the file value to the `relative` beginning with `/` and it will be parsed accordingly.
+		if ( substr( $value, 0, 3 ) === '///' ) {
+			$value = substr( $value, 2 );
+		}
 		switch ( $this->get_type_of_file_path( $value ) ) {
 			case 'absolute':
 				$this->data['file'] = esc_url_raw( $value );
