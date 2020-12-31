@@ -45,6 +45,7 @@ class WC_Query {
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
+			add_filter( 'posts_clauses_request', array( $this, 'exclude_hidden_products_from_wp_search' ), 0, 2 );
 		}
 		$this->init_query_vars();
 	}
@@ -885,6 +886,36 @@ class WC_Query {
 	 */
 	public function remove_add_to_cart_pagination( $url ) {
 		return remove_query_arg( 'add-to-cart', $url );
+	}
+
+	/**
+	 * Fixes the WP search to exclude products marked as "hidden" from WooCommerce.
+	 *
+	 * @param  array    $clauses  The query clauses.
+	 * @param  WP_Query $wp_query The query.
+	 * @return array    $clauses  The query clauses.
+	 */
+	public function exclude_hidden_products_from_wp_search( array $clauses, WP_Query $wp_query ) {
+		global $wpdb;
+
+		if ( $wp_query->is_search ) {
+			$clauses['fields'] .= ", (
+				SELECT
+					count(*)
+				FROM
+					{$wpdb->term_relationships}
+				WHERE
+					{$wpdb->term_relationships}.object_id = wp_posts.ID
+					AND {$wpdb->term_relationships}.term_taxonomy_id in(
+						SELECT
+							term_id FROM {$wpdb->terms}
+						WHERE
+							name = 'exclude-from-search')) AS wc_excluded_from_search";
+
+			$clauses['where'] .= ' HAVING wc_excluded_from_search = 0';
+		}
+
+		return $clauses;
 	}
 
 	/**
