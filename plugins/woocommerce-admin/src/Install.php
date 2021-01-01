@@ -478,6 +478,7 @@ class Install {
 			'wc-admin-learn-more-about-product-settings',
 			'wc-admin-onboarding-profiler-reminder',
 			'wc-admin-historical-data',
+			'wc-admin-review-shipping-settings',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(

@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\Features;
 use \Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 use \Automattic\WooCommerce\Admin\PluginsHelper;
-use \Automattic\WooCommerce\Admin\Features\OnboardingSetUpShipping;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -65,9 +64,6 @@ class Onboarding {
 		// Add actions and filters.
 		$this->add_actions();
 		$this->add_filters();
-
-		// Hook up dependent classes.
-		new OnboardingSetUpShipping();
 	}
 
 	/**

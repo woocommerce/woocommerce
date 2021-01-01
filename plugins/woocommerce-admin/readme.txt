@@ -82,6 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Invalidate product count if the last product was updated in the list. #5790
 - Fix: Updating (non wordpress user) customer with order data
 - Dev: Add documentation for filter `woocommerce_admin_pages_list` and `wc_admin_register_page` #5844
+- Dev: Revert work done in #4857 for automated shipping after OBW is completed #5971
 
 == Changelog ==
 

@@ -622,27 +622,6 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Review_Shipping_Settings.
- *
- * @deprecated since 1.7.0, use ReviewShippingSettings
- */
-class WC_Admin_Notes_Review_Shipping_Settings extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\ReviewShippingSettings';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
  * WC_Admin_Notes_Selling_Online_Courses.
  *
  * @deprecated since 1.7.0, use SellingOnlineCourses
