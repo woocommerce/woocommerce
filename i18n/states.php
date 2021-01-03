@@ -306,7 +306,7 @@ return array(
 	'CZ' => array(),
 	'DE' => array(),
 	'DK' => array(),
-	'DO' => array(
+	'DO' => array( // Dominican Republic.
 		'DO-01' => __( 'Distrito Nacional', 'woocommerce' ),
 		'DO-02' => __( 'Azua', 'woocommerce' ),
 		'DO-03' => __( 'Baoruco', 'woocommerce' ),
