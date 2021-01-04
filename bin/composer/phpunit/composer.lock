@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5f4d3a122b88daaf9a7d3eadd0b50d1",
+    "content-hash": "cbe696cc9c487e3027f943e82d88261f",
     "packages": [],
     "packages-dev": [
         {
@@ -730,12 +730,12 @@
             "version": "6.5.14",
             "source": {
                 "type": "git",
-                "url": "https://github.com/woocommerce/phpunit.git",
+                "url": "https://github.com/sebastianbergmann/phpunit.git",
                 "reference": "bac23fe7ff13dbdb461481f706f0e9fe746334b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/phpunit/zipball/bac23fe7ff13dbdb461481f706f0e9fe746334b7",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/bac23fe7ff13dbdb461481f706f0e9fe746334b7",
                 "reference": "bac23fe7ff13dbdb461481f706f0e9fe746334b7",
                 "shasum": ""
             },
@@ -789,15 +789,7 @@
                     "src/"
                 ]
             },
-            "autoload-dev": {
-                "classmap": [
-                    "tests/"
-                ],
-                "files": [
-                    "src/Framework/Assert/Functions.php",
-                    "tests/_files/CoveredFunction.php"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
