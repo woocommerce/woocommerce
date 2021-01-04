@@ -16,7 +16,7 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form } from '@woocommerce/components';
-import { getCurrencyData } from '@woocommerce/currency';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -80,9 +80,17 @@ class StoreDetails extends Component {
 			return null;
 		}
 
-		const region = getCurrencyRegion( countryState );
-		const currencyData = getCurrencyData();
-		return currencyData[ region ] || currencyData.US;
+		const Currency = this.context;
+		const country = getCountryCode( countryState );
+		const { currencySymbols = {}, localeInfo = {} } = getSetting(
+			'onboarding',
+			{}
+		);
+		return Currency.getDataForCountry(
+			country,
+			localeInfo,
+			currencySymbols
+		);
 	}
 
 	onSubmit() {
@@ -112,7 +120,7 @@ class StoreDetails extends Component {
 
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: getCountryCode( values.countryState ),
-			derived_currency: currencySettings.code,
+			derived_currency: currencySettings.currency_code,
 			setup_client: values.isClient,
 		} );
 

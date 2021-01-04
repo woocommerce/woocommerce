@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { decodeEntities } from '@wordpress/html-entities';
 import { sprintf } from '@wordpress/i18n';
 import { numberFormat } from '@woocommerce/number';
 import deprecated from '@wordpress/deprecated';
@@ -11,7 +12,14 @@ const CurrencyFactory = ( currencySetting ) => {
 	setCurrency( currencySetting );
 
 	function setCurrency( setting ) {
-		const defaultCurrency = getCurrencyData().US;
+		const defaultCurrency = {
+			code: 'USD',
+			symbol: '$',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			precision: 2,
+		};
 		const config = { ...defaultCurrency, ...setting };
 		currency = {
 			code: config.code.toString(),
@@ -84,18 +92,49 @@ const CurrencyFactory = ( currencySetting ) => {
 			case 'right':
 				return '%2$s%1$s';
 			case 'left_space':
-				return '%1$s&nbsp;%2$s';
+				return '%1$s %2$s';
 			case 'right_space':
-				return '%2$s&nbsp;%1$s';
+				return '%2$s %1$s';
 		}
 
 		return '%1$s%2$s';
+	}
+
+	/**
+	 * Get formatted data for a country from supplied locale and symbol info.
+	 *
+	 * @param {string} countryCode Country code.
+	 * @param {Object} localeInfo Locale info by country code.
+	 * @param {Object} currencySymbols Currency symbols by symbol code.
+	 * @return {Object} Formatted currency data for country.
+	 */
+	function getDataForCountry(
+		countryCode,
+		localeInfo = {},
+		currencySymbols = {}
+	) {
+		const countryInfo = localeInfo[ countryCode ];
+		const symbol = currencySymbols[ countryInfo.currency_code ];
+
+		if ( ! symbol || ! countryInfo ) {
+			return {};
+		}
+
+		return {
+			code: countryInfo.currency_code,
+			symbol: decodeEntities( symbol ),
+			symbolPosition: countryInfo.currency_pos,
+			thousandSeparator: countryInfo.thousand_sep,
+			decimalSeparator: countryInfo.decimal_sep,
+			precision: countryInfo.num_decimals,
+		};
 	}
 
 	return {
 		getCurrencyConfig: () => {
 			return { ...currency };
 		},
+		getDataForCountry,
 		setCurrency,
 		formatAmount,
 		formatCurrency,
@@ -169,9 +208,19 @@ export default CurrencyFactory;
  *
  * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
  *
+ * @deprecated
+ *
  * @return {Object} Curreny data.
  */
 export function getCurrencyData() {
+	deprecated( 'getCurrencyData', {
+		version: '3.1.0',
+		alternative: 'CurrencyFactory.getDataForCountry',
+		plugin: 'WooCommerce Admin',
+		hint:
+			'Pass in the country, locale data, and symbol info to use getDataForCountry',
+	} );
+
 	// See https://github.com/woocommerce/woocommerce-admin/issues/3101.
 	return {
 		US: {
