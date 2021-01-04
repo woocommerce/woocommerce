@@ -2,7 +2,7 @@
 	margin-top: -$gap;
 	margin-bottom: $gap-large;
 	background: $studio-white;
-	border: 1px solid $gray-400;
+	border: 1px solid $table-border;
 	border-top: 0;
 	@include breakpoint( '<782px' ) {
 		margin-left: -16px;
@@ -15,7 +15,7 @@
 
 	.woocommerce-chart__header {
 		min-height: 50px;
-		border-bottom: 1px solid $gray-400;
+		border-bottom: 1px solid $table-border;
 		display: flex;
 		flex-flow: row wrap;
 		justify-content: space-between;
@@ -64,7 +64,7 @@
 
 .woocommerce-chart__interval-select {
 	align-items: start;
-	border-right: 1px solid $gray-400;
+	border-right: 1px solid $table-border;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -102,7 +102,7 @@
 	background: transparent !important;
 
 	&.components-button {
-		color: $gray-400;
+		color: $table-border;
 		display: inline-flex;
 		padding: 8px;
 

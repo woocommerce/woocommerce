@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Card, TablePlaceholder } from '@woocommerce/components';
+import { Card } from '@wordpress/components';
+import { TablePlaceholder } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -9,7 +10,7 @@ import { Card, TablePlaceholder } from '@woocommerce/components';
 import { headers } from './index';
 
 export const Basic = () => (
-	<Card className="woocommerce-analytics__card">
+	<Card size={ null }>
 		<TablePlaceholder caption="Revenue Last Week" headers={ headers } />
 	</Card>
 );

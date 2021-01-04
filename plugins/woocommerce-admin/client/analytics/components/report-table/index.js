@@ -9,7 +9,6 @@ import { focus } from '@wordpress/dom';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
 import {
@@ -375,10 +374,6 @@ const ReportTable = ( props ) => {
 
 	// Hide any headers based on user prefs, if loaded.
 	const filteredHeaders = filterShownHeaders( headers, userPrefColumns );
-	const className = classnames( 'woocommerce-report-table', {
-		'has-compare': !! compareBy,
-		'has-search': !! searchBy,
-	} );
 
 	return (
 		<Fragment>
@@ -388,7 +383,8 @@ const ReportTable = ( props ) => {
 				aria-hidden
 			/>
 			<TableCard
-				className={ className }
+				className={ 'woocommerce-report-table' }
+				hasSearch={ !! searchBy }
 				actions={ [
 					compareBy && (
 						<CompareButton

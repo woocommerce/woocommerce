@@ -3,11 +3,20 @@
 exports[`Leaderboard should render correct data in the table 1`] = `
 <div>
   <div
-    class="woocommerce-card woocommerce-table woocommerce-analytics__card woocommerce-leaderboard"
+    class="components-card is-size-medium woocommerce-table woocommerce-leaderboard css-1xs3c37-CardUI e1q7k77g0"
   >
-    
     <div
-      class="woocommerce-card__body"
+      class="components-flex components-card__header is-size-medium e1q7k77g1 css-aafj2m-Flex-HeaderUI eboqfv50"
+    >
+      <p
+        class="css-1ahfdc3-Text e15wbhsk0"
+      />
+      <div
+        class="woocommerce-table__actions"
+      />
+    </div>
+    <div
+      class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
     >
       <div
         aria-hidden="false"
@@ -248,6 +257,9 @@ exports[`Leaderboard should render correct data in the table 1`] = `
         </table>
       </div>
     </div>
+    <div
+      class="components-flex components-card__footer is-size-medium e1q7k77g4 css-ndnb5h-Flex-FooterUI eboqfv50"
+    />
   </div>
 </div>
 `;
