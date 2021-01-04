@@ -614,7 +614,34 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
+			$new_tags = array();
+
+			foreach ( $request['tags'] as $tag ) {
+				if ( ! isset( $tag['name'] ) ) {
+					$new_tags[] = $tag;
+					continue;
+				}
+
+				if ( ! term_exists( $tag['name'], 'product_tag' ) ) {
+					// Create the tag if it doesn't exist.
+					$term_id = wp_insert_term( $tag['name'], 'product_tag' );
+
+					if ( ! is_wp_error( $term_id ) ) {
+						$new_tags[] = array(
+							'id' => $term_id['term_id'],
+						);
+
+						continue;
+					}
+				} else {
+					// Tag exists, assume user wants to set the product with this tag.
+					$new_tags[] = array(
+						'id' => get_term_by( 'name', $tag['name'], 'product_tag' )->term_id,
+					);
+				}
+			}
+
+			$product = $this->save_taxonomy_terms( $product, $new_tags, 'tag' );
 		}
 
 		// Downloadable.
