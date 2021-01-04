@@ -3,19 +3,19 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	verifyPublishAndTrash
 } = require( '@woocommerce/e2e-utils' );
 
 const runCreateOrderTest = () => {
 	describe('Add New Order Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can create new order', async () => {
 			// Go to "add order" page
-			await StoreOwnerFlow.openNewOrder();
+			await merchant.openNewOrder();
 
 			// Make sure we're on the add order page
 			await expect(page.title()).resolves.toMatch('Add new order');

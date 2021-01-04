@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-const { StoreOwnerFlow } = require( '@woocommerce/e2e-utils' );
+const { merchant } = require( '@woocommerce/e2e-utils' );
 
 /**
  * External dependencies
@@ -16,12 +16,12 @@ const {
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can make sure WooCommerce is activated. If not, activate it', async () => {
 			const slug = 'woocommerce';
-			await StoreOwnerFlow.openPlugins();
+			await merchant.openPlugins();
 			const disableLink = await page.$(`tr[data-slug="${slug}"] .deactivate a`);
 			if (disableLink) {
 				return;

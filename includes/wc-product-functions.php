@@ -949,7 +949,7 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
- * @return float
+ * @return float|string Price with tax included, or an empty string if price calculation failed.
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
@@ -1033,7 +1033,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
- * @return float
+ * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args(

@@ -817,18 +817,8 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/woocommerce/phpunit/tree/6.5.14"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/6.5.14"
             },
-            "funding": [
-                {
-                    "type": "github",
-                    "url": "https://github.com/sebastianbergmann"
-                },
-                {
-                    "type": "custom",
-                    "url": "https://phpunit.de/donate.html"
-                }
-            ],
             "time": "2019-02-01T05:22:47+00:00"
         },
         {

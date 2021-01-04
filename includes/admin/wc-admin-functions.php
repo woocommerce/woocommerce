@@ -220,10 +220,10 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 
 	/*
 	 * 0 as $item_quantity usually indicates we're deleting the order item.
-	 * We need to perform different calculations for this case.
+	 * Let's restore back the reduced count.
 	 */
 	if ( 0 === $item_quantity ) {
-		$diff = min( absint( $refunded_item_quantity ), $already_reduced_stock ) * -1;
+		$diff = $already_reduced_stock * -1;
 	}
 
 	if ( $diff < 0 ) {
@@ -240,6 +240,14 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 
 	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
 	$item->save();
+
+	if ( $item_quantity > 0 ) {
+		// If stock was reduced, then we need to mark this on parent order object as well so that cancel logic works properly.
+		$order_data_store = WC_Data_Store::load( 'order' );
+		if ( $item->get_order_id() && ! $order_data_store->get_stock_reduced( $item->get_order_id() ) ) {
+			$order_data_store->set_stock_reduced( $item->get_order_id(), true );
+		}
+	}
 
 	return array(
 		'from' => $new_stock + $diff,
@@ -259,6 +267,7 @@ function wc_save_order_items( $order_id, $items ) {
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
 	$qty_change_order_notes = array();
+	$order                  = wc_get_order( $order_id );
 
 	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
@@ -333,9 +342,11 @@ function wc_save_order_items( $order_id, $items ) {
 
 			$item->save();
 
-			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
-			if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
-				$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';
+			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ) ) ) {
+				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
+				if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
+					$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';
+				}
 			}
 		}
 	}

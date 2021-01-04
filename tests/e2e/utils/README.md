@@ -38,20 +38,22 @@ describe( 'Cart page', () => {
 
 ### Merchant `StoreOwnerFlow`
 
-| Function | Description |
-|----------|-------------|
-| `login` | Log in as merchant |
-| `logout` | log out of merchant account |
-| `openAllOrdersView` | Go to the orders listing |
-| `openDashboard` | Go to the WordPress dashboard  |
-| `openNewCoupon` | Go to the new coupon editor |
-| `openNewOrder` | Go to the new order editor |
-| `openNewProduct` | Go to the new product editor |
-| `openPermalinkSettings` | Go to Settings -> Permalinks |
-| `openPlugins` | Go to the Plugins screen |
-| `openSettings` | Go to WooCommerce -> Settings |
-| `runSetupWizard` | Open the onboarding profiler |
-|----------|-------------|
+| Function | Parameters | Description |
+|----------|-------------|------------|
+| `login` | | Log in as merchant |
+| `logout` | | Log out of merchant account |
+| `openAllOrdersView` | | Go to the orders listing |
+| `openDashboard` | | Go to the WordPress dashboard  |
+| `openNewCoupon` | | Go to the new coupon editor |
+| `openNewOrder` | | Go to the new order editor |
+| `openNewProduct` | | Go to the new product editor |
+| `openPermalinkSettings` | | Go to Settings -> Permalinks |
+| `openPlugins` | | Go to the Plugins screen |
+| `openSettings` | | Go to WooCommerce -> Settings |
+| `runSetupWizard` | | Open the onboarding profiler |
+| `goToOrder` | `orderId` | Go to view a single order |
+| `updateOrderStatus` | `orderId, status` | Update the status of an order |
+|----------|-------------|-------------|
 
 ### Shopper `CustomerFlow`
 

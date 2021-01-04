@@ -36,9 +36,9 @@ jobs:
      - npm install
      - composer install --no-dev
     script:
-      - npm run build:assets
-      - npm run docker:up
-      - npm run test:e2e
+      - travis_retry npm run build:assets
+      - travis_retry npm run docker:up
+      - travis_retry npm run test:e2e
     after_script:
       - npm run docker:down
   - name: "WP Nightly"
