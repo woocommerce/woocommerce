@@ -114,6 +114,8 @@ const Container = ( { menuItems } ) => {
 		} );
 	};
 
+	const isRootBackVisible = activeLevel === 'woocommerce' && rootBackUrl;
+
 	return (
 		<div className="woocommerce-navigation">
 			<Header />
@@ -129,7 +131,7 @@ const Container = ( { menuItems } ) => {
 						setActiveLevel( ...args );
 					} }
 				>
-					{ activeLevel === 'woocommerce' && rootBackUrl && (
+					{ isRootBackVisible && (
 						<NavigationBackButton
 							className="woocommerce-navigation__back-to-dashboard"
 							href={ rootBackUrl }
@@ -152,8 +154,10 @@ const Container = ( { menuItems } ) => {
 								backButtonLabel={
 									category.backButtonLabel || null
 								}
-								onBackButtonClick={ () =>
-									trackBackClick( category.id )
+								onBackButtonClick={
+									isRootBackVisible
+										? null
+										: () => trackBackClick( category.id )
 								}
 							>
 								{ !! primaryItems && (
