@@ -9,7 +9,6 @@ import compareVersions from 'compare-versions';
 import { getSetting } from './get-setting';
 
 export * from './default-constants';
-export { setSetting } from './set-setting';
 import '../../filters/exclude-draft-status-from-analytics';
 
 /**
