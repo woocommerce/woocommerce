@@ -47,7 +47,7 @@ const getCcOrEcheckPaymentMethodOption = (
 			setActivePaymentMethod( method.gateway );
 			setPaymentStatus().success( {
 				payment_method: method.gateway,
-				[ savedTokenKey ]: token,
+				[ savedTokenKey ]: token + '',
 				isSavedToken: true,
 			} );
 		},
@@ -81,7 +81,7 @@ const getDefaultPaymentMethodOptions = (
 			setActivePaymentMethod( method.gateway );
 			setPaymentStatus().success( {
 				payment_method: method.gateway,
-				[ savedTokenKey ]: token,
+				[ savedTokenKey ]: token + '',
 				isSavedToken: true,
 			} );
 		},
