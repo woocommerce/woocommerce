@@ -7,7 +7,6 @@ import { useRef, useEffect, useCallback } from '@wordpress/element';
 import { useQueryStateContext } from '@woocommerce/base-context';
 import { usePrevious } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { assign } from 'lodash';
 
 /**
  * Internal dependencies
@@ -134,7 +133,7 @@ export const useSynchronizedQueryState = ( synchronizedQuery, context ) => {
 			)
 		) {
 			setQueryState(
-				assign( {}, currentQueryState, currentSynchronizedQuery )
+				Object.assign( {}, currentQueryState, currentSynchronizedQuery )
 			);
 			isInitialized.current = true;
 		}
