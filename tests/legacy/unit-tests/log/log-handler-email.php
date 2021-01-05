@@ -47,7 +47,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 0 )->body
+			$this->normalize_eol( $mailer->get_sent( 0 )->body )
 		);
 		$this->assertEquals(
 			"[{$site_name}] EMERGENCY: 2 WooCommerce log messages",
@@ -70,11 +70,13 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 1 )->body
+			$this->normalize_eol( $mailer->get_sent( 1 )->body )
 		);
-
 	}
 
+	private function normalize_eol( $string ) {
+		return str_replace( "\r\n", PHP_EOL, $string );
+	}
 
 	/**
 	 * Test email subject
@@ -223,7 +225,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 0 )->body
+			$this->normalize_eol( $mailer->get_sent( 0 )->body )
 		);
 
 		$this->assertEquals(
@@ -239,9 +241,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 1 )->body
+			$this->normalize_eol( $mailer->get_sent( 1 )->body )
 		);
 	}
-
-
 }
