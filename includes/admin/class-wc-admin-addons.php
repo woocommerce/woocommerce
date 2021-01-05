@@ -43,7 +43,7 @@ class WC_Admin_Addons {
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, WEEK_IN_SECONDS );
+					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
 				}
 			}
 		}
