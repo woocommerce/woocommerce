@@ -215,7 +215,7 @@ class WC_Notes_Run_Db_Update {
 					'_nonce_action'  => 'woocommerce_hide_notices_nonce',
 					'_nonce_name'    => '_wc_notice_nonce',
 				),
-				wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
+				wc_get_current_admin_url() ? remove_query_arg( 'do_update_woocommerce', wc_get_current_admin_url() ) : admin_url( 'admin.php?page=wc-settings' )
 			)
 		);
 
