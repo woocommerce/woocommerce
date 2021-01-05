@@ -48,7 +48,7 @@ const verifyPublishAndTrash = async () => {
 
 const openNewProductAndVerify = async () => {
 	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
+	await merchant.openNewProduct();
 
 	// Make sure we're on the add product page
 	await expect(page.title()).resolves.toMatch('Add new product');
