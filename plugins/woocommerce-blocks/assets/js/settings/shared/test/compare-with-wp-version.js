@@ -1,10 +1,10 @@
 /**
  * Internal dependencies
  */
-import { isWpVersion, setSetting } from '..';
+import { isWpVersion } from '..';
+import { allSettings } from '../settings-init';
 
 describe( 'isWpVersion', () => {
-	let initial = true;
 	it.each`
 		version               | operator | result
 		${ '5.3-beta1' }      | ${ '<' } | ${ true }
@@ -18,13 +18,8 @@ describe( 'isWpVersion', () => {
 		'should return $result when $version is the current wpVersion ' +
 			'and `5.3` is the version compared using `$operator`',
 		( { version, operator, result } ) => {
-			setSetting( 'wpVersion', version );
-			// deprecated caches messages once per session, so we only check
-			// console warn on initial call.
-			if ( initial ) {
-				expect( console ).toHaveWarned();
-			}
-			initial = false;
+			// eslint-disable-next-line
+			allSettings[ 'wpVersion' ] = version;
 			expect( isWpVersion( '5.3', operator ) ).toBe( result );
 		}
 	);
