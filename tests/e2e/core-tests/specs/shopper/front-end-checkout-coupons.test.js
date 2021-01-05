@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
+/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect, jest/no-standalone-expect */
 /**
  * Internal dependencies
  */
@@ -33,8 +33,6 @@ const runCheckoutApplyCouponsTest = () => {
 		it('allows customer to apply coupons in the checkout', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
-			await shopper.goToCart();
-            await shopper.productIsInCart('Simple product');
             await shopper.goToCheckout();
 
             // Apply Fixed cart discount coupon
