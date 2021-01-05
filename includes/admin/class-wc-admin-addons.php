@@ -25,7 +25,7 @@ class WC_Admin_Addons {
 	public static function get_featured() {
 		$featured = get_transient( 'wc_addons_featured' );
 		if ( false === $featured ) {
-			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured-v2.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			$raw_featured = wp_safe_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
