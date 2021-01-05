@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	clickTab,
 	uiUnblocked,
 	setCheckbox,
@@ -24,6 +24,7 @@ const {
 const config = require( 'config' );
 
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyPublishAndTrash = async () => {
 	// Wait for auto save
@@ -47,7 +48,7 @@ const verifyPublishAndTrash = async () => {
 
 const openNewProductAndVerify = async () => {
 	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
+	await merchant.openNewProduct();
 
 	// Make sure we're on the add product page
 	await expect(page.title()).resolves.toMatch('Add new product');
@@ -56,7 +57,7 @@ const openNewProductAndVerify = async () => {
 const runAddSimpleProductTest = () => {
 	describe('Add New Simple Product Page', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can create simple virtual product titled "Simple Product" with regular price $9.99', async () => {
@@ -66,7 +67,7 @@ const runAddSimpleProductTest = () => {
 			await expect(page).toFill('#title', simpleProductName);
 			await expect(page).toClick('#_virtual');
 			await clickTab('General');
-			await expect(page).toFill('#_regular_price', '9.99');
+			await expect(page).toFill('#_regular_price', simpleProductPrice);
 
 			// Publish product, verify that it was published. Trash product, verify that it was trashed.
 			await verifyPublishAndTrash(

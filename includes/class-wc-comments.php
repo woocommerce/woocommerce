@@ -357,7 +357,7 @@ class WC_Comments {
 			WHERE comment_parent = 0
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
-			AND comment_type = 'review'
+			AND comment_type in ( 'review', '', 'comment' )
 				",
 				$product->get_id()
 			)

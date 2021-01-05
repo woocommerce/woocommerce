@@ -374,23 +374,24 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			</table>
 		</div>
 		<script type="text/javascript">
-			jQuery('.section_title').click(function(){
-				var next_section = jQuery(this).next('.section');
+			jQuery( '.section_title' ).on( 'click', function() {
+				var next_section = jQuery( this ).next( '.section' );
 
-				if ( jQuery(next_section).is(':visible') )
+				if ( jQuery( next_section ).is( ':visible' ) ) {
 					return false;
+				}
 
-				jQuery('.section:visible').slideUp();
-				jQuery('.section_title').removeClass('open');
-				jQuery(this).addClass('open').next('.section').slideDown();
+				jQuery( '.section:visible' ).slideUp();
+				jQuery( '.section_title' ).removeClass( 'open' );
+				jQuery( this ).addClass( 'open' ).next( '.section' ).slideDown();
 
 				return false;
-			});
-			jQuery('.section').slideUp( 100, function() {
+			} );
+			jQuery( '.section' ).slideUp( 100, function() {
 				<?php if ( empty( $this->product_ids ) ) : ?>
-					jQuery('.section_title:eq(1)').click();
+					jQuery( '.section_title:eq(1)' ).click();
 				<?php endif; ?>
-			});
+			} );
 		</script>
 		<?php
 	}

@@ -23,7 +23,7 @@ jQuery( function ( $ ) {
 	// Tabbed Panels
 	$( document.body ).on( 'wc-init-tabbed-panels', function() {
 		$( 'ul.wc-tabs' ).show();
-		$( 'ul.wc-tabs a' ).click( function( e ) {
+		$( 'ul.wc-tabs a' ).on( 'click', function( e ) {
 			e.preventDefault();
 			var panel_wrap = $( this ).closest( 'div.panel-wrap' );
 			$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );

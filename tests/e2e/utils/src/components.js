@@ -5,12 +5,13 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from './flows';
+import { merchant } from './flows';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyAndPublish = async () => {
 	// Wait for auto save
@@ -208,7 +209,7 @@ const completeOnboardingWizard = async () => {
 const createSimpleProduct = async () => {
 	const product = await factories.products.simple.create( {
 		name: simpleProductName,
-		regularPrice: '9.99'
+		regularPrice: simpleProductPrice
 	} );
 	return product.id;
 } ;
@@ -218,9 +219,9 @@ const createSimpleProduct = async () => {
  */
 const createVariableProduct = async () => {
 	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
+	await merchant.openNewProduct();
 
-	// Make sure we're on the add order page
+	// Make sure we're on the add product page
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 	// Set product data
@@ -344,9 +345,93 @@ const createVariableProduct = async () => {
 	return variablePostIdValue;
 };
 
+/**
+ * Create a basic order with the provided order status.
+ *
+ * @param orderStatus Status of the new order. Defaults to `Pending payment`.
+ */
+const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
+	// Go to 'Add new order' page
+	await merchant.openNewOrder();
+
+	// Make sure we're on the add order page
+	await expect( page.title() ).resolves.toMatch( 'Add new order' );
+
+	// Set order status
+	await expect( page ).toSelect( '#order_status', orderStatus );
+
+	// Wait for auto save
+	await page.waitFor( 2000 );
+
+	// Create the order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '#message' );
+
+	// Verify
+	await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+
+	const variablePostId = await page.$( '#post_ID' );
+	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
+	return variablePostIdValue;
+};
+
+/**
+ * Adds a product to an order in the merchant.
+ *
+ * @param orderId ID of the order to add the product to.
+ * @param productName Name of the product being added to the order.
+ */
+const addProductToOrder = async ( orderId, productName ) => {
+	await merchant.goToOrder( orderId );
+
+	// Add a product to the order
+	await expect( page ).toClick( 'button.add-line-item' );
+	await expect( page ).toClick( 'button.add-order-item' );
+	await page.waitForSelector( '.wc-backbone-modal-header' );
+	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
+	await expect( page ).toFill( '#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName );
+	await expect( page ).toClick( 'li[aria-selected="true"]' );
+	await page.click( '.wc-backbone-modal-content #btn-ok' );
+
+	await uiUnblocked();
+
+	// Verify the product we added shows as a line item now
+	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
+}
+
+/**
+ * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
+ *
+ * @param couponAmount Amount to be applied. Defaults to 5.
+ */
+const createCoupon = async ( couponAmount = '5' ) => {
+	await merchant.openNewCoupon();
+
+	// Fill in coupon code
+	let couponCode = 'code-' + new Date().getTime().toString();
+	await expect(page).toFill( '#title', couponCode );
+
+	// Set general coupon data
+	await clickTab( 'General' );
+	await expect(page).toSelect( '#discount_type', 'Fixed cart discount' );
+	await expect(page).toFill( '#coupon_amount', couponAmount );
+
+	// Publish coupon
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+
+	return couponCode;
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createSimpleOrder,
 	verifyAndPublish,
+	addProductToOrder,
+	createCoupon,
 };

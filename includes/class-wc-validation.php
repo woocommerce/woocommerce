@@ -91,6 +91,7 @@ class WC_Validation {
 			case 'PT':
 				$valid = (bool) preg_match( '/^([0-9]{4})([-])([0-9]{3})$/', $postcode );
 				break;
+			case 'PR':
 			case 'US':
 				$valid = (bool) preg_match( '/^([0-9]{5})(-[0-9]{4})?$/i', $postcode );
 				break;

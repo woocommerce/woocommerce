@@ -122,12 +122,23 @@ class WC_Post_Data {
 	 * Handle type changes.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Product $product Product data.
 	 * @param string     $from    Origin type.
 	 * @param string     $to      New type.
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		if ( 'variable' === $from && 'variable' !== $to ) {
+		/**
+		 * Filter to prevent variations from being deleted while switching from a variable product type to a variable product type.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param bool       A boolean value of true will delete the variations.
+		 * @param WC_Product $product Product data.
+		 * @return string    $from    Origin type.
+		 * @param string     $to      New type.
+		 */
+		if ( apply_filters( 'woocommerce_delete_variations_on_product_type_change', 'variable' === $from && 'variable' !== $to, $product, $from, $to ) ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $product->get_id(), true );
@@ -406,8 +417,9 @@ class WC_Post_Data {
 					$customer->save();
 				}
 
-				// Delete order count meta.
+				// Delete order count and last order meta.
 				delete_user_meta( $customer_id, '_order_count' );
+				delete_user_meta( $customer_id, '_last_order' );
 			}
 
 			// Clean up items.

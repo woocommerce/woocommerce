@@ -218,6 +218,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Get products.
+	 *
+	 * @param  array $query_args Query args.
+	 *
+	 * @return array Products.
+	 */
+	protected function get_objects( $query_args ) {
+		$query_args['paginate'] = true;
+		$query_args['return']   = 'objects';
+		$results                = wc_get_products( $query_args );
+
+		return array(
+			'objects' => $results->products,
+			'total'   => $results->total,
+			'pages'   => $results->max_num_pages,
+		);
+	}
+
+	/**
 	 * Set product images.
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
@@ -1324,18 +1343,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
-	 *                            Options: 'view' and 'edit'.
+	 * @param string     $context Request context. Options: 'view' and 'edit'.
+	 *
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$data = parent::get_product_data( $product, $context );
-
+		$data = parent::get_product_data( ...func_get_args() );
 		// Replace in_stock with stock_status.
-		$pos             = array_search( 'in_stock', array_keys( $data ), true );
-		$array_section_1 = array_slice( $data, 0, $pos, true );
-		$array_section_2 = array_slice( $data, $pos + 1, null, true );
-
-		return $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
+		$pos = array_search( 'in_stock', array_keys( $data ), true );
+		if ( false !== $pos ) {
+			$array_section_1 = array_slice( $data, 0, $pos, true );
+			$array_section_2 = array_slice( $data, $pos + 1, null, true );
+			$data = $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
+		}
+		return $data;
 	}
 }

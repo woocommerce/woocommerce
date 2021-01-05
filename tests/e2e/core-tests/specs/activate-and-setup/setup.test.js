@@ -13,7 +13,7 @@ const {
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -31,7 +31,7 @@ const runInitialStoreSettingsTest = () => {
 
 		it('can enable tax rates and calculations', async () => {
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Make sure the general tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'General'});
@@ -50,7 +50,7 @@ const runInitialStoreSettingsTest = () => {
 
 		it('can configure permalink settings', async () => {
 			// Go to Permalink Settings page
-			await StoreOwnerFlow.openPermalinkSettings();
+			await merchant.openPermalinkSettings();
 
 			// Select "Post name" option in common settings section
 			await page.click('input[value="/%postname%/"]', {text: ' Post name'});
