@@ -59,7 +59,7 @@ class WC_Beta_Tester_Import_Export {
 	 * Add options page to menu
 	 */
 	public function add_to_menu() {
-		add_submenu_page( 'plugins.php', __( 'WooCommerce Tester Import/Export', 'woocommerce-beta-tester' ), __( 'WC Import/Export', 'woocommerce-beta-tester' ), static::IMPORT_CAP, 'wc-beta-tester-settings', array( $this, 'settings_page_html' ) );
+		add_submenu_page( 'plugins.php', __( 'WC Beta Tester Import/Export', 'woocommerce-beta-tester' ), __( 'WC Import/Export', 'woocommerce-beta-tester' ), static::IMPORT_CAP, 'wc-beta-tester-settings', array( $this, 'settings_page_html' ) );
 	}
 
 	/**
@@ -137,37 +137,39 @@ class WC_Beta_Tester_Import_Export {
 			return;
 		}
 
-		if ( ! empty( $_FILES[ static::IMPORT_FILENAME ] ) ) {
-			$tmp_file = $_FILES[ static::IMPORT_FILENAME ]['tmp_name'];
-			if ( empty( $tmp_file ) ) {
-				$this->add_message( __( 'No file uploaded.', 'woocommerce-beta-tester' ) );
-				return;
-			}
-
-			if ( is_readable( $tmp_file ) ) {
-				$maybe_json = file_get_contents( $tmp_file );
-				$settings = json_decode( $maybe_json, true );
-				if ( $settings !== null ) {
-					foreach ( $this->get_setting_list() as $option_name ) {
-						if ( ! isset( $settings[ $option_name ] ) ) {
-							continue;
-						}
-						$setting = maybe_unserialize( $settings[ $option_name ] );
-						if ( is_null( $setting ) ) {
-							delete_option( $option_name );
-						} else {
-							update_option( $option_name, $setting );
-						}
-					}
-					$this->add_message( __( 'Settings Imported', 'woocommerce-beta-tester' ), 'updated' );
-				} else {
-					$this->add_message( __( 'File did not contain well formed JSON.', 'woocommerce-beta-tester' ) );
-				}
-			} else {
-				$this->add_message( __( 'Fie could not be read.', 'woocommerce-beta-tester' ) );
-			}
-		} else {
+		if ( empty( $_FILES[ static::IMPORT_FILENAME ] ) ) {
 			$this->add_message( __( 'No file uploaded.', 'woocommerce-beta-tester' ) );
+			return;
+		}
+
+		$tmp_file = $_FILES[ static::IMPORT_FILENAME ]['tmp_name'];
+		if ( empty( $tmp_file ) ) {
+			$this->add_message( __( 'No file uploaded.', 'woocommerce-beta-tester' ) );
+			return;
+		}
+
+		if ( ! is_readable( $tmp_file ) ) {
+			$this->add_message( __( 'Fie could not be read.', 'woocommerce-beta-tester' ) );
+			return;
+		}
+
+		$maybe_json = file_get_contents( $tmp_file );
+		$settings = json_decode( $maybe_json, true );
+		if ( $settings !== null ) {
+			foreach ( $this->get_setting_list() as $option_name ) {
+				if ( ! isset( $settings[ $option_name ] ) ) {
+					continue;
+				}
+				$setting = maybe_unserialize( $settings[ $option_name ] );
+				if ( is_null( $setting ) ) {
+					delete_option( $option_name );
+				} else {
+					update_option( $option_name, $setting );
+				}
+			}
+			$this->add_message( __( 'Settings Imported', 'woocommerce-beta-tester' ), 'updated' );
+		} else {
+			$this->add_message( __( 'File did not contain well formed JSON.', 'woocommerce-beta-tester' ) );
 		}
 	}
 
@@ -189,7 +191,7 @@ class WC_Beta_Tester_Import_Export {
 	}
 
 	/**
-	 * Add an setttings import status message.
+	 * Add a settings import status message.
 	 *
 	 * @param string $message Message string.
 	 * @param string $type Message type. Optional. Default 'error'.

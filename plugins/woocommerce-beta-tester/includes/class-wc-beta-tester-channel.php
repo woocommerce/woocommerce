@@ -123,7 +123,7 @@ class WC_Beta_Tester_Settings {
 	 * Add options page to menu
 	 */
 	public function add_to_menus() {
-		add_submenu_page( 'plugins.php', __( 'WooCommerce Tester', 'woocommerce-beta-tester' ), __( 'WooCommerce Tester', 'woocommerce-beta-tester' ), 'install_plugins', 'wc-beta-tester', array( $this, 'settings_page_html' ) );
+		add_submenu_page( 'plugins.php', __( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ), __( 'WC Beta Tester', 'woocommerce-beta-tester' ), 'install_plugins', 'wc-beta-tester', array( $this, 'settings_page_html' ) );
 	}
 
 	/**

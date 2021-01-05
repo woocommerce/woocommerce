@@ -261,7 +261,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			array(
 				'parent' => 0,
 				'id'     => 'wc-beta-tester',
-				'title'  => __( 'WooCommerce Tester', 'woocommerce-beta-tester' ),
+				'title'  => __( 'WC Beta Tester', 'woocommerce-beta-tester' ),
 			)
 		);
 
