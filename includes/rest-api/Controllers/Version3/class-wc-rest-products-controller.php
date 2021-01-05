@@ -624,11 +624,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( ! term_exists( $tag['name'], 'product_tag' ) ) {
 					// Create the tag if it doesn't exist.
-					$term_id = wp_insert_term( $tag['name'], 'product_tag' );
+					$term = wp_insert_term( $tag['name'], 'product_tag' );
 
-					if ( ! is_wp_error( $term_id ) ) {
+					if ( ! is_wp_error( $term ) ) {
 						$new_tags[] = array(
-							'id' => $term_id['term_id'],
+							'id' => $term['term_id'],
 						);
 
 						continue;
