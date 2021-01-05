@@ -118,7 +118,7 @@
 		"qs": "6.9.4",
 		"react-click-outside": "3.0.1",
 		"react-dates": "17.2.0",
-		"react-router-dom": "5.1.2",
+		"react-router-dom": "5.2.0",
 		"react-transition-group": "4.3.0",
 		"react-visibility-sensor": "5.1.1",
 		"redux": "4.0.5"
