@@ -384,7 +384,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
 		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$request['context']  = isset( $request['context'] ) ? $request['context'] : 'view';
+		$request['context']  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data                = $this->get_formatted_item_data( $object );
 		$data                = $this->add_additional_fields_to_object( $data, $request );
 		$data                = $this->filter_response_by_context( $data, $request['context'] );
