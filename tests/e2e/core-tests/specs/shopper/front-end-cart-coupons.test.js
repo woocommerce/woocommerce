@@ -30,7 +30,7 @@ const runCartApplyCouponsTest = () => {
 			await merchant.logout();
 		});
 
-		it('allows customer to apply a fixed cart coupon in the cart', async () => {
+		it('allows customer to apply coupons in the cart', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
 			await shopper.goToCart();
