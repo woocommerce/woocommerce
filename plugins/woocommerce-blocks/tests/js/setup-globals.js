@@ -28,6 +28,16 @@ global.wcSettings = {
 		userLocale: 'en_US',
 		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 	},
+	shippingCountries: {
+		AT: 'Austria',
+		CA: 'Canada',
+		GB: 'United Kingdom (UK)',
+	},
+	shippingStates: {
+		CA: {
+			ON: 'Ontario',
+		},
+	},
 };
 
 global.jQuery = () => ( {

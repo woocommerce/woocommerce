@@ -11,19 +11,19 @@ const longContent =
 
 describe( 'ReadMore Component', () => {
 	describe( 'Test the truncateHtml function', () => {
-		it( 'Truncate long HTML content to length of 10', async () => {
+		it( 'Truncate long HTML content to length of 10', () => {
 			const truncatedContent = truncateHtml( longContent, 10 );
 
 			expect( truncatedContent ).toEqual( '<p>Lorem ipsum...</p>' );
 		} );
-		it( 'Truncate long HTML content, but avoid cutting off HTML tags.', async () => {
+		it( 'Truncate long HTML content, but avoid cutting off HTML tags.', () => {
 			const truncatedContent = truncateHtml( longContent, 40 );
 
 			expect( truncatedContent ).toEqual(
 				'<p>Lorem ipsum dolor sit amet, <strong>consectetur...</strong></p>'
 			);
 		} );
-		it( 'No need to truncate short HTML content.', async () => {
+		it( 'No need to truncate short HTML content.', () => {
 			const truncatedContent = truncateHtml( shortContent, 100 );
 
 			expect( truncatedContent ).toEqual(
