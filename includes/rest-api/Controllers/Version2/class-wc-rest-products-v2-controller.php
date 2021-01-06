@@ -158,8 +158,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->get_product_data( $object, $context, $request );
+		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$this->request = $request;
+		$data          = $this->get_product_data( $object, $context, $request );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -753,7 +754,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'stock_quantity':
 					$base_data['stock_quantity'] = $product->get_stock_quantity( $context );
 					break;
-				case 'stock_status': // For API V3, this field is computed using `in_stock`.
 				case 'in_stock':
 					$base_data['in_stock'] = $product->is_in_stock();
 					break;
