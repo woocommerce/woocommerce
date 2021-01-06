@@ -140,8 +140,8 @@ const completeOnboardingWizard = async () => {
 	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
 	expect( extensionsToggles ).toHaveLength( 4 );
 
-	// Disable download of the 4 extensions
-	for ( let i = 0; i < 4; i++ ) {
+	// Disable download of the onboarding suggested extensions
+	for ( let i = 0; i < extensionsToggles.length; i++ ) {
 		await extensionsToggles[i].click();
 	}
 
