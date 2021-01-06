@@ -1230,9 +1230,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			// Block checks.
 			if ( $values['block'] && get_post( $page_id ) ) {
 				$block_required = true;
-				$page           = get_post( $page_id );
-				$page_info      = WC_Tracker::get_block_tracker_data( $values['block'], $page_name );
-				if ( 'Yes' === $page_info['page_contains_block'] ) {
+				if ( WC_Blocks_Utils::does_page_contains_block( $page_id, $values['block'] ) ) {
 					$block_present = true;
 				}
 			}
