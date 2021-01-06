@@ -62,11 +62,11 @@ class WC_Blocks_Utils {
 	/**
 	 * Check if a given page contains a particular block.
 	 *
-	 * @param string $page       (int|WP_Post) Page post ID or post object.
+	 * @param int|WP_Post $page   Page post ID or post object.
 	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
 	 * @return bool|null         Boolean value if the page contains the block or not. Null in case the page does not exist.
 	 */
-	public static function does_page_contains_block( $page, $block_name ) {
+	public static function has_block_in_page( $page, $block_name ) {
 		$page_to_check = get_post( $page );
 		if ( null === $page_to_check ) {
 			return null;
