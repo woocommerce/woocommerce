@@ -19,3 +19,4 @@ Every release includes specific testing instructions for new features and bug fi
 - [3.9.0](./390.md)
 - [4.0.0](./400.md)
 - [4.1.0](./410.md)
+- [4.2.0](./420.md)
