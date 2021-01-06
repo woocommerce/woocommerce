@@ -29,6 +29,7 @@
 * Fix - Adjust stock items only for statuses which reduces the stock. #28620
 * Fix - Named parameter to fix DB update routine on PHP8. #28537
 * Fix - Add protection around func_get_args_call for backwards compatibility. #28677
+* Fix - Restore stock_status in REST API V3 response. #28731
 * Dev - Hook for intializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
