@@ -116,7 +116,7 @@ class WC_Meta_Box_Product_Data {
 				'variations'     => array(
 					'label'    => __( 'Variations', 'woocommerce' ),
 					'target'   => 'variable_product_options',
-					'class'    => array( 'variations_tab', 'show_if_variable' ),
+					'class'    => array( 'show_if_variable' ),
 					'priority' => 60,
 				),
 				'advanced'       => array(
@@ -177,7 +177,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 
-		include __DIR__  . '/views/html-product-data-variations.php';
+		include __DIR__ . '/views/html-product-data-variations.php';
 	}
 
 	/**
@@ -349,7 +349,7 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_from = wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) );
 
 			if ( ! empty( $date_on_sale_from ) ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			}
 		}
 
@@ -358,7 +358,7 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_to = wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) );
 
 			if ( ! empty( $date_on_sale_to ) ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			}
 		}
 
@@ -475,7 +475,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_from = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_from'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_from ) ) {
-						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 					}
 				}
 
@@ -484,7 +484,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_to = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_to'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_to ) ) {
-						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 					}
 				}
 

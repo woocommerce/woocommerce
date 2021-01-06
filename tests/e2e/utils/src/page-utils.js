@@ -56,7 +56,7 @@ const setCheckbox = async( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
 	if ( checkboxStatus !== true ) {
-		await page.click( selector );
+		await checkbox.click();
 	}
 };
 
@@ -70,7 +70,7 @@ const unsetCheckbox = async( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
 	if ( checkboxStatus === true ) {
-		await page.click( selector );
+		await checkbox.click();
 	}
 };
 
