@@ -55,7 +55,7 @@
 		"qs": "6.9.4",
 		"react-dates": "^17.2.0",
 		"react-router-dom": "5.2.0",
-		"react-transition-group": "4.3.0"
+		"react-transition-group": "4.4.1"
 	},
 	"publishConfig": {
 		"access": "public"
