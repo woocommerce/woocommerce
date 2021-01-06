@@ -590,7 +590,7 @@ return array(
 		'ML' => __( 'Meghalaya', 'woocommerce' ),
 		'MZ' => __( 'Mizoram', 'woocommerce' ),
 		'NL' => __( 'Nagaland', 'woocommerce' ),
-		'OD' => __( 'Odisha', 'woocommerce' ),
+		'OR' => __( 'Odisha', 'woocommerce' ),
 		'PB' => __( 'Punjab', 'woocommerce' ),
 		'RJ' => __( 'Rajasthan', 'woocommerce' ),
 		'SK' => __( 'Sikkim', 'woocommerce' ),
