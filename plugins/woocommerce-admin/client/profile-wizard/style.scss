@@ -91,12 +91,12 @@
 		}
 
 		.woocommerce-profile-wizard__footnote {
-			margin-top: $gap;
-			text-align: center;
+			max-width: 424px;
+			margin: 32px auto 25px auto;
 
 			p {
 				color: $gray-700;
-				text-align: left;
+				text-align: center;
 				margin-bottom: 12px;
 			}
 		}

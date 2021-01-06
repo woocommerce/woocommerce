@@ -26,3 +26,18 @@ export const groupListOfObjectsBy = (
 	}
 	return {};
 };
+
+/**
+ * Returns a (shallow) copy of an object with all its props set to the specified value
+ *
+ * @param {*} obj the Object to copy.
+ * @param {*} value the value to set all props on the object to.
+ */
+export const setAllPropsToValue = ( obj, value ) => {
+	return Object.entries( obj ).reduce( ( acc, [ key ] ) => {
+		return {
+			...acc,
+			[ key ]: value,
+		};
+	}, {} );
+};

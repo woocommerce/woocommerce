@@ -38,9 +38,17 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { getCountryCode, getCurrencyRegion } from '../../dashboard/utils';
-import { CurrencyContext } from '../../lib/currency-context';
-import { createNoticesFromResponse } from '../../lib/notices';
+import {
+	getCountryCode,
+	getCurrencyRegion,
+} from '../../../../../dashboard/utils';
+import { CurrencyContext } from '../../../../../lib/currency-context';
+import { createNoticesFromResponse } from '../../../../../lib/notices';
+import { extensionBenefits } from '../../data/extension-benefits';
+import { sellingVenueOptions } from '../../data/selling-venue-options';
+import { platformOptions } from '../../data/platform-options';
+import { getRevenueOptions } from '../../data/revenue-options';
+import { getProductCountOptions } from '../../data/product-options';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
@@ -436,54 +444,6 @@ class BusinessDetails extends Component {
 			return null;
 		}
 
-		const extensionBenefits = [
-			{
-				slug: 'facebook-for-woocommerce',
-				title: __( 'Market on Facebook', 'woocommerce-admin' ),
-				icon: 'onboarding/fb-woocommerce.png',
-				description: __(
-					'Grow your business by targeting the right people and driving sales with Facebook.',
-					'woocommerce-admin'
-				),
-			},
-			{
-				slug: 'mailchimp-for-woocommerce',
-				title: __(
-					'Contact customers with Mailchimp',
-					'woocommerce-admin'
-				),
-				icon: 'onboarding/mailchimp.png',
-				description: __(
-					'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.',
-					'woocommerce-admin'
-				),
-			},
-			{
-				slug: 'creative-mail-by-constant-contact',
-				title: __(
-					'Email marketing for WooCommerce with Creative Mail',
-					'woocommerce-admin'
-				),
-				icon: 'onboarding/creativemail.png',
-				description: __(
-					'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.',
-					'woocommerce-admin'
-				),
-			},
-			{
-				slug: 'kliken-marketing-for-google',
-				title: __(
-					'Drive traffic to your store with Google Ads & Marketing by Kliken',
-					'woocommerce-admin'
-				),
-				icon: 'onboarding/g-shopping.png',
-				description: __(
-					'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
-					'woocommerce-admin'
-				),
-			},
-		];
-
 		return (
 			<div>
 				{ extensionBenefits.map( ( benefit ) => (
@@ -683,154 +643,16 @@ class BusinessDetails extends Component {
 			hasInstallActivateError,
 			isUpdatingProfileItems,
 		} = this.props;
-		const { formatAmount } = this.context;
-		const productCountOptions = [
-			{
-				key: '0',
-				label: __(
-					"I don't have any products yet.",
-					'woocommerce-admin'
-				),
-			},
-			{
-				key: '1-10',
-				label: this.getNumberRangeString( 1, 10 ),
-			},
-			{
-				key: '11-100',
-				label: this.getNumberRangeString( 11, 100 ),
-			},
-			{
-				key: '101-1000',
-				label: this.getNumberRangeString( 101, 1000 ),
-			},
-			{
-				key: '1000+',
-				label: this.getNumberRangeString( 1000 ),
-			},
-		];
+		const { getCurrencyConfig } = this.context;
 
-		const revenueOptions = [
-			{
-				key: 'none',
-				label: sprintf(
-					/* translators: %s: $0 revenue amount */
-					__( "%s (I'm just getting started)", 'woocommerce-admin' ),
-					formatAmount( 0 )
-				),
-			},
-			{
-				key: 'up-to-2500',
-				label: sprintf(
-					/* translators: %s: A given revenue amount, e.g., $2500 */
-					__( 'Up to %s', 'woocommerce-admin' ),
-					formatAmount( this.convertCurrency( 2500 ) )
-				),
-			},
-			{
-				key: '2500-10000',
-				label: this.getNumberRangeString(
-					this.convertCurrency( 2500 ),
-					this.convertCurrency( 10000 ),
-					formatAmount
-				),
-			},
-			{
-				key: '10000-50000',
-				label: this.getNumberRangeString(
-					this.convertCurrency( 10000 ),
-					this.convertCurrency( 50000 ),
-					formatAmount
-				),
-			},
-			{
-				key: '50000-250000',
-				label: this.getNumberRangeString(
-					this.convertCurrency( 50000 ),
-					this.convertCurrency( 250000 ),
-					formatAmount
-				),
-			},
-			{
-				key: 'more-than-250000',
-				label: sprintf(
-					/* translators: %s: A given revenue amount, e.g., $250000 */
-					__( 'More than %s', 'woocommerce-admin' ),
-					formatAmount( this.convertCurrency( 250000 ) )
-				),
-			},
-		];
+		const productCountOptions = getProductCountOptions(
+			getCurrencyConfig()
+		);
 
-		const sellingVenueOptions = [
-			{
-				key: 'no',
-				label: __( 'No', 'woocommerce-admin' ),
-			},
-			{
-				key: 'other',
-				label: __( 'Yes, on another platform', 'woocommerce-admin' ),
-			},
-			{
-				key: 'other-woocommerce',
-				label: __(
-					'Yes, I own a different store powered by WooCommerce',
-					'woocommerce-admin'
-				),
-			},
-			{
-				key: 'brick-mortar',
-				label: __(
-					'Yes, in person at physical stores and/or events',
-					'woocommerce-admin'
-				),
-			},
-			{
-				key: 'brick-mortar-other',
-				label: __(
-					'Yes, on another platform and in person at physical stores and/or events',
-					'woocommerce-admin'
-				),
-			},
-		];
-
-		const otherPlatformOptions = [
-			{
-				key: 'shopify',
-				label: __( 'Shopify', 'woocommerce-admin' ),
-			},
-			{
-				key: 'bigcommerce',
-				label: __( 'BigCommerce', 'woocommerce-admin' ),
-			},
-			{
-				key: 'magento',
-				label: __( 'Magento', 'woocommerce-admin' ),
-			},
-			{
-				key: 'wix',
-				label: __( 'Wix', 'woocommerce-admin' ),
-			},
-			{
-				key: 'amazon',
-				label: __( 'Amazon', 'woocommerce-admin' ),
-			},
-			{
-				key: 'ebay',
-				label: __( 'eBay', 'woocommerce-admin' ),
-			},
-			{
-				key: 'etsy',
-				label: __( 'Etsy', 'woocommerce-admin' ),
-			},
-			{
-				key: 'squarespace',
-				label: __( 'Squarespace', 'woocommerce-admin' ),
-			},
-			{
-				key: 'other',
-				label: __( 'Other', 'woocommerce-admin' ),
-			},
-		];
+		const revenueOptions = getRevenueOptions(
+			getCurrencyConfig(),
+			this.props.settings.woocommerce_default_country
+		);
 
 		return (
 			<Form
@@ -915,9 +737,7 @@ class BusinessDetails extends Component {
 														'Which platform is the store using?',
 														'woocommerce-admin'
 													) }
-													options={
-														otherPlatformOptions
-													}
+													options={ platformOptions }
 													required
 													{ ...getInputProps(
 														'other_platform'
@@ -990,7 +810,7 @@ class BusinessDetails extends Component {
 
 BusinessDetails.contextType = CurrencyContext;
 
-export default compose(
+export const BundleBusinessDetailsStep = compose(
 	withSelect( ( select ) => {
 		const {
 			getSettings,

@@ -9,7 +9,7 @@ import { setCheckboxToUnchecked, clickContinue } from './utils';
 import { waitForElementCount } from '../../utils/lib';
 const config = require( 'config' );
 
-export async function completeBusinessSection() {
+async function fillOutDropdowns() {
 	// Query for the <SelectControl>s
 	await waitForElementCount( page, '.woocommerce-select-control', 2 );
 	const selectControls = await page.$$( '.woocommerce-select-control' );
@@ -27,6 +27,10 @@ export async function completeBusinessSection() {
 	await expect( page ).toClick( '.woocommerce-select-control__option', {
 		text: config.get( 'onboardingwizard.sellingelsewhere' ),
 	} );
+}
+
+export async function completeBusinessSection() {
+	await fillOutDropdowns();
 
 	// Site is in US so the "Install recommended free business features"
 	// checkbox is present, uncheck it.
@@ -36,4 +40,10 @@ export async function completeBusinessSection() {
 	await setCheckboxToUnchecked( installFeaturesCheckbox );
 
 	await clickContinue();
+}
+
+export async function completeSelectiveBundleInstallBusinessDetailsTab() {
+	await fillOutDropdowns();
+
+	await page.click( 'button.is-primary' );
 }

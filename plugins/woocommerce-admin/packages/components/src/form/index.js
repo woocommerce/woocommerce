@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { cloneElement, Component } from '@wordpress/element';
-import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -33,10 +32,10 @@ class Form extends Component {
 		return ! Object.keys( this.state.errors ).length;
 	}
 
-	validate() {
+	validate( onValidate = () => {} ) {
 		const { values } = this.state;
 		const errors = this.props.validate( values );
-		this.setState( { errors } );
+		this.setState( { errors }, onValidate );
 	}
 
 	setValue( name, value ) {
@@ -44,7 +43,17 @@ class Form extends Component {
 			( prevState ) => ( {
 				values: { ...prevState.values, [ name ]: value },
 			} ),
-			this.validate
+			() => {
+				this.validate( () => {
+					// onChangeCallback keeps track of validity, so needs to
+					// happen after setting the error state.
+					this.props.onChangeCallback(
+						{ name, value },
+						this.state.values,
+						! Object.keys( this.state.errors || {} ).length
+					);
+				} );
+			}
 		);
 	}
 
@@ -138,6 +147,10 @@ Form.propTypes = {
 	 */
 	onSubmitCallback: PropTypes.func,
 	/**
+	 * Function to call when a value changes in the form.
+	 */
+	onChangeCallback: PropTypes.func,
+	/**
 	 * A function that is passed a list of all values and
 	 * should return an `errors` object with error response.
 	 */
@@ -147,9 +160,10 @@ Form.propTypes = {
 Form.defaultProps = {
 	errors: {},
 	initialValues: {},
-	onSubmitCallback: noop,
+	onSubmitCallback: () => {},
+	onChangeCallback: () => {},
 	touched: {},
-	validate: noop,
+	validate: () => {},
 };
 
 export default Form;

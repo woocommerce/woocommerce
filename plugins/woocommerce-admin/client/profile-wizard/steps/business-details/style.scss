@@ -1,0 +1,16 @@
+.business-details.woocommerce-profile-wizard__container,
+.business-features.woocommerce-profile-wizard__container {
+	.woocommerce-admin__business-details__spinner {
+		display: flex;
+		justify-content: center;
+	}
+
+	.woocommerce-profile-wizard__step-header {
+		margin-top: 28px;
+	}
+
+	.woocommerce-profile-wizard__card-actions {
+		display: flex;
+		justify-content: center;
+	}
+}

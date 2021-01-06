@@ -25,8 +25,11 @@ export async function setCheckboxToChecked( checkbox ) {
 	await checkbox.click();
 }
 
-export async function getText( node ) {
-	return page.evaluate( ( element ) => element.textContent, node );
+export async function getElementByText( element, text ) {
+	const els = await page.$x(
+		`//${ element }[contains(text(), '${ text }')]`
+	);
+	return els[ 0 ];
 }
 
 export async function setCheckboxToUnchecked( checkbox ) {
@@ -39,4 +42,13 @@ export async function setCheckboxToUnchecked( checkbox ) {
 	}
 
 	await checkbox.click();
+}
+
+export async function getPreviousSibling( el ) {
+	return page.evaluateHandle( ( el ) => el.previousElementSibling, el );
+}
+
+export async function getElementProperty( el, property ) {
+	const prop = await el.getProperty( property );
+	return prop.jsonValue();
 }

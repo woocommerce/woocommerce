@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { groupListOfObjectsBy } from '../index.js';
+import { groupListOfObjectsBy, setAllPropsToValue } from '../index.js';
 
 describe( 'groupListOfObjectsBy', () => {
 	const objectList = [
@@ -77,5 +77,41 @@ describe( 'groupListOfObjectsBy', () => {
 		expect( type1.length ).toBe( 3 );
 		expect( type2.length ).toBe( 2 );
 		expect( type3.length ).toBe( 1 );
+	} );
+} );
+
+describe( 'setAllPropsToValue', () => {
+	it( 'sets all the shallow props of the returned object to the passed value', () => {
+		const targetObject = {
+			one: 1,
+			two: 'two',
+			three: false,
+			four: { five: 'six' },
+		};
+
+		expect( setAllPropsToValue( targetObject, 'hello' ) ).toEqual( {
+			one: 'hello',
+			two: 'hello',
+			three: 'hello',
+			four: 'hello',
+		} );
+	} );
+
+	it( 'does not mutate the passed in object', () => {
+		const targetObject = {
+			one: 1,
+			two: 'two',
+			three: false,
+			four: { five: 'six' },
+		};
+
+		setAllPropsToValue( targetObject, 'hello' );
+
+		expect( targetObject ).toEqual( {
+			one: 1,
+			two: 'two',
+			three: false,
+			four: { five: 'six' },
+		} );
 	} );
 } );

@@ -1,7 +1,3 @@
-/**
- * @format
- */
-
 export async function completeBenefitsSection() {
 	// Wait for Benefits section to appear
 	await page.waitForSelector(

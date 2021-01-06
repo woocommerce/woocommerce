@@ -22,7 +22,7 @@ import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import { installActivateAndConnectWcpay } from './tasks/payments/methods';
-import { groupListOfObjectsBy } from '../lib/lists';
+import { groupListOfObjectsBy } from '../lib/collections';
 
 export function recordTaskViewEvent(
 	taskName,
