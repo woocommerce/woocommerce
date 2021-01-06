@@ -293,6 +293,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['coupon_lines'] = $order->get_items( 'coupon' );
 					break;
 				case 'refunds':
+					$data['refunds'] = array();
 					foreach ( $order->get_refunds() as $refund ) {
 						$data['refunds'][] = array(
 							'id'     => $refund->get_id(),
