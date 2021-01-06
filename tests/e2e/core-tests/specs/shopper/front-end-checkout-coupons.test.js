@@ -21,18 +21,22 @@ const {
 
 const runCheckoutApplyCouponsTest = () => {
 	describe('Checkout applying coupons', () => {
+			let couponFixedCart;
+			let couponPercentage;
+			let couponFixedProduct;
 		beforeAll(async () => {
 			await merchant.login();
             await createSimpleProduct();
-            await createCoupon('Fixed cart discount');
-            await createCoupon('Percentage discount', '50');
-			await createCoupon('Fixed product discount');
+            couponFixedCart = await createCoupon();
+			couponPercentage = await createCoupon('50', 'Percentage discount');
+			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await merchant.logout();
 		});
 
 		it('allows customer to apply coupons in the checkout', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
+			await uiUnblocked();
             await shopper.goToCheckout();
 
             // Apply Fixed cart discount coupon
