@@ -20,12 +20,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that all expected response fields are present.
-	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
+	 * Get all expected fields.
 	 */
-	public function test_product_api_get_all_fields() {
-		wp_set_current_user( $this->user );
-		$expected_response_fields = array(
+	public function get_expected_response_fields() {
+		return array(
 			'id',
 			'name',
 			'slug',
@@ -92,6 +90,15 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 		);
+	}
+
+	/**
+	 * Test that all expected response fields are present.
+	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
+	 */
+	public function test_product_api_get_all_fields() {
+		wp_set_current_user( $this->user );
+		$expected_response_fields = get_expected_response_fields();
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
@@ -118,5 +125,24 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		};
 		$response = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
 		$this->assertArrayHasKey( 'id', $response );
+	}
+
+	/**
+	 * Test that all fields are returned when requested one by one.
+	 */
+	public function test_products_get_each_field_one_by_one() {
+		wp_set_current_user( $this->user );
+		$expected_response_fields = $this->get_expected_response_fields();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		foreach ( $expected_response_fields as $field ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+			$request->set_param( '_fields', $field );
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 200, $response->get_status() );
+			$response_fields = array_keys( $response->get_data() );
+
+			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in product API response." );
+		}
 	}
 }
