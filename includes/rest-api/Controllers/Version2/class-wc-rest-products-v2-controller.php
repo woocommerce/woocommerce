@@ -753,6 +753,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'stock_quantity':
 					$base_data['stock_quantity'] = $product->get_stock_quantity( $context );
 					break;
+				case 'stock_status': // For API V3, this field is computed using `in_stock`.
 				case 'in_stock':
 					$base_data['in_stock'] = $product->is_in_stock();
 					break;
