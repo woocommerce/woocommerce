@@ -260,13 +260,28 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		// These fields are dependent on other fields.
+		$dependent_fields = array(
+			'date_created_gmt'   => 'date_created',
+			'date_modified_gmt'  => 'date_modified',
+			'date_completed_gmt' => 'date_completed',
+			'date_paid_gmt'      => 'date_paid',
+		);
+
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Only fetch fields that we need.
-		$fields            = $this->get_fields_for_response( $this->request );
+		$fields = $this->get_fields_for_response( $this->request );
+		foreach ( $dependent_fields as $field_key => $dependency ) {
+			if ( in_array( $field_key, $fields ) && ! in_array( $dependency, $fields ) ) {
+				$fields[] = $dependency;
+			}
+		}
+
 		$extra_fields      = array_intersect( $extra_fields, $fields );
 		$format_decimal    = array_intersect( $format_decimal, $fields );
 		$format_date       = array_intersect( $format_date, $fields );
+
 		$format_line_items = array_intersect( $format_line_items, $fields );
 
 		$data = $order->get_base_data();
