@@ -263,14 +263,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Only fetch fields that we need.
-		$request = func_get_arg( 1 );
-		if ( $request ) {
-			$fields            = $this->get_fields_for_response( $request );
-			$extra_fields      = array_intersect( $extra_fields, $fields );
-			$format_decimal    = array_intersect( $format_decimal, $fields );
-			$format_date       = array_intersect( $format_date, $fields );
-			$format_line_items = array_intersect( $format_line_items, $fields );
-		}
+		$fields            = $this->get_fields_for_response( $this->request );
+		$extra_fields      = array_intersect( $extra_fields, $fields );
+		$format_decimal    = array_intersect( $format_decimal, $fields );
+		$format_date       = array_intersect( $format_date, $fields );
+		$format_line_items = array_intersect( $format_line_items, $fields );
 
 		$data = $order->get_base_data();
 
@@ -281,7 +278,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['meta_data'] = $order->get_meta_data();
 					break;
 				case 'line_items':
-					$data['line_items'] = $order->get_items( 'line_item');
+					$data['line_items'] = $order->get_items( 'line_item' );
 					break;
 				case 'tax_lines':
 					$data['tax_lines'] = $order->get_items( 'tax' );
@@ -387,10 +384,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
 		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$data                = $this->get_formatted_item_data( $object, $request );
-		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$request['context']  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                = $this->get_formatted_item_data( $object );
 		$data                = $this->add_additional_fields_to_object( $data, $request );
-		$data                = $this->filter_response_by_context( $data, $context );
+		$data                = $this->filter_response_by_context( $data, $request['context'] );
 		$response            = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 

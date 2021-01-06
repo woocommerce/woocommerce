@@ -12,7 +12,8 @@
   },
   "products": {
     "simple": {
-      "name": "Simple product"
+      "name": "Simple product",
+      "price": "9.99"
     },
     "variable": {
       "name": "Variable Product with Three Variations"

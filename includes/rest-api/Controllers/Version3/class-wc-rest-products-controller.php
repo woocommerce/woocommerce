@@ -614,7 +614,34 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
+			$new_tags = array();
+
+			foreach ( $request['tags'] as $tag ) {
+				if ( ! isset( $tag['name'] ) ) {
+					$new_tags[] = $tag;
+					continue;
+				}
+
+				if ( ! term_exists( $tag['name'], 'product_tag' ) ) {
+					// Create the tag if it doesn't exist.
+					$term = wp_insert_term( $tag['name'], 'product_tag' );
+
+					if ( ! is_wp_error( $term ) ) {
+						$new_tags[] = array(
+							'id' => $term['term_id'],
+						);
+
+						continue;
+					}
+				} else {
+					// Tag exists, assume user wants to set the product with this tag.
+					$new_tags[] = array(
+						'id' => get_term_by( 'name', $tag['name'], 'product_tag' )->term_id,
+					);
+				}
+			}
+
+			$product = $this->save_taxonomy_terms( $product, $new_tags, 'tag' );
 		}
 
 		// Downloadable.
@@ -1343,24 +1370,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
-	 *                            Options: 'view' and 'edit'.
-	 * @param array      $fields  List of fields to fetch. If empty, then all fields will be returned.
-	 *                            For backward compatibility, we pass this argument silently.
+	 * @param string     $context Request context. Options: 'view' and 'edit'.
+	 *
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$request = func_get_arg( 2 );
-		$data = parent::get_product_data( $product, $context, $request );
-
+		$data = parent::get_product_data( ...func_get_args() );
 		// Replace in_stock with stock_status.
-		$pos             = array_search( 'in_stock', array_keys( $data ), true );
+		$pos = array_search( 'in_stock', array_keys( $data ), true );
 		if ( false !== $pos ) {
 			$array_section_1 = array_slice( $data, 0, $pos, true );
 			$array_section_2 = array_slice( $data, $pos + 1, null, true );
-			$data =  $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
+			$data = $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
 		}
-
 		return $data;
 	}
 }
