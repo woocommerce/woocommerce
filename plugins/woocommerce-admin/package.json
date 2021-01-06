@@ -111,7 +111,7 @@
 		"core-js": "3.7.0",
 		"debug": "4.3.1",
 		"dompurify": "2.2.6",
-		"github-label-sync": "^2.0.0",
+		"github-label-sync": "2.0.0",
 		"gridicons": "3.3.1",
 		"interpolate-components": "1.1.1",
 		"memoize-one": "5.1.1",
