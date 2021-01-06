@@ -67,7 +67,7 @@ class WC_Blocks_Utils {
 	 * @return bool|null         Boolean value if the page contains the block or not. Null in case the page does not exist.
 	 */
 	public static function does_page_contains_block( $page, $block_name ) {
-		$page_to_check = get_post( $page_id );
+		$page_to_check = get_post( $page );
 		if ( null === $page_to_check ) {
 			return null;
 		}
