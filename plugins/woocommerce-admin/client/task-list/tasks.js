@@ -85,7 +85,10 @@ export function getAllTasks( {
 		product_types: productTypes,
 	} = profileItems;
 
-	let purchaseAndInstallText = __( 'Add paid extensions to my store' );
+	let purchaseAndInstallText = __(
+		'Add paid extensions to my store',
+		'woocommerce-admin'
+	);
 
 	if ( uniqueItemsList.length === 1 ) {
 		const { name: itemName } = uniqueItemsList[ 0 ];
