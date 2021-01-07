@@ -68,7 +68,7 @@ jQuery( function ( $ ) {
 
 			try {
 				$( '#debug-report' ).slideDown();
-				$( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).trigger( 'focus' ).select();
+				$( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).trigger( 'focus' ).trigger( 'select' );
 				$( this ).fadeOut();
 				return false;
 			} catch ( e ) {
@@ -108,7 +108,7 @@ jQuery( function ( $ ) {
 		 */
 		copyFail: function() {
 			$( '.copy-error' ).removeClass( 'hidden' );
-			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).select();
+			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).trigger( 'select' );
 		}
 	};
 
