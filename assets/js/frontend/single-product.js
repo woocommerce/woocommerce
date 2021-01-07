@@ -101,8 +101,8 @@ jQuery( function( $ ) {
 		$target.data( 'product_gallery', this );
 
 		// Pick functionality to initialize...
-		this.flexslider_enabled = $.isFunction( $.fn.flexslider ) && wc_single_product_params.flexslider_enabled;
-		this.zoom_enabled       = $.isFunction( $.fn.zoom ) && wc_single_product_params.zoom_enabled;
+		this.flexslider_enabled = 'function' === typeof $.fn.flexslider && wc_single_product_params.flexslider_enabled;
+		this.zoom_enabled       = 'function' === typeof $.fn.zoom && wc_single_product_params.zoom_enabled;
 		this.photoswipe_enabled = typeof PhotoSwipe !== 'undefined' && wc_single_product_params.photoswipe_enabled;
 
 		// ...also taking args into account.
