@@ -62,7 +62,7 @@ jQuery( function( $ ) {
 
 				$( this )
 					.on( 'select2:select', function() {
-						$( this ).focus(); // Maintain focus after select https://github.com/select2/select2/issues/4384
+						$( this ).trigger( 'focus' ); // Maintain focus after select https://github.com/select2/select2/issues/4384
 					} )
 					.selectWoo( select2_args );
 			});

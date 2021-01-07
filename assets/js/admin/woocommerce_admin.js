@@ -232,7 +232,7 @@
 		});
 		// Focus on inputs within the table if clicked instead of trying to sort.
 		$( '.wc_input_table.sortable tbody input' ).on( 'click', function() {
-			$( this ).focus();
+			$( this ).trigger( 'focus' );
 		} );
 
 		$( '.wc_input_table .remove_rows' ).on( 'click', function() {
