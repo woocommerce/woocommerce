@@ -26,7 +26,7 @@ class WC_Admin_Addons {
 		$featured = get_transient( 'wc_addons_featured' );
 		if ( false === $featured ) {
 			$headers = array();
-			$auth = WC_Helper_Options::get( 'auth' );
+			$auth    = WC_Helper_Options::get( 'auth' );
 
 			if ( ! empty( $auth['access_token'] ) ) {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
@@ -35,7 +35,7 @@ class WC_Admin_Addons {
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
-					'headers' => $headers,
+					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
 				)
 			);
@@ -87,7 +87,7 @@ class WC_Admin_Addons {
 		$parameters     = self::build_parameter_string( $category, $term, $country );
 
 		$headers = array();
-		$auth = WC_Helper_Options::get( 'auth' );
+		$auth    = WC_Helper_Options::get( 'auth' );
 
 		if ( ! empty( $auth['access_token'] ) ) {
 			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
