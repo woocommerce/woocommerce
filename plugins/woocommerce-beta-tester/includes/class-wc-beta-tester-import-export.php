@@ -149,7 +149,7 @@ class WC_Beta_Tester_Import_Export {
 		}
 
 		if ( ! is_readable( $tmp_file ) ) {
-			$this->add_message( __( 'Fie could not be read.', 'woocommerce-beta-tester' ) );
+			$this->add_message( __( 'File could not be read.', 'woocommerce-beta-tester' ) );
 			return;
 		}
 
