@@ -21,12 +21,15 @@ const {
 
 const runCartApplyCouponsTest = () => {
 	describe('Cart applying coupons', () => {
+			let couponFixedCart;
+			let couponPercentage;
+			let couponFixedProduct;
 		beforeAll(async () => {
 			await merchant.login();
             await createSimpleProduct();
-            await createCoupon('Fixed cart discount');
-            await createCoupon('Percentage discount', '50');
-			await createCoupon('Fixed product discount');
+            couponFixedCart = await createCoupon();
+			couponPercentage = await createCoupon('50', 'Percentage discount');
+			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await merchant.logout();
 		});
 
@@ -37,7 +40,7 @@ const runCartApplyCouponsTest = () => {
 			await shopper.productIsInCart('Simple product');
 
 			// Apply Fixed cart discount coupon
-			await expect(page).toFill('#coupon_code', 'Code-Fixed cart discount');
+			await expect(page).toFill('#coupon_code', couponFixedCart);
 			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
@@ -55,7 +58,7 @@ const runCartApplyCouponsTest = () => {
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
 			
 			// Apply Percentage discount coupon
-			await expect(page).toFill('#coupon_code', 'Code-Percentage discount');
+			await expect(page).toFill('#coupon_code', couponPercentage);
 			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
@@ -68,7 +71,7 @@ const runCartApplyCouponsTest = () => {
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
 
 			// Apply Fixed product discount coupon
-			await expect(page).toFill('#coupon_code', 'Code-Fixed product discount');
+			await expect(page).toFill('#coupon_code', couponFixedProduct);
 			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
@@ -76,13 +79,13 @@ const runCartApplyCouponsTest = () => {
 			await page.waitForSelector('.order-total .amount', {text: '$4.99'});
 			
 			// Try to apply the same coupon
-			await expect(page).toFill('#coupon_code', 'Code-Fixed product discount');
+			await expect(page).toFill('#coupon_code', couponFixedProduct);
 			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
 			await page.waitForSelector('.woocommerce-error', { text: 'Coupon code already applied!' });
 
 			// Try to apply multiple coupons
-			await expect(page).toFill('#coupon_code', 'Code-Fixed cart discount');
+			await expect(page).toFill('#coupon_code', couponFixedCart);
 			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
 			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
