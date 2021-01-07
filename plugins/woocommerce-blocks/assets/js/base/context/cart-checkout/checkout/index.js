@@ -39,7 +39,7 @@ export const CheckoutProvider = ( {
 					<PaymentMethodDataProvider>
 						{ children }
 						{ /* If the current user is an admin, we let BlockErrorBoundary render
-						the error, or we simply die silently. */ }
+								the error, or we simply die silently. */ }
 						<BlockErrorBoundary
 							renderError={
 								CURRENT_USER_IS_ADMIN ? null : () => null

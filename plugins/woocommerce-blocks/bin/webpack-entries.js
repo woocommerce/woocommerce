@@ -95,6 +95,8 @@ const entries = {
 			],
 		} ),
 
+		'packages-style': glob.sync( './packages/**/*.scss' ),
+
 		'reviews-style': './assets/js/blocks/reviews/editor.scss',
 		...getBlockEntries( '**/*.scss' ),
 	},
@@ -105,6 +107,7 @@ const entries = {
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
 		wcSharedContext: './assets/js/shared/context/index.js',
 		wcSharedHocs: './assets/js/shared/hocs/index.js',
+		wcBlocksCheckout: './packages/checkout/index.js',
 	},
 	main: {
 		// Shared blocks code

@@ -50,6 +50,15 @@ const getProgressBarPluginConfig = ( name, fileSuffix ) => {
 };
 
 const getCoreConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
 	return {
 		entry: getEntryConfig( 'core', options.exclude || [] ),
 		output: {
@@ -86,6 +95,12 @@ const getCoreConfig = ( options = {} ) => {
 						},
 					},
 				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
 			],
 		},
 		plugins: [
@@ -107,6 +122,7 @@ const getCoreConfig = ( options = {} ) => {
 				}`,
 			} ),
 		],
+		resolve,
 	};
 };
 
