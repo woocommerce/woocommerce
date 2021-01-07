@@ -406,7 +406,7 @@ jQuery( function( $ ) {
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 
 						wc_checkout_form.scroll_to_notices();
 					}
@@ -560,7 +560,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 			wc_checkout_form.scroll_to_notices();
 			$( document.body ).trigger( 'checkout_error' , [ error_message ] );
 		},
