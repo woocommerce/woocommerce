@@ -142,7 +142,7 @@ jQuery( function( $ ) {
 					$statebox.append( $option );
 				} );
 
-				$statebox.val( value ).change();
+				$statebox.val( value ).trigger( 'change' );
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 			}
