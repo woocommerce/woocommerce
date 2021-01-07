@@ -221,25 +221,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Get products.
-	 *
-	 * @param  array $query_args Query args.
-	 *
-	 * @return array Products.
-	 */
-	protected function get_objects( $query_args ) {
-		$query_args['paginate'] = true;
-		$query_args['return']   = 'objects';
-		$results                = wc_get_products( $query_args );
-
-		return array(
-			'objects' => $results->products,
-			'total'   => $results->total,
-			'pages'   => $results->max_num_pages,
-		);
-	}
-
-	/**
 	 * Set product images.
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
