@@ -9,7 +9,6 @@ import {
 	CardFooter,
 	CheckboxControl,
 	FlexItem as MaybeFlexItem,
-	__experimentalText as Text,
 	Popover,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
@@ -19,6 +18,7 @@ import { Form } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

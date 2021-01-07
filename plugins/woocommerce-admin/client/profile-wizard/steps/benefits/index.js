@@ -2,13 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import {
-	Button,
-	Card,
-	CardBody,
-	CardFooter,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Button, Card, CardBody, CardFooter } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -22,6 +16,7 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

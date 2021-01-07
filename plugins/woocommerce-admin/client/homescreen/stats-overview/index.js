@@ -10,7 +10,6 @@ import {
 	CardHeader,
 	CardBody,
 	CardFooter,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { get, xor } from 'lodash';
 import {
@@ -23,6 +22,7 @@ import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

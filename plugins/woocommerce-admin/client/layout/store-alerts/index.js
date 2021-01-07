@@ -11,7 +11,6 @@ import {
 	CardHeader,
 	Dashicon,
 	SelectControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
@@ -22,6 +21,7 @@ import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

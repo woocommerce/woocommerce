@@ -7,9 +7,9 @@ import {
 	Button,
 	Modal,
 	RadioControl,
-	__experimentalText as Text,
 	TextareaControl,
 } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 
 /**

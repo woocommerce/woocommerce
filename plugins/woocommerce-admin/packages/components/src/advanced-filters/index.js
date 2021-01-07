@@ -10,14 +10,12 @@ import {
 	CardHeader,
 	Dropdown,
 	SelectControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { Component, createRef } from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
 import interpolateComponents from 'interpolate-components';
-
 import {
 	getActiveFiltersFromQuery,
 	getDefaultOptionValue,
@@ -25,6 +23,7 @@ import {
 	getQueryFromActiveFilters,
 	getHistory,
 } from '@woocommerce/navigation';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

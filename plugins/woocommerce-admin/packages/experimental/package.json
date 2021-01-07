@@ -1,15 +1,15 @@
 {
-	"name": "@woocommerce/navigation",
-	"version": "5.2.0",
-	"description": "WooCommerce navigation utilities.",
+	"name": "@woocommerce/experimental",
+	"version": "1.0.0",
+	"description": "WooCommerce experimental components.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"keywords": [
 		"wordpress",
 		"woocommerce",
-		"navigation"
+		"experimental"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/navigation/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/experimental/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce-admin.git"
@@ -21,13 +21,11 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime-corejs2": "7.12.5",
-		"@woocommerce/experimental": "file:../experimental",
-		"history": "4.10.1",
-		"lodash": "4.17.15",
-		"qs": "6.9.4"
+		"@babel/runtime": "^7.11.2",
+		"@wordpress/components": "10.0.0"
 	},
 	"publishConfig": {
 		"access": "public"
-	}
+	},
+	"private": true
 }

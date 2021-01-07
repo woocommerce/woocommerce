@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __experimentalNavigationItem as NavigationItem } from '@wordpress/components';
+import { NavigationItem } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 import { WooNavigationItem, useNavSlot } from '@woocommerce/navigation';
 

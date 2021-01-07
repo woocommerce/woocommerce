@@ -5,13 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, cloneElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
-import {
-	Button,
-	Card,
-	CardBody,
-	CardHeader,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Icon, check } from '@wordpress/icons';
 import { List, EllipsisMenu, Badge } from '@woocommerce/components';
@@ -23,6 +17,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

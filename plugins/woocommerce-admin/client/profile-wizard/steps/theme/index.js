@@ -14,13 +14,13 @@ import {
 	CardFooter,
 	TabPanel,
 	Tooltip,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { H } from '@woocommerce/components';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

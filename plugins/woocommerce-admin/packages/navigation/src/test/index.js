@@ -1,23 +1,33 @@
 /**
  * Internal dependencies
  */
-import { getPersistedQuery, getSearchWords, getNewPath } from '../index';
-
-jest.mock( '../index', () => ( {
-	...require.requireActual( '../index' ),
-	getQuery: jest.fn().mockReturnValue( {
-		filter: 'advanced',
-		product_includes: 127,
-		period: 'year',
-		compare: 'previous_year',
-		after: '2018-02-01',
-		before: '2018-01-01',
-		interval: 'day',
-		search: 'lorem',
-	} ),
-} ) );
+import {
+	getHistory,
+	getPersistedQuery,
+	getSearchWords,
+	getNewPath,
+} from '../index';
 
 describe( 'getPersistedQuery', () => {
+	beforeEach( () => {
+		getHistory().push(
+			getNewPath(
+				{
+					filter: 'advanced',
+					product_includes: 127,
+					period: 'year',
+					compare: 'previous_year',
+					after: '2018-02-01',
+					before: '2018-01-01',
+					interval: 'day',
+					search: 'lorem',
+				},
+				'/',
+				{}
+			)
+		);
+	} );
+
 	it( "should return an empty object it the query doesn't contain any time related parameters", () => {
 		const query = {
 			filter: 'advanced',

@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useUserPreferences } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { __experimentalText as Text } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

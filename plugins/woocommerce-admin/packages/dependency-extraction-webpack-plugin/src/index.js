@@ -24,6 +24,11 @@ const wooRequestToExternal = ( request ) => {
 			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 		};
 
+		const excludedExternals = [ 'experimental' ];
+		if ( excludedExternals.includes( handle ) ) {
+			return;
+		}
+
 		if ( irregularExternalMap[ handle ] ) {
 			return irregularExternalMap[ handle ];
 		}

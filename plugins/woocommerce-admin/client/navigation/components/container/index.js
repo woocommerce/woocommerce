@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
-	__experimentalNavigation as Navigation,
-	__experimentalNavigationBackButton as NavigationBackButton,
-	__experimentalNavigationMenu as NavigationMenu,
-	__experimentalNavigationGroup as NavigationGroup,
-} from '@wordpress/components';
+	Navigation,
+	NavigationBackButton,
+	NavigationMenu,
+	NavigationGroup,
+} from '@woocommerce/experimental';
 import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { withSelect } from '@wordpress/data';

@@ -1,16 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	Button,
-	Tooltip,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Button, Tooltip } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import ChevronDownIcon from 'gridicons/dist/chevron-down';
 import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
+import { Text } from '@woocommerce/experimental';
+
 /**
  * Internal dependencies
  */

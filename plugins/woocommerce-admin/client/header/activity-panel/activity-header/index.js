@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { __experimentalText as Text } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 import { EllipsisMenu } from '@woocommerce/components';
 
 /**

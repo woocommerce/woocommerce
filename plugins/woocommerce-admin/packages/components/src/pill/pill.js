@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { __experimentalText as Text } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
+
 export function Pill( { children } ) {
 	return (
 		<Text className="woocommerce-pill" variant="caption" as="span">

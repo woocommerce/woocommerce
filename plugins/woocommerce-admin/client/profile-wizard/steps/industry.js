@@ -9,7 +9,6 @@ import {
 	CardBody,
 	CardFooter,
 	CheckboxControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
@@ -18,6 +17,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { TextControl } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

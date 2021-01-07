@@ -11,13 +11,13 @@ import {
 	CardFooter,
 	CheckboxControl,
 	FormToggle,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

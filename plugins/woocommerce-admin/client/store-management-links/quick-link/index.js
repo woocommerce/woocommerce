@@ -3,8 +3,8 @@
  */
 import React from '@wordpress/element';
 import { external, Icon } from '@wordpress/icons';
-import { __experimentalText as Text } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

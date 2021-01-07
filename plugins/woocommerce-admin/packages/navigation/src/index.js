@@ -228,4 +228,4 @@ export { SlotFillProvider as NavSlotFillProvider } from '@wordpress/components';
  * in the /client folder. This problem is due to WC Admin bundling @wordpress/components
  * instead of enqueuing and using wp.components from the window.
  */
-export { __experimentalUseSlot as useNavSlot } from '@wordpress/components';
+export { useSlot as useNavSlot } from '@woocommerce/experimental';

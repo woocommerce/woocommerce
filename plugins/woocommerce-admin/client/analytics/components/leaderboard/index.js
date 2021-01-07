@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Card,
-	CardBody,
-	CardHeader,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Card, CardBody, CardHeader } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { EmptyTable, TableCard } from '@woocommerce/components';
@@ -19,6 +14,7 @@ import {
 	getLeaderboard,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

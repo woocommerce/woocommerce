@@ -12,7 +12,6 @@ import {
 	CheckboxControl,
 	FormToggle,
 	Popover,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -34,6 +33,7 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

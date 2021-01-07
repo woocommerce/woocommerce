@@ -1,14 +1,10 @@
 /**
  * External dependencies
  */
-import {
-	Card as WPCard,
-	CardBody,
-	CardHeader,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Card as WPCard, CardBody, CardHeader } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

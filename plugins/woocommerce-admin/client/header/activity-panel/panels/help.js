@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { __experimentalText as Text } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 import { withSelect } from '@wordpress/data';
 import { Fragment, useEffect } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';

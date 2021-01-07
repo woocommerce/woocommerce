@@ -6,11 +6,8 @@ import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import {
-	Card,
-	CardHeader,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Card, CardHeader } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
