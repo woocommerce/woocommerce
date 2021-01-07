@@ -32,7 +32,7 @@ class OnboardingEmailMarketing {
 		$content = __( 'We\'re here for you - get tips, product updates and inspiration straight to your email box', 'woocommerce-admin' );
 
 		$note = new Note();
-		$note->set_title( __( 'Tips, product updates, and inspiration', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Sign up for tips, product updates, and inspiration', 'woocommerce-admin' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
