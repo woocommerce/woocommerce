@@ -1101,9 +1101,11 @@ class WC_Cart extends WC_Legacy_Cart {
 						// Allow if valid or show error.
 						if ( $valid_value === $value ) {
 							$attributes[ $attribute_key ] = $value;
+							$variation[ $attribute_key ] = $value;
 						} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs(), true ) ) {
 							// If valid values are empty, this is an 'any' variation so get all possible values.
 							$attributes[ $attribute_key ] = $value;
+							$variation[ $attribute_key ] = $value;
 						} else {
 							/* translators: %s: Attribute name. */
 							throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
@@ -1111,8 +1113,6 @@ class WC_Cart extends WC_Legacy_Cart {
 					} elseif ( '' === $valid_value ) {
 						$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 					}
-
-					$variation = $attributes;
 				}
 				if ( ! empty( $missing_attributes ) ) {
 					/* translators: %s: Attribute name. */
