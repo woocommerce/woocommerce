@@ -51,7 +51,9 @@ function _wc_beta_tester_bootstrap() {
 	} elseif ( ! class_exists( 'WC_Beta_Tester' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
 		// Settings.
-		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-settings.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-channel.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-import-export.php';
+		new WC_Beta_Tester_Import_Export();
 		// Tools.
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 

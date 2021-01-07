@@ -106,7 +106,7 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Check wether or not the transients need to be overruled and API needs to be called for every single page load
+	 * Check whether or not the transients need to be overruled and API needs to be called for every single page load
 	 *
 	 * @return bool overrule or not
 	 */
