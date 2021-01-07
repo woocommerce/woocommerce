@@ -1,3 +1,6 @@
+# Line-ending normalization
+* text=auto
+
 /.* export-ignore
 /*.md export-ignore
 /node_modules* export-ignore
