@@ -118,13 +118,13 @@ jQuery( function( $ ) {
 		}
 
 		// Bind functions to this.
-		this.initFlexslider       = this.initFlexslider.on( this );
-		this.initZoom             = this.initZoom.on( this );
-		this.initZoomForTarget    = this.initZoomForTarget.on( this );
-		this.initPhotoswipe       = this.initPhotoswipe.on( this );
-		this.onResetSlidePosition = this.onResetSlidePosition.on( this );
-		this.getGalleryItems      = this.getGalleryItems.on( this );
-		this.openPhotoswipe       = this.openPhotoswipe.on( this );
+		this.initFlexslider       = this.initFlexslider.bind( this );
+		this.initZoom             = this.initZoom.bind( this );
+		this.initZoomForTarget    = this.initZoomForTarget.bind( this );
+		this.initPhotoswipe       = this.initPhotoswipe.bind( this );
+		this.onResetSlidePosition = this.onResetSlidePosition.bind( this );
+		this.getGalleryItems      = this.getGalleryItems.bind( this );
+		this.openPhotoswipe       = this.openPhotoswipe.bind( this );
 
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider( args.flexslider );

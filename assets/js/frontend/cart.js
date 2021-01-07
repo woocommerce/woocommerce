@@ -152,9 +152,9 @@ jQuery( function( $ ) {
 		 */
 		init: function( cart ) {
 			this.cart                       = cart;
-			this.toggle_shipping            = this.toggle_shipping.on( this );
-			this.shipping_method_selected   = this.shipping_method_selected.on( this );
-			this.shipping_calculator_submit = this.shipping_calculator_submit.on( this );
+			this.toggle_shipping            = this.toggle_shipping.bind( this );
+			this.shipping_method_selected   = this.shipping_method_selected.bind( this );
+			this.shipping_calculator_submit = this.shipping_calculator_submit.bind( this );
 
 			$( document ).on(
 				'click',
@@ -261,16 +261,16 @@ jQuery( function( $ ) {
 		 * Initialize cart UI events.
 		 */
 		init: function() {
-			this.update_cart_totals    = this.update_cart_totals.on( this );
-			this.input_keypress        = this.input_keypress.on( this );
-			this.cart_submit           = this.cart_submit.on( this );
-			this.submit_click          = this.submit_click.on( this );
-			this.apply_coupon          = this.apply_coupon.on( this );
-			this.remove_coupon_clicked = this.remove_coupon_clicked.on( this );
-			this.quantity_update       = this.quantity_update.on( this );
-			this.item_remove_clicked   = this.item_remove_clicked.on( this );
-			this.item_restore_clicked  = this.item_restore_clicked.on( this );
-			this.update_cart           = this.update_cart.on( this );
+			this.update_cart_totals    = this.update_cart_totals.bind( this );
+			this.input_keypress        = this.input_keypress.bind( this );
+			this.cart_submit           = this.cart_submit.bind( this );
+			this.submit_click          = this.submit_click.bind( this );
+			this.apply_coupon          = this.apply_coupon.bind( this );
+			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
+			this.quantity_update       = this.quantity_update.bind( this );
+			this.item_remove_clicked   = this.item_remove_clicked.bind( this );
+			this.item_restore_clicked  = this.item_restore_clicked.bind( this );
+			this.update_cart           = this.update_cart.bind( this );
 
 			$( document ).on(
 				'wc_update_cart added_to_cart',

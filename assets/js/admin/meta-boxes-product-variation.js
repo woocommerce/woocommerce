@@ -346,7 +346,7 @@ jQuery( function( $ ) {
 
 			postForm.on( 'submit', this.save_on_submit );
 
-			$( 'input:submit', postForm ).on( 'click keypress', function() {
+			$( 'input:submit', postForm ).bind( 'click keypress', function() {
 				postForm.data( 'callerid', this.id );
 			});
 

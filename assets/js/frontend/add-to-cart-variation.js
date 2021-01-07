@@ -22,10 +22,10 @@
 		self.$form.off( '.wc-variation-form' );
 
 		// Methods.
-		self.getChosenAttributes    = self.getChosenAttributes.on( self );
-		self.findMatchingVariations = self.findMatchingVariations.on( self );
-		self.isMatch                = self.isMatch.on( self );
-		self.toggleResetLink        = self.toggleResetLink.on( self );
+		self.getChosenAttributes    = self.getChosenAttributes.bind( self );
+		self.findMatchingVariations = self.findMatchingVariations.bind( self );
+		self.isMatch                = self.isMatch.bind( self );
+		self.toggleResetLink        = self.toggleResetLink.bind( self );
 
 		// Events.
 		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: self }, self.onReset );
