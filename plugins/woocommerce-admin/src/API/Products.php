@@ -157,7 +157,9 @@ class Products extends \WC_REST_Products_Controller {
 				$data->data['last_order_date'] = wc_rest_prepare_date_response( $this->last_order_dates[ $product_id ] );
 			}
 		}
-		$data->data['name'] = wp_strip_all_tags( $data->data['name'] );
+		if ( isset( $data->data['name'] ) ) {
+			$data->data['name'] = wp_strip_all_tags( $data->data['name'] );
+		}
 
 		return $data;
 	}
