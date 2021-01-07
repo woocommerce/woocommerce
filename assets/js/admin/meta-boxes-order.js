@@ -158,7 +158,7 @@ jQuery( function ( $ ) {
 
 		change_customer_user: function() {
 			if ( ! $( '#_billing_country' ).val() ) {
-				$( 'a.edit_address' ).click();
+				$( 'a.edit_address' ).trigger( 'click' );
 				wc_meta_boxes_order.load_billing( true );
 				wc_meta_boxes_order.load_shipping( true );
 			}
@@ -643,7 +643,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( 'tr' ).find( '.view' ).hide();
 			$( this ).closest( 'tr' ).find( '.edit' ).show();
 			$( this ).hide();
-			$( 'button.add-line-item' ).click();
+			$( 'button.add-line-item' ).trigger( 'click' );
 			$( 'button.cancel-action' ).attr( 'data-reload', true );
 			window.wcTracks.recordEvent( 'order_edit_edit_item_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,

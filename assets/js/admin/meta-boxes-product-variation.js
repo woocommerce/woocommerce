@@ -104,7 +104,7 @@ jQuery( function( $ ) {
 						date_to   = $( '.sale_price_dates_to', $el ).val();
 
 					if ( '' !== date_from || '' !== date_to ) {
-						$( 'a.sale_schedule', $el ).click();
+						$( 'a.sale_schedule', $el ).trigger( 'click' );
 					}
 				});
 

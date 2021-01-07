@@ -121,7 +121,7 @@ jQuery( function( $ ) {
 			$focused = $( document.activeElement );
 
 		if ( $focused.is( '.wc-wizard-service-toggle, .wc-wizard-service-enable' ) && ( 13 === code || 32 === code ) ) {
-			$focused.find( ':input' ).click();
+			$focused.find( ':input' ).trigger( 'click' );
 		}
 	} );
 

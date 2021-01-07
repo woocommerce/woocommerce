@@ -113,7 +113,7 @@ jQuery( function( $ ) {
 
 		show_and_hide_panels();
 
-		$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).click();
+		$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
 
 		$( document.body ).trigger( 'woocommerce-product-type-change', select_val, $( this ) );
 
@@ -335,7 +335,7 @@ jQuery( function( $ ) {
 
 			attribute_row_indexes();
 
-			$attributes.find( '.woocommerce_attribute' ).last().find( 'h3' ).click();
+			$attributes.find( '.woocommerce_attribute' ).last().find( 'h3' ).trigger( 'click' );
 
 			$wrapper.unblock();
 
