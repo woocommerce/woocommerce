@@ -547,9 +547,9 @@ jQuery( function( $ ) {
 				callerid = postForm.data( 'callerid' );
 
 			if ( 'publish' === callerid ) {
-				postForm.append('<input type="hidden" name="publish" value="1" />').submit();
+				postForm.append('<input type="hidden" name="publish" value="1" />').trigger( 'submit' );
 			} else {
-				postForm.append('<input type="hidden" name="save-post" value="1" />').submit();
+				postForm.append('<input type="hidden" name="save-post" value="1" />').trigger( 'submit' );
 			}
 		},
 
