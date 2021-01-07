@@ -34,11 +34,11 @@ jQuery( function ( $ ) {
 			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
 				if ( $( this ).is( 'thead' ) ) {
 					var label = $( this ).find( 'th:eq(0)' ).data( 'export-label' ) || $( this ).text();
-					report = report + '\n### ' + $.trim( label ) + ' ###\n\n';
+					report = report + '\n### ' + label.trim() + ' ###\n\n';
 				} else {
 					$( 'tr', $( this ) ).each( function() {
 						var label       = $( this ).find( 'td:eq(0)' ).data( 'export-label' ) || $( this ).find( 'td:eq(0)' ).text();
-						var the_name    = $.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
+						var the_name    = label.trim().replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
 
 						// Find value
 						var $value_html = $( this ).find( 'td:eq(2)' ).clone();
@@ -47,7 +47,7 @@ jQuery( function ( $ ) {
 						$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
 
 						// Format value
-						var the_value   = $.trim( $value_html.text() );
+						var the_value   = $value_html.text().trim();
 						var value_array = the_value.split( ', ' );
 
 						if ( value_array.length > 1 ) {

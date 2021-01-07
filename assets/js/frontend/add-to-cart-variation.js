@@ -314,7 +314,7 @@
 		}
 
 		// Reveal
-		if ( $.trim( form.$singleVariation.text() ) ) {
+		if ( form.$singleVariation.text().trim() ) {
 			form.$singleVariation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
 		} else {
 			form.$singleVariation.show().trigger( 'show_variation', [ variation, purchasable ] );
