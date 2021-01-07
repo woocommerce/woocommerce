@@ -7,11 +7,11 @@ import {
 	TAXES_ENABLED,
 	DISPLAY_ITEMIZED_TAXES,
 } from '@woocommerce/block-settings';
+import { TotalsItem } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import TotalsItem from '../item';
 import './style.scss';
 
 const TotalsTaxes = ( { currency, values } ) => {

@@ -19,6 +19,7 @@ const wcDepMap = {
 	'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
 	'@woocommerce/shared-context': [ 'wc', 'wcSharedContext' ],
 	'@woocommerce/shared-hocs': [ 'wc', 'wcSharedHocs' ],
+	'@woocommerce/blocks-checkout': [ 'wc', 'wcBlocksCheckout' ],
 };
 
 const wcHandleMap = {
@@ -28,6 +29,7 @@ const wcHandleMap = {
 	'@woocommerce/block-data': 'wc-blocks-data-store',
 	'@woocommerce/shared-context': 'wc-shared-context',
 	'@woocommerce/shared-hocs': 'wc-shared-hocs',
+	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
 };
 
 const getAlias = ( options = {} ) => {

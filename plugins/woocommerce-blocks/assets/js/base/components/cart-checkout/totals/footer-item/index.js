@@ -9,11 +9,11 @@ import {
 import { createInterpolateElement } from 'wordpress-element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
+import { TotalsItem } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import TotalsItem from '../item';
 import './style.scss';
 
 const SHOW_TAXES = TAXES_ENABLED && DISPLAY_CART_PRICES_INCLUDING_TAX;

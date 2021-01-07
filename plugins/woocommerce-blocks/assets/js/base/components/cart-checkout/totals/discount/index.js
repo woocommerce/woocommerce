@@ -6,11 +6,11 @@ import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip } from '@woocommerce/base-components/chip';
 import PropTypes from 'prop-types';
+import { TotalsItem } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import TotalsItem from '../item';
 import './style.scss';
 
 const TotalsDiscount = ( {
