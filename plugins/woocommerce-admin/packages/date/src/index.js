@@ -2,7 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
-import { find } from 'lodash';
+import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
 
@@ -208,50 +208,96 @@ export function getCurrentPeriod( period, compare ) {
  * @param {Object} [before] - before date if custom period
  * @return {DateValue} - DateValue data about the selected period
  */
-function getDateValue( period, compare, after, before ) {
-	switch ( period ) {
-		case 'today':
-			return getCurrentPeriod( 'day', compare );
-		case 'yesterday':
-			return getLastPeriod( 'day', compare );
-		case 'week':
-			return getCurrentPeriod( 'week', compare );
-		case 'last_week':
-			return getLastPeriod( 'week', compare );
-		case 'month':
-			return getCurrentPeriod( 'month', compare );
-		case 'last_month':
-			return getLastPeriod( 'month', compare );
-		case 'quarter':
-			return getCurrentPeriod( 'quarter', compare );
-		case 'last_quarter':
-			return getLastPeriod( 'quarter', compare );
-		case 'year':
-			return getCurrentPeriod( 'year', compare );
-		case 'last_year':
-			return getLastPeriod( 'year', compare );
-		case 'custom':
-			const difference = before.diff( after, 'days' );
-			if ( compare === 'previous_period' ) {
-				const secondaryEnd = after.clone().subtract( 1, 'days' );
-				const secondaryStart = secondaryEnd
-					.clone()
-					.subtract( difference, 'days' );
+const getDateValue = memoize(
+	( period, compare, after, before ) => {
+		switch ( period ) {
+			case 'today':
+				return getCurrentPeriod( 'day', compare );
+			case 'yesterday':
+				return getLastPeriod( 'day', compare );
+			case 'week':
+				return getCurrentPeriod( 'week', compare );
+			case 'last_week':
+				return getLastPeriod( 'week', compare );
+			case 'month':
+				return getCurrentPeriod( 'month', compare );
+			case 'last_month':
+				return getLastPeriod( 'month', compare );
+			case 'quarter':
+				return getCurrentPeriod( 'quarter', compare );
+			case 'last_quarter':
+				return getLastPeriod( 'quarter', compare );
+			case 'year':
+				return getCurrentPeriod( 'year', compare );
+			case 'last_year':
+				return getLastPeriod( 'year', compare );
+			case 'custom':
+				const difference = before.diff( after, 'days' );
+				if ( compare === 'previous_period' ) {
+					const secondaryEnd = after.clone().subtract( 1, 'days' );
+					const secondaryStart = secondaryEnd
+						.clone()
+						.subtract( difference, 'days' );
+					return {
+						primaryStart: after,
+						primaryEnd: before,
+						secondaryStart,
+						secondaryEnd,
+					};
+				}
 				return {
 					primaryStart: after,
 					primaryEnd: before,
-					secondaryStart,
-					secondaryEnd,
+					secondaryStart: after.clone().subtract( 1, 'years' ),
+					secondaryEnd: before.clone().subtract( 1, 'years' ),
 				};
-			}
+		}
+	},
+	( period, compare, after, before ) =>
+		[
+			period,
+			compare,
+			after && after.format(),
+			before && before.format(),
+		].join( ':' )
+);
+
+/**
+ * Memoized internal logic of getDateParamsFromQuery().
+ *
+ * @param {string} period - period value, ie `last_week`
+ * @param {string} compare - compare value, ie `previous_year`
+ * @param {string} after - date in iso date format, ie `2018-07-03`
+ * @param {string} before - date in iso date format, ie `2018-07-03`
+ * @param {string} defaultDateRange - the store's default date range
+ * @return {Object} - date parameters derived from query parameters with added defaults
+ */
+const getDateParamsFromQueryMemoized = memoize(
+	( period, compare, after, before, defaultDateRange ) => {
+		if ( period && compare ) {
 			return {
-				primaryStart: after,
-				primaryEnd: before,
-				secondaryStart: after.clone().subtract( 1, 'years' ),
-				secondaryEnd: before.clone().subtract( 1, 'years' ),
+				period,
+				compare,
+				after: after ? moment( after ) : null,
+				before: before ? moment( before ) : null,
 			};
-	}
-}
+		}
+		const queryDefaults = parse(
+			defaultDateRange.replace( /&amp;/g, '&' )
+		);
+
+		return {
+			period: queryDefaults.period,
+			compare: queryDefaults.compare,
+			after: queryDefaults.after ? moment( queryDefaults.after ) : null,
+			before: queryDefaults.before
+				? moment( queryDefaults.before )
+				: null,
+		};
+	},
+	( period, compare, after, before, defaultDateRange ) =>
+		[ period, compare, after, before, defaultDateRange ].join( ':' )
+);
 
 /**
  * Add default date-related parameters to a query object
@@ -269,23 +315,67 @@ export const getDateParamsFromQuery = (
 	defaultDateRange = 'period=month&compare=previous_year'
 ) => {
 	const { period, compare, after, before } = query;
-	if ( period && compare ) {
-		return {
+
+	return getDateParamsFromQueryMemoized(
+		period,
+		compare,
+		after,
+		before,
+		defaultDateRange
+	);
+};
+
+/**
+ * Memoized internal logic of getCurrentDates().
+ *
+ * @param {string} period - period value, ie `last_week`
+ * @param {string} compare - compare value, ie `previous_year`
+ * @param {Object} primaryStart - primary query start DateTime, in Moment instance.
+ * @param {Object} primaryEnd - primary query start DateTime, in Moment instance.
+ * @param {Object} secondaryStart - primary query start DateTime, in Moment instance.
+ * @param {Object} secondaryEnd - primary query start DateTime, in Moment instance.
+ * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
+ */
+const getCurrentDatesMemoized = memoize(
+	(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	) => ( {
+		primary: {
+			label: find( presetValues, ( item ) => item.value === period )
+				.label,
+			range: getRangeLabel( primaryStart, primaryEnd ),
+			after: primaryStart,
+			before: primaryEnd,
+		},
+		secondary: {
+			label: find( periods, ( item ) => item.value === compare ).label,
+			range: getRangeLabel( secondaryStart, secondaryEnd ),
+			after: secondaryStart,
+			before: secondaryEnd,
+		},
+	} ),
+	(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	) =>
+		[
 			period,
 			compare,
-			after: after ? moment( after ) : null,
-			before: before ? moment( before ) : null,
-		};
-	}
-	const queryDefaults = parse( defaultDateRange.replace( /&amp;/g, '&' ) );
-
-	return {
-		period: queryDefaults.period,
-		compare: queryDefaults.compare,
-		after: queryDefaults.after ? moment( queryDefaults.after ) : null,
-		before: queryDefaults.before ? moment( queryDefaults.before ) : null,
-	};
-};
+			primaryStart && primaryStart.format(),
+			primaryEnd && primaryEnd.format(),
+			secondaryStart && secondaryStart.format(),
+			secondaryEnd && secondaryEnd.format(),
+		].join( ':' )
+);
 
 /**
  * Get Date Value Objects for a primary and secondary date range
@@ -313,21 +403,14 @@ export const getCurrentDates = (
 		secondaryEnd,
 	} = getDateValue( period, compare, after, before );
 
-	return {
-		primary: {
-			label: find( presetValues, ( item ) => item.value === period )
-				.label,
-			range: getRangeLabel( primaryStart, primaryEnd ),
-			after: primaryStart,
-			before: primaryEnd,
-		},
-		secondary: {
-			label: find( periods, ( item ) => item.value === compare ).label,
-			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			after: secondaryStart,
-			before: secondaryEnd,
-		},
-	};
+	return getCurrentDatesMemoized(
+		period,
+		compare,
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd
+	);
 };
 
 /**

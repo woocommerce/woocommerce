@@ -6,7 +6,7 @@ import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { get } from 'lodash';
+import { get, memoize } from 'lodash';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
@@ -21,12 +21,26 @@ import {
 	defaultTableDateFormat,
 	getCurrentDates,
 } from '@woocommerce/date';
+import { stringify } from 'qs';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
+
+const EMPTY_ARRAY = [];
+
+const summaryFields = [
+	'orders_count',
+	'gross_sales',
+	'total_sales',
+	'refunds',
+	'coupons',
+	'taxes',
+	'shipping',
+	'net_revenue',
+];
 
 class RevenueReportTable extends Component {
 	constructor() {
@@ -257,16 +271,7 @@ class RevenueReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
-				summaryFields={ [
-					'orders_count',
-					'gross_sales',
-					'total_sales',
-					'refunds',
-					'coupons',
-					'taxes',
-					'shipping',
-					'net_revenue',
-				] }
+				summaryFields={ summaryFields }
 				query={ query }
 				tableData={ tableData }
 				title={ __( 'Revenue', 'woocommerce-admin' ) }
@@ -280,6 +285,69 @@ class RevenueReportTable extends Component {
 
 RevenueReportTable.contextType = CurrencyContext;
 
+/**
+ * Memoized props object formatting function.
+ *
+ * @param {boolean} isError
+ * @param {boolean} isRequesting
+ * @param {Object} tableQuery
+ * @param {Object} revenueData
+ * @return {Object} formatted tableData prop
+ */
+const formatProps = memoize(
+	( isError, isRequesting, tableQuery, revenueData ) => ( {
+		tableData: {
+			items: {
+				data: get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ),
+				totalResults: get( revenueData, [ 'totalResults' ], 0 ),
+			},
+			isError,
+			isRequesting,
+			query: tableQuery,
+		},
+	} ),
+	( isError, isRequesting, tableQuery, revenueData ) =>
+		[
+			isError,
+			isRequesting,
+			stringify( tableQuery ),
+			get( revenueData, [ 'totalResults' ], 0 ),
+			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
+		].join( ':' )
+);
+
+/**
+ * Memoized table query formatting function.
+ *
+ * @param {string} order
+ * @param {string} orderBy
+ * @param {number} page
+ * @param {number} pageSize
+ * @param {Object} datesFromQuery
+ * @return {Object} formatted tableQuery object
+ */
+const formatTableQuery = memoize(
+	// @todo Support hour here when viewing a single day
+	( order, orderBy, page, pageSize, datesFromQuery ) => ( {
+		interval: 'day',
+		orderby: orderBy,
+		order,
+		page,
+		per_page: pageSize,
+		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+	} ),
+	( order, orderBy, page, pageSize, datesFromQuery ) =>
+		[
+			order,
+			orderBy,
+			page,
+			pageSize,
+			datesFromQuery.primary.after,
+			datesFromQuery.primary.before,
+		].join( ':' )
+);
+
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, filters, advancedFilters } = props;
@@ -291,16 +359,13 @@ export default compose(
 			REPORTS_STORE_NAME
 		);
 
-		// @todo Support hour here when viewing a single day
-		const tableQuery = {
-			interval: 'day',
-			orderby: query.orderby || 'date',
-			order: query.order || 'desc',
-			page: query.paged || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-		};
+		const tableQuery = formatTableQuery(
+			query.order || 'desc',
+			query.orderby || 'date',
+			query.paged || 1,
+			query.per_page || QUERY_DEFAULTS.pageSize,
+			datesFromQuery
+		);
 		const filteredTableQuery = getReportTableQuery( {
 			endpoint: 'revenue',
 			query,
@@ -318,16 +383,6 @@ export default compose(
 			filteredTableQuery,
 		] );
 
-		return {
-			tableData: {
-				items: {
-					data: get( revenueData, [ 'data', 'intervals' ], [] ),
-					totalResults: get( revenueData, [ 'totalResults' ], 0 ),
-				},
-				isError,
-				isRequesting,
-				query: tableQuery,
-			},
-		};
+		return formatProps( isError, isRequesting, tableQuery, revenueData );
 	} )
 )( RevenueReportTable );

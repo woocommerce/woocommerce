@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull, get, includes } from 'lodash';
+import { find, forEach, isNull, get, includes, memoize } from 'lodash';
 import moment from 'moment';
 import {
 	appendTimestamp,
@@ -20,6 +20,7 @@ import {
 import * as reportsUtils from './utils';
 import { MAX_PER_PAGE, QUERY_DEFAULTS } from '../constants';
 import { STORE_NAME } from './constants';
+import { getResourceName } from '../utils';
 
 /**
  * Add filters and advanced filters values to a query object.
@@ -284,6 +285,57 @@ export function getSummaryNumbers( options ) {
 }
 
 /**
+ * Static responses object to avoid returning new references each call.
+ */
+const reportChartDataResponses = {
+	requesting: {
+		isEmpty: false,
+		isError: false,
+		isRequesting: true,
+		data: {
+			totals: {},
+			intervals: [],
+		},
+	},
+	error: {
+		isEmpty: false,
+		isError: true,
+		isRequesting: false,
+		data: {
+			totals: {},
+			intervals: [],
+		},
+	},
+	empty: {
+		isEmpty: true,
+		isError: false,
+		isRequesting: false,
+		data: {
+			totals: {},
+			intervals: [],
+		},
+	},
+};
+
+const EMPTY_ARRAY = [];
+
+/**
+ * Cache helper for returning the full chart dataset after multiple
+ * requests. Memoized on the request query (string), only called after
+ * all the requests have resolved successfully.
+ */
+const getReportChartDataResponse = memoize(
+	( requestString, totals, intervals ) => ( {
+		isEmpty: false,
+		isError: false,
+		isRequesting: false,
+		data: { totals, intervals },
+	} ),
+	( requestString, totals, intervals ) =>
+		[ requestString, totals.length, intervals.length ].join( ':' )
+);
+
+/**
  * Returns all of the data needed to render a chart with summary numbers on a report page.
  *
  * @param  {Object} options           arguments
@@ -301,16 +353,6 @@ export function getReportChartData( options ) {
 		STORE_NAME
 	);
 
-	const response = {
-		isEmpty: false,
-		isError: false,
-		isRequesting: false,
-		data: {
-			totals: {},
-			intervals: [],
-		},
-	};
-
 	const requestQuery = getRequestQuery( options );
 	// Disable eslint rule requiring `stats` to be defined below because the next two if statements
 	// depend on `getReportStats` to have been called.
@@ -318,19 +360,20 @@ export function getReportChartData( options ) {
 	const stats = getReportStats( endpoint, requestQuery );
 
 	if ( isResolving( 'getReportStats', [ endpoint, requestQuery ] ) ) {
-		return { ...response, isRequesting: true };
+		return reportChartDataResponses.requesting;
 	}
 
 	if ( getReportStatsError( endpoint, requestQuery ) ) {
-		return { ...response, isError: true };
+		return reportChartDataResponses.error;
 	}
 
 	if ( isReportDataEmpty( stats, endpoint ) ) {
-		return { ...response, isEmpty: true };
+		return reportChartDataResponses.empty;
 	}
 
 	const totals = ( stats && stats.data && stats.data.totals ) || null;
-	let intervals = ( stats && stats.data && stats.data.intervals ) || [];
+	let intervals =
+		( stats && stats.data && stats.data.intervals ) || EMPTY_ARRAY;
 
 	// If we have more than 100 results for this time period,
 	// we need to make additional requests to complete the response.
@@ -363,9 +406,9 @@ export function getReportChartData( options ) {
 		}
 
 		if ( isFetching ) {
-			return { ...response, isRequesting: true };
+			return reportChartDataResponses.requesting;
 		} else if ( isError ) {
-			return { ...response, isError: true };
+			return reportChartDataResponses.error;
 		}
 
 		forEach( pagedData, function ( _data ) {
@@ -379,7 +422,11 @@ export function getReportChartData( options ) {
 		} );
 	}
 
-	return { ...response, data: { totals, intervals } };
+	return getReportChartDataResponse(
+		getResourceName( endpoint, requestQuery ),
+		totals,
+		intervals
+	);
 }
 
 /**
