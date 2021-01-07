@@ -67,3 +67,23 @@
 		}
 	}
 }
+
+@media screen and (max-width: 438px) {
+	.woocommerce-profile-wizard__body {
+		.woocommerce-profile-wizard__product-types {
+			.woocommerce-product-wizard__product-types-label {
+				width: min-content;
+			}
+		}
+	}
+}
+
+@media screen and (max-width: 375px) {
+	.woocommerce-profile-wizard__body {
+		.woocommerce-profile-wizard__product-types {
+			.woocommerce-pill {
+				white-space: nowrap;
+			}
+		}
+	}
+}
