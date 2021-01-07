@@ -1,3 +1,8 @@
+# 5.3.0
+
+-   `getQueryExcludedScreens` Return a list of screens that should be excluded from persisted query logic.
+-   `getScreenFromPath` Given a path (defaulting to current), return simple screen "name"
+
 # 5.2.0
 
 -   Add slot/fill components WooNavigationItem, NavSlotFillProvider, and useNavSlot.

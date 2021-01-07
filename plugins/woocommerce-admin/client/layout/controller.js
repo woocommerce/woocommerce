@@ -10,6 +10,8 @@ import {
 	getNewPath,
 	getPersistedQuery,
 	getHistory,
+	getQueryExcludedScreens,
+	getScreenFromPath,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
 
@@ -42,8 +44,6 @@ const MarketingOverview = lazy( () =>
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
-
-const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
@@ -226,7 +226,7 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
 		const path = query.path || 'homescreen';
-		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
+		const screen = getScreenFromPath( path );
 
 		const isExcludedScreen = excludedScreens.includes( screen );
 
@@ -248,13 +248,8 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 
 // Update's wc-admin links in wp-admin menu
 window.wpNavMenuUrlUpdate = function ( query ) {
-	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
-		'stock',
-		'settings',
-		'customers',
-		'homescreen',
-	] );
 	const nextQuery = getPersistedQuery( query );
+	const excludedScreens = getQueryExcludedScreens();
 
 	Array.from(
 		document.querySelectorAll( '#adminmenu a' )
