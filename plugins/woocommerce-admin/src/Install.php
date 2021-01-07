@@ -479,6 +479,7 @@ class Install {
 			'wc-admin-onboarding-profiler-reminder',
 			'wc-admin-historical-data',
 			'wc-admin-review-shipping-settings',
+			'wc-admin-home-screen-feedback',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(

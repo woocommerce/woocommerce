@@ -29,7 +29,6 @@ use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\InsightFirstSale;
-use \Automattic\WooCommerce\Admin\Notes\HomeScreenFeedback;
 use \Automattic\WooCommerce\Admin\Notes\NeedSomeInspiration;
 use \Automattic\WooCommerce\Admin\Notes\OnlineClothingStore;
 use \Automattic\WooCommerce\Admin\Notes\FirstProduct;
@@ -101,7 +100,6 @@ class Events {
 		MigrateFromShopify::possibly_add_note();
 		InsightFirstSale::possibly_add_note();
 		LaunchChecklist::possibly_add_note();
-		HomeScreenFeedback::possibly_add_note();
 		NeedSomeInspiration::possibly_add_note();
 		OnlineClothingStore::possibly_add_note();
 		FirstProduct::possibly_add_note();

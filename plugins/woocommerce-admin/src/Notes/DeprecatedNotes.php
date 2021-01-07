@@ -286,27 +286,6 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Home_Screen_Feedback.
- *
- * @deprecated since 1.7.0, use HomeScreenFeedback
- */
-class WC_Admin_Notes_Home_Screen_Feedback extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\HomeScreenFeedback';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
  * WC_Admin_Notes_Insight_First_Sale.
  *
  * @deprecated since 1.7.0, use InsightFirstSale
