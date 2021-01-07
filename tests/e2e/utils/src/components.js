@@ -408,13 +408,13 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	await merchant.openNewCoupon();
 
 	// Fill in coupon code
-	let couponCode = 'Code-' + discountType;
+	let couponCode = 'Code-' + discountType + new Date().getTime().toString();
 	await expect(page).toFill( '#title', couponCode );
 
 	// Set general coupon data
 	await clickTab( 'General' );
-	await expect(page).toFill( '#coupon_amount', couponAmount );
 	await expect(page).toSelect( '#discount_type', discountType );
+	await expect(page).toFill( '#coupon_amount', couponAmount );
 
 	// Publish coupon
 	await expect( page ).toClick( '#publish' );
