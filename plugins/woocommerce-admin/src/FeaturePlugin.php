@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\Notes\InsightFirstProductAndPayment;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\OrderMilestones;
 use \Automattic\WooCommerce\Admin\Notes\WooSubscriptionsNotes;
