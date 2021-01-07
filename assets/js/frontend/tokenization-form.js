@@ -15,11 +15,11 @@ jQuery( function( $ ) {
 		}, wc_tokenization_form_params );
 
 		// Bind functions to this.
-		this.onDisplay             = this.onDisplay.bind( this );
-		this.hideForm              = this.hideForm.bind( this );
-		this.showForm              = this.showForm.bind( this );
-		this.showSaveNewCheckbox   = this.showSaveNewCheckbox.bind( this );
-		this.hideSaveNewCheckbox   = this.hideSaveNewCheckbox.bind( this );
+		this.onDisplay             = this.onDisplay.on( this );
+		this.hideForm              = this.hideForm.on( this );
+		this.showForm              = this.showForm.on( this );
+		this.showSaveNewCheckbox   = this.showSaveNewCheckbox.on( this );
+		this.hideSaveNewCheckbox   = this.hideSaveNewCheckbox.on( this );
 
 		// When a radio button is changed, make sure to show/hide our new CC info area.
 		this.$target.on(

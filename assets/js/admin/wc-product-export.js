@@ -11,7 +11,7 @@
 		this.$form.find('.woocommerce-exporter-progress').val( 0 );
 
 		// Methods.
-		this.processStep = this.processStep.bind( this );
+		this.processStep = this.processStep.on( this );
 
 		// Events.
 		$form.on( 'submit', { productExportForm: this }, this.onSubmit );

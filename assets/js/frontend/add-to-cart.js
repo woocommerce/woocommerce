@@ -10,8 +10,8 @@ jQuery( function( $ ) {
 	 */
 	var AddToCartHandler = function() {
 		this.requests   = [];
-		this.addRequest = this.addRequest.bind( this );
-		this.run        = this.run.bind( this );
+		this.addRequest = this.addRequest.on( this );
+		this.run        = this.run.on( this );
 
 		$( document.body )
 			.on( 'click', '.add_to_cart_button', { addToCartHandler: this }, this.onAddToCart )

@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 	});
 
 	// Prevent enter submitting post form.
-	$( '#upsell_product_data' ).bind( 'keypress', function( e ) {
+	$( '#upsell_product_data' ).on( 'keypress', function( e ) {
 		if ( e.keyCode === 13 ) {
 			return false;
 		}

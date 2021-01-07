@@ -252,7 +252,7 @@ jQuery( function( $ ) {
 			bySlug[ slug ].find( 'a' )
 				.on( 'mouseenter mouseleave', ( function( $hover, event ) {
 					$hover.toggleClass( 'plugin-install-source', 'mouseenter' === event.type );
-				} ).bind( null, hover ? $el.closest( hover ) : $el ) );
+				} ).on( null, hover ? $el.closest( hover ) : $el ) );
 		}
 	}
 
