@@ -111,7 +111,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		// If this is a session, set or change the data store to sessions. Changes do not persist in the database.
-		if ( $is_session ) {
+		if ( $is_session && isset( WC()->session ) ) {
 			$this->data_store = WC_Data_Store::load( 'customer-session' );
 			$this->data_store->read( $this );
 		}
