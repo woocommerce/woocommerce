@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export */
+/* eslint-disable jest/no-export, jest/no-standalone-expect */
 
 /**
  * Internal dependencies
@@ -15,6 +15,8 @@ const {
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const discountedPrice = simpleProductPrice - 5.00;
 
 const couponDialogMessage = 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.';
 
@@ -34,6 +36,9 @@ const runOrderApplyCouponTest = () => {
 				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
 				page.removeAllListeners('dialog'),
 			]);
+
+			// Make sure the simple product price is greater than the coupon amount
+			await expect(Number(simpleProductPrice)).toBeGreaterThan(5.00);
 		} );
 
 		it('can apply a coupon', async () => {
@@ -55,7 +60,7 @@ const runOrderApplyCouponTest = () => {
 
 			// Check that the coupon has been applied
 			await expect(page).toMatchElement('.wc-order-item-discount', { text: '5.00' });
-			await expect(page).toMatchElement('.line_cost > .view > .woocommerce-Price-amount', { text: '4.99' });
+			await expect(page).toMatchElement('.line_cost > .view > .woocommerce-Price-amount', { text: discountedPrice });
 		});
 
 		it('can remove a coupon', async () => {
@@ -69,10 +74,10 @@ const runOrderApplyCouponTest = () => {
 			// Verify the coupon pricing has been removed
 			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode });
 			await expect(page).not.toMatchElement('.wc-order-item-discount', { text: '5.00' });
-			await expect(page).not.toMatchElement('.line-cost .view .woocommerce-Price-amount', { text: '4.99' });
+			await expect(page).not.toMatchElement('.line-cost .view .woocommerce-Price-amount', { text: discountedPrice });
 
 			// Verify the original price is the order total
-			await expect(page).toMatchElement('.line_cost > .view > .woocommerce-Price-amount', { text: '9.99' });
+			await expect(page).toMatchElement('.line_cost > .view > .woocommerce-Price-amount', { text: simpleProductPrice });
 		});
 
 	});

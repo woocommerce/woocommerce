@@ -158,8 +158,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->get_product_data( $object, $context, $request );
+		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$this->request = $request;
+		$data          = $this->get_product_data( $object, $context, $request );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -591,6 +592,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 	/**
 	 * Fetch price HTML.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @param string     $context Context of request, can be `view` or `edit`.
 	 *
@@ -602,6 +604,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 	/**
 	 * Fetch related IDs.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @param string     $context Context of request, can be `view` or `edit`.
 	 *
@@ -613,6 +616,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 	/**
 	 * Fetch meta data.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @param string     $context Context of request, can be `view` or `edit`.
 	 *
@@ -625,18 +629,20 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get product data.
 	 *
-	 * @param WC_Product      $product Product instance.
-	 * @param string          $context Request context. Options: 'view' and 'edit'.
-	 * @param WP_REST_Request $request Current request object. For backward compatibility, we pass this argument silently.
+	 * @param WC_Product $product Product instance.
+	 * @param string     $context Request context. Options: 'view' and 'edit'.
 	 *
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$fields = array();
-		$request = func_get_arg( 2 );
-		if ( $request instanceof WP_REST_Request ) {
-			$fields = $this->get_fields_for_response( $request );
-		}
+		/*
+		 * @param WP_REST_Request $request Current request object. For backward compatibility, we pass this argument silently.
+		 *
+		 *  TODO: Refactor to fix this behavior when DI gets included to make it obvious and clean.
+		*/
+		$request = func_num_args() >= 2 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
+		$fields  = $this->get_fields_for_response( $request );
+
 		$base_data = array();
 		foreach ( $fields as $field ) {
 			switch ( $field ) {
@@ -649,7 +655,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'slug':
 					$base_data['slug'] = $product->get_slug( $context );
 					break;
-
 				case 'permalink':
 					$base_data['permalink'] = $product->get_permalink();
 					break;
@@ -848,7 +853,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param WC_Data         $object  Object data.
 	 * @param WP_REST_Request $request Request object.
 	 *
-	 * @return array                   Links for the given post.
+	 * @return array Links for the given post.
 	 */
 	protected function prepare_links( $object, $request ) {
 		$links = array(
