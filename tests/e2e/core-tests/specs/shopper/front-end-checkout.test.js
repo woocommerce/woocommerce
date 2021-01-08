@@ -14,6 +14,12 @@ const {
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const twoProductPrice = singleProductPrice * 2;
+const threeProductPrice = singleProductPrice * 3;
+const fourProductPrice = singleProductPrice * 4;
+const fiveProductPrice = singleProductPrice * 5;
+
 let orderId;
 
 const runCheckoutPageTest = () => {
@@ -74,14 +80,14 @@ const runCheckoutPageTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.productIsInCheckout(simpleProductName, `1`, `9.99`, `9.99`);
+			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
 		});
 
 		it('allows customer to choose available payment methods', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.productIsInCheckout(simpleProductName, `2`, `19.98`, `19.98`);
+			await shopper.productIsInCheckout(simpleProductName, `2`, twoProductPrice, twoProductPrice);
 
 			await expect(page).toClick('.wc_payment_method label', {text: 'PayPal'});
 			await expect(page).toClick('.wc_payment_method label', {text: 'Direct bank transfer'});
@@ -92,7 +98,7 @@ const runCheckoutPageTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.productIsInCheckout(simpleProductName, `3`, `29.97`, `29.97`);
+			await shopper.productIsInCheckout(simpleProductName, `3`, threeProductPrice, threeProductPrice);
 			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 		});
 
@@ -100,7 +106,7 @@ const runCheckoutPageTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.productIsInCheckout(simpleProductName, `4`, `39.96`, `39.96`);
+			await shopper.productIsInCheckout(simpleProductName, `4`, fourProductPrice, fourProductPrice);
 
 			// Select checkbox to ship to a different address
 			await page.evaluate(() => {
@@ -115,7 +121,7 @@ const runCheckoutPageTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.productIsInCheckout(simpleProductName, `5`, `49.95`, `49.95`);
+			await shopper.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
 			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 
 			await uiUnblocked();
@@ -151,13 +157,13 @@ const runCheckoutPageTest = () => {
 			await expect(page).toMatchElement('.wc-order-item-name', {text: simpleProductName});
 
 			// Verify product cost
-			await expect(page).toMatchElement('.woocommerce-Price-amount.amount', {text: '9.99'});
+			await expect(page).toMatchElement('.woocommerce-Price-amount.amount', {text: singleProductPrice});
 
 			// Verify product quantity
 			await expect(page).toMatchElement('.quantity', {text: '5'});
 
 			// Verify total order amount without shipping
-			await expect(page).toMatchElement('.line_cost', {text: '49.95'});
+			await expect(page).toMatchElement('.line_cost', {text: fiveProductPrice});
 		});
 	});
 };

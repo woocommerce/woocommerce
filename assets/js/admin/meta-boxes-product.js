@@ -355,7 +355,7 @@ jQuery( function( $ ) {
 	});
 
 	$( '.product_attributes' ).on( 'click', 'button.select_all_attributes', function() {
-		$( this ).closest( 'td' ).find( 'select option' ).attr( 'selected', 'selected' );
+		$( this ).closest( 'td' ).find( 'select option' ).prop( 'selected', 'selected' );
 		$( this ).closest( 'td' ).find( 'select' ).change();
 		return false;
 	});
