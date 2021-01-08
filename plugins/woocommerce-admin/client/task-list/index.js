@@ -116,7 +116,6 @@ export class TaskDashboard extends Component {
 			dismissedTasks,
 			isExtendedTaskListComplete,
 			isExtendedTaskListHidden,
-			isSetupTaskListHidden,
 			isTaskListComplete,
 			query,
 			trackedCompletedTasks,
@@ -127,7 +126,7 @@ export class TaskDashboard extends Component {
 
 		return (
 			<>
-				{ setupTasks && ! isSetupTaskListHidden && (
+				{ setupTasks && (
 					<TaskList
 						dismissedTasks={ dismissedTasks || [] }
 						isTaskListComplete={ isTaskListComplete }
