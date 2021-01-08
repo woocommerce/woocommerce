@@ -20,6 +20,7 @@ class Init {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_features', array( $this, 'maybe_remove_nav_feature' ), 0 );
 		add_action( 'update_option_woocommerce_navigation_enabled', array( $this, 'reload_page_on_toggle' ), 10, 2 );
@@ -33,6 +34,40 @@ class Init {
 			CoreMenu::instance()->init();
 			Screen::instance()->init();
 		}
+	}
+
+	/**
+	 * Add the feature toggle to the features settings.
+	 *
+	 * @param array $features Feature sections.
+	 * @return array
+	 */
+	public static function add_feature_toggle( $features ) {
+		$description  = __(
+			'Adds the new WooCommerce navigation experience to the dashboard',
+			'woocommerce-admin'
+		);
+		$update_text  = '';
+		$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
+		if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
+			$update_text = sprintf(
+				/* translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag. */
+				__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce-admin' ),
+				'<br/>',
+				'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
+				'</a>'
+			);
+		}
+
+		$features[] = array(
+			'title' => __( 'Navigation', 'woocommerce-admin' ),
+			'desc'  => $description . $update_text,
+			'id'    => 'woocommerce_navigation_enabled',
+			'type'  => 'checkbox',
+			'class' => $needs_update ? 'disabled' : '',
+		);
+
+		return $features;
 	}
 
 	/**

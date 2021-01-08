@@ -10,7 +10,7 @@
 		"marketing": true,
 		"minified-js": false,
 		"mobile-app-banner": true,
-		"navigation": true,
+		"navigation": false,
 		"onboarding": true,
 		"remote-inbox-notifications": true,
 		"shipping-label-banner": true,

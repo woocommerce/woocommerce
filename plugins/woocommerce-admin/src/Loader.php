@@ -247,6 +247,15 @@ class Loader {
 	 * @return array
 	 */
 	public static function add_features_section( $sections ) {
+		$features = apply_filters(
+			'woocommerce_settings_features',
+			array()
+		);
+
+		if ( empty( $features ) ) {
+			return $sections;
+		}
+
 		$sections['features'] = __( 'Features', 'woocommerce-admin' );
 		return $sections;
 	}
@@ -263,24 +272,16 @@ class Loader {
 			return $settings;
 		}
 
-		$description  = __(
-			'Adds the new WooCommerce navigation experience to the dashboard',
-			'woocommerce-admin'
+		$features = apply_filters(
+			'woocommerce_settings_features',
+			array()
 		);
-		$update_text  = '';
-		$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
-		if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
-			$update_text = sprintf(
-				/* translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag. */
-				__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce-admin' ),
-				'<br/>',
-				'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
-				'</a>'
-			);
+
+		if ( empty( $features ) ) {
+			return $settings;
 		}
 
-		return apply_filters(
-			'woocommerce_settings_features',
+		return array_merge(
 			array(
 				array(
 					'title' => __( 'Features', 'woocommerce-admin' ),
@@ -288,13 +289,9 @@ class Loader {
 					'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' ),
 					'id'    => 'features_options',
 				),
-				array(
-					'title' => __( 'Navigation', 'woocommerce-admin' ),
-					'desc'  => $description . $update_text,
-					'id'    => 'woocommerce_navigation_enabled',
-					'type'  => 'checkbox',
-					'class' => $needs_update ? 'disabled' : '',
-				),
+			),
+			$features,
+			array(
 				array(
 					'type' => 'sectionend',
 					'id'   => 'features_options',
