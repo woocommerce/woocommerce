@@ -1349,7 +1349,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product.
 	 * @return int
-	 * @throws WC_Data_Exception Exception thrown if the item cannot be added to the cart.
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
