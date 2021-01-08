@@ -5,7 +5,7 @@ const path = require( 'path' );
 /**
  * Internal dependencies
  */
-const getTestConfig = require( './test-config' );
+const { getTestConfig } = require( './test-config' );
 const getAppRoot = require( './app-root' );
 
 const getAppName = () => {
