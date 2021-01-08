@@ -84,6 +84,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Updating (non wordpress user) customer with order data
 - Dev: Add documentation for filter `woocommerce_admin_pages_list` and `wc_admin_register_page` #5844
 - Dev: Revert work done in #4857 for automated shipping after OBW is completed #5971
+- Add: Welcome modal when coming from Calypso #6004
 - Enhancement: Add an a/b experiment for installing free business features #5786
 - Dev: Add `onChangeCallback` feature to the wc-admin <Form> component #5786 
 
