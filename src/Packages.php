@@ -74,8 +74,8 @@ class Packages {
 		if ( is_admin() ) {
 			$is_woocommerce_just_activated = get_transient( 'woocommerce_activated_plugin' );
 			if ( $is_woocommerce_just_activated ) {
-				do_action( 'woocommerce_activated_plugin', 'woocommerce/woocommerce.php' );
 				delete_transient( 'woocommerce_activated_plugin' );
+				do_action( 'woocommerce_activated_plugin', 'woocommerce/woocommerce.php' );
 			}
 		}
 	}
