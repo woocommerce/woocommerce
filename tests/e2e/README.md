@@ -113,9 +113,9 @@ Puppeteer will still automatically download Chromium when needed.
 
 - Run `npm install jest --global`
 
-- Run `npm run docker:up` - it will build the test site using Docker.  
+- Run `npx wc-e2e docker:up` - it will build the test site using Docker.  
 
-- Run `docker ps` - to confirm that the Docker containers were built and running. You should see the log that looks similar to below indicating that everything had been built as expected:
+- Run `docker ps` - to confirm that the Docker containers are running. You should see the log that looks similar to below indicating that everything had been built as expected:
 
 ```
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
@@ -139,16 +139,16 @@ Username: admin
 PW: password
 ```
 
-- Run `npm run docker:down` when you are done with running e2e tests or when making any changes to test suite.
+- Run `npx wc-e2e docker:down` when you are done with running e2e tests or when making any changes to test suite.
 
-Note that running `npm run docker:down` and then `npm run docker:up` re-initializes the test container.
+Note that running `npx wc-e2e docker:down` and then `npx wc-e2e docker:up` re-initializes the test container.
 
 ### How to run tests in headless mode
 
 To run e2e tests in headless mode use the following command:
 
 ```bash
-npm run test:e2e
+npx wc-e2e test:e2e
 ```
 
 ### How to run tests in non-headless mode
@@ -156,7 +156,7 @@ npm run test:e2e
 Tests are run headless by default. However, sometimes it's useful to observe the browser while running tests. To do so, you can run tests in a non-headless (dev) mode:
 
 ```bash
-npm run test:e2e-dev
+npx wc-e2e test:e2e-dev
 ```
 
 The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. 
@@ -164,7 +164,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 By default, SlowMo mode is set to slow down running of tests by 50 milliseconds. If you'd like to override it and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below: 
 
 ```
-PUPPETEER_SLOWMO=10 npm run test:e2e-dev
+PUPPETEER_SLOWMO=10 npx wc-e2e test:e2e-dev
 ```
 
 The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
@@ -179,7 +179,7 @@ For example:
 Tests are run headless by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
             
 ```bash
-npm run test:e2e-debug
+npx wc-e2e test:e2e-debug
 ```
 
 When all tests have been completed the debugger is left active. Control doesn't return to the command line until the debugger is closed. Otherwise, debug mode functions the same as non-headless mode.
@@ -189,7 +189,7 @@ When all tests have been completed the debugger is left active. Control doesn't 
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
+npx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
 ``` 
 
 ### How to skip tests
