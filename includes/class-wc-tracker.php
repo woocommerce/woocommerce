@@ -27,6 +27,13 @@ class WC_Tracker {
 	private static $api_url = 'https://tracking.woocommerce.com/v1/';
 
 	/**
+	 * Rows per page - max.
+	 *
+	 * @var int
+	 */
+	const PER_PAGE_MAX = 100;
+
+	/**
 	 * Hook into cron event.
 	 */
 	public static function init() {
@@ -371,11 +378,10 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_orders() {
-		$orders = wc_get_orders(
-			array(
-				'type'           => array( 'shop_order', 'shop_order_refund' ),
-				'posts_per_page' => -1,
-			)
+		$args = array(
+			'type'  => array( 'shop_order', 'shop_order_refund' ),
+			'limit' => self::PER_PAGE_MAX,
+			'paged' => 1,
 		);
 
 		$first            = time();
@@ -383,70 +389,81 @@ class WC_Tracker {
 		$processing_first = time();
 		$processing_last  = 0;
 
-		foreach ( $orders as $order ) {
-			$date_created = (int) $order->get_date_created()->getTimestamp();
-			$type         = $order->get_type();
-			$status       = $order->get_status();
+		$orders       = wc_get_orders( $args );
+		$orders_count = count( $orders );
 
-			if ( 'shop_order' == $type ) {
+		while ( $orders_count ) {
 
-				// Find the first and last order dates for completed and processing statuses.
-				if ( 'completed' == $status && $date_created < $first ) {
-					$first = $date_created;
-				}
-				if ( 'completed' == $status && $date_created > $last ) {
-					$last = $date_created;
-				}
-				if ( 'processing' == $status && $date_created < $processing_first ) {
-					$processing_first = $date_created;
-				}
-				if ( 'processing' == $status && $date_created > $processing_last ) {
-					$processing_last = $date_created;
-				}
+			foreach ( $orders as $order ) {
 
-				// Get order counts by status.
-				$status = 'wc-' . $status;
+				$date_created = (int) $order->get_date_created()->getTimestamp();
+				$type         = $order->get_type();
+				$status       = $order->get_status();
 
-				if ( ! isset( $order_data[ $status ] ) ) {
-					$order_data[ $status ]  = 1;
-				} else {
-					$order_data[ $status ] += 1;
-				}
+				if ( 'shop_order' == $type ) {
 
-				// Count number of orders by gateway used.
-				$gateway = $order->get_payment_method();
+					// Find the first and last order dates for completed and processing statuses.
+					if ( 'completed' == $status && $date_created < $first ) {
+						$first = $date_created;
+					}
+					if ( 'completed' == $status && $date_created > $last ) {
+						$last = $date_created;
+					}
+					if ( 'processing' == $status && $date_created < $processing_first ) {
+						$processing_first = $date_created;
+					}
+					if ( 'processing' == $status && $date_created > $processing_last ) {
+						$processing_last = $date_created;
+					}
 
-				if ( ! empty( $gateway ) && in_array( $status, array( 'wc-completed', 'wc-refunded', 'wc-processing' ) ) ) {
-					$gateway = 'gateway_' . $gateway;
+					// Get order counts by status.
+					$status = 'wc-' . $status;
 
-					if ( ! isset( $order_data[ $gateway ] ) ) {
-						$order_data[ $gateway ]  = 1;
+					if ( ! isset( $order_data[ $status ] ) ) {
+						$order_data[ $status ]  = 1;
 					} else {
-						$order_data[ $gateway ] += 1;
+						$order_data[ $status ] += 1;
+					}
+
+					// Count number of orders by gateway used.
+					$gateway = $order->get_payment_method();
+
+					if ( ! empty( $gateway ) && in_array( $status, array( 'wc-completed', 'wc-refunded', 'wc-processing' ) ) ) {
+						$gateway = 'gateway_' . $gateway;
+
+						if ( ! isset( $order_data[ $gateway ] ) ) {
+							$order_data[ $gateway ]  = 1;
+						} else {
+							$order_data[ $gateway ] += 1;
+						}
+					}
+				} else {
+					// If it is a refunded order (shop_order_refunnd type), add the prefix as this prefix gets
+					// added midway in the if clause.
+					$status = 'wc-' . $status;
+				}
+
+				// Calculate the gross total for 'completed' and 'processing' orders.
+				$total = $order->get_total();
+
+				if ( in_array( $status, array( 'wc-completed', 'wc-refunded' ) ) ) {
+					if ( ! isset( $order_data['gross'] ) ) {
+						$order_data['gross']  = $total;
+					} else {
+						$order_data['gross'] += $total;
+					}
+				} elseif ( 'wc-processing' == $status ) {
+					if ( ! isset( $order_data['processing_gross'] ) ) {
+						$order_data['processing_gross']  = $total;
+					} else {
+						$order_data['processing_gross'] += $total;
 					}
 				}
-			} else {
-				// If it is a refunded order (shop_order_refunnd type), add the prefix as this prefix gets
-				// added midway in the if clause.
-				$status = 'wc-' . $status;
 			}
+			$args['paged']++;
 
-			// Calculate the gross total for 'completed' and 'processing' orders.
-			$total = $order->get_total();
-
-			if ( in_array( $status, array( 'wc-completed', 'wc-refunded' ) ) ) {
-				if ( ! isset( $order_data['gross'] ) ) {
-					$order_data['gross']  = $total;
-				} else {
-					$order_data['gross'] += $total;
-				}
-			} elseif ( 'wc-processing' == $status ) {
-				if ( ! isset( $order_data['processing_gross'] ) ) {
-					$order_data['processing_gross']  = $total;
-				} else {
-					$order_data['processing_gross'] += $total;
-				}
-			}
+			$orders       = wc_get_orders( $args );
+			$orders_count = count( $orders );
 		}
 
 		$order_data['first']            = gmdate( 'Y-m-d H:i:s', $first );
