@@ -500,7 +500,7 @@ class WC_Post_Data {
 	 * @return string
 	 */
 	public function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
-		$post_types = array_merge( wc_get_order_types(), array( 'product', 'product_variation' ) );
+		$post_types = array( 'shop_order', 'shop_coupon', 'product', 'product_variation' );
 
 		if ( in_array( get_post_type( $post_id ), $post_types, true ) ) {
 			$new_status = $previous_status;
