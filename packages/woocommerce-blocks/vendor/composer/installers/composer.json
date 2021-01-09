@@ -1,0 +1,112 @@
+{
+    "name": "composer/installers",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "description": "A multi-framework Composer library installer",
+    "keywords": [
+        "installer",
+        "Aimeos",
+        "AGL",
+        "AnnotateCms",
+        "Attogram",
+        "Bitrix",
+        "CakePHP",
+        "Chef",
+        "Cockpit",
+        "CodeIgniter",
+        "concrete5",
+        "Craft",
+        "Croogo",
+        "DokuWiki",
+        "Dolibarr",
+        "Drupal",
+        "Elgg",
+        "Eliasis",
+        "ExpressionEngine",
+        "eZ Platform",
+        "FuelPHP",
+        "Grav",
+        "Hurad",
+        "ImageCMS",
+        "iTop",
+        "Joomla",
+        "Kanboard",
+        "Known",
+        "Kohana",
+        "Lan Management System",
+        "Laravel",
+        "Lavalite",
+        "Lithium",
+        "Magento",
+        "majima",
+        "Mako",
+        "MantisBT",
+        "Mautic",
+        "Maya",
+        "MODX",
+        "MODX Evo",
+        "MediaWiki",
+        "OXID",
+        "osclass",
+        "MODULEWork",
+        "Moodle",
+        "Piwik",
+        "pxcms",
+        "phpBB",
+        "Plentymarkets",
+        "PPI",
+        "Puppet",
+        "Porto",
+        "RadPHP",
+        "ReIndex",
+        "Roundcube",
+        "shopware",
+        "SilverStripe",
+        "SMF",
+        "SyDES",
+        "Sylius",
+        "symfony",
+        "Thelia",
+        "TYPO3",
+        "WHMCS",
+        "WolfCMS",
+        "WordPress",
+        "YAWIK",
+        "Zend",
+        "Zikula"
+    ],
+    "homepage": "https://composer.github.io/installers/",
+    "authors": [
+        {
+            "name": "Kyle Robinson Young",
+            "email": "kyle@dontkry.com",
+            "homepage": "https://github.com/shama"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Composer\\Installers\\": "src/Composer/Installers" }
+    },
+    "extra": {
+        "class": "Composer\\Installers\\Plugin",
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "replace": {
+        "shama/baton": "*",
+        "roundcube/plugin-installer": "*"
+    },
+    "require": {
+        "composer-plugin-api": "^1.0 || ^2.0"
+    },
+    "require-dev": {
+        "composer/composer": "1.6.* || 2.0.*@dev",
+        "composer/semver": "1.0.* || 2.0.*@dev",
+        "phpunit/phpunit": "^4.8.36",
+        "sebastian/comparator": "^1.2.4",
+        "symfony/process": "^2.3"
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
