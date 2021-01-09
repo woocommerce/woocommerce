@@ -492,7 +492,7 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Ensure statuses are correctly reassigned when restoring orders.
+	 * Ensure statuses are correctly reassigned when restoring orders and products.
 	 *
 	 * @param string $new_status      The new status of the post being restored.
 	 * @param int    $post_id         The ID of the post being restored.
@@ -500,7 +500,9 @@ class WC_Post_Data {
 	 * @return string
 	 */
 	public function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
-		if ( in_array( get_post_type( $post_id ), wc_get_order_types(), true ) ) {
+		$post_types = array_merge( wc_get_order_types(), array( 'product' ) );
+
+		if ( in_array( get_post_type( $post_id ), $post_types, true ) ) {
 			$new_status = $previous_status;
 		}
 
