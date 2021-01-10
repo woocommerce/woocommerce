@@ -27,13 +27,6 @@ class WC_Tracker {
 	private static $api_url = 'https://tracking.woocommerce.com/v1/';
 
 	/**
-	 * Rows per page - max.
-	 *
-	 * @var int
-	 */
-	const PER_PAGE_MAX = 100;
-
-	/**
 	 * Hook into cron event.
 	 */
 	public static function init() {
@@ -380,7 +373,7 @@ class WC_Tracker {
 	private static function get_orders() {
 		$args = array(
 			'type'  => array( 'shop_order', 'shop_order_refund' ),
-			'limit' => self::PER_PAGE_MAX,
+			'limit' => get_option( 'posts_per_page' ),
 			'paged' => 1,
 		);
 
