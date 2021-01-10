@@ -394,7 +394,9 @@ class WC_Form_Handler {
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
-			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
+
+			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->has_status( $valid_order_statuses ) ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
