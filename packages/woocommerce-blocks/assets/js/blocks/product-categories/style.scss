@@ -1,0 +1,112 @@
+.wc-block-product-categories {
+	margin-bottom: 1em;
+
+	&.is-dropdown {
+		display: flex;
+	}
+
+	select {
+		margin-right: 0.5em;
+	}
+}
+
+.wc-block-product-categories-list--has-images {
+	list-style: none outside;
+
+	.wc-block-product-categories-list-item {
+		margin: 4px 0 4px 60px;
+		list-style: none outside;
+		clear: both;
+
+		ul {
+			margin: 4px 0 0;
+		}
+	}
+
+	.wc-block-product-categories-list-item__image {
+		max-width: 50px;
+		display: inline-block;
+		position: relative;
+		padding: 0;
+		margin: 0;
+		margin-right: 0.5em;
+		margin-left: -60px;
+		position: relative;
+		vertical-align: middle;
+		border: 1px solid #eee;
+
+		img {
+			margin: 0;
+			padding: 0;
+		}
+	}
+}
+
+.wc-block-product-categories-list-item-count::before {
+	content: " (";
+}
+
+.wc-block-product-categories-list-item-count::after {
+	content: ")";
+}
+
+.wp-block-woocommerce-product-categories.is-loading .wc-block-product-categories__placeholder {
+	display: inline-block;
+	height: 1em;
+	width: 50%;
+	min-width: 200px;
+	background: currentColor;
+	opacity: 0.2;
+}
+
+.wc-block-product-categories__button {
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	margin: 0;
+	border: none;
+	cursor: pointer;
+	background: none;
+	padding: 0 0.5em;
+	color: $gray-700;
+	position: relative;
+	overflow: hidden;
+	border-radius: 0.25em;
+	svg {
+		fill: currentColor;
+		outline: none;
+		.rtl & {
+			transform: rotate(180deg);
+		}
+	}
+	&:active {
+		color: currentColor;
+	}
+	&:disabled,
+	&[aria-disabled="true"] {
+		cursor: default;
+		opacity: 0.3;
+	}
+	&:focus:enabled {
+		background-color: #fff;
+		color: $gray-900;
+		box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px #fff;
+		outline: 2px solid transparent;
+		outline-offset: -2px;
+	}
+	&:not(:disabled):not([aria-disabled="true"]):hover {
+		background-color: #fff;
+		color: $gray-900;
+		box-shadow: inset 0 0 0 1px $gray-200, inset 0 0 0 2px #fff, 0 1px 1px rgba(25, 30, 35, 0.2);
+	}
+	&:not(:disabled):not([aria-disabled="true"]):active {
+		outline: none;
+		background-color: #fff;
+		color: $gray-900;
+		box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px #fff;
+	}
+	&[aria-disabled="true"]:focus,
+	&:disabled:focus {
+		box-shadow: none;
+	}
+}
