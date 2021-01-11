@@ -50,7 +50,7 @@ const runOrderApplyCouponTest = () => {
 			// Verify the coupon list is showing
 			await page.waitForSelector('.wc-used-coupons');
 			await expect(page).toMatchElement('.wc_coupon_list', { text: 'Coupon(s)' });
-			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: 'code-fixed cart discount' });
+			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
 
 			// Check that the coupon has been applied
 			await expect(page).toMatchElement('.wc-order-item-discount', { text: '5.00' });
@@ -60,7 +60,7 @@ const runOrderApplyCouponTest = () => {
 		it('can remove a coupon', async () => {
 			// Make sure we have a coupon on the page to use
 			await page.waitForSelector('.wc-used-coupons');
-			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: 'code-fixed cart discount' });
+			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
 
 			// We need to use this here as `expect(page).toClick()` was unable to find the element
 			// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
@@ -69,7 +69,7 @@ const runOrderApplyCouponTest = () => {
 			await uiUnblocked();
 
 			// Verify the coupon pricing has been removed
-			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: 'code-fixed cart discount' });
+			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
 			await expect(page).not.toMatchElement('.wc-order-item-discount', { text: '5.00' });
 			await expect(page).not.toMatchElement('.line-cost .view .woocommerce-Price-amount', { text: '4.99' });
 
