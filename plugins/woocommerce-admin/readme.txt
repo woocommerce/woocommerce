@@ -73,6 +73,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Fix: Undefined $collate variable when database does not have collation capability. #5992
 - Tweak: Remove visit_count from track, and update task count logic. #5996
 - Fix: Moved certified owner label for review to title. ##5877
 - Fix: Move collapsible config to panels object, to allow for more control. #5855
