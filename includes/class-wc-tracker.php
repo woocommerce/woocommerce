@@ -352,20 +352,6 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get order counts
-	 *
-	 * @return array
-	 */
-	private static function get_order_counts() {
-		$order_count      = array();
-		$order_count_data = wp_count_posts( 'shop_order' );
-		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
-			$order_count[ $status_slug ] = $order_count_data->{ $status_slug };
-		}
-		return $order_count;
-	}
-
-	/**
 	 * Get all order data.
 	 *
 	 * @return array
@@ -632,94 +618,12 @@ class WC_Tracker {
 	/**
 	 * Get order totals
 	 *
+	 * @deprecated 4.10.0 Logic moved to get_orders.
 	 * @return array
 	 */
 	public static function get_order_totals() {
-		global $wpdb;
-
-		$gross_total = $wpdb->get_var(
-			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
-			GROUP BY order_meta.meta_key
-		"
-		);
-
-		if ( is_null( $gross_total ) ) {
-			$gross_total = 0;
-		}
-
-		$processing_gross_total = $wpdb->get_var(
-			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status = 'wc-processing'
-			GROUP BY order_meta.meta_key
-		"
-		);
-
-		if ( is_null( $processing_gross_total ) ) {
-			$processing_gross_total = 0;
-		}
-
-		return array(
-			'gross'            => $gross_total,
-			'processing_gross' => $processing_gross_total,
-		);
-	}
-
-	/**
-	 * Get last order date
-	 *
-	 * @return string
-	 */
-	private static function get_order_dates() {
-		global $wpdb;
-
-		$min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-completed'
-		",
-			ARRAY_A
-		);
-
-		if ( is_null( $min_max ) ) {
-			$min_max = array(
-				'first' => '-',
-				'last'  => '-',
-			);
-		}
-
-		$processing_min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-processing'
-		",
-			ARRAY_A
-		);
-
-		if ( is_null( $processing_min_max ) ) {
-			$processing_min_max = array(
-				'processing_first' => '-',
-				'processing_last'  => '-',
-			);
-		}
-
-		return array_merge( $min_max, $processing_min_max );
+		wc_deprecated_function( 'WC_Tracker::get_order_totals', '4.10.0', '' );
+		return self::get_orders();
 	}
 
 	/**
