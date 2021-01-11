@@ -27,14 +27,6 @@ final class DownloadPermissionsAdjuster {
 	}
 
 	/**
-	 * Initialize the hooks used by this class.
-	 */
-	public static function init_hooks()
-	{
-		add_action('adjust_download_permissions', array(wc_get_container()->get(self::class), 'adjust_download_permissions'), 10, 1);
-	}
-
-	/**
 	 * Schedule a download permissions adjustment for a product if necessary.
 	 * This should be executed whenever a product is saved.
 	 *
