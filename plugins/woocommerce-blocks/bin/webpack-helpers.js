@@ -19,7 +19,7 @@ const wcDepMap = {
 	'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
 	'@woocommerce/shared-context': [ 'wc', 'wcSharedContext' ],
 	'@woocommerce/shared-hocs': [ 'wc', 'wcSharedHocs' ],
-	'@woocommerce/blocks-checkout': [ 'wc', 'wcBlocksCheckout' ],
+	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
 };
 
 const wcHandleMap = {

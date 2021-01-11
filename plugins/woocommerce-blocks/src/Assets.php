@@ -95,7 +95,7 @@ class Assets {
 		}
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
-			$asset_api->register_script( 'wc-blocks-checkout', 'build/wc-blocks-checkout.js', [], false );
+			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [], false );
 			$asset_api->register_script( 'wc-checkout-block', $asset_api->get_block_asset_build_path( 'checkout' ), $block_dependencies );
 			$asset_api->register_script( 'wc-cart-block', $asset_api->get_block_asset_build_path( 'cart' ), $block_dependencies );
 		}
