@@ -18,6 +18,7 @@ jest.mock( '../panels', () => {
 				count: 10000,
 				initialOpen: true,
 				panel: <span>Custom panel 1</span>,
+				collapsible: true,
 			},
 			{
 				id: 'custom-panel-2',
@@ -25,6 +26,7 @@ jest.mock( '../panels', () => {
 				count: 20000,
 				initialOpen: false,
 				panel: <span>Custom panel 2</span>,
+				collapsible: true,
 			},
 		] ),
 	};

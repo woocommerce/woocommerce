@@ -1,64 +1,67 @@
-@mixin accordion-header {
-	.woocommerce-accordion-header {
-		order: 1;
-		text-align: left;
-		.woocommerce-accordion-title {
-			margin-right: $gap;
-		}
-	}
-}
-.woocommerce-accordion-card {
-	.components-card__header,
-	.components-panel__body-title .components-button {
-		font-size: 20px;
-		line-height: 28px;
-		color: $gray-900;
-		&:focus {
-			box-shadow: unset;
-			outline: unset;
+.woocommerce-activity-panel {
+	background: transparent;
+	border: 0;
+
+	.components-panel__body {
+		background: #fff;
+		border: 1px solid $gray-200;
+
+		&.is-opened {
+			margin-bottom: $gap-large;
+
+			.components-panel__body-toggle {
+				border-bottom: 1px solid $gray-200;
+			}
 		}
 	}
 
-	.components-card__header {
-		height: 60px;
-		@include accordion-header();
+	&.components-panel > .components-panel__body:last-child {
+		border-bottom: 1px solid $gray-200;
 	}
 
-	.components-panel__body-title {
-		margin: 0;
-		padding: $gap-small 0;
-		height: 60px;
-		.components-button {
+	.components-panel__row {
+		margin: 0 -#{$gap} -#{$gap} -#{$gap};
+		> div {
 			width: 100%;
-			padding-left: 24px;
-			font-style: normal;
-			font-weight: 400;
-			display: flex;
-			flex-direction: row;
-
-			@include accordion-header();
-
-			.woocommerce-accordion-header {
-				width: 50%;
-			}
-
-			& > span {
-				order: 2;
-				width: 50%;
-				text-align: right;
-				.components-panel__arrow {
-					width: 30px;
-					height: 30px;
-					vertical-align: text-top;
-				}
-			}
 		}
+	}
+
+	.components-panel__body-toggle {
+		border-radius: 0;
+
+		&:disabled {
+			opacity: 1;
+		}
+	}
+
+	.woocommerce-activity-panel {
+		margin-bottom: $gap-large;
+	}
+
+	.components-panel__body-title p {
+		margin-right: $gap;
 	}
 
 	.woocommerce-activity-card {
 		padding: $gap-largest/2 $gutter $gutter;
+
+		&:not(:last-of-type) {
+			border-bottom: 1px solid $gray-200;
+		}
+
 		&__header {
 			margin-bottom: $gap-small;
+		}
+	}
+
+	.woocommerce-empty-activity-card {
+		margin: 0;
+		background: unset;
+		text-align: center;
+		padding: $gap-large $gutter $gap-smallest;
+
+		h4 {
+			color: $gray-900;
 		}
 	}
 
@@ -110,6 +113,7 @@
 
 	.woocommerce-layout__activity-panel-empty {
 		border-top: 1px solid $gray-200;
+		border-bottom: 0;
 	}
 
 	.woocommerce-activity-card__button {
@@ -118,11 +122,5 @@
 			outline: unset;
 			border: 1px solid $gray-200;
 		}
-	}
-}
-
-.components-panel__body-title {
-	.woocommerce-accordion-card .is-opened & {
-		border-bottom: 1px solid $gray-200;
 	}
 }

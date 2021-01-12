@@ -1,13 +1,4 @@
-.woocommerce-accordion-card {
-	.woocommerce-empty-activity-card {
-		background: unset;
-		text-align: center;
-		padding: ( $fallback-gutter / 2 ) $gutter 0;
-		h4 {
-			color: $gray-900;
-		}
-	}
-
+.woocommerce-activity-panel {
 	.woocommerce-order-empty__success-icon {
 		font-size: 36px;
 	}
