@@ -181,7 +181,7 @@
 
 @mixin icon( $glyph: "\e001" ) {
 	font-family: "WooCommerce";
-	speak: none;
+	speak: never;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -199,7 +199,7 @@
 
 @mixin icon_dashicons( $glyph: "\f333" ) {
 	font-family: "Dashicons";
-	speak: none;
+	speak: never;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -218,7 +218,7 @@
 
 @mixin iconbefore( $glyph: "\e001" ) {
 	font-family: "WooCommerce";
-	speak: none;
+	speak: never;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -231,7 +231,7 @@
 
 @mixin iconbeforedashicons( $glyph: "\f333" ) {
 	font-family: "Dashicons";
-	speak: none;
+	speak: never;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -243,7 +243,7 @@
 
 @mixin iconafter( $glyph: "\e001" ) {
 	font-family: "WooCommerce";
-	speak: none;
+	speak: never;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
