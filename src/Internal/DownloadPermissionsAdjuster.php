@@ -10,20 +10,23 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class to adjust download permissions on product save.
  */
-final class DownloadPermissionsAdjuster {
+class DownloadPermissionsAdjuster {
 
 	/**
+	 * The downloads data store to use.
+	 *
 	 * @var WC_Data_Store
 	 */
 	private $downloads_data_store;
 
 	/**
 	 * Class initialization, to be executed when the class is resolved by the container.
+	 *
+	 * @internal
 	 */
-	public function init()
-	{
-		$this->downloads_data_store = WC()->get_instance_of( \WC_Data_Store::class, 'customer-download');
-		add_action('adjust_download_permissions', array($this, 'adjust_download_permissions'), 10, 1);
+	final public function init() {
+		$this->downloads_data_store = WC()->get_instance_of( \WC_Data_Store::class, 'customer-download' );
+		add_action( 'adjust_download_permissions', array( $this, 'adjust_download_permissions' ), 10, 1 );
 	}
 
 	/**
@@ -34,22 +37,30 @@ final class DownloadPermissionsAdjuster {
 	 */
 	public function maybe_schedule_adjust_download_permissions( \WC_Product $product ) {
 		$children_ids = $product->get_children();
-		if (!$children_ids) {
+		if ( ! $children_ids ) {
 			return;
 		}
 
 		$scheduled_action_args = array( $product->get_id() );
 
-		$already_scheduled_actions = as_get_scheduled_actions(
-			array(
-				'hook' => 'adjust_download_permissions',
-				'args' => $scheduled_action_args,
-				'status' => \ActionScheduler_Store::STATUS_PENDING
-			)
-		);
+		$already_scheduled_actions =
+			WC()->call_function(
+				'as_get_scheduled_actions',
+				array(
+					'hook'   => 'adjust_download_permissions',
+					'args'   => $scheduled_action_args,
+					'status' => \ActionScheduler_Store::STATUS_PENDING,
+				),
+				'ids'
+			);
 
-		if(empty($already_scheduled_actions)) {
-			as_schedule_single_action(time() + 1, 'adjust_download_permissions', $scheduled_action_args);
+		if ( empty( $already_scheduled_actions ) ) {
+			WC()->call_function(
+				'as_schedule_single_action',
+				WC()->call_function( 'time' ) + 1,
+				'adjust_download_permissions',
+				$scheduled_action_args
+			);
 		}
 	}
 
@@ -72,12 +83,12 @@ final class DownloadPermissionsAdjuster {
 		$product = wc_get_product( $product_id );
 
 		$children_ids = $product->get_children();
-		if (!$children_ids) {
+		if ( ! $children_ids ) {
 			return;
 		}
 
-		$parent_downloads = $this->get_download_files_and_permissions($product);
-		if (!$parent_downloads) {
+		$parent_downloads = $this->get_download_files_and_permissions( $product );
+		if ( ! $parent_downloads ) {
 			return;
 		}
 
