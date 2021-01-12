@@ -55,9 +55,6 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$this->assertEquals( strpos( $coupon_held_key[ $coupon->get_id() ], '_coupon_held_' ), 0 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ), 1 );
 
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
 		$order2_id = $checkout->create_order(
 			array(
 				'billing_email'  => 'a@c.com',
@@ -101,11 +98,6 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$this->assertNotWPError( $order_id1 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon1->get_id() ), 1 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon2->get_id() ), 1 );
-
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon_code1 );
-		WC()->cart->add_discount( $coupon_code2 );
 
 		$order2_id = $checkout->create_order(
 			array(
@@ -175,7 +167,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->check_customer_coupons( $posted_data );
-		$this->assertTrue( wc_has_notice( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ), 'error' ) );
+		$this->assertTrue( wc_has_notice( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST ), 'error' ) );
 	}
 
 	/**

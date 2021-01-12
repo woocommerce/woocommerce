@@ -422,12 +422,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$this->get_tentative_usage_query( $coupon_id )
 		);
 	}
+
 	/**
 	 * Get the number of uses for a coupon by user ID.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Coupon $coupon Coupon object.
-	 * @param id        $user_id User ID.
+	 * @param int       $user_id User ID.
 	 * @return int
 	 */
 	public function get_usage_by_user_id( &$coupon, $user_id ) {

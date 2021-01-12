@@ -153,7 +153,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'     => '_sku',
 					'value'   => $skus,
 					'compare' => 'IN',
@@ -164,7 +165,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_tax_class',
 					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
 				)
@@ -179,7 +181,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_stock_status',
 					'value' => $request['stock_status'],
 				)
@@ -313,7 +316,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		if ( 'variation' === $product->get_type() ) {
 			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array(
+				"woocommerce_rest_invalid_{$this->post_type}_id",
+				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
+				array(
 					'status' => 404,
 				)
 			);
@@ -595,7 +600,34 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$product = $this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
+			$new_tags = array();
+
+			foreach ( $request['tags'] as $tag ) {
+				if ( ! isset( $tag['name'] ) ) {
+					$new_tags[] = $tag;
+					continue;
+				}
+
+				if ( ! term_exists( $tag['name'], 'product_tag' ) ) {
+					// Create the tag if it doesn't exist.
+					$term = wp_insert_term( $tag['name'], 'product_tag' );
+
+					if ( ! is_wp_error( $term ) ) {
+						$new_tags[] = array(
+							'id' => $term['term_id'],
+						);
+
+						continue;
+					}
+				} else {
+					// Tag exists, assume user wants to set the product with this tag.
+					$new_tags[] = array(
+						'id' => get_term_by( 'name', $tag['name'], 'product_tag' )->term_id,
+					);
+				}
+			}
+
+			$product = $this->save_taxonomy_terms( $product, $new_tags, 'tag' );
 		}
 
 		// Downloadable.
@@ -1324,18 +1356,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
-	 *                            Options: 'view' and 'edit'.
+	 * @param string     $context Request context. Options: 'view' and 'edit'.
+	 *
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$data = parent::get_product_data( $product, $context );
-
-		// Replace in_stock with stock_status.
-		$pos             = array_search( 'in_stock', array_keys( $data ), true );
-		$array_section_1 = array_slice( $data, 0, $pos, true );
-		$array_section_2 = array_slice( $data, $pos + 1, null, true );
-
-		return $array_section_1 + array( 'stock_status' => $product->get_stock_status( $context ) ) + $array_section_2;
+		$data = parent::get_product_data( ...func_get_args() );
+		// Add stock_status if needed.
+		if ( isset( $this->request ) ) {
+			$fields = $this->get_fields_for_response( $this->request );
+			if ( in_array( 'stock_status', $fields ) ) {
+				$data['stock_status'] = $product->get_stock_status( $context );
+			}
+		}
+		return $data;
 	}
 }
