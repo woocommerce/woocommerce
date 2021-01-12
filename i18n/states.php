@@ -440,6 +440,7 @@ return array(
 		'ZA' => __( 'Zamora', 'woocommerce' ),
 		'Z'  => __( 'Zaragoza', 'woocommerce' ),
 	),
+	'ET' => array(),
 	'FI' => array(),
 	'FR' => array(),
 	'GH' => array( // Ghanaian Regions.
