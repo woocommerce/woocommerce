@@ -90,6 +90,7 @@
 		margin: 0;
 		max-height: 300px;
 		overflow: auto;
+		color: $input-text-active;
 
 		// Required by IE11.
 		&:empty {
