@@ -180,6 +180,33 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			)
 		);
 	}
+	
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 4.9.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_refunded_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_refunded_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_refunded_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-refunded',
+					'type'         => 'shop_order',
+				)
+			)
+		);
+	}
 
 	/**
 	 * Find and trash old orders.
