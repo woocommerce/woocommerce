@@ -7,6 +7,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 /**
  * Shows print shipping label banner on edit order page.
@@ -58,21 +59,18 @@ class ShippingLabelBanner {
 			$wcs_version       = null;
 			$wcs_tos_accepted  = null;
 
-			if ( class_exists( '\Jetpack_Data' ) ) {
+			if ( defined( 'JETPACK__VERSION' ) ) {
+				$jetpack_version = JETPACK__VERSION;
+			}
 
-				if ( defined( 'JETPACK_MASTER_USER' ) ) {
-					$user_token = \Jetpack_Data::get_access_token( JETPACK_MASTER_USER );
-					$jetpack_connected = isset( $user_token->external_user_id );
-				} else {
-					$jetpack_connected = apply_filters( 'woocommerce_admin_is_jetpack_connected', false );
-				}
-
-				$jetpack_version   = JETPACK__VERSION;
+			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
+				$jetpack_connected = ( new Jetpack_Connection_Manager() )->is_active();
 			}
 
 			if ( class_exists( '\WC_Connect_Loader' ) ) {
 				$wcs_version = \WC_Connect_Loader::get_wcs_version();
 			}
+
 			if ( class_exists( '\WC_Connect_Options' ) ) {
 				$wcs_tos_accepted = \WC_Connect_Options::get_option( 'tos_accepted' );
 			}
