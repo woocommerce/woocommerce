@@ -125,6 +125,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_refunded_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'delete_inactive_accounts' ) );
 		self::$background_process->save()->dispatch();
