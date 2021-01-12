@@ -50,6 +50,7 @@ curl "https://example-store.com/wp-json/wc/store/cart/items"
       }
     ],
     "variation": [],
+    "item_data": [],
     "prices": {
       "currency_code": "GBP",
       "currency_symbol": "£",
@@ -122,6 +123,7 @@ curl "https://example-store.com/wp-json/wc/store/cart/items"
       }
     ],
     "variation": [],
+    "item_data": [],
     "prices": {
       "currency_code": "GBP",
       "currency_symbol": "£",
@@ -216,6 +218,7 @@ curl "https://example-store.com/wp-json/wc/store/cart/items/e369853df766fa44e1ed
     }
   ],
   "variation": [],
+  "item_data": [],
   "prices": {
     "currency_code": "GBP",
     "currency_symbol": "£",

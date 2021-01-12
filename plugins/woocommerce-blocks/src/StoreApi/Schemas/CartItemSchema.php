@@ -144,6 +144,35 @@ class CartItemSchema extends ProductSchema {
 					],
 				],
 			],
+			'item_data'            => [
+				'description' => __( 'Metadata related to the cart item', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'name'    => [
+							'description' => __( 'Name of the metadata.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'value'   => [
+							'description' => __( 'Value of the metadata.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'display' => [
+							'description' => __( 'Optionally, how the metadata value should be displayed to the user.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
 			'prices'               => [
 				'description' => __( 'Price data for the product in the current line item, including or excluding taxes based on the "display prices during cart and checkout" setting. Provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
@@ -295,6 +324,7 @@ class CartItemSchema extends ProductSchema {
 			'permalink'            => $product->get_permalink(),
 			'images'               => $this->get_images( $product ),
 			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
+			'item_data'            => $this->get_item_data( $cart_item ),
 			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
 			'totals'               => (object) $this->prepare_currency_response(
 				[
@@ -385,5 +415,26 @@ class CartItemSchema extends ProductSchema {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Format cart item data removing any HTML tag.
+	 *
+	 * @param array $cart_item Cart item array.
+	 * @return array
+	 */
+	protected function get_item_data( $cart_item ) {
+		$item_data = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
+		return array_map( [ $this, 'remove_tags_from_item_data' ], $item_data );
+	}
+
+	/**
+	 * Remove HTML tags from cart item data.
+	 *
+	 * @param array $item_data_element Individual element of a cart item data.
+	 * @return array
+	 */
+	protected function remove_tags_from_item_data( $item_data_element ) {
+		return array_map( 'wp_strip_all_tags', $item_data_element );
 	}
 }
