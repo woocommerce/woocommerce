@@ -67,6 +67,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	const E_WC_COUPON_MAX_SPEND_LIMIT_MET            = 112;
 	const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
 	const E_WC_COUPON_EXCLUDED_CATEGORIES            = 114;
+	const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK       = 115;
+	const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST = 116;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -993,6 +995,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+				break;
+			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK:
+				if ( is_user_logged_in() && wc_get_page_id( 'myaccount' ) > 0 ) {
+					/* translators: %s: myaccount page link. */
+					$err = sprintf( __( 'Coupon usage limit has been reached. If you were using this coupon just now but order was not complete, you can retry or cancel the order by going to the <a href="%s">my account page</a>.', 'woocommerce' ), wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) );
+				} else {
+					$err = $this->get_coupon_error( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
+				}
+				break;
+			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST:
+				$err = __( 'Coupon usage limit has been reached. Please try again after some time, or contact us for help.', 'woocommerce' );
 				break;
 			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
 				// Store excluded products that are in cart in $products.

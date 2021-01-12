@@ -1,9 +1,19 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
+ * External dependencies
+ */
+const { HTTPClientFactory } = require( '@woocommerce/api' );
+const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
+
+/**
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -16,22 +26,12 @@ const {
 	waitAndClick
 } = require( '@woocommerce/e2e-environment' );
 
-/**
- * External dependencies
- */
-const { HTTPClientFactory } = require( '@woocommerce/api' );
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
-
 const runInitialStoreSettingsTest = () => {
 	describe('Store owner can finish initial store setup', () => {
 
 		it('can enable tax rates and calculations', async () => {
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Make sure the general tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'General'});
@@ -50,7 +50,7 @@ const runInitialStoreSettingsTest = () => {
 
 		it('can configure permalink settings', async () => {
 			// Go to Permalink Settings page
-			await StoreOwnerFlow.openPermalinkSettings();
+			await merchant.openPermalinkSettings();
 
 			// Select "Post name" option in common settings section
 			await page.click('input[value="/%postname%/"]', {text: ' Post name'});

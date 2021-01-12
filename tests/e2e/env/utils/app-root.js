@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 const path = require( 'path' );
 
 const getAppRoot = () => {
@@ -16,12 +19,4 @@ const getAppRoot = () => {
     return appPath;
 };
 
-const getAppName = () => {
-	const appRoot = getAppRoot();
-	return path.basename( appRoot );
-};
-
-module.exports = {
-	getAppRoot,
-	getAppName,
-};
+module.exports = getAppRoot;

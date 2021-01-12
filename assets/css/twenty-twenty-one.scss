@@ -295,11 +295,11 @@ a.button {
 
 .woocommerce-store-notice__dismiss-link {
 	float: right;
-	color: #fff;
+	color: #000;
 
 	&:hover {
-		text-decoration: underline;
-		color: #fff;
+		text-decoration: none;
+		color: #000;
 	}
 }
 

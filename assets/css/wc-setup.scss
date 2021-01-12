@@ -374,7 +374,7 @@ body {
 			li a::before {
 				color: #82878c;
 				font: 400 20px/1 dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
-				speak: none;
+				speak: never;
 				display: inline-block;
 				padding: 0 10px 0 0;
 				top: 1px;

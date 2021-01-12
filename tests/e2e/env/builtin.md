@@ -42,6 +42,7 @@ The built in container initialization needs to know the particulars of your test
 ```
 {
   "url": "http://localhost:8084/",
+  "appName": "{repository-folder-name}",
   "users": {
     "admin": {
       "username": "admin",
@@ -57,8 +58,10 @@ The built in container initialization needs to know the particulars of your test
 }
 ```
 
-You can override these in `/tests/e2e/config/default.json`. The `customer` entry is not required by the sequencer but is required for the core test suite. 
+You can override these in `/tests/e2e/config/default.json`.
 
+- The `appName` entry is optional. If present, it is used as a prefix for the docker container names.
+- The `customer` entry is not required by the sequencer but is required for the core test suite.
 - The test sequencer does not use the user account email addresses.
 
 ```

@@ -978,6 +978,15 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'GT' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'Department', 'woocommerce' ),
+						),
+					),
 					'HK' => array(
 						'postcode' => array(
 							'required' => false,
