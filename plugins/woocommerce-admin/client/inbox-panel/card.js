@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, createRef, Fragment } from '@wordpress/element';
+import { Component, createRef } from '@wordpress/element';
 import { Button, Dropdown, Modal } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import VisibilitySensor from 'react-visibility-sensor';
@@ -207,11 +207,7 @@ class InboxNoteCard extends Component {
 	renderDismissConfirmationModal() {
 		return (
 			<Modal
-				title={
-					<Fragment>
-						{ __( 'Are you sure?', 'woocommerce-admin' ) }
-					</Fragment>
-				}
+				title={ <>{ __( 'Are you sure?', 'woocommerce-admin' ) }</> }
 				onRequestClose={ () => this.closeDismissModal() }
 				className="woocommerce-inbox-dismiss-confirmation_modal"
 			>
@@ -249,7 +245,7 @@ class InboxNoteCard extends Component {
 		}
 
 		return (
-			<Fragment>
+			<>
 				{ noteActions.map( ( action, index ) => (
 					<NoteAction
 						key={ index }
@@ -258,7 +254,7 @@ class InboxNoteCard extends Component {
 						onClick={ () => this.onActionClicked( action ) }
 					/>
 				) ) }
-			</Fragment>
+			</>
 		);
 	}
 
@@ -310,6 +306,9 @@ class InboxNoteCard extends Component {
 					) }
 					<div className="woocommerce-inbox-message__wrapper">
 						<div className="woocommerce-inbox-message__content">
+							{ unread && (
+								<div className="woocommerce-inbox-message__unread-indicator" />
+							) }
 							{ date && (
 								<span className="woocommerce-inbox-message__date">
 									{ moment.utc( date ).fromNow() }
