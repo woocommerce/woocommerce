@@ -6,13 +6,14 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import ProductVariationData from '../product-variation-data';
+import ProductDetails from '../product-details';
 import ProductSummary from '../product-summary';
 import './style.scss';
 
 const ProductMetadata = ( {
 	shortDescription = '',
 	fullDescription = '',
+	itemData = [],
 	variation = [],
 } ) => {
 	return (
@@ -22,9 +23,12 @@ const ProductMetadata = ( {
 				shortDescription={ shortDescription }
 				fullDescription={ fullDescription }
 			/>
-			<ProductVariationData
-				className="wc-block-components-product-metadata__variation-data"
-				variation={ variation }
+			<ProductDetails details={ itemData } />
+			<ProductDetails
+				details={ variation.map( ( { attribute = '', value } ) => ( {
+					name: attribute,
+					value,
+				} ) ) }
 			/>
 		</div>
 	);
@@ -33,7 +37,13 @@ const ProductMetadata = ( {
 ProductMetadata.propTypes = {
 	shortDescription: PropTypes.string,
 	fullDescription: PropTypes.string,
-	variation: PropTypes.array,
+	itemData: PropTypes.array,
+	variation: PropTypes.arrayOf(
+		PropTypes.shape( {
+			attribute: PropTypes.string,
+			value: PropTypes.string.isRequired,
+		} )
+	),
 };
 
 export default ProductMetadata;

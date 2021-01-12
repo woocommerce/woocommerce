@@ -27,6 +27,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		quantity,
 		short_description: shortDescription,
 		description: fullDescription,
+		item_data: itemData = [],
 		variation,
 	} = cartItem;
 
@@ -81,6 +82,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }
+					itemData={ itemData }
 					variation={ variation }
 				/>
 			</div>

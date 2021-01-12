@@ -52,6 +52,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		permalink = '',
 		images = [],
 		variation = [],
+		item_data: itemData = [],
 		prices = {
 			currency_code: 'USD',
 			currency_minor_unit: 2,
@@ -132,6 +133,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }
+					itemData={ itemData }
 					variation={ variation }
 				/>
 			</td>
