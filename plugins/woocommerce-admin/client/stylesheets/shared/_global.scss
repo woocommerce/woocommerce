@@ -41,14 +41,8 @@
 
 body.woocommerce-page {
 	.components-button.is-primary {
-		color: $studio-white;
-
 		&:not(:disabled) {
-			&:hover,
-			&:active,
-			&:focus {
-				color: $studio-white;
-			}
+			color: $studio-white;
 		}
 	}
 
