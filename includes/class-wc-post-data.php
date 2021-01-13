@@ -499,7 +499,7 @@ class WC_Post_Data {
 	 * @param string $previous_status The status of the post at the point where it was trashed.
 	 * @return string
 	 */
-	public function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
+	public static function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
 		$post_types = array( 'shop_order', 'shop_coupon', 'product', 'product_variation' );
 
 		if ( in_array( get_post_type( $post_id ), $post_types, true ) ) {
