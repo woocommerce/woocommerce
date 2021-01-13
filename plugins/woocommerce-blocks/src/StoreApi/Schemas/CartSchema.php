@@ -303,18 +303,21 @@ class CartSchema extends AbstractSchema {
 		// calculated so we can avoid returning costs and rates prematurely.
 		$has_calculated_shipping = $cart->show_shipping();
 
+		// Get shipping packages to return in the response from the cart.
+		$shipping_packages = $has_calculated_shipping ? $controller->get_shipping_packages() : [];
+
 		return [
-			'coupons'                 => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
-			'shipping_rates'          => $has_calculated_shipping ? array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ) : [],
+			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
+			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
 			'shipping_address'        => $this->shipping_address_schema->get_item_response( wc()->customer ),
 			'billing_address'         => $this->billing_address_schema->get_item_response( wc()->customer ),
-			'items'                   => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
+			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
 			'needs_payment'           => $cart->needs_payment(),
 			'needs_shipping'          => $cart->needs_shipping(),
 			'has_calculated_shipping' => $has_calculated_shipping,
-			'totals'                  => (object) $this->prepare_currency_response(
+			'totals'                  => $this->prepare_currency_response(
 				[
 					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
 					'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),
