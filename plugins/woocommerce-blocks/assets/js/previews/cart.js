@@ -156,6 +156,7 @@ export const previewCart = {
 			},
 		},
 	],
+	fees: [],
 	items_count: 3,
 	items_weight: 0,
 	needs_payment: true,

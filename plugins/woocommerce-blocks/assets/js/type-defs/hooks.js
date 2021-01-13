@@ -12,6 +12,8 @@
  *                                                      to the cart.
  * @property {Array}               cartItems            An array of items in the
  *                                                      cart.
+ * @property {Array}               cartFees             An array of fees in the
+ *                                                      cart.
  * @property {number}              cartItemsCount       The number of items in the
  *                                                      cart.
  * @property {number}              cartItemsWeight      The weight of all items in

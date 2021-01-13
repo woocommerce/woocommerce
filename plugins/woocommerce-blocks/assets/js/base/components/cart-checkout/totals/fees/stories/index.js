@@ -17,16 +17,22 @@ export default {
 
 export const Default = () => {
 	const currency = currencyKnob();
-	const totalFees = text( 'Total fees', '1000' );
-	const totalFeesTax = text( 'Total fees tax', '200' );
+	const totalFees = text( 'Total fee', '1000' );
+	const totalFeesTax = text( 'Total fee tax', '200' );
 
 	return (
 		<TotalsFees
 			currency={ currency }
-			values={ {
-				total_fees: totalFees,
-				total_fees_tax: totalFeesTax,
-			} }
+			cartFees={ [
+				{
+					id: 'fee',
+					name: 'Fee',
+					totals: {
+						total: totalFees,
+						total_tax: totalFeesTax,
+					},
+				},
+			] }
 		/>
 	);
 };

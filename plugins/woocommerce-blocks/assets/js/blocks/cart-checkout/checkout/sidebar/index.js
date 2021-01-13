@@ -23,6 +23,7 @@ import { useStoreCartCoupons } from '@woocommerce/base-hooks';
 const CheckoutSidebar = ( {
 	cartCoupons = [],
 	cartItems = [],
+	cartFees = [],
 	cartTotals = {},
 } ) => {
 	const {
@@ -39,7 +40,7 @@ const CheckoutSidebar = ( {
 		<>
 			<OrderSummary cartItems={ cartItems } />
 			<Subtotal currency={ totalsCurrency } values={ cartTotals } />
-			<TotalsFees currency={ totalsCurrency } values={ cartTotals } />
+			<TotalsFees currency={ totalsCurrency } cartFees={ cartFees } />
 			<TotalsDiscount
 				cartCoupons={ cartCoupons }
 				currency={ totalsCurrency }

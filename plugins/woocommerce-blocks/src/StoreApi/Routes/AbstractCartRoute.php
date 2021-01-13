@@ -17,31 +17,18 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->maybe_load_cart();
-		$this->maybe_recalculate_totals();
+		$this->calculate_totals();
 		return parent::get_response( $request );
 	}
 
 	/**
-	 * If shipping/tax data has changed on the server since last calculation, trigger a recalculation now.
-	 *
-	 * @return void
+	 * Ensures the cart totals are calculated before an API response is generated.
 	 */
-	protected function maybe_recalculate_totals() {
-		$current_hash = wc()->session->get( 'store_api_calculation_hash', '' );
-		$new_hash     = md5(
-			wp_json_encode(
-				[
-					\WC_Cache_Helper::get_transient_version( 'shipping' ),
-					wc()->cart->get_cart_hash(),
-				]
-			)
-		);
-		if ( ! hash_equals( $current_hash, $new_hash ) ) {
-			wc()->session->set( 'store_api_calculation_hash', $new_hash );
-			wc()->cart->get_cart();
-			wc()->cart->calculate_shipping();
-			wc()->cart->calculate_totals();
-		}
+	protected function calculate_totals() {
+		wc()->cart->get_cart();
+		wc()->cart->calculate_fees();
+		wc()->cart->calculate_shipping();
+		wc()->cart->calculate_totals();
 	}
 
 	/**

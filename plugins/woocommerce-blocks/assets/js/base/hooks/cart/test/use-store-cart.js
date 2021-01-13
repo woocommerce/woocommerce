@@ -37,6 +37,7 @@ describe( 'useStoreCart', () => {
 		cartIsLoading: false,
 		cartItemErrors: [],
 		cartErrors: [],
+		cartFees: [],
 		billingAddress: {
 			first_name: '',
 			last_name: '',
@@ -98,6 +99,7 @@ describe( 'useStoreCart', () => {
 		cartTotals: mockCartTotals,
 		cartIsLoading: mockCartIsLoading,
 		cartErrors: mockCartErrors,
+		cartFees: [],
 		billingAddress: {},
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],

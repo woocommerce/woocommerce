@@ -41,6 +41,13 @@ class CartSchema extends AbstractSchema {
 	protected $coupon_schema;
 
 	/**
+	 * Fee schema instance.
+	 *
+	 * @var CartFeeSchema
+	 */
+	protected $fee_schema;
+
+	/**
 	 * Shipping rates schema instance.
 	 *
 	 * @var CartShippingRateSchema
@@ -74,6 +81,7 @@ class CartSchema extends AbstractSchema {
 	 * @param ExtendRestApi          $extend Rest Extending instance.
 	 * @param CartItemSchema         $item_schema Item schema instance.
 	 * @param CartCouponSchema       $coupon_schema Coupon schema instance.
+	 * @param CartFeeSchema          $fee_schema Fee schema instance.
 	 * @param CartShippingRateSchema $shipping_rate_schema Shipping rates schema instance.
 	 * @param ShippingAddressSchema  $shipping_address_schema Shipping address schema instance.
 	 * @param BillingAddressSchema   $billing_address_schema Billing address schema instance.
@@ -83,6 +91,7 @@ class CartSchema extends AbstractSchema {
 		ExtendRestApi $extend,
 		CartItemSchema $item_schema,
 		CartCouponSchema $coupon_schema,
+		CartFeeSchema $fee_schema,
 		CartShippingRateSchema $shipping_rate_schema,
 		ShippingAddressSchema $shipping_address_schema,
 		BillingAddressSchema $billing_address_schema,
@@ -90,6 +99,7 @@ class CartSchema extends AbstractSchema {
 	) {
 		$this->item_schema             = $item_schema;
 		$this->coupon_schema           = $coupon_schema;
+		$this->fee_schema              = $fee_schema;
 		$this->shipping_rate_schema    = $shipping_rate_schema;
 		$this->shipping_address_schema = $shipping_address_schema;
 		$this->billing_address_schema  = $billing_address_schema;
@@ -177,6 +187,16 @@ class CartSchema extends AbstractSchema {
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
+			],
+			'fees'                    => [
+				'description' => __( 'List of cart fees.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( $this->fee_schema->get_properties() ),
+				],
 			],
 			'totals'                  => [
 				'description' => __( 'Cart total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
@@ -317,6 +337,7 @@ class CartSchema extends AbstractSchema {
 			'needs_payment'           => $cart->needs_payment(),
 			'needs_shipping'          => $cart->needs_shipping(),
 			'has_calculated_shipping' => $has_calculated_shipping,
+			'fees'                    => $this->get_item_responses_from_schema( $this->fee_schema, $cart->get_fees() ),
 			'totals'                  => $this->prepare_currency_response(
 				[
 					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),

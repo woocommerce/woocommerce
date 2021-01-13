@@ -18,6 +18,7 @@ export const useStoreCart = () => ( {
 	cartTotals: previewCart.totals,
 	cartIsLoading: false,
 	cartErrors: [],
+	cartFees: [],
 	billingAddress: {},
 	shippingAddress: {},
 	shippingRates: previewShippingRates,

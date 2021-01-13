@@ -65,6 +65,7 @@ const Cart = ( { attributes } ) => {
 
 	const {
 		cartItems,
+		cartFees,
 		cartTotals,
 		cartIsLoading,
 		cartItemsCount,
@@ -114,7 +115,7 @@ const Cart = ( { attributes } ) => {
 					{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
 				</Title>
 				<Subtotal currency={ totalsCurrency } values={ cartTotals } />
-				<TotalsFees currency={ totalsCurrency } values={ cartTotals } />
+				<TotalsFees currency={ totalsCurrency } cartFees={ cartFees } />
 				<TotalsDiscount
 					cartCoupons={ appliedCoupons }
 					currency={ totalsCurrency }
