@@ -68,6 +68,16 @@ class Packages {
 			}
 			call_user_func( array( $package_class, 'init' ) );
 		}
+
+		// Proxies "activated_plugin" hook for embedded packages listen on WC plugin activation
+		// https://github.com/woocommerce/woocommerce/issues/28697.
+		if ( is_admin() ) {
+			$woocommerce_activated_plugin = get_transient( 'woocommerce_activated_plugin' );
+			if ( $woocommerce_activated_plugin ) {
+				delete_transient( 'woocommerce_activated_plugin' );
+				do_action( 'woocommerce_activated_plugin', $woocommerce_activated_plugin );
+			}
+		}
 	}
 
 	/**
