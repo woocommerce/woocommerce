@@ -14,19 +14,19 @@ use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
  */
 class RestApi {
 	/**
-	 * Stores Rest Extending instance
+	 * Stores Rest Routes instance
 	 *
-	 * @var ExtendRestApi
+	 * @var RoutesController
 	 */
-	private $extend;
+	private $routes;
 
 	/**
 	 * Constructor
 	 *
-	 * @param ExtendRestApi $extend Rest Extending instance.
+	 * @param RoutesController $routes Rest Routes instance.
 	 */
-	public function __construct( ExtendRestApi $extend ) {
-		$this->extend = $extend;
+	public function __construct( RoutesController $routes ) {
+		$this->routes = $routes;
 		$this->init();
 	}
 
@@ -43,9 +43,7 @@ class RestApi {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
-		$schemas = new SchemaController( $this->extend );
-		$routes  = new RoutesController( $schemas );
-		$routes->register_routes();
+		$this->routes->register_routes();
 	}
 
 	/**

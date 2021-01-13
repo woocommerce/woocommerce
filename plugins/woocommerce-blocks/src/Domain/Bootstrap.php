@@ -25,6 +25,8 @@ use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\RoutesController;
+use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -176,7 +178,7 @@ class Bootstrap {
 		$this->container->register(
 			RestApi::class,
 			function ( Container $container ) {
-				return new RestApi( $container->get( ExtendRestApi::class ) );
+				return new RestApi( $container->get( RoutesController::class ) );
 			}
 		);
 		$this->container->register(
@@ -205,6 +207,18 @@ class Bootstrap {
 				$formatters->register( 'html', HtmlFormatter::class );
 				$formatters->register( 'currency', CurrencyFormatter::class );
 				return $formatters;
+			}
+		);
+		$this->container->register(
+			SchemaController::class,
+			function( Container $container ) {
+				return new SchemaController( $container->get( ExtendRestApi::class ) );
+			}
+		);
+		$this->container->register(
+			RoutesController::class,
+			function( Container $container ) {
+				return new RoutesController( $container->get( SchemaController::class ) );
 			}
 		);
 		$this->container->register(
