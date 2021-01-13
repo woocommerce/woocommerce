@@ -103,6 +103,19 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/tracker/(?P<note_id>[\d-]+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'track_opened_email' ),
+					'permission_callback' => '__return_true',
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/update',
 			array(
 				array(
@@ -449,6 +462,20 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_note', $response, $data, $request );
+	}
+
+
+	/**
+	 * Track opened emails.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public function track_opened_email( $request ) {
+		$note = NotesRepository::get_note( $request->get_param( 'note_id' ) );
+		if ( ! $note ) {
+			return;
+		}
+		wc_admin_record_tracks_event( 'wcadmin_email_note_opened', array( 'note_name' => $note->get_name() ) );
 	}
 
 	/**

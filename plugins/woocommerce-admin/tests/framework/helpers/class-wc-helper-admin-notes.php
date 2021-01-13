@@ -24,7 +24,7 @@ class WC_Helper_Admin_Notes {
 	}
 
 	/**
-	 * Create two notes that we can use for notes REST API tests
+	 * Create four notes that we can use for notes REST API tests
 	 */
 	public static function add_notes_for_tests() {
 		$data_store = WC_Data_Store::load( 'admin-note' );
@@ -101,5 +101,35 @@ class WC_Helper_Admin_Notes {
 		);
 		$note_4->save();
 
+	}
+
+	/**
+	 * Create a note that we can use for email notes tests
+	 */
+	public static function add_email_notes_for_test() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		$note_5 = new Note();
+		$note_5->set_title( 'PHPUNIT_TEST_NOTE_5_TITLE' );
+		$note_5->set_content( 'PHPUNIT_TEST_NOTE_5_CONTENT' );
+		$additional_data = array(
+			'heading'        => 'PHPUNIT_TEST_EMAIL_HEADING',
+			'role'           => 'administrator',
+			'template_html'  => 'PHPUNIT_TEST_EMAIL_HTML_TEMPLATE',
+			'template_plain' => 'PHPUNIT_TEST_EMAIL_HTML_PLAIN',
+		);
+		$note_5->set_content_data( (object) $additional_data );
+		$note_5->set_type( Note::E_WC_ADMIN_NOTE_EMAIL );
+		$note_5->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
+		$note_5->set_source( 'PHPUNIT_TEST' );
+		$note_5->set_is_snoozable( false );
+		$note_5->set_layout( 'plain' );
+		$note_5->set_image( '' );
+		$note_5->add_action(
+			'PHPUNIT_TEST_NOTE_5_ACTION_SLUG',
+			'PHPUNIT_TEST_NOTE_5_ACTION_LABEL',
+			'?s=PHPUNIT_TEST_NOTE_5_ACTION_URL'
+		);
+		$note_5->save();
 	}
 }

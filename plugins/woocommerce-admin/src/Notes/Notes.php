@@ -301,4 +301,104 @@ class Notes {
 
 		return $note->get_status();
 	}
+
+	/**
+	 * Get action by id.
+	 *
+	 * @param Note $note The note that has of the action.
+	 * @param int  $action_id Action ID.
+	 * @return object|bool The found action.
+	 */
+	public static function get_action_by_id( $note, $action_id ) {
+		$actions      = $note->get_actions( 'edit' );
+		$found_action = false;
+
+		foreach ( $actions as $action ) {
+			if ( $action->id === $action_id ) {
+				$found_action = $action;
+			}
+		}
+		return $found_action;
+	}
+
+	/**
+	 * Trigger note action.
+	 *
+	 * @param Note   $note The note that has the triggered action.
+	 * @param object $triggered_action The triggered action.
+	 * @return Note|bool
+	 */
+	public static function trigger_note_action( $note, $triggered_action ) {
+		/**
+		 * Fires when an admin note action is taken.
+		 *
+		 * @param string $name The triggered action name.
+		 * @param Note   $note The corresponding Note.
+		 */
+		do_action( 'woocommerce_note_action', $triggered_action->name, $note );
+
+		/**
+		 * Fires when an admin note action is taken.
+		 * For more specific targeting of note actions.
+		 *
+		 * @param Note $note The corresponding Note.
+		 */
+		do_action( 'woocommerce_note_action_' . $triggered_action->name, $note );
+
+		// Update the note with the status for this action.
+		if ( ! empty( $triggered_action->status ) ) {
+			$note->set_status( $triggered_action->status );
+		}
+
+		$note->save();
+
+		if ( in_array( $note->get_type(), array( 'error', 'update' ), true ) ) {
+			$tracks_event = 'wcadmin_store_alert_action';
+		} else {
+			$tracks_event = 'wcadmin_inbox_action_click';
+		}
+
+		wc_admin_record_tracks_event(
+			$tracks_event,
+			array(
+				'note_name'    => $note->get_name(),
+				'note_type'    => $note->get_type(),
+				'note_title'   => $note->get_title(),
+				'note_content' => $note->get_content(),
+				'action_name'  => $triggered_action->name,
+				'action_label' => $triggered_action->label,
+				'screen'       => self::get_screen_name(),
+			)
+		);
+		return $note;
+	}
+
+	/**
+	 * Get screen name.
+	 *
+	 * @return string The screen name.
+	 */
+	public static function get_screen_name() {
+		$screen_name = '';
+
+		if ( isset( $_SERVER['HTTP_REFERER'] ) ) {
+			parse_str( wp_parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_QUERY ), $queries ); // phpcs:ignore sanitization ok.
+		}
+		if ( isset( $queries ) ) {
+			$page      = isset( $queries['page'] ) ? $queries['page'] : null;
+			$path      = isset( $queries['path'] ) ? $queries['path'] : null;
+			$post_type = isset( $queries['post_type'] ) ? $queries['post_type'] : null;
+			$post      = isset( $queries['post'] ) ? get_post_type( $queries['post'] ) : null;
+		}
+
+		if ( isset( $page ) ) {
+			$current_page = 'wc-admin' === $page ? 'home_screen' : $page;
+			$screen_name  = isset( $path ) ? substr( str_replace( '/', '_', $path ), 1 ) : $current_page;
+		} elseif ( isset( $post_type ) ) {
+			$screen_name = $post_type;
+		} elseif ( isset( $post ) ) {
+			$screen_name = $post;
+		}
+		return $screen_name;
+	}
 }

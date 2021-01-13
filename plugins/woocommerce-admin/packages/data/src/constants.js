@@ -24,4 +24,5 @@ export const QUERY_DEFAULTS = {
 	pageSize: 25,
 	period: 'month',
 	compare: 'previous_year',
+	noteTypes: [ 'info', 'marketing', 'survey', 'warning' ],
 };

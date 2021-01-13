@@ -29,6 +29,7 @@ class WC_Admin_Note extends DeprecatedClassFacade {
 	const E_WC_ADMIN_NOTE_UNACTIONED    = Note::E_WC_ADMIN_NOTE_UNACTIONED;
 	const E_WC_ADMIN_NOTE_ACTIONED      = Note::E_WC_ADMIN_NOTE_ACTIONED;
 	const E_WC_ADMIN_NOTE_SNOOZED       = Note::E_WC_ADMIN_NOTE_SNOOZED;
+	const E_WC_ADMIN_NOTE_EMAIL         = Note::E_WC_ADMIN_NOTE_EMAIL;
 
 	/**
 	 * The name of the non-deprecated class that this facade covers.
