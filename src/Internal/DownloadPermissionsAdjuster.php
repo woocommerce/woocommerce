@@ -131,11 +131,10 @@ class DownloadPermissionsAdjuster {
 	 * @return array[] Information about the downloadable files and permissions for the product.
 	 */
 	private function get_download_files_and_permissions( \WC_Product $product ) {
-		$result = array(
+		$result    = array(
 			'permission_data_by_file_order_user' => array(),
 			'download_ids_by_file_url'           => array(),
 		);
-
 		$downloads = $product->get_downloads();
 		foreach ( $downloads as $download ) {
 			$result['download_ids_by_file_url'][ $download->get_file() ] = $download->get_id();
@@ -144,12 +143,14 @@ class DownloadPermissionsAdjuster {
 		$permissions = $this->downloads_data_store->get_downloads( array( 'product_id' => $product->get_id() ) );
 		foreach ( $permissions as $permission ) {
 			$permission_data = (array) $permission->data;
-			$file            = $downloads[ $permission_data['download_id'] ]->get_file();
-			$data            = array(
-				'file' => $file,
-				'data' => (array) $permission->data,
-			);
-			$result['permission_data_by_file_order_user'][ "${file}:${permission_data['user_id']}:${permission_data['order_id']}" ] = $data;
+			if ( array_key_exists( $permission_data['download_id'], $downloads ) ) {
+				$file = $downloads[ $permission_data['download_id'] ]->get_file();
+				$data = array(
+					'file' => $file,
+					'data' => (array) $permission->data,
+				);
+				$result['permission_data_by_file_order_user'][ "${file}:${permission_data['user_id']}:${permission_data['order_id']}" ] = $data;
+			}
 		}
 
 		return $result;
