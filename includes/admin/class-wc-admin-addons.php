@@ -93,7 +93,7 @@ class WC_Admin_Addons {
 			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 		}
 
-		$raw_extensions = wp_remote_get(
+		$raw_extensions = wp_safe_remote_get(
 			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
 			array( 'headers' => $headers )
 		);
