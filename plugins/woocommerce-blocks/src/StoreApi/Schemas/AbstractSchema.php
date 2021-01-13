@@ -72,7 +72,7 @@ abstract class AbstractSchema {
 	}
 
 	/**
-	 * Returns extended data for a specific endpoint
+	 * Returns extended data for a specific endpoint.
 	 *
 	 * @param string $endpoint The endpoint identifer.
 	 * @param array  ...$passed_args An array of arguments to be passed to callbacks.
@@ -83,7 +83,7 @@ abstract class AbstractSchema {
 	}
 
 	/**
-	 * Returns extended schema for a specific endpoint
+	 * Returns extended schema for a specific endpoint.
 	 *
 	 * @param string $endpoint The endpoint identifer.
 	 * @param array  ...$passed_args An array of arguments to be passed to callbacks.
@@ -98,6 +98,24 @@ abstract class AbstractSchema {
 			'properties'  => $this->extend->get_endpoint_schema( $endpoint, $passed_args ),
 		];
 	}
+
+	/**
+	 * Apply a schema get_item_response callback to an array of items and return the result.
+	 *
+	 * @param AbstractSchema $schema Schema class instance.
+	 * @param array          $items Array of items.
+	 * @return array Array of values from the callback function.
+	 */
+	protected function get_item_responses_from_schema( AbstractSchema $schema, $items ) {
+		$items = array_filter( $items );
+
+		if ( empty( $items ) ) {
+			return [];
+		}
+
+		return array_values( array_map( [ $schema, 'get_item_response' ], $items ) );
+	}
+
 	/**
 	 * Retrieves an array of endpoint arguments from the item schema for the controller.
 	 *
