@@ -298,7 +298,7 @@ class OrderController {
 	 * @param string    $address_type billing or shipping address, used in error messages.
 	 * @param \WP_Error $errors Error object.
 	 */
-	protected function validate_address_fields( $address, $address_type = 'billing', \WP_Error $errors ) {
+	protected function validate_address_fields( $address, $address_type, \WP_Error $errors ) {
 		$all_locales    = wc()->countries->get_country_locale();
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : [];
 
