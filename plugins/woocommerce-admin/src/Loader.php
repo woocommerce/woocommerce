@@ -63,6 +63,7 @@ class Loader {
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_filter( 'woocommerce_get_sections_advanced', array( __CLASS__, 'add_features_section' ) );
 		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'add_features_settings' ), 10, 2 );
+		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'maybe_load_beta_features_modal' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
@@ -261,6 +262,39 @@ class Loader {
 	}
 
 	/**
+	 * Conditionally loads the beta features tracking modal.
+	 *
+	 * @param array $settings Settings.
+	 * @return array
+	 */
+	public static function maybe_load_beta_features_modal( $settings ) {
+		$tracking_enabled = get_option( 'woocommerce_allow_tracking', 'no' );
+
+		if ( 'yes' === $tracking_enabled ) {
+			return $settings;
+		}
+
+		$rtl = is_rtl() ? '.rtl' : '';
+
+		wp_enqueue_style(
+			'wc-admin-beta-features-tracking-modal',
+			self::get_url( "beta-features-tracking-modal/style{$rtl}", 'css' ),
+			array( 'wp-components' ),
+			self::get_file_version( 'css' )
+		);
+
+		wp_enqueue_script(
+			'wc-admin-beta-features-tracking-modal',
+			self::get_url( 'wp-admin-scripts/beta-features-tracking-modal', 'js' ),
+			array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ),
+			self::get_file_version( 'js' ),
+			true
+		);
+
+		return $settings;
+	}
+
+	/**
 	 * Adds the Features settings.
 	 *
 	 * @param array  $settings Settings.
@@ -286,7 +320,7 @@ class Loader {
 				array(
 					'title' => __( 'Features', 'woocommerce-admin' ),
 					'type'  => 'title',
-					'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' ),
+					'desc'  => __( 'Test new features to improve the store management experience. These features might be included in future versions of WooCommerce. <a href="https://href.li/?https://woocommerce.com/usage-tracking/">Requires usage tracking.</a>', 'woocommerce-admin' ),
 					'id'    => 'features_options',
 				),
 			),
