@@ -64,8 +64,8 @@ class ChooseNiche {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'How to choose a niche for your online store', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Your niche defines the products and services you develop. It directs your marketing. It focuses your attention on specific problems facing your customers. It differentiates you from the competition. Learn more about the five guiding principles to define your niche.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Finding an audience for your business', 'woocommerce-admin' ) );
+		$note->set_content( __( 'There’s nothing quite like entrepreneurship! We put together a blog post series — titled From Idea to First Customer — with all the tips, resources, and tools to inspire a great idea, empower you to execute it, and lead to your very first sale.', 'woocommerce-admin' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
@@ -73,7 +73,7 @@ class ChooseNiche {
 		$note->add_action(
 			'choose-niche',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://woocommerce.com/posts/how-to-choose-a-niche-online-business/?utm_source=inbox',
+			'https://woocommerce.com/posts/idea-to-first-ecommerce-customer-finding-an-audience/?utm_source=inbox',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);

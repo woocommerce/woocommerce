@@ -93,6 +93,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Email note to add first product. #6024
 - Add: Note for users coming from Calypso. #6030
 - Enhancement: Add an "unread" indicator to inbox messages. #6047 
+- Tweak: update the content for the ChooseNiche note. #6048
+
 
 == Changelog ==
 
