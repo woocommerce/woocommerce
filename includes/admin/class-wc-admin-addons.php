@@ -25,11 +25,25 @@ class WC_Admin_Addons {
 	public static function get_featured() {
 		$featured = get_transient( 'wc_addons_featured' );
 		if ( false === $featured ) {
-			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured-v2.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			$headers = array();
+			$auth    = WC_Helper_Options::get( 'auth' );
+
+			if ( ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+
+			$raw_featured = wp_safe_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				array(
+					'headers'    => $headers,
+					'user-agent' => 'WooCommerce Addons Page',
+				)
+			);
+
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, WEEK_IN_SECONDS );
+					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
 				}
 			}
 		}
@@ -71,9 +85,19 @@ class WC_Admin_Addons {
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
 		$parameters     = self::build_parameter_string( $category, $term, $country );
-		$raw_extensions = wp_remote_get(
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters
+
+		$headers = array();
+		$auth    = WC_Helper_Options::get( 'auth' );
+
+		if ( ! empty( $auth['access_token'] ) ) {
+			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+		}
+
+		$raw_extensions = wp_safe_remote_get(
+			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+			array( 'headers' => $headers )
 		);
+
 		if ( ! is_wp_error( $raw_extensions ) ) {
 			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
 		}
