@@ -801,8 +801,8 @@ final class WooCommerce {
 	public function activated_plugin( $filename ) {
 		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
 
-		if ( 'woocommerce/woocommerce.php' === $filename ) {
-			set_transient( 'woocommerce_activated_plugin', true );
+		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
+			set_transient( 'woocommerce_activated_plugin', $filename );
 		}
 
 		WC_Helper::activated_plugin( $filename );
