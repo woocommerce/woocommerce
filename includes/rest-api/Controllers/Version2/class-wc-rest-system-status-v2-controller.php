@@ -1177,12 +1177,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
-				'block'     => apply_filters( 'woocommerce_cart_block_tag', 'woocommerce/cart' ),
+				'block'     => 'woocommerce/cart',
 			),
 			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
-				'block'      => apply_filters( 'woocommerce_checkout_block_tag', 'woocommerce/checkout' ),
+				'block'     => 'woocommerce/checkout',
 			),
 			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
