@@ -2,7 +2,7 @@ sudo: required
 
 language: php
 
-dist: trusty
+dist: xenial
 
 services:
     - xvfb
@@ -25,7 +25,7 @@ matrix:
           env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress COMPOSER_DEV=1
         - name: 'PHP 7.0 unit tests'
           php: 7.0
-          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+          env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress PHPUNIT=6
         - name: 'PHP 5.6 unit tests'
           php: 5.6
           env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress WC_VERSION=3.8.1

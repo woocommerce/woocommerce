@@ -14,4 +14,8 @@ if [ "$1" == 'before' ]; then
 	else
 		composer install --no-dev
 	fi
+	# phpunit ^7 is not supported in php 7.0
+	if [[ "$PHPUNIT" == "6" ]]; then
+		curl -fsSL -o vendor/bin/phpunit https://phar.phpunit.de/phpunit-6.5.9.phar --create-dirs && chmod +x vendor/bin/phpunit
+	fi
 fi
