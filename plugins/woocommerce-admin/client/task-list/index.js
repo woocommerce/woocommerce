@@ -116,6 +116,7 @@ export class TaskDashboard extends Component {
 			dismissedTasks,
 			isExtendedTaskListComplete,
 			isExtendedTaskListHidden,
+			isSetupTaskListHidden,
 			isTaskListComplete,
 			query,
 			trackedCompletedTasks,
@@ -123,10 +124,11 @@ export class TaskDashboard extends Component {
 		const { isCartModalOpen } = this.state;
 		const allTasks = this.getAllTasks();
 		const { extension: extensionTasks, setup: setupTasks } = allTasks;
+		const { task } = query;
 
 		return (
 			<>
-				{ setupTasks && (
+				{ setupTasks && ( ! isSetupTaskListHidden || task ) && (
 					<TaskList
 						dismissedTasks={ dismissedTasks || [] }
 						isTaskListComplete={ isTaskListComplete }

@@ -17,12 +17,15 @@ jest.mock( '../tasks' );
 
 describe( 'TaskDashboard and TaskList', () => {
 	afterEach( () => jest.clearAllMocks() );
+	const MockTask = () => {
+		return <div>mock task</div>;
+	};
 	const tasks = {
 		setup: [
 			{
 				key: 'optional',
 				title: 'This task is optional',
-				container: null,
+				container: <MockTask />,
 				completed: false,
 				visible: true,
 				time: '1 minute',
@@ -133,6 +136,41 @@ describe( 'TaskDashboard and TaskList', () => {
 		expect(
 			queryByTestId( container, 'completed-dismiss-button' )
 		).toBeNull();
+	} );
+
+	it( 'renders the selected task', async () => {
+		apiFetch.mockResolvedValue( {} );
+		getAllTasks.mockReturnValue( tasks );
+		const { container } = render(
+			<TaskDashboard
+				dismissedTasks={ [] }
+				isSetupTaskListHidden={ true }
+				profileItems={ {} }
+				query={ { task: 'optional' } }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		// Wait for the task to render.
+		expect( await findByText( container, 'mock task' ) ).toBeDefined();
+	} );
+
+	it( 'renders only the extended task list', () => {
+		apiFetch.mockResolvedValue( {} );
+		getAllTasks.mockReturnValue( tasks );
+		const { queryByText } = render(
+			<TaskDashboard
+				dismissedTasks={ [] }
+				isSetupTaskListHidden={ true }
+				profileItems={ {} }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		expect( queryByText( 'Finish setup' ) ).toBeNull();
+
+		expect( queryByText( 'Extensions setup' ) ).not.toBeNull();
 	} );
 
 	it( 'sets homescreen layout default when dismissed', () => {

@@ -92,6 +92,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add merchant email notifications #5922 
 - Add: Email note to add first product. #6024
 - Add: Note for users coming from Calypso. #6030
+- Fix: Fixed error hiding core task list. #6050
 - Enhancement: Add an "unread" indicator to inbox messages. #6047 
 - Tweak: update the content for the ChooseNiche note. #6048
 - Fix: Generate JSON translation chunks on plugin activation #6028
