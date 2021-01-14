@@ -98,6 +98,25 @@ class Loader {
 
 		// Combine JSON translation files (from chunks) when language packs are updated.
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'combine_translation_chunk_files' ), 10, 2 );
+
+		// Handler for WooCommerce and WooCommerce Admin plugin activation.
+		add_action( 'woocommerce_activated_plugin', array( __CLASS__, 'activated_plugin' ) );
+		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
+	}
+
+	/**
+	 * Run when plugin is activated (can be WooCommerce or WooCommerce Admin).
+	 *
+	 * @param string $filename Activated plugin filename.
+	 */
+	public static function activated_plugin( $filename ) {
+		$plugin_domain           = explode( '/', plugin_basename( __FILE__ ) )[0];
+		$activated_plugin_domain = explode( '/', $filename )[0];
+
+		// Ensure we're only running only on activation hook that originates from our plugin.
+		if ( $plugin_domain === $activated_plugin_domain ) {
+			self::generate_translation_strings();
+		}
 	}
 
 	/**
@@ -666,6 +685,63 @@ class Loader {
 	}
 
 	/**
+	 * Combine translation chunks when plugin is activated.
+	 *
+	 * This function combines JSON translation data auto-extracted by GlotPress
+	 * from Webpack-generated JS chunks into a single file. This is necessary
+	 * since the JS chunks are not known to WordPress via wp_register_script()
+	 * and wp_set_script_translations().
+	 */
+	public static function generate_translation_strings() {
+		$plugin_domain = explode( '/', plugin_basename( __FILE__ ) )[0];
+		$locale        = determine_locale();
+		$lang_dir      = WP_LANG_DIR . '/plugins/';
+
+		// Bail early if not localized.
+		if ( 'en_US' === $locale ) {
+			return;
+		}
+
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		$access_type = get_filesystem_method();
+		if ( 'direct' === $access_type ) {
+			\WP_Filesystem();
+			self::build_and_save_translations( $lang_dir, $plugin_domain, $locale );
+		} else {
+			// I'm reluctant to add support for other filesystems here as it would require
+			// user's input on activating plugin - which I don't think is common.
+			return;
+		}
+	}
+
+	/**
+	 * Combine and save translations for a specific locale.
+	 *
+	 * Note that this assumes \WP_Filesystem is already initialized with write access.
+	 *
+	 * @param string $language_dir Path to language files.
+	 * @param string $plugin_domain Text domain.
+	 * @param string $locale Locale being retrieved.
+	 */
+	public static function build_and_save_translations( $language_dir, $plugin_domain, $locale ) {
+		global $wp_filesystem;
+		$translations_from_chunks = self::get_translation_chunk_data( $language_dir, $plugin_domain, $locale );
+
+		if ( empty( $translations_from_chunks ) ) {
+			return;
+		}
+
+		$cache_filename          = self::get_combined_translation_filename( $plugin_domain, $locale );
+		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
+
+		// Cache combined translations strings to a file.
+		$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+	}
+
+	/**
 	 * Combine translation chunks when files are updated.
 	 *
 	 * This function combines JSON translation data auto-extracted by GlotPress
@@ -677,10 +753,6 @@ class Loader {
 	 * @param array                  $hook_extra Info about the upgraded language packs.
 	 */
 	public static function combine_translation_chunk_files( $instance, $hook_extra ) {
-		// So long as this function is hooked to the 'upgrader_process_complete' action,
-		// the filesystem object should be hooked up.
-		global $wp_filesystem;
-
 		if (
 			! is_a( $instance, 'Language_Pack_Upgrader' ) ||
 			! isset( $hook_extra['translations'] ) ||
@@ -706,17 +778,9 @@ class Loader {
 
 		// Build combined translation files for all updated locales.
 		foreach ( $locales as $locale ) {
-			$translations_from_chunks = self::get_translation_chunk_data( $language_dir, $plugin_domain, $locale );
-
-			if ( empty( $translations_from_chunks ) ) {
-				continue;
-			}
-
-			$cache_filename          = self::get_combined_translation_filename( $plugin_domain, $locale );
-			$chunk_translations_json = wp_json_encode( $translations_from_chunks );
-
-			// Cache combined translations strings to a file.
-			$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+			// So long as this function is hooked to the 'upgrader_process_complete' action,
+			// WP_Filesystem should be hooked up to be able to call build_and_save_translations.
+			self::build_and_save_translations( $language_dir, $plugin_domain, $locale );
 		}
 	}
 
