@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.2
+
 ## Fixed
 
 - Missing `config` package dependency
