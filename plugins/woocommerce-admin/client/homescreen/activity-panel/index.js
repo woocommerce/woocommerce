@@ -71,7 +71,12 @@ export const ActivityPanel = () => {
 							<Text key={ title } variant="title.small">
 								{ title }
 							</Text>,
-							count !== null && <Badge count={ count } />,
+							count !== null && (
+								<Badge
+									key={ `${ title }-badge` }
+									count={ count }
+								/>
+							),
 						] }
 						key={ id }
 						className={ className }
@@ -82,7 +87,7 @@ export const ActivityPanel = () => {
 						<PanelRow>{ panel }</PanelRow>
 					</PanelBody>
 				) : (
-					<div className="components-panel__body">
+					<div className="components-panel__body" key={ id }>
 						<h2 className="components-panel__body-title">
 							<Button
 								className="components-panel__body-toggle"
