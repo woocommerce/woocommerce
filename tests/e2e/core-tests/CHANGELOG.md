@@ -25,6 +25,8 @@
 - Shopper Variable product info updates on different variations
 - Merchant order emails flow
 
+- Shopper My Account Pay Order
+
 ## Fixed
 
 - Flaky Create Product, Coupon, and Order tests
