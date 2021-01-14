@@ -1771,6 +1771,8 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
+	// 'setlocale' is required for compatibility with PHP 8.
+	// Without it, 'iconv' will return '?'s instead of transliterated characters.
 	$prev_locale = setlocale( LC_CTYPE, 0 );
 	setlocale( LC_ALL, 'C.UTF-8' );
 
