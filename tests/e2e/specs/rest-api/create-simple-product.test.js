@@ -1,5 +1,5 @@
 import { getTestConfig } from '@woocommerce/e2e-environment';
-import { HTTPClientFactory } from "@woocommerce/api";
+import { HTTPClientFactory } from '@woocommerce/api';
 import { SimpleProduct } from '@woocommerce/api';
 
 describe('REST API > Product Endpoint', () => {
@@ -21,7 +21,7 @@ describe('REST API > Product Endpoint', () => {
 			.withBasicAuth(admin.username, admin.password)
 			.withIndexPermalinks()
 			.create();
-	} );
+	});
 
 	it('can create a simple product', async () => {
 		const repository = SimpleProduct.restRepository( client );
