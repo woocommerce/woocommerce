@@ -55,6 +55,30 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
     $ vendor/bin/phpunit --coverage-text
 
+### Running tests in PHP 8
+
+WooCommerce currently supports PHP versions from 7.0 up to 8.0, and this poses an issue with PHPUnit:
+
+* The latest PHPUnit version that supports PHP 7.0 is 6.5.14
+* The latest PHPUnit version that WordPress (and thus WooCommerce) supports is 7.5.20, but that version doesn't work on PHP 8
+
+To workaround this, the testing strategy used by WooCommerce is as follows:
+
+* We normally use PHPUnit 6.5.14
+* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). The Travis build is configured to use this fork instead of the old version 6 when running in PHP 8.
+
+If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the Travis setup script does. These are the commands that you'll need (run them after a regular `composer install`):
+
+```shell
+curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+composer bin phpunit config --unset platform
+composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+```
+
+Just remember that you can't include the modified `composer.json` in any commit!
+
 
 ## Writing Tests
 
