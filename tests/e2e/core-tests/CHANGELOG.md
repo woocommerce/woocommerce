@@ -6,6 +6,8 @@
 - Merchant Apply Coupon tests
 - Added new config variable for Simple Product price to `tests/e2e/env/config/default.json`. Defaults to 9.99
 
+- Shopper My Account Pay Order
+
 ## Fixed
 
 - Flaky Create Product, Coupon, and Order tests
