@@ -123,9 +123,11 @@ class DeleteDraftOrders extends TestCase {
 	}
 
 	public function test_greater_than_batch_results_error() {
-		$sample_results = function() {
-			return array_fill( 0, 21, ( new WC_Order ) );
-
+		$sample_results = function( $results, $args ) {
+			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+				return array_fill( 0, 21, ( new WC_Order ) );
+			}
+			return $results;
 		};
 		$this->mock_results_for_wc_query($sample_results);
 		$this->draft_orders_instance->delete_expired_draft_orders();
@@ -134,8 +136,11 @@ class DeleteDraftOrders extends TestCase {
 	}
 
 	public function test_order_not_instance_of_wc_order_error() {
-		$sample_results = function() {
-			return [ 10 ];
+		$sample_results = function( $results, $args ) {
+			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+				return [ 10 ];
+			}
+			return $results;
 		};
 		$this->mock_results_for_wc_query( $sample_results );
 		$this->draft_orders_instance->delete_expired_draft_orders();
@@ -144,10 +149,13 @@ class DeleteDraftOrders extends TestCase {
 	}
 
 	public function test_order_incorrect_status_error() {
-		$sample_results = function() {
-			$test_order = new WC_Order();
-			$test_order->set_status( 'on-hold' );
-			return [ $test_order ];
+		$sample_results = function( $results, $args ) {
+			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+				$test_order = new WC_Order();
+				$test_order->set_status( 'on-hold' );
+				return [ $test_order ];
+			}
+			return $results;
 		};
 		$this->mock_results_for_wc_query( $sample_results );
 		$this->draft_orders_instance->delete_expired_draft_orders();
@@ -182,10 +190,11 @@ class DeleteDraftOrders extends TestCase {
 	}
 
 	private function mock_results_for_wc_query( $mock_callback ) {
-		add_filter( 'woocommerce_order_query', $mock_callback );
+		add_filter( 'woocommerce_order_query', $mock_callback, 10, 2 );
 	}
 
 	private function unset_mock_results_for_wc_query( $mock_callback ) {
-		remove_filter( 'woocommerce_order_query', $mock_callback );
+		$removed = remove_filter( 'woocommerce_order_query', $mock_callback );
+		$this->assertTrue( $removed );
 	}
 }
