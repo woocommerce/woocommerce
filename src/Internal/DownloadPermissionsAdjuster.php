@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -25,7 +27,7 @@ class DownloadPermissionsAdjuster {
 	 * @internal
 	 */
 	final public function init() {
-		$this->downloads_data_store = WC()->get_instance_of( \WC_Data_Store::class, 'customer-download' );
+		$this->downloads_data_store = wc_get_container()->get( LegacyProxy::class )->get_instance_of( \WC_Data_Store::class, 'customer-download' );
 		add_action( 'adjust_download_permissions', array( $this, 'adjust_download_permissions' ), 10, 1 );
 	}
 

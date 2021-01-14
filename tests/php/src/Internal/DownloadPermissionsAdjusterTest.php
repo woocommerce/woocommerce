@@ -39,8 +39,8 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 			function( $exists, $filename ) {
 				return true;
 			},
-			2,
-			10
+			10,
+			2
 		);
 	}
 
