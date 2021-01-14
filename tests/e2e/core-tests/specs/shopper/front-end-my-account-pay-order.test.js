@@ -30,15 +30,17 @@ const runMyAccountPayOrderTest = () => {
 			const orderId = await page.evaluate(orderElement => orderElement.textContent, orderElement);
 			await shopper.logout();
 			await merchant.login();
-            await merchant.updateOrderStatus(orderId, 'Pending payment');
-            await merchant.logout();
+			await merchant.updateOrderStatus(orderId, 'Pending payment');
+			await merchant.logout();
 		})
 
 		it('allows customer to pay for his order in my account', async () => {
-            await shopper.login();
-            await shopper.goToOrders();
-            await expect(page.url()).toMatch('my-account/orders');
-			await expect(page).toMatchElement('h1', {text: 'Orders'});
+			await shopper.login();
+			await shopper.goToOrders();
+			await expect(page).toClick('.wc_payment_method woocommerce-button button pay', {text: 'Pay'});
+            await expect(page).toMatchElement('.entry-title', {text: 'Pay for order'});
+            await shopper.placeOrder();
+            await expect(page).toMatch('Order received');
 		});
 	});
 }
