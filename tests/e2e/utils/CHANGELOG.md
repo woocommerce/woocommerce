@@ -12,6 +12,7 @@
 - `createSimpleOrder( status )` component which accepts an order status string and creates a basic order with that status
 - `addProductToOrder( orderId, productName )` component which adds the provided productName to the passed in orderId
 - `createCoupon( couponAmount )` component which accepts a coupon amount string (it defaults to 5) and creates a basic coupon. Returns the generated coupon code.
+- `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 
 ## Changes
 
