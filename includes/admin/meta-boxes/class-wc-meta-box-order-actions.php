@@ -118,7 +118,7 @@ class WC_Meta_Box_Order_Actions {
 
 				WC()->payment_gateways();
 				WC()->shipping();
-				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order );
+				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order, true );
 
 				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 

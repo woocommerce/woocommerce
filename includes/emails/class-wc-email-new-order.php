@@ -80,8 +80,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 *
 		 * @param int            $order_id The order ID.
 		 * @param WC_Order|false $order Order object.
+		 * @param bool           $force_send Whether to force send the email.
 		 */
-		public function trigger( $order_id, $order = false ) {
+		public function trigger( $order_id, $order = false, $force_send = false ) {
 			$this->setup_locale();
 
 			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
@@ -92,10 +93,19 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+
+				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
+			}
+
+			if ( 'true' === $email_already_sent && ! $force_send ) {
+				return;
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+
+				$order->update_meta_data( '_new_order_email_sent', 'true' );
+				$order->save();
 			}
 
 			$this->restore_locale();
