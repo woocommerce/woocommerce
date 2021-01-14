@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce">
-	<div id="message" class="error inline">
+	<div id="message" class="error inline" style="margin-top:30px">
 		<p>
 			<strong>
 			<?php
