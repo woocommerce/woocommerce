@@ -1305,6 +1305,7 @@ return array(
 		'VN' => __( 'Vrancea', 'woocommerce' ),
 	),
 	'RS' => array(),
+	'RW' => array(),
 	'SG' => array(),
 	'SK' => array(),
 	'SI' => array(),
