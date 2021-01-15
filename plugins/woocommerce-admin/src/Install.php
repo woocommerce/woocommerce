@@ -137,7 +137,25 @@ class Install {
 		 */
 		if ( ! $version_option || $requires_update ) {
 			self::install();
+			/**
+			 * WooCommerce Admin has been installed or updated.
+			 */
 			do_action( 'woocommerce_admin_updated' );
+
+			if ( ! $version_option ) {
+				/**
+				 * WooCommerce Admin has been installed.
+				 */
+				do_action( 'woocommerce_admin_newly_installed' );
+			}
+
+			if ( $requires_update ) {
+				/**
+				 * An existing installation of WooCommerce Admin has been
+				 * updated.
+				 */
+				do_action( 'woocommerce_admin_updated_existing' );
+			}
 		}
 
 		/*

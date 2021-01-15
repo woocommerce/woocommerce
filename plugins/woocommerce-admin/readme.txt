@@ -104,6 +104,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: update the content for the ChooseNiche note. #6048
 - Fix: Generate JSON translation chunks on plugin activation #6028
 - Dev: Update travis CI distribution. #6067
+- Add: Manage activity from home screen inbox message. #6072
 
 == 1.8.3 1/5/2021 ==
 

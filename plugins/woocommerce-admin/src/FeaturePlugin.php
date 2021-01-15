@@ -21,6 +21,7 @@ use \Automattic\WooCommerce\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
+use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
 
 /**
  * Feature plugin main class.
@@ -193,6 +194,7 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new LearnMoreAboutVariableProducts();
 		new WelcomeToWooCommerceForStoreUsers();
+		new ManageStoreActivityFromHomeScreen();
 
 		// Initialize RemoteInboxNotificationsEngine.
 		RemoteInboxNotificationsEngine::init();
