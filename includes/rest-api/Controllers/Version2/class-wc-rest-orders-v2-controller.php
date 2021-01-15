@@ -260,17 +260,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		// These fields are dependent on other fields.
+		$dependent_fields = array(
+			'date_created_gmt'   => 'date_created',
+			'date_modified_gmt'  => 'date_modified',
+			'date_completed_gmt' => 'date_completed',
+			'date_paid_gmt'      => 'date_paid',
+		);
+
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Only fetch fields that we need.
-		$request = func_get_arg( 1 );
-		if ( $request ) {
-			$fields            = $this->get_fields_for_response( $request );
-			$extra_fields      = array_intersect( $extra_fields, $fields );
-			$format_decimal    = array_intersect( $format_decimal, $fields );
-			$format_date       = array_intersect( $format_date, $fields );
-			$format_line_items = array_intersect( $format_line_items, $fields );
+		$fields = $this->get_fields_for_response( $this->request );
+		foreach ( $dependent_fields as $field_key => $dependency ) {
+			if ( in_array( $field_key, $fields ) && ! in_array( $dependency, $fields ) ) {
+				$fields[] = $dependency;
+			}
 		}
+
+		$extra_fields      = array_intersect( $extra_fields, $fields );
+		$format_decimal    = array_intersect( $format_decimal, $fields );
+		$format_date       = array_intersect( $format_date, $fields );
+
+		$format_line_items = array_intersect( $format_line_items, $fields );
 
 		$data = $order->get_base_data();
 
@@ -281,7 +293,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['meta_data'] = $order->get_meta_data();
 					break;
 				case 'line_items':
-					$data['line_items'] = $order->get_items( 'line_item');
+					$data['line_items'] = $order->get_items( 'line_item' );
 					break;
 				case 'tax_lines':
 					$data['tax_lines'] = $order->get_items( 'tax' );
@@ -296,6 +308,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['coupon_lines'] = $order->get_items( 'coupon' );
 					break;
 				case 'refunds':
+					$data['refunds'] = array();
 					foreach ( $order->get_refunds() as $refund ) {
 						$data['refunds'][] = array(
 							'id'     => $refund->get_id(),
@@ -387,10 +400,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
 		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$data                = $this->get_formatted_item_data( $object, $request );
-		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$request['context']  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                = $this->get_formatted_item_data( $object );
 		$data                = $this->add_additional_fields_to_object( $data, $request );
-		$data                = $this->filter_response_by_context( $data, $context );
+		$data                = $this->filter_response_by_context( $data, $request['context'] );
 		$response            = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 

@@ -18,6 +18,11 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
+const config = require( 'config' );
+const simpleProductName = config.get( 'products.simple.name' );
+const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const twoProductPrice = singleProductPrice * 2;
+
 const runCartPageTest = () => {
 	describe('Cart page', () => {
 		beforeAll(async () => {
@@ -33,32 +38,32 @@ const runCartPageTest = () => {
 
 		it('should add the product to the cart when "Add to cart" is clicked', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage('Simple product');
+			await shopper.addToCartFromShopPage(simpleProductName);
 
 			await shopper.goToCart();
-			await shopper.productIsInCart('Simple product');
+			await shopper.productIsInCart(simpleProductName);
 		});
 
 		it('should increase item qty when "Add to cart" of the same product is clicked', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage('Simple product');
+			await shopper.addToCartFromShopPage(simpleProductName);
 
 			await shopper.goToCart();
-			await shopper.productIsInCart('Simple product', 2);
+			await shopper.productIsInCart(simpleProductName, 2);
 		});
 
 		it('should update qty when updated via qty input', async () => {
 			await shopper.goToCart();
-			await shopper.setCartQuantity('Simple product', 4);
+			await shopper.setCartQuantity(simpleProductName, 4);
 			await expect(page).toClick('button', {text: 'Update cart'});
 			await uiUnblocked();
 
-			await shopper.productIsInCart('Simple product', 4);
+			await shopper.productIsInCart(simpleProductName, 4);
 		});
 
 		it('should remove the item from the cart when remove is clicked', async () => {
 			await shopper.goToCart();
-			await shopper.removeFromCart('Simple product');
+			await shopper.removeFromCart(simpleProductName);
 			await uiUnblocked();
 
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
@@ -66,17 +71,17 @@ const runCartPageTest = () => {
 
 		it('should update subtotal in cart totals when adding product to the cart', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage('Simple product');
+			await shopper.addToCartFromShopPage(simpleProductName);
 
 			await shopper.goToCart();
-			await shopper.productIsInCart('Simple product', 1);
-			await expect(page).toMatchElement('.cart-subtotal .amount', {text: '$9.99'});
+			await shopper.productIsInCart(simpleProductName, 1);
+			await expect(page).toMatchElement('.cart-subtotal .amount', {text: `$${ singleProductPrice }`});
 
-			await shopper.setCartQuantity('Simple product', 2);
+			await shopper.setCartQuantity(simpleProductName, 2);
 			await expect(page).toClick('button', {text: 'Update cart'});
 			await uiUnblocked();
 
-			await expect(page).toMatchElement('.cart-subtotal .amount', {text: '$19.98'});
+			await expect(page).toMatchElement('.cart-subtotal .amount', {text: `$${ twoProductPrice }`});
 		});
 
 		it('should go to the checkout page when "Proceed to Checkout" is clicked', async () => {

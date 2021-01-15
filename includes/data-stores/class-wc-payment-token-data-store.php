@@ -305,7 +305,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id Token ID.
+	 * @param int $token_id Token ID.
 	 * @return object
 	 */
 	public function get_token_by_id( $token_id ) {
@@ -322,7 +322,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Returns metadata for a specific payment token.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id Token ID.
+	 * @param int $token_id Token ID.
 	 * @return array
 	 */
 	public function get_metadata( $token_id ) {
@@ -333,7 +333,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Get a token's type by ID.
 	 *
 	 * @since 3.0.0
-	 * @param id $token_id Token ID.
+	 * @param int $token_id Token ID.
 	 * @return string
 	 */
 	public function get_token_type_by_id( $token_id ) {
@@ -353,7 +353,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param id   $token_id Token ID.
+	 * @param int  $token_id Token ID.
 	 * @param bool $status Whether given payment token is the default payment token or not.
 	 *
 	 * @return void
