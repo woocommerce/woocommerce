@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\Survey;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -56,7 +57,7 @@ class NavigationFeedbackFollowUp {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'share-feedback', __( 'Share feedback', 'woocommerce-admin' ), 'https://automattic.survey.fm/new-navigation' );
+		$note->add_action( 'share-feedback', __( 'Share feedback', 'woocommerce-admin' ), Survey::get_url( '/new-navigation' ) );
 		return $note;
 	}
 }

@@ -19,6 +19,10 @@ export class NavigationOptOutContainer extends Component {
 			return null;
 		}
 
+		if ( ! window.surveyData || ! window.surveyData.url ) {
+			return null;
+		}
+
 		return (
 			<Modal
 				title={ __( 'Help us improve', 'woocommerce-admin' ) }
@@ -45,7 +49,7 @@ export class NavigationOptOutContainer extends Component {
 					<Button
 						isPrimary
 						target="_blank"
-						href="https://automattic.survey.fm/new-navigation-opt-out"
+						href={ window.surveyData.url }
 						onClick={ () =>
 							this.setState( { isModalOpen: false } )
 						}

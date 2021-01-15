@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\Survey;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
@@ -201,6 +202,14 @@ class Init {
 			array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ),
 			Loader::get_file_version( 'js' ),
 			true
+		);
+
+		wp_localize_script(
+			'wc-admin-navigation-opt-out',
+			'surveyData',
+			array(
+				'url' => Survey::get_url( '/new-navigation-opt-out' ),
+			)
 		);
 
 		delete_option( 'woocommerce_navigation_show_opt_out' );
