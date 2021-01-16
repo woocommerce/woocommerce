@@ -338,7 +338,7 @@ class CartSchema extends AbstractSchema {
 			'needs_shipping'          => $cart->needs_shipping(),
 			'has_calculated_shipping' => $has_calculated_shipping,
 			'fees'                    => $this->get_item_responses_from_schema( $this->fee_schema, $cart->get_fees() ),
-			'totals'                  => $this->prepare_currency_response(
+			'totals'                  => (object) $this->prepare_currency_response(
 				[
 					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
 					'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),

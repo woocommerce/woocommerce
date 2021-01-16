@@ -107,6 +107,7 @@ function wc_install_core() {
 tests_add_filter(
 	'muplugins_loaded',
 	function() {
+		define( 'JETPACK_AUTOLOAD_DEV', true );
 		wc_load_core();
 		// install blocks plugin
 		wc_blocks_install();
