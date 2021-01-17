@@ -71,6 +71,9 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 2. Activity Panels
 3. Analytics
 
+== Unreleased ==
+- Tweak: update the content and timing of the NeedSomeInspiration note. #6076
+
 == Changelog ==
 
 == 1.9.0 1/15/2021 ==
