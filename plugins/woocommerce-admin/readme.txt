@@ -72,7 +72,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Unreleased ==
+
+- Fix: allow for more terms to be shown for product attributes in the Analytics orders report. #5868
 - Tweak: update the content and timing of the NeedSomeInspiration note. #6076
+
 
 == Changelog ==
 
