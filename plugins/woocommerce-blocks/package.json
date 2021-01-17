@@ -41,6 +41,7 @@
 		"lint:css": "stylelint 'assets/**/*.scss'",
 		"lint:css-fix": "stylelint 'assets/**/*.scss' --fix",
 		"lint:js": "wp-scripts lint-js",
+		"lint:js:report": "npm run lint:js -- --output-file eslint_report.json --format json",
 		"lint:js-fix": "eslint assets/js --ext=js,jsx --fix",
 		"lint:php": "composer run-script phpcs ./src",
 		"package-plugin": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh",
