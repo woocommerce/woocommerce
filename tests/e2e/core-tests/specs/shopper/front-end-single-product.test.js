@@ -7,11 +7,13 @@ const {
 	merchant,
 	createSimpleProduct,
 	createVariableProduct,
+	createGroupedProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
 
 let simplePostIdValue;
 let variablePostIdValue;
+let groupedPostIdValue;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
@@ -67,6 +69,24 @@ const runSingleProductPageTest = () => {
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 	});
+
+	describe('Grouped Product Page', () => {
+		beforeAll(async () => {
+			await merchant.login();
+			groupedPostIdValue = await createGroupedProduct();
+			await merchant.logout();
+		})
+
+		it('should be able to add grouped products to the cart', async () => {
+			// Add a grouped product to cart
+			await shopper.goToProduct(groupedPostIdValue);
+
+			// Verify cart contents
+
+			// Remove items from cart
+
+		})
+	})
 };
 
 module.exports = runSingleProductPageTest;

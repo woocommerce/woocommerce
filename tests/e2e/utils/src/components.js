@@ -346,6 +346,24 @@ const createVariableProduct = async () => {
 };
 
 /**
+ * Create grouped product.
+ */
+const createGroupedProduct = async () => {
+	// Create two products to be linked in a grouped product after
+
+	
+	// Go to "add product" page
+	await merchant.openNewProduct();
+
+	// Make sure we're on the add product page
+	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+
+	// Set product data
+	await expect( page ).toFill( '#title', 'Grouped Product' );
+	await expect( page ).toSelect( '#product-type', 'Grouped product' );
+}
+
+/**
  * Create a basic order with the provided order status.
  *
  * @param orderStatus Status of the new order. Defaults to `Pending payment`.
@@ -431,6 +449,7 @@ export {
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createGroupedProduct,
 	createSimpleOrder,
 	verifyAndPublish,
 	addProductToOrder,
