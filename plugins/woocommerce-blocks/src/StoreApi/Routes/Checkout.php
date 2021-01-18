@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartException;
 use \Exception;
 use \WP_Error;
 use \WP_REST_Server;
@@ -190,7 +191,10 @@ class Checkout extends AbstractRoute {
 	 * 5. Process Payment
 	 *
 	 * @throws RouteException On error.
+	 * @throws InvalidStockLevelsInCartException On error.
+	 *
 	 * @param WP_REST_Request $request Request object.
+	 *
 	 * @return WP_REST_Response
 	 */
 	protected function get_route_post_response( WP_REST_Request $request ) {
@@ -260,36 +264,51 @@ class Checkout extends AbstractRoute {
 	 * @return WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
+		$error_from_message = new WP_Error(
+			$error_code,
+			$error_message
+		);
 		switch ( $http_status_code ) {
-			case 400:
-				return new WP_Error(
-					$error_code,
-					$error_message,
-					array_merge(
-						$additional_data,
-						[
-							'status' => $http_status_code,
-						]
-					)
-				);
 			case 409:
-				// If there was a conflict, return the cart so the client can resolve it.
-				$controller = new CartController();
-				$cart       = $controller->get_cart_instance();
-
-				return new WP_Error(
-					$error_code,
-					$error_message,
-					array_merge(
-						$additional_data,
-						[
-							'status' => $http_status_code,
-							'cart'   => wc()->api->get_endpoint_data( '/wc/store/cart' ),
-						]
-					)
-				);
+				// 409 is when there was a conflict, so we return the cart so the client can resolve it.
+				return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code, true );
 		}
-		return new WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
+		return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code );
+	}
+
+	/**
+	 * Get route response when something went wrong.
+	 *
+	 * @param WP_Error $error_object User facing error message.
+	 * @param int      $http_status_code HTTP status. Defaults to 500.
+	 * @param array    $additional_data  Extra data (key value pairs) to expose in the error response.
+	 * @return WP_Error WP Error object.
+	 */
+	protected function get_route_error_response_from_object( $error_object, $http_status_code = 500, $additional_data = [] ) {
+		switch ( $http_status_code ) {
+			case 409:
+				// 409 is when there was a conflict, so we return the cart so the client can resolve it.
+				return $this->add_data_to_error_object( $error_object, $additional_data, $http_status_code, true );
+		}
+		return $this->add_data_to_error_object( $error_object, $additional_data, $http_status_code );
+	}
+
+	/**
+	 * Adds additional data to the WP_Error object.
+	 *
+	 * @param WP_Error $error The error object to add the cart to.
+	 * @param array    $data The data to add to the error object.
+	 * @param int      $http_status_code The HTTP status code this error should return.
+	 * @param bool     $include_cart Whether the cart should be included in the error data.
+	 * @returns WP_Error The WP_Error with the cart added.
+	 */
+	private function add_data_to_error_object( $error, $data, $http_status_code, bool $include_cart = false ) {
+		$data = array_merge( $data, [ 'status' => $http_status_code ] );
+		if ( $include_cart ) {
+			$data = array_merge( $data, [ 'cart' => wc()->api->get_endpoint_data( '/wc/store/cart' ) ] );
+		}
+		$error->add_data( $data );
+		return $error;
 	}
 
 	/**
