@@ -132,7 +132,7 @@ class WC_Post_Data {
 		/**
 		 * Filter to prevent variations from being deleted while switching from a variable product type to a variable product type.
 		 *
-		 * @since 4.9.0
+		 * @since 5.0.0
 		 *
 		 * @param bool       A boolean value of true will delete the variations.
 		 * @param WC_Product $product Product data.
