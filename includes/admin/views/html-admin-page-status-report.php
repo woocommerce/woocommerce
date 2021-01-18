@@ -11,7 +11,8 @@ global $wpdb;
 
 if ( ! defined( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
 	// Define if we're checking against major or minor versions.
-	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'major' );
+	// Since 5.0 all versions are backwards compatible, so there's no more check.
+	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
 }
 
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
