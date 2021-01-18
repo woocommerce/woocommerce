@@ -232,6 +232,17 @@ const CheckoutProcessor = () => {
 					addErrorNotice( formatStoreApiErrorMessage( response ), {
 						id: 'checkout',
 					} );
+
+					if ( Array.isArray( response.additional_errors ) ) {
+						response.additional_errors.forEach(
+							( additionalError ) => {
+								addErrorNotice( additionalError.message, {
+									id: additionalError.error_code,
+								} );
+							}
+						);
+					}
+
 					dispatchActions.setHasError();
 					dispatchActions.setAfterProcessing( response );
 					setIsProcessingOrder( false );
