@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -264,6 +265,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_version_and_type( $product );
 		$this->handle_updated_props( $product );
 		$this->clear_caches( $product );
+
+		wc_get_container()
+			->get( DownloadPermissionsAdjuster::class )
+			->maybe_schedule_adjust_download_permissions( $product );
 
 		$product->apply_changes();
 
