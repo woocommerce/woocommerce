@@ -356,21 +356,24 @@ class WC_Comments {
 			return array();
 		}
 
-		$product_id_string = implode( "','", array_map( 'esc_sql', $product_ids ) );
+		$product_id_string_placeholder = substr( str_repeat( ',%s', count( $product_ids ) ), 1 );
 
 		$review_counts = $wpdb->get_results(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"
-				SELECT comment_post_ID as product_id, COUNT( comment_post_ID ) as review_count
-				FROM $wpdb->comments
-				WHERE
-					comment_parent = 0
-					AND comment_post_ID IN ( '$product_id_string' )
-					AND comment_approved = '1'
-					AND comment_type in ( 'review', '', 'comment' )
-				GROUP BY product_id
-			",
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Ignored for allowing interpolation in IN query.
+			$wpdb->prepare(
+				"
+					SELECT comment_post_ID as product_id, COUNT( comment_post_ID ) as review_count
+					FROM $wpdb->comments
+					WHERE
+						comment_parent = 0
+						AND comment_post_ID IN ( $product_id_string_placeholder )
+						AND comment_approved = '1'
+						AND comment_type in ( 'review', '', 'comment' )
+					GROUP BY product_id
+				",
+				$product_ids
+			),
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared.
 			ARRAY_A
 		);
 

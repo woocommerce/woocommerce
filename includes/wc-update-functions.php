@@ -2236,7 +2236,7 @@ function wc_update_500_fix_product_review_count() {
 			"
 				SELECT post_id, meta_value
 				FROM $wpdb->postmeta
-				JOIN $wpdb->posts 
+				JOIN $wpdb->posts
 					ON $wpdb->postmeta.post_id = $wpdb->posts.ID
 				WHERE
 					post_type = 'product'
@@ -2278,7 +2278,7 @@ function wc_update_500_fix_product_review_count() {
 }
 
 /**
- * Update DB version to 4.5.0.
+ * Update DB version to 5.0.0.
  */
 function wc_update_500_db_version() {
 	WC_Install::update_db_version( '5.0.0' );
