@@ -6,8 +6,8 @@
 class WC_Emails_Tests extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test that email_header hooks are compitable with do_action calls with only param.
-	 * This test should be dropped after all extensions are using compitable do_action calls.
+	 * Test that email_header hooks are compatible with do_action calls with only param.
+	 * This test should be dropped after all extensions are using compatible do_action calls.
 	 */
 	public function test_email_header_is_compatible_with_legacy_do_action() {
 		$email_object = new WC_Emails();
@@ -21,8 +21,8 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that email_footer hooks are compitable with do_action calls with only param.
-	 * This test should be dropped after all extensions are using compitable do_action calls.
+	 * Test that email_footer hooks are compatible with do_action calls with only param.
+	 * This test should be dropped after all extensions are using compatible do_action calls.
 	 */
 	public function test_email_footer_is_compatible_with_legacy_do_action() {
 		$email_object = new WC_Emails();
