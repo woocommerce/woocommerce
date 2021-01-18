@@ -81,7 +81,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 * Assumes that all the keys in the passed data are valid.
 	 *
 	 * @param array $data Data to create the permission for.
-	 * @returns int The database id of the created permission, or false if the permission creation failed.
+	 * @return int The database id of the created permission, or false if the permission creation failed.
 	 */
 	private function insert_new_download_permission( $data ) {
 		global $wpdb;
@@ -137,7 +137,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			return $adjusted_date;
 		}
 
-		throw new Exception( "I don't know how to get a date from a " . is_object( $date ) ? get_class( $date ) : gettype( $date ) );
+		$msg = sprintf( __( "I don't know how to get a date from a %s", 'woocommerce' ), is_object( $date ) ? get_class( $date ) : gettype( $date ) );
+		throw new Exception( $msg );
 	}
 
 	/**
