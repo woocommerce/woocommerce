@@ -660,49 +660,6 @@ class WC_Tracker {
 		return ( '0' !== $result ) ? 'Yes' : 'No';
 	}
 
-	/**
-	 * Get blocks from a woocommerce page.
-	 *
-	 * @param string $woo_page_name A woocommerce page e.g. `checkout` or `cart`.
-	 * @return array Array of blocks as returned by parse_blocks().
-	 */
-	private static function get_all_blocks_from_page( $woo_page_name ) {
-		$page_id = wc_get_page_id( $woo_page_name );
-
-		$page = get_post( $page_id );
-		if ( ! $page ) {
-			return array();
-		}
-
-		$blocks = parse_blocks( $page->post_content );
-		if ( ! $blocks ) {
-			return array();
-		}
-
-		return $blocks;
-	}
-
-	/**
-	 * Get all instances of the specified block on a specific woo page
-	 * (e.g. `cart` or `checkout` page).
-	 *
-	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
-	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
-	 * @return array Array of blocks as returned by parse_blocks().
-	 */
-	private static function get_blocks_from_page( $block_name, $woo_page_name ) {
-		$page_blocks = self::get_all_blocks_from_page( $woo_page_name );
-
-		// Get any instances of the specified block.
-		return array_values(
-			array_filter(
-				$page_blocks,
-				function ( $block ) use ( $block_name ) {
-					return ( $block_name === $block['blockName'] );
-				}
-			)
-		);
-	}
 
 	/**
 	 * Get tracker data for a specific block type on a woocommerce page.
@@ -714,7 +671,7 @@ class WC_Tracker {
 	 * - block_attributes
 	 */
 	public static function get_block_tracker_data( $block_name, $woo_page_name ) {
-		$blocks = self::get_blocks_from_page( $block_name, $woo_page_name );
+		$blocks = WC_Blocks_Utils::get_blocks_from_page( $block_name, $woo_page_name );
 
 		$block_present = false;
 		$attributes    = array();

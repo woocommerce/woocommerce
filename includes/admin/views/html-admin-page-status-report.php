@@ -844,10 +844,11 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
 			} else {
-				// Shortcode check.
-				if ( $_page['shortcode_required'] ) {
-					if ( ! $_page['shortcode_present'] ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page does not contain the shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) . '</mark>';
+				// Shortcode and block check.
+				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
+					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
+						/* Translators: %1$s: shortcode text, %2$s: block slug. */
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
 						$found_error = true;
 					}
 				}
