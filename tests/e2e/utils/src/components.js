@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, selectOptionInSelect2 } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -350,16 +350,14 @@ const createVariableProduct = async () => {
  */
 const createGroupedProduct = async () => {
 	// Create two products to be linked in a grouped product after
-	const product1 = await factories.products.simple.create( {
-		name: simpleProductName + new Date().getTime().toString(),
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 1',
 		regularPrice: simpleProductPrice
 	} );
-	let product1name = product1.name;
-	const product2 = await factories.products.simple.create( {
-		name: simpleProductName + new Date().getTime().toString(),
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 2',
 		regularPrice: simpleProductPrice
 	} );
-	let product2name = product2.name;
 
 	// Go to "add product" page
 	await merchant.openNewProduct();
@@ -367,9 +365,18 @@ const createGroupedProduct = async () => {
 	// Make sure we're on the add product page
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
-	// Set product data
+	// Set product data and save the product
 	await expect( page ).toFill( '#title', 'Grouped Product' );
 	await expect( page ).toSelect( '#product-type', 'Grouped product' );
+	await clickTab('Linked Products');
+	await selectOptionInSelect2(simpleProductName + ' 1');
+	await selectOptionInSelect2(simpleProductName + ' 2');
+	await verifyAndPublish();
+
+	// Get product ID
+	const groupedPostId = await page.$( '#post_ID' );
+	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
+	return groupedPostIdValue;
 }
 
 /**

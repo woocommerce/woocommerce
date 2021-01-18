@@ -18,7 +18,8 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
 const runSingleProductPageTest = () => {
-	describe('Single Product Page', () => {
+// REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE
+	describe.skip('Single Product Page', () => {
 		beforeAll(async () => {
 			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
@@ -81,8 +82,9 @@ const runSingleProductPageTest = () => {
 			// Add a grouped product to cart
 			await shopper.goToProduct(groupedPostIdValue);
 
-			// Verify cart contents
 
+			// Verify cart contents
+			
 			// Remove items from cart
 
 		})
