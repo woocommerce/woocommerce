@@ -565,6 +565,8 @@ class WC_Product_CSV_Importer_Controller {
 						__( 'Attribute %d global', 'woocommerce' ) => 'attributes:taxonomy',
 						/* translators: %d: Attribute number */
 						__( 'Attribute %d default', 'woocommerce' ) => 'attributes:default',
+						/* translators: %d: Attribute number */
+						__( 'Attribute %d variation', 'woocommerce' ) => 'attributes:variation',
 						/* translators: %d: Download number */
 						__( 'Download %d name', 'woocommerce' ) => 'downloads:name',
 						/* translators: %d: Download number */
@@ -735,6 +737,7 @@ class WC_Product_CSV_Importer_Controller {
 					'attributes:taxonomy' . $index => __( 'Is a global attribute?', 'woocommerce' ),
 					'attributes:visible' . $index  => __( 'Attribute visibility', 'woocommerce' ),
 					'attributes:default' . $index  => __( 'Default attribute', 'woocommerce' ),
+					'attributes:variation' . $index  => __( 'Used for variations?', 'woocommerce' ),
 				),
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
