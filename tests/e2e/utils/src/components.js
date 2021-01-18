@@ -350,8 +350,17 @@ const createVariableProduct = async () => {
  */
 const createGroupedProduct = async () => {
 	// Create two products to be linked in a grouped product after
+	const product1 = await factories.products.simple.create( {
+		name: simpleProductName + new Date().getTime().toString(),
+		regularPrice: simpleProductPrice
+	} );
+	let product1name = product1.name;
+	const product2 = await factories.products.simple.create( {
+		name: simpleProductName + new Date().getTime().toString(),
+		regularPrice: simpleProductPrice
+	} );
+	let product2name = product2.name;
 
-	
 	// Go to "add product" page
 	await merchant.openNewProduct();
 
