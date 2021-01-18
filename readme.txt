@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Styling for dismiss link of the store notice for Twenty Twenty and Twenty Twenty One themes. #28790
 * Tweak - Notice to deprecate legacy reports in favor of the newer analytics page. #28799
 * Tweak - Ability to create new tags for products when creating a product via the REST API. #28723
+* Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
 * Fix - Improves the logic for deleting variations when a product type is changed. #27137
 * Fix - Use 'setlocale' in 'wc_ascii_uasort_comparison' for compatibility with PHP 8. #27844
 * Fix - Normalize end of lines in log-handler-email tests for compatibility with PHP 8. #27844
