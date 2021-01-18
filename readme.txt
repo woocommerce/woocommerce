@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.3
 Tested up to: 5.6
 Requires PHP: 7.0
-Stable tag: 4.8.0
+Stable tag: 4.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,11 +160,36 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 4.9.0 - 2021-01-xx =
+= 5.0.0 - 2021-02-09 =
+
+**WooCommerce**
+* Enhancement - Create additional download permissions for simple downloadable products that are converted to variable products provided that there are variations offering the same files. #28521
+* Enhancement - Export SASS variables as CSS variables. #28709
+* Tweak - Added "Store management insights" option. #28712
+* Tweak - Styling for dismiss link of the store notice for Twenty Twenty and Twenty Twenty One themes. #28790
+* Tweak - Notice to deprecate legacy reports in favor of the newer analytics page. #28799
+* Tweak - Ability to create new tags for products when creating a product via the REST API. #28723
+* Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
+* Fix - Improves the logic for deleting variations when a product type is changed. #27137
+* Fix - Use 'setlocale' in 'wc_ascii_uasort_comparison' for compatibility with PHP 8. #27844
+* Fix - Normalize end of lines in log-handler-email tests for compatibility with PHP 8. #27844
+* Fix - Invert `if` statement to reduce nesting level in `\WC_Shipping::calculate_shipping_for_package`. #28558
+* Fix - Changed value for speak to fix css3 validation issue. #28607
+* Fix - Check if Cart and Checkout pages are using block instead of shortcode for the Status check. #28679
+* Fix - Attributes on Edit Product page - "Select all" not working after "Select none" used. #28681
+* Fix - Ensure the orders and products statuses are reverted correctly when restoring them. #28690
+* Fix - Add checks to make sure session is initialised before loading the data store. #28692
+* Fix - Update featured extensions API endpoint on WooCommerce/Extensions page. #28719
+* Fix - Add Authorization header to the features extensions and search requests made to the marketplace. #28719
+* Fix - Duplicate New Order emails being sent when changing order status. #28809
+* Fix - Add migration to fix existing product review count. #28814
+* Dev - Use a custom fork of PHPUnit 7 in PHP 8 to workaround compatibility issues. #27844
+* Dev - Introduced `woocommerce_activated_plugin` hook. #28698
+* Dev - Clean up the `WC_Shipping_Zone_Data_Store::read()` method, documenting the `woocommerce_shipping_zone_loaded` hook. #28801
+* Localization - Adding states for Dominican Republic. #28713
+* Localization - Restored list of Serbia districts #28778
+* Localization - Update Indian state name from `Orissa` to `Odisha`. #28740
+* Localization - Remove post code requirement for Guatemala. #28706
+* Localization - Fixed name for state in Guatemala. #28706
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
-
-== Upgrade Notice ==
-
-= 4.0 =
-4.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
