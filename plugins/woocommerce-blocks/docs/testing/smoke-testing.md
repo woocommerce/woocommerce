@@ -66,6 +66,8 @@ To make future testing more efficient, we recommend setting up some Blocks in ad
 ```
 </details>
 
+In the `wp:woocommerce/product-search` substitute the URL used for the `action` attribute to your site URL or the block will not embedd correctly. 
+
 
 ### 2. Create a page with the All Products Block, and some Filter Blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized.
 
