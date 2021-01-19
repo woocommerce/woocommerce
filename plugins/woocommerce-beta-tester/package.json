@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "build": "npm run uglify && npm run less",
+    "build": "./bin/build-zip.sh",
     "preuglify": "rm -f $npm_package_assets_js_min",
     "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
     "preless": "rm -f $npm_package_assets_styles_css",
@@ -35,5 +35,8 @@
   "engines": {
     "node": ">=6.8.1",
     "npm": ">=4.0.5"
+  },
+  "config": {
+    "wp_org_slug": "woocommerce-beta-tester"
   }
 }
