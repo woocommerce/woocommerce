@@ -191,6 +191,22 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'id'   => 'email_template_options',
 				),
 
+				array(
+					'title' => __( 'Store management insights', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'email_merchant_notes',
+				),
+
+				array(
+					'title'         => __( 'Enable email insights', 'woocommerce' ),
+					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
+					'id'            => 'woocommerce_merchant_email_notifications',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'yes',
+					'autoload'      => false,
+				),
+
 			)
 		);
 

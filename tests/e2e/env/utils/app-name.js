@@ -13,8 +13,15 @@ const getAppName = () => {
 	if ( testConfig.appName ) {
 		return testConfig.appName;
 	}
-	const appRoot = getAppRoot();
-	return path.basename( appRoot );
+	return getAppBase();
 };
 
-module.exports = getAppName;
+const getAppBase = () => {
+	const appRoot = getAppRoot();
+	return path.basename( appRoot );
+}
+
+module.exports = {
+	getAppName,
+	getAppBase,
+};

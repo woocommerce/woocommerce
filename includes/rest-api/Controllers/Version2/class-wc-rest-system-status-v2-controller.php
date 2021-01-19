@@ -1162,7 +1162,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 	/**
 	 * Returns a mini-report on WC pages and if they are configured correctly:
-	 * Present, visible, and including the correct shortcode.
+	 * Present, visible, and including the correct shortcode or block.
 	 *
 	 * @return array
 	 */
@@ -1172,22 +1172,27 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_shop_page_id',
 				'shortcode' => '',
+				'block'     => '',
 			),
 			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+				'block'     => 'woocommerce/cart',
 			),
 			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+				'block'     => 'woocommerce/checkout',
 			),
 			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+				'block'     => '',
 			),
 			_x( 'Terms and conditions', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_terms_page_id',
 				'shortcode' => '',
+				'block'     => '',
 			),
 		);
 
@@ -1199,6 +1204,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$page_visible       = false;
 			$shortcode_present  = false;
 			$shortcode_required = false;
+			$block_present      = false;
+			$block_required     = false;
 
 			// Page checks.
 			if ( $page_id ) {
@@ -1220,6 +1227,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				}
 			}
 
+			// Block checks.
+			if ( $values['block'] && get_post( $page_id ) ) {
+				$block_required = true;
+				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
+			}
+
 			// Wrap up our findings into an output array.
 			$pages_output[] = array(
 				'page_name'          => $page_name,
@@ -1228,8 +1241,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'page_exists'        => $page_exists,
 				'page_visible'       => $page_visible,
 				'shortcode'          => $values['shortcode'],
+				'block'              => $values['block'],
 				'shortcode_required' => $shortcode_required,
 				'shortcode_present'  => $shortcode_present,
+				'block_present'      => $block_present,
+				'block_required'     => $block_required,
 			);
 		}
 
