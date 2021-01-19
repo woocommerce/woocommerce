@@ -291,7 +291,7 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id = absint( $order->get_user_id() );
+								$user_id  = absint( $order->get_user_id() );
 								$customer = new WC_Customer( $user_id );
 								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
