@@ -58,6 +58,24 @@ class WC_Countries {
 	}
 
 	/**
+	 * Check if a given code represents a valid ISO 3166-1 alpha-2 code for a country known to us.
+	 *
+	 * @since 5.1.0
+	 * @param string $country_code The country code to check as a ISO 3166-1 alpha-2 code.
+	 * @param bool   $throw True to throw an exception if the country code isn't recognized.
+	 * @return bool True if the country is known to us, false otherwise.
+	 * @throws Exception The country code isn't recognized, and the $throw argument was passed as true.
+	 */
+	public function country_exists( $country_code, $throw = false ) {
+		$exists = array_key_exists( $country_code, $this->get_countries() );
+		if ( ! $exists && $throw ) {
+			/* translators: %s: ISO 3166-1 alpha-2 country code. */
+			throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $country_code ) );
+		}
+		return $exists;
+	}
+
+	/**
 	 * Get all continents.
 	 *
 	 * @return array
@@ -919,7 +937,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
-							'hidden' => true,
+							'hidden'   => true,
 						),
 					),
 					'DK' => array(
@@ -928,7 +946,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
-							'hidden' => true,
+							'hidden'   => true,
 						),
 					),
 					'EE' => array(
@@ -999,7 +1017,7 @@ class WC_Countries {
 						),
 					),
 					'HU' => array(
-						'last_name' => array(
+						'last_name'  => array(
 							'class'    => array( 'form-row-first' ),
 							'priority' => 10,
 						),
@@ -1007,20 +1025,20 @@ class WC_Countries {
 							'class'    => array( 'form-row-last' ),
 							'priority' => 20,
 						),
-						'postcode' => array(
+						'postcode'   => array(
 							'class'    => array( 'form-row-first', 'address-field' ),
 							'priority' => 65,
 						),
-						'city' => array(
+						'city'       => array(
 							'class' => array( 'form-row-last', 'address-field' ),
 						),
-						'address_1' => array(
+						'address_1'  => array(
 							'priority' => 71,
 						),
-						'address_2' => array(
+						'address_2'  => array(
 							'priority' => 72,
 						),
-						'state' => array(
+						'state'      => array(
 							'label' => __( 'County', 'woocommerce' ),
 						),
 					),
@@ -1242,7 +1260,7 @@ class WC_Countries {
 							'required' => true,
 						),
 						'state'    => array(
-							'label' => __( 'District', 'woocommerce' ),
+							'label'    => __( 'District', 'woocommerce' ),
 							'required' => false,
 						),
 					),
@@ -1314,7 +1332,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
-							'hidden' => true,
+							'hidden'   => true,
 						),
 					),
 					'TR' => array(

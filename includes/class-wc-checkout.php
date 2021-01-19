@@ -830,6 +830,11 @@ class WC_Checkout {
 		$this->validate_posted_data( $data, $errors );
 		$this->check_cart_items();
 
+		$billing_country = WC()->customer->get_shipping_country();
+		if ( $billing_country ) {
+			WC()->countries->country_exists( $billing_country, true );
+		}
+
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) { // WPCS: input var ok, CSRF ok.
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
@@ -839,6 +844,9 @@ class WC_Checkout {
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElseif
+			} elseif ( ! WC()->countries->country_exists( $shipping_country, true ) ) {
+				// Nothing to do, as an exception will have been thrown.
 			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				/* translators: %s: shipping location */
 				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
