@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 - Fix: allow for more terms to be shown for product attributes in the Analytics orders report. #5868
 - Tweak: update the content and timing of the NeedSomeInspiration note. #6076
+- Add: Remote inbox notifications contains comparison and fix product rule. #6073
 
 
 == Changelog ==

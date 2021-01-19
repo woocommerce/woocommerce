@@ -128,6 +128,34 @@ The `status` is what the status of the created note will be set to after interac
 ## Rule
 Rules in an array are executed as an AND operation. If there are no rules in the array the result is false and the specified notification is not shown.
 
+### Operations
+Some rule types support an `operation` value, which is used to compare two
+values. The following operations are implemented:
+
+- `=`
+- `<`
+- `<=`
+- `>`
+- `>=`
+- `!=`
+- `contains`
+- `!contains`
+
+`contains` and `!contains` allow checking if the provided value is present (or
+not present) in the haystack value. An example of this is using the
+`onboarding_profile` rule to match on a value in the `product_types` array -
+this rule matches if `physical` was selected as a product type in the
+onboarding profile:
+
+```json
+{
+	'type': 'onboarding_profile',
+	'index': 'product_types',
+	'operation': 'contains',
+	'value': 'physical'
+}
+```
+
 ### Plugins activated
 This passes if all of the listed plugins are installed and activated.
 
@@ -265,6 +293,7 @@ The currently available indices are:
 ```
 there_were_no_products
 there_are_now_products
+new_product_count
 ```
 
 `index`, `operation`, and `value` are required.

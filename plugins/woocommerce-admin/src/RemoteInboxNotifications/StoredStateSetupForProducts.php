@@ -95,8 +95,18 @@ class StoredStateSetupForProducts {
 
 		$stored_state                         = RemoteInboxNotificationsEngine::get_stored_state();
 		$stored_state->there_are_now_products = true;
+
+		// This is used to increment the product count yielded by the query,
+		// which is one less than the actual product count at this point in the
+		// product publish lifecycle. This is currently being used by
+		// ProductCountRuleProcessor.
+		$stored_state->new_product_count = 1;
+
 		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 
 		RemoteInboxNotificationsEngine::run();
+
+		$stored_state->new_product_count = 0;
+		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 	}
 }

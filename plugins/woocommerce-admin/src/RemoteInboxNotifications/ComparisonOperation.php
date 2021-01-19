@@ -32,6 +32,10 @@ class ComparisonOperation {
 				return $left_operand >= $right_operand;
 			case '!=':
 				return $left_operand !== $right_operand;
+			case 'contains':
+				return in_array( $right_operand, $left_operand, true );
+			case '!contains':
+				return ! in_array( $right_operand, $left_operand, true );
 		}
 
 		return false;
