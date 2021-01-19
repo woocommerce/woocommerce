@@ -2,11 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
-import {
-	useQueryStateByContext,
-	useQueryStateByKey,
-	useCollection,
-} from '@woocommerce/base-hooks';
 import { useQueryStateContext } from '@woocommerce/base-context';
 import { useDebounce } from 'use-debounce';
 import { sortBy } from 'lodash';
@@ -15,6 +10,8 @@ import { sortBy } from 'lodash';
  * Internal dependencies
  */
 import { useShallowEqual } from './use-shallow-equal';
+import { useQueryStateByContext, useQueryStateByKey } from './use-query-state';
+import { useCollection } from './use-collection';
 
 const buildCollectionDataQuery = ( collectionDataQueryState ) => {
 	const query = collectionDataQueryState;

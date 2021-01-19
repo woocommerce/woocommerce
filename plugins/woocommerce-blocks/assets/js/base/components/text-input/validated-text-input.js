@@ -12,7 +12,7 @@ import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 /**
  * Internal dependencies
  */
-import TextInput from './index';
+import TextInput from './text-input';
 import './style.scss';
 
 const ValidatedTextInput = ( {

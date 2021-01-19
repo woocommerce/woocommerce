@@ -1,4 +1,4 @@
-export { default as AddressForm } from './address-form';
+export * from './address-form';
 export { default as FormStep } from './form-step';
 export { default as OrderSummary } from './order-summary';
 export { default as PlaceOrderButton } from './place-order-button';
@@ -16,4 +16,4 @@ export { default as ShippingLocation } from './shipping-location';
 export { default as ShippingRatesControl } from './shipping-rates-control';
 export { default as PaymentMethodIcons } from './payment-method-icons';
 export { default as PaymentMethodLabel } from './payment-method-label';
-export * from './totals/index.js';
+export * from './totals';

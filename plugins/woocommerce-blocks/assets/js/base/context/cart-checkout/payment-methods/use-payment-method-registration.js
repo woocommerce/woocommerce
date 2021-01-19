@@ -8,10 +8,6 @@ import {
 } from '@woocommerce/blocks-registry';
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import {
-	useEditorContext,
-	useShippingDataContext,
-} from '@woocommerce/base-context';
-import {
 	useEmitResponse,
 	useShallowEqual,
 	useStoreCart,
@@ -21,6 +17,12 @@ import {
 	CURRENT_USER_IS_ADMIN,
 	PAYMENT_GATEWAY_SORT_ORDER,
 } from '@woocommerce/block-settings';
+
+/**
+ * Internal dependencies
+ */
+import { useEditorContext } from '../../editor';
+import { useShippingDataContext } from '../shipping';
 
 /**
  * This hook handles initializing registered payment methods and exposing all

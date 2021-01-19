@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import ProductList from './index';
+import ProductList from './product-list';
 
 const ProductListContainer = ( { attributes } ) => {
 	const [ currentPage, setPage ] = useState( 1 );

@@ -1,12 +1,8 @@
 /**
- * External dependencies
- */
-import { ValidationContextProvider } from '@woocommerce/base-context';
-
-/**
  * Internal dependencies
  */
 import { AddToCartFormStateContextProvider } from '../form-state';
+import { ValidationContextProvider } from '../../shared';
 import FormSubmit from './submit';
 
 /**

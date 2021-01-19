@@ -3,14 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import triggerFetch from '@wordpress/api-fetch';
-import {
-	useAddToCartFormContext,
-	useValidationContext,
-} from '@woocommerce/base-context';
 import { useEffect, useCallback, useState } from '@wordpress/element';
 import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import { triggerFragmentRefresh } from '@woocommerce/base-utils';
+
+/**
+ * Internal dependencies
+ */
+import { useAddToCartFormContext } from '../../form-state';
+import { useValidationContext } from '../../../shared';
 
 /**
  * FormSubmit.

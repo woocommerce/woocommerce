@@ -9,7 +9,7 @@ import { CheckoutProvider } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import AddressForm from '../';
+import AddressForm from '../address-form';
 
 const renderInCheckoutProvider = ( ui, options = {} ) => {
 	const Wrapper = ( { children } ) => {

@@ -10,10 +10,6 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { useStoreCart, useSelectShippingRate } from '@woocommerce/base-hooks';
-import {
-	useCheckoutContext,
-	useCustomerDataContext,
-} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -29,6 +25,8 @@ import {
 	reducer as emitReducer,
 	emitEvent,
 } from './event-emit';
+import { useCheckoutContext } from '../checkout-state';
+import { useCustomerDataContext } from '../customer';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataContext} ShippingDataContext

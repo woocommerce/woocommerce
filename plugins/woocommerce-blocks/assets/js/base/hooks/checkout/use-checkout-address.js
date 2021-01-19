@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import defaultAddressFields from '@woocommerce/base-components/cart-checkout/address-form/default-address-fields';
+import { defaultAddressFields } from '@woocommerce/base-components/cart-checkout';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import {
 	useShippingDataContext,

@@ -13,7 +13,6 @@ import {
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
 import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
-import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -40,6 +39,7 @@ import {
 import { useCustomerDataContext } from '../customer';
 import { useCheckoutContext } from '../checkout-state';
 import { useShippingDataContext } from '../shipping';
+import { useEditorContext } from '../../editor';
 import {
 	EMIT_TYPES,
 	emitterSubscribers,

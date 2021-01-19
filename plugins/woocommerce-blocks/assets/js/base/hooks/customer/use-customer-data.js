@@ -3,7 +3,6 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { useEffect, useState, useCallback, useRef } from '@wordpress/element';
-import { useStoreNotices, useStoreCart } from '@woocommerce/base-hooks';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -13,6 +12,8 @@ import { formatStoreApiErrorMessage } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import { shouldUpdateAddressStore } from './utils';
+import { useStoreNotices } from '../use-store-notices';
+import { useStoreCart } from '../cart';
 
 /**
  * This is a custom hook for syncing customer address data (billing and shipping) with the server.

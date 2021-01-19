@@ -4,13 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import triggerFetch from '@wordpress/api-fetch';
 import {
-	useCheckoutContext,
-	useShippingDataContext,
-	useCustomerDataContext,
-	usePaymentMethodDataContext,
-	useValidationContext,
-} from '@woocommerce/base-context';
-import {
 	useEffect,
 	useRef,
 	useCallback,
@@ -24,6 +17,11 @@ import { formatStoreApiErrorMessage } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import { preparePaymentData } from './utils';
+import { useCheckoutContext } from '../../checkout-state';
+import { useShippingDataContext } from '../../shipping';
+import { useCustomerDataContext } from '../../customer';
+import { usePaymentMethodDataContext } from '../../payment-methods';
+import { useValidationContext } from '../../../shared';
 
 /**
  * CheckoutProcessor component.
