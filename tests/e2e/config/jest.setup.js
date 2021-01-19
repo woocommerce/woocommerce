@@ -1,6 +1,5 @@
 import { SimpleProduct } from '@woocommerce/api';
 import {
-	switchUserToAdmin,
 	visitAdminPage,
 	switchUserToTest,
 	clearLocalStorage,
@@ -8,13 +7,15 @@ import {
 	factories,
 } from '@woocommerce/e2e-utils';
 
+const { merchant } = require( '@woocommerce/e2e-utils' );
+
 /**
  * Navigates to the post listing screen and bulk-trashes any posts which exist.
  *
  * @return {Promise} Promise resolving once posts have been trashed.
  */
 async function trashExistingPosts() {
-	await switchUserToAdmin();
+	await merchant.login();
 	// Visit `/wp-admin/edit.php` so we can see a list of posts and delete them.
 	await visitAdminPage( 'edit.php' );
 

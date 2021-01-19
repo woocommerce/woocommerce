@@ -9,6 +9,7 @@
 ## Fixed
 
 - Remove redundant `puppeteer` dependency
+- Support for admin user configuration from default.json
 
 # 0.1.6
 
