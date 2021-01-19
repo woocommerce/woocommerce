@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, selectOptionInSelect2 } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -346,6 +346,40 @@ const createVariableProduct = async () => {
 };
 
 /**
+ * Create grouped product.
+ */
+const createGroupedProduct = async () => {
+	// Create two products to be linked in a grouped product after
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 1',
+		regularPrice: simpleProductPrice
+	} );
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 2',
+		regularPrice: simpleProductPrice
+	} );
+
+	// Go to "add product" page
+	await merchant.openNewProduct();
+
+	// Make sure we're on the add product page
+	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+
+	// Set product data and save the product
+	await expect( page ).toFill( '#title', 'Grouped Product' );
+	await expect( page ).toSelect( '#product-type', 'Grouped product' );
+	await clickTab('Linked Products');
+	await selectOptionInSelect2(simpleProductName + ' 1');
+	await selectOptionInSelect2(simpleProductName + ' 2');
+	await verifyAndPublish();
+
+	// Get product ID
+	const groupedPostId = await page.$( '#post_ID' );
+	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
+	return groupedPostIdValue;
+}
+
+/**
  * Create a basic order with the provided order status.
  *
  * @param orderStatus Status of the new order. Defaults to `Pending payment`.
@@ -431,6 +465,7 @@ export {
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createGroupedProduct,
 	createSimpleOrder,
 	verifyAndPublish,
 	addProductToOrder,
