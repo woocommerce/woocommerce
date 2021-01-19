@@ -96,7 +96,12 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
 			}
 
-			// Prevent sending multiple times.
+			/**
+			 * Controls if new order emails can be resend multiple times.
+			 *
+			 * @since 5.0.0
+			 * @param bool $allows Defaults to true.
+			 */
 			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
 				return;
 			}
