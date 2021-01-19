@@ -12,7 +12,6 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { useEffect, useRef } from '@wordpress/element';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { ValidationInputError } from '@woocommerce/base-components/validation';
-import { useEmitResponse } from '@woocommerce/base-hooks';
 import {
 	PaymentMethodIcons,
 	PaymentMethodLabel,
@@ -21,7 +20,7 @@ import {
 /**
  * Internal dependencies
  */
-import { useStoreCartCoupons, useStoreCart } from '..';
+import { useStoreCartCoupons, useStoreCart, useEmitResponse } from '..';
 
 /**
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps

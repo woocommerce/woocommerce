@@ -4,7 +4,11 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { useThrowError } from '@woocommerce/base-hooks';
+
+/**
+ * Internal dependencies
+ */
+import { useThrowError } from '../use-throw-error';
 
 /**
  * This is a custom hook for loading the selected shipping rate from the cart store and actions for selecting a rate.
