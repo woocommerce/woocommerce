@@ -18,8 +18,7 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
 const runSingleProductPageTest = () => {
-// REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE REMEMBER TO REMOVE THIS SKIP RULE
-	describe.skip('Single Product Page', () => {
+	describe('Single Product Page', () => {
 		beforeAll(async () => {
 			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
