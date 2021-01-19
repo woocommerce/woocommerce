@@ -52,11 +52,6 @@ class LegacyProxy {
 			return $class_name::instance( ...$args );
 		}
 
-		// If the class has a "load" method, use it.
-		if ( method_exists( $class_name, 'load' ) ) {
-			return $class_name::load( ...$args );
-		}
-
 		// Fallback to simply creating a new instance of the class.
 		return new $class_name( ...$args );
 	}

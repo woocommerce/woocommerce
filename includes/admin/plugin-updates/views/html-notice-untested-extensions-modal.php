@@ -18,7 +18,7 @@ $untested_plugins_msg = sprintf(
 ?>
 <div id="wc_untested_extensions_modal">
 	<div class="wc_untested_extensions_modal--content">
-		<h1><?php esc_html_e( "Are you sure you're ready?", 'woocommerce' ); ?></h1>
+		<h1><?php esc_html_e( "This is a major update, are you sure you're ready?", 'woocommerce' ); ?></h1>
 		<div class="wc_plugin_upgrade_notice extensions_warning">
 			<p><?php echo esc_html( $untested_plugins_msg ); ?></p>
 
@@ -41,7 +41,7 @@ $untested_plugins_msg = sprintf(
 				</table>
 			</div>
 
-			<p><?php esc_html_e( 'We strongly recommend creating a backup of your site before updating.', 'woocommerce' ); ?> <a href="https://woocommerce.com/2017/05/create-use-backups-woocommerce/" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
+			<p><?php esc_html_e( 'As this is a major update, we strongly recommend creating a backup of your site before updating.', 'woocommerce' ); ?> <a href="https://woocommerce.com/2017/05/create-use-backups-woocommerce/" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
 
 			<?php if ( current_user_can( 'update_plugins' ) ) : ?>
 				<div class="actions">

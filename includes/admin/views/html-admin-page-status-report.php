@@ -11,8 +11,7 @@ global $wpdb;
 
 if ( ! defined( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
 	// Define if we're checking against major or minor versions.
-	// Since 5.0 all versions are backwards compatible, so there's no more check.
-	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
+	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'major' );
 }
 
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
@@ -845,11 +844,10 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
 			} else {
-				// Shortcode and block check.
-				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
-					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
-						/* Translators: %1$s: shortcode text, %2$s: block slug. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+				// Shortcode check.
+				if ( $_page['shortcode_required'] ) {
+					if ( ! $_page['shortcode_present'] ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page does not contain the shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) . '</mark>';
 						$found_error = true;
 					}
 				}

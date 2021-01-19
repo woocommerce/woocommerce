@@ -42,14 +42,9 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	 * @param stdClass $response Plugin update response.
 	 */
 	public function in_plugin_update_message( $args, $response ) {
-		$version_type = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
-		if ( ! is_string( $version_type ) ) {
-			$version_type = 'none';
-		}
-
 		$this->new_version            = $response->new_version;
 		$this->upgrade_notice         = $this->get_upgrade_notice( $response->new_version );
-		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, $version_type );
+		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, 'major' );
 
 		$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
 		$new_version_parts     = explode( '.', $this->new_version );

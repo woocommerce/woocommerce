@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAdminConfig, getAppBase, getAppRoot, getAppName, getTestConfig } = require( '../utils' );
+const { getAppBase, getAppRoot, getAppName, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
@@ -29,7 +29,7 @@ program
     .parse( process.argv );
 
 const appPath = getAppRoot();
-const envVars = getAdminConfig();
+const envVars = {};
 
 if ( appPath ) {
     if ( 'up' === command ) {

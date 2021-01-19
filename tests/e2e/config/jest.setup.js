@@ -1,11 +1,10 @@
 const {
+	switchUserToAdmin,
 	visitAdminPage,
 	switchUserToTest,
 	clearLocalStorage,
 	setBrowserViewport
 } = require( "@wordpress/e2e-test-utils" );
-
-const { merchant } = require( '@woocommerce/e2e-utils' );
 
 /**
  * Navigates to the post listing screen and bulk-trashes any posts which exist.
@@ -13,7 +12,7 @@ const { merchant } = require( '@woocommerce/e2e-utils' );
  * @return {Promise} Promise resolving once posts have been trashed.
  */
 async function trashExistingPosts() {
-	await merchant.login();
+	await switchUserToAdmin();
 	// Visit `/wp-admin/edit.php` so we can see a list of posts and delete them.
 	await visitAdminPage( 'edit.php' );
 
@@ -42,7 +41,7 @@ async function trashExistingPosts() {
  * @return {Promise} Promise resolving once products have been trashed.
  */
 async function trashExistingProducts() {
-	await merchant.login();
+	await switchUserToAdmin();
 	// Visit `/wp-admin/edit.php?post_type=product` so we can see a list of products and delete them.
 	await visitAdminPage( 'edit.php', 'post_type=product' );
 

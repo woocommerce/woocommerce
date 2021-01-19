@@ -27,21 +27,4 @@ const getTestConfig = () => {
 	return testConfig;
 };
 
-/**
- * Get user account settings for Docker configuration.
- */
-const getAdminConfig = () => {
-	const testConfig = getTestConfig();
-	const adminConfig = {
-		'WORDPRESS_LOGIN': testConfig.users.admin.username ? testConfig.users.admin.username : 'admin',
-		'WORDPRESS_PASSWORD': testConfig.users.admin.password ? testConfig.users.admin.password : 'password',
-		'WORDPRESS_EMAIL': testConfig.users.admin.email ? testConfig.users.admin.email : 'admin@woocommercecoree2etestsuite.com',
-	};
-
-	return adminConfig;
-};
-
-module.exports = {
-	getTestConfig,
-	getAdminConfig,
-};
+module.exports = getTestConfig;
