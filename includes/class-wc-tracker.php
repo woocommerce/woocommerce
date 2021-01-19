@@ -618,11 +618,11 @@ class WC_Tracker {
 	/**
 	 * Get order totals
 	 *
-	 * @deprecated 4.10.0 Logic moved to get_orders.
+	 * @deprecated 5.1.0 Logic moved to get_orders.
 	 * @return array
 	 */
 	public static function get_order_totals() {
-		wc_deprecated_function( 'WC_Tracker::get_order_totals', '4.10.0', '' );
+		wc_deprecated_function( 'WC_Tracker::get_order_totals', '5.1.0', '' );
 		return self::get_orders();
 	}
 
