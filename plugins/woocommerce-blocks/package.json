@@ -121,7 +121,7 @@
 		"deep-freeze": "0.0.1",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.10.0",
-		"fs-extra": "9.0.1",
+		"fs-extra": "9.1.0",
 		"glob": "7.1.6",
 		"glob-promise": "3.4.0",
 		"husky": "2.4.1",
