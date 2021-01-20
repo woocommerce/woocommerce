@@ -124,22 +124,19 @@ function getReviewRating( review ) {
 	const starStyle = {
 		width: ( rating / 5 ) * 100 + '%' /* stylelint-disable-line */,
 	};
+	const ratingText = sprintf(
+		/* Translators: %f is referring to the average rating value */
+		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
+		rating
+	);
 	return (
 		<div className="wc-block-review-list-item__rating wc-block-components-review-list-item__rating">
 			<div
 				className="wc-block-review-list-item__rating__stars wc-block-components-review-list-item__rating__stars"
 				role="img"
+				aria-label={ ratingText }
 			>
-				<span style={ starStyle }>
-					{ sprintf(
-						/* Translators: %f to the average rating for the review. */
-						__(
-							'Rated %f out of 5',
-							'woo-gutenberg-products-block'
-						),
-						rating
-					) }
-				</span>
+				<span style={ starStyle }>{ ratingText }</span>
 			</div>
 		</div>
 	);
