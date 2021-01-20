@@ -13,7 +13,7 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-stale: 60
-        days-before-close: 20
+        days-before-close: 10
         remove-stale-when-updated: true
         exempt-issue-labels: 'priority: critical,priority: high'
         stale-issue-message: "This issue has been marked as `stale` because it has not seen any activity within the past 60 days. Our team uses this tool to help surface issues for review. If you are the author of the issue there's no need to comment as it will be looked at. \n\n###### Internal: After 10 days with no activity this issue will be automatically be closed."
