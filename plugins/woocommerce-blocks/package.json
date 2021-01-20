@@ -154,7 +154,7 @@
 		"npm": "6.14.8"
 	},
 	"dependencies": {
-		"@stripe/react-stripe-js": "1.1.2",
+		"@stripe/react-stripe-js": "1.2.0",
 		"@stripe/stripe-js": "1.11.0",
 		"@woocommerce/components": "5.1.2",
 		"@wordpress/autop": "2.9.0",
