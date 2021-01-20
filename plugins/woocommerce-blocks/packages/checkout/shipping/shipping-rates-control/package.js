@@ -6,13 +6,13 @@ import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import Label from '@woocommerce/base-components/label';
 import Title from '@woocommerce/base-components/title';
-import Panel from '@woocommerce/base-components/panel';
 import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import PackageOptions from './package-options';
+import Panel from '../../panel';
 import './style.scss';
 
 const Package = ( {

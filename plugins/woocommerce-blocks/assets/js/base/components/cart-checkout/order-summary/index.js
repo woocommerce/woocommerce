@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { useContainerWidthContext } from '@woocommerce/base-context';
-import Panel from '@woocommerce/base-components/panel';
+import { Panel } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

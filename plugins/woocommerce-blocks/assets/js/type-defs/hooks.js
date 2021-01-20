@@ -35,6 +35,7 @@
  *                                                      cart.
  * @property {Array}               shippingRates        array of selected shipping
  *                                                      rates.
+ * @property {Object}              extensions           Values provided by  *                                                      extensions.
  * @property {boolean}             shippingRatesLoading Whether or not the
  *                                                      shipping rates are
  *                                                      being loaded.

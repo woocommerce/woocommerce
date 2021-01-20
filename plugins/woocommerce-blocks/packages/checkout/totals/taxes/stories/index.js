@@ -10,8 +10,7 @@ import { currencyKnob } from '@woocommerce/knobs';
 import TotalsTaxes from '../';
 
 export default {
-	title:
-		'WooCommerce Blocks/@base-components/cart-checkout/totals/TotalsTaxes',
+	title: 'WooCommerce Blocks/@blocks-checkout/TotalsTaxes',
 	component: TotalsTaxes,
 };
 

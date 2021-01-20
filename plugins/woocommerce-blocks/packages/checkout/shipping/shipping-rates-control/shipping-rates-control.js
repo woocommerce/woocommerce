@@ -110,4 +110,3 @@ ShippingRatesControl.propTypes = {
 };
 
 export default ShippingRatesControl;
-export { Packages };
