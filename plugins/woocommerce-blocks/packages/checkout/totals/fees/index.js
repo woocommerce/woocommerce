@@ -1,12 +1,17 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import PropTypes from 'prop-types';
-import { TotalsItem } from '@woocommerce/blocks-checkout';
 
-const TotalsFees = ( { currency, cartFees } ) => {
+/**
+ * Internal dependencies
+ */
+import TotalsItem from '../item';
+
+const TotalsFees = ( { currency, cartFees, className } ) => {
 	return (
 		<>
 			{ cartFees.map( ( { id, name, totals } ) => {
@@ -21,7 +26,10 @@ const TotalsFees = ( { currency, cartFees } ) => {
 				return (
 					<TotalsItem
 						key={ id }
-						className="wc-block-components-totals-fees"
+						className={ classnames(
+							'wc-block-components-totals-fees',
+							className
+						) }
 						currency={ currency }
 						label={
 							name || __( 'Fee', 'woo-gutenberg-products-block' )
@@ -41,6 +49,7 @@ const TotalsFees = ( { currency, cartFees } ) => {
 TotalsFees.propTypes = {
 	currency: PropTypes.object.isRequired,
 	cartFees: PropTypes.array.isRequired,
+	className: PropTypes.string,
 };
 
 export default TotalsFees;

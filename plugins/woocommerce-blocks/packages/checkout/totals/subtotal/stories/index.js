@@ -10,7 +10,7 @@ import { currencyKnob } from '@woocommerce/knobs';
 import Subtotal from '../';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/cart-checkout/totals/Subtotal',
+	title: 'WooCommerce Blocks/@blocks-checkout/Subtotal',
 	component: Subtotal,
 };
 

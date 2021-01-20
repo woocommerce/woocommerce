@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
-import { getCurrency } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
 import {
@@ -17,6 +16,7 @@ import {
 	ProductMetadata,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
+import { getCurrency } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 
 /**

@@ -63,6 +63,7 @@ describe( 'useStoreCart', () => {
 			country: '',
 		},
 		shippingRates: previewCart.shipping_rates,
+		extensions: {},
 		shippingRatesLoading: false,
 		cartHasCalculatedShipping: true,
 	};
@@ -103,6 +104,7 @@ describe( 'useStoreCart', () => {
 		billingAddress: {},
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
+		extensions: {},
 		shippingRatesLoading: false,
 		cartHasCalculatedShipping: true,
 		receiveCart: undefined,

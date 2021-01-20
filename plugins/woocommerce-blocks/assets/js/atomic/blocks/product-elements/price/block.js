@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import ProductPrice from '@woocommerce/base-components/product-price';
-import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
+import { getCurrencyFromPriceResponse } from '@woocommerce/blocks-checkout';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,

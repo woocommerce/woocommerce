@@ -92,6 +92,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					cartErrors: [],
 					billingAddress: defaultBillingAddress,
 					shippingAddress: defaultShippingAddress,
+					extensions: {},
 					shippingRates: previewCart.shipping_rates,
 					shippingRatesLoading: false,
 					cartHasCalculatedShipping:
@@ -130,6 +131,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				cartErrors,
 				billingAddress,
 				shippingAddress,
+				extensions: cartData.extensions || {},
 				shippingRates: cartData.shippingRates || [],
 				shippingRatesLoading,
 				cartHasCalculatedShipping: cartData.hasCalculatedShipping,

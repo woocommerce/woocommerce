@@ -5,20 +5,22 @@
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import {
-	Subtotal,
-	TotalsFees,
 	TotalsCoupon,
 	TotalsDiscount,
 	TotalsFooterItem,
-	TotalsShipping,
-	TotalsTaxes,
 } from '@woocommerce/base-components/cart-checkout';
-import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
+import {
+	Subtotal,
+	TotalsFees,
+	TotalsTaxes,
+	TotalsShipping,
+	ExperimentalOrderMeta,
+	getCurrencyFromPriceResponse,
+} from '@woocommerce/blocks-checkout';
 import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
-import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { CartExpressPayment } from '@woocommerce/base-components/payment-methods';
 import {
 	useStoreCartCoupons,

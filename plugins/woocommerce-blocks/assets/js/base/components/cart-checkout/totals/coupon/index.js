@@ -11,7 +11,7 @@ import LoadingMask from '@woocommerce/base-components/loading-mask';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import { useValidationContext } from '@woocommerce/base-context';
-import Panel from '@woocommerce/base-components/panel';
+import { Panel } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

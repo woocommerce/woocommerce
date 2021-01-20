@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { getCurrency } from '@woocommerce/base-utils';
 import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
+import { getCurrency } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 
