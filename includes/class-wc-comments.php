@@ -341,6 +341,49 @@ class WC_Comments {
 	}
 
 	/**
+	 * Utility function for getting review counts for multiple products in one query. This is not cached.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param array $product_ids Array of product IDs.
+	 *
+	 * @return array
+	 */
+	public static function get_review_counts_for_product_ids( $product_ids ) {
+		global $wpdb;
+
+		if ( empty( $product_ids ) ) {
+			return array();
+		}
+
+		$product_id_string_placeholder = substr( str_repeat( ',%s', count( $product_ids ) ), 1 );
+
+		$review_counts = $wpdb->get_results(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Ignored for allowing interpolation in IN query.
+			$wpdb->prepare(
+				"
+					SELECT comment_post_ID as product_id, COUNT( comment_post_ID ) as review_count
+					FROM $wpdb->comments
+					WHERE
+						comment_parent = 0
+						AND comment_post_ID IN ( $product_id_string_placeholder )
+						AND comment_approved = '1'
+						AND comment_type in ( 'review', '', 'comment' )
+					GROUP BY product_id
+				",
+				$product_ids
+			),
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared.
+			ARRAY_A
+		);
+
+		// Convert to key value pairs.
+		$counts = array_replace( array_fill_keys( $product_ids, 0 ), array_column( $review_counts, 'review_count', 'product_id' ) );
+
+		return $counts;
+	}
+
+	/**
 	 * Get product review count for a product (not replies). Please note this is not cached.
 	 *
 	 * @since 3.0.0
@@ -348,22 +391,9 @@ class WC_Comments {
 	 * @return int
 	 */
 	public static function get_review_count_for_product( &$product ) {
-		global $wpdb;
+		$counts = self::get_review_counts_for_product_ids( array( $product->get_id() ) );
 
-		$count = $wpdb->get_var(
-			$wpdb->prepare(
-				"
-			SELECT COUNT(*) FROM $wpdb->comments
-			WHERE comment_parent = 0
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND comment_type = 'review'
-				",
-				$product->get_id()
-			)
-		);
-
-		return $count;
+		return $counts[ $product->get_id() ];
 	}
 
 	/**

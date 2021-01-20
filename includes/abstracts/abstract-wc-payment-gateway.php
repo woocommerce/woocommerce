@@ -218,7 +218,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Get the return url (thank you page).
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order|null $order Order object.
 	 * @return string
 	 */
 	public function get_return_url( $order = null ) {
@@ -369,9 +369,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * If the gateway declares 'refunds' support, this will allow it to refund.
 	 * a passed in amount.
 	 *
-	 * @param  int    $order_id Order ID.
-	 * @param  float  $amount Refund amount.
-	 * @param  string $reason Refund reason.
+	 * @param  int        $order_id Order ID.
+	 * @param  float|null $amount Refund amount.
+	 * @param  string     $reason Refund reason.
 	 * @return boolean True or false based on success, or a WP_Error object.
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {

@@ -405,7 +405,7 @@
 				}
 
 				// Track when suggestions are displayed (and not already visible).
-				$( 'ul.product_data_tabs li.marketplace-suggestions_options a' ).click( function( e ) {
+				$( 'ul.product_data_tabs li.marketplace-suggestions_options a' ).on( 'click', function( e ) {
 					e.preventDefault();
 
 					if ( '#marketplace_suggestions' === currentTab ) {

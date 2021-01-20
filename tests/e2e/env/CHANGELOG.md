@@ -1,8 +1,15 @@
 # Unreleased
 
+## Added
+
+- support for custom container name
+- Insert a 12 hour delay in using new docker image tags
+- Package `bin` script `wc-e2e`
+
 ## Fixed
 
 - Remove redundant `puppeteer` dependency
+- Support for admin user configuration from default.json
 
 # 0.1.6
 

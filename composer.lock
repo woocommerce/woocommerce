@@ -4,27 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "486f7eb6eda8b5a537d5a6e72c4cbdad",
+    "content-hash": "758b097c13e89200b28bf3a3b5fc2752",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.6.0",
+            "version": "v2.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "47dde8dbca6b1e30f176725f2f748a9abefcaf58"
+                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/47dde8dbca6b1e30f176725f2f748a9abefcaf58",
-                "reference": "47dde8dbca6b1e30f176725f2f748a9abefcaf58",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/5437697a56aefbdf707849b9833e1b36093d7a73",
+                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^1.1 || ^2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5"
+                "yoast/phpunit-polyfills": "0.2.0"
             },
             "type": "composer-plugin",
             "extra": {
@@ -44,9 +44,9 @@
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.6.0"
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.7.1"
             },
-            "time": "2020-11-19T21:20:12+00:00"
+            "time": "2020-12-18T22:33:59+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -515,16 +515,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.7.2",
+            "version": "1.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "efd94d917504fe71bae650233de47344c8d5c005"
+                "reference": "534442980c34369f711efdb8e85fdcb1363be712"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/efd94d917504fe71bae650233de47344c8d5c005",
-                "reference": "efd94d917504fe71bae650233de47344c8d5c005",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/534442980c34369f711efdb8e85fdcb1363be712",
+                "reference": "534442980c34369f711efdb8e85fdcb1363be712",
                 "shasum": ""
             },
             "require": {
@@ -558,22 +558,22 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v1.7.2"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v1.8.3"
             },
-            "time": "2020-11-19T17:48:33+00:00"
+            "time": "2021-01-06T00:00:42+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.8.1",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "e5aef9eddd13c5511ba673eb70ed8cb3e80d828c"
+                "reference": "f5b2485254f36f0b85fd0f30c28e17bdf44a8d1e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/e5aef9eddd13c5511ba673eb70ed8cb3e80d828c",
-                "reference": "e5aef9eddd13c5511ba673eb70ed8cb3e80d828c",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/f5b2485254f36f0b85fd0f30c28e17bdf44a8d1e",
+                "reference": "f5b2485254f36f0b85fd0f30c28e17bdf44a8d1e",
                 "shasum": ""
             },
             "require": {
@@ -609,9 +609,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v3.8.1"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.0.0"
             },
-            "time": "2020-11-23T20:48:39+00:00"
+            "time": "2020-12-08T13:17:01+00:00"
         }
     ],
     "packages-dev": [

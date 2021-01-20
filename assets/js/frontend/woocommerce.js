@@ -25,7 +25,7 @@ jQuery( function( $ ) {
 	}
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
+	$( '.woocommerce-store-notice__dismiss-link' ).on( 'click', function( event ) {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
 		event.preventDefault();
@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 	$( '.woocommerce form input' ).filter(':password').parent('span').addClass('password-input');
 	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
 
-	$( '.show-password-input' ).click(
+	$( '.show-password-input' ).on( 'click',
 		function() {
 			$( this ).toggleClass( 'display-password' );
 			if ( $( this ).hasClass( 'display-password' ) ) {

@@ -345,16 +345,16 @@
         },
         {
             "name": "wp-cli/i18n-command",
-            "version": "v2.2.5",
+            "version": "v2.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/i18n-command.git",
-                "reference": "b02ecdc9a57f9633740c254d19749118b7411f0f"
+                "reference": "a66da3f09f6a728832381012848c3074bf1635c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/b02ecdc9a57f9633740c254d19749118b7411f0f",
-                "reference": "b02ecdc9a57f9633740c254d19749118b7411f0f",
+                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/a66da3f09f6a728832381012848c3074bf1635c8",
+                "reference": "a66da3f09f6a728832381012848c3074bf1635c8",
                 "shasum": ""
             },
             "require": {
@@ -400,9 +400,9 @@
             "homepage": "https://github.com/wp-cli/i18n-command",
             "support": {
                 "issues": "https://github.com/wp-cli/i18n-command/issues",
-                "source": "https://github.com/wp-cli/i18n-command/tree/master"
+                "source": "https://github.com/wp-cli/i18n-command/tree/v2.2.6"
             },
-            "time": "2020-07-08T15:20:38+00:00"
+            "time": "2020-12-07T19:28:27+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",

@@ -56,7 +56,7 @@ const setCheckbox = async( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
 	if ( checkboxStatus !== true ) {
-		await page.click( selector );
+		await checkbox.click();
 	}
 };
 
@@ -70,7 +70,7 @@ const unsetCheckbox = async( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
 	if ( checkboxStatus === true ) {
-		await page.click( selector );
+		await checkbox.click();
 	}
 };
 
@@ -155,6 +155,47 @@ const verifyValueOfInputField = async( selector, value ) => {
 	await expect( fieldValue ).toBe( value );
 };
 
+/**
+ * Clicks on a filter on a list page, such as WooCommerce > Orders or Posts > All Posts.
+ *
+ * @param {string} selector Selector of the filter link to be clicked.
+ */
+const clickFilter = async ( selector ) => {
+	await page.waitForSelector( selector );
+	await page.focus( selector );
+	await Promise.all( [
+		page.click( `.subsubsub > ${selector} > a` ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+};
+
+/**
+ * Moves all items in a list view to the trash.
+ *
+ * If there's more than 20 items, it moves all 20 items on the current page.
+ */
+const moveAllItemsToTrash = async () => {
+	await setCheckbox( '#cb-select-all-1' );
+	await expect( page ).toSelect( '#bulk-action-selector-top', 'Move to Trash' );
+	await Promise.all( [
+		page.click( '#doaction' ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+};
+
+/**
+ * Use puppeteer page eval to click an element.
+ *
+ * Useful for clicking items that have been added to the DOM via ajax.
+ *
+ * @param {string} selector Selector of the filter link to be clicked.
+ */
+const evalAndClick = async ( selector ) => {
+	// We use this when `expect(page).toClick()` is unable to find the element
+	// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
+	page.$eval( selector, elem => elem.click() );
+};
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -167,4 +208,7 @@ export {
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
 	verifyValueOfInputField,
+	clickFilter,
+	moveAllItemsToTrash,
+	evalAndClick,
 };
