@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.2.0
+
 ## Added
 
 - support for custom container name
@@ -9,7 +11,7 @@
 ## Fixed
 
 - Remove redundant `puppeteer` dependency
-- Support for admin user configuration from default.json
+- Support for admin user configuration from `default.json`
 
 # 0.1.6
 
