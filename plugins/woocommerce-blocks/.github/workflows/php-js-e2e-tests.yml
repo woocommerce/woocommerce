@@ -6,13 +6,13 @@ on:
   pull_request:
 
 jobs:
-  
+
   Setup:
     runs-on: ubuntu-latest
     name: Setup
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Cache node modules
         uses: actions/cache@v2
         env:
@@ -25,17 +25,17 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-  
+
       - name: Use Node.js 14.x
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-  
+
       - name: Npm install and build
         run: |
           npm ci
           FORCE_REDUCED_MOTION=true npm run build:e2e-test
-          
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
@@ -46,24 +46,24 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-  
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
           coverage: none
           tools: composer
-  
+
       - name: Composer install
         run: |
           composer install
-  
+
   PHPUnitTests:
     name: PHP Unit Tests
     needs: Setup
 
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
 
@@ -91,18 +91,18 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
       - name: Run PHP Unit tests
         run: |
           npm run phpunit
-          
+
   JSUnitTests:
     name: JS Unit Tests
     needs: Setup
 
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
 
@@ -131,13 +131,13 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
       - name: Run JavaScript Unit tests
         run: |
           npm run test
-    
-    
+
+
   JSE2ETestsWP56Gutenberg:
     name: JavaScipt E2E Tests (WP 5.6 with Gutenberg plugin)
     needs: Setup
@@ -170,7 +170,7 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
@@ -201,7 +201,7 @@ jobs:
           npm run wp-env start
           npm run wp-env clean all
           npm run wp-env run tests-cli "wp plugin install gutenberg --activate"
-          npm run test:e2e   
+          npm run test:e2e
 
   JSE2ETestsWP56:
     name: JavaScipt E2E Tests (WP 5.6)
@@ -235,7 +235,7 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
@@ -301,7 +301,7 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
@@ -367,7 +367,7 @@ jobs:
 
       - name: blocks.ini setup
         run: |
-          echo 'woocommerce_blocks_phase = 3' > blocks.ini
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
