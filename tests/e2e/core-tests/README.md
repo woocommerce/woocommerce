@@ -37,7 +37,7 @@ The functions to access the core tests are:
 ### Activation and setup
 
 - `runSetupOnboardingTests` - Run all setup and onboarding tests
-  - `runActivationTest` - Merchant can activate WooCommerce 
+  - `runActivationTest` - Merchant can activate WooCommerce
   - `runOnboardingFlowTest` - Merchant can complete onboarding flow
   - `runTaskListTest` - Merchant can complete onboarding task list
   - `runInitialStoreSettingsTest` - Merchant can complete initial settings
@@ -45,7 +45,7 @@ The functions to access the core tests are:
 ### Merchant
 
 - `runMerchantTests` - Run all merchant tests
-  - `runCreateCouponTest` - Merchant can create coupon 
+  - `runCreateCouponTest` - Merchant can create coupon
   - `runCreateOrderTest` - Merchant can create order
   - `runAddSimpleProductTest` - Merchant can create a simple product
   - `runAddVariableProductTest` - Merchant can create a variable product
@@ -59,10 +59,11 @@ The functions to access the core tests are:
 ### Shopper
 
 - `runShopperTests` - Run all shopper tests
-  - `runCartPageTest` - Shopper can view and update cart 
+  - `runCartPageTest` - Shopper can view and update cart
   - `runCheckoutPageTest` - Shopper can complete checkout
+  - `runCheckoutRegisteredPageTest` - Registered shopper can complete checkout
   - `runMyAccountPageTest` - Shopper can access my account page
-  - `runSingleProductPageTest` - Shopper can view single product page 
+  - `runSingleProductPageTest` - Shopper can view single product page
 
 ## Contributing a new test
 
@@ -92,7 +93,7 @@ const runExampleTestName = () => {
 
 module.exports = runExampleTestName;
 ```
-- Add your test to `tests/e2e/core-tests/specs/index.js` 
+- Add your test to `tests/e2e/core-tests/specs/index.js`
 ```js
 const runExampleTestName = require( './grouping/example-test-name.test' );
 // ...

@@ -1,6 +1,8 @@
 # Unreleased
 
 ## Added
+
+- Registered Shopper Checkout tests
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
