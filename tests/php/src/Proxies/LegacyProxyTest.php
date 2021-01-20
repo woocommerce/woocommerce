@@ -61,6 +61,18 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_instance_of' uses the 'load' static method in classes that implement it, passing the supplied arguments.
+	 */
+	public function test_get_instance_of_class_with_load_method_gets_an_instance_of_the_appropriate_class() {
+		// ClassWithLoadMethod is in the root namespace and thus can't be autoloaded.
+		require_once dirname( __DIR__ ) . '/Internal/DependencyManagement/ExampleClasses/ClassWithLoadMethod.php';
+
+		$loaded = $this->sut->get_instance_of( \ClassWithLoadMethod::class, 'foo', 'bar' );
+		$this->assertSame( \ClassWithLoadMethod::$loaded, $loaded );
+		$this->assertEquals( array( 'foo', 'bar' ), \ClassWithLoadMethod::$loaded_args );
+	}
+
+	/**
 	 * @testdox 'get_instance_of' can be used to get an instance of a class implementing WC_Queue_Interface.
 	 */
 	public function test_get_instance_of_wc_queue_interface_gets_an_instance_of_the_appropriate_class() {
