@@ -117,9 +117,10 @@ const getCoreConfig = ( options = {} ) => {
 				// file name
 				fileName: 'blocks.ini',
 				// content of the file
-				content: `woocommerce_blocks_phase = ${
-					process.env.WOOCOMMERCE_BLOCKS_PHASE || 3
-				}`,
+				content: `
+woocommerce_blocks_phase = ${ process.env.WOOCOMMERCE_BLOCKS_PHASE || 3 }
+woocommerce_blocks_env = ${ NODE_ENV }
+`.trim(),
 			} ),
 		],
 		resolve,
