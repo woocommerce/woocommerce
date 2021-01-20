@@ -32,7 +32,7 @@ const page = {
 				components: {
 					link: (
 						<Link
-							href="https://wordpress.com/support/store/"
+							href="https://wordpress.com/support/new-woocommerce-experience-on-wordpress-dot-com/"
 							type="external"
 							target="_blank"
 						/>

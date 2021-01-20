@@ -48,7 +48,7 @@ class WelcomeToWooCommerceForStoreUsers {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://wordpress.com/support/store/"',
+			'https://wordpress.com/support/new-woocommerce-experience-on-wordpress-dot-com/"',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);
