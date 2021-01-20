@@ -65,6 +65,52 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Parses query to create nonces when available.
+	 *
+	 * @param object $response The WP_REST_Response we're working with.
+	 * @return object $response The prepared WP_REST_Response object.
+	 */
+	public static function prepare_note_with_nonce( $response ) {
+		if ( 'wc-update-db-reminder' !== $response->data['name'] || ! isset( $response->data['actions'] ) ) {
+			return $response;
+		}
+
+		foreach ( $response->data['actions'] as $action_key => $action ) {
+			$url_parts = ! empty( $action->query ) ? wp_parse_url( $action->query ) : '';
+
+			if ( ! isset( $url_parts['query'] ) ) {
+				$response->data['actions'][ $action_key ] = $action;
+				continue;
+			}
+
+			wp_parse_str( $url_parts['query'], $params );
+
+			if ( array_key_exists( '_nonce_action', $params ) && array_key_exists( '_nonce_name', $params ) ) {
+				$_params = $params;
+
+				unset( $_params['_nonce_action'] );
+				unset( $_params['_nonce_name'] );
+
+				$url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'];
+
+				$parsed_query = wp_nonce_url(
+					add_query_arg(
+						$_params,
+						$url
+					),
+					$params['_nonce_action'],
+					$params['_nonce_name']
+				);
+
+				$response->data['actions'][ $action_key ]->query = html_entity_decode( $parsed_query );
+				$response->data['actions'][ $action_key ]->url   = html_entity_decode( $parsed_query );
+			}
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Store notices to DB
 	 */
 	public static function store_notices() {
