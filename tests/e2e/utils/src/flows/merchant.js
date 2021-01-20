@@ -9,6 +9,7 @@ const config = require( 'config' );
 const { clearAndFillInput } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
+	WP_ADMIN_ALL_PRODUCTS_VIEW,
 	WP_ADMIN_DASHBOARD,
 	WP_ADMIN_LOGIN,
 	WP_ADMIN_NEW_COUPON,
@@ -56,6 +57,12 @@ const merchant = {
 
 	openAllOrdersView: async () => {
 		await page.goto( WP_ADMIN_ALL_ORDERS_VIEW, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAllProductsView: async () => {
+		await page.goto( WP_ADMIN_ALL_PRODUCTS_VIEW, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -117,6 +124,12 @@ const merchant = {
 
 	goToOrder: async ( orderId ) => {
 		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	goToProduct: async ( productId ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( productId ), {
 			waitUntil: 'networkidle0',
 		} );
 	},

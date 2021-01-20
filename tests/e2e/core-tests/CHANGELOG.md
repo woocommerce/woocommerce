@@ -5,7 +5,8 @@
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
 - Added new config variable for Simple Product price to `tests/e2e/env/config/default.json`. Defaults to 9.99
-
+- Merchant Product Edit tests
+- Merchant Product Search tests
 - Shopper Checkout Apply Coupon
 
 ## Fixed
