@@ -76,9 +76,9 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Bump minimum supported version of PHP to 7.0. #6046
 - Fix: allow for more terms to be shown for product attributes in the Analytics orders report. #5868
 - Tweak: update the content and timing of the NeedSomeInspiration note. #6076
+- Add: new inbox message - Getting started in Ecommerce - watch this webinar. #6086
 - Add: Remote inbox notifications contains comparison and fix product rule. #6073
 - Update: store deprecation welcome modal support doc link #6094
-
 
 == Changelog ==
 
