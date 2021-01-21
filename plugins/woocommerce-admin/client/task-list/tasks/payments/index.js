@@ -9,8 +9,8 @@ import {
 	Button,
 	Card,
 	CardBody,
+	CardMedia,
 	CardFooter,
-	CardHeader,
 	FormToggle,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -253,7 +253,7 @@ class Payments extends Component {
 
 					return (
 						<Card key={ key } className={ classes }>
-							<CardHeader isBorderless>
+							<CardMedia isBorderless>
 								{ showRecommendedRibbon && (
 									<div className="woocommerce-task-payment__recommended-ribbon">
 										<span>
@@ -265,7 +265,7 @@ class Payments extends Component {
 									</div>
 								) }
 								{ before }
-							</CardHeader>
+							</CardMedia>
 							<CardBody>
 								<H className="woocommerce-task-payment__title">
 									{ title }
