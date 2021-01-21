@@ -161,6 +161,7 @@ export class ProductTypes extends Component {
 						<Button
 							isPrimary
 							onClick={ this.onContinue }
+							isBusy={ isProfileItemsRequesting }
 							disabled={
 								! selected.length || isProfileItemsRequesting
 							}

@@ -307,6 +307,7 @@ class StoreDetails extends Component {
 								<Button
 									isPrimary
 									onClick={ handleSubmit }
+									isBusy={ isUpdatingProfileItems }
 									disabled={
 										! isValidForm || isUpdatingProfileItems
 									}
