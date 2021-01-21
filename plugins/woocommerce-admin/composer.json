@@ -9,7 +9,7 @@
 	"minimum-stability": "dev",
 	"require": {
 		"composer/installers": "^1.9.0",
-		"php": ">=5.6|>=7.0",
+		"php": ">=7.0",
 		"automattic/jetpack-autoloader": "^2.2.0"
 	},
 	"require-dev": {
