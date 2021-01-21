@@ -10,7 +10,7 @@
 	"require": {
 		"composer/installers": "^1.9.0",
 		"php": ">=7.0",
-		"automattic/jetpack-autoloader": "^2.2.0"
+		"automattic/jetpack-autoloader": "2.7.1"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "7.5.20",
