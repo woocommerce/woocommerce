@@ -18,7 +18,7 @@ export const Basic = () => (
 					key="refunds"
 					value={ '$24.00' }
 					label="Refunds"
-					delta={ -10 }
+					delta={ -10.12 }
 					href="/analytics/report"
 					selected
 				/>,
