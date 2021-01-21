@@ -652,7 +652,7 @@ class Onboarding {
 	protected function is_home_or_setup_wizard_page() {
 		$allowed_paths = array( 'wc-admin', 'wc-admin&path=/setup-wizard' );
 		$current_page  = PageController::get_instance()->get_current_page();
-		if ( ! $current_page ) {
+		if ( ! $current_page || ! isset( $current_page['path'] ) ) {
 			return false;
 		}
 
