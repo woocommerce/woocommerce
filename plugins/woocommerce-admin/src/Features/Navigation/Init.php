@@ -18,13 +18,18 @@ use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
  */
 class Init {
 	/**
+	 * Option name used to toggle this feature.
+	 */
+	const TOGGLE_OPTION_NAME = 'woocommerce_navigation_enabled';
+
+	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_features', array( $this, 'maybe_remove_nav_feature' ), 0 );
-		add_action( 'update_option_woocommerce_navigation_enabled', array( $this, 'reload_page_on_toggle' ), 10, 2 );
+		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
 
 		if ( Loader::is_feature_enabled( 'navigation' ) ) {
@@ -63,7 +68,7 @@ class Init {
 		$features[] = array(
 			'title' => __( 'Navigation', 'woocommerce-admin' ),
 			'desc'  => $description . $update_text,
-			'id'    => 'woocommerce_navigation_enabled',
+			'id'    => self::TOGGLE_OPTION_NAME,
 			'type'  => 'checkbox',
 			'class' => $needs_update ? 'disabled' : '',
 		);
@@ -106,7 +111,7 @@ class Init {
 	 */
 	public function maybe_remove_nav_feature( $features ) {
 		$has_feature_enabled = in_array( 'navigation', $features, true );
-		$has_option_disabled = 'yes' !== get_option( 'woocommerce_navigation_enabled', 'no' );
+		$has_option_disabled = 'yes' !== get_option( self::TOGGLE_OPTION_NAME, 'no' );
 		$is_not_compatible   = ! self::is_nav_compatible();
 
 		if ( ( $has_feature_enabled && $has_option_disabled ) || $is_not_compatible ) {
@@ -122,7 +127,7 @@ class Init {
 	 * @return array
 	 */
 	public function preload_options( $options ) {
-		$options[] = 'woocommerce_navigation_enabled';
+		$options[] = self::TOGGLE_OPTION_NAME;
 
 		return $options;
 	}
