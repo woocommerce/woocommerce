@@ -416,9 +416,8 @@ export default compose(
 		const requestingTaskListOptions =
 			isResolving( 'getOption', [ 'woocommerce_task_list_complete' ] ) ||
 			isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
-		const trackedCompletedTasks = getOption(
-			'woocommerce_task_list_tracked_completed_tasks'
-		);
+		const trackedCompletedTasks =
+			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
 
 		return {
 			hasUnreadNotes,
