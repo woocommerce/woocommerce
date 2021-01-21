@@ -106,7 +106,7 @@ class BusinessDetails extends Component {
 				],
 		} );
 
-		const _updates = {
+		const updates = {
 			other_platform: otherPlatform,
 			other_platform_name:
 				otherPlatform === 'other' ? otherPlatformName : '',
@@ -117,9 +117,9 @@ class BusinessDetails extends Component {
 		};
 
 		// Remove possible empty values like `revenue` and `other_platform`.
-		const updates = Object.entries( _updates ).filter( ( { value } ) => {
-			return value !== '';
-		} );
+		Object.keys( updates ).forEach(
+			( key ) => updates[ key ] === '' && delete updates[ key ]
+		);
 
 		const promises = [
 			updateProfileItems( updates ).catch( () => {
