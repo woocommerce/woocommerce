@@ -101,8 +101,8 @@ class WC_Admin_Notices {
 				$merged_params = array_merge( $nonce, $org_params );
 				$parsed_query  = add_query_arg( $merged_params, $url );
 
-				$response->data['actions'][ $action_key ]->query = html_entity_decode( $parsed_query );
-				$response->data['actions'][ $action_key ]->url   = html_entity_decode( $parsed_query );
+				$response->data['actions'][ $action_key ]->query = $parsed_query;
+				$response->data['actions'][ $action_key ]->url   = $parsed_query;
 			}
 		}
 
