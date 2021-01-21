@@ -494,8 +494,15 @@ class Menu {
 			return;
 		}
 
-		foreach ( $submenu['woocommerce'] as $menu_item ) {
+		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( in_array( $menu_item[2], CoreMenu::get_excluded_items(), true ) ) {
+				// phpcs:disable
+				if ( ! isset( $menu_item[ self::CSS_CLASSES ] ) ) {
+					$submenu['woocommerce'][ $key ][] .= ' hide-if-js';
+				} else {
+					$submenu['woocommerce'][ $key ][ self::CSS_CLASSES ] .= ' hide-if-js';
+				}
+				// phpcs:enable
 				continue;
 			}
 
