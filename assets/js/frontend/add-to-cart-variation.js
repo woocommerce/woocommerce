@@ -379,7 +379,7 @@
 			if ( ! current_attr_select.data( 'attribute_html' ) ) {
 				var refSelect = current_attr_select.clone();
 
-				refSelect.find( 'option' ).removeAttr( 'disabled attached' ).removeAttr( 'selected' );
+				refSelect.find( 'option' ).prop( 'disabled attached', false ).prop( 'selected', false );
 
 				// Legacy data attribute.
 				current_attr_select.data(
