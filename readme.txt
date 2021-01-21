@@ -160,7 +160,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 4.9.0 - 2021-01-xx =
+= 4.9.1 2021-01-19 =
+
+* Fix - Reverts #28204 to ensure compatibility with extensions using legacy do_action calls. #28835
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
 
