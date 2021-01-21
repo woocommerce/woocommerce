@@ -9,7 +9,11 @@ import {
 import { createInterpolateElement } from 'wordpress-element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
-import { TotalsItem } from '@woocommerce/blocks-checkout';
+import {
+	__EXPERIMENTAL_TOTAL_LABEL_FILTER,
+	TotalsItem,
+} from '@woocommerce/blocks-checkout';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -20,12 +24,16 @@ const SHOW_TAXES = TAXES_ENABLED && DISPLAY_CART_PRICES_INCLUDING_TAX;
 
 const TotalsFooterItem = ( { currency, values } ) => {
 	const { total_price: totalPrice, total_tax: totalTax } = values;
+	const label = applyFilters(
+		__EXPERIMENTAL_TOTAL_LABEL_FILTER,
+		__( 'Total', 'woo-gutenberg-products-block' )
+	);
 
 	return (
 		<TotalsItem
 			className="wc-block-components-totals-footer-item"
 			currency={ currency }
-			label={ __( 'Total', 'woo-gutenberg-products-block' ) }
+			label={ label }
 			value={ parseInt( totalPrice, 10 ) }
 			description={
 				SHOW_TAXES && (
