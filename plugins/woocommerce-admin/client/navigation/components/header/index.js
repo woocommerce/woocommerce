@@ -15,6 +15,7 @@ import { debounce } from 'lodash';
  * Internal dependencies
  */
 import useIsScrolled from '../../../hooks/useIsScrolled';
+import { addHistoryListener } from '../../utils';
 
 const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );
@@ -67,6 +68,8 @@ const Header = () => {
 		for ( const { eventName, handler } of foldEvents ) {
 			window.addEventListener( eventName, handler, false );
 		}
+
+		addHistoryListener( () => foldOnMobile() );
 	}, [] );
 
 	let buttonIcon = <Icon size="36px" icon={ wordpress } />;
