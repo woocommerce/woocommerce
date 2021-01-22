@@ -24,6 +24,7 @@
 * Fix - Add Authorization header to the features extensions and search requests made to the marketplace. #28719
 * Fix - Duplicate New Order emails being sent when changing order status. #28809
 * Fix - Add migration to fix existing product review count. #28814
+* Fix - Fixed issues with empty prices in PHP 8. #28900
 * Dev - Use a custom fork of PHPUnit 7 in PHP 8 to workaround compatibility issues. #27844
 * Dev - Introduced `woocommerce_activated_plugin` hook. #28698
 * Dev - Clean up the `WC_Shipping_Zone_Data_Store::read()` method, documenting the `woocommerce_shipping_zone_loaded` hook. #28801
