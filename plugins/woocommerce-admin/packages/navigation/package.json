@@ -25,7 +25,7 @@
 		"@woocommerce/experimental": "file:../experimental",
 		"history": "4.10.1",
 		"lodash": "4.17.15",
-		"qs": "6.9.4"
+		"qs": "6.9.6"
 	},
 	"publishConfig": {
 		"access": "public"
