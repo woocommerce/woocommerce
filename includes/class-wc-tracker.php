@@ -364,8 +364,9 @@ class WC_Tracker {
 		);
 
 		$first            = time();
+		$processing_first = $first;
+		$first_time       = $first;
 		$last             = 0;
-		$processing_first = time();
 		$processing_last  = 0;
 
 		$orders       = wc_get_orders( $args );
@@ -445,10 +446,21 @@ class WC_Tracker {
 			$orders_count = count( $orders );
 		}
 
-		$order_data['first']            = gmdate( 'Y-m-d H:i:s', $first );
-		$order_data['last']             = gmdate( 'Y-m-d H:i:s', $last );
-		$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
-		$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
+		if( $first !== $first_time ) {
+			$order_data['first'] = gmdate( 'Y-m-d H:i:s', $first );
+		}
+
+		if( $processing_first !== $first_time ) {
+			$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
+		}
+
+		if( $last ) {
+			$order_data['last'] = gmdate( 'Y-m-d H:i:s', $last );
+		}
+
+		if( $processing_last ) {
+			$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
+		}
 
 		return $order_data;
 	}
