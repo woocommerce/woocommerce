@@ -157,7 +157,6 @@ done
 
 if [[ "$WAITFORIT_HOST" == "" || "$WAITFORIT_PORT" == "" ]]; then
     echoerr "Error: you need to provide a host and port to test."
-    usage
 fi
 
 WAITFORIT_TIMEOUT=${WAITFORIT_TIMEOUT:-15}

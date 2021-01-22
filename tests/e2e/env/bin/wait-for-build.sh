@@ -11,7 +11,7 @@ count=0
 WP_BASE_URL=$(node utils/get-base-url.js)
 printf "Testing URL: $WP_BASE_URL\n\n"
 
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${WP_BASE_URL}/?pagename=ready)" != "200" ]]
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${WP_BASE_URL})" != "200" ]]
 
 do
   echo "$(date) - Docker container is still being built"
