@@ -44,7 +44,7 @@
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-admin",
 		"lint": "npm run lint:js && npm run lint:css",
 		"lint:css": "stylelint '**/*.scss'",
-		"lint:css-fix": "stylelint '**/*.scss' --fix",
+		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:js": "wp-scripts lint-js ./packages ./client",
 		"lint:js:packages": "wp-scripts lint-js ./packages",
 		"lint:js:client": "wp-scripts lint-js ./client",
