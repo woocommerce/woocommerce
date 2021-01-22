@@ -588,7 +588,7 @@ function wc_price( $price, $args = array() ) {
 	 * @param float        $raw_price      Raw price.
 	 * @param float|string $original_price Original price as float, or empty string. Since 5.0.0.
 	 */
-	$price = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ), $original_price );
+	$price = apply_filters( 'raw_woocommerce_price', $negative ? $price * -1 : $price, $original_price );
 
 	/**
 	 * Filter formatted price.
