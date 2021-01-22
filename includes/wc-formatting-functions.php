@@ -574,6 +574,9 @@ function wc_price( $price, $args = array() ) {
 		)
 	);
 
+	// Convert to float to avoid issues on PHP 8.
+	$price = (float) $price;
+
 	$unformatted_price = $price;
 	$negative          = $price < 0;
 	$price             = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
