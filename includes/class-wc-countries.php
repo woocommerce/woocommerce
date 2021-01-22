@@ -62,17 +62,10 @@ class WC_Countries {
 	 *
 	 * @since 5.1.0
 	 * @param string $country_code The country code to check as a ISO 3166-1 alpha-2 code.
-	 * @param bool   $throw True to throw an exception if the country code isn't recognized.
 	 * @return bool True if the country is known to us, false otherwise.
-	 * @throws Exception The country code isn't recognized, and the $throw argument was passed as true.
 	 */
-	public function country_exists( $country_code, $throw = false ) {
-		$exists = array_key_exists( $country_code, $this->get_countries() );
-		if ( ! $exists && $throw ) {
-			/* translators: %s: ISO 3166-1 alpha-2 country code. */
-			throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $country_code ) );
-		}
-		return $exists;
+	public function country_exists( $country_code ) {
+		return array_key_exists( $country_code, $this->get_countries() );
 	}
 
 	/**

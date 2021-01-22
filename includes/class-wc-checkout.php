@@ -827,14 +827,16 @@ class WC_Checkout {
 	 * @since  3.0.0
 	 * @param  array    $data   An array of posted data.
 	 * @param  WP_Error $errors Validation errors.
+	 * @throws Exception Invalid country code in billing or shipping address.
 	 */
 	protected function validate_checkout( &$data, &$errors ) {
 		$this->validate_posted_data( $data, $errors );
 		$this->check_cart_items();
 
 		$billing_country = WC()->customer->get_shipping_country();
-		if ( $billing_country ) {
-			WC()->countries->country_exists( $billing_country, true );
+		if ( ! WC()->countries->country_exists( $billing_country ) ) {
+			/* translators: %s: ISO 3166-1 alpha-2 country code. */
+			throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $billing_country ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -847,9 +849,9 @@ class WC_Checkout {
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
-			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElseif
 			} elseif ( ! WC()->countries->country_exists( $shipping_country, true ) ) {
-				// Nothing to do, as an exception will have been thrown.
+				/* translators: %s: ISO 3166-1 alpha-2 country code. */
+				throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $billing_country ) );
 			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				/* translators: %s: shipping location */
 				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
