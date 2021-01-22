@@ -163,6 +163,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 = 5.0.0 - 2021-02-09 =
 
 **WooCommerce**
+
 * Enhancement - Create additional download permissions for simple downloadable products that are converted to variable products provided that there are variations offering the same files. #28521
 * Enhancement - Export SASS variables as CSS variables. #28709
 * Tweak - Added "Store management insights" option. #28712
@@ -191,5 +192,34 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Localization - Update Indian state name from `Orissa` to `Odisha`. #28740
 * Localization - Remove post code requirement for Guatemala. #28706
 * Localization - Fixed name for state in Guatemala. #28706
+
+**WooCommerce Admin - 1.9.0**
+
+* Fix - Add Customer Type column to the Orders report table. #5820
+* Fix - Product exclusion filter on Orders Report.
+* Fix - Typo in Variation Stats DataStore context filter value.
+* Fix - support custom attributes in Attribute advanced report filter.
+* Fix - Don't show Stock and Reviews Homescreen panels too early.
+* Tweak - Remove deprecated use of Jetpack in shipping label banner. #5929
+* Fix - Undefined `$collate` variable when database does not have collation capability. #5992
+* Tweak - Remove `visit_count` from track, and update task count logic. #5996
+* Fix - Moved certified owner label for review to title. ##5877
+* Fix - Move collapsible config to panels object, to allow for more control. #5855
+* Enhancement - Show Help panel tooltip when user visits unfinished task more then once. #5826
+* Tweak - Fix inconsistent REST API paramater name for customer type filtering.
+* Enhancement - Tasks extensibility in Home Screen. #5794
+* Enhancement - Add page parameter to override default wc-admin page in Navigation API. #5821
+* Fix - Invalidate product count if the last product was updated in the list. #5790
+* Fix - Updating (non wordpress user) customer with order data
+* Dev - Add documentation for filter `woocommerce_admin_pages_list` and `wc_admin_register_page` #5844
+* Dev - Revert work done in #4857 for automated shipping after OBW is completed #5971
+* Add - Welcome modal when coming from Calypso #6004
+* Enhancement - Add an a/b experiment for installing free business features #5786
+* Dev - Add `onChangeCallback` feature to the wc-admin `<Form>` component #5786 
+* Dev - Add merchant email notifications #5922 
+* Add - Email note to add first product. #6024
+* Add - Note for users coming from Calypso. #6030
+* Enhancement - Add an "unread" indicator to inbox messages. #6047 
+* Add - Manage activity from home screen inbox message. #6072
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
