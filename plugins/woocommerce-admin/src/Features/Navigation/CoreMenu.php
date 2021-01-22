@@ -42,15 +42,11 @@ class CoreMenu {
 	 * Add registered admin settings as menu items.
 	 */
 	public static function get_setting_items() {
-		$setting_pages = \WC_Admin_Settings::get_settings_pages();
-		$settings      = array();
-		foreach ( $setting_pages as $setting_page ) {
-			$settings = $setting_page->add_settings_page( $settings );
-		}
+		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
 		$menu_items = array();
 		$order      = 0;
-		foreach ( $settings as $key => $setting ) {
+		foreach ( $tabs as $key => $setting ) {
 			$order       += 10;
 			$menu_items[] = (
 				array(
