@@ -28,5 +28,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ':package: Artifacts ready for [download](https://github.com/${{ context.repo.owner }}/${{ context.repo.repo }}/actions/runs/${{ github.run_id }})!'
+              body: ':package: Artifacts ready for [download](https://github.com/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }})!'
             })
