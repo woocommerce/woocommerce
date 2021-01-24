@@ -95,7 +95,7 @@ const getCustomerPaymentMethods = ( availablePaymentMethods = {} ) => {
 				const isAvailable = gateway in availablePaymentMethods;
 				return (
 					isAvailable &&
-					availablePaymentMethods[ gateway ].supports?.savePaymentInfo
+					availablePaymentMethods[ gateway ].supports?.showSavedCards
 				);
 			}
 		);

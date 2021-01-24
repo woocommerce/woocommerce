@@ -297,8 +297,10 @@
  *                                                              inline cc
  *                                                              form or separate inputs.
  * @property {{[k:string]:CreditCardIcon}} icons                Contains supported cc icons.
- * @property {boolean}                     allowSavedCards      Used to indicate whether saved cards
+ * @property {boolean}                     showSavedCards       Used to indicate whether saved cards
  *                                                              can be used.
+ * @property {boolean}                     showSaveOption       Used to indicate whether the option to
+ *                                                              save card can be displayed.
  * @property {boolean}                     allowPaymentRequest  True if merchant has enabled payment
  *                                                              request (Chrome/Apple Pay).
  */

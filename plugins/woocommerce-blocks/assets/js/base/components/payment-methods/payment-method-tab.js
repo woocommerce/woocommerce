@@ -18,14 +18,15 @@ import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 /**
  * Component used to render the contents of a payment method tab.
  *
- * @param {Object}  props              Incoming props for the component.
- * @param {boolean} props.allowsSaving Whether that payment method allows saving
- *                                     the data for future purchases.
- * @param {Object}  props.children     Content of the payment method tab.
+ * @param {Object}  props                Incoming props for the component.
+ * @param {boolean} props.showSaveOption Whether that payment method allows saving
+ *                                       the data for future purchases and should
+ *                                       display the checkbox to do so.
+ * @param {Object}  props.children       Content of the payment method tab.
  *
  * @return {*} The rendered component.
  */
-const PaymentMethodTab = ( { children, allowsSaving } ) => {
+const PaymentMethodTab = ( { children, showSaveOption } ) => {
 	const { isEditor } = useEditorContext();
 	const {
 		shouldSavePayment,
@@ -36,7 +37,7 @@ const PaymentMethodTab = ( { children, allowsSaving } ) => {
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
 			{ children }
-			{ customerId > 0 && allowsSaving && (
+			{ customerId > 0 && showSaveOption && (
 				<CheckboxControl
 					className="wc-block-components-payment-methods__save-card-info"
 					label={ __(
@@ -54,7 +55,7 @@ const PaymentMethodTab = ( { children, allowsSaving } ) => {
 };
 
 PaymentMethodTab.propTypes = {
-	allowsSaving: PropTypes.bool,
+	showSaveOption: PropTypes.bool,
 	children: PropTypes.node,
 };
 
