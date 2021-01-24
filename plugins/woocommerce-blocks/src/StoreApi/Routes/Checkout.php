@@ -230,7 +230,6 @@ class Checkout extends AbstractRoute {
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @internal This Hook is experimental and may change or be removed.
-		 * @since 3.8.0
 		 *
 		 * @param WC_Order $order Order object.
 		 */
@@ -355,6 +354,23 @@ class Checkout extends AbstractRoute {
 		} else {
 			$order_controller->update_order_from_cart( $this->order );
 		}
+
+		/**
+		 * WooCommerce Blocks Checkout Update Order Meta (experimental).
+		 *
+		 * This hook gives extensions the chance to add or update meta data on the $order.
+		 *
+		 * This is similar to existing core hook woocommerce_checkout_update_order_meta.
+		 * We're using a new action:
+		 * - To keep the interface focused (only pass $order, not passing request data).
+		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
+		 * @internal This Hook is experimental and may change or be removed.
+		 *
+		 * @param WC_Order $order Order object.
+		 */
+		do_action( '__experimental_woocommerce_blocks_checkout_update_order_meta', $this->order );
 
 		// Confirm order is valid before proceeding further.
 		if ( ! $this->order instanceof WC_Order ) {

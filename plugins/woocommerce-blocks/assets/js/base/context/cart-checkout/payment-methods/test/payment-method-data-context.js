@@ -72,7 +72,8 @@ const registerMockPaymentMethods = () => {
 			icons: null,
 			canMakePayment: () => true,
 			supports: {
-				savePaymentInfo: true,
+				showSavedCards: true,
+				showSaveOption: true,
 			},
 			ariaLabel: name,
 		} );
