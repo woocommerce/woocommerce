@@ -43,7 +43,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import_sample_products' ),
-					'permission_callback' => array( $this, 'import_products_permission_check' ),
+					'permission_callback' => array( $this, 'create_products_permission_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -74,6 +74,29 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_status_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/create_product_from_template',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_product_from_template' ),
+					'permission_callback' => array( $this, 'create_products_permission_check' ),
+					'args'                => array_merge(
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
+						array(
+							'template_name' => array(
+								'required'    => true,
+								'type'        => 'string',
+								'description' => __( 'Product template name.', 'woocommerce-admin' ),
+							),
+						)
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -82,7 +105,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function import_products_permission_check( $request ) {
+	public function create_products_permission_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'create' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
@@ -119,31 +142,77 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Import sample products from WooCommerce sample CSV.
+	 * Import sample products from given CSV path.
 	 *
+	 * @param  string $csv_file CSV file path.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public static function import_sample_products() {
+	public static function import_sample_products_from_csv( $csv_file ) {
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
-		$file = WC_ABSPATH . 'sample-data/sample_products.csv';
 
-		if ( file_exists( $file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
+		if ( file_exists( $csv_file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			add_filter( 'locale', '__return_false', 9999 );
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 			$args           = array(
 				'parse'   => true,
-				'mapping' => self::get_header_mappings( $file ),
+				'mapping' => self::get_header_mappings( $csv_file ),
 			);
 			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
-			$importer = new $importer_class( $file, $args );
+			$importer = new $importer_class( $csv_file, $args );
 			$import   = $importer->import();
-			return rest_ensure_response( $import );
+			return $import;
 		} else {
 			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce-admin' ) );
 		}
 	}
+
+	/**
+	 * Import sample products from WooCommerce sample CSV.
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public static function import_sample_products() {
+		$sample_csv_file = WC_ABSPATH . 'sample-data/sample_products.csv';
+
+		$import = self::import_sample_products_from_csv( $sample_csv_file );
+		return rest_ensure_response( $import );
+	}
+
+
+	/**
+	 * Creates a product from a template name passed in through the template_name param.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function create_product_from_template( $request ) {
+		$template_name = $request->get_param( 'template_name' );
+		$template_path = __DIR__ . '/Templates/' . $template_name . '_product.csv';
+		$template_path = apply_filters( 'woocommerce_product_template_csv_file_path', $template_path, $template_name );
+
+		$import = self::import_sample_products_from_csv( $template_path );
+
+		if ( is_wp_error( $import ) || 0 === count( $import['imported'] ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_product_creation_error',
+				/* translators: %s is template name */
+				__( 'Sorry, creating the product with template failed.', 'woocommerce-admin' ),
+				array( 'status' => 500 )
+			);
+		}
+		$product = wc_get_product( $import['imported'][0] );
+		$product->set_status( 'auto-draft' );
+		$product->save();
+
+		return rest_ensure_response(
+			array(
+				'id' => $product->get_id(),
+			)
+		);
+	}
+
 
 	/**
 	 * Get header mappings from CSV columns.

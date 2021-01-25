@@ -15,14 +15,15 @@ const reducer = (
 ) => {
 	switch ( type ) {
 		case TYPES.SET_ITEM:
+			const itemData = state.data[ itemType ] || {};
 			return {
 				...state,
 				data: {
 					...state.data,
 					[ itemType ]: {
-						...state.data[ itemType ],
+						...itemData,
 						[ id ]: {
-							...state.data[ itemType ][ id ],
+							...( itemData[ id ] || {} ),
 							...item,
 						},
 					},

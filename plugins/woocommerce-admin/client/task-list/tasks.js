@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import Appearance from './tasks/appearance';
 import { getCategorizedOnboardingProducts } from '../dashboard/utils';
-import Products from './tasks/products';
+import { Products } from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';

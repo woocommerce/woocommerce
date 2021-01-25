@@ -33,10 +33,25 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove product attributes that where created in previous tests.
+	 */
+	public function clear_product_attribute_taxonomies() {
+		$taxonomies = get_taxonomies();
+		foreach ( (array) $taxonomies as $taxonomy ) {
+			// pa - product attribute.
+			if ( 'pa_' === substr( $taxonomy, 0, 3 ) ) {
+				unregister_taxonomy( $taxonomy );
+			}
+		}
+	}
+
+	/**
 	 * Test that sample product data is imported.
 	 */
 	public function test_import_sample_products() {
 		wp_set_current_user( $this->user );
+
+		$this->clear_product_attribute_taxonomies();
 
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/import_sample_products' );
 		$response = $this->server->dispatch( $request );
@@ -45,9 +60,60 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assertArrayHasKey( 'failed', $data );
+		$this->assertEquals( 0, count( $data['failed'] ) );
 		$this->assertArrayHasKey( 'imported', $data );
 		$this->assertArrayHasKey( 'skipped', $data );
+		// There might be previous products present.
+		if ( 0 === count( $data['skipped'] ) ) {
+			$this->assertGreaterThan( 10, count( $data['imported'] ) );
+		}
 		$this->assertArrayHasKey( 'updated', $data );
+		$this->assertEquals( 0, count( $data['updated'] ) );
+	}
+
+	/**
+	 * Test creating a product from a template name.
+	 */
+	public function test_create_product_from_template() {
+		wp_set_current_user( $this->user );
+		$this->clear_product_attribute_taxonomies();
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
+		$request->set_param( 'template_name', 'physical' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertArrayHasKey( 'id', $data );
+		$product = wc_get_product( $data['id'] );
+		$this->assertEquals( 'auto-draft', $product->get_status() );
+		$this->assertEquals( 'simple', $product->get_type() );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
+		$request->set_param( 'template_name', 'digital' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertArrayHasKey( 'id', $data );
+		$product = wc_get_product( $data['id'] );
+		$this->assertEquals( 'auto-draft', $product->get_status() );
+		$this->assertEquals( 'simple', $product->get_type() );
+	}
+
+	/**
+	 * Test that we get an error when template_name does not exist.
+	 */
+	public function test_create_product_from_wrong_template_name() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
+		$request->set_param( 'template_name', 'random' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 500, $response->get_status() );
 	}
 
 	/**
@@ -85,4 +151,6 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 'Custom post content', get_the_content( null, null, $data['post_id'] ) );
 	}
+
+
 }

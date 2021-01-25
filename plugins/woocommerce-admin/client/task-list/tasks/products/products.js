@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
 import { List } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
@@ -11,10 +11,26 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import ProductTemplateModal from './product-template-modal';
 
 const subTasks = [
 	{
-		title: __( 'Add manually (recommended)', 'woocommerce-admin' ),
+		key: 'addProductTemplate',
+		title: __( 'Start with a template (recommended)', 'woocommerce-admin' ),
+		content: __(
+			'For small stores we recommend adding products manually',
+			'woocommerce-admin'
+		),
+		before: <i className="material-icons-outlined">add_box</i>,
+		after: <i className="material-icons-outlined">chevron_right</i>,
+		onClick: () =>
+			recordEvent( 'tasklist_add_product', {
+				method: 'product_template',
+			} ),
+	},
+	{
+		key: 'addProductManually',
+		title: __( 'Add manually', 'woocommerce-admin' ),
 		content: __(
 			'For small stores we recommend adding products manually',
 			'woocommerce-admin'
@@ -28,6 +44,7 @@ const subTasks = [
 		),
 	},
 	{
+		key: 'importProducts',
 		title: __( 'Import', 'woocommerce-admin' ),
 		content: __(
 			'For larger stores we recommend importing all products at once via CSV file',
@@ -42,6 +59,7 @@ const subTasks = [
 		),
 	},
 	{
+		key: 'migrateProducts',
 		title: __( 'Migrate', 'woocommerce-admin' ),
 		content: __(
 			'For stores currently selling elsewhere we suggest using a product migration service',
@@ -57,16 +75,33 @@ const subTasks = [
 	},
 ];
 
-export default class Products extends Component {
-	render() {
-		return (
-			<Fragment>
-				<Card className="woocommerce-task-card">
-					<CardBody size={ null }>
-						<List items={ subTasks } />
-					</CardBody>
-				</Card>
-			</Fragment>
-		);
-	}
+export default function Products() {
+	const [ selectTemplate, setSelectTemplate ] = useState( null );
+
+	const onTaskClick = ( task ) => {
+		task.onClick();
+		if ( task.key === 'addProductTemplate' ) {
+			setSelectTemplate( true );
+		}
+	};
+
+	const listItems = subTasks.map( ( task ) => ( {
+		...task,
+		onClick: () => onTaskClick( task ),
+	} ) );
+
+	return (
+		<Fragment>
+			<Card className="woocommerce-task-card">
+				<CardBody size={ null }>
+					<List items={ listItems } />
+				</CardBody>
+			</Card>
+			{ selectTemplate ? (
+				<ProductTemplateModal
+					onClose={ () => setSelectTemplate( null ) }
+				/>
+			) : null }
+		</Fragment>
+	);
 }

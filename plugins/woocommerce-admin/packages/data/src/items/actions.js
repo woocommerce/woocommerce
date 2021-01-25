@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { NAMESPACE } from '../constants';
+import { NAMESPACE, WC_ADMIN_NAMESPACE } from '../constants';
 
 export function setItem( itemType, id, item ) {
 	return {
@@ -64,7 +65,6 @@ export function* updateProductStock( product, quantity ) {
 		default:
 			url += `/products/${ id }`;
 	}
-
 	try {
 		yield apiFetch( {
 			path: url,
@@ -77,5 +77,24 @@ export function* updateProductStock( product, quantity ) {
 		yield setItem( 'products', id, product );
 		yield setError( 'products', id, error );
 		return false;
+	}
+}
+
+export function* createProductFromTemplate( itemFields, query ) {
+	try {
+		const url = addQueryArgs(
+			`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/create_product_from_template`,
+			query || {}
+		);
+		const newItem = yield apiFetch( {
+			path: url,
+			method: 'POST',
+			data: itemFields,
+		} );
+		yield setItem( 'products', newItem.id, newItem );
+		return newItem;
+	} catch ( error ) {
+		yield setError( 'createProductFromTemplate', query, error );
+		throw error;
 	}
 }
