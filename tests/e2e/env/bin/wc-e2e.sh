@@ -25,6 +25,9 @@ fi
 # Store original path
 OLDPATH=$(pwd)
 
+# Return value for CI test runs
+TESTRESULT=0
+
 # Use the script symlink to find and change directory to the root of the package
 SCRIPTPATH=$(dirname "$0")
 REALPATH=$(readlink $0)
@@ -46,12 +49,15 @@ case $1 in
 		;;
 	'test:e2e')
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js $2
+		TESTRESULT=$?
 		;;
 	'test:e2e-dev')
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev $2
+		TESTRESULT=$?
 		;;
 	'test:e2e-debug')
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug $2
+		TESTRESULT=$?
 		;;
 	*)
 		usage
@@ -60,3 +66,5 @@ esac
 
 # Restore working path
 cd $OLDPATH
+
+exit $TESTRESULT
