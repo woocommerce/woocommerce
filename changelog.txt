@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 4.9.2 2021-01-25 =
+
+* Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
+
 = 4.9.1 2021-01-19 =
 
 * Fix - Reverts #28204 to ensure compatibility with extensions using legacy do_action calls. #28835
