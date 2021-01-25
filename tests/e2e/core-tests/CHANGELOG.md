@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.1
+
 ## Added
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
