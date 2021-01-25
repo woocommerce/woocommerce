@@ -3,6 +3,8 @@
 # 0.1.1
 
 ## Added
+
+- Registered Shopper Checkout tests
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
