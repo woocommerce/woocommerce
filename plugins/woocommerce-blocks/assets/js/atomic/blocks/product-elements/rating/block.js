@@ -45,7 +45,6 @@ const Block = ( { className } ) => {
 		<div
 			className={ classnames(
 				className,
-				'star-rating',
 				'wc-block-components-product-rating',
 				{
 					[ `${ parentClassName }__product-rating` ]: parentClassName,
