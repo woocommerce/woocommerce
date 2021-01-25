@@ -119,7 +119,7 @@ class WC_Order extends WC_Abstract_Order {
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
-				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
+				do_action( 'woocommerce_payment_complete', $this->get_id() );
 			} else {
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
 			}
