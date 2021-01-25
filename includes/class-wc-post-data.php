@@ -41,6 +41,7 @@ class WC_Post_Data {
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
+		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
 
 		// Status transitions.
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -122,12 +123,23 @@ class WC_Post_Data {
 	 * Handle type changes.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Product $product Product data.
 	 * @param string     $from    Origin type.
 	 * @param string     $to      New type.
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
-		if ( 'variable' === $from && 'variable' !== $to ) {
+		/**
+		 * Filter to prevent variations from being deleted while switching from a variable product type to a variable product type.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param bool       A boolean value of true will delete the variations.
+		 * @param WC_Product $product Product data.
+		 * @return string    $from    Origin type.
+		 * @param string     $to      New type.
+		 */
+		if ( apply_filters( 'woocommerce_delete_variations_on_product_type_change', 'variable' === $from && 'variable' !== $to, $product, $from, $to ) ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $product->get_id(), true );
@@ -488,6 +500,24 @@ class WC_Post_Data {
 				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
 			}
 		}
+	}
+
+	/**
+	 * Ensure statuses are correctly reassigned when restoring orders and products.
+	 *
+	 * @param string $new_status      The new status of the post being restored.
+	 * @param int    $post_id         The ID of the post being restored.
+	 * @param string $previous_status The status of the post at the point where it was trashed.
+	 * @return string
+	 */
+	public static function wp_untrash_post_status( $new_status, $post_id, $previous_status ) {
+		$post_types = array( 'shop_order', 'shop_coupon', 'product', 'product_variation' );
+
+		if ( in_array( get_post_type( $post_id ), $post_types, true ) ) {
+			$new_status = $previous_status;
+		}
+
+		return $new_status;
 	}
 
 	/**

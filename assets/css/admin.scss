@@ -360,7 +360,7 @@
 	}
 
 	.addons-button-solid {
-		background-color:#674399;
+		background-color: #674399;
 		color: #fff;
 	}
 
@@ -2128,7 +2128,7 @@ ul.wc_coupon_list_block {
 
 			&::after {
 				font-family: "Dashicons";
-				speak: none;
+				speak: never;
 				font-weight: normal;
 				font-variant: normal;
 				text-transform: none;
@@ -3170,6 +3170,7 @@ table.wc_input_table {
 }
 
 table.wc_tax_rates {
+
 	td.country {
 		position: relative;
 	}

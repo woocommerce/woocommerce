@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAppRoot, getAppName, getTestConfig } = require( '../utils' );
+const { getAdminConfig, getAppBase, getAppRoot, getAppName, getTestConfig } = require( '../utils' );
 
 const dockerArgs = [];
 let command = '';
@@ -29,7 +29,7 @@ program
     .parse( process.argv );
 
 const appPath = getAppRoot();
-const envVars = {};
+const envVars = getAdminConfig();
 
 if ( appPath ) {
     if ( 'up' === command ) {
@@ -65,7 +65,7 @@ const testConfig = getTestConfig();
 
 // Set some environment variables
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
-	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + envVars.APP_NAME;
+	envVars.WC_E2E_FOLDER_MAPPING = '/var/www/html/wp-content/plugins/' + getAppBase();
 }
 if ( ! process.env.WORDPRESS_PORT ) {
 	process.env.WORDPRESS_PORT = testConfig.port;

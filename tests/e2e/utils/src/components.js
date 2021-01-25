@@ -11,6 +11,7 @@ import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyAndPublish = async () => {
 	// Wait for auto save
@@ -139,8 +140,8 @@ const completeOnboardingWizard = async () => {
 	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
 	expect( extensionsToggles ).toHaveLength( 4 );
 
-	// Disable download of the 4 extensions
-	for ( let i = 0; i < 4; i++ ) {
+	// Disable download of the onboarding suggested extensions
+	for ( let i = 0; i < extensionsToggles.length; i++ ) {
 		await extensionsToggles[i].click();
 	}
 
@@ -208,7 +209,7 @@ const completeOnboardingWizard = async () => {
 const createSimpleProduct = async () => {
 	const product = await factories.products.simple.create( {
 		name: simpleProductName,
-		regularPrice: '9.99'
+		regularPrice: simpleProductPrice
 	} );
 	return product.id;
 } ;

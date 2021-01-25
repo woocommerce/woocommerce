@@ -25,25 +25,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 */
 	protected $namespace = 'wc/v3';
 
-
-	/**
-	 * Get Orders.
-	 *
-	 * @param  array $query_args Query args.
-	 *
-	 * @return array Products.
-	 */
-	protected function get_objects( $query_args ) {
-		$query_args['paginate'] = true;
-		$results                = wc_get_orders( $query_args );
-
-		return array(
-			'objects' => $results->orders,
-			'total'   => $results->total,
-			'pages'   => $results->max_num_pages,
-		);
-	}
-
 	/**
 	 * Calculate coupons.
 	 *

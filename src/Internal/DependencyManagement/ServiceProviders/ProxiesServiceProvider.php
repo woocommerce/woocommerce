@@ -1,6 +1,6 @@
 <?php
 /**
- * Proxies class file.
+ * ProxiesServiceProvider class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
