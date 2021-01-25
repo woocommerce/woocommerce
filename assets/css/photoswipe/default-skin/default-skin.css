@@ -270,6 +270,9 @@ a.pswp__share--download:hover {
     font-size: 11px;
     color: #BBB; }
 
+.pswp__caption a {
+  color: #007bff; }
+
 .pswp__caption__center {
   text-align: left;
   max-width: 420px;
