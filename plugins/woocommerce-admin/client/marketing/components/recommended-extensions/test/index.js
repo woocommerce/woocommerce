@@ -177,7 +177,7 @@ describe( 'Click Recommendations', () => {
 	} );
 } );
 
-describe( 'Custom title and description ', () => {
+describe( 'Custom title and description', () => {
 	it( 'should override defaults', () => {
 		const { getByText } = render(
 			<RecommendedExtensions

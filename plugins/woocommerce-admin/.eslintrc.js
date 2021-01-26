@@ -8,5 +8,11 @@ module.exports = {
 			'error',
 			{ definedTags: [ 'jest-environment' ] },
 		],
+		'import/no-extraneous-dependencies': 'warn',
+		'import/no-unresolved': 'warn',
+		'jest/no-deprecated-functions': 'warn',
+		'@wordpress/no-unsafe-wp-apis': 'warn',
+		'jest/valid-title': 'warn',
+		'@wordpress/no-global-active-element': 'warn',
 	},
 };

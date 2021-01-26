@@ -18,7 +18,7 @@ import {
 } from '../scales';
 
 jest.mock( 'd3-scale', () => ( {
-	...require.requireActual( 'd3-scale' ),
+	...jest.requireActual( 'd3-scale' ),
 	scaleBand: jest.fn().mockReturnValue( {
 		bandwidth: jest.fn().mockReturnThis(),
 		domain: jest.fn().mockReturnThis(),

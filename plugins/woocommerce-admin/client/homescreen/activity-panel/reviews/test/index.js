@@ -48,7 +48,7 @@ const REVIEW = {
 };
 
 jest.mock( '@woocommerce/components', () => ( {
-	...require.requireActual( '@woocommerce/components' ),
+	...jest.requireActual( '@woocommerce/components' ),
 	Link: ( { children } ) => {
 		return <>{ children }</>;
 	},

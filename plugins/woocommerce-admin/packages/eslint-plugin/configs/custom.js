@@ -3,6 +3,11 @@ module.exports = {
 	rules: {
 		'@woocommerce/dependency-group': 'error',
 	},
+	settings: {
+		jsdoc: {
+			mode: 'typescript',
+		},
+	},
 	overrides: [
 		{
 			files: [

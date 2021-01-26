@@ -424,7 +424,7 @@ describe( 'Page with single post', () => {
 	} );
 } );
 
-describe( 'Custom title and description ', () => {
+describe( 'Custom title and description', () => {
 	it( 'should override defaults', () => {
 		const { getByText } = render(
 			<KnowledgeBase

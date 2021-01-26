@@ -21,10 +21,10 @@ npm install @woocommerce/eslint-plugin --save-dev
 
 ## Usage
 
-To opt-in to the default configuration, extend your own project's `.eslintrc` file:
+To opt-in to the default configuration, extend your own project's `.eslintrc.js` file:
 
-```
-{
+```js
+module.exports = {
   "extends": [ "plugin:@woocommerce/eslint-plugin/recommended" ]
 }
 ```
@@ -32,6 +32,12 @@ To opt-in to the default configuration, extend your own project's `.eslintrc` fi
 Refer to the [ESLint documentation on Shareable Configs](http://eslint.org/docs/developer-guide/shareable-configs) for more information.
 
 The `recommended` preset will include rules governing an ES2015+ environment, and includes rules from the [`@wordpress/eslint-plugin/recommended`](https://github.com/WordPress/gutenberg/tree/master/packages/eslint-plugin) project.
+
+If you want to use prettier in your code editor, you'll need ot create a `.prettierrc.js` file at the root of your project with the following:
+
+```js
+module.exports = require("@wordpress/prettier-config");
+```
 
 ### Rules
 

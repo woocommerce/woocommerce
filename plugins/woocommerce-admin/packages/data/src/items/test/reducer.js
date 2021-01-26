@@ -31,8 +31,8 @@ describe( 'items reducer', () => {
 			errors: {},
 			data: {
 				[ itemType ]: {
-					'1': { id: 1, title: 'Donkey', status: 'flavortown' },
-					'2': { id: 2, title: 'Sauce', status: 'flavortown' },
+					1: { id: 1, title: 'Donkey', status: 'flavortown' },
+					2: { id: 2, title: 'Sauce', status: 'flavortown' },
 				},
 			},
 		};
