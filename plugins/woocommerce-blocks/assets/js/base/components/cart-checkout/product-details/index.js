@@ -12,6 +12,12 @@ import './style.scss';
 
 // Component to display cart item data and variations.
 const ProductDetails = ( { details = [] } ) => {
+	if ( ! Array.isArray( details ) ) {
+		return null;
+	}
+
+	details = details.filter( ( detail ) => ! detail.hidden );
+
 	if ( details.length === 0 ) {
 		return null;
 	}
@@ -25,7 +31,10 @@ const ProductDetails = ( { details = [] } ) => {
 					  ) }`
 					: '';
 				return (
-					<li key={ detail.name } className={ className }>
+					<li
+						key={ detail.name + ( detail.display || detail.name ) }
+						className={ className }
+					>
 						{ detail.name && (
 							<>
 								<span className="wc-block-components-product-details__name">
@@ -47,7 +56,7 @@ ProductDetails.propTypes = {
 	details: PropTypes.arrayOf(
 		PropTypes.shape( {
 			display: PropTypes.string,
-			name: PropTypes.string.isRequired,
+			name: PropTypes.string,
 			value: PropTypes.string.isRequired,
 		} )
 	),
