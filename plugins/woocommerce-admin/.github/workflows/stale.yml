@@ -19,7 +19,5 @@ jobs:
                   close-pr-message: 'This PR was automatically closed due to being stale.'
                   stale-pr-label: 'status: stale'
                   stale-issue-label: 'status: stale'
-                  debug-only: true
-                  operations-per-run: 500
                   exempt-issue-labels: 'cooldown period,priority: high,priority: critical'
                   ascending: true
