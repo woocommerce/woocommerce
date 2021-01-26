@@ -425,16 +425,20 @@ class CartItemSchema extends ProductSchema {
 	 */
 	protected function get_item_data( $cart_item ) {
 		$item_data = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
-		return array_map( [ $this, 'remove_tags_from_item_data' ], $item_data );
+		return array_map( [ $this, 'format_item_data_element' ], $item_data );
 	}
 
 	/**
-	 * Remove HTML tags from cart item data.
+	 * Remove HTML tags from cart item data and set the `hidden` property to
+	 * `__experimental_woocommerce_blocks_hidden`.
 	 *
 	 * @param array $item_data_element Individual element of a cart item data.
 	 * @return array
 	 */
-	protected function remove_tags_from_item_data( $item_data_element ) {
+	protected function format_item_data_element( $item_data_element ) {
+		if ( array_key_exists( '__experimental_woocommerce_blocks_hidden', $item_data_element ) ) {
+			$item_data_element['hidden'] = $item_data_element['__experimental_woocommerce_blocks_hidden'];
+		}
 		return array_map( 'wp_strip_all_tags', $item_data_element );
 	}
 }
