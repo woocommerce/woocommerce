@@ -1046,10 +1046,22 @@ function wc_print_js() {
  * @param  integer $expire Expiry of the cookie.
  * @param  bool    $secure Whether the cookie should be served only over https.
  * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
+ * @param  string  $samesite cookie-sending behavior
  */
-function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
+function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false, $samesite = 'Strict' ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
+		if ( version_compare(PHP_VERSION, '7.3.0') >= 0 ) {		
+			setcookie( $name, $value, Array(
+				'expires' => $expire,
+				'path' => COOKIEPATH ? COOKIEPATH : '/',
+				'domain' => COOKIE_DOMAIN,
+				'secure' => $secure,
+				'httponly' => apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ),
+				'samesite' => apply_filters( 'woocommerce_cookie_samesite', $samesite, $name, $value )));
+		}
+		else {
+			setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
+		}
 	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
