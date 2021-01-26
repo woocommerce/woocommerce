@@ -109,14 +109,14 @@ class WC_Order extends WC_Abstract_Order {
 				WC()->session->set( 'order_awaiting_payment', false );
 			}
 
-			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this, $transaction_id ) ) ) {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
 					$this->set_date_paid( time() );
 				}
-				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
+				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this, $transaction_id ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
