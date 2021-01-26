@@ -1055,7 +1055,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 				'expires' => $expire,
 				'path' => COOKIEPATH ? COOKIEPATH : '/',
 				'domain' => COOKIE_DOMAIN,
-				'secure' => $secure,
+				'secure' => apply_filters( 'woocommerce_cookie_secure', $secure, $name, $value ),
 				'httponly' => apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ),
 				'samesite' => apply_filters( 'woocommerce_cookie_samesite', $samesite, $name, $value )));
 		}
