@@ -20,7 +20,7 @@ class WC_Payment_Tokens {
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
-	 * @param  array $args Query argyments {
+	 * @param  array $args Query arguments {
 	 *     Array of query parameters.
 	 *
 	 *     @type string $token_id   Token ID.
