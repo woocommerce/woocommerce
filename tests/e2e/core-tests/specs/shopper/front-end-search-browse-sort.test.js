@@ -88,7 +88,24 @@ const runSearchBrowseSortTest = () => {
 
 		it('should let user sort the products in the shop', async () => {
             await shopper.goToShop();
+
+            // Sort by price high to low
+            await page.select('.orderby', 'price-desc');
+            // Verify the first product in sort order
+            await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title',
+             {text: simpleProductName + ' 3'});
+
+            // Sort by price low to high
+            await page.select('.orderby', 'price');
+            // Verify the first product in sort order
+            await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title',
+             {text: simpleProductName + ' 1'});
             
+            // Sort by date of creation, latest to oldest
+            await page.select('.orderby', 'date');
+            // Verify the first product in sort order
+            await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title',
+             {text: simpleProductName + ' 3'});
 		});
 	});
 };
