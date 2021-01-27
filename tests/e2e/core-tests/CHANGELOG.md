@@ -14,6 +14,7 @@
 
 
 - Shopper Cart Apply Coupon
+- Shopper Search, Browse & Sort Products
 
 ## Fixed
 
