@@ -64,7 +64,7 @@
 		"test": "./node_modules/jest-24.9.0/bin/jest.js --config tests/js/jest.config.json",
 		"test-staged": "./node_modules/jest-24.9.0/bin/jest.js --bail --config tests/js/jest.config.json --findRelatedTests",
 		"test:help": "wp-scripts test-unit-js --help",
-		"test:php": "docker-compose -f docker/wc-admin-php-test-suite/docker-compose.yml run --rm phpunit",
+		"test:php": "docker-compose -f docker/wc-admin-php-test-suite/docker-compose.yml run --rm phpunit ; docker-compose -f docker/wc-admin-php-test-suite/docker-compose.yml down",
 		"test:update-snapshots": "jest --updateSnapshot --config tests/js/jest.config.json",
 		"test:watch": "npm run test -- --watch",
 		"test:zip": "npm run clean && composer i && ./bin/build-test-zip.sh",
