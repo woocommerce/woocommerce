@@ -71,6 +71,7 @@ const runSearchBrowseSortTest = () => {
 			await uiUnblocked();
 
 			// Verify the category assignment and open it
+			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
 			await expect(page).toMatchElement('span.posted_in > a', {text: clothing});
 			await expect(page).toClick('span.posted_in > a', {text: clothing});
 			await uiUnblocked();
