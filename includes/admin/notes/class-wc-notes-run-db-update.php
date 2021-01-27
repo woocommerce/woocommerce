@@ -110,10 +110,13 @@ class WC_Notes_Run_Db_Update {
 	 */
 	private static function update_needed_notice( $note_id = null ) {
 		$update_url = html_entity_decode(
-			wp_nonce_url(
-				add_query_arg( 'do_update_woocommerce', 'true', wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' ) ),
-				'wc_db_update',
-				'wc_db_update_nonce'
+			add_query_arg(
+				array(
+					'do_update_woocommerce' => 'true',
+					'_nonce_action'         => 'wc_db_update',
+					'_nonce_name'           => 'wc_db_update_nonce',
+				),
+				wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
 			)
 		);
 
@@ -206,14 +209,13 @@ class WC_Notes_Run_Db_Update {
 	 */
 	private static function update_done_notice( $note_id ) {
 		$hide_notices_url = html_entity_decode( // to convert &amp;s to normal &, otherwise produces invalid link.
-			wp_nonce_url(
-				add_query_arg(
-					'wc-hide-notice',
-					'update',
-					wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
+			add_query_arg(
+				array(
+					'wc-hide-notice' => 'update',
+					'_nonce_action'  => 'woocommerce_hide_notices_nonce',
+					'_nonce_name'    => '_wc_notice_nonce',
 				),
-				'woocommerce_hide_notices_nonce',
-				'_wc_notice_nonce'
+				wc_get_current_admin_url() ? remove_query_arg( 'do_update_woocommerce', wc_get_current_admin_url() ) : admin_url( 'admin.php?page=wc-settings' )
 			)
 		);
 
