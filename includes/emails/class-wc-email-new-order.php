@@ -80,9 +80,8 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 *
 		 * @param int            $order_id The order ID.
 		 * @param WC_Order|false $order Order object.
-		 * @param bool           $force_send Whether to force send the email.
 		 */
-		public function trigger( $order_id, $order = false, $force_send = false ) {
+		public function trigger( $order_id, $order = false ) {
 			$this->setup_locale();
 
 			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
@@ -97,7 +96,13 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
 			}
 
-			if ( 'true' === $email_already_sent && ! $force_send ) {
+			/**
+			 * Controls if new order emails can be resend multiple times.
+			 *
+			 * @since 5.0.0
+			 * @param bool $allows Defaults to true.
+			 */
+			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
 				return;
 			}
 

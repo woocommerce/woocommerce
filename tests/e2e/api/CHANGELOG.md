@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.1
+
 ## Breaking Changes
 
 - The `HTTPClientFactory` API was changed to make it easier to configure instances with
@@ -13,6 +15,11 @@
 ## Changes
 
 - Added a tranformation layer between API responses and internal models
+
+## Fixed
+
+- issues that caused the factory creation to fail for SimpleProduct types
+- a bug with OAuth signature generation when using query parameters
 
 # 0.1.0
 

@@ -574,10 +574,33 @@ function wc_price( $price, $args = array() ) {
 		)
 	);
 
+	$original_price = $price;
+
+	// Convert to float to avoid issues on PHP 8.
+	$price = (float) $price;
+
 	$unformatted_price = $price;
 	$negative          = $price < 0;
-	$price             = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
-	$price             = apply_filters( 'formatted_woocommerce_price', number_format( $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'] ), $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'] );
+
+	/**
+	 * Filter raw price.
+	 *
+	 * @param float        $raw_price      Raw price.
+	 * @param float|string $original_price Original price as float, or empty string. Since 5.0.0.
+	 */
+	$price = apply_filters( 'raw_woocommerce_price', $negative ? $price * -1 : $price, $original_price );
+
+	/**
+	 * Filter formatted price.
+	 *
+	 * @param float        $formatted_price    Formatted price.
+	 * @param float        $price              Unformatted price.
+	 * @param int          $decimals           Number of decimals.
+	 * @param string       $decimal_separator  Decimal separator.
+	 * @param string       $thousand_separator Thousand separator.
+	 * @param float|string $original_price     Original price as float, or empty string. Since 5.0.0.
+	 */
+	$price = apply_filters( 'formatted_woocommerce_price', number_format( $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'] ), $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'], $original_price );
 
 	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $args['decimals'] > 0 ) {
 		$price = wc_trim_zeros( $price );
@@ -593,12 +616,13 @@ function wc_price( $price, $args = array() ) {
 	/**
 	 * Filters the string of price markup.
 	 *
-	 * @param string $return            Price HTML markup.
-	 * @param string $price             Formatted price.
-	 * @param array  $args              Pass on the args.
-	 * @param float  $unformatted_price Price as float to allow plugins custom formatting. Since 3.2.0.
+	 * @param string       $return            Price HTML markup.
+	 * @param string       $price             Formatted price.
+	 * @param array        $args              Pass on the args.
+	 * @param float        $unformatted_price Price as float to allow plugins custom formatting. Since 3.2.0.
+	 * @param float|string $original_price    Original price as float, or empty string. Since 5.0.0.
 	 */
-	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price );
+	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price, $original_price );
 }
 
 /**
