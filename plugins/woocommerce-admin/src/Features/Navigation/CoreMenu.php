@@ -134,10 +134,11 @@ class CoreMenu {
 				'order'  => 20,
 			)
 		);
-		$coupon_items      = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'woocommerce-marketing' ) );
-		$setting_items     = self::get_setting_items();
-		$wca_items         = array();
-		$wca_pages         = \Automattic\WooCommerce\Admin\PageController::get_instance()->get_pages();
+
+		$coupon_items  = Menu::get_post_type_items( 'shop_coupon', array( 'parent' => 'woocommerce-marketing' ) );
+		$setting_items = self::get_setting_items();
+		$wca_items     = array();
+		$wca_pages     = \Automattic\WooCommerce\Admin\PageController::get_instance()->get_pages();
 
 		foreach ( $wca_pages as $page ) {
 			if ( ! isset( $page['nav_args'] ) ) {

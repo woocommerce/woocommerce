@@ -213,7 +213,9 @@ class Screen {
 	 * @param string $post_type Post type to add.
 	 */
 	public static function register_post_type( $post_type ) {
-		self::$post_types[] = $post_type;
+		if ( ! in_array( $post_type, self::$post_types, true ) ) {
+			self::$post_types[] = $post_type;
+		}
 	}
 
 	/**
@@ -222,6 +224,8 @@ class Screen {
 	 * @param string $taxonomy Taxonomy to add.
 	 */
 	public static function register_taxonomy( $taxonomy ) {
-		self::$taxonomies[] = $taxonomy;
+		if ( ! in_array( $taxonomy, self::$taxonomies, true ) ) {
+			self::$taxonomies[] = $taxonomy;
+		}
 	}
 }
