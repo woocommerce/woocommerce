@@ -9,7 +9,7 @@ Our blocks are generally made up of up to 4 files:
 |- style.scss
 ```
 
-The only required file is `index.js`, this sets up the block using [`registerBlockType`.](https://wordpress.org/gutenberg/handbook/designers-developers/developers/block-api/block-registration/) Each block has edit and save functions.
+The only required file is `index.js`, this sets up the block using [`registerBlockType`](https://wordpress.org/gutenberg/handbook/designers-developers/developers/block-api/block-registration/). Each block has edit and save functions.
 
 The scss files are split so that things in `style` are added to the editor _and_ frontend, while styles in `editor` are only added to the editor. Most of our blocks should use core components that won't need CSS though.
 
