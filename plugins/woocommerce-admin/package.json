@@ -132,7 +132,7 @@
 		"@babel/plugin-transform-async-to-generator": "7.12.1",
 		"@babel/plugin-transform-react-jsx": "7.12.12",
 		"@babel/runtime-corejs2": "7.12.5",
-		"@octokit/graphql": "4.5.8",
+		"@octokit/graphql": "4.5.9",
 		"@storybook/addon-a11y": "6.1.14",
 		"@storybook/addon-actions": "6.1.14",
 		"@storybook/addon-console": "1.2.2",
