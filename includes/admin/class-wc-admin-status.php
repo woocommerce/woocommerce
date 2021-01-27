@@ -377,7 +377,7 @@ class WC_Admin_Status {
 	private static function output_plugins_info( $plugins, $untested_plugins ) {
 		$wc_version = Constants::get_constant( 'WC_VERSION' );
 
-		if ( 'major' === WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE ) {
+		if ( 'major' === Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
 			// Since we're only testing against major, we don't need to show minor and patch version.
 			$wc_version = $wc_version[0] . '.0';
 		}

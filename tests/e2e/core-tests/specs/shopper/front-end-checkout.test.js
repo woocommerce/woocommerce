@@ -20,7 +20,8 @@ const threeProductPrice = singleProductPrice * 3;
 const fourProductPrice = singleProductPrice * 4;
 const fiveProductPrice = singleProductPrice * 5;
 
-let orderId;
+let guestOrderId;
+let customerOrderId;
 
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
@@ -136,34 +137,36 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return orderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			return guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+		});
+
+		it('allows existing customer to place order', async () => {
+			await shopper.login();
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCheckout();
+			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+
+			await uiUnblocked();
+
+			await expect(page).toClick('.wc_payment_method label', {text: 'Cash on delivery'});
+			await expect(page).toMatchElement('.payment_method_cod', {text: 'Pay with cash upon delivery.'});
+			await uiUnblocked();
+			await shopper.placeOrder();
+
+			await expect(page).toMatch('Order received');
+
+			// Get order ID from the order received html element on the page
+			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
+			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
+			return customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('store owner can confirm the order was received', async () => {
 			await merchant.login();
-			await merchant.openAllOrdersView();
-
-			// Click on the order which was placed in the previous step
-			await Promise.all([
-				page.click('#post-' + orderId),
-				page.waitForNavigation({waitUntil: 'networkidle0'}),
-			]);
-
-			// Verify that the order page is indeed of the order that was placed
-			// Verify order number
-			await expect(page).toMatchElement('.woocommerce-order-data__heading', {text: 'Order #' + orderId + ' details'});
-
-			// Verify product name
-			await expect(page).toMatchElement('.wc-order-item-name', {text: simpleProductName});
-
-			// Verify product cost
-			await expect(page).toMatchElement('.woocommerce-Price-amount.amount', {text: singleProductPrice});
-
-			// Verify product quantity
-			await expect(page).toMatchElement('.quantity', {text: '5'});
-
-			// Verify total order amount without shipping
-			await expect(page).toMatchElement('.line_cost', {text: fiveProductPrice});
+			await merchant.verifyOrder(guestOrderId, simpleProductName, singleProductPrice, 5, fiveProductPrice);
+			await merchant.verifyOrder(customerOrderId, simpleProductName, singleProductPrice, 1, singleProductPrice, true);
 		});
 	});
 };

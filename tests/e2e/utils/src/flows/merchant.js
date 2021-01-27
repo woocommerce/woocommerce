@@ -131,6 +131,31 @@ const merchant = {
 		await page.waitForSelector( '#message' );
 		await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
 	},
+
+	verifyOrder: async (orderId, productName, productPrice, quantity, orderTotal, ensureCustomerRegistered = false) => {
+		await merchant.goToOrder(orderId);
+
+		// Verify that the order page is indeed of the order that was placed
+		// Verify order number
+		await expect(page).toMatchElement('.woocommerce-order-data__heading', {text: 'Order #' + orderId + ' details'});
+
+		// Verify product name
+		await expect(page).toMatchElement('.wc-order-item-name', {text: productName});
+
+		// Verify product cost
+		await expect(page).toMatchElement('.woocommerce-Price-amount.amount', {text: productPrice});
+
+		// Verify product quantity
+		await expect(page).toMatchElement('.quantity', {text: quantity.toString()});
+
+		// Verify total order amount without shipping
+		await expect(page).toMatchElement('.line_cost', {text: orderTotal});
+
+		if ( ensureCustomerRegistered ) {
+			// Verify customer profile link is present to verify order was placed by a registered customer, not a guest
+			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
+		}
+	},
 };
 
 module.exports = merchant;
