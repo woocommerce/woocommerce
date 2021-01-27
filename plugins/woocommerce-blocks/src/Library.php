@@ -40,7 +40,8 @@ class Library {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public static function register_blocks() {
-		global $wp_version;
+		global $wp_version, $pagenow;
+
 		$blocks = [
 			'AllReviews',
 			'FeaturedCategory',
@@ -68,6 +69,18 @@ class Library {
 		}
 		if ( Package::feature()->is_experimental_build() ) {
 			$blocks[] = 'SingleProduct';
+		}
+		/**
+		 * This disables specific blocks in Widget Areas by not registering them.
+		 */
+		if ( 'themes.php' === $pagenow ) {
+			$blocks_to_unset = [
+				'AllProducts',
+				'PriceFilter',
+				'AttributeFilter',
+				'ActiveFilters',
+			];
+			$blocks          = array_diff( $blocks, $blocks_to_unset );
 		}
 		foreach ( $blocks as $class ) {
 			$class    = __NAMESPACE__ . '\\BlockTypes\\' . $class;
