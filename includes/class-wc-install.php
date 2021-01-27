@@ -157,6 +157,10 @@ class WC_Install {
 			'wc_update_450_sanitize_coupons_code',
 			'wc_update_450_db_version',
 		),
+		'5.0.0' => array(
+			'wc_update_500_fix_product_review_count',
+			'wc_update_500_db_version',
+		),
 	);
 
 	/**

@@ -48,11 +48,6 @@ The built in container initialization needs to know the particulars of your test
       "username": "admin",
       "password": "password",
       "email": "admin@woocommercecoree2etestsuite.com"
-    },
-    "customer": {
-      "username": "customer",
-      "password": "password",
-      "email": "customer@woocommercecoree2etestsuite.com"
     }
   }
 }
