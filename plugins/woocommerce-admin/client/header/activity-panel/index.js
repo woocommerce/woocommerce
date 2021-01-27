@@ -111,8 +111,8 @@ export class ActivityPanel extends Component {
 	isPerformingSetupTask() {
 		const {
 			requestingTaskListOptions,
-			taskListComplete,
-			taskListHidden,
+			setupTaskListComplete,
+			setupTaskListHidden,
 			query,
 		} = this.props;
 
@@ -120,7 +120,8 @@ export class ActivityPanel extends Component {
 			query.task &&
 			! query.path &&
 			( requestingTaskListOptions === true ||
-				( taskListHidden === false && taskListComplete === false ) );
+				( setupTaskListHidden === false &&
+					setupTaskListComplete === false ) );
 
 		return isPerformingSetupTask;
 	}
@@ -130,8 +131,8 @@ export class ActivityPanel extends Component {
 		const {
 			hasUnreadNotes,
 			isEmbedded,
-			taskListComplete,
-			taskListHidden,
+			setupTaskListComplete,
+			setupTaskListHidden,
 		} = this.props;
 
 		const isPerformingSetupTask = this.isPerformingSetupTask();
@@ -147,8 +148,8 @@ export class ActivityPanel extends Component {
 			! isEmbedded && this.isHomescreen() && ! isPerformingSetupTask;
 
 		const showStoreSetup =
-			! taskListComplete &&
-			! taskListHidden &&
+			! setupTaskListComplete &&
+			! setupTaskListHidden &&
 			! isPerformingSetupTask &&
 			( ! this.isHomescreen() || isEmbedded );
 
@@ -201,7 +202,7 @@ export class ActivityPanel extends Component {
 	}
 
 	renderPanel() {
-		const { updateOptions, taskListHidden } = this.props;
+		const { updateOptions, setupTaskListHidden } = this.props;
 		const { isPanelOpen, currentTab, isPanelSwitching } = this.state;
 		const tab = find( this.getTabs(), { name: currentTab } );
 
@@ -229,7 +230,7 @@ export class ActivityPanel extends Component {
 			if ( currentLocation !== homescreenLocation ) {
 				// Ensure that if the user is trying to get to the task list they can see it even if
 				// it was dismissed.
-				if ( taskListHidden === 'no' ) {
+				if ( setupTaskListHidden === 'no' ) {
 					this.redirectToHomeScreen();
 				} else {
 					updateOptions( {
@@ -409,9 +410,9 @@ export default compose(
 		const hasUnreadNotes = getUnreadNotes( select );
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 
-		const taskListComplete =
+		const setupTaskListComplete =
 			getOption( 'woocommerce_task_list_complete' ) === 'yes';
-		const taskListHidden =
+		const setupTaskListHidden =
 			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
 		const requestingTaskListOptions =
 			isResolving( 'getOption', [ 'woocommerce_task_list_complete' ] ) ||
@@ -422,8 +423,8 @@ export default compose(
 		return {
 			hasUnreadNotes,
 			requestingTaskListOptions,
-			taskListComplete,
-			taskListHidden,
+			setupTaskListComplete,
+			setupTaskListHidden,
 			trackedCompletedTasks,
 		};
 	} ),

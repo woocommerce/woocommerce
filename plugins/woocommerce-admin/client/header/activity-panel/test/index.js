@@ -103,8 +103,8 @@ describe( 'Activity Panel', () => {
 		render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden={ false }
+				setupTaskListComplete={ false }
+				setupTaskListHidden={ false }
 				getHistory={ () => ( {
 					location: {
 						pathname: '/customers',
@@ -140,8 +140,8 @@ describe( 'Activity Panel', () => {
 		const { queryByText, rerender } = render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden={ false }
+				setupTaskListComplete={ false }
+				setupTaskListHidden={ false }
 				query={ {
 					task: 'products',
 				} }
@@ -153,8 +153,8 @@ describe( 'Activity Panel', () => {
 		rerender(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
-				taskListComplete
-				taskListHidden={ false }
+				setupTaskListComplete
+				setupTaskListHidden={ false }
 				query={ {
 					task: 'products',
 				} }
@@ -168,8 +168,8 @@ describe( 'Activity Panel', () => {
 		const { queryByText } = render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden={ false }
+				setupTaskListComplete={ false }
+				setupTaskListHidden={ false }
 				getHistory={ () => ( {
 					location: {
 						pathname: '/',
@@ -188,8 +188,8 @@ describe( 'Activity Panel', () => {
 		const { getByText } = render(
 			<ActivityPanel
 				requestingTaskListOptions={ false }
-				taskListComplete={ false }
-				taskListHidden={ false }
+				setupTaskListComplete={ false }
+				setupTaskListHidden={ false }
 				isEmbedded
 				query={ {} }
 			/>
@@ -203,8 +203,8 @@ describe( 'Activity Panel', () => {
 			const { getByText } = render(
 				<ActivityPanel
 					requestingTaskListOptions={ false }
-					taskListComplete={ false }
-					taskListHidden={ false }
+					setupTaskListComplete={ false }
+					setupTaskListHidden={ false }
 					userPreferencesData={ {
 						task_list_tracked_started_tasks: { payment: 2 },
 					} }
@@ -222,8 +222,8 @@ describe( 'Activity Panel', () => {
 			render(
 				<ActivityPanel
 					requestingTaskListOptions={ false }
-					taskListComplete={ false }
-					taskListHidden={ false }
+					setupTaskListComplete={ false }
+					setupTaskListHidden={ false }
 					userPreferencesData={ {
 						task_list_tracked_started_tasks: { payment: 1 },
 					} }
@@ -238,8 +238,8 @@ describe( 'Activity Panel', () => {
 			render(
 				<ActivityPanel
 					requestingTaskListOptions={ false }
-					taskListComplete={ false }
-					taskListHidden={ false }
+					setupTaskListComplete={ false }
+					setupTaskListHidden={ false }
 					userPreferencesData={ {
 						task_list_tracked_started_tasks: {},
 					} }
@@ -256,8 +256,8 @@ describe( 'Activity Panel', () => {
 			const { queryByText } = render(
 				<ActivityPanel
 					requestingTaskListOptions={ false }
-					taskListComplete={ false }
-					taskListHidden={ false }
+					setupTaskListComplete={ false }
+					setupTaskListHidden={ false }
 					userPreferencesData={ {
 						task_list_tracked_started_tasks: { payment: 2 },
 					} }
@@ -274,8 +274,8 @@ describe( 'Activity Panel', () => {
 			const { queryByText } = render(
 				<ActivityPanel
 					requestingTaskListOptions={ false }
-					taskListComplete={ false }
-					taskListHidden={ false }
+					setupTaskListComplete={ false }
+					setupTaskListHidden={ false }
 					userPreferencesData={ {
 						task_list_tracked_started_tasks: { payment: 2 },
 						help_panel_highlight_shown: 'yes',

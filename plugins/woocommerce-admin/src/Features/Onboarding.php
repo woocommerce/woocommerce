@@ -105,6 +105,7 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
+		add_action( 'current_screen', array( $this, 'reset_extended_task_list' ) );
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
@@ -947,10 +948,9 @@ class Onboarding {
 			'id'    => 'woocommerce_onboard_tab',
 		);
 
-		$task_list_hidden = (
-			'yes' === get_option( 'woocommerce_task_list_hidden', 'no' ) ||
-			'yes' === get_option( 'woocommerce_extended_task_list_hidden', 'no' )
-		);
+		$task_list_hidden = ( 'yes' === get_option( 'woocommerce_task_list_hidden', 'no' ) );
+
+		$extended_task_list_hidden = ( 'yes' === get_option( 'woocommerce_extended_task_list_hidden', 'no' ) );
 
 		$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
@@ -963,6 +963,13 @@ class Onboarding {
 		( $task_list_hidden
 			? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
 			: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+		);
+
+		$help_tab['content'] .= '<h3>' . __( 'Extended task List', 'woocommerce-admin' ) . '</h3>';
+		$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the extended task lists, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+		( $extended_task_list_hidden
+			? '<p><a href="' . wc_admin_url( '&reset_extended_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+			: '<p><a href="' . wc_admin_url( '&reset_extended_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
 		);
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -1096,12 +1103,35 @@ class Onboarding {
 
 		$task_list_hidden = 1 === absint( $_GET['reset_task_list'] ) ? 'no' : 'yes'; // phpcs:ignore CSRF ok.
 		update_option( 'woocommerce_task_list_hidden', $task_list_hidden );
-		update_option( 'woocommerce_extended_task_list_hidden', $task_list_hidden );
 
 		wc_admin_record_tracks_event(
 			'tasklist_toggled',
 			array(
 				'status' => 'yes' === $task_list_hidden ? 'disabled' : 'enabled',
+			)
+		);
+		wp_safe_redirect( wc_admin_url() );
+		exit;
+	}
+
+	/**
+	 * Reset the extended task list and redirect to the dashboard.
+	 */
+	public static function reset_extended_task_list() {
+		if (
+			! Loader::is_admin_page() ||
+			! isset( $_GET['reset_extended_task_list'] ) // phpcs:ignore CSRF ok.
+		) {
+			return;
+		}
+
+		$extended_task_list_hidden = 1 === absint( $_GET['reset_extended_task_list'] ) ? 'no' : 'yes'; // phpcs:ignore CSRF ok.
+		update_option( 'woocommerce_extended_task_list_hidden', $extended_task_list_hidden );
+
+		wc_admin_record_tracks_event(
+			'extended_tasklist_toggled',
+			array(
+				'status' => 'yes' === $extended_task_list_hidden ? 'disabled' : 'enabled',
 			)
 		);
 		wp_safe_redirect( wc_admin_url() );
