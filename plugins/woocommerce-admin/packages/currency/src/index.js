@@ -113,10 +113,10 @@ const CurrencyFactory = ( currencySetting ) => {
 		localeInfo = {},
 		currencySymbols = {}
 	) {
-		const countryInfo = localeInfo[ countryCode ];
+		const countryInfo = localeInfo[ countryCode ] || {};
 		const symbol = currencySymbols[ countryInfo.currency_code ];
 
-		if ( ! symbol || ! countryInfo ) {
+		if ( ! symbol ) {
 			return {};
 		}
 
