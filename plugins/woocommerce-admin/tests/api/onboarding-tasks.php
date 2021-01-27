@@ -33,13 +33,21 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		$this->remove_color_or_logo_attribute_taxonomy();
+	}
+
+	/**
 	 * Remove product attributes that where created in previous tests.
 	 */
-	public function clear_product_attribute_taxonomies() {
+	public function remove_color_or_logo_attribute_taxonomy() {
 		$taxonomies = get_taxonomies();
 		foreach ( (array) $taxonomies as $taxonomy ) {
 			// pa - product attribute.
-			if ( 'pa_' === substr( $taxonomy, 0, 3 ) ) {
+			if ( 'pa_color' === $taxonomy || 'pa_logo' === $taxonomy ) {
 				unregister_taxonomy( $taxonomy );
 			}
 		}
@@ -51,7 +59,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	public function test_import_sample_products() {
 		wp_set_current_user( $this->user );
 
-		$this->clear_product_attribute_taxonomies();
+		$this->remove_color_or_logo_attribute_taxonomy();
 
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/import_sample_products' );
 		$response = $this->server->dispatch( $request );
@@ -65,7 +73,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'skipped', $data );
 		// There might be previous products present.
 		if ( 0 === count( $data['skipped'] ) ) {
-			$this->assertGreaterThan( 10, count( $data['imported'] ) );
+			$this->assertGreaterThan( 1, count( $data['imported'] ) );
 		}
 		$this->assertArrayHasKey( 'updated', $data );
 		$this->assertEquals( 0, count( $data['updated'] ) );
@@ -76,7 +84,6 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_create_product_from_template() {
 		wp_set_current_user( $this->user );
-		$this->clear_product_attribute_taxonomies();
 
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
 		$request->set_param( 'template_name', 'physical' );
