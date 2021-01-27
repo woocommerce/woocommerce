@@ -174,10 +174,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $data['type'] ) ) {
-			$types   = array_keys( wc_get_product_types() );
-			$types[] = 'variation';
 
-			if ( ! in_array( $data['type'], $types, true ) ) {
+			if ( ! array_key_exists( $data['type'], WC_Admin_Exporters::get_product_types() ) ) {
 				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 

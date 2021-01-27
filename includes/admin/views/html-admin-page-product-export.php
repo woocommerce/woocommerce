@@ -49,11 +49,10 @@ $exporter = new WC_Product_CSV_Exporter();
 							<td>
 								<select id="woocommerce-exporter-types" class="woocommerce-exporter-types wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all products', 'woocommerce' ); ?>">
 									<?php
-									foreach ( wc_get_product_types() as $value => $label ) {
+									foreach ( WC_Admin_Exporters::get_product_types() as $value => $label ) {
 										echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
 									}
 									?>
-									<option value="variation"><?php esc_html_e( 'Product variations', 'woocommerce' ); ?></option>
 								</select>
 							</td>
 						</tr>
