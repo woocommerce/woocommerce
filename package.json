@@ -22,7 +22,7 @@
     "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
-    "build:zip": "npm run build && composer install && npm run build:dev",
+    "build:zip": "npm run build",
     "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:down": "npx wc-e2e docker:down",
