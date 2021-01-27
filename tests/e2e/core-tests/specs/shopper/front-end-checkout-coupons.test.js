@@ -7,7 +7,8 @@ const {
 	merchant,
 	createCoupon,
 	createSimpleProduct,
-	uiUnblocked
+	uiUnblocked,
+	clearAndFillInput,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -28,7 +29,7 @@ const {
 const applyCouponToCart = async ( couponCode ) => {
 	await expect(page).toClick('a', {text: 'Click here to enter your code'});
 	await uiUnblocked();
-	await expect(page).toFill('#coupon_code', couponCode);
+	await clearAndFillInput('#coupon_code', couponCode);
 	await expect(page).toClick('button', {text: 'Apply coupon'});
 	await uiUnblocked();
 };
@@ -94,9 +95,10 @@ const runCheckoutApplyCouponsTest = () => {
 		});
 
 		it('prevents customer applying same coupon twice', async () => {
-			await applyCouponToCart( couponFixedProduct );
-			await applyCouponToCart( couponFixedProduct );
-			await expect(page).toMatchElement('.woocommerce-error', { text: 'Coupon code already applied!' });
+			await applyCouponToCart( couponPercentage );
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+			await applyCouponToCart( couponPercentage );
+			await expect(page).toMatchElement('.woocommerce-error li', { text: 'Coupon code already applied!' });
 		});
 
 		it('allows customer to apply multiple coupon', async () => {
