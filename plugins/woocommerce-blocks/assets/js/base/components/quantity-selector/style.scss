@@ -12,12 +12,13 @@
 
 .wc-block-components-quantity-selector {
 	display: flex;
-	min-width: 100px;
+	width: 107px;
 	border: 1px solid $gray-300;
 	background: #fff;
 	border-radius: 4px;
 	// needed so that buttons fill the container.
 	box-sizing: content-box;
+	margin: 0 0 0.25em 0;
 
 	.has-dark-controls & {
 		background-color: transparent;

@@ -3,9 +3,6 @@
 		white-space: nowrap;
 	}
 
-	.wc-block-components-product-name {
-		color: inherit;
-	}
 	.wc-block-components-address-form {
 		.wc-block-components-text-input,
 		.wc-block-components-country-input,
@@ -64,15 +61,6 @@ table.wc-block-cart-items {
 				text-transform: none;
 				white-space: nowrap;
 			}
-			.wc-block-cart-item__remove-icon {
-				@include link-button;
-
-				fill: currentColor;
-				position: absolute;
-				top: $gap;
-				right: 0;
-				display: none;
-			}
 		}
 		.wc-block-components-product-name {
 			display: block;
@@ -86,7 +74,11 @@ table.wc-block-cart-items {
 			.wc-block-components-product-price__regular,
 			.wc-block-components-product-price__value {
 				display: block;
+				font-weight: bold;
 			}
+		}
+		.wc-block-components-product-metadata {
+			margin-bottom: 0.75em;
 		}
 
 		&.is-disabled {
@@ -112,6 +104,7 @@ table.wc-block-cart-items {
 	.wc-block-cart-items {
 		.wc-block-cart-items__row {
 			.wc-block-cart-item__price,
+			.wc-block-cart-item__individual-price,
 			.wc-block-cart-item__product-metadata,
 			.wc-block-cart-item__image > *,
 			.wc-block-components-quantity-selector {
@@ -127,12 +120,17 @@ table.wc-block-cart-items {
 				margin-top: 0.25em;
 				min-width: 8em;
 			}
-			.wc-block-cart-item__remove-link,
-			.wc-block-cart-item__remove-icon {
+			.wc-block-cart-item__remove-link {
 				visibility: hidden;
 			}
 			.wc-block-cart-item__image a {
 				display: block;
+			}
+			.wc-block-cart-item__individual-price {
+				@include force-content();
+				max-width: 3em;
+				display: block;
+				margin-top: 0.25em;
 			}
 			.wc-block-cart-item__total {
 				> span,
@@ -192,10 +190,9 @@ table.wc-block-cart-items {
 			}
 			.wc-block-cart-item__product {
 				grid-column-start: 2;
-				grid-column-end: 4;
+				grid-column-end: 3;
 				grid-row-start: 1;
 				justify-self: stretch;
-				margin-right: 24px;
 				padding-bottom: $gap;
 			}
 			.wc-block-cart-item__quantity {
@@ -205,20 +202,9 @@ table.wc-block-cart-items {
 				padding-right: $gap;
 				align-self: end;
 				padding-top: $gap;
-
-				.wc-block-cart-item__remove-link {
-					display: none;
-				}
-				.wc-block-cart-item__remove-icon {
-					display: block;
-				}
 			}
 			.wc-block-cart-item__total {
-				grid-column: 2 / span 2;
-				grid-row-start: 2;
-				align-self: end;
-				justify-self: end;
-				padding-bottom: 0.375em;
+				grid-row-start: 1;
 
 				.wc-block-components-formatted-money-amount {
 					display: inline-block;

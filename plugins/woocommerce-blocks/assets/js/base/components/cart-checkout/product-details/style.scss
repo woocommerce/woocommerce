@@ -3,6 +3,10 @@
 	list-style: none;
 	margin: 0.5em 0;
 	padding: 0;
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
 }
 
 .wc-block-components-product-details__name,
