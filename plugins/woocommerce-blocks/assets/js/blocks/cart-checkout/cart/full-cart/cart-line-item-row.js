@@ -8,7 +8,6 @@ import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
-import { Icon, trash } from '@woocommerce/icons';
 import {
 	ProductBackorderBadge,
 	ProductImage,
@@ -82,14 +81,19 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 	} = useStoreCartItemQuantity( lineItem );
 
 	const currency = getCurrency( prices );
-	const regularAmount = Dinero( {
+	const regularAmountSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.regular_price, 10 ),
 		precision: parseInt( prices.raw_prices.precision, 10 ),
-	} ).multiply( quantity );
-	const purchaseAmount = Dinero( {
+	} );
+	const purchaseAmountSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.price, 10 ),
 		precision: parseInt( prices.raw_prices.precision, 10 ),
-	} ).multiply( quantity );
+	} );
+	const regularAmount = regularAmountSingle.multiply( quantity );
+	const purchaseAmount = purchaseAmountSingle.multiply( quantity );
+	const saleAmountSingle = regularAmountSingle.subtract(
+		purchaseAmountSingle
+	);
 	const saleAmount = regularAmount.subtract( purchaseAmount );
 	const firstImage = images.length ? images[ 0 ] : {};
 	const isProductHiddenFromCatalog =
@@ -130,51 +134,68 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 						/>
 					)
 				) }
+
+				<div className="wc-block-cart-item__prices">
+					<ProductPrice
+						currency={ currency }
+						regularPrice={ getAmountFromRawPrice(
+							regularAmountSingle,
+							currency
+						) }
+						price={ getAmountFromRawPrice(
+							purchaseAmountSingle,
+							currency
+						) }
+					/>
+				</div>
+
+				<ProductSaleBadge
+					currency={ currency }
+					saleAmount={ getAmountFromRawPrice(
+						saleAmountSingle,
+						currency
+					) }
+				/>
+
 				<ProductMetadata
 					shortDescription={ shortDescription }
 					fullDescription={ fullDescription }
 					itemData={ itemData }
 					variation={ variation }
 				/>
-			</td>
-			<td className="wc-block-cart-item__quantity">
-				<QuantitySelector
-					disabled={ isPendingDelete }
-					quantity={ quantity }
-					maximum={ quantityLimit }
-					onChange={ changeQuantity }
-					itemName={ name }
-				/>
-				<button
-					className="wc-block-cart-item__remove-link"
-					onClick={ removeItem }
-					disabled={ isPendingDelete }
-				>
-					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
-				</button>
-				<button
-					className="wc-block-cart-item__remove-icon"
-					onClick={ removeItem }
-				>
-					<span className="screen-reader-text">
+
+				<div className="wc-block-cart-item__quantity">
+					<QuantitySelector
+						disabled={ isPendingDelete }
+						quantity={ quantity }
+						maximum={ quantityLimit }
+						onChange={ changeQuantity }
+						itemName={ name }
+					/>
+					<button
+						className="wc-block-cart-item__remove-link"
+						onClick={ removeItem }
+						disabled={ isPendingDelete }
+					>
 						{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
-					</span>
-					<Icon srcElement={ trash } />
-				</button>
+					</button>
+				</div>
 			</td>
 			<td className="wc-block-cart-item__total">
 				<ProductPrice
 					currency={ currency }
-					regularPrice={ getAmountFromRawPrice(
-						regularAmount,
-						currency
-					) }
 					price={ getAmountFromRawPrice( purchaseAmount, currency ) }
 				/>
-				<ProductSaleBadge
-					currency={ currency }
-					saleAmount={ getAmountFromRawPrice( saleAmount, currency ) }
-				/>
+
+				{ quantity > 1 && (
+					<ProductSaleBadge
+						currency={ currency }
+						saleAmount={ getAmountFromRawPrice(
+							saleAmount,
+							currency
+						) }
+					/>
+				) }
 			</td>
 		</tr>
 	);

@@ -42,7 +42,6 @@ export { default as tag } from './library/tag';
 export { default as tags } from './library/tags';
 export { default as thumbUp } from './library/thumb-up';
 export { default as toggle } from './library/toggle';
-export { default as trash } from './library/trash';
 export { default as truck } from './library/truck';
 export { default as widgets } from './library/widgets';
 export { default as woo } from './library/woo';

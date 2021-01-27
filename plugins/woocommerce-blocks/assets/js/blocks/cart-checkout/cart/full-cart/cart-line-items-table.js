@@ -39,11 +39,6 @@ const CartLineItemsTable = ( { lineItems = [], isLoading = false } ) => {
 							{ __( 'Details', 'woo-gutenberg-products-block' ) }
 						</span>
 					</th>
-					<th className="wc-block-cart-items__header-quantity">
-						<span>
-							{ __( 'Quantity', 'woo-gutenberg-products-block' ) }
-						</span>
-					</th>
 					<th className="wc-block-cart-items__header-total">
 						<span>
 							{ __( 'Total', 'woo-gutenberg-products-block' ) }
