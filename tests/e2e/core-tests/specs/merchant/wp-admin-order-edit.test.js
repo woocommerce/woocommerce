@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	createSimpleOrder,
 	moveAllItemsToTrash
 } = require( '@woocommerce/e2e-utils' );
@@ -13,25 +13,25 @@ let orderId;
 const runEditOrderTest = () => {
 	describe('WooCommerce Orders > Edit order', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 			orderId = await createSimpleOrder('Processing');
 		});
 
 		afterAll( async () => {
 			// Make sure we're on the all orders view and cleanup the orders we created
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 			await moveAllItemsToTrash();
 		});
 		
 		it('can view single order', async () => {
 			// Go to "orders" page
-			await StoreOwnerFlow.openAllOrdersView();
+			await merchant.openAllOrdersView();
 
 			// Make sure we're on the orders page
 			await expect(page.title()).resolves.toMatch('Orders');
 
 			//Open order we created
-			await StoreOwnerFlow.goToOrder(orderId);
+			await merchant.goToOrder(orderId);
 
 			// Make sure we're on the order details page
 			await expect(page.title()).resolves.toMatch('Edit order');
@@ -39,13 +39,13 @@ const runEditOrderTest = () => {
         
         it('can update order status', async () => {
 			//Open order we created
-			await StoreOwnerFlow.goToOrder(orderId);
+			await merchant.goToOrder(orderId);
 
 			// Make sure we're still on the order details page
 			await expect(page.title()).resolves.toMatch('Edit order');
 
 			// Update order status to `Completed` 
-			await StoreOwnerFlow.updateOrderStatus(orderId, 'Completed');
+			await merchant.updateOrderStatus(orderId, 'Completed');
 
 			// Verify order status changed note added
 			await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Completed' } );
@@ -59,7 +59,7 @@ const runEditOrderTest = () => {
         
         it('can update order details', async () => {
 			//Open order we created
-			await StoreOwnerFlow.goToOrder(orderId);
+			await merchant.goToOrder(orderId);
 
 			// Make sure we're still on the order details page
 			await expect(page.title()).resolves.toMatch('Edit order');
