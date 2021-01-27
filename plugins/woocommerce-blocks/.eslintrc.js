@@ -25,6 +25,11 @@ module.exports = {
 		'react-hooks/exhaustive-deps': 'error',
 		'react/jsx-fragments': [ 'error', 'syntax' ],
 		'@wordpress/no-global-active-element': 'warn',
+		// @todo Remove temporary conversion of eslint rules to warn instead of error.
+		//       These are new rules surfacing as a result of a eslint plugin update and the intent
+		//       is to update them in their own individual prs to make for easier review.
+		'import/no-extraneous-dependencies': 'warn',
+		'import/no-unresolved': 'warn',
 	},
 	overrides: [
 		{
