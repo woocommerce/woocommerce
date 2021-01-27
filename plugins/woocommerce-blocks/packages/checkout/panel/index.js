@@ -55,7 +55,7 @@ Panel.propTypes = {
 	className: PropTypes.string,
 	hasBorder: PropTypes.bool,
 	initialOpen: PropTypes.bool,
-	title: PropTypes.element,
+	title: PropTypes.node,
 	titleTag: PropTypes.string,
 };
 
