@@ -368,6 +368,7 @@ class WC_Tracker {
 		$first_time       = $first;
 		$last             = 0;
 		$processing_last  = 0;
+		$order_data       = array();
 
 		$orders       = wc_get_orders( $args );
 		$orders_count = count( $orders );
@@ -462,7 +463,11 @@ class WC_Tracker {
 			$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
 		}
 
-		return array_map( 'strval', $order_data );
+		foreach ( $order_data as $key => $value ) {
+			$order_data[ $key ] = (string) $value;
+		}
+
+		return $order_data;
 	}
 
 	/**
