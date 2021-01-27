@@ -446,23 +446,23 @@ class WC_Tracker {
 			$orders_count = count( $orders );
 		}
 
-		if( $first !== $first_time ) {
+		if ( $first !== $first_time ) {
 			$order_data['first'] = gmdate( 'Y-m-d H:i:s', $first );
 		}
 
-		if( $processing_first !== $first_time ) {
+		if ( $processing_first !== $first_time ) {
 			$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
 		}
 
-		if( $last ) {
+		if ( $last ) {
 			$order_data['last'] = gmdate( 'Y-m-d H:i:s', $last );
 		}
 
-		if( $processing_last ) {
+		if ( $processing_last ) {
 			$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
 		}
 
-		return $order_data;
+		return array_map( 'strval', $order_data );
 	}
 
 	/**
