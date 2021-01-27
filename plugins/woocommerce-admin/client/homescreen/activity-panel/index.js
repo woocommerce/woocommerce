@@ -11,6 +11,7 @@ import {
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -34,16 +35,18 @@ export const ActivityPanel = () => {
 		const countLowStockProducts = getLowStockCount( select );
 		const countUnapprovedReviews = getUnapprovedReviews( select );
 		const publishedProductCount = getSetting( 'publishedProductCount', 0 );
-
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const isTaskListHidden = getOption( 'woocommerce_task_list_hidden' );
 		return {
 			countLowStockProducts,
-			countUnreadOrders,
-			manageStock,
-			orderStatuses,
-			totalOrderCount,
-			reviewsEnabled,
 			countUnapprovedReviews,
+			countUnreadOrders,
+			isTaskListHidden,
+			manageStock,
 			publishedProductCount,
+			reviewsEnabled,
+			totalOrderCount,
+			orderStatuses,
 		};
 	} );
 

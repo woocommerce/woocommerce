@@ -25,6 +25,11 @@ jest.mock( '@woocommerce/data', () => ( {
 	useUserPreferences: jest.fn().mockReturnValue( {} ),
 } ) );
 
+// We aren't testing the <ActivityPanel /> component here.
+jest.mock( '../activity-panel', () => ( {
+	ActivityPanel: jest.fn().mockReturnValue( '[ActivityPanel]' ),
+} ) );
+
 describe( 'Homescreen Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
 		const { container } = render(
@@ -42,7 +47,7 @@ describe( 'Homescreen Layout', () => {
 		expect( placeholder ).not.toBeNull();
 	} );
 
-	it( 'should show TaskList inline', async () => {
+	it( 'should show TaskList inline', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
@@ -59,11 +64,11 @@ describe( 'Homescreen Layout', () => {
 		expect( columns ).not.toBeNull();
 
 		// Expect that the <TaskList /> is there too.
-		const taskList = await screen.findByText( '[TaskList]' );
+		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).toBeDefined();
 	} );
 
-	it( 'should render TaskList alone when on task', async () => {
+	it( 'should render TaskList alone when on task', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
@@ -82,7 +87,7 @@ describe( 'Homescreen Layout', () => {
 		expect( columns ).toBeNull();
 
 		// Expect that the <TaskList /> is there though.
-		const taskList = await screen.findByText( '[TaskList]' );
+		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).toBeDefined();
 	} );
 

@@ -14,6 +14,7 @@ export function getAllPanels( {
 	countLowStockProducts,
 	countUnapprovedReviews,
 	countUnreadOrders,
+	isTaskListHidden,
 	manageStock,
 	orderStatuses,
 	publishedProductCount,
@@ -37,6 +38,7 @@ export function getAllPanels( {
 		},
 		totalOrderCount > 0 &&
 			publishedProductCount > 0 &&
+			isTaskListHidden === 'yes' &&
 			manageStock === 'yes' && {
 				className: 'woocommerce-homescreen-card',
 				count: countLowStockProducts,
@@ -51,6 +53,7 @@ export function getAllPanels( {
 				title: __( 'Stock', 'woocommerce-admin' ),
 			},
 		publishedProductCount > 0 &&
+			isTaskListHidden === 'yes' &&
 			reviewsEnabled === 'yes' && {
 				className: 'woocommerce-homescreen-card',
 				id: 'reviews-panel',
