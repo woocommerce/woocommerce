@@ -106,7 +106,6 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_action( 'current_screen', array( $this, 'reset_extended_task_list' ) );
-		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
 	}
@@ -972,85 +971,7 @@ class Onboarding {
 			: '<p><a href="' . wc_admin_url( '&reset_extended_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
 		);
 
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$help_tab['content'] .= '<h3>' . __( 'Calypso / WordPress.com', 'woocommerce-admin' ) . '</h3>';
-			if ( class_exists( 'Jetpack' ) ) {
-				$help_tab['content'] .= '<p>' . __( 'Quickly access the Jetpack connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
-				$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_jetpack_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
-			}
-
-			$help_tab['content'] .= '<p>' . __( 'Quickly access the WooCommerce.com connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
-			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_helper_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
-		}
-
 		$screen->add_help_tab( $help_tab );
-	}
-
-	/**
-	 * Allows quick access to testing the calypso parts of onboarding.
-	 */
-	public static function calypso_tests() {
-		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
-
-		if ( Loader::is_admin_page() && class_exists( 'Jetpack' ) && isset( $_GET['test_wc_jetpack_connect'] ) && 1 === absint( $_GET['test_wc_jetpack_connect'] ) ) { // phpcs:ignore CSRF ok.
-			$redirect_url = esc_url_raw(
-				add_query_arg(
-					array(
-						'page' => 'wc-admin',
-					),
-					admin_url( 'admin.php' )
-				)
-			);
-
-			$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
-			$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
-
-			wp_redirect( $connect_url );
-			exit;
-		}
-
-		if ( Loader::is_admin_page() && isset( $_GET['test_wc_helper_connect'] ) && 1 === absint( $_GET['test_wc_helper_connect'] ) ) { // phpcs:ignore CSRF ok.
-			include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
-
-			$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
-
-			$request = \WC_Helper_API::post(
-				'oauth/request_token',
-				array(
-					'body' => array(
-						'home_url'     => home_url(),
-						'redirect_uri' => $redirect_uri,
-					),
-				)
-			);
-
-			$code = wp_remote_retrieve_response_code( $request );
-			if ( 200 !== $code ) {
-				wp_die( esc_html__( 'WooCommerce Helper was not able to connect to WooCommerce.com.', 'woocommerce-admin' ) );
-				exit;
-			}
-
-			$secret = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( empty( $secret ) ) {
-				wp_die( esc_html__( 'WooCommerce Helper was not able to connect to WooCommerce.com.', 'woocommerce-admin' ) );
-				exit;
-			}
-
-			$connect_url = add_query_arg(
-				array(
-					'home_url'     => rawurlencode( home_url() ),
-					'redirect_uri' => rawurlencode( $redirect_uri ),
-					'secret'       => rawurlencode( $secret ),
-					'wccom-from'   => 'onboarding',
-				),
-				\WC_Helper_API::url( 'oauth/authorize' )
-			);
-
-			$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
-
-			wp_redirect( $connect_url );
-			exit;
-		}
 	}
 
 	/**
