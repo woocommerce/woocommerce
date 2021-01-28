@@ -1099,6 +1099,7 @@ class Loader {
 		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
 		$settings['wcVersion']       = WC_VERSION;
 		$settings['siteUrl']         = site_url();
+		$settings['shopUrl']         = get_permalink( woocommerce_get_page_id( 'shop' ) );
 		$settings['dateFormat']      = get_option( 'date_format' );
 		$settings['plugins']         = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
