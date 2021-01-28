@@ -12,10 +12,10 @@ const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' )
 const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
 const runCartPageTest = require( './shopper/front-end-cart.test' );
 const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
+const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
 const runMyAccountPayOrderTest = require( './shopper/front-end-my-account-pay-order.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
 const runSingleProductPageTest = require( './shopper/front-end-single-product.test' );
-const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
 
 // Merchant tests
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
@@ -39,10 +39,10 @@ const runShopperTests = () => {
 	runCartApplyCouponsTest();
 	runCartPageTest();
 	runCheckoutPageTest();
+	runCheckoutApplyCouponsTest();
 	runMyAccountPayOrderTest();
 	runMyAccountPageTest();
 	runSingleProductPageTest();
-	runCheckoutApplyCouponsTest();
 };
 
 const runMerchantTests = () => {
@@ -67,6 +67,7 @@ module.exports = {
 	runCartApplyCouponsTest,
 	runCartPageTest,
 	runCheckoutPageTest,
+	runCheckoutApplyCouponsTest,
 	runMyAccountPayOrderTest,
 	runMyAccountPageTest,
 	runSingleProductPageTest,
@@ -82,5 +83,4 @@ module.exports = {
 	runOrderRefundTest,
 	runOrderApplyCouponTest,
 	runMerchantTests,
-	runCheckoutApplyCouponsTest,
 };
