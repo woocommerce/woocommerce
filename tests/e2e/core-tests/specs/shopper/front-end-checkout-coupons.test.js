@@ -45,11 +45,11 @@ const removeCouponFromCart = async () => {
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
 }
 const runCheckoutApplyCouponsTest = () => {
-	let couponFixedCart;
-	let couponPercentage;
-	let couponFixedProduct;
-
 	describe('Checkout coupons', () => {
+		let couponFixedCart;
+		let couponPercentage;
+		let couponFixedProduct;
+
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
@@ -98,7 +98,10 @@ const runCheckoutApplyCouponsTest = () => {
 			await applyCouponToCart( couponFixedCart );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 			await applyCouponToCart( couponFixedCart );
-			await expect(page).toMatchElement('.woocommerce-error li', { text: 'Coupon code already applied!' });
+			// Verify only one discount applied
+			// This is a work around for Puppeteer inconsistently finding 'Coupon code already applied'
+			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
 		});
 
 		it('allows customer to apply multiple coupons', async () => {
