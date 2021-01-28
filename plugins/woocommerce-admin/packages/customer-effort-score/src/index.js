@@ -29,7 +29,7 @@ const noop = () => {};
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Object} props.icon                        Icon (React component) to be shown on the notice.
  */
-function CustomerEffortScore( {
+export function CustomerEffortScore( {
 	recordScoreCallback,
 	label,
 	createNotice,
