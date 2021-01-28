@@ -119,6 +119,7 @@
 		"cross-env": "6.0.3",
 		"cssnano": "4.1.10",
 		"deep-freeze": "0.0.1",
+		"eslint-import-resolver-webpack": "^0.13.0",
 		"eslint-plugin-import": "^2.22.1",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.10.0",
