@@ -63,6 +63,9 @@ class SchemaController {
 			Schemas\ShippingAddressSchema::IDENTIFIER  => new Schemas\ShippingAddressSchema(
 				$this->extend
 			),
+			Schemas\CartShippingRateSchema::IDENTIFIER => new Schemas\CartShippingRateSchema(
+				$this->extend
+			),
 			Schemas\CartSchema::IDENTIFIER             => new Schemas\CartSchema(
 				$this->extend,
 				new Schemas\CartItemSchema(

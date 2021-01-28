@@ -25,7 +25,6 @@
  * @property {ShippingErrorTypes}   shippingErrorTypes          The error type constants for the shipping rate error
  *                                                              status.
  * @property {CartShippingOption[]} shippingRates               An array of available shipping rates.
- * @property {Function}             setShippingRates            Used to set the available shipping rates.
  * @property {boolean}              shippingRatesLoading        Whether or not the shipping rates are being loaded.
  * @property {string[]}             selectedRates               The ids of the rates that are selected.
  * @property {Function}             setSelectedRates            Function for setting the selected rates.

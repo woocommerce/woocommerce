@@ -64,8 +64,6 @@ const ShippingOptionsStep = () => {
 		return null;
 	}
 
-	const packageCount = getShippingRatesPackageCount( shippingRates );
-
 	return (
 		<FormStep
 			id="shipping-option"
@@ -81,7 +79,7 @@ const ShippingOptionsStep = () => {
 					: ''
 			}
 		>
-			{ isEditor && ! packageCount ? (
+			{ isEditor && ! getShippingRatesPackageCount( shippingRates ) ? (
 				<NoShippingPlaceholder />
 			) : (
 				<ShippingRatesControl

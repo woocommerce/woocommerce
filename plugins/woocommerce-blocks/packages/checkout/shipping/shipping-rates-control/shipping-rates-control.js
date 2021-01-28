@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useEffect } from 'react';
+import { useEffect } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { speak } from '@wordpress/a11y';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
@@ -14,14 +14,33 @@ import {
 /**
  * Internal dependencies
  */
-import Packages from './packages';
+import Package from './package';
+import ExperimentalOrderShippingPackages from '../../order-shipping-packages';
 import './style.scss';
 
+/**
+ * @typedef {import('react')} React
+ */
+
+/**
+ * Renders the shipping rates control element.
+ *
+ * @todo Move ShippingRatesControl, TotalsShipping, and ShippingRateSelector to our base components folder.
+ * they're too coupled with our base implementation to be exported and we should only export Package.
+ *
+ * @param {Object} props Incoming props.
+ * @param {Array} props.shippingRates Array of packages containing shipping rates.
+ * @param {boolean} props.shippingRatesLoading True when rates are being loaded.
+ * @param {string} props.className Class name for package rates.
+ * @param {boolean} props.collapsible If true, when multiple packages are rendered they can be toggled open and closed.
+ * @param {React.ReactElement} props.noResultsMessage Rendered when there are no packages.
+ * @param {Function} props.renderOption Function to render a shipping rate.
+ */
 const ShippingRatesControl = ( {
 	shippingRates,
 	shippingRatesLoading,
 	className,
-	collapsibleWhenMultiple = false,
+	collapsible = false,
 	noResultsMessage,
 	renderOption,
 } ) => {
@@ -29,7 +48,7 @@ const ShippingRatesControl = ( {
 		if ( shippingRatesLoading ) {
 			return;
 		}
-		const packages = getShippingRatesPackageCount( shippingRates );
+		const packageCount = getShippingRatesPackageCount( shippingRates );
 		const shippingOptions = getShippingRatesRateCount( shippingRates );
 		if ( shippingOptions === 0 ) {
 			speak(
@@ -38,7 +57,7 @@ const ShippingRatesControl = ( {
 					'woo-gutenberg-products-block'
 				)
 			);
-		} else if ( packages === 1 ) {
+		} else if ( packageCount === 1 ) {
 			speak(
 				sprintf(
 					// translators: %d number of shipping options found.
@@ -58,10 +77,10 @@ const ShippingRatesControl = ( {
 					_n(
 						'Shipping option searched for %d package.',
 						'Shipping options searched for %d packages.',
-						packages,
+						packageCount,
 						'woo-gutenberg-products-block'
 					),
-					packages
+					packageCount
 				) +
 					' ' +
 					sprintf(
@@ -87,26 +106,64 @@ const ShippingRatesControl = ( {
 			) }
 			showSpinner={ true }
 		>
-			<Packages
+			<ExperimentalOrderShippingPackages.Slot
 				className={ className }
-				collapsible={
-					shippingRates.length > 1 && collapsibleWhenMultiple
-				}
+				collapsible={ collapsible }
 				noResultsMessage={ noResultsMessage }
 				renderOption={ renderOption }
-				shippingRates={ shippingRates }
 			/>
+			<ExperimentalOrderShippingPackages>
+				<Packages
+					packages={ shippingRates }
+					noResultsMessage={ noResultsMessage }
+				/>
+			</ExperimentalOrderShippingPackages>
 		</LoadingMask>
 	);
 };
 
+/**
+ * Renders multiple packages within the slotfill.
+ *
+ * @param {Object} props Incoming props.
+ * @param {Array} props.packages Array of packages.
+ * @param {React.ReactElement} props.noResultsMessage Rendered when there are no packages.
+ * @param {boolean} props.collapsible If the package should be rendered as a
+ * collapsible panel.
+ * @param {boolean} props.collapse If the panel should be collapsed by default,
+ * only works if collapsible is true.
+ * @param {boolean} props.showItems If we should items below the package name.
+ * @return {React.ReactElement|Array} Rendered components.
+ */
+const Packages = ( {
+	packages,
+	collapse,
+	showItems,
+	collapsible,
+	noResultsMessage,
+} ) => {
+	if ( ! packages.length ) {
+		return noResultsMessage;
+	}
+
+	return packages.map( ( { package_id: packageId, ...packageData } ) => (
+		<Package
+			key={ packageId }
+			packageId={ packageId }
+			packageData={ packageData }
+			collapsible={ collapsible }
+			collapse={ collapse }
+			showItems={ showItems }
+		/>
+	) );
+};
+
 ShippingRatesControl.propTypes = {
 	noResultsMessage: PropTypes.node.isRequired,
-	renderOption: PropTypes.func.isRequired,
+	renderOption: PropTypes.func,
 	className: PropTypes.string,
-	collapsibleWhenMultiple: PropTypes.bool,
+	collapsible: PropTypes.bool,
 	shippingRates: PropTypes.array,
 	shippingRatesLoading: PropTypes.bool,
 };
-
 export default ShippingRatesControl;

@@ -20,6 +20,8 @@ import ShippingRateSelector from './shipping-rate-selector';
 import hasShippingRate from './has-shipping-rate';
 import './style.scss';
 
+/** @typedef {import('react')} React */
+
 /**
  * Renders the shipping totals row, rates, and calculator if enabled.
  *
@@ -41,10 +43,10 @@ const TotalsShipping = ( {
 		false
 	);
 	const {
-		shippingRates,
-		shippingRatesLoading,
 		shippingAddress,
 		cartHasCalculatedShipping,
+		shippingRates,
+		shippingRatesLoading,
 	} = useStoreCart();
 
 	const totalShippingValue = DISPLAY_CART_PRICES_INCLUDING_TAX

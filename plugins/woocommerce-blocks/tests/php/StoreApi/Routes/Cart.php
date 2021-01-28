@@ -12,12 +12,14 @@ use \WC_Helper_Coupon as CouponHelper;
 use \WC_Helper_Shipping;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
+use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Cart Controller Tests.
@@ -38,11 +40,11 @@ class Cart extends TestCase {
 
 		$this->products = [];
 
-		$this->mock_formatters = new Formatters();
-		$this->mock_formatters->register( 'money', MoneyFormatter::class );
-		$this->mock_formatters->register( 'html', HtmlFormatter::class );
-		$this->mock_formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new Package( '', '', new FeatureGating( 2 ) ), $this->mock_formatters );
+		$formatters = new Formatters();
+		$formatters->register( 'money', MoneyFormatter::class );
+		$formatters->register( 'html', HtmlFormatter::class );
+		$formatters->register( 'currency', CurrencyFormatter::class );
+		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
 
 		// Create some test products.
 		$this->products[0] = ProductHelper::create_simple_product( false );
@@ -76,7 +78,7 @@ class Cart extends TestCase {
 		$this->assertArrayHasKey( '/wc/store/cart/apply-coupon', $routes );
 		$this->assertArrayHasKey( '/wc/store/cart/remove-coupon', $routes );
 		$this->assertArrayHasKey( '/wc/store/cart/update-customer', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/select-shipping-rate/(?P<package_id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/select-shipping-rate', $routes );
 	}
 
 	/**

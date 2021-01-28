@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useCallback } from '@wordpress/element';
 
 /**
  * Helper method for throwing an error in a React Hook.
@@ -12,8 +12,14 @@ import { useState } from '@wordpress/element';
  */
 export const useThrowError = () => {
 	const [ , setState ] = useState();
-	return ( error ) =>
-		setState( () => {
-			throw error;
-		} );
+
+	const throwError = useCallback(
+		( error ) =>
+			setState( () => {
+				throw error;
+			} ),
+		[]
+	);
+
+	return throwError;
 };

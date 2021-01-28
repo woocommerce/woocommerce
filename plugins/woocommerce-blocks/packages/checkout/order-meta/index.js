@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createSlotFill } from 'wordpress-components';
-import { Children, cloneElement } from 'wordpress-element';
+import { Children, cloneElement } from '@wordpress/element';
 import classnames from 'classnames';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { useStoreCart } from '@woocommerce/base-hooks';
