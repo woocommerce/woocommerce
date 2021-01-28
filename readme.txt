@@ -171,6 +171,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Notice to deprecate legacy reports in favor of the newer analytics page. #28799
 * Tweak - Ability to create new tags for products when creating a product via the REST API. #28723
 * Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
+* Tweak - Use `wp_robots_no_robots()` when available to support WP 5.7. #28949
 * Fix - Improves the logic for deleting variations when a product type is changed. #27137
 * Fix - Use 'setlocale' in 'wc_ascii_uasort_comparison' for compatibility with PHP 8. #27844
 * Fix - Normalize end of lines in log-handler-email tests for compatibility with PHP 8. #27844
@@ -217,6 +218,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Welcome modal when coming from Calypso #6004
 * Enhancement - Add an a/b experiment for installing free business features #5786
 * Dev - Add `onChangeCallback` feature to the wc-admin `<Form>` component #5786 
+* Fix - Generate JSON translation chunks on plugin activation #6028
 * Dev - Add merchant email notifications #5922 
 * Add - Email note to add first product. #6024
 * Add - Note for users coming from Calypso. #6030
