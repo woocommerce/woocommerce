@@ -440,16 +440,16 @@ Selects an available shipping rate for a package, then returns the full cart res
 This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
-POST /cart/select-shipping-rate/:package_id
+POST /cart/select-shipping-rate
 ```
 
 | Attribute    | Type    | Required | Description                                     |
 | :----------- | :------ | :------: | :---------------------------------------------- |
-| `package_id` | integer |    no    | The ID of the shipping package within the cart. |
-| `rate_id`    | string  |    no    | The chosen rate ID for the package.             |
+| `package_id` | integer|string |    yes    | The ID of the shipping package within the cart. |
+| `rate_id`    | string  |    yes    | The chosen rate ID for the package.             |
 
 ```http
-curl --header "X-WC-Store-API-Nonce: 12345" --request POST /cart/select-shipping-rate/1?rate_id=flat_rate:1
+curl --header "X-WC-Store-API-Nonce: 12345" --request POST /cart/select-shipping-rate?package_id=1&rate_id=flat_rate:1
 ```
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.

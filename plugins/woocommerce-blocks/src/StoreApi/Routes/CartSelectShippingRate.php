@@ -15,7 +15,7 @@ class CartSelectShippingRate extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return '/cart/select-shipping-rate/(?P<package_id>[\d]+)';
+		return '/cart/select-shipping-rate';
 	}
 
 	/**
@@ -32,7 +32,7 @@ class CartSelectShippingRate extends AbstractCartRoute {
 				'args'                => [
 					'package_id' => array(
 						'description' => __( 'The ID of the package being shipped.', 'woo-gutenberg-products-block' ),
-						'type'        => 'integer',
+						'type'        => [ 'integer', 'string' ],
 						'required'    => true,
 					),
 					'rate_id'    => [
@@ -58,7 +58,7 @@ class CartSelectShippingRate extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		if ( ! isset( $request['package_id'] ) || ! is_numeric( $request['package_id'] ) ) {
+		if ( ! isset( $request['package_id'] ) ) {
 			throw new RouteException( 'woocommerce_rest_cart_missing_package_id', __( 'Invalid Package ID.', 'woo-gutenberg-products-block' ), 400 );
 		}
 
@@ -66,7 +66,7 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		$cart       = $controller->get_cart_instance();
 
 		if ( $cart->needs_shipping() ) {
-			$package_id = absint( $request['package_id'] );
+			$package_id = wc_clean( wp_unslash( $request['package_id'] ) );
 			$rate_id    = wc_clean( wp_unslash( $request['rate_id'] ) );
 
 			try {

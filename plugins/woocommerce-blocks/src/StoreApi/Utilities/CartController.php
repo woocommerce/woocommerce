@@ -515,8 +515,8 @@ class CartController {
 	/**
 	 * Selects a shipping rate.
 	 *
-	 * @param int    $package_id ID of the package to choose a rate for.
-	 * @param string $rate_id ID of the rate being chosen.
+	 * @param int|string $package_id ID of the package to choose a rate for.
+	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
 		$cart                        = $this->get_cart_instance();

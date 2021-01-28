@@ -6,25 +6,32 @@ import RadioControl, {
 	RadioControlOptionLayout,
 } from '@woocommerce/base-components/radio-control';
 
-const PackageOptions = ( {
+/**
+ * Internal dependencies
+ */
+import { renderPackageRateOption } from './render-package-rate-option';
+
+const PackageRates = ( {
 	className,
 	noResultsMessage,
-	onChange,
-	options,
-	renderOption,
+	onSelectRate,
+	rates,
+	renderOption = renderPackageRateOption,
 	selected,
 } ) => {
-	if ( options.length === 0 ) {
+	if ( rates.length === 0 ) {
 		return noResultsMessage;
 	}
 
-	if ( options.length > 1 ) {
+	if ( rates.length > 1 ) {
 		return (
 			<RadioControl
 				className={ className }
-				onChange={ onChange }
+				onChange={ ( selectedRateId ) => {
+					onSelectRate( selectedRateId );
+				} }
 				selected={ selected }
-				options={ options.map( renderOption ) }
+				options={ rates.map( renderOption ) }
 			/>
 		);
 	}
@@ -34,7 +41,7 @@ const PackageOptions = ( {
 		secondaryLabel,
 		description,
 		secondaryDescription,
-	} = renderOption( options[ 0 ] );
+	} = renderOption( rates[ 0 ] );
 
 	return (
 		<RadioControlOptionLayout
@@ -46,13 +53,13 @@ const PackageOptions = ( {
 	);
 };
 
-PackageOptions.propTypes = {
-	onChange: PropTypes.func.isRequired,
-	options: PropTypes.arrayOf( PropTypes.object ).isRequired,
-	renderOption: PropTypes.func.isRequired,
+PackageRates.propTypes = {
+	onSelectRate: PropTypes.func.isRequired,
+	rates: PropTypes.arrayOf( PropTypes.object ).isRequired,
+	renderOption: PropTypes.func,
 	className: PropTypes.string,
 	noResultsMessage: PropTypes.node,
 	selected: PropTypes.string,
 };
 
-export default PackageOptions;
+export default PackageRates;

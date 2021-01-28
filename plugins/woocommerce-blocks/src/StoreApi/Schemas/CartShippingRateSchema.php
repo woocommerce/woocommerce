@@ -32,7 +32,7 @@ class CartShippingRateSchema extends AbstractSchema {
 		return [
 			'package_id'     => [
 				'description' => __( 'The ID of the package the shipping rates belong to.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
+				'type'        => [ 'integer', 'string' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
