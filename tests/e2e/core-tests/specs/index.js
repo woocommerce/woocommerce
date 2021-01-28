@@ -15,8 +15,8 @@ const runGroupedProductAPITest = require( './api/grouped-product' );
 const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
 const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
 const runCartPageTest = require( './shopper/front-end-cart.test' );
-const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
+const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runMyAccountPayOrderTest = require( './shopper/front-end-my-account-pay-order.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
 const runSingleProductPageTest = require( './shopper/front-end-single-product.test' );
@@ -53,8 +53,8 @@ const runShopperTests = () => {
 	runProductBrowseSearchSortTest();
 	runCartApplyCouponsTest();
 	runCartPageTest();
-	runCheckoutPageTest();
 	runCheckoutApplyCouponsTest();
+	runCheckoutPageTest();
 	runMyAccountPayOrderTest();
 	runMyAccountPageTest();
 	runSingleProductPageTest();
@@ -94,8 +94,8 @@ module.exports = {
 	runGroupedProductAPITest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
-	runCheckoutPageTest,
 	runCheckoutApplyCouponsTest,
+	runCheckoutPageTest,
 	runMyAccountPayOrderTest,
 	runMyAccountPageTest,
 	runSingleProductPageTest,
