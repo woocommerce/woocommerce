@@ -82,6 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: store deprecation welcome modal support doc link #6094
 - Enhancement: Allowing users to create products by selecting a template. #5892
 - Dev: Add wait script for mysql to be ready for phpunit tests in docker. #6185
+- Update: Homescreen layout, moving Inbox panel for better interaction. #6122
 
 == Changelog ==
 

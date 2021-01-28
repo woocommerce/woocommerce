@@ -12,9 +12,6 @@ class InboxNotePlaceholder extends Component {
 				className={ `woocommerce-inbox-message is-placeholder ${ className }` }
 				aria-hidden
 			>
-				<div className="woocommerce-inbox-message__image">
-					<div className="banner-block" />
-				</div>
 				<div className="woocommerce-inbox-message__wrapper">
 					<div className="woocommerce-inbox-message__content">
 						<div className="woocommerce-inbox-message__date">
