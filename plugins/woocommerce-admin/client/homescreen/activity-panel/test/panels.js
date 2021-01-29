@@ -11,6 +11,7 @@ describe( 'ActivityPanel', () => {
 			totalOrderCount: 0,
 			publishedProductCount: 1,
 			manageStock: 'yes',
+			isTaskListHidden: 'yes',
 		} );
 
 		expect( panels ).toEqual(
@@ -48,17 +49,22 @@ describe( 'ActivityPanel', () => {
 		);
 	} );
 
-	it( 'should exclude the reviews and stock panels when the setup task list is visible', () => {
+	it( 'should exclude any panel when the setup task list is visible', () => {
 		const panels = getAllPanels( {
 			countUnreadOrders: 0,
 			orderStatuses: [],
-			totalOrderCount: 1, // Yes, I realize this isn't "possible".
+			totalOrderCount: 1,
 			publishedProductCount: 0,
 			manageStock: 'yes',
 			reviewsEnabled: 'yes',
 			isTaskListHidden: 'no',
 		} );
 
+		expect( panels ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { id: 'orders-panel' } ),
+			] )
+		);
 		expect( panels ).toEqual(
 			expect.not.arrayContaining( [
 				expect.objectContaining( { id: 'reviews-panel' } ),
@@ -76,6 +82,7 @@ describe( 'ActivityPanel', () => {
 			countUnreadOrders: 1,
 			orderStatuses: [],
 			totalOrderCount: 10,
+			isTaskListHidden: 'yes',
 		} );
 
 		expect( panels ).toEqual(
