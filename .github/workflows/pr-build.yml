@@ -57,9 +57,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-     
+
       - name: Run npm install, and cache if they aren't.
         run: npm install
     
@@ -74,6 +72,7 @@ jobs:
               mkdir -p code/woocommerce
               mkdir -p package/woocommerce
               mkdir -p tmp/woocommerce
+              mkdir -p node_modules
 
       - name: Checkout code.
         uses: actions/checkout@v2
@@ -89,13 +88,9 @@ jobs:
         with:
           path: ./node_modules
           key: ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          restore-keys: ${{ runner.os }}-build-${{ env.cache-name }}-
 
       - name: Restore node modules from cache, if available.
-        if: steps.cache_node_modules.outputs.cache-hit == true
         run: mv ./node_modules package/woocommerce/node_modules
 
       - name: Run npm install.
