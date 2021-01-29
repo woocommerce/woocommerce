@@ -70,19 +70,21 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'email_notification_settings'             => array( 'title', 'sectionend' ),
-			''                                        => 'email_notification',
-			'email_recipient_options'                 => 'sectionend',
-			'email_options'                           => array( 'title', 'sectionend' ),
-			'woocommerce_email_from_name'             => 'text',
-			'woocommerce_email_from_address'          => 'email',
-			'email_template_options'                  => array( 'title', 'sectionend' ),
-			'woocommerce_email_header_image'          => 'text',
-			'woocommerce_email_footer_text'           => 'textarea',
-			'woocommerce_email_base_color'            => 'color',
-			'woocommerce_email_background_color'      => 'color',
-			'woocommerce_email_body_background_color' => 'color',
-			'woocommerce_email_text_color'            => 'color',
+			'email_notification_settings'              => array( 'title', 'sectionend' ),
+			''                                         => 'email_notification',
+			'email_recipient_options'                  => 'sectionend',
+			'email_options'                            => array( 'title', 'sectionend' ),
+			'woocommerce_email_from_name'              => 'text',
+			'woocommerce_email_from_address'           => 'email',
+			'email_template_options'                   => array( 'title', 'sectionend' ),
+			'woocommerce_email_header_image'           => 'text',
+			'woocommerce_email_footer_text'            => 'textarea',
+			'woocommerce_email_base_color'             => 'color',
+			'woocommerce_email_background_color'       => 'color',
+			'woocommerce_email_body_background_color'  => 'color',
+			'woocommerce_email_text_color'             => 'color',
+			'email_merchant_notes'                     => 'title',
+			'woocommerce_merchant_email_notifications' => 'checkbox',
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
