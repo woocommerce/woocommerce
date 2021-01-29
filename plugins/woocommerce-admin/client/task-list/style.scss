@@ -32,11 +32,18 @@
 				height: 32px;
 			}
 
-			.woocommerce-list__item-before svg {
+			.woocommerce-list__item-before .woocommerce-task__icon svg {
 				fill: $white;
 				position: relative;
 				top: 4px;
 				left: 5px;
+			}
+
+			.woocommerce-list__item-text {
+				.woocommerce-pill {
+					padding: 1px $gap-smaller;
+					margin-left: $gap-smaller;
+				}
 			}
 
 			.components-popover__content {

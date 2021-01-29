@@ -17,7 +17,7 @@ describe( 'products', () => {
 			render( <Products /> );
 
 			expect(
-				screen.queryByText( 'Start with a template (recommended)' )
+				screen.queryByText( 'Start with a template' )
 			).toBeInTheDocument();
 			expect( screen.queryByText( 'Add manually' ) ).toBeInTheDocument();
 			expect( screen.queryByText( 'Import' ) ).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe( 'products', () => {
 			render( <Products /> );
 
 			fireEvent(
-				screen.queryByText( 'Start with a template (recommended)' ),
+				screen.queryByText( 'Start with a template' ),
 				// eslint-disable-next-line no-undef
 				new MouseEvent( 'click', { bubbles: true } )
 			);
@@ -53,7 +53,7 @@ describe( 'products', () => {
 			render( <Products /> );
 
 			fireEvent(
-				screen.queryByText( 'Start with a template (recommended)' ),
+				screen.queryByText( 'Start with a template' ),
 				// eslint-disable-next-line no-undef
 				new MouseEvent( 'click', { bubbles: true } )
 			);

@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
-import { List } from '@woocommerce/components';
+import { Icon, templatePartSidebar } from '@wordpress/icons';
+import { List, Pill } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -16,12 +17,17 @@ import ProductTemplateModal from './product-template-modal';
 const subTasks = [
 	{
 		key: 'addProductTemplate',
-		title: __( 'Start with a template (recommended)', 'woocommerce-admin' ),
+		title: (
+			<>
+				{ __( 'Start with a template', 'woocommerce-admin' ) }
+				<Pill>{ __( 'Recommended', 'woocommerce-admin' ) }</Pill>
+			</>
+		),
 		content: __(
-			'For small stores we recommend adding products manually',
+			'Use a template to add physical, digital, and variable products',
 			'woocommerce-admin'
 		),
-		before: <i className="material-icons-outlined">add_box</i>,
+		before: <Icon icon={ templatePartSidebar }></Icon>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', {
