@@ -49,6 +49,7 @@ jobs:
       # From https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows#using-the-cache-action
       - name: Cache node modules
         uses: actions/cache@v2
+        id: cache_node_modules
         env:
           cache-name: cache-node-modules
         with:
@@ -94,7 +95,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: Restore node modules from cache, if available.
-        if: steps.cache_node_modules.outputs.cache-hit == 'true'
+        if: steps.cache_node_modules.outputs.cache-hit == true
         run: mv ./node_modules package/woocommerce/node_modules
 
       - name: Run npm install.
