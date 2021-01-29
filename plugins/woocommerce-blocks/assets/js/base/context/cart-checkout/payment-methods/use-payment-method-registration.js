@@ -54,12 +54,17 @@ const usePaymentMethodRegistration = (
 	const { selectedRates, shippingAddress } = useShippingDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
-	const { cartTotals, cartNeedsShipping } = useStoreCart();
+	const {
+		cartTotals,
+		cartNeedsShipping,
+		paymentRequirements,
+	} = useStoreCart();
 	const canPayArgument = useRef( {
 		cartTotals,
 		cartNeedsShipping,
 		shippingAddress,
 		selectedShippingMethods,
+		paymentRequirements,
 	} );
 	const { addErrorNotice } = useStoreNotices();
 
@@ -69,12 +74,14 @@ const usePaymentMethodRegistration = (
 			cartNeedsShipping,
 			shippingAddress,
 			selectedShippingMethods,
+			paymentRequirements,
 		};
 	}, [
 		cartTotals,
 		cartNeedsShipping,
 		shippingAddress,
 		selectedShippingMethods,
+		paymentRequirements,
 	] );
 
 	const refreshCanMakePayments = useCallback( async () => {
@@ -144,7 +151,12 @@ const usePaymentMethodRegistration = (
 	// Some payment methods (e.g. COD) can be disabled for specific shipping methods.
 	useEffect( () => {
 		refreshCanMakePayments();
-	}, [ refreshCanMakePayments, cartTotals, selectedShippingMethods ] );
+	}, [
+		refreshCanMakePayments,
+		cartTotals,
+		selectedShippingMethods,
+		paymentRequirements,
+	] );
 
 	return isInitialized;
 };

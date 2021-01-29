@@ -303,6 +303,7 @@
  *                                                              save card can be displayed.
  * @property {boolean}                     allowPaymentRequest  True if merchant has enabled payment
  *                                                              request (Chrome/Apple Pay).
+ * @property {Object}                      supports             List of features supported by the payment gateway
  */
 /* eslint-enable jsdoc/valid-types */
 

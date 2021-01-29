@@ -13,6 +13,7 @@
  * @property {Object} edit              A react node to display a preview of your payment method in the editor.
  * @property {Function} canMakePayment  A callback to determine whether the payment method should be shown in the checkout.
  * @property {string} [paymentMethodId] A unique string to represent the payment method server side. If not provided, defaults to name.
+ * @property {Object} supports          Object that describes various features provided by the payment method.
  */
 
 /**
@@ -27,6 +28,7 @@
  * @property {Object} label                   A react node that will be used as a label for the payment method in the checkout.
  * @property {string} ariaLabel               An accessibility label. Screen readers will output this label when the payment method is selected.
  * @property {string} [placeOrderButtonLabel] Optionally customise the label text for the checkout submit (`Place Order`) button.
+ * @property {Object} supports                Object that describes various features provided by the payment method.
  */
 
 export {};

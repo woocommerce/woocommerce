@@ -40,6 +40,7 @@
  *                                                      shipping rates are
  *                                                      being loaded.
  * @property {boolean}             cartHasCalculatedShipping Whether or not the cart has calculated shipping yet.
+ * @property {Array}               paymentRequirements  List of features required from payment gateways.
  * @property {function(Object):any} receiveCart         Dispatcher to receive
  *                                                      updated cart.
  */

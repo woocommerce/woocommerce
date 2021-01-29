@@ -45,6 +45,9 @@ const paypalPaymentMethod = {
 		settings.title ||
 			__( 'Payment via PayPal', 'woo-gutenberg-products-block' )
 	),
+	supports: {
+		features: settings.supports ?? [],
+	},
 };
 
 registerPaymentMethod( paypalPaymentMethod );

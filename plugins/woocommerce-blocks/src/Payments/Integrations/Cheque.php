@@ -73,6 +73,7 @@ final class Cheque extends AbstractPaymentMethodType {
 		return [
 			'title'       => $this->get_setting( 'title' ),
 			'description' => $this->get_setting( 'description' ),
+			'supports'    => $this->get_supported_features(),
 		];
 	}
 }

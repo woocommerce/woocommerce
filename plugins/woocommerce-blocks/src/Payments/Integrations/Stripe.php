@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 use Exception;
 use WC_Stripe_Payment_Request;
 use WC_Stripe_Helper;
+use WC_Gateway_Stripe;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
@@ -96,6 +97,7 @@ final class Stripe extends AbstractPaymentMethodType {
 			'showSavedCards'      => $this->get_show_saved_cards(),
 			'allowPaymentRequest' => $this->get_allow_payment_request(),
 			'showSaveOption'      => $this->get_show_save_option(),
+			'supports'            => $this->get_supported_features(),
 		];
 	}
 
@@ -332,5 +334,15 @@ final class Stripe extends AbstractPaymentMethodType {
 			$order->set_payment_method_title( 'Chrome Payment Request (Stripe)' );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Returns an array of supported features.
+	 *
+	 * @return string[]
+	 */
+	public function get_supported_features() {
+		$gateway = new WC_Gateway_Stripe();
+		return array_filter( $gateway->supports, array( $gateway, 'supports' ) );
 	}
 }

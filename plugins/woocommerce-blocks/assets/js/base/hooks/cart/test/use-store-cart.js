@@ -108,6 +108,7 @@ describe( 'useStoreCart', () => {
 		shippingRatesLoading: false,
 		cartHasCalculatedShipping: true,
 		receiveCart: undefined,
+		paymentRequirements: [],
 	};
 
 	const getWrappedComponents = ( Component ) => (

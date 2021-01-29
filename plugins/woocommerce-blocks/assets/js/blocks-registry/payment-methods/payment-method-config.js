@@ -12,6 +12,8 @@ import {
 	assertValidElementOrString,
 } from './assertions';
 
+import { canMakePaymentWithFeaturesCheck } from './payment-method-config-helper';
+
 export default class PaymentMethodConfig {
 	constructor( config ) {
 		// validate config
@@ -23,7 +25,6 @@ export default class PaymentMethodConfig {
 		this.content = config.content;
 		this.icons = config.icons;
 		this.edit = config.edit;
-		this.canMakePayment = config.canMakePayment;
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
 			showSavedCards:
@@ -31,7 +32,12 @@ export default class PaymentMethodConfig {
 				config?.supports?.savePaymentInfo || // Kept for backward compatibility if methods still pass this when registering.
 				false,
 			showSaveOption: config?.supports?.showSaveOption || false,
+			features: config?.supports?.features || [],
 		};
+		this.canMakePayment = canMakePaymentWithFeaturesCheck(
+			config.canMakePayment,
+			this.supports.features
+		);
 	}
 
 	static assertValidConfig = ( config ) => {
@@ -103,6 +109,11 @@ export default class PaymentMethodConfig {
 					link:
 						'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686',
 				}
+			);
+		}
+		if ( ! Array.isArray( config.supports?.features ) ) {
+			throw new Error(
+				'The features property for the payment method must be an array.'
 			);
 		}
 		if (
