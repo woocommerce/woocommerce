@@ -12,6 +12,9 @@
 
 - Shopper Checkout Apply Coupon
 
+
+- Shopper Cart Apply Coupon
+
 ## Fixed
 
 - Flaky Create Product, Coupon, and Order tests

@@ -906,7 +906,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
 
 		foreach ( $query->posts as $post ) {
-			$orders[] = wc_get_order( $post );
+			$order = wc_get_order( $post );
+
+			// If the order returns false, don't add it to the list.
+			if ( false === $order ) {
+				continue;
+			}
+
+			$orders[] = $order;
 		}
 
 		return $orders;
