@@ -1,4 +1,23 @@
-# 0.16
+# Unreleased
+
+# 0.2.0
+
+## Fixed
+
+- Return jest exit code from `npx wc-e2e test:e2e*`
+
+## Added
+
+- support for custom container name
+- Insert a 12 hour delay in using new docker image tags
+- Package `bin` script `wc-e2e`
+
+## Fixed
+
+- Remove redundant `puppeteer` dependency
+- Support for admin user configuration from `default.json`
+
+# 0.1.6
 
 ## Added
 
@@ -25,6 +44,6 @@
 - removed the products and orders delete resets
 - eliminated the use of docker-compose.yaml in the root of the project
 
-# 0.15
+# 0.1.5
 
 - Initial/beta release

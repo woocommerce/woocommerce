@@ -6,7 +6,7 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ), locale = $.parseJSON( locale_json );
+	var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ), locale = JSON.parse( locale_json );
 
 	function field_is_required( field, is_required ) {
 		if ( is_required ) {
@@ -51,7 +51,7 @@ jQuery( function( $ ) {
 				$statefield.attr( 'data-o_class', $statefield.attr( 'class' ) );
 			}
 
-			var locale_fields = $.parseJSON( wc_address_i18n_params.locale_fields );
+			var locale_fields = JSON.parse( wc_address_i18n_params.locale_fields );
 
 			$.each( locale_fields, function( key, value ) {
 

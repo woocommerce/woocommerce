@@ -701,6 +701,7 @@ function wc_update_230_options() {
 	// _money_spent and _order_count may be out of sync - clear them
 	delete_metadata( 'user', 0, '_money_spent', '', true );
 	delete_metadata( 'user', 0, '_order_count', '', true );
+	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
 	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
@@ -2217,4 +2218,68 @@ function wc_update_450_sanitize_coupons_code() {
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
 	return false;
+}
+
+/**
+ * Fixes product review count that might have been incorrect.
+ *
+ * See @link https://github.com/woocommerce/woocommerce/issues/27688.
+ */
+function wc_update_500_fix_product_review_count() {
+	global $wpdb;
+
+	$product_id      = 0;
+	$last_product_id = get_option( 'woocommerce_update_500_last_product_id', '0' );
+
+	$products_data = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+				SELECT post_id, meta_value
+				FROM $wpdb->postmeta
+				JOIN $wpdb->posts
+					ON $wpdb->postmeta.post_id = $wpdb->posts.ID
+				WHERE
+					post_type = 'product'
+					AND post_status = 'publish'
+					AND post_id > %d
+					AND meta_key = '_wc_review_count'
+				ORDER BY post_id ASC
+				LIMIT 10
+			",
+			$last_product_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $products_data ) ) {
+		delete_option( 'woocommerce_update_500_last_product_id' );
+		return false;
+	}
+
+	$product_ids_to_check = array_column( $products_data, 'post_id' );
+	$actual_review_counts = WC_Comments::get_review_counts_for_product_ids( $product_ids_to_check );
+
+	foreach ( $products_data as $product_data ) {
+		$product_id           = intval( $product_data['post_id'] );
+		$current_review_count = intval( $product_data['meta_value'] );
+
+		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
+			WC_Comments::clear_transients( $product_id );
+		}
+	}
+
+	// Start the run again.
+	if ( $product_id ) {
+		return update_option( 'woocommerce_update_500_last_product_id', $product_id );
+	}
+
+	delete_option( 'woocommerce_update_500_last_product_id' );
+	return false;
+}
+
+/**
+ * Update DB version to 5.0.0.
+ */
+function wc_update_500_db_version() {
+	WC_Install::update_db_version( '5.0.0' );
 }

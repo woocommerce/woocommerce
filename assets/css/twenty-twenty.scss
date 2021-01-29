@@ -279,11 +279,11 @@ a.button {
 
 .woocommerce-store-notice__dismiss-link {
 	float: right;
-	color: #fff;
+	color: #000;
 
 	&:hover {
-		text-decoration: underline;
-		color: #fff;
+		text-decoration: none;
+		color: #000;
 	}
 }
 
@@ -1659,6 +1659,16 @@ a.reset_variations {
 		h3 {
 			margin-top: 4rem;
 		}
+	}
+
+	form[name="checkout"] {
+		display: table;
+	}
+
+	.blockUI.blockOverlay {
+		position: relative;
+
+		@include loader();
 	}
 
 	form {

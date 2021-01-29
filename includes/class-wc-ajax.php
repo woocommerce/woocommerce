@@ -368,7 +368,7 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true.
-		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
 			$messages = wc_print_notices( true );
 		} else {
@@ -1572,10 +1572,15 @@ class WC_AJAX {
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
-		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
-		$products        = array();
+		$products = array();
 
-		foreach ( $product_objects as $product_object ) {
+		foreach ( $ids as $id ) {
+			$product_object = wc_get_product( $id );
+
+			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+				continue;
+			}
+
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
 
@@ -1589,7 +1594,7 @@ class WC_AJAX {
 				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
 			}
 
-			$products[ $product_object->get_id() ] = rawurldecode( $formatted_name );
+			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );

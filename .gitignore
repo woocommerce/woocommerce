@@ -24,8 +24,7 @@ none
 /assets/css/photoswipe/**/*.min.css
 
 # Minified JS
-/assets/js/admin/*.min.js
-/assets/js/frontend/*.min.js
+/assets/js/**/*.min.js
 
 # OS X metadata
 .DS_Store
@@ -59,7 +58,8 @@ tests/cli/vendor
 
 # Composer
 /vendor/
-/bin/composer/**/vendor
+/bin/composer/**/vendor/
+/lib/vendor/
 contributors.md
 contributors.html
 
@@ -75,3 +75,4 @@ i18n/languages/woocommerce.pot
 
 # Build
 build/
+woocommerce.zip

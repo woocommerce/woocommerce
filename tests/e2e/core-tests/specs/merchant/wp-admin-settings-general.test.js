@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	settingsPageSaveChanges,
 	verifyValueOfInputField
 } = require( '@woocommerce/e2e-utils' );
@@ -20,12 +20,12 @@ const {
 const runUpdateGeneralSettingsTest = () => {
 	describe('WooCommerce General Settings', () => {
 		beforeAll(async () => {
-			await StoreOwnerFlow.login();
+			await merchant.login();
 		});
 
 		it('can update settings', async () => {
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Make sure the general tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'General'});

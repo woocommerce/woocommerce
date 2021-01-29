@@ -358,9 +358,6 @@ class WC_Countries {
 
 		if ( 'eu_vat' === $type ) {
 			$countries[] = 'MC';
-			$countries[] = 'IM';
-			// The UK is still part of the EU VAT zone.
-			$countries[] = 'GB';
 		}
 
 		return apply_filters( 'woocommerce_european_union_countries', $countries, $type );
@@ -528,7 +525,7 @@ class WC_Countries {
 					'NZ'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 					'NO'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'PL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
-					'PR'      => "{company}\n{name}\n{address_1} {address_2}\n{state} \n{country} {postcode}",
+					'PR'      => "{company}\n{name}\n{address_1} {address_2}\n{city} \n{country} {postcode}",
 					'PT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'SK'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'RS'      => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -981,6 +978,15 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'GT' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'Department', 'woocommerce' ),
+						),
+					),
 					'HK' => array(
 						'postcode' => array(
 							'required' => false,
@@ -1205,11 +1211,11 @@ class WC_Countries {
 					),
 					'PR' => array(
 						'city'  => array(
-							'required' => false,
-							'hidden'   => true,
+							'label' => __( 'Municipality', 'woocommerce' ),
 						),
 						'state' => array(
-							'label' => __( 'Municipality', 'woocommerce' ),
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'PT' => array(
@@ -1230,10 +1236,10 @@ class WC_Countries {
 					),
 					'RS' => array(
 						'city'     => array(
-							'required' => false,
+							'required' => true,
 						),
 						'postcode' => array(
-							'required' => false,
+							'required' => true,
 						),
 						'state'    => array(
 							'label' => __( 'District', 'woocommerce' ),

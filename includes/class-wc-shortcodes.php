@@ -230,7 +230,7 @@ class WC_Shortcodes {
 			woocommerce_product_loop_end();
 		}
 
-		woocommerce_reset_loop();
+		wc_reset_loop();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}

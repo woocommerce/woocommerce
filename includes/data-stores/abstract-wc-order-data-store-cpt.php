@@ -93,14 +93,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Method to read an order from the database.
 	 *
-	 * @param WC_Data $order Order object.
+	 * @param WC_Order $order Order object.
 	 *
 	 * @throws Exception If passed order is invalid.
 	 */
 	public function read( &$order ) {
 		$order->set_defaults();
 		$post_object = get_post( $order->get_id() );
-
 		if ( ! $order->get_id() || ! $post_object || ! in_array( $post_object->post_type, wc_get_order_types(), true ) ) {
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
@@ -108,8 +107,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order->set_props(
 			array(
 				'parent_id'     => $post_object->post_parent,
-				'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified' => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'  => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified' => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'        => $post_object->post_status,
 			)
 		);

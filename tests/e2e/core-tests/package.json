@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-core-tests",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "End-To-End (E2E) tests for WooCommerce",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/core-tests/README.md",
   "repository": {
@@ -11,7 +11,10 @@
   "main": "index.js",
   "dependencies": {
     "@jest/globals": "^26.4.2",
-    "@woocommerce/e2e-utils": "file:../utils"
+    "config": "3.3.3"
+  },
+  "peerDependencies": {
+    "@woocommerce/e2e-utils": "^0.1.2"
   },
   "publishConfig": {
     "access": "public"

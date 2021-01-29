@@ -1,9 +1,19 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
+ * External dependencies
+ */
+const { HTTPClientFactory } = require( '@woocommerce/api' );
+const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
+
+/**
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -12,24 +22,16 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const {
+	getTestConfig,
 	waitAndClick
 } = require( '@woocommerce/e2e-environment' );
-
-/**
- * External dependencies
- */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
 
 const runInitialStoreSettingsTest = () => {
 	describe('Store owner can finish initial store setup', () => {
 
 		it('can enable tax rates and calculations', async () => {
 			// Go to general settings page
-			await StoreOwnerFlow.openSettings('general');
+			await merchant.openSettings('general');
 
 			// Make sure the general tab is active
 			await expect(page).toMatchElement('a.nav-tab-active', {text: 'General'});
@@ -48,7 +50,7 @@ const runInitialStoreSettingsTest = () => {
 
 		it('can configure permalink settings', async () => {
 			// Go to Permalink Settings page
-			await StoreOwnerFlow.openPermalinkSettings();
+			await merchant.openPermalinkSettings();
 
 			// Select "Post name" option in common settings section
 			await page.click('input[value="/%postname%/"]', {text: ' Post name'});
@@ -67,6 +69,18 @@ const runInitialStoreSettingsTest = () => {
 				verifyValueOfInputField('#permalink_structure', '/%postname%/'),
 				verifyValueOfInputField('#woocommerce_permalink_structure', '/product/'),
 			]);
+		});
+
+		it( 'can use api with pretty permalinks', async () => {
+			const testConfig = getTestConfig();
+			const admin = testConfig.users.admin;
+			const client = HTTPClientFactory.build( testConfig.url )
+				.withBasicAuth( admin.username, admin.password )
+				.withIndexPermalinks()
+				.create();
+
+			const response = await client.get( '/wc/v3/products' );
+			expect( response.statusCode ).toBe( 200 );
 		});
 	});
 };

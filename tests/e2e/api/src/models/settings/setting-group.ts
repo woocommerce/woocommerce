@@ -47,7 +47,7 @@ export class SettingGroup extends Model {
 	 *
 	 * @param {Object} properties The properties to set in the object.
 	 */
-	public constructor( properties: Partial< SettingGroup > = {} ) {
+	public constructor( properties?: Partial< SettingGroup > ) {
 		super();
 		Object.assign( this, properties );
 	}

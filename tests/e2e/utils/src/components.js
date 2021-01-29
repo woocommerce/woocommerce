@@ -5,12 +5,13 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
+import { merchant } from './flows';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyAndPublish = async () => {
 	// Wait for auto save
@@ -24,6 +25,20 @@ const verifyAndPublish = async () => {
 	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
 };
 
+/**
+ * Wait for primary button to be enabled and click.
+ *
+ * @param waitForNetworkIdle - Wait for network idle after click
+ * @returns {Promise<void>}
+ */
+const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	await page.click( 'button.is-primary' );
+	if ( waitForNetworkIdle ) {
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+	}
+};
 /**
  * Complete onboarding wizard.
  */
@@ -87,15 +102,7 @@ const completeOnboardingWizard = async () => {
 	await expect( page ).toFill( '.components-text-control__input', config.get( 'onboardingwizard.industry' ) );
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "What type of products will be listed?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	await waitAndClickPrimary();
 
 	// Product types section
 
@@ -109,15 +116,7 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Tell us about your business" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	await waitAndClickPrimary();
 
 	// Business Details section
 
@@ -135,48 +134,15 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Query for the extensions toggles
-	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
-	expect( extensionsToggles ).toHaveLength( 3 );
-
-	// Disable download of the 3 extensions
-	for ( let i = 0; i < 3; i++ ) {
-		await extensionsToggles[i].click();
-	}
-
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	await waitAndClickPrimary( false );
 
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Theme" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	// Skip installing extensions
+	await evalAndClick( '.components-checkbox-control__input' );
+	await waitAndClickPrimary();
 
 	// Theme section
-
-	// Wait for "Continue with my active theme" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue with my active theme" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Enhance your store with WooCommerce Services" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Benefits section
-
-	// Wait for Benefits section to appear
-	await page.waitForSelector( '.woocommerce-profile-wizard__benefits' );
-
-	// Wait for "No thanks" button to become active
-	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
-	// Click on "No thanks" button to move to the next step
-	await page.click( 'button.is-secondary' );
+	await waitAndClickPrimary();
 
 	// End of onboarding wizard
 
@@ -203,151 +169,12 @@ const completeOnboardingWizard = async () => {
 };
 
 /**
- * Complete old setup wizard.
- */
-const completeOldSetupWizard = async () => {
-	// Fill out store setup section details
-	// Select country where the store is located
-	await expect( page ).toSelect( 'select[name="store_country"]', config.get( 'addresses.admin.store.country' ) );
-	// Fill store's address - first line
-	await expect( page ).toFill( '#store_address', config.get( 'addresses.admin.store.addressfirstline' ) );
-
-	// Fill store's address - second line
-	await expect( page ).toFill( '#store_address_2', config.get( 'addresses.admin.store.addresssecondline' ) );
-
-	// Fill the city where the store is located
-	await expect( page ).toFill( '#store_city', config.get( 'addresses.admin.store.city' ) );
-
-	// Select the state where the store is located
-	await expect( page ).toSelect( 'select[name="store_state"]', config.get( 'addresses.admin.store.state') );
-
-	// Fill postcode of the store
-	await expect( page ).toFill( '#store_postcode', config.get( 'addresses.admin.store.postcode' ) );
-
-	// Select currency and type of products to sell details
-	await expect( page ).toSelect( 'select[name="currency_code"]', '\n' +
-		'\t\t\t\t\t\tUnited States (US) dollar ($ USD)\t\t\t\t\t' );
-	await expect( page ).toSelect( 'select[name="product_type"]', 'I plan to sell both physical and digital products' );
-
-	// Verify that checkbox next to "I will also be selling products or services in person." is not selected
-	await verifyCheckboxIsUnset( '#woocommerce_sell_in_person' );
-
-	// Click on "Let's go!" button to move to the next step
-	await page.$eval( 'button[name=save_step]', elem => elem.click() );
-
-	// Wait for usage tracking pop-up window to appear
-	await page.waitForSelector( '#wc-backbone-modal-dialog' );
-	await expect( page ).toMatchElement(
-		'.wc-backbone-modal-header', { text: 'Help improve WooCommerce with usage tracking' }
-	);
-
-	await page.waitForSelector( '#wc_tracker_checkbox_dialog' );
-
-	// Verify that checkbox next to "Enable usage tracking and help improve WooCommerce" is not selected
-	await verifyCheckboxIsUnset( '#wc_tracker_checkbox_dialog' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.$eval( '#wc_tracker_submit', elem => elem.click() ),
-
-		// Wait for the Payment section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Fill out payment section details
-	// Turn off Stripe account toggle
-	await page.click( '.wc-wizard-service-toggle' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button[name=save_step]', { text: 'Continue' } ),
-
-		// Wait for the Shipping section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Fill out shipping section details
-	// Turn off WooCommerce Shipping option
-	await page.$eval( '#wc_recommended_woocommerce_services', elem => elem.click() );
-
-	await page.waitForSelector( 'select[name="shipping_zones[domestic][method]"]' );
-	await page.waitForSelector( 'select[name="shipping_zones[intl][method]"]' );
-
-	// Select Flat Rate shipping method for domestic shipping zone
-	await page.evaluate( () => {
-		document.querySelector( 'select[name="shipping_zones[domestic][method]"] > option:nth-child(1)' ).selected = true;
-		let element = document.querySelector( 'select[name="shipping_zones[domestic][method]"]' );
-		let event = new Event( 'change', { bubbles: true } );
-		event.simulated = true;
-		element.dispatchEvent( event );
-	} );
-
-	await page.$eval( 'input[name="shipping_zones[domestic][flat_rate][cost]"]', e => e.setAttribute( 'value', '10.00' ) );
-
-	// Select Flat Rate shipping method for the rest of the world shipping zone
-	await page.evaluate( () => {
-		document.querySelector( 'select[name="shipping_zones[intl][method]"] > option:nth-child(1)' ).selected = true;
-		let element = document.querySelector( 'select[name="shipping_zones[intl][method]"]' );
-		let event = new Event( 'change', { bubbles: true } );
-		event.simulated = true;
-		element.dispatchEvent( event );
-	} );
-
-	await page.$eval( 'input[name="shipping_zones[intl][flat_rate][cost]"]', e => e.setAttribute( 'value', '20.00' ) );
-
-	// Select product weight and product dimensions options
-	await expect( page ).toSelect( 'select[name="weight_unit"]', 'Pounds' );
-	await expect( page ).toSelect( 'select[name="dimension_unit"]', 'Inches' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button[name=save_step]', { text: 'Continue' } ),
-
-		// Wait for the Recommended section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Fill out recommended section details
-	// Turn off Storefront Theme option
-	await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
-	await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
-
-	// Turn off Automated Taxes option
-	await page.waitForSelector( '#wc_recommended_automated_taxes', { visible: true } );
-	await page.$eval( '#wc_recommended_automated_taxes', elem => elem.click() );
-
-	// Turn off Mailchimp option
-	await page.waitForSelector( '#wc_recommended_mailchimp', { visible: true } );
-	await page.$eval( '#wc_recommended_mailchimp', elem => elem.click() );
-
-	// Turn off Facebook option
-	await page.waitForSelector( '#wc_recommended_facebook', { visible: true } );
-	await page.$eval( '#wc_recommended_facebook', elem => elem.click() );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button[name=save_step]', { text: 'Continue' } ),
-
-		// Wait for the Jetpack section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Skip activate Jetpack section
-	// Click on "Skip this step" in order to skip Jetpack installation
-	await page.click( '.wc-setup-footer-links' );
-
-	// Finish Setup Wizard - Ready! section
-	// Visit Dashboard
-	await StoreOwnerFlow.openDashboard();
-} ;
-
-/**
  * Create simple product.
  */
 const createSimpleProduct = async () => {
 	const product = await factories.products.simple.create( {
 		name: simpleProductName,
-		regularPrice: '9.99'
+		regularPrice: simpleProductPrice
 	} );
 	return product.id;
 } ;
@@ -357,9 +184,9 @@ const createSimpleProduct = async () => {
  */
 const createVariableProduct = async () => {
 	// Go to "add product" page
-	await StoreOwnerFlow.openNewProduct();
+	await merchant.openNewProduct();
 
-	// Make sure we're on the add order page
+	// Make sure we're on the add product page
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 	// Set product data
@@ -483,10 +310,94 @@ const createVariableProduct = async () => {
 	return variablePostIdValue;
 };
 
+/**
+ * Create a basic order with the provided order status.
+ *
+ * @param orderStatus Status of the new order. Defaults to `Pending payment`.
+ */
+const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
+	// Go to 'Add new order' page
+	await merchant.openNewOrder();
+
+	// Make sure we're on the add order page
+	await expect( page.title() ).resolves.toMatch( 'Add new order' );
+
+	// Set order status
+	await expect( page ).toSelect( '#order_status', orderStatus );
+
+	// Wait for auto save
+	await page.waitFor( 2000 );
+
+	// Create the order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '#message' );
+
+	// Verify
+	await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+
+	const variablePostId = await page.$( '#post_ID' );
+	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
+	return variablePostIdValue;
+};
+
+/**
+ * Adds a product to an order in the merchant.
+ *
+ * @param orderId ID of the order to add the product to.
+ * @param productName Name of the product being added to the order.
+ */
+const addProductToOrder = async ( orderId, productName ) => {
+	await merchant.goToOrder( orderId );
+
+	// Add a product to the order
+	await expect( page ).toClick( 'button.add-line-item' );
+	await expect( page ).toClick( 'button.add-order-item' );
+	await page.waitForSelector( '.wc-backbone-modal-header' );
+	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
+	await expect( page ).toFill( '#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName );
+	await expect( page ).toClick( 'li[aria-selected="true"]' );
+	await page.click( '.wc-backbone-modal-content #btn-ok' );
+
+	await uiUnblocked();
+
+	// Verify the product we added shows as a line item now
+	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
+}
+
+/**
+ * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
+ *
+ * @param couponAmount Amount to be applied. Defaults to 5.
+ * @param discountType Type of a coupon. Defaults to Fixed cart discount.
+ */
+const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart discount' ) => {
+	await merchant.openNewCoupon();
+
+	// Fill in coupon code
+	let couponCode = 'Code-' + discountType + new Date().getTime().toString();
+	await expect(page).toFill( '#title', couponCode );
+
+	// Set general coupon data
+	await clickTab( 'General' );
+	await expect(page).toSelect( '#discount_type', discountType );
+	await expect(page).toFill( '#coupon_amount', couponAmount );
+
+	// Publish coupon
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+
+	return couponCode;
+};
+
 export {
-	completeOldSetupWizard,
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createSimpleOrder,
 	verifyAndPublish,
+	addProductToOrder,
+	createCoupon,
 };

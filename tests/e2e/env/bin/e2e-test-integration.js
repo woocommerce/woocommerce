@@ -44,7 +44,7 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 // Check for running a specific script
 if ( program.args.length == 1 ) {
 	// Check for both absolute and relative paths
-	const testSpecAbs = path.resolve( program.args[0] )
+	const testSpecAbs = path.resolve( program.args[0] );
 	const testSpecRel = path.resolve( appPath, program.args[0] );
 	if ( fs.existsSync( testSpecAbs ) ) {
 		process.env.jest_test_spec = testSpecAbs;

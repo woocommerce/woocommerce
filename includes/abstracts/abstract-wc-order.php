@@ -1270,6 +1270,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
+		$tax_location   = $this->get_tax_location();
+		$tax_location   = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
 
 		if ( $item_discounts ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
@@ -1277,7 +1279,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
 				if ( $this->get_prices_include_tax() && wc_tax_enabled() && 'taxable' === $item->get_tax_status() ) {
-					$taxes = WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+					$taxes = WC_Tax::calc_tax( $amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), true );
 
 					// Use unrounded taxes so totals will be re-calculated accurately, like in cart.
 					$amount = $amount - array_sum( $taxes );
@@ -1299,6 +1301,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
+		$tax_location      = $this->get_tax_location();
+		$tax_location      = array(
+			$tax_location['country'],
+			$tax_location['state'],
+			$tax_location['postcode'],
+			$tax_location['city'],
+		);
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
@@ -1321,7 +1330,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						continue;
 					}
 
-					$taxes = array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), $this->get_prices_include_tax() ) );
+					$taxes = array_sum( WC_Tax::calc_tax( $item_discount_amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), $this->get_prices_include_tax() ) );
 					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
 						$taxes = wc_round_tax_total( $taxes );
 					}
@@ -1349,7 +1358,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product.
 	 * @return int
-	 * @throws WC_Data_Exception Exception thrown if the item cannot be added to the cart.
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
@@ -1513,6 +1521,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+	}
+
+	/**
+	 * Get tax rates for an order. Use order's shipping or billing address, defaults to base location.
+	 *
+	 * @param string $tax_class     Tax class to get rates for.
+	 * @param array  $location_args Location to compute rates for. Should be in form: array( country, state, postcode, city).
+	 * @param object $customer      Only used to maintain backward compatibility for filter `woocommerce-matched_rates`.
+	 *
+	 * @return mixed|void Tax rates.
+	 */
+	protected function get_tax_rates( $tax_class, $location_args = array(), $customer = null ) {
+		$tax_location = $this->get_tax_location( $location_args );
+		$tax_location = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
+		return WC_Tax::get_rates_from_location( $tax_class, $tax_location, $customer );
 	}
 
 	/**

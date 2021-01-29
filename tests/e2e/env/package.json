@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-environment",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "WooCommerce End to End Testing Environment Configuration.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",
@@ -30,11 +30,11 @@
     "jest-puppeteer": "^4.4.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.1",
-    "@babel/core": "^7.12.3",
-    "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.12.1",
-    "@wordpress/eslint-plugin": "^4.0.0",
+    "@babel/cli": "7.12.0",
+    "@babel/core": "7.12.0",
+    "@babel/polyfill": "7.11.5",
+    "@babel/preset-env": "7.12.0",
+    "@wordpress/eslint-plugin": "7.1.0",
     "ndb": "^1.1.5",
     "semver": "^7.3.2"
   },
@@ -54,5 +54,8 @@
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
     "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+  },
+  "bin": {
+    "wc-e2e": "bin/wc-e2e.sh"
   }
 }

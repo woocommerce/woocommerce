@@ -6,25 +6,31 @@
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
   "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "lib"
+    }
+  ],
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "2.2.0",
-    "automattic/jetpack-constants": "1.5.0",
-    "composer/installers": "1.7.0",
+    "automattic/jetpack-autoloader": "2.7.1",
+    "automattic/jetpack-constants": "1.5.1",
+    "composer/installers": "~1.7",
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "3.1.0",
     "psr/container": "1.0.0",
     "woocommerce/action-scheduler": "3.1.6",
-    "woocommerce/woocommerce-admin": "1.6.3",
-    "woocommerce/woocommerce-blocks": "3.6.0",
-    "league/container": "3.3.3"
+    "woocommerce/woocommerce-admin": "1.9.0",
+    "woocommerce/woocommerce-blocks": "4.0.0"
   },
   "require-dev": {
     "bamarni/composer-bin-plugin": "^1.4"
   },
   "config": {
+    "optimize-autoloader": true,
     "platform": {
-      "php": "7.1"
+      "php": "7.0"
     },
     "preferred-install": {
         "woocommerce/action-scheduler": "dist",
@@ -43,7 +49,10 @@
     ],
     "psr-4": {
       "Automattic\\WooCommerce\\": "src/",
-      "Automattic\\WooCommerce\\Vendor\\League\\Container\\": "vendor/league/container/"
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+    },
+    "psr-0": {
+      "Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
     }
   },
   "autoload-dev": {
@@ -58,12 +67,10 @@
   "scripts": {
     "post-install-cmd": [
       "@composer bin all install --ansi",
-      "sh ./bin/prefix-vendor-namespaces.sh",
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
       "@composer bin all update --ansi",
-      "sh ./bin/prefix-vendor-namespaces.sh",
       "sh ./bin/package-update.sh"
     ],
     "test": [
@@ -86,14 +93,18 @@
     ],
     "bin": [
       "echo 'bin not installed'"
+    ],
+    "build-lib": [
+      "sh ./bin/build-lib.sh"
     ]
   },
   "extra": {
     "installer-paths": {
-      "packages/action-scheduler": ["woocommerce/action-scheduler"],
-      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
-      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"],
-      "packages/woocommerce-admin": ["woocommerce/woocommerce-admin"]
+      "packages/{$name}": [
+        "woocommerce/action-scheduler",
+        "woocommerce/woocommerce-blocks",
+        "woocommerce/woocommerce-admin"
+      ]
     },
     "scripts-description": {
       "test": "Run unit tests",

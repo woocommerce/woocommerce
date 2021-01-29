@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-utils",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "End-To-End (E2E) test utils for WooCommerce",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-utils/README.md",
   "repository": {
@@ -11,10 +11,14 @@
   "main": "build/index.js",
   "module": "build-module/index.js",
   "dependencies": {
-    "@woocommerce/api": "0.1.0",
-    "@wordpress/e2e-test-utils": "4.6.0",
+    "@wordpress/deprecated": "^2.10.0",
+    "@wordpress/e2e-test-utils": "^4.6.0",
+    "config": "3.3.3",
     "faker": "^5.1.0",
     "fishery": "^1.0.1"
+  },
+  "peerDependencies": {
+    "@woocommerce/api": "^0.1.0"
   },
   "publishConfig": {
     "access": "public"

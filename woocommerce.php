@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 4.8.0-dev
+ * Version: 5.1.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
@@ -51,6 +51,7 @@ function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.Fu
  * Returns the WooCommerce PSR11-compatible object container.
  * Code in the `includes` directory should use the container to get instances of classes in the `src` directory.
  *
+ * @since  4.4.0
  * @return \Psr\Container\ContainerInterface The WooCommerce PSR11 container.
  */
 function wc_get_container() : \Psr\Container\ContainerInterface {

@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 const {
-	StoreOwnerFlow,
+	merchant,
 	completeOnboardingWizard,
 } = require( '@woocommerce/e2e-utils' );
 
@@ -19,7 +19,7 @@ const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
-			await StoreOwnerFlow.runSetupWizard();
+			await merchant.runSetupWizard();
 			await completeOnboardingWizard();
 		});
 	});
@@ -35,9 +35,10 @@ const runTaskListTest = () => {
 			const taskListItems = await page.$$('.woocommerce-list__item-title');
 			expect(taskListItems).toHaveLength(6);
 
+			const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
 			await Promise.all([
 				// Click on "Set up shipping" task to move to the next step
-				taskListItems[3].click(),
+				setupTaskListItem.click(),
 
 				// Wait for shipping setup section to load
 				page.waitForNavigation({waitUntil: 'networkidle0'}),

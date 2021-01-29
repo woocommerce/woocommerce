@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Automattic",
   "description": "A simple interface for interacting with a WooCommerce installation.",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/api/README.md",
@@ -21,7 +21,8 @@
     "!*.tsbuildinfo",
     "!/dist/**/__tests__/",
     "!/dist/**/__mocks__/",
-    "!/dist/**/__snapshops__/"
+    "!/dist/**/__snapshops__/",
+    "!/dist/**/__test_data__/"
   ],
   "sideEffects": false,
   "scripts": {
@@ -42,7 +43,7 @@
     "@types/jest": "25.2.1",
     "@types/moxios": "^0.4.9",
     "@types/node": "13.13.5",
-    "jest": "25.5.4",
+    "jest": "^25.1.0",
     "jest-mock-extended": "^1.0.10",
     "moxios": "0.4.0",
     "ts-jest": "25.5.0",
