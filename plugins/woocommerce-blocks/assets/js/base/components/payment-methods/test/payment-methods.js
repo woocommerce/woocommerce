@@ -34,6 +34,9 @@ const registerMockPaymentMethods = () => {
 			icons: null,
 			canMakePayment: () => true,
 			ariaLabel: name,
+			supports: {
+				features: [ 'products' ],
+			},
 		} );
 	} );
 };

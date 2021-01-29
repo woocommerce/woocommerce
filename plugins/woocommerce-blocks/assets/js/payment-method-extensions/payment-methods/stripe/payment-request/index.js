@@ -9,7 +9,7 @@ import { getSetting } from '@woocommerce/settings';
 import { PAYMENT_METHOD_NAME } from './constants';
 import { PaymentRequestExpress } from './payment-request-express';
 import { applePayImage } from './apple-pay-preview';
-import { loadStripe } from '../stripe-utils';
+import { getStripeServerData, loadStripe } from '../stripe-utils';
 
 const ApplePayPreview = () => <img src={ applePayImage } alt="" />;
 
@@ -68,6 +68,9 @@ const paymentRequestPaymentMethod = {
 			totalPrice: parseInt( cartData?.cartTotals?.total_price || 0, 10 ),
 		} ),
 	paymentMethodId: 'stripe',
+	supports: {
+		features: getStripeServerData()?.supports ?? [],
+	},
 };
 
 export default paymentRequestPaymentMethod;

@@ -52,7 +52,10 @@ const options = {
 	content: <div>A react node</div>,
 	edit: <div> A react node </div>,
 	canMakePayment: () => true,
-	paymentMethodId: 'new_payment_method',
+  paymentMethodId: 'new_payment_method',
+  supports = {
+      features: [],
+  }
 };
 ```
 
@@ -63,6 +66,7 @@ Here's some more details on the configuration options:
 -   `edit` (required): This should be a react node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this react node will receive props from the payment method interface to checkout (but they will contain preview data).
 -   `canMakePayment` (required): A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order. Return a boolean value - true if payment method is available for use. If your gateway needs to perform async initialisation to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: `Cash on delivery`); or for payment methods to control whether they are available depending on other conditions. Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.
 -   `paymentMethodId`: This is the only optional configuration object. The value of this property is what will accompany the checkout processing request to the server and used to identify what payment method gateway class to load for processing the payment (if the shopper selected the gateway). So for instance if this is `stripe`, then `WC_Gateway_Stripe::process_payment` will be invoked for processing the payment.
+-   `supports:features`: This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature.
 
 ### Payment Methods - `registerPaymentMethod( options )`
 

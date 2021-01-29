@@ -79,6 +79,9 @@ const cashOnDeliveryPaymentMethod = {
 	edit: <Content />,
 	canMakePayment,
 	ariaLabel: label,
+	supports: {
+		features: settings?.supports ?? [],
+	},
 };
 
 registerPaymentMethod( cashOnDeliveryPaymentMethod );

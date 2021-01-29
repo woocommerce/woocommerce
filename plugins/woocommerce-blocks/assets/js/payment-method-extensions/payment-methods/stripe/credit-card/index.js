@@ -58,6 +58,7 @@ const stripeCcPaymentMethod = {
 	supports: {
 		showSavedCards: getStripeServerData().showSavedCards,
 		showSaveOption: getStripeServerData().showSaveOption,
+		features: getStripeServerData()?.supports ?? [],
 	},
 };
 

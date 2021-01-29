@@ -95,6 +95,7 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 			'description'              => $this->get_setting( 'description' ),
 			'enableForVirtual'         => $this->get_enable_for_virtual(),
 			'enableForShippingMethods' => $this->get_enable_for_methods(),
+			'supports'                 => $this->get_supported_features(),
 		];
 	}
 }
