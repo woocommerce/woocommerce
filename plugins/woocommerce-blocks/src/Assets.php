@@ -63,7 +63,10 @@ class Assets {
 		// Inline data.
 		wp_add_inline_script(
 			'wc-blocks-middleware',
-			"var wcStoreApiNonce = '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "';",
+			"
+			var wcStoreApiNonce = '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "';
+			var wcStoreApiNonceTimestamp = '" . esc_js( time() ) . "';
+			",
 			'before'
 		);
 

@@ -5,6 +5,7 @@ module.exports = {
 	],
 	globals: {
 		wcStoreApiNonce: 'readonly',
+		wcStoreApiNonceTimestamp: 'readonly',
 		fetchMock: true,
 		jQuery: 'readonly',
 		IntersectionObserver: 'readonly',
