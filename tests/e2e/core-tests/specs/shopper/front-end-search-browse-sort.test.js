@@ -26,6 +26,7 @@ const singleProductPrice3 = config.has('products.simple.price') ? config.get('pr
 const clothing = 'Clothing';
 const audio = 'Audio';
 const hardware = 'Hardware';
+const productTitle = 'ul.products > li.first > a > h2.woocommerce-loop-product__title';
 
 const runSearchBrowseSortTest = () => {
 	describe('Search, browse by categories and sort items in the shop', () => {
@@ -67,21 +68,21 @@ const runSearchBrowseSortTest = () => {
 			await shopper.goToShop();
 
 			// Open the 1st product with Clothing category
-			await expect(page).toClick('h2.woocommerce-loop-product__title', {text: simpleProductName + ' 1'});
+			await page.waitForSelector(productTitle);
+			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
 			await uiUnblocked();
 
 			// Verify the category assignment and open it
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toMatchElement('span.posted_in > a', {text: clothing});
 			await expect(page).toClick('span.posted_in > a', {text: clothing});
 			await uiUnblocked();
 
 			// Verify Clothing category page
 			await expect(page.title()).resolves.toMatch(clothing);
-			await expect(page).toMatchElement('h2.woocommerce-loop-product__title', {text: simpleProductName + ' 1'});
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
 
 			// Verify clicking on the product
-			await expect(page).toClick('h2.woocommerce-loop-product__title', {text: simpleProductName + ' 1'});
+			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
 			await uiUnblocked();
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
 			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
@@ -93,19 +94,19 @@ const runSearchBrowseSortTest = () => {
 			// Sort by price high to low
 			await page.select('.orderby', 'price-desc');
 			// Verify the first product in sort order
-			await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title', 
+			await expect(page).toMatchElement(productTitle, 
 				{text: simpleProductName + ' 3'});
 
 			// Sort by price low to high
 			await page.select('.orderby', 'price');
 			// Verify the first product in sort order
-			await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title',
+			await expect(page).toMatchElement(productTitle,
 				{text: simpleProductName + ' 1'});
 
 			// Sort by date of creation, latest to oldest
 			await page.select('.orderby', 'date');
 			// Verify the first product in sort order
-			await expect(page).toMatchElement('ul.products > li.first > a > h2.woocommerce-loop-product__title',
+			await expect(page).toMatchElement(productTitle,
 				{text: simpleProductName + ' 3'});
 		});
 	});
