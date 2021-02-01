@@ -387,7 +387,7 @@ class WC_Shortcode_My_Account {
 		 * @param WP_User $user     The user.
 		 * @param string  $new_pass New user password.
 		 */
-		do_action( 'after_password_reset', $user, $new_pass );
+		do_action( 'woocommerce_after_password_reset', $user, $new_pass );
 	}
 
 	/**
