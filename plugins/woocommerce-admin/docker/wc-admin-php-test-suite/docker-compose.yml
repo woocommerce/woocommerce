@@ -3,11 +3,13 @@ version: "3"
 services:
   phpunit:
     build: "."
+    image: wc-admin-php-test-suite-phpunit:1.1.0
     volumes:
       - "test-suite:/tmp"
       - "../../:/app"
     environment:
       - WC_CORE_DIR=/tmp/wordpress/wp-content/plugins/woocommerce
+      - WC_VERSION=${WC_VERSION:-4.5.0}
       - DB_USER=root
       - DB_PASS=password
       - DB_NAME=wordpress_test
