@@ -209,6 +209,11 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 	// Publish the product
 	await expect(page).toClick('#publish');
 	await page.waitForSelector('.updated.notice', {text:'Product published.'});
+
+	// Get the product ID
+	const groupedPostId = await page.$( '#post_ID' );
+	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
+	return groupedPostIdValue;
 };
 
 /**
