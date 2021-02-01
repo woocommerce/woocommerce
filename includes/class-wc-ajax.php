@@ -1302,7 +1302,7 @@ class WC_AJAX {
 			/**
 			 * Fires after order items are removed.
 			 *
-			 * @since 4.9.0
+			 * @since 5.1.0
 			 *
 			 * @param int $item_id WC item ID.
 			 * @param WC_Order_Item|false $item As returned by $order->get_item( $item_id ).
