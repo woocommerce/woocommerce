@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, selectOptionInSelect2 } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2 } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -25,6 +25,20 @@ const verifyAndPublish = async () => {
 	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
 };
 
+/**
+ * Wait for primary button to be enabled and click.
+ *
+ * @param waitForNetworkIdle - Wait for network idle after click
+ * @returns {Promise<void>}
+ */
+const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	await page.click( 'button.is-primary' );
+	if ( waitForNetworkIdle ) {
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+	}
+};
 /**
  * Complete onboarding wizard.
  */
@@ -88,15 +102,7 @@ const completeOnboardingWizard = async () => {
 	await expect( page ).toFill( '.components-text-control__input', config.get( 'onboardingwizard.industry' ) );
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "What type of products will be listed?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	await waitAndClickPrimary();
 
 	// Product types section
 
@@ -110,15 +116,7 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Tell us about your business" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	await waitAndClickPrimary();
 
 	// Business Details section
 
@@ -136,48 +134,15 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-select-control__control' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Query for the extensions toggles
-	const extensionsToggles = await page.$$( '.components-form-toggle__input' );
-	expect( extensionsToggles ).toHaveLength( 4 );
-
-	// Disable download of the onboarding suggested extensions
-	for ( let i = 0; i < extensionsToggles.length; i++ ) {
-		await extensionsToggles[i].click();
-	}
-
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	await waitAndClickPrimary( false );
 
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Theme" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+	// Skip installing extensions
+	await evalAndClick( '.components-checkbox-control__input' );
+	await waitAndClickPrimary();
 
 	// Theme section
-
-	// Wait for "Continue with my active theme" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-
-	await Promise.all( [
-		// Click on "Continue with my active theme" button to move to the next step
-		page.click( 'button.is-primary' ),
-
-		// Wait for "Enhance your store with WooCommerce Services" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
-
-	// Benefits section
-
-	// Wait for Benefits section to appear
-	await page.waitForSelector( '.woocommerce-profile-wizard__benefits' );
-
-	// Wait for "No thanks" button to become active
-	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
-	// Click on "No thanks" button to move to the next step
-	await page.click( 'button.is-secondary' );
+	await waitAndClickPrimary();
 
 	// End of onboarding wizard
 

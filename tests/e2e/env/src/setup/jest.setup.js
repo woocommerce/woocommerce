@@ -19,6 +19,21 @@ import {
  */
 const pageEvents = [];
 /**
+ * Set of logged messages that will only be logged once.
+ *
+ * @type {Object<string,object>}
+ */
+const loggedMessages = {
+	proxy: {
+		logged: false,
+		text: 'Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED',
+	},
+	http404: {
+		logged: false,
+		text: 'the server responded with a status of 404',
+	},
+};
+/**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
  * to the Puppeteer ConsoleMessage type, its value the corresponding function
@@ -140,16 +155,21 @@ function observeConsoleLogging() {
 			return;
 		}
 
-		// As of WordPress 5.3.2 in Chrome 79, navigating to the block editor
-		// (Posts > Add New) will display a console warning about
-		// non - unique IDs.
-		// See: https://core.trac.wordpress.org/ticket/23165
-		if ( text.includes( 'elements with non-unique id #_wpnonce' ) ) {
-			return;
-		}
-
 		const logFunction = OBSERVED_CONSOLE_MESSAGE_TYPES[ type ];
 
+		// Limit warnings on missing resources.
+		let previouslyLogged = false;
+		Object.keys( loggedMessages ).forEach( function( key ) {
+			if ( text.includes( loggedMessages[ key ].text ) ) {
+				if ( loggedMessages[ key ].logged ) {
+					previouslyLogged = true;
+				}
+				loggedMessages[ key ].logged = true;
+			}
+		} );
+		if ( previouslyLogged ) {
+			return;
+		}
 		// As of Puppeteer 1.6.1, `message.text()` wrongly returns an object of
 		// type JSHandle for error logging, instead of the expected string.
 		//

@@ -352,7 +352,7 @@ function wc_no_js() {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
-		})()
+		})();
 	</script>
 	<?php
 }
@@ -3568,7 +3568,12 @@ function wc_empty_cart_message() {
  */
 function wc_page_noindex() {
 	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		wp_no_robots();
+		// Adds support for WP 5.7.
+		if ( function_exists( 'wp_robots_no_robots' ) ) {
+			wp_robots_no_robots();
+		} else {
+			wp_no_robots();
+		}
 	}
 }
 add_action( 'wp_head', 'wc_page_noindex' );

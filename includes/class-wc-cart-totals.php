@@ -698,11 +698,11 @@ final class WC_Cart_Totals {
 	/**
 	 * Subtotals are costs before discounts.
 	 *
-	 * To prevent rounding issues we need to work with the inclusive price where possible.
-	 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+	 * To prevent rounding issues we need to work with the inclusive price where possible
+	 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would
 	 * be 8.325 leading to totals being 1p off.
 	 *
-	 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
+	 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated
 	 * afterwards.
 	 *
 	 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
