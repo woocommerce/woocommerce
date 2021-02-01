@@ -105,6 +105,8 @@ class D3Legend extends Component {
 							onFocus={ handleLegendHover }
 						>
 							<button
+								role="checkbox"
+								aria-checked={ row.visible ? 'true' : 'false' }
 								onClick={ handleLegendToggle }
 								id={ `woocommerce-legend-${ instanceId }__item-button__${ row.key }` }
 								disabled={

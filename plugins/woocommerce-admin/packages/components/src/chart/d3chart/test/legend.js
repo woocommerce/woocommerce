@@ -30,8 +30,8 @@ describe( 'Legend', () => {
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
 
-		expect( getByRole( 'button', { name: /Lorem/ } ) ).toBeEnabled();
-		expect( getByRole( 'button', { name: /Ipsum/ } ) ).toBeEnabled();
+		expect( getByRole( 'checkbox', { name: /Lorem/ } ) ).toBeEnabled();
+		expect( getByRole( 'checkbox', { name: /Ipsum/ } ) ).toBeEnabled();
 	} );
 
 	test( 'should prevent toggling off of last active dataset', () => {
@@ -43,7 +43,7 @@ describe( 'Legend', () => {
 			<D3Legend colorScheme={ colorScheme } data={ data } />
 		);
 
-		expect( getByRole( 'button', { name: /Lorem/ } ) ).toBeDisabled();
-		expect( getByRole( 'button', { name: /Ipsum/ } ) ).toBeEnabled();
+		expect( getByRole( 'checkbox', { name: /Lorem/ } ) ).toBeDisabled();
+		expect( getByRole( 'checkbox', { name: /Ipsum/ } ) ).toBeEnabled();
 	} );
 } );
