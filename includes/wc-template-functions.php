@@ -3569,7 +3569,7 @@ function wc_empty_cart_message() {
  */
 function wc_page_noindex() {
 	// wp_no_robots is deprecated since WP 5.7.
-	if ( ! function_exists( 'wp_robots_no_robots' ) ) {
+	if ( function_exists( 'wp_robots_no_robots' ) ) {
 		return;
 	}
 
