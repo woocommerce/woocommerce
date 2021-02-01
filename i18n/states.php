@@ -1536,7 +1536,7 @@ return array(
 		'RSVO' => _x( 'Vojvodina', 'district', 'woocommerce' ),
 	),
 	'SE' => array(),
-	'UA' => array( // Ukraine districts. Ref: https://www.iso.org/obp/ui/#iso:code:3166:UA
+	'UA' => array( // Ukraine districts. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:UA, https://www.iso.org/obp/ui/#iso:code:3166:UA.
 		'UA-43' => __( 'Avtonomna Respublika Krym', 'woocommerce' ),
 		'UA-71' => __( 'Cherkaska oblast', 'woocommerce' ),
 		'UA-74' => __( 'Chernihivska oblast', 'woocommerce' ),
