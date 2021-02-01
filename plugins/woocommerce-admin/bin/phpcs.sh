@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
+PHP_FILES_CHANGED=""
 
-if [[ ${RUN_PHPCS} == 1 ]]; then
-	CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $TRAVIS_COMMIT_RANGE | grep \\\\.php | awk '{print}' ORS=' '`
+for FILE in $(echo $CHANGED_FILES | tr ',' '\n')
+do
+	if [[ $FILE =~ ".php" ]]; then
+		PHP_FILES_CHANGED += "$FILE,"
+	fi	
+done
 
-	if [ "$CHANGED_FILES" != "" ]; then
-		echo "Running Code Sniffer."
-		cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/"
-		./vendor/bin/phpcs --encoding=utf-8 -n -p $CHANGED_FILES
-	fi
+if [ "$PHP_FILES_CHANGED" != "" ]; then
+	composer install
+	echo "Running Code Sniffer."
+	./vendor/bin/phpcs --encoding=utf-8 -n -p $PHP_FILES_CHANGED
+else
+	echo "No changed files detected, sniffer not run."
 fi
+

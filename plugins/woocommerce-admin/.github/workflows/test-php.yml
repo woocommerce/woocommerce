@@ -1,0 +1,69 @@
+name: Run PHP unit tests
+on: [pull_request]
+
+jobs:
+    test-php:
+        env:
+            WP_CORE_DIR: '/tmp/wordpress'
+            COMPOSER_DEV: 1
+
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['7.1', '7.2', '7.3']
+                wordpress: ['5.3', '5.6']
+                woocommerce: ['4.8.0', '4.9.1']
+                phpunit: ['7.5.20']
+                composer: ['2.0.6']
+                include:
+                    - php: '7.0'
+                      wordpress: '5.5'
+                      woocommerce: 'latest'
+                      phpunit: '6.5.9'
+                      composer: '1.10.19'
+                    - php: '7.0'
+                      wordpress: '5.6'
+                      woocommerce: '4.9.1'
+                      phpunit: '6.5.9'
+                      composer: '2.0.6'
+                    - php: '7.3'
+                      wordpress: '5.6'
+                      woocommerce: '4.7.0'
+                      phpunit: '6.5.9'
+                      composer: '1.10.19'
+        steps:
+            - name: Cancel Previous Runs
+              uses: styfle/cancel-workflow-action@0.7.0
+              with:
+                  access_token: ${{ github.token }}
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Setup PHP
+              uses: shivammathur/setup-php@2.9.0
+              with:
+                  php-version: ${{matrix.php}}
+                  tools: phpunit:${{matrix.phpunit}}
+                  extensions: mysqli
+            - name: Setup Node.js
+              uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'
+            - name: Set up the tests
+              env:
+                  WP_VERSION: ${{matrix.wordpress}}
+                  WC_VERSION: ${{matrix.woocommerce}}
+                  PHP_UNIT: ${{matrix.phpunit}}
+                  COMPOSER_VERSION: ${{matrix.composer}}
+              run: |
+                  sudo /etc/init.d/mysql start
+                  bash bin/ci/gh-install-wp-tests.sh wc_admin_test root 'root' localhost
+                  cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/"
+                  npm run build:feature-config	
+                  composer install --no-dev
+                  node --version
+                  npm --version
+                  timedatectl
+            - name: Run the PHP unit tests
+              run: bin/phpunit.sh
+              shell: bash
