@@ -5,6 +5,10 @@
 .has-woocommerce-navigation {
 	margin-top: -$admin-bar-height;
 
+	.screen-reader-shortcut:focus {
+		top: 7px;
+	}
+
 	#wpadminbar,
 	#adminmenuwrap,
 	#adminmenuback {
