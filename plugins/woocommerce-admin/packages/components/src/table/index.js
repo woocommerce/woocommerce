@@ -166,7 +166,9 @@ class TableCard extends Component {
 		return (
 			<Card className={ classes }>
 				<CardHeader>
-					<Text variant="title.small">{ title }</Text>
+					<Text variant="title.small" as="h2">
+						{ title }
+					</Text>
 					<div className="woocommerce-table__actions">
 						{ actions }
 					</div>

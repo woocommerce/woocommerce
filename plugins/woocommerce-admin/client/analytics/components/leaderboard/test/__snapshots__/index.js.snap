@@ -8,7 +8,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
     <div
       class="components-flex components-card__header is-size-medium e1q7k77g1 css-aafj2m-Flex-HeaderUI eboqfv50"
     >
-      <p
+      <h2
         class="css-1ahfdc3-Text e15wbhsk0"
       />
       <div
