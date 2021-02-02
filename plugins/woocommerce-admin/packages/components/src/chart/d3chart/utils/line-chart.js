@@ -170,6 +170,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'cx', ( d ) => scales.xScale( moment( d.date ).toDate() ) )
 			.attr( 'cy', ( d ) => scales.yScale( d.value ) )
 			.attr( 'tabindex', '0' )
+			.attr( 'role', 'graphics-symbol' )
 			.attr( 'aria-label', ( d ) => {
 				const label = formats.screenReaderFormat(
 					d.date instanceof Date ? d.date : moment( d.date ).toDate()
