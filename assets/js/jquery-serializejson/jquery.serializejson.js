@@ -131,7 +131,7 @@
 
       if (opts.typeFunctions && type && opts.typeFunctions[type]) { // use a type if available
         parsedVal = opts.typeFunctions[type](valStr);
-      } else if (opts.parseNumbers  && f.isNumeric(valStr)) { // auto: number
+      } else if (opts.parseNumbers  && (! isNaN(valStr) && isFinite(valStr))) { // auto: number
         parsedVal = Number(valStr);
       } else if (opts.parseBooleans && (valStr === "true" || valStr === "false")) { // auto: boolean
         parsedVal = (valStr === "true");
@@ -201,17 +201,17 @@
     // depending on the options to skip values by name or type, and the data-skip-falsy attribute.
     shouldSkipFalsy: function($form, name, nameWithNoType, type, opts) {
       var f = $.serializeJSON;
-      
+
       var skipFromDataAttr = f.attrFromInputWithName($form, name, 'data-skip-falsy');
       if (skipFromDataAttr != null) {
-        return skipFromDataAttr !== 'false'; // any value is true, except if explicitly using 'false' 
+        return skipFromDataAttr !== 'false'; // any value is true, except if explicitly using 'false'
       }
 
       var optForFields = opts.skipFalsyValuesForFields;
       if (optForFields && (optForFields.indexOf(nameWithNoType) !== -1 || optForFields.indexOf(name) !== -1)) {
         return true;
       }
-      
+
       var optForTypes = opts.skipFalsyValuesForTypes;
       if (type == null) type = 'string'; // assume fields with no type are targeted as string
       if (optForTypes && optForTypes.indexOf(type) !== -1) {
@@ -314,12 +314,12 @@
 
         // '' is used to push values into the array "array[]"
         if (nextKey === '') {
-          if (f.isUndefined(o[key]) || !$.isArray(o[key])) {
+          if (f.isUndefined(o[key]) || !Array.isArray(o[key])) {
             o[key] = []; // define (or override) as array to push values
           }
         } else {
           if (opts.useIntKeysAsArrayIndex && f.isValidArrayIndex(nextKey)) { // if 1, 2, 3 ... then use an array, where nextKey is the index
-            if (f.isUndefined(o[key]) || !$.isArray(o[key])) {
+            if (f.isUndefined(o[key]) || !Array.isArray(o[key])) {
               o[key] = []; // define (or override) as array, to insert values using int keys as array indexes
             }
           } else { // for anything else, use an object, where nextKey is going to be the attribute name
