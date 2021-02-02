@@ -428,6 +428,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		return apply_filters( 'woocommerce_downloadable_products_settings', $settings );
 	}
+
+	/**
+	 * Save settings and trigger the 'woocommerce_update_options_'.id action.
+	 */
+	public function save() {
+		$this->save_settings_for_current_section();
+
+		// Any time we update the product settings, we should flush the term count cache.
+		$tools_controller = WC()->get_instance_of( WC_REST_System_Status_Tools_Controller::class );
+		$tools_controller->execute_tool( 'recount_terms' );
+
+		$this->do_update_options_action();
+	}
 }
 
 return new WC_Settings_Products();
