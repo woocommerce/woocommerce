@@ -1,15 +1,11 @@
 /**
  * External dependencies
  */
-import { useEffect, useState, useRef, useCallback } from '@wordpress/element';
+import { useEffect, useRef, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	useEditorContext,
-	usePaymentMethodDataContext,
-} from '@woocommerce/base-context';
+import { usePaymentMethodDataContext } from '@woocommerce/base-context';
 import RadioControl from '@woocommerce/base-components/radio-control';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
-import PropTypes from 'prop-types';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
@@ -88,14 +84,15 @@ const getDefaultPaymentMethodOptions = (
 	};
 };
 
-const SavedPaymentMethodOptions = ( { onChange } ) => {
-	const { isEditor } = useEditorContext();
+const SavedPaymentMethodOptions = () => {
 	const {
 		setPaymentStatus,
 		customerPaymentMethods,
+		activePaymentMethod,
 		setActivePaymentMethod,
+		activeSavedToken,
+		setActiveSavedToken,
 	} = usePaymentMethodDataContext();
-	const [ selectedToken, setSelectedToken ] = useState( '' );
 	const standardMethods = getPaymentMethods();
 
 	/**
@@ -109,10 +106,9 @@ const SavedPaymentMethodOptions = ( { onChange } ) => {
 			if ( token === '0' ) {
 				setPaymentStatus().started();
 			}
-			setSelectedToken( token );
-			onChange( token );
+			setActiveSavedToken( token );
 		},
-		[ onChange, setSelectedToken, setPaymentStatus ]
+		[ setActiveSavedToken, setPaymentStatus ]
 	);
 
 	useEffect( () => {
@@ -133,7 +129,11 @@ const SavedPaymentMethodOptions = ( { onChange } ) => {
 									setActivePaymentMethod,
 									setPaymentStatus
 							  );
-					if ( paymentMethod.is_default && selectedToken === '' ) {
+					if (
+						! activePaymentMethod &&
+						paymentMethod.is_default &&
+						activeSavedToken === ''
+					) {
 						updateToken( paymentMethod.tokenId + '' );
 						option.onChange( paymentMethod.tokenId );
 					}
@@ -145,31 +145,21 @@ const SavedPaymentMethodOptions = ( { onChange } ) => {
 	}, [
 		customerPaymentMethods,
 		updateToken,
-		selectedToken,
+		activeSavedToken,
+		activePaymentMethod,
 		setActivePaymentMethod,
 		setPaymentStatus,
 		standardMethods,
 	] );
 
-	// In the editor, show `Use a new payment method` option as selected.
-	const selectedOption = isEditor ? '0' : selectedToken + '';
-	const newPaymentMethodOption = {
-		value: '0',
-		label: __( 'Use a new payment method', 'woo-gutenberg-product-blocks' ),
-		name: `wc-saved-payment-method-token-new`,
-	};
 	return currentOptions.current.length > 0 ? (
 		<RadioControl
 			id={ 'wc-payment-method-saved-tokens' }
-			selected={ selectedOption }
+			selected={ activeSavedToken }
 			onChange={ updateToken }
-			options={ [ ...currentOptions.current, newPaymentMethodOption ] }
+			options={ currentOptions.current }
 		/>
 	) : null;
-};
-
-SavedPaymentMethodOptions.propTypes = {
-	onChange: PropTypes.func.isRequired,
 };
 
 export default SavedPaymentMethodOptions;

@@ -16,17 +16,16 @@ import PropTypes from 'prop-types';
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 
 /**
- * Component used to render the contents of a payment method tab.
+ * Component used to render the contents of a payment method card.
  *
  * @param {Object}  props                Incoming props for the component.
  * @param {boolean} props.showSaveOption Whether that payment method allows saving
- *                                       the data for future purchases and should
- *                                       display the checkbox to do so.
- * @param {Object}  props.children       Content of the payment method tab.
+ *                                       the data for future purchases.
+ * @param {Object}  props.children       Content of the payment method card.
  *
  * @return {*} The rendered component.
  */
-const PaymentMethodTab = ( { children, showSaveOption } ) => {
+const PaymentMethodCard = ( { children, showSaveOption } ) => {
 	const { isEditor } = useEditorContext();
 	const {
 		shouldSavePayment,
@@ -54,9 +53,9 @@ const PaymentMethodTab = ( { children, showSaveOption } ) => {
 	);
 };
 
-PaymentMethodTab.propTypes = {
+PaymentMethodCard.propTypes = {
 	showSaveOption: PropTypes.bool,
 	children: PropTypes.node,
 };
 
-export default PaymentMethodTab;
+export default PaymentMethodCard;

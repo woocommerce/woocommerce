@@ -131,7 +131,11 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		isFailResponse,
 		noticeContexts,
 	} = useEmitResponse();
+	// The active payment method - e.g. Stripe CC or BACS.
 	const [ activePaymentMethod, setActive ] = useState( '' );
+	// If a previously saved payment method is active, the token for that method.
+	// For example, a for a Stripe CC card saved to user account.
+	const [ activeSavedToken, setActiveSavedToken ] = useState( '' );
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
 
@@ -445,6 +449,8 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		errorMessage: paymentData.errorMessage,
 		activePaymentMethod,
 		setActivePaymentMethod,
+		activeSavedToken,
+		setActiveSavedToken,
 		onPaymentProcessing,
 		customerPaymentMethods,
 		paymentMethods: paymentData.paymentMethods,

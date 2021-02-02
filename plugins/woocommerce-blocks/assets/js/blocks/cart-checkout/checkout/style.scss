@@ -14,16 +14,15 @@
 
 .wc-block-checkout__actions {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	flex-direction: column;
 	margin: 0 0 $gap-large*2;
-	padding: 0 0 0 $gap-larger;
+	padding-left: 9px;
 
 	.wc-block-components-checkout-place-order-button {
 		width: 50%;
 		padding: 1em;
 		height: auto;
-		margin-left: auto;
+		margin-bottom: 44px;
 
 		.wc-block-components-button__text {
 			line-height: 24px;
@@ -150,4 +149,8 @@
 	.wc-block-checkout__actions {
 		padding-right: 36px;
 	}
+}
+
+.wc-block-checkout__actions {
+	margin-top: $gap;
 }

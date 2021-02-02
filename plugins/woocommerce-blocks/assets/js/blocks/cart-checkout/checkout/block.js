@@ -141,6 +141,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						allowCreateAccount={ allowCreateAccount }
 					/>
 					<div className="wc-block-checkout__actions">
+						<PlaceOrderButton />
 						{ attributes.showReturnToCart && (
 							<ReturnToCartButton
 								link={ getSetting(
@@ -149,7 +150,6 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 								) }
 							/>
 						) }
-						<PlaceOrderButton />
 					</div>
 					{ attributes.showPolicyLinks && <Policies /> }
 				</Main>
