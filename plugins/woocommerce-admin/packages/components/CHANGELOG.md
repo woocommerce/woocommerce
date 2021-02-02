@@ -9,6 +9,7 @@
 -   Allow single-selection support to `<Search />`.
 -   Improve handling of `multiple` and `inlineTags` in `<SelectControl />`.
 -   Deprecate use of `<Card>` in favor of the `<Card>` component in `@wordpress/components`.
+-   Fixing screen reader text being undefined for report `<Table>`
 
 # 5.1.2
 

@@ -214,14 +214,14 @@ class Table extends Component {
 													'Sort by %s in ascending order',
 													'woocommerce-admin'
 												),
-												screenReaderLabel
+												screenReaderLabel || label
 										  )
 										: sprintf(
 												__(
 													'Sort by %s in descending order',
 													'woocommerce-admin'
 												),
-												screenReaderLabel
+												screenReaderLabel || label
 										  );
 
 								const textLabel = (
