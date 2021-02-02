@@ -53,7 +53,7 @@
 				.on( 'click', css_class, function( evt ) {
 					evt.preventDefault();
 					if ( ! document.queryCommandSupported( 'copy' ) ) {
-						$( css_class ).parent().find( 'input' ).focus().trigger( 'select' );
+						$( css_class ).parent().find( 'input' ).focus().select();
 						$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
 					} else {
 						$( '#copy-error' ).text( '' );
@@ -72,7 +72,7 @@
 					} ).focus();
 				} )
 				.on( 'aftercopyerror', css_class, function() {
-					$( css_class ).parent().find( 'input' ).focus().trigger( 'select' );
+					$( css_class ).parent().find( 'input' ).focus().select();
 					$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
 				} );
 		},
