@@ -68,7 +68,7 @@ jQuery( function ( $ ) {
 
 			try {
 				$( '#debug-report' ).slideDown();
-				$( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).trigger( 'focus' ).trigger( 'select' );
+				$( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).focus().trigger( 'select' );
 				$( this ).fadeOut();
 				return false;
 			} catch ( e ) {
@@ -100,7 +100,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).trigger( 'focus' );
+			}).focus();
 		},
 
 		/**
@@ -108,7 +108,7 @@ jQuery( function ( $ ) {
 		 */
 		copyFail: function() {
 			$( '.copy-error' ).removeClass( 'hidden' );
-			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).trigger( 'select' );
+			$( '#debug-report' ).find( 'textarea' ).focus().trigger( 'select' );
 		}
 	};
 

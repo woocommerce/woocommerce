@@ -53,7 +53,7 @@
 				.on( 'click', css_class, function( evt ) {
 					evt.preventDefault();
 					if ( ! document.queryCommandSupported( 'copy' ) ) {
-						$( css_class ).parent().find( 'input' ).trigger( 'focus' ).trigger( 'select' );
+						$( css_class ).parent().find( 'input' ).focus().trigger( 'select' );
 						$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
 					} else {
 						$( '#copy-error' ).text( '' );
@@ -69,10 +69,10 @@
 						'fadeIn':     50,
 						'fadeOut':    50,
 						'delay':      0
-					} ).trigger( 'focus' );
+					} ).focus();
 				} )
 				.on( 'aftercopyerror', css_class, function() {
-					$( css_class ).parent().find( 'input' ).trigger( 'focus' ).trigger( 'select' );
+					$( css_class ).parent().find( 'input' ).focus().trigger( 'select' );
 					$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
 				} );
 		},

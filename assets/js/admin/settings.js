@@ -126,7 +126,7 @@
 			var moveBtn = $( this ),
 				$row    = moveBtn.closest( 'tr' );
 
-			moveBtn.trigger( 'focus' );
+			moveBtn.focus();
 
 			var isMoveUp = moveBtn.is( '.wc-move-up' ),
 				isMoveDown = moveBtn.is( '.wc-move-down' );
@@ -147,7 +147,7 @@
 				}
 			}
 
-			moveBtn.trigger( 'focus' ); // Re-focus after the container was moved.
+			moveBtn.focus(); // Re-focus after the container was moved.
 			moveBtn.closest( 'table' ).trigger( 'updateMoveButtons' );
 		} );
 

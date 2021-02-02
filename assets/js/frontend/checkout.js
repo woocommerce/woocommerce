@@ -582,7 +582,7 @@ jQuery( function( $ ) {
 		},
 		show_coupon_form: function() {
 			$( '.checkout_coupon' ).slideToggle( 400, function() {
-				$( '.checkout_coupon' ).find( ':input:eq(0)' ).trigger( 'focus' );
+				$( '.checkout_coupon' ).find( ':input:eq(0)' ).focus();
 			});
 			return false;
 		},
