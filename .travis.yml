@@ -19,6 +19,7 @@ php:
   - "7.2"
   - "7.3"
   - "7.4"
+  - "8.0"
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -35,9 +36,9 @@ jobs:
      - npm install
      - composer install --no-dev
     script:
-      - travis_retry npm run build:assets
-      - travis_retry npm run docker:up
-      - travis_retry npm run test:e2e
+      - npm run build:assets
+      - npm run docker:up
+      - npm run test:e2e
     after_script:
       - npm run docker:down
   - name: "WP Nightly"
@@ -45,10 +46,10 @@ jobs:
     env: WP_VERSION=nightly WP_MULTISITE=0
   - name: "WP Latest - 1"
     php: "7.2"
-    env: WP_VERSION=5.4 WP_MULTISITE=0
+    env: WP_VERSION=5.5 WP_MULTISITE=0
   - name: "WP Latest - 2"
     php: "7.2"
-    env: WP_VERSION=5.3 WP_MULTISITE=0
+    env: WP_VERSION=5.4 WP_MULTISITE=0
   - name: "Code Standards"
     php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
@@ -87,6 +88,14 @@ install:
       echo "xdebug.ini does not exist"
     fi
   - composer install
+  - |
+    if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+      curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+      unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+      composer bin phpunit config --unset platform
+      composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+      composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+    fi
   - |
     # Install WP Test suite:
     if [[ ! -z "$WP_VERSION" ]]; then

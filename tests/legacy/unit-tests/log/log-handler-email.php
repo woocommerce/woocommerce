@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Tests_Log_Handler_Email file.
+ *
+ * @package WooCommerce\Tests
+ */
 
 /**
  * Class WC_Tests_Log_Handler_Email
@@ -7,12 +12,18 @@
  */
 class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
-	function setUp() {
+	/**
+	 * Test setup.
+	 */
+	public function setUp() {
 		parent::setUp();
 		reset_phpmailer_instance();
 	}
 
-	function tearDown() {
+	/**
+	 * Test teardown.
+	 */
+	public function tearDown() {
 		reset_phpmailer_instance();
 		parent::tearDown();
 	}
@@ -37,9 +48,9 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				'You have received the following WooCommerce log messages:'
 				. PHP_EOL
 				. PHP_EOL
-				. date( 'c', $time ) . ' EMERGENCY msg_emergency'
+				. gmdate( 'c', $time ) . ' EMERGENCY msg_emergency'
 				. PHP_EOL
-				. date( 'c', $time ) . ' EMERGENCY msg_emergency 2'
+				. gmdate( 'c', $time ) . ' EMERGENCY msg_emergency 2'
 				. PHP_EOL
 				. PHP_EOL
 				. "Visit {$site_name} admin area:"
@@ -47,7 +58,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 0 )->body
+			$this->normalize_eol( $mailer->get_sent( 0 )->body )
 		);
 		$this->assertEquals(
 			"[{$site_name}] EMERGENCY: 2 WooCommerce log messages",
@@ -62,7 +73,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				'You have received the following WooCommerce log message:'
 				. PHP_EOL
 				. PHP_EOL
-				. date( 'c', $time ) . ' EMERGENCY msg_emergency'
+				. gmdate( 'c', $time ) . ' EMERGENCY msg_emergency'
 				. PHP_EOL
 				. PHP_EOL
 				. "Visit {$site_name} admin area:"
@@ -70,11 +81,19 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 1 )->body
+			$this->normalize_eol( $mailer->get_sent( 1 )->body )
 		);
-
 	}
 
+	/**
+	 * Replace network-style end of lines with PHP-style end of lines in a string.
+	 *
+	 * @param string $string The string to do the replacements in.
+	 * @return string The string once the replacement has been done.
+	 */
+	private function normalize_eol( $string ) {
+		return str_replace( "\r\n", PHP_EOL, $string );
+	}
 
 	/**
 	 * Test email subject
@@ -160,7 +179,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$handler->handle( time(), 'info', '', array() );
 		$handler->send_log_email();
 
-		// Info should not be handled, get_sent is false
+		// Info should not be handled, get_sent is false.
 		$this->assertFalse( $mailer->get_sent( 0 ) );
 
 		$handler->handle( time(), 'notice', '', array() );
@@ -180,7 +199,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$handler->handle( time(), 'info', '', array() );
 		$handler->send_log_email();
 
-		// Info should not be handled, get_sent is false
+		// Info should not be handled, get_sent is false.
 		$this->assertFalse( $mailer->get_sent( 0 ) );
 
 		$handler->set_threshold( 'info' );
@@ -215,7 +234,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				'You have received the following WooCommerce log message:'
 				. PHP_EOL
 				. PHP_EOL
-				. date( 'c', $time ) . ' EMERGENCY message 1'
+				. gmdate( 'c', $time ) . ' EMERGENCY message 1'
 				. PHP_EOL
 				. PHP_EOL
 				. "Visit {$site_name} admin area:"
@@ -223,7 +242,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 0 )->body
+			$this->normalize_eol( $mailer->get_sent( 0 )->body )
 		);
 
 		$this->assertEquals(
@@ -231,7 +250,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				'You have received the following WooCommerce log message:'
 				. PHP_EOL
 				. PHP_EOL
-				. date( 'c', $time ) . ' EMERGENCY message 2'
+				. gmdate( 'c', $time ) . ' EMERGENCY message 2'
 				. PHP_EOL
 				. PHP_EOL
 				. "Visit {$site_name} admin area:"
@@ -239,9 +258,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 				. admin_url()
 				. PHP_EOL
 			),
-			$mailer->get_sent( 1 )->body
+			$this->normalize_eol( $mailer->get_sent( 1 )->body )
 		);
 	}
-
-
 }
