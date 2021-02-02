@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { usePaymentMethods } from '@woocommerce/base-hooks';
-import { useCallback, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import Label from '@woocommerce/base-components/label';
+import { usePaymentMethodDataContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -18,15 +20,7 @@ import SavedPaymentMethodOptions from './saved-payment-method-options';
  */
 const PaymentMethods = () => {
 	const { isInitialized, paymentMethods } = usePaymentMethods();
-	const [ showNewPaymentMethods, setShowNewPaymentMethods ] = useState(
-		true
-	);
-	const onChange = useCallback(
-		( token ) => {
-			setShowNewPaymentMethods( token === '0' );
-		},
-		[ setShowNewPaymentMethods ]
-	);
+	const { customerPaymentMethods } = usePaymentMethodDataContext();
 
 	if ( isInitialized && Object.keys( paymentMethods ).length === 0 ) {
 		return <NoPaymentMethods />;
@@ -34,8 +28,26 @@ const PaymentMethods = () => {
 
 	return (
 		<>
-			<SavedPaymentMethodOptions onChange={ onChange } />
-			{ showNewPaymentMethods && <PaymentMethodOptions /> }
+			<SavedPaymentMethodOptions />
+			{ Object.keys( customerPaymentMethods ).length > 0 && (
+				<Label
+					label={ __(
+						'Use another payment method.',
+						'woo-gutenberg-products-block'
+					) }
+					screenReaderLabel={ __(
+						'Other available payment methods',
+						'woo-gutenberg-products-block'
+					) }
+					wrapperElement="p"
+					wrapperProps={ {
+						className: [
+							'wc-block-components-checkout-step__description wc-block-components-checkout-step__description-payments-aligned',
+						],
+					} }
+				/>
+			) }
+			<PaymentMethodOptions />
 		</>
 	);
 };

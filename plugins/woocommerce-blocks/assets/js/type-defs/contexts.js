@@ -134,6 +134,9 @@
  * @property {string}                      activePaymentMethod              The active payment method slug.
  * @property {function(string)}            setActivePaymentMethod           A function for setting the active payment
  *                                                                          method.
+ * @property {string}                      activeSavedToken                 Current active token.
+ * @property {function(string):undefined}  setActiveSavedToken              A function for setting the active payment
+ *                                                                          method token.
  * @property {SavedCustomerPaymentMethods} customerPaymentMethods           Returns the customer payment for the
  *                                                                          customer if it exists.
  * @property {Object}                      paymentMethods                   Registered payment methods.

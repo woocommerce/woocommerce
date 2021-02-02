@@ -94,8 +94,4 @@
 		left: -$gap-larger/2;
 		top: 0;
 	}
-
-	&:last-of-type .wc-block-components-checkout-step__container::after {
-		content: none;
-	}
 }

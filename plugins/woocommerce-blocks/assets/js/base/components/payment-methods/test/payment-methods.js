@@ -6,26 +6,36 @@ import {
 	registerPaymentMethod,
 	__experimentalDeRegisterPaymentMethod,
 } from '@woocommerce/blocks-registry';
-import { PaymentMethodDataProvider } from '@woocommerce/base-context';
+import {
+	PaymentMethodDataProvider,
+	usePaymentMethodDataContext,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
 import PaymentMethods from '../payment-methods';
 
-jest.mock( '../payment-method-options', () => () => (
-	<span>Payment method options</span>
-) );
-jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => (
+jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
+	return (
+		<>
+			<span>Saved payment method options</span>
+			<button onClick={ () => onChange( '0' ) }>Select saved</button>
+		</>
+	);
+} );
+
+jest.mock( '../../radio-control-accordion', () => ( { onChange } ) => (
 	<>
-		<span>Saved payment method options</span>
-		<button onClick={ () => onChange( '1' ) }>Select saved</button>
-		<button onClick={ () => onChange( '0' ) }>Select not saved</button>
+		<span>Payment method options</span>
+		<button onClick={ () => onChange( 'stripe' ) }>
+			Select new payment
+		</button>
 	</>
 ) );
 
 const registerMockPaymentMethods = () => {
-	[ 'cheque' ].forEach( ( name ) => {
+	[ 'stripe' ].forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
 			label: name,
@@ -33,16 +43,18 @@ const registerMockPaymentMethods = () => {
 			edit: <div>A payment method</div>,
 			icons: null,
 			canMakePayment: () => true,
-			ariaLabel: name,
 			supports: {
+				showSavedCards: true,
+				showSaveOption: true,
 				features: [ 'products' ],
 			},
+			ariaLabel: name,
 		} );
 	} );
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'cheque' ].forEach( ( name ) => {
+	[ 'stripe' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
 };
@@ -65,11 +77,27 @@ describe( 'PaymentMethods', () => {
 		} );
 	} );
 
-	test( 'should hide/show PaymentMethodOptions when a saved payment method is checked/unchecked', async () => {
+	test( 'selecting new payment method', async () => {
+		const ShowActivePaymentMethod = () => {
+			const {
+				activePaymentMethod,
+				activeSavedToken,
+			} = usePaymentMethodDataContext();
+			return (
+				<>
+					<div>
+						{ 'Active Payment Method: ' + activePaymentMethod }
+					</div>
+					<div>{ 'Active Saved Token: ' + activeSavedToken }</div>
+				</>
+			);
+		};
+
 		registerMockPaymentMethods();
 		render(
 			<PaymentMethodDataProvider>
 				<PaymentMethods />
+				<ShowActivePaymentMethod />
 			</PaymentMethodDataProvider>
 		);
 
@@ -82,33 +110,21 @@ describe( 'PaymentMethods', () => {
 			);
 			expect( savedPaymentMethodOptions ).not.toBeNull();
 			expect( paymentMethodOptions ).not.toBeNull();
+			const savedToken = screen.queryByText(
+				/Active Payment Method: stripe/
+			);
+			expect( savedToken ).toBeNull();
 		} );
 
-		fireEvent.click( screen.getByText( 'Select saved' ) );
+		fireEvent.click( screen.getByText( 'Select new payment' ) );
 
 		await waitFor( () => {
-			const savedPaymentMethodOptions = screen.queryByText(
-				/Saved payment method options/
+			const activePaymentMethod = screen.queryByText(
+				/Active Payment Method: stripe/
 			);
-			const paymentMethodOptions = screen.queryByText(
-				/Payment method options/
-			);
-			expect( savedPaymentMethodOptions ).not.toBeNull();
-			expect( paymentMethodOptions ).toBeNull();
+			expect( activePaymentMethod ).not.toBeNull();
 		} );
 
-		fireEvent.click( screen.getByText( 'Select not saved' ) );
-
-		await waitFor( () => {
-			const savedPaymentMethodOptions = screen.queryByText(
-				/Saved payment method options/
-			);
-			const paymentMethodOptions = screen.queryByText(
-				/Payment method options/
-			);
-			expect( savedPaymentMethodOptions ).not.toBeNull();
-			expect( paymentMethodOptions ).not.toBeNull();
-		} );
 		resetMockPaymentMethods();
 	} );
 } );
