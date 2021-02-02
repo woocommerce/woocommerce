@@ -250,7 +250,7 @@
 		var shifted    = false;
 		var hasFocus   = false;
 
-		$( document.body ).bind( 'keyup keydown', function( e ) {
+		$( document.body ).on( 'keyup keydown', function( e ) {
 			shifted    = e.shiftKey;
 			controlled = e.ctrlKey || e.metaKey;
 		});

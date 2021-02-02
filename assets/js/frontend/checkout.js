@@ -16,8 +16,8 @@ jQuery( function( $ ) {
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
 		init: function() {
-			$( document.body ).bind( 'update_checkout', this.update_checkout );
-			$( document.body ).bind( 'init_checkout', this.init_checkout );
+			$( document.body ).on( 'update_checkout', this.update_checkout );
+			$( document.body ).on( 'init_checkout', this.init_checkout );
 
 			// Payment methods
 			this.$checkout_form.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
