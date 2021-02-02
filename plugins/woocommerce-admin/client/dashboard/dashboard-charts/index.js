@@ -73,6 +73,7 @@ const renderIntervalSelector = ( { chartInterval, setInterval, query } ) => {
 				value: allowedInterval,
 				label: intervalLabels[ allowedInterval ],
 			} ) ) }
+			aria-label="Chart period"
 			onChange={ setInterval }
 		/>
 	);

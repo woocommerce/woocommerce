@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { Icon, wordpress } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { useSelect } from '@wordpress/data';
-import { useEffect } from 'react';
+import { useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { debounce } from 'lodash';
 
@@ -21,6 +21,9 @@ const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const siteUrl = getSetting( 'siteUrl', '' );
 	const isScrolled = useIsScrolled();
+	const [ isFolded, setIsFolded ] = useState(
+		document.body.classList.contains( false )
+	);
 	const navClasses = {
 		folded: 'is-wc-nav-folded',
 		expanded: 'is-wc-nav-expanded',
@@ -29,11 +32,13 @@ const Header = () => {
 	const foldNav = () => {
 		document.body.classList.add( navClasses.folded );
 		document.body.classList.remove( navClasses.expanded );
+		setIsFolded( true );
 	};
 
 	const expandNav = () => {
 		document.body.classList.remove( navClasses.folded );
 		document.body.classList.add( navClasses.expanded );
+		setIsFolded( false );
 	};
 
 	const toggleFolded = () => {
@@ -105,6 +110,9 @@ const Header = () => {
 			<Button
 				onClick={ () => toggleFolded() }
 				className="woocommerce-navigation-header__site-icon"
+				aria-label="Fold navigation"
+				role="switch"
+				aria-checked={ isFolded ? 'true' : 'false' }
 			>
 				{ buttonIcon }
 			</Button>
