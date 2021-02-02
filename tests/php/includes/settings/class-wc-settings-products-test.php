@@ -143,4 +143,30 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
 	}
+
+	/**
+	 * @testdox 'save' flushes the term count cache.
+	 */
+	public function test_save_does_recount_terms() {
+		// phpcs:disable Squiz.Commenting
+		$mock_tools_controller = new class() {
+			public $tool_executed;
+
+			public function execute_tool( $tool ) {
+				$this->tool_executed = $tool;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_class_mocks(
+			array(
+				'WC_REST_System_Status_Tools_Controller' => $mock_tools_controller,
+			)
+		);
+
+		$sut = new WC_Settings_Products();
+		$sut->save();
+
+		$this->assertEquals( 'recount_terms', $mock_tools_controller->tool_executed );
+	}
 }
