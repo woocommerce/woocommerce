@@ -171,7 +171,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Notice to deprecate legacy reports in favor of the newer analytics page. #28799
 * Tweak - Ability to create new tags for products when creating a product via the REST API. #28723
 * Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
-* Tweak - Use `wp_robots_no_robots()` when available to support WP 5.7. #28949
+* Tweak - Use `wp_robots_no_robots()` when available to support WP 5.7. #28993
 * Fix - Improves the logic for deleting variations when a product type is changed. #27137
 * Fix - Use 'setlocale' in 'wc_ascii_uasort_comparison' for compatibility with PHP 8. #27844
 * Fix - Normalize end of lines in log-handler-email tests for compatibility with PHP 8. #27844
@@ -186,6 +186,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Duplicate New Order emails being sent when changing order status. #28809
 * Fix - Add migration to fix existing product review count. #28814
 * Fix - Fixed issues with empty prices in PHP 8. #28900
+* Dev - Increased WordPress minimum version to 5.4 according to WooCommerce's L-2 support policy. #28977
 * Dev - Use a custom fork of PHPUnit 7 in PHP 8 to workaround compatibility issues. #27844
 * Dev - Introduced `woocommerce_activated_plugin` hook. #28698
 * Dev - Clean up the `WC_Shipping_Zone_Data_Store::read()` method, documenting the `woocommerce_shipping_zone_loaded` hook. #28801
