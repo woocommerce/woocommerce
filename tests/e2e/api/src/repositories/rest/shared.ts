@@ -15,6 +15,7 @@ import {
 	CreateFn,
 	ModelTransformer,
 	IgnorePropertyTransformation,
+	// @ts-ignore
 	ModelParentID,
 } from '../../framework';
 import {
