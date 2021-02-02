@@ -190,10 +190,10 @@ table.wc-block-cart-items {
 			}
 			.wc-block-cart-item__product {
 				grid-column-start: 2;
-				grid-column-end: 3;
+				grid-column-end: 4;
 				grid-row-start: 1;
 				justify-self: stretch;
-				padding-bottom: $gap;
+				padding: 0 $gap $gap 0;
 			}
 			.wc-block-cart-item__quantity {
 				grid-column-start: 1;
