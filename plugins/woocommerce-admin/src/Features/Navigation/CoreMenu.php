@@ -42,6 +42,8 @@ class CoreMenu {
 	 * Add registered admin settings as menu items.
 	 */
 	public static function get_setting_items() {
+		// Calling this method adds pages to the below tabs filter on non-settings pages.
+		\WC_Admin_Settings::get_settings_pages();
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
 		$menu_items = array();
