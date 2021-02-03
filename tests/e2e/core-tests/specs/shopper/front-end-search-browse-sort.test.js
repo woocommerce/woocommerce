@@ -69,6 +69,7 @@ const runSearchBrowseSortTest = () => {
 			// Go to the 1st product detail page
 			await shopper.goToProduct(groupedPostIdValue);
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await page.focus('span.posted_in > a');
 			await expect(page).toClick('span.posted_in > a', {text: clothing});
 			await uiUnblocked();
 
