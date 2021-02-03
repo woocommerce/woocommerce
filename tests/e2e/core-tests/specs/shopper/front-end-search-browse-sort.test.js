@@ -66,10 +66,7 @@ const runSearchBrowseSortTest = () => {
 		});
 
 		it('should let user browse products by categories', async () => {
-			// Go to the 1st product detail page
-			await shopper.goToProduct(groupedPostIdValue);
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await page.focus('span.posted_in > a');
+			// Click on the category name
 			await expect(page).toClick('span.posted_in > a', {text: clothing});
 			await uiUnblocked();
 
