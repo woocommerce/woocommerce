@@ -71,7 +71,7 @@
 		"@babel/plugin-proposal-class-properties": "7.12.1",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-env": "7.12.11",
-		"@octokit/graphql": "4.5.9",
+		"@octokit/graphql": "4.6.0",
 		"@storybook/addon-a11y": "6.0.28",
 		"@storybook/addon-actions": "6.0.28",
 		"@storybook/addon-docs": "6.0.28",
