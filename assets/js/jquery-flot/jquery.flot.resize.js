@@ -40,7 +40,7 @@ can just fix the size of their placeholders.
         }
 
         function bindEvents(plot, eventHolder) {
-            plot.getPlaceholder().resize(onResize);
+            plot.getPlaceholder().on( 'resize', onResize );
         }
 
         function shutdown(plot, eventHolder) {
