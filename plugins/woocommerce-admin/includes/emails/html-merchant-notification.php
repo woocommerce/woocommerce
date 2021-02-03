@@ -15,7 +15,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 
 <?php if ( isset( $email_image ) ) { ?>
 <div>
-	<img src="<?php echo esc_url( $email_image ); ?>" style="display: block; margin-bottom: 24px;"/>
+	<img src="<?php echo esc_url( $email_image ); ?>" style="display: block; margin-bottom: 24px; width: 90px;"/>
 </div>
 <?php } ?>
 
