@@ -7,16 +7,13 @@ import PropTypes from 'prop-types';
 import { speak } from '@wordpress/a11y';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
+	ShippingRatesControlPackage,
+	ExperimentalOrderShippingPackages,
+} from '@woocommerce/blocks-checkout';
+import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
-
-/**
- * Internal dependencies
- */
-import Package from './package';
-import ExperimentalOrderShippingPackages from '../../order-shipping-packages';
-import './style.scss';
 
 /**
  * @typedef {import('react')} React
@@ -24,9 +21,6 @@ import './style.scss';
 
 /**
  * Renders the shipping rates control element.
- *
- * @todo Move ShippingRatesControl, TotalsShipping, and ShippingRateSelector to our base components folder.
- * they're too coupled with our base implementation to be exported and we should only export Package.
  *
  * @param {Object} props Incoming props.
  * @param {Array} props.shippingRates Array of packages containing shipping rates.
@@ -141,7 +135,7 @@ const Packages = ( {
 	}
 
 	return packages.map( ( { package_id: packageId, ...packageData } ) => (
-		<Package
+		<ShippingRatesControlPackage
 			key={ packageId }
 			packageId={ packageId }
 			packageData={ packageData }

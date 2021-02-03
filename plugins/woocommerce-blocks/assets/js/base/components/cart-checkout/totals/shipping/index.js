@@ -11,11 +11,11 @@ import {
 	ShippingCalculator,
 	ShippingLocation,
 } from '@woocommerce/base-components/cart-checkout';
+import { TotalsItem } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import TotalsItem from '../item';
 import ShippingRateSelector from './shipping-rate-selector';
 import hasShippingRate from './has-shipping-rate';
 import './style.scss';
