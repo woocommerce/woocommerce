@@ -372,7 +372,7 @@
             methods.setToClearWatchedEvent();
           });
         },
-        update: function() {
+        update: function() {console.log('updating...');
           var disabledClass = namespace + 'disabled';
           if (slider.pagingCount === 1) {
             slider.directionNav.addClass(disabledClass).attr('tabindex', '-1');
@@ -382,10 +382,10 @@
             } else if (slider.animatingTo === slider.last) {
               slider.directionNav.removeClass(disabledClass).filter('.' + namespace + "next").addClass(disabledClass).attr('tabindex', '-1');
             } else {
-              slider.directionNav.removeClass(disabledClass).removeAttr('tabindex');
+              slider.directionNav.removeClass(disabledClass).prop( 'tabindex', '-1' );
             }
           } else {
-            slider.directionNav.removeClass(disabledClass).removeAttr('tabindex');
+            slider.directionNav.removeClass(disabledClass).prop( 'tabindex', '-1' );
           }
         }
       },
