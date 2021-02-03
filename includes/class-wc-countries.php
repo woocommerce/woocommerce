@@ -591,7 +591,7 @@ class WC_Countries {
 				array(
 					'{first_name}'       => $args['first_name'],
 					'{last_name}'        => $args['last_name'],
-					'{name}'             => $args['first_name'] . ' ' . $args['last_name'],
+					'{name}'             => sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $args['first_name'], $args['last_name'] ),
 					'{company}'          => $args['company'],
 					'{address_1}'        => $args['address_1'],
 					'{address_2}'        => $args['address_2'],
@@ -601,7 +601,7 @@ class WC_Countries {
 					'{country}'          => $full_country,
 					'{first_name_upper}' => wc_strtoupper( $args['first_name'] ),
 					'{last_name_upper}'  => wc_strtoupper( $args['last_name'] ),
-					'{name_upper}'       => wc_strtoupper( $args['first_name'] . ' ' . $args['last_name'] ),
+					'{name_upper}'       => wc_strtoupper( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $args['first_name'], $args['last_name'] ) ),
 					'{company_upper}'    => wc_strtoupper( $args['company'] ),
 					'{address_1_upper}'  => wc_strtoupper( $args['address_1'] ),
 					'{address_2_upper}'  => wc_strtoupper( $args['address_2'] ),
