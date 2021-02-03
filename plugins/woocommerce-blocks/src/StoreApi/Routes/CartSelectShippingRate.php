@@ -64,17 +64,15 @@ class CartSelectShippingRate extends AbstractCartRoute {
 
 		$controller = new CartController();
 		$cart       = $controller->get_cart_instance();
+		$package_id = wc_clean( wp_unslash( $request['package_id'] ) );
+		$rate_id    = wc_clean( wp_unslash( $request['rate_id'] ) );
 
-		if ( $cart->needs_shipping() ) {
-			$package_id = wc_clean( wp_unslash( $request['package_id'] ) );
-			$rate_id    = wc_clean( wp_unslash( $request['rate_id'] ) );
-
-			try {
-				$controller->select_shipping_rate( $package_id, $rate_id );
-			} catch ( \WC_Rest_Exception $e ) {
-				throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
-			}
+		try {
+			$controller->select_shipping_rate( $package_id, $rate_id );
+		} catch ( \WC_Rest_Exception $e ) {
+			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 		}
+
 		$cart->calculate_shipping();
 		$cart->calculate_totals();
 
