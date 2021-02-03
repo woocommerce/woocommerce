@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5fac5fbdbcff552de109cd95d469e975",
+    "content-hash": "c02ead9a6d919588e422cfe4c59d68c2",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -281,6 +281,10 @@
                 "geolocation",
                 "maxmind"
             ],
+            "support": {
+                "issues": "https://github.com/maxmind/MaxMind-DB-Reader-php/issues",
+                "source": "https://github.com/maxmind/MaxMind-DB-Reader-php/tree/v1.6.0"
+            },
             "time": "2019-12-19T22:59:03+00:00"
         },
         {
@@ -355,6 +359,10 @@
                 "email",
                 "pre-processing"
             ],
+            "support": {
+                "issues": "https://github.com/MyIntervals/emogrifier/issues",
+                "source": "https://github.com/MyIntervals/emogrifier"
+            },
             "time": "2019-12-26T19:37:31+00:00"
         },
         {
@@ -404,6 +412,10 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/master"
+            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -495,20 +507,24 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
+            "support": {
+                "issues": "https://github.com/woocommerce/action-scheduler/issues",
+                "source": "https://github.com/woocommerce/action-scheduler/tree/master"
+            },
             "time": "2020-05-12T16:22:33+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "1.9.0-rc.3",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "8c5b20cb6347959daf5403ee30e47061f335240b"
+                "reference": "cb2fa7ad034200acba6ee3ef0f332453d2533144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/8c5b20cb6347959daf5403ee30e47061f335240b",
-                "reference": "8c5b20cb6347959daf5403ee30e47061f335240b",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/cb2fa7ad034200acba6ee3ef0f332453d2533144",
+                "reference": "cb2fa7ad034200acba6ee3ef0f332453d2533144",
                 "shasum": ""
             },
             "require": {
@@ -540,7 +556,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2021-01-22T10:23:29+00:00"
+            "time": "2021-01-28T00:59:01+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
