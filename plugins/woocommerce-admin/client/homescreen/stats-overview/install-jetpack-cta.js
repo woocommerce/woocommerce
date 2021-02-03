@@ -4,7 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PLUGINS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	useUserPreferences,
+	USER_STORE_NAME,
+} from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
@@ -78,23 +82,34 @@ export const JetpackCTA = ( {
 
 export const InstallJetpackCTA = () => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
-	const { jetpackInstallState, isBusy } = useSelect( ( select ) => {
-		const { getPluginInstallState, isPluginsRequesting } = select(
-			PLUGINS_STORE_NAME
-		);
-		const installState = getPluginInstallState( 'jetpack' );
-		const busyState =
-			isPluginsRequesting( 'getJetpackConnectUrl' ) ||
-			isPluginsRequesting( 'installPlugins' ) ||
-			isPluginsRequesting( 'activatePlugins' );
+	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
+		( select ) => {
+			const { getPluginInstallState, isPluginsRequesting } = select(
+				PLUGINS_STORE_NAME
+			);
+			const installState = getPluginInstallState( 'jetpack' );
+			const busyState =
+				isPluginsRequesting( 'getJetpackConnectUrl' ) ||
+				isPluginsRequesting( 'installPlugins' ) ||
+				isPluginsRequesting( 'activatePlugins' );
+			const { getCurrentUser } = select( USER_STORE_NAME );
+			const currentUser = getCurrentUser() || {};
 
-		return {
-			isBusy: busyState,
-			jetpackInstallState: installState,
-		};
-	} );
+			return {
+				isBusy: busyState,
+				jetpackInstallState: installState,
+				canUserInstallPlugins:
+					currentUser.capabilities &&
+					currentUser.capabilities.install_plugins,
+			};
+		}
+	);
 
 	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
+
+	if ( ! canUserInstallPlugins ) {
+		return null;
+	}
 
 	const onClickInstall = () => {
 		installJetpackAndConnect( createErrorNotice, getAdminLink );

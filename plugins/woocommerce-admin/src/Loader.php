@@ -1085,8 +1085,10 @@ class Loader {
 			}
 		}
 
-		$user_controller   = new \WP_REST_Users_Controller();
-		$user_response     = $user_controller->get_current_item( new \WP_REST_Request() );
+		$user_controller = new \WP_REST_Users_Controller();
+		$request         = new \WP_REST_Request();
+		$request->set_query_params( array( 'context' => 'edit' ) );
+		$user_response     = $user_controller->get_current_item( $request );
 		$current_user_data = is_wp_error( $user_response ) ? (object) array() : $user_response->get_data();
 
 		$settings['currentUserData']      = $current_user_data;
