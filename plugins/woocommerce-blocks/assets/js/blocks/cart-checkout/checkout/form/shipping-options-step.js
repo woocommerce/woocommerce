@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { FormStep } from '@woocommerce/base-components/cart-checkout';
+import {
+	FormStep,
+	ShippingRatesControl,
+} from '@woocommerce/base-components/cart-checkout';
 import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
-import {
-	getCurrencyFromPriceResponse,
-	ShippingRatesControl,
-} from '@woocommerce/blocks-checkout';
+import { getCurrencyFromPriceResponse } from '@woocommerce/blocks-checkout';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import {
 	useCheckoutContext,

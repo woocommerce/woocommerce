@@ -8,7 +8,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { ShippingRatesControl } from '../../shipping';
+import ShippingRatesControl from '../../shipping-rates-control';
 
 const ShippingRateSelector = ( {
 	hasRates,

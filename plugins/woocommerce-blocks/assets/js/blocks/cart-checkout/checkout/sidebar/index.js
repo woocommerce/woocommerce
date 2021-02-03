@@ -6,12 +6,12 @@ import {
 	TotalsCoupon,
 	TotalsDiscount,
 	TotalsFooterItem,
+	TotalsShipping,
 } from '@woocommerce/base-components/cart-checkout';
 import {
 	Subtotal,
 	TotalsFees,
 	TotalsTaxes,
-	TotalsShipping,
 	ExperimentalOrderMeta,
 	getCurrencyFromPriceResponse,
 } from '@woocommerce/blocks-checkout';
