@@ -333,9 +333,9 @@ const createGroupedProduct = async () => {
 	// Set product data and save the product
 	await expect( page ).toFill( '#title', 'Grouped Product' );
 	await expect( page ).toSelect( '#product-type', 'Grouped product' );
-	await clickTab('Linked Products');
-	await selectOptionInSelect2(simpleProductName + ' 1');
-	await selectOptionInSelect2(simpleProductName + ' 2');
+	await clickTab( 'Linked Products' );
+	await selectOptionInSelect2( simpleProductName + ' 1' );
+	await selectOptionInSelect2( simpleProductName + ' 2' );
 	await verifyAndPublish();
 
 	// Get product ID

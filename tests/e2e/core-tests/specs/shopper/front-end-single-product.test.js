@@ -35,7 +35,9 @@ const runSingleProductPageTest = () => {
 			// Verify cart contents
 			await shopper.goToCart();
 			await shopper.productIsInCart(simpleProductName, 5);
+		});
 
+		it('should be able to remove simple products from the cart', async () => {
 			// Remove items from cart
 			await shopper.removeFromCart(simpleProductName);
 			await uiUnblocked();
@@ -62,7 +64,9 @@ const runSingleProductPageTest = () => {
 			// Verify cart contents
 			await shopper.goToCart();
 			await shopper.productIsInCart('Variable Product with Three Variations');
+		});
 
+		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
 			await shopper.removeFromCart('Variable Product with Three Variations');
 			await uiUnblocked();
@@ -75,7 +79,7 @@ const runSingleProductPageTest = () => {
 			await merchant.login();
 			groupedPostIdValue = await createGroupedProduct();
 			await merchant.logout();
-		})
+		});
 
 		it('should be able to add grouped products to the cart', async () => {
 			// Add a grouped product to cart
@@ -97,7 +101,9 @@ const runSingleProductPageTest = () => {
 			await shopper.goToCart();
 			await shopper.productIsInCart(simpleProductName+' 1');
 			await shopper.productIsInCart(simpleProductName+' 2');
+		});
 
+		it('should be able to remove grouped products from the cart', async () => {
 			// Remove items from cart
 			await shopper.removeFromCart(simpleProductName+' 1');
 			await uiUnblocked();
@@ -111,8 +117,8 @@ const runSingleProductPageTest = () => {
 			await uiUnblocked();
 			await expect(page).toMatchElement('.woocommerce-message', {text: '“'+simpleProductName+' 2” removed.'});
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
-		})
-	})
+		});
+	});
 };
 
 module.exports = runSingleProductPageTest;
