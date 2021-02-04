@@ -9,13 +9,13 @@ const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setu
 const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' );
 
 // Shopper tests
+const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
 const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
 const runCartPageTest = require( './shopper/front-end-cart.test' );
 const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
 const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
 const runSingleProductPageTest = require( './shopper/front-end-single-product.test' );
-const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
 
 // Merchant tests
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
@@ -36,13 +36,13 @@ const runSetupOnboardingTests = () => {
 };
 
 const runShopperTests = () => {
+	runProductBrowseSearchSortTest();
 	runCartApplyCouponsTest();
 	runCartPageTest();
 	runCheckoutApplyCouponsTest();
 	runCheckoutPageTest();
 	runMyAccountPageTest();
 	runSingleProductPageTest();
-	runProductBrowseSearchSortTest();
 };
 
 const runMerchantTests = () => {
