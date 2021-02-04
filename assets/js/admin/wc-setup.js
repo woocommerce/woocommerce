@@ -37,7 +37,7 @@ jQuery( function( $ ) {
 		} );
 
 		$( document.body ).on( 'wc_backbone_modal_response', function() {
-			form.unbind( 'submit' ).trigger( 'submit' );
+			form.off( 'submit' ).trigger( 'submit' );
 		} );
 
 		$( '#wc_tracker_checkbox_dialog' ).on( 'change', function( e ) {
@@ -46,7 +46,7 @@ jQuery( function( $ ) {
 		} );
 
 		$( '#wc_tracker_submit' ).on( 'click', function () {
-			form.unbind( 'submit' ).trigger( 'submit' );
+			form.off( 'submit' ).trigger( 'submit' );
 		} );
 
 		return true;
