@@ -17,7 +17,19 @@ jQuery( function ( $ ) {
 	runTipTip();
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function() {
-		$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
+		var metabox = $( this ).parent( '.wc-metabox' );
+
+		if ( metabox.hasClass( 'closed' ) ) {
+			metabox.removeClass( 'closed' );
+		} else {
+			metabox.addClass( 'closed' );
+		}
+
+		if ( metabox.hasClass( 'open' ) ) {
+			metabox.removeClass( 'open' );
+		} else {
+			metabox.addClass( 'open' );
+		}
 	});
 
 	// Tabbed Panels
