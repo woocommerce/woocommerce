@@ -69,7 +69,7 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 					}
 					var $checkbox = $( 'input[value="woocommerce/woocommerce.php"]' );
 					if ( $checkbox.prop( 'checked' ) ) {
-						$( '#wc-upgrade-warning' ).click();
+						$( '#wc-upgrade-warning' ).trigger( 'click' );
 					}
 				}
 

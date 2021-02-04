@@ -155,7 +155,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 					}
 				);
 
-				jQuery('.chart-placeholder.customers_vs_guests').resize();
+				jQuery('.chart-placeholder.customers_vs_guests').trigger( 'resize' );
 			});
 		</script>
 		<?php
@@ -412,7 +412,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 							],
 						}
 					);
-					jQuery('.chart-placeholder').resize();
+					jQuery('.chart-placeholder').trigger( 'resize' );
 				}
 
 				drawGraph();

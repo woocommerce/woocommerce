@@ -389,7 +389,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			} );
 			jQuery( '.section' ).slideUp( 100, function() {
 				<?php if ( empty( $this->product_ids ) ) : ?>
-					jQuery( '.section_title:eq(1)' ).click();
+					jQuery( '.section_title:eq(1)' ).trigger( 'click' );
 				<?php endif; ?>
 			} );
 		</script>
@@ -610,7 +610,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							}
 						);
 
-						jQuery('.chart-placeholder').resize();
+						jQuery('.chart-placeholder').trigger( 'resize' );
 					}
 
 					drawGraph();

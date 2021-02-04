@@ -140,23 +140,23 @@ class WC_Admin_Permalink_Settings {
 		<?php wp_nonce_field( 'wc-permalinks', 'wc-permalinks-nonce' ); ?>
 		<script type="text/javascript">
 			jQuery( function() {
-				jQuery('input.wctog').change(function() {
+				jQuery('input.wctog').on( 'change', function() {
 					jQuery('#woocommerce_permalink_structure').val( jQuery( this ).val() );
 				});
-				jQuery('.permalink-structure input').change(function() {
+				jQuery('.permalink-structure input').on( 'change', function() {
 					jQuery('.wc-permalink-structure').find('code.non-default-example, code.default-example').hide();
 					if ( jQuery(this).val() ) {
 						jQuery('.wc-permalink-structure code.non-default-example').show();
-						jQuery('.wc-permalink-structure input').removeAttr('disabled');
+						jQuery('.wc-permalink-structure input').prop('disabled', false);
 					} else {
 						jQuery('.wc-permalink-structure code.default-example').show();
-						jQuery('.wc-permalink-structure input:eq(0)').click();
+						jQuery('.wc-permalink-structure input:eq(0)').trigger( 'click' );
 						jQuery('.wc-permalink-structure input').attr('disabled', 'disabled');
 					}
 				});
-				jQuery('.permalink-structure input:checked').change();
-				jQuery('#woocommerce_permalink_structure').focus( function(){
-					jQuery('#woocommerce_custom_selection').click();
+				jQuery('.permalink-structure input:checked').trigger( 'change' );
+				jQuery('#woocommerce_permalink_structure').on( 'focus', function(){
+					jQuery('#woocommerce_custom_selection').trigger( 'click' );
 				} );
 			} );
 		</script>

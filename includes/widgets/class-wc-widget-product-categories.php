@@ -245,7 +245,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 			wc_enqueue_js(
 				"
-				jQuery( '.dropdown_product_cat' ).change( function() {
+				jQuery( '.dropdown_product_cat' ).on( 'change', function() {
 					if ( jQuery(this).val() != '' ) {
 						var this_page = '';
 						var home_url  = '" . esc_js( home_url( '/' ) ) . "';

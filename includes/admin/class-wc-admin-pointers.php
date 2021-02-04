@@ -254,12 +254,12 @@ class WC_Admin_Pointers {
 								button2 = $( '<a class=\"button button-primary\" href=\"#\">' + next + '</a>' ),
 								wrapper = $( '<div class=\"wc-pointer-buttons\" />' );
 
-							button.bind( 'click.pointer', function(e) {
+							button.on( 'click.pointer', function(e) {
 								e.preventDefault();
 								t.element.pointer('destroy');
 							});
 
-							button2.bind( 'click.pointer', function(e) {
+							button2.on( 'click.pointer', function(e) {
 								e.preventDefault();
 								t.element.pointer('close');
 							});

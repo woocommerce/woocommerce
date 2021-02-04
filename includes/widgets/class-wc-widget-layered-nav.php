@@ -297,13 +297,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			wc_enqueue_js(
 				"
 				// Update value on change.
-				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).change( function() {
+				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).on( 'change', function() {
 					var slug = jQuery( this ).val();
 					jQuery( ':input[name=\"filter_" . esc_js( $taxonomy_filter_name ) . "\"]' ).val( slug );
 
 					// Submit form on change if standard dropdown.
 					if ( ! jQuery( this ).attr( 'multiple' ) ) {
-						jQuery( this ).closest( 'form' ).submit();
+						jQuery( this ).closest( 'form' ).trigger( 'submit' );
 					}
 				});
 

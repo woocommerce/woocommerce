@@ -849,7 +849,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 						}
 					);
 
-					jQuery('.chart-placeholder').resize();
+					jQuery('.chart-placeholder').trigger( 'resize' );
 				}
 
 				drawGraph();
