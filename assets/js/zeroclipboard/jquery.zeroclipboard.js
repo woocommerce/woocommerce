@@ -474,7 +474,7 @@
  * The underlying implementation of `ZeroClipboard.destroy`.
  * @private
  */
-    var _destroy = function() {console.log('zero', ZeroClipboard);
+    var _destroy = function() {
       ZeroClipboard.clearData();
       ZeroClipboard.blur();
       ZeroClipboard.emit("destroy");
