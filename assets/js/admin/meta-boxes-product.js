@@ -34,17 +34,23 @@ jQuery( function( $ ) {
 	}
 
 	$( function() {
-		// Prevent inputs in meta box headings opening/closing contents.
-		$( '#woocommerce-product-data' ).find( '.hndle' ).off( 'click.postboxes' );
+		var woocommerce_product_data = $( '#woocommerce-product-data' );
 
-		$( '#woocommerce-product-data' ).on( 'click', '.hndle', function( event ) {
+		// Prevent inputs in meta box headings opening/closing contents.
+		woocommerce_product_data.find( '.hndle' ).off( 'click.postboxes' );
+
+		woocommerce_product_data.on( 'click', '.hndle', function( event ) {
 
 			// If the user clicks on some form input inside the h3 the box should not be toggled.
 			if ( $( event.target ).filter( 'input, option, label, select' ).length ) {
 				return;
 			}
 
-			$( '#woocommerce-product-data' ).toggleClass( 'closed' );
+			if ( woocommerce_product_data.hasClass( 'closed' ) ) {
+				woocommerce_product_data.removeClass( 'closed' );
+			} else {
+				woocommerce_product_data.addClass( 'closed' );
+			}
 		});
 	});
 

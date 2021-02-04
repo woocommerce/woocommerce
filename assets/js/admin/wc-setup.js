@@ -139,7 +139,14 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
-		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
+		var listToggle = $( this ).closest( '.wc-wizard-services-list-toggle' );
+
+		if ( listToggle.hasClass( 'closed' ) ) {
+			listToggle.removeClass( 'closed' );
+		} else {
+			listToggle.addClass( 'closed' );
+		}
+
 		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 			.slideToggle()
 			.css( 'display', 'flex' );
