@@ -202,7 +202,7 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
