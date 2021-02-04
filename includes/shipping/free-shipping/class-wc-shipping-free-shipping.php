@@ -233,7 +233,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				});
 
 				// Change while load.
-				$( '#woocommerce_free_shipping_requires' ).change();
+				$( '#woocommerce_free_shipping_requires' ).trigger( 'change' );
 				$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
 						wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );

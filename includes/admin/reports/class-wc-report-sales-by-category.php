@@ -244,13 +244,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					// Select all/None
 					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).attr( 'selected', 'selected' );
-						jQuery(this).closest( 'div' ).find('select').change();
+						jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
 						return false;
 					});
 
 					jQuery( '.chart-widget').on( 'click', '.select_none', function() {
-						jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( 'selected' );
-						jQuery(this).closest( 'div' ).find('select').change();
+						jQuery(this).closest( 'div' ).find( 'select option' ).prop( 'selected', false );
+						jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
 						return false;
 					});
 				});
@@ -430,7 +430,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 							}
 						);
 
-						jQuery('.chart-placeholder').resize();
+						jQuery('.chart-placeholder').trigger( 'resize' );
 
 					}
 

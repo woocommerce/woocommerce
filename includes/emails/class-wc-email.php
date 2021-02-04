@@ -1029,7 +1029,7 @@ class WC_Email extends WC_Settings_API {
 
 			<?php
 			wc_enqueue_js(
-				"jQuery( 'select.email_type' ).change( function() {
+				"jQuery( 'select.email_type' ).on( 'change', function() {
 
 					var val = jQuery( this ).val();
 
@@ -1043,7 +1043,7 @@ class WC_Email extends WC_Settings_API {
 						jQuery('.template_plain').hide();
 					}
 
-				}).change();
+				}).trigger( 'change' );
 
 				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
 				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
@@ -1067,7 +1067,7 @@ class WC_Email extends WC_Settings_API {
 					return false;
 				});
 
-				jQuery( '.editor textarea' ).change( function() {
+				jQuery( '.editor textarea' ).on( 'change', function() {
 					var name = jQuery( this ).attr( 'data-name' );
 
 					if ( name ) {

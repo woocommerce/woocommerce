@@ -221,6 +221,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( 'action' === current ) {
 				action_event_field.show();
 			}
-		}).change();
+		}).trigger( 'change' );
 	});
 </script>
