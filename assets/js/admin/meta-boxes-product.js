@@ -404,7 +404,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item.removeAttr( 'style' );
+			ui.item[0].removeAttribute( 'style' );
 			attribute_row_indexes();
 		}
 	});
@@ -501,7 +501,7 @@ jQuery( function( $ ) {
 				var this_page = window.location.toString();
 				this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
 
-				$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
+				$( '#variable_product_options' ).on( 'load', this_page + ' #variable_product_options_inner', function() {
 					$( '#variable_product_options' ).trigger( 'reload' );
 				} );
 			}
@@ -661,7 +661,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item.removeAttr( 'style' );
+			ui.item[0].removeAttribute( 'style' );
 		},
 		update: function() {
 			var attachment_ids = '';
@@ -689,8 +689,8 @@ jQuery( function( $ ) {
 		$image_gallery_ids.val( attachment_ids );
 
 		// Remove any lingering tooltips.
-		$( '#tiptip_holder' ).removeAttr( 'style' );
-		$( '#tiptip_arrow' ).removeAttr( 'style' );
+		$( '#tiptip_holder' )[0].removeAttribute( 'style' );
+		$( '#tiptip_arrow' )[0].removeAttribute( 'style' );
 
 		return false;
 	});
