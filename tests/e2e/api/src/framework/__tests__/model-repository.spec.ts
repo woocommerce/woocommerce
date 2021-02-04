@@ -1,4 +1,4 @@
-import { Model } from '../../models/model';
+import { Model } from '../../models';
 import {
 	CreatesModels,
 	DeletesChildModels,

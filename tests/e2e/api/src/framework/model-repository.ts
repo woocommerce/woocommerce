@@ -1,4 +1,4 @@
-import { Model, ModelID } from '../models/model';
+import { Model, ModelID } from '../models';
 
 /**
  * An interface for describing the shape of parent identifiers for repositories.
@@ -6,7 +6,7 @@ import { Model, ModelID } from '../models/model';
  * @typedef ModelParentID
  * @alias Object.<string,ModelID>
  */
-interface ModelParentID {
+export interface ModelParentID {
 	[ key: number ]: ModelID
 }
 

@@ -1,4 +1,4 @@
-export { SimpleProduct } from './products/simple-product';
-
-export { SettingGroup } from './settings/setting-group';
-export { Setting } from './settings/setting';
+export * from './products';
+export * from './model';
+export * from './settings';
+export * from './shared-types';
