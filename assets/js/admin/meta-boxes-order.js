@@ -117,8 +117,8 @@ jQuery( function ( $ ) {
 		},
 
 		init_tiptip: function() {
-			$( '#tiptip_holder' )[0].removeAttribute( 'style' );
-			$( '#tiptip_arrow' )[0].removeAttribute( 'style' );
+			$( '#tiptip_holder' ).removeAttr( 'style' );
+			$( '#tiptip_arrow' ).removeAttr( 'style' );
 			$( '.tips' ).tipTip({
 				'attribute': 'data-tip',
 				'fadeIn': 50,
