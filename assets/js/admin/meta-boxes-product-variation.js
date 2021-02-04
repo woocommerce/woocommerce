@@ -116,8 +116,8 @@ jQuery( function( $ ) {
 			}
 
 			// Init TipTip
-			$( '#tiptip_holder' )[0].removeAttribute( 'style' );
-			$( '#tiptip_arrow' )[0].removeAttribute( 'style' );
+			$( '#tiptip_holder' ).removeAttr( 'style' );
+			$( '#tiptip_arrow' ).removeAttr( 'style' );
 			$( '.woocommerce_variations .tips, .woocommerce_variations .help_tip, .woocommerce_variations .woocommerce-help-tip', wrapper )
 				.tipTip({
 					'attribute': 'data-tip',
