@@ -404,7 +404,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item[0].removeAttribute( 'style' );
+			ui.item.removeAttr( 'style' );
 			attribute_row_indexes();
 		}
 	});
@@ -661,7 +661,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item[0].removeAttribute( 'style' );
+			ui.item.removeAttr( 'style' );
 		},
 		update: function() {
 			var attachment_ids = '';
@@ -689,8 +689,8 @@ jQuery( function( $ ) {
 		$image_gallery_ids.val( attachment_ids );
 
 		// Remove any lingering tooltips.
-		$( '#tiptip_holder' )[0].removeAttribute( 'style' );
-		$( '#tiptip_arrow' )[0].removeAttribute( 'style' );
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
 
 		return false;
 	});
