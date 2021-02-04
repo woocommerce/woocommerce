@@ -27,8 +27,8 @@ const defaultBillingAddress = {
 	phone: '',
 };
 
-const decodeAddress = ( address ) =>
-	mapValues( address, ( value ) => decodeEntities( value ) );
+const decodeValues = ( object ) =>
+	mapValues( object, ( value ) => decodeEntities( value ) );
 
 /**
  * @constant
@@ -53,6 +53,7 @@ export const defaultCartData = {
 	cartHasCalculatedShipping: false,
 	paymentRequirements: [],
 	receiveCart: () => {},
+	extensions: {},
 };
 
 /**
@@ -115,14 +116,17 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			);
 			const shippingRatesLoading = store.isCustomerDataUpdating();
 			const { receiveCart } = dispatch( storeKey );
-			const billingAddress = decodeAddress( cartData.billingAddress );
+			const billingAddress = decodeValues( cartData.billingAddress );
 			const shippingAddress = cartData.needsShipping
-				? decodeAddress( cartData.shippingAddress )
+				? decodeValues( cartData.shippingAddress )
 				: billingAddress;
+			const cartFees = cartData.fees.map( ( fee ) =>
+				decodeValues( fee )
+			);
 			return {
 				cartCoupons: cartData.coupons,
 				cartItems: cartData.items || [],
-				cartFees: cartData.fees || [],
+				cartFees,
 				cartItemsCount: cartData.itemsCount,
 				cartItemsWeight: cartData.itemsWeight,
 				cartNeedsPayment: cartData.needsPayment,
