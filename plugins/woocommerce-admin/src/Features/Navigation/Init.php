@@ -34,7 +34,6 @@ class Init {
 
 		if ( Loader::is_feature_enabled( 'navigation' ) ) {
 			add_action( 'in_admin_header', array( __CLASS__, 'embed_navigation' ) );
-			add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_scripts' ) );
 
 			Menu::instance()->init();
 			CoreMenu::instance()->init();
@@ -144,24 +143,6 @@ class Init {
 		?>
 		<div id="woocommerce-embedded-navigation"></div>
 		<?php
-	}
-
-	/**
-	 * Enqueue scripts on non-WooCommerce pages.
-	 */
-	public function maybe_enqueue_scripts() {
-		if ( Screen::is_woocommerce_page() ) {
-			return;
-		}
-
-		$rtl = is_rtl() ? '-rtl' : '';
-
-		wp_enqueue_style(
-			'wc-admin-navigation',
-			Loader::get_url( "navigation/style{$rtl}", 'css' ),
-			array(),
-			Loader::get_file_version( 'css' )
-		);
 	}
 
 	/**

@@ -57,6 +57,15 @@ class Menu {
 	protected static $menu_items = array();
 
 	/**
+	 * Store categories with menu item IDs.
+	 *
+	 * @var array
+	 */
+	protected static $categories = array(
+		'woocommerce' => array(),
+	);
+
+	/**
 	 * Registered callbacks or URLs with migration boolean as key value pairs.
 	 *
 	 * @var array
@@ -172,7 +181,9 @@ class Menu {
 			);
 		}
 
-		self::$menu_items[ $menu_item['id'] ] = $menu_item;
+		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
+		self::$categories[ $menu_item['id'] ]       = array();
+		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
 
 		if ( isset( $args['url'] ) ) {
 			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
@@ -230,7 +241,8 @@ class Menu {
 
 		$menu_item['menuId'] = self::get_item_menu_id( $menu_item );
 
-		self::$menu_items[ $menu_item['id'] ] = $menu_item;
+		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
+		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
 
 		if ( isset( $args['url'] ) ) {
 			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
@@ -644,7 +656,32 @@ class Menu {
 	 * @return array
 	 */
 	public static function get_items() {
-		return apply_filters( 'woocommerce_navigation_menu_items', self::$menu_items );
+		$menu_items = self::get_prepared_menu_item_data( self::$menu_items );
+		return apply_filters( 'woocommerce_navigation_menu_items', $menu_items );
+	}
+
+	/**
+	 * Get registered menu items.
+	 *
+	 * @return array
+	 */
+	public static function get_category_items( $category ) {
+		if ( ! isset( self::$categories[ $category ] ) ) {
+			return array();
+		}
+
+		$menu_item_ids = self::$categories[ $category ];
+
+		
+		$category_menu_items = array();
+		foreach ( $menu_item_ids as $id ) {
+			if ( isset( self::$menu_items[ $id ] ) ) {
+				$category_menu_items[] = self::$menu_items[ $id ];
+			}
+		}
+
+		$category_menu_items = self::get_prepared_menu_item_data( $category_menu_items );
+		return apply_filters( 'woocommerce_navigation_menu_category_items', $category_menu_items );
 	}
 
 	/**
@@ -659,10 +696,10 @@ class Menu {
 	/**
 	 * Gets the menu item data for use in the client.
 	 *
+	 * @param array $menu_items Menu items to prepare.
 	 * @return array
 	 */
-	public static function get_prepared_menu_item_data() {
-		$menu_items = self::get_items();
+	public static function get_prepared_menu_item_data( $menu_items ) {
 		foreach ( $menu_items as $index => $menu_item ) {
 			if ( $menu_item[ 'capability' ] && ! current_user_can( $menu_item[ 'capability' ] ) ) {
 				unset( $menu_items[ $index ] );
@@ -670,11 +707,17 @@ class Menu {
 		}
 
 		// Sort the menu items.
-		$order = array_column( $menu_items, 'order' );
-		$title = array_column( $menu_items, 'title' );
-		array_multisort( $order, SORT_ASC, $title, SORT_ASC, $menu_items );
+		$menuOrder = array(
+			'primary'   => 0,
+			'secondary' => 1,
+			'plugins'   => 2,
+		);
+		$menu      = array_map( function( $item ) use( $menuOrder ) { return $menuOrder[ $item['menuId'] ]; }, $menu_items );
+		$order     = array_column( $menu_items, 'order' );
+		$title     = array_column( $menu_items, 'title' );
+		array_multisort( $menu, SORT_ASC, $order, SORT_ASC, $title, SORT_ASC, $menu_items );
 
-		return array_values( $menu_items );
+		return $menu_items;
 	}
 
 	/**
@@ -685,7 +728,7 @@ class Menu {
 	 */
 	public function enqueue_data( $menu ) {
 		$data = array(
-			'menuItems'     => self::get_prepared_menu_item_data(),
+			'menuItems'     => array_values( self::get_items() ),
 			'rootBackUrl'   => apply_filters( 'woocommerce_navigation_root_back_url', get_dashboard_url() ),
 			'rootBackLabel' => apply_filters( 'woocommerce_navigation_root_back_label', __( 'WordPress Dashboard', 'woocommerce-admin' ) ),
 		);
