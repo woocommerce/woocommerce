@@ -58,7 +58,7 @@
 			}
 			if(org_title != ""){
 				if(!opts.content){
-					org_elem[0].removeAttribute(opts.attribute); //remove original Attribute
+					org_elem.prop(opts.attribute, false); //remove original Attribute
 				}
 				var timeout = false;
 
@@ -101,8 +101,8 @@
 					opts.enter.call(this);
 					tiptip_content.html(org_title);
 					tiptip_holder.hide().css("margin","0");
-					tiptip_holder[0].removeAttribute('class');
-					tiptip_arrow[0].removeAttribute("style");
+					tiptip_holder.removeAttr('class');
+					tiptip_arrow.removeAttr("style");
 
 					var top = parseInt(org_elem.offset()['top']);
 					var left = parseInt(org_elem.offset()['left']);
