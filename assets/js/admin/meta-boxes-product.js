@@ -77,7 +77,7 @@ jQuery( function( $ ) {
 		var current_visibility = $( '#current_visibility' ).val();
 		var current_featured   = $( '#current_featured' ).val();
 
-		$( 'input[name=_visibility]' )[0].removeAttribute( 'checked' );
+		$( 'input[name=_visibility]' ).prop( 'checked', false );
 		$( 'input[name=_visibility][value=' + current_visibility + ']' ).attr( 'checked', 'checked' );
 
 		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
@@ -86,7 +86,7 @@ jQuery( function( $ ) {
 			label = label + ', ' + woocommerce_admin_meta_boxes.featured_label;
 			$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
 		} else {
-			$( 'input[name=_featured]' )[0].removeAttribute( 'checked' );
+			$( 'input[name=_featured]' ).prop( 'checked', false );
 		}
 
 		$( '#catalog-visibility-display' ).text( label );
@@ -102,13 +102,13 @@ jQuery( function( $ ) {
 		if ( 'variable' === select_val ) {
 			$( 'input#_manage_stock' ).trigger( 'change' );
 			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' )[0].removeAttribute( 'checked' );
+			$( 'input#_virtual' ).prop( 'checked', false );
 		} else if ( 'grouped' === select_val ) {
 			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' )[0].removeAttribute( 'checked' );
+			$( 'input#_virtual' ).prop( 'checked', false );
 		} else if ( 'external' === select_val ) {
 			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' )[0].removeAttribute( 'checked' );
+			$( 'input#_virtual' ).prop( 'checked', false );
 		}
 
 		show_and_hide_panels();
@@ -361,7 +361,7 @@ jQuery( function( $ ) {
 	});
 
 	$( '.product_attributes' ).on( 'click', 'button.select_no_attributes', function() {
-		$( this ).closest( 'td' ).find( 'select option' )[0].removeAttribute( 'selected' );
+		$( this ).closest( 'td' ).find( 'select option' ).prop( 'selected', false );
 		$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 		return false;
 	});
@@ -373,7 +373,7 @@ jQuery( function( $ ) {
 			if ( $parent.is( '.taxonomy' ) ) {
 				$parent.find( 'select, input[type=text]' ).val( '' );
 				$parent.hide();
-				$( 'select.attribute_taxonomy' ).find( 'option[value="' + $parent.data( 'taxonomy' ) + '"]' )[0].removeAttribute( 'disabled' );
+				$( 'select.attribute_taxonomy' ).find( 'option[value="' + $parent.data( 'taxonomy' ) + '"]' ).prop( 'disabled', false );
 			} else {
 				$parent.find( 'select, input[type=text]' ).val( '' );
 				$parent.hide();
@@ -398,7 +398,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item[0].removeAttribute( 'style' );
+			ui.item.removeAttr( 'style' );
 			attribute_row_indexes();
 		}
 	});
@@ -655,7 +655,7 @@ jQuery( function( $ ) {
 			ui.item.css( 'background-color', '#f6f6f6' );
 		},
 		stop: function( event, ui ) {
-			ui.item[0].removeAttribute( 'style' );
+			ui.item.removeAttr( 'style' );
 		},
 		update: function() {
 			var attachment_ids = '';
@@ -683,8 +683,8 @@ jQuery( function( $ ) {
 		$image_gallery_ids.val( attachment_ids );
 
 		// Remove any lingering tooltips.
-		$( '#tiptip_holder' )[0].removeAttribute( 'style' );
-		$( '#tiptip_arrow' )[0].removeAttribute( 'style' );
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
 
 		return false;
 	});
