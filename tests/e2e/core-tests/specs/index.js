@@ -47,7 +47,6 @@ const runSetupOnboardingTests = () => {
 };
 
 const runShopperTests = () => {
-	runProductBrowseSearchSortTest();
 	runCartApplyCouponsTest();
 	runCartPageTest();
 	runCheckoutApplyCouponsTest();
