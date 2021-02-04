@@ -125,12 +125,12 @@
 					// Skip the fade-in for IE8 and lower since it chokes on fading-in
 					// and changing position based on mousemovement at the same time.
 					$img.stop()
-					.fadeTo($.support.opacity ? settings.duration : 0, 1, $.isFunction(settings.onZoomIn) ? settings.onZoomIn.call(img) : false);
+					.fadeTo($.support.opacity ? settings.duration : 0, 1, 'function' === typeof settings.onZoomIn ? settings.onZoomIn.call(img) : false);
 				}
 
 				function stop() {
 					$img.stop()
-					.fadeTo(settings.duration, 0, $.isFunction(settings.onZoomOut) ? settings.onZoomOut.call(img) : false);
+					.fadeTo(settings.duration, 0, 'function' === typeof settings.onZoomOut ? settings.onZoomOut.call(img) : false);
 				}
 
 				// Mouse events
@@ -221,8 +221,8 @@
 							}
 						});
 				}
-				
-				if ($.isFunction(settings.callback)) {
+
+				if ('function' === typeof settings.callback) {
 					settings.callback.call(img);
 				}
 			};
