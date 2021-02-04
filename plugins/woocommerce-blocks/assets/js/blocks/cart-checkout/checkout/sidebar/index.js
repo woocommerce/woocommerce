@@ -13,8 +13,8 @@ import {
 	TotalsFees,
 	TotalsTaxes,
 	ExperimentalOrderMeta,
-	getCurrencyFromPriceResponse,
 } from '@woocommerce/blocks-checkout';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useShippingDataContext } from '@woocommerce/base-context';
 import {
 	COUPONS_ENABLED,

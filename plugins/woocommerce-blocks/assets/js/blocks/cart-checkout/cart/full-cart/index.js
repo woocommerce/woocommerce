@@ -15,8 +15,9 @@ import {
 	TotalsFees,
 	TotalsTaxes,
 	ExperimentalOrderMeta,
-	getCurrencyFromPriceResponse,
 } from '@woocommerce/blocks-checkout';
+
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
