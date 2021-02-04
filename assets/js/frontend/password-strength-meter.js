@@ -48,7 +48,7 @@
 			) {
 				submit.attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 			} else {
-				submit.removeAttr( 'disabled', 'disabled' ).removeClass( 'disabled' );
+				submit.prop( 'disabled', false ).removeClass( 'disabled' );
 			}
 		},
 
