@@ -18,7 +18,6 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-let variablePostIdValue;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
@@ -31,6 +30,7 @@ const productTitle = 'li.first > a > h2.woocommerce-loop-product__title';
 
 const runProductBrowseSearchSortTest = () => {
 	describe('Search, browse by categories and sort items in the shop', () => {
+			let variablePostIdValue;
 		beforeAll(async () => {
 			await merchant.login();
 

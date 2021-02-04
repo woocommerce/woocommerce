@@ -36,13 +36,13 @@ const runSetupOnboardingTests = () => {
 };
 
 const runShopperTests = () => {
-	runProductBrowseSearchSortTest();
 	runCartApplyCouponsTest();
 	runCartPageTest();
 	runCheckoutApplyCouponsTest();
 	runCheckoutPageTest();
 	runMyAccountPageTest();
 	runSingleProductPageTest();
+	runProductBrowseSearchSortTest();
 };
 
 const runMerchantTests = () => {
