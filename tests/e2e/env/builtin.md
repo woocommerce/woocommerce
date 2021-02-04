@@ -79,8 +79,8 @@ You can override these in `/tests/e2e/config/default.json`.
 
 The built in container defaults to mapping the root folder of the repository to a folder in the `plugins` folder. For example `woocommerce` is mapped to `/var/www/html/wp-content/plugins/woocommerce`. Use the `WC_E2E_FOLDER_MAPPING` environment variable to override this mapping.
 
-- Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npm explore @woocommerce/e2e-environment -- npm run docker:up```
-- Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/plugins npm explore @woocommerce/e2e-environment -- npm run docker:up```
+- Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npx wc-e2e docker:up```
+- Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content npx wc-e2e docker:up```
 
 ### Travis CI Supported Versions
 
@@ -106,11 +106,11 @@ version: ~> 1.0
 
 script:
   - npm install jest --global
-  - npm explore @woocommerce/e2e-environment -- npm run docker:up
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
+  - npx wc-e2e docker:up
+  - npx wc-e2e test:e2e
 
 ....
 
 after_script:
-  - npm explore @woocommerce/e2e-environment -- npm run docker:down
+  - npx wc-e2e docker:down
 ```
