@@ -15,6 +15,7 @@ const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupo
 const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
 const runSingleProductPageTest = require( './shopper/front-end-single-product.test' );
+const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
 
 // Merchant tests
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
@@ -41,6 +42,7 @@ const runShopperTests = () => {
 	runCheckoutPageTest();
 	runMyAccountPageTest();
 	runSingleProductPageTest();
+	runProductBrowseSearchSortTest();
 };
 
 const runMerchantTests = () => {
@@ -80,4 +82,5 @@ module.exports = {
 	runOrderRefundTest,
 	runOrderApplyCouponTest,
 	runMerchantTests,
+	runProductBrowseSearchSortTest,
 };

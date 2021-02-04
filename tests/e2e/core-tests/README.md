@@ -63,6 +63,7 @@ The functions to access the core tests are:
   - `runCheckoutPageTest` - Shopper can complete checkout
   - `runMyAccountPageTest` - Shopper can access my account page
   - `runSingleProductPageTest` - Shopper can view single product page
+  - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
 
 ## Contributing a new test
 
