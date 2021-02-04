@@ -167,7 +167,7 @@
 
 					// Postcode and city don't have `name` values by default.
 					// They're only created if the contents changes, to save on database queries (I think)
-					this.$el.find( 'td.postcode input, td.city input' ).change( function() {
+					this.$el.find( 'td.postcode input, td.city input' ).on( 'change', function() {
 						$( this ).attr( 'name', $( this ).data( 'name' ) );
 					});
 
