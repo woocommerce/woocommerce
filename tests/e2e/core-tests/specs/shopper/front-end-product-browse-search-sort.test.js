@@ -27,7 +27,7 @@ const singleProductPrice3 = config.has('products.simple.price') ? config.get('pr
 const clothing = 'Clothing';
 const audio = 'Audio';
 const hardware = 'Hardware';
-const productTitle = 'ul.products > li.first > a > h2.woocommerce-loop-product__title';
+const productTitle = 'li.first > a > h2.woocommerce-loop-product__title';
 
 const runProductBrowseSearchSortTest = () => {
 	describe('Search, browse by categories and sort items in the shop', () => {
@@ -45,27 +45,8 @@ const runProductBrowseSearchSortTest = () => {
 			await merchant.logout();
 		});
 
-		it('should let user browse products by categories', async () => {
-			await shopper.goToShop();
-
-			// Go to 1st product and click category name
-			await shopper.goToProduct(variablePostIdValue);
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toClick('span.posted_in > a', {text: clothing});
-			await uiUnblocked();
-
-			// Verify Clothing category page
-			await expect(page.title()).resolves.toMatch(clothing);
-			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
-
-			// Verify clicking on the product
-			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
-			await uiUnblocked();
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
-		});
-
 		it('should let user search the store', async () => {
+			await shopper.login();
 			await shopper.goToShop();
 
 			// Search for the 1st product
@@ -84,26 +65,44 @@ const runProductBrowseSearchSortTest = () => {
 			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
 		});
 
+		it('should let user browse products by categories', async () => {
+			// Go to 1st product and click category name
+			await shopper.goToProduct(variablePostIdValue);
+			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await Promise.all([
+				page.waitForNavigation({waitUntil: 'networkidle0'}),
+				page.click('span.posted_in > a', {text: clothing}),
+			]);
+			await uiUnblocked();
+
+			// Verify Clothing category page
+			await expect(page.title()).resolves.toMatch(clothing);
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
+
+			// Verify clicking on the product
+			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
+			await uiUnblocked();
+			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
+		});
+
 		it('should let user sort the products in the shop', async () => {
 			await shopper.goToShop();
 
 			// Sort by price high to low
 			await page.select('.orderby', 'price-desc');
-			// Verify the first product in sort order
-			await expect(page).toMatchElement(productTitle, 
-				{text: simpleProductName + ' 3'});
+            // Verify the first product in sort order
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 3'});
 
 			// Sort by price low to high
 			await page.select('.orderby', 'price');
-			// Verify the first product in sort order
-			await expect(page).toMatchElement(productTitle,
-				{text: simpleProductName + ' 1'});
+            // Verify the first product in sort order
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
 
 			// Sort by date of creation, latest to oldest
 			await page.select('.orderby', 'date');
-			// Verify the first product in sort order
-			await expect(page).toMatchElement(productTitle,
-				{text: simpleProductName + ' 3'});
+            // Verify the first product in sort order
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 3'});
 		});
 	});
 };
