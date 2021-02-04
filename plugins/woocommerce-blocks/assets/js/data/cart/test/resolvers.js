@@ -20,6 +20,7 @@ describe( 'getCartData', () => {
 				const { value } = fulfillment.next( {
 					coupons: [],
 					items: [],
+					fees: [],
 					itemsCount: 0,
 					itemsWeight: 0,
 					needsShipping: true,
@@ -29,6 +30,7 @@ describe( 'getCartData', () => {
 					receiveCart( {
 						coupons: [],
 						items: [],
+						fees: [],
 						itemsCount: 0,
 						itemsWeight: 0,
 						needsShipping: true,

@@ -20,7 +20,7 @@ describe( 'Testing cart', () => {
 		} );
 		// need to clear the store resolution state between tests.
 		await dispatch( storeKey ).invalidateResolutionForStore();
-		await dispatch( storeKey ).receiveCart( defaultCartState );
+		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 	} );
 	afterEach( () => {
 		fetchMock.resetMocks();
@@ -44,7 +44,9 @@ describe( 'Testing cart', () => {
 	it( 'renders empty cart if there are no items in the cart', async () => {
 		fetchMock.mockResponse( ( req ) => {
 			if ( req.url.match( /wc\/store\/cart/ ) ) {
-				return Promise.resolve( JSON.stringify( defaultCartState ) );
+				return Promise.resolve(
+					JSON.stringify( defaultCartState.cartData )
+				);
 			}
 		} );
 		render(

@@ -16,6 +16,7 @@ export const defaultCartState = {
 			country: '',
 		},
 		items: [],
+		fees: [],
 		itemsCount: 0,
 		itemsWeight: 0,
 		needsShipping: true,

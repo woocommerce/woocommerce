@@ -130,7 +130,7 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 		} );
 		// need to clear the store resolution state between tests.
 		await dispatch( storeKey ).invalidateResolutionForStore();
-		await dispatch( storeKey ).receiveCart( defaultCartState );
+		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 	} );
 	afterEach( async () => {
 		resetMockPaymentMethods();
