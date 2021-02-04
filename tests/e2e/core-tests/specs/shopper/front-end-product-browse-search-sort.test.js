@@ -45,8 +45,27 @@ const runProductBrowseSearchSortTest = () => {
 			await merchant.logout();
 		});
 
+		it('should let user browse products by categories', async () => {
+			await shopper.goToShop();
+
+			// Go to 1st product and click category name
+			await shopper.goToProduct(variablePostIdValue);
+			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await expect(page).toClick('span.posted_in > a', {text: clothing});
+			await uiUnblocked();
+
+			// Verify Clothing category page
+			await expect(page.title()).resolves.toMatch(clothing);
+			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
+
+			// Verify clicking on the product
+			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
+			await uiUnblocked();
+			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
+		});
+
 		it('should let user search the store', async () => {
-			await shopper.login();
 			await shopper.goToShop();
 
 			// Search for the 1st product
@@ -60,24 +79,6 @@ const runProductBrowseSearchSortTest = () => {
 			// Verify the results
 			await expect(page).toMatchElement('h2.entry-title', {text: simpleProductName + ' 1'});
 			await expect(page).toClick('h2.entry-title', {text: simpleProductName + ' 1'});
-			await uiUnblocked();
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
-		});
-
-		it('should let user browse products by categories', async () => {
-			// Go to 1st product and click category name
-			await shopper.goToProduct(variablePostIdValue);
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toClick('span.posted_in > a', {text: clothing});
-			await uiUnblocked();
-
-			// Verify Clothing category page
-			await expect(page.title()).resolves.toMatch(clothing);
-			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
-
-			// Verify clicking on the product
-			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
 			await uiUnblocked();
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
 			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
