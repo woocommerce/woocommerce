@@ -12,7 +12,7 @@ jQuery( function ( $ ) {
 				this.states = JSON.parse( wc_users_params.countries.replace( /&quot;/g, '"' ) );
 			}
 
-			$( '.js_field-country' ).selectWoo().change( this.change_country );
+			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
 
