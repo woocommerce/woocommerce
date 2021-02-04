@@ -8,7 +8,7 @@ import {
 	useCustomerDataContext,
 } from '@woocommerce/base-context';
 import { __ } from '@wordpress/i18n';
-import { getCurrencyFromPriceResponse } from '@woocommerce/blocks-checkout';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useEffect, useRef } from '@wordpress/element';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { ValidationInputError } from '@woocommerce/base-components/validation';

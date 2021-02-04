@@ -15,7 +15,7 @@ import {
 	ProductMetadata,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
-import { getCurrency } from '@woocommerce/blocks-checkout';
+import { getCurrency } from '@woocommerce/price-format';
 import Dinero from 'dinero.js';
 
 /**

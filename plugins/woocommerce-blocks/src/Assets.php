@@ -96,6 +96,7 @@ class Assets {
 		if ( Package::feature()->is_experimental_build() ) {
 			$asset_api->register_script( 'wc-single-product-block', $asset_api->get_block_asset_build_path( 'single-product' ), $block_dependencies );
 		}
+		$asset_api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
 			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [], false );

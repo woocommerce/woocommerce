@@ -10,7 +10,7 @@ import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
-import { getCurrencyFromPriceResponse } from '@woocommerce/blocks-checkout';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import {
 	useCheckoutContext,

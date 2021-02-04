@@ -11,7 +11,7 @@ import { useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
-import { getCurrencyFromPriceResponse } from '@woocommerce/blocks-checkout';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
