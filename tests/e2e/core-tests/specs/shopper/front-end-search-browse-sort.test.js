@@ -18,7 +18,7 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-let groupedPostIdValue;
+let variablePostIdValue;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
@@ -35,7 +35,7 @@ const runSearchBrowseSortTest = () => {
 			await merchant.login();
 
 			// Create 1st product with Clothing category 
-			groupedPostIdValue = await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
+			variablePostIdValue = await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
 
 			// Create 2nd product with Audio category 
 			await createSimpleProductWithCategory(simpleProductName + ' 2', singleProductPrice2, audio);
@@ -67,7 +67,7 @@ const runSearchBrowseSortTest = () => {
 
 		it('should let user browse products by categories', async () => {
 			// Go to 1st product and click category name
-			await shopper.goToProduct(groupedPostIdValue);
+			await shopper.goToProduct(variablePostIdValue);
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
 			await expect(page).toClick('span.posted_in > a', {text: clothing});
 			await uiUnblocked();

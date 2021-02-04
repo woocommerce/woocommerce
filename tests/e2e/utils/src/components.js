@@ -202,18 +202,21 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 		await checkbox.click();
 	} catch (error) {
 		await expect(page).toClick('#product_cat-add-toggle');
+		await uiUnblocked();
 		await expect(page).toFill('#newproduct_cat', categoryName);
+		await uiUnblocked();
 		await expect(page).toClick('#product_cat-add-submit');
 	}
 
 	// Publish the product
 	await expect(page).toClick('#publish');
+	await uiUnblocked();
 	await page.waitForSelector('.updated.notice', {text:'Product published.'});
 
 	// Get the product ID
-	const groupedPostId = await page.$( '#post_ID' );
-	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
-	return groupedPostIdValue;
+	const variablePostId = await page.$('#post_ID');
+	let variablePostIdValue = (await(await variablePostId.getProperty('value')).jsonValue());
+	return variablePostIdValue;
 };
 
 /**
