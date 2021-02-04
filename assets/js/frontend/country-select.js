@@ -70,7 +70,7 @@ jQuery( function( $ ) {
 
 		wc_country_select_select2();
 
-		$( document.body ).bind( 'country_to_state_changed', function() {
+		$( document.body ).on( 'country_to_state_changed', function() {
 			wc_country_select_select2();
 		});
 	}
@@ -142,7 +142,7 @@ jQuery( function( $ ) {
 					$statebox.append( $option );
 				} );
 
-				$statebox.val( value ).change();
+				$statebox.val( value ).trigger( 'change' );
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 			}

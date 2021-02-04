@@ -16,8 +16,8 @@ jQuery( function( $ ) {
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
 		init: function() {
-			$( document.body ).bind( 'update_checkout', this.update_checkout );
-			$( document.body ).bind( 'init_checkout', this.init_checkout );
+			$( document.body ).on( 'update_checkout', this.update_checkout );
+			$( document.body ).on( 'init_checkout', this.init_checkout );
 
 			// Payment methods
 			this.$checkout_form.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
@@ -50,7 +50,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$checkout_form.find( '#ship-to-different-address input' ).change();
+			this.$checkout_form.find( '#ship-to-different-address input' ).trigger( 'change' );
 			this.init_payment_methods();
 
 			// Update on page load
@@ -58,7 +58,7 @@ jQuery( function( $ ) {
 				$( document.body ).trigger( 'init_checkout' );
 			}
 			if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
-				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
+				$( 'input#createaccount' ).change( this.toggle_create_account ).trigger( 'change' );
 			}
 		},
 		init_payment_methods: function() {
@@ -130,7 +130,7 @@ jQuery( function( $ ) {
 
 			if ( $( this ).is( ':checked' ) ) {
 				// Ensure password is not pre-populated.
-				$( '#account_password' ).val( '' ).change();
+				$( '#account_password' ).val( '' ).trigger( 'change' );
 				$( 'div.create-account' ).slideDown();
 			}
 		},
@@ -380,11 +380,11 @@ jQuery( function( $ ) {
 							var ID = $( this ).attr( 'id' );
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
-									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
+									$( this ).prop( 'checked', paymentDetails[ ID ] ).trigger( 'change' );
 								} else if ( $.inArray( $( this ).attr( 'type' ), [ 'select' ] ) !== -1 ) {
-									$( this ).val( paymentDetails[ ID ] ).change();
+									$( this ).val( paymentDetails[ ID ] ).trigger( 'change' );
 								} else if ( null !== $( this ).val() && 0 === $( this ).val().length ) {
-									$( this ).val( paymentDetails[ ID ] ).change();
+									$( this ).val( paymentDetails[ ID ] ).trigger( 'change' );
 								}
 							}
 						});
@@ -406,7 +406,7 @@ jQuery( function( $ ) {
 						}
 
 						// Lose focus for all fields
-						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
+						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 
 						wc_checkout_form.scroll_to_notices();
 					}
@@ -560,7 +560,7 @@ jQuery( function( $ ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
-			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
+			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 			wc_checkout_form.scroll_to_notices();
 			$( document.body ).trigger( 'checkout_error' , [ error_message ] );
 		},
