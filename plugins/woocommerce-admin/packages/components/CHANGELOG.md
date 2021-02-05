@@ -10,6 +10,7 @@
 -   Improve handling of `multiple` and `inlineTags` in `<SelectControl />`.
 -   Deprecate use of `<Card>` in favor of the `<Card>` component in `@wordpress/components`.
 -   Fixing screen reader text being undefined for report `<Table>`
+-   Update `<SearchListControl />` to use checkbox and radio inputs.
 
 # 5.1.2
 

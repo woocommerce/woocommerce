@@ -2,18 +2,7 @@
  * External dependencies
  */
 import { escapeRegExp, first, last, isNil } from 'lodash';
-import { MenuItem } from '@wordpress/components';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
-import {
-	IconCheckChecked,
-	IconCheckUnchecked,
-	IconRadioSelected,
-	IconRadioUnselected,
-} from './icons';
 
 function getHighlightedName( name, search ) {
 	if ( ! search ) {
@@ -33,13 +22,6 @@ function getBreadcrumbsForDisplay( breadcrumbs ) {
 
 	return first( breadcrumbs ) + ' … ' + last( breadcrumbs );
 }
-
-const getInteractionIcon = ( isSingle = false, isSelected = false ) => {
-	if ( isSingle ) {
-		return isSelected ? <IconRadioSelected /> : <IconRadioUnselected />;
-	}
-	return isSelected ? <IconCheckChecked /> : <IconCheckUnchecked />;
-};
 
 const SearchListItem = ( {
 	countLabel,
@@ -64,16 +46,30 @@ const SearchListItem = ( {
 	const hasBreadcrumbs = item.breadcrumbs && item.breadcrumbs.length;
 
 	return (
-		<MenuItem
-			role={ isSingle ? 'menuitemradio' : 'menuitemcheckbox' }
-			className={ classes.join( ' ' ) }
-			onClick={ onSelect( item ) }
-			isSelected={ isSelected }
-			{ ...props }
-		>
-			<span className="woocommerce-search-list__item-state">
-				{ getInteractionIcon( isSingle, isSelected ) }
-			</span>
+		<label htmlFor={ item.id } className={ classes.join( ' ' ) }>
+			{ isSingle ? (
+				<input
+					type="radio"
+					id={ item.id }
+					name={ item.name }
+					value={ item.value }
+					onChange={ onSelect( item ) }
+					checked={ isSelected }
+					className="woocommerce-search-list__item-input"
+					{ ...props }
+				></input>
+			) : (
+				<input
+					type="checkbox"
+					id={ item.id }
+					name={ item.name }
+					value={ item.value }
+					onChange={ onSelect( item ) }
+					checked={ isSelected }
+					className="woocommerce-search-list__item-input"
+					{ ...props }
+				></input>
+			) }
 
 			<span className="woocommerce-search-list__item-label">
 				{ hasBreadcrumbs ? (
@@ -94,7 +90,7 @@ const SearchListItem = ( {
 					{ countLabel || item.count }
 				</span>
 			) }
-		</MenuItem>
+		</label>
 	);
 };
 

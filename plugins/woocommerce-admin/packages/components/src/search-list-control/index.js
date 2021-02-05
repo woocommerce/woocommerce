@@ -4,7 +4,6 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	Button,
-	MenuGroup,
 	Spinner,
 	TextControl,
 	withSpokenMessages,
@@ -25,12 +24,12 @@ import Tag from '../tag';
 
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woocommerce-admin' ),
-	list: __( 'Results', 'woocommerce-admin' ),
 	noItems: __( 'No items found.', 'woocommerce-admin' ),
 	noResults: __( 'No results for %s', 'woocommerce-admin' ),
 	search: __( 'Search for items', 'woocommerce-admin' ),
 	selected: ( n ) =>
 		sprintf(
+			/* translators: Number of items selected from list. */
 			_n(
 				'%d item selected',
 				'%d items selected',
@@ -127,16 +126,19 @@ export class SearchListControl extends Component {
 		if ( ! list ) {
 			return null;
 		}
+
 		return list.map( ( item ) => (
 			<Fragment key={ item.id }>
-				{ renderItem( {
-					item,
-					isSelected: this.isSelected( item ),
-					onSelect: this.onSelect,
-					isSingle,
-					search,
-					depth,
-				} ) }
+				<li>
+					{ renderItem( {
+						item,
+						isSelected: this.isSelected( item ),
+						onSelect: this.onSelect,
+						isSingle,
+						search,
+						depth,
+					} ) }
+				</li>
 				{ this.renderList( item.children, depth + 1 ) }
 			</Fragment>
 		) );
@@ -176,12 +178,9 @@ export class SearchListControl extends Component {
 		}
 
 		return (
-			<MenuGroup
-				label={ messages.list }
-				className="woocommerce-search-list__list"
-			>
+			<ul className="woocommerce-search-list__list">
 				{ this.renderList( list ) }
-			</MenuGroup>
+			</ul>
 		);
 	}
 
@@ -294,10 +293,6 @@ SearchListControl.propTypes = {
 		 * A more detailed label for the "Clear all" button, read to screen reader users.
 		 */
 		clear: PropTypes.string,
-		/**
-		 * Label for the list of selectable items, only read to screen reader users.
-		 */
-		list: PropTypes.string,
 		/**
 		 * Message to display when the list is empty (implies nothing loaded from the server
 		 * or parent component).

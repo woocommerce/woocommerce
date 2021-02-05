@@ -49,6 +49,10 @@
 	overflow-x: hidden;
 	overflow-y: auto;
 
+	li {
+		margin-bottom: 0;
+	}
+
 	&.is-loading {
 		padding: $gap-small 0;
 		text-align: center;
@@ -112,11 +116,8 @@
 			border-bottom: none !important;
 		}
 
-		.woocommerce-search-list__item-state {
-			flex: 0 0 16px;
-			margin-right: $gap-smaller;
-			// Set an explicit height to ensure vertical alignment
-			height: 24px;
+		.woocommerce-search-list__item-input {
+			margin: 0 $gap-smaller 0 0;
 		}
 
 		.woocommerce-search-list__item-label {
