@@ -59,37 +59,49 @@ We follow the same WordPress support policy as WooCommerce, this means we need t
 
 For that, we run end-to-end tests against all of those versions, and because we use packages published by Gutenberg, we also run tests against the latest version of Gutenberg plugin.
 
-When a new version of WordPress is released, we drop support for the oldest version we have, so if the latest version is 5.5, we would test against:
+When a new version of WordPress is released, we drop support for the oldest version we have, so if the latest version is 5.6, we would test against:
 
-- WordPress 5.3
 - WordPress 5.4
 - WordPress 5.5
-- WordPress 5.5 + Gutenberg
+- WordPress 5.6
+- WordPress 5.6 + Gutenberg
 
-When 5.6 is released, we would drop support for 5.3, and update our `./.travis.yml` file.
+When 5.7 is released, we would drop support for 5.4, and update our `./.github/workflows/php-js-e2e-tests.yml` file.
 
 You need to bump the test version, so
 
 ```yml
-- name: E2E Tests (WP 5.3)
-	script:
-			- npm run test:e2e
-	env:
-			- WP_VERSION=5.3
-			- E2E_TESTS=1
-			- WOOCOMMERCE_BLOCKS_PHASE=3
+  JSE2ETestsWP54:
+    name: JavaScipt E2E Tests (WP 5.4)
+      ...
+      - name: E2E Tests (WP 5.4)
+        env:
+          WOOCOMMERCE_BLOCKS_PHASE: 3
+          WP_VERSION: 5.4-branch
+        run: |
+          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
+          echo $JSON > .wp-env.override.json
+          npm run wp-env start
+          npm run wp-env clean all
+          npm run test:e2e
 ```
 
 Would become
 
 ```yml
-- name: E2E Tests (WP 5.4)
-	script:
-			- npm run test:e2e
-	env:
-			- WP_VERSION=5.4
-			- E2E_TESTS=1
-			- WOOCOMMERCE_BLOCKS_PHASE=3
+  JSE2ETestsWP55:
+    name: JavaScipt E2E Tests (WP 5.5)
+      ...
+      - name: E2E Tests (WP 5.5)
+        env:
+          WOOCOMMERCE_BLOCKS_PHASE: 3
+          WP_VERSION: 5.5-branch
+        run: |
+          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
+          echo $JSON > .wp-env.override.json
+          npm run wp-env start
+          npm run wp-env clean all
+          npm run test:e2e
 ```
 
 You also need to check any existing tests that checks the WP version.
