@@ -622,9 +622,9 @@ class WC_Query {
 
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
 		$args['where'] .= $wpdb->prepare(
-			' AND wc_product_meta_lookup.min_price >= %f AND wc_product_meta_lookup.max_price <= %f ',
-			$current_min_price,
-			$current_max_price
+			' AND NOT (%f<wc_product_meta_lookup.min_price OR %f>wc_product_meta_lookup.max_price ) ',
+			$current_max_price,
+			$current_min_price
 		);
 		return $args;
 	}
