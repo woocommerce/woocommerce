@@ -33,7 +33,7 @@ const runProductBrowseSearchSortTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			// Create 1st product with Clothing category 
-			variablePostIdValue = await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
+			await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
 			// Create 2nd product with Audio category 
 			await createSimpleProductWithCategory(simpleProductName + ' 2', singleProductPrice2, audio);
 			// Create 3rd product with Hardware category 
