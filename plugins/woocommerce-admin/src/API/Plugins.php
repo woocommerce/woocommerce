@@ -391,6 +391,9 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
+		// the mollie-payments-for-woocommerce plugin calls `WP_Filesystem()` during it's activation hook, which crashes without this include.
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
 		foreach ( $plugins as $plugin ) {
 			$slug = $plugin;
 			$path = isset( $allowed_plugins[ $slug ] ) ? $allowed_plugins[ $slug ] : false;

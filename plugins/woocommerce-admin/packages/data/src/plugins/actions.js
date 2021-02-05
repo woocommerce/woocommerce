@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { apiFetch, dispatch, select } from '@wordpress/data-controls';
+import { _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -72,7 +73,7 @@ export function* installPlugins( plugins ) {
 		}
 
 		if ( Object.keys( results.errors.errors ).length ) {
-			throw results.errors;
+			throw results.errors.errors;
 		}
 
 		yield setIsRequesting( 'installPlugins', false );
@@ -80,7 +81,7 @@ export function* installPlugins( plugins ) {
 		return results;
 	} catch ( error ) {
 		yield setError( 'installPlugins', error );
-		throw new Error( formatErrors( error ) );
+		throw new Error( formatErrorMessage( error ) );
 	}
 }
 
@@ -99,7 +100,7 @@ export function* activatePlugins( plugins ) {
 		}
 
 		if ( Object.keys( results.errors.errors ).length ) {
-			throw results.errors;
+			throw results.errors.errors;
 		}
 
 		yield setIsRequesting( 'activatePlugins', false );
@@ -199,3 +200,20 @@ export function formatErrors( response ) {
 
 	return response;
 }
+
+const formatErrorMessage = ( pluginErrors, actionType = 'install' ) => {
+	return sprintf(
+		/* translators: %(actionType): install or activate (the plugin). %(pluginName): a plugin slug (e.g. woocommerce-services). %(error): a single error message or in plural a comma separated error message list.*/
+		_n(
+			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
+			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
+			pluginErrors.length,
+			'woocommerce-admin'
+		),
+		{
+			actionType,
+			pluginName: Object.keys( pluginErrors ).join( ', ' ),
+			error: Object.values( pluginErrors ).join( ', \n' ),
+		}
+	);
+};

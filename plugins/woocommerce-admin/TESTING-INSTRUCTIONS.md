@@ -3,6 +3,17 @@ Testing instructions
 
 ## 2.0.0
 
+### Add the Mollie payment provider setup task #6257
+
+- You'll need a site that has the setup task list visible. Complete the OBW and make sure you're in a Mollie supported country (Such as United Kingdom).
+- Go to the setup payments task
+- Mollie should be listed as an option
+- Click "Set up" button on the Mollie task
+- It should install and activate the mollie payments plugin
+- The connect step should provide links to create an account or go straight to Mollie settings. (test both links work)
+- Click "continue"
+- You should arrive back at the payment provider list
+
 ### Fix: allow for more terms to be shown for product attributes in the Analytics orders report. #5868
 
 1. Create a product attribute

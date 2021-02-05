@@ -21,7 +21,7 @@ describe( 'TaskList > Payments', () => {
 			countryCode: 'SE',
 			onboardingStatus: {},
 			options: [],
-			profileItems: {},
+			profileItems: { industry: [] },
 		};
 
 		it( 'includes Klarna Checkout for SE, NO, and FI', () => {
@@ -48,7 +48,7 @@ describe( 'TaskList > Payments', () => {
 				'PL',
 				'FR',
 				'IT',
-				'UK',
+				'GB',
 			];
 			supportedCountryCodes.forEach( ( countryCode ) => {
 				params.countryCode = countryCode;
@@ -57,6 +57,60 @@ describe( 'TaskList > Payments', () => {
 					methods.some( ( e ) => e.key === 'klarna_payments' )
 				).toBe( true );
 			} );
+		} );
+
+		describe( 'Mollie', () => {
+			it( 'Detects the plugin is enabled based on the options passed', () => {
+				const mollieParams = {
+					...params,
+					options: {
+						woocommerce_mollie_payments_settings: {
+							enabled: 'yes',
+						},
+					},
+				};
+
+				const mollieMethod = getPaymentMethods( mollieParams ).find(
+					( method ) => method.key === 'mollie'
+				);
+
+				expect( mollieMethod.isEnabled ).toBe( true );
+			} );
+
+			it( 'is enabled for supported countries', () => {
+				[
+					'FR',
+					'DE',
+					'GB',
+					'AT',
+					'CH',
+					'ES',
+					'IT',
+					'PL',
+					'FI',
+					'NL',
+					'BE',
+				].forEach( ( countryCode ) => {
+					const methods = getPaymentMethods( {
+						...params,
+						countryCode,
+					} );
+
+					expect(
+						methods.filter( ( method ) => method.key === 'mollie' )
+							.length
+					).toBe( 1 );
+				} );
+			} );
+		} );
+
+		it( 'is marked as `isConfigured` if the plugin is active', () => {
+			expect(
+				getPaymentMethods( {
+					...params,
+					activePlugins: [ 'mollie-payments-for-woocommerce' ],
+				} ).find( ( method ) => method.key === 'mollie' ).isConfigured
+			).toBe( true );
 		} );
 	} );
 
