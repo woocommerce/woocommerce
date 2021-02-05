@@ -46,7 +46,6 @@ const runProductBrowseSearchSortTest = () => {
 		});
 
 		it('should let user search the store', async () => {
-			await shopper.login();
 			await shopper.goToShop();
 
 			// Search for the 1st product
@@ -68,7 +67,6 @@ const runProductBrowseSearchSortTest = () => {
 		it('should let user browse products by categories', async () => {
 			// Go to 1st product and click category name
 			await shopper.goToProduct(variablePostIdValue);
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
 			await Promise.all([
 				page.waitForNavigation({waitUntil: 'networkidle0'}),
 				page.click('span.posted_in > a', {text: clothing}),
@@ -76,10 +74,7 @@ const runProductBrowseSearchSortTest = () => {
 			await uiUnblocked();
 
 			// Verify Clothing category page
-			await expect(page.title()).resolves.toMatch(clothing);
 			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
-
-			// Verify clicking on the product
 			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
 			await uiUnblocked();
 			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
@@ -91,17 +86,17 @@ const runProductBrowseSearchSortTest = () => {
 
 			// Sort by price high to low
 			await page.select('.orderby', 'price-desc');
-            // Verify the first product in sort order
+			// Verify the first product in sort order
 			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 3'});
 
 			// Sort by price low to high
 			await page.select('.orderby', 'price');
-            // Verify the first product in sort order
+			// Verify the first product in sort order
 			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
 
 			// Sort by date of creation, latest to oldest
 			await page.select('.orderby', 'date');
-            // Verify the first product in sort order
+			// Verify the first product in sort order
 			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 3'});
 		});
 	});
