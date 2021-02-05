@@ -1470,7 +1470,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		},
 
 		/**
@@ -1483,7 +1483,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		}
 	};
 
