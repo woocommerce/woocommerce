@@ -30,16 +30,12 @@ const productTitle = 'li.first > a > h2.woocommerce-loop-product__title';
 
 const runProductBrowseSearchSortTest = () => {
 	describe('Search, browse by categories and sort items in the shop', () => {
-			let variablePostIdValue;
 		beforeAll(async () => {
 			await merchant.login();
-
 			// Create 1st product with Clothing category 
 			variablePostIdValue = await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
-
 			// Create 2nd product with Audio category 
 			await createSimpleProductWithCategory(simpleProductName + ' 2', singleProductPrice2, audio);
-
 			// Create 3rd product with Hardware category 
 			await createSimpleProductWithCategory(simpleProductName + ' 3', singleProductPrice3, hardware);
 			await merchant.logout();
@@ -47,26 +43,11 @@ const runProductBrowseSearchSortTest = () => {
 
 		it('should let user search the store', async () => {
 			await shopper.goToShop();
-
-			// Search for the 1st product
-			await expect(page).toFill('.search-field', simpleProductName + ' 1');
-			await expect(page).toClick('.search-submit');
-			await uiUnblocked();
-
-			// Make sure we're on the search results page
-			await expect(page.title()).resolves.toMatch('Search Results for “' + simpleProductName + ' 1”');
-
-			// Verify the results
-			await expect(page).toMatchElement('h2.entry-title', {text: simpleProductName + ' 1'});
-			await expect(page).toClick('h2.entry-title', {text: simpleProductName + ' 1'});
-			await uiUnblocked();
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
-			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
+			await shopper.searchForProduct(simpleProductName + ' 1');
 		});
 
 		it('should let user browse products by categories', async () => {
-			// Go to 1st product and click category name
-			await shopper.goToProduct(variablePostIdValue);
+			// Browse through Clothing category link
 			await Promise.all([
 				page.waitForNavigation({waitUntil: 'networkidle0'}),
 				page.click('span.posted_in > a', {text: clothing}),
@@ -74,10 +55,11 @@ const runProductBrowseSearchSortTest = () => {
 			await uiUnblocked();
 
 			// Verify Clothing category page
+			await page.waitForSelector(productTitle);
 			await expect(page).toMatchElement(productTitle, {text: simpleProductName + ' 1'});
 			await expect(page).toClick(productTitle, {text: simpleProductName + ' 1'});
 			await uiUnblocked();
-			await expect(page.title()).resolves.toMatch(simpleProductName + ' 1');
+			await page.waitForSelector('h1.entry-title');
 			await expect(page).toMatchElement('h1.entry-title', simpleProductName + ' 1');
 		});
 
