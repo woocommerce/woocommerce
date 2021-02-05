@@ -137,6 +137,17 @@ const shopper = {
 		await quantityInput.type( quantityValue.toString() );
 	},
 
+	searchForProduct: async ( prouductName ) => {
+		await expect(page).toFill('.search-field', prouductName);
+		await expect(page).toClick('.search-submit');
+		await page.waitForSelector('h2.entry-title');
+		await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
+		await expect(page).toClick('h2.entry-title', {text: prouductName});
+		await page.waitForSelector('h1.entry-title');
+		await expect(page.title()).resolves.toMatch(prouductName);
+		await expect(page).toMatchElement('h1.entry-title', prouductName);
+	},
+
 	/*
 	 * My Accounts flows.
 	 */
