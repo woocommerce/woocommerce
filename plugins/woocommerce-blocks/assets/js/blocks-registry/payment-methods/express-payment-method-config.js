@@ -13,7 +13,7 @@ export default class ExpressPaymentMethodConfig {
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
-			features: config?.supports?.features || [],
+			features: config?.supports?.features || [ 'products' ],
 		};
 		this.canMakePayment = canMakePaymentWithFeaturesCheck(
 			config.canMakePayment,
@@ -36,9 +36,12 @@ export default class ExpressPaymentMethodConfig {
 				'The paymentMethodId property for the payment method must be a string or undefined (in which case it will be the value of the name property).'
 			);
 		}
-		if ( ! Array.isArray( config.supports?.features ) ) {
+		if (
+			typeof config.supports?.features !== 'undefined' &&
+			! Array.isArray( config.supports?.features )
+		) {
 			throw new Error(
-				'The features property for the payment method must be an array.'
+				'The features property for the payment method must be an array or undefined.'
 			);
 		}
 		assertValidElement( config.content, 'content' );
