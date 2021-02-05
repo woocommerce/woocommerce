@@ -32,7 +32,7 @@ export default class PaymentMethodConfig {
 				config?.supports?.savePaymentInfo || // Kept for backward compatibility if methods still pass this when registering.
 				false,
 			showSaveOption: config?.supports?.showSaveOption || false,
-			features: config?.supports?.features || [],
+			features: config?.supports?.features || [ 'products' ],
 		};
 		this.canMakePayment = canMakePaymentWithFeaturesCheck(
 			config.canMakePayment,
@@ -111,9 +111,12 @@ export default class PaymentMethodConfig {
 				}
 			);
 		}
-		if ( ! Array.isArray( config.supports?.features ) ) {
+		if (
+			typeof config.supports?.features !== 'undefined' &&
+			! Array.isArray( config.supports?.features )
+		) {
 			throw new Error(
-				'The features property for the payment method must be an array.'
+				'The features property for the payment method must be an array or undefined.'
 			);
 		}
 		if (
