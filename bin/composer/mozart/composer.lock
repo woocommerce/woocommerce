@@ -13,12 +13,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/coenjacobs/mozart.git",
-                "reference": "782a9282a7097ae38ddb7600388885059de10ea1"
+                "reference": "3b1243ca8505fa6436569800dc34269178930f39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/coenjacobs/mozart/zipball/782a9282a7097ae38ddb7600388885059de10ea1",
-                "reference": "782a9282a7097ae38ddb7600388885059de10ea1",
+                "url": "https://api.github.com/repos/coenjacobs/mozart/zipball/3b1243ca8505fa6436569800dc34269178930f39",
+                "reference": "3b1243ca8505fa6436569800dc34269178930f39",
                 "shasum": ""
             },
             "require": {
@@ -64,7 +64,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-02-03T20:37:56+00:00"
+            "time": "2021-02-04T20:20:50+00:00"
         },
         {
             "name": "league/flysystem",
