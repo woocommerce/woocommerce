@@ -64,3 +64,33 @@ Testing instructions
 - Single column:
   - store setup tasks, inbox panel, stats overview, store management links (only visible when setup tasks is hidden).
 - Hide the setup tasks list, and see if the store management links show up in the right place.
+
+### Enhancement: Use the new Paypal payments plugin for onboarding. #6261
+
+- Create new woo store, and finish the onboarding wizard
+- Go to the home screen, and click the **Set up payments** task. **Paypal Payments** option should be listed as an option, with a **Set up** button.
+- Click **Set up** on the Paypal plugin.
+- It should automatically start the **Install** step, and install and enable the [Paypal Payments](https://woocommerce.com/products/woocommerce-paypal-payments/) plugin.
+- For Paypal Payments version greater then `1.1.0`.
+  - For the second step it should show a `Connect` button
+  - Click on **Connect** and a window should popup for Paypal, follow this until finished. The last button is - Go back to Woocommerce Developers
+  - Once done, the page should reload, and briefly show the setup screen again, it should then finish and go back to the payment list.
+  - Once on the payment list, the `Set up` button should be gone, and instead show a toggle, that is set to enabled.
+    - The enable/disable button should be correctly reflected in the Woocommerce payment settings screen as well.
+- For Paypal Payments version `1.1.0` and below
+  - For the second step it will show the manual fields (merchant email, merchant id, client id, client secret). 
+  - Check if the help links work below, they should help with finding the above credentials.
+    - If you have a business account set up, you can find the credentials in these two places
+    - [Get live app credentials](https://developer.paypal.com/developer/applications/)
+    - [Merchant id](https://www.paypal.com/businessmanage/account/aboutBusiness)
+  - Fill in the credentials and click **Proceed**, this should succeed and redirect you to the Payment options list
+  - The **Set up** button should be replaced by a toggle, that is set to enabled.
+    - The enable/disable button should be correctly reflected in the Woocommerce payment settings screen as well.
+
+Once everything is configured and enabled do a client test
+- Make sure you have added a product and store homescreen (Finish the **Personalize my store** task)
+- Navigate to one of the products and add it to the cart
+- Click **go to checkout**
+- Paypal should be one of the options to pay
+- Filling in your billing/shipping info then click pay with **Paypal**
+- The paypal pay window should pop up correctly without errors.

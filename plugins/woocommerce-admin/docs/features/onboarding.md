@@ -20,7 +20,6 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 * GET `/wc-admin/plugins/connect-jetpack` - Generates a URL for connecting to Jetpack. A `redirect_url` is accepted, which is used upon a successful connection.
 * POST `/wc-admin/plugins/request-wccom-connect` - Generates a URL for the WooCommerce.com connection process.
 * POST `/wc-admin/plugins/finish-wccom-connect` - Finishes the WooCommerce.com connection process by storing the received access token.
-* POST `/wc-admin/plugins/connect-paypal` - Generates a URL for connecting to PayPal during the payments task.
 * POST `/wc-admin/plugins/connect-square` - Generates a URL for connecting to Square during the payments task.
 * GET `/wc-admin/onboarding/profile` - Returns the information gathered during the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.
 * POST `/wc-admin/onboarding/profile` - Sets data for the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.

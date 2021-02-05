@@ -88,6 +88,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Refactored extended task list. #6081
 - Fix: Fixed the Add First Product email note checks. #6260
 - Fix: Onboarding - Fixed "Business Details" error. #6271
+- Enhancement: Use the new Paypal payments plugin for onboarding. #6261
 
 
 == Changelog ==

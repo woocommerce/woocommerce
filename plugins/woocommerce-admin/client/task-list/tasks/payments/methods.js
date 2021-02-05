@@ -23,7 +23,7 @@ import { MollieLogo } from './images/mollie';
 import Stripe from './stripe';
 import Square from './square';
 import WCPay from './wcpay';
-import PayPal from './paypal';
+import PayPal, { PAYPAL_PLUGIN } from './paypal';
 import Klarna from './klarna';
 import PayFast from './payfast';
 import EWay from './eway';
@@ -73,10 +73,13 @@ export function getPaymentMethods( {
 	onboardingStatus,
 	options,
 	profileItems,
+	paypalOnboardingStatus,
+	loadingPaypalStatus,
 } ) {
 	const {
 		stripeSupportedCountries = [],
 		wcPayIsConnected = false,
+		enabledPaymentGateways = [],
 	} = onboardingStatus;
 
 	const hasCbdIndustry = profileItems.industry.some( ( { slug } ) => {
@@ -122,7 +125,7 @@ export function getPaymentMethods( {
 		},
 		{
 			key: 'paypal',
-			title: __( 'PayPal Checkout', 'woocommerce-admin' ),
+			title: __( 'PayPal Payments', 'woocommerce-admin' ),
 			content: (
 				<>
 					{ __(
@@ -133,19 +136,17 @@ export function getPaymentMethods( {
 			),
 			before: <img src={ wcAssetUrl + 'images/paypal.png' } alt="" />,
 			visible: ! hasCbdIndustry,
-			plugins: [ 'woocommerce-gateway-paypal-express-checkout' ],
+			plugins: [ PAYPAL_PLUGIN ],
 			container: <PayPal />,
 			isConfigured:
-				options.woocommerce_ppec_paypal_settings &&
-				( ( options.woocommerce_ppec_paypal_settings.reroute_requests &&
-					options.woocommerce_ppec_paypal_settings.email ) ||
-					( options.woocommerce_ppec_paypal_settings.api_username &&
-						options.woocommerce_ppec_paypal_settings
-							.api_password ) ),
-			isEnabled:
-				options.woocommerce_ppec_paypal_settings &&
-				options.woocommerce_ppec_paypal_settings.enabled === 'yes',
-			optionName: 'woocommerce_ppec_paypal_settings',
+				paypalOnboardingStatus &&
+				paypalOnboardingStatus.production &&
+				paypalOnboardingStatus.production.onboarded,
+			isEnabled: enabledPaymentGateways.includes( 'ppcp-gateway' ),
+			optionName: 'woocommerce_ppcp-gateway_settings',
+			loading: activePlugins.includes( PAYPAL_PLUGIN )
+				? loadingPaypalStatus
+				: false,
 		},
 		{
 			key: 'klarna_checkout',

@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 
 export const STORE_NAME = 'wc/admin/plugins';
+export const PAYPAL_NAMESPACE = '/wc-paypal/v1';
 
 /**
  * Plugin slugs and names as key/value pairs.

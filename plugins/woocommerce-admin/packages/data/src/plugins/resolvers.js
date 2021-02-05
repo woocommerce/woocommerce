@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { WC_ADMIN_NAMESPACE, JETPACK_NAMESPACE } from '../constants';
+import { OPTIONS_STORE_NAME } from '../options';
+import { PAYPAL_NAMESPACE, STORE_NAME } from './constants';
 import {
 	setIsRequesting,
 	updateActivePlugins,
@@ -15,6 +17,7 @@ import {
 	updateInstalledPlugins,
 	updateIsJetpackConnected,
 	updateJetpackConnectUrl,
+	setPaypalOnboardingStatus,
 } from './actions';
 
 export function* getActivePlugins() {
@@ -88,4 +91,52 @@ export function* getJetpackConnectUrl( query ) {
 	}
 
 	yield setIsRequesting( 'getJetpackConnectUrl', false );
+}
+
+export function* getPaypalOnboardingStatus() {
+	yield setIsRequesting( 'getPaypalOnboardingStatus', true );
+
+	const errorData = yield select(
+		STORE_NAME,
+		'getPluginsError',
+		'getPaypalOnboardingStatus'
+	);
+	if ( errorData && errorData.data && errorData.data.status === 404 ) {
+		// The get-status request doesn't exist fall back to using options.
+		yield setOnboardingStatusWithOptions();
+	} else {
+		try {
+			const url = PAYPAL_NAMESPACE + '/onboarding/get-status';
+			const results = yield apiFetch( {
+				path: url,
+				method: 'GET',
+			} );
+
+			yield setPaypalOnboardingStatus( results );
+		} catch ( error ) {
+			yield setOnboardingStatusWithOptions();
+			yield setError( 'getPaypalOnboardingStatus', error );
+		}
+	}
+
+	yield setIsRequesting( 'getPaypalOnboardingStatus', false );
+}
+
+function* setOnboardingStatusWithOptions() {
+	const options = yield select(
+		OPTIONS_STORE_NAME,
+		'getOption',
+		'woocommerce-ppcp-settings'
+	);
+	yield setPaypalOnboardingStatus( {
+		production: {
+			onboarded:
+				options.merchant_email_production &&
+				options.merchant_id_production &&
+				options.client_id_production &&
+				options.client_secret_production
+					? true
+					: false,
+		},
+	} );
 }

@@ -64,6 +64,7 @@ class OnboardingTasks {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_import_notice_admin_script' ) );
+		add_filter( 'woocommerce_paypal_payments_onboarding_redirect_url', array( $this, 'ppcp_ob_after_onboarding_redirect_url' ) );
 	}
 
 	/**
@@ -72,6 +73,8 @@ class OnboardingTasks {
 	public function add_media_scripts() {
 		wp_enqueue_media();
 	}
+
+
 
 	/**
 	 * Get task item data for settings filter.
@@ -101,6 +104,7 @@ class OnboardingTasks {
 		$settings['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
 		$settings['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
 		$settings['hasPaymentGateway']              = ! empty( $enabled_gateways );
+		$settings['enabledPaymentGateways']         = array_keys( $enabled_gateways );
 		$settings['hasPhysicalProducts']            = count(
 			wc_get_products(
 				array(
@@ -226,6 +230,22 @@ class OnboardingTasks {
 		}
 		return false;
 	}
+
+
+	/**
+	 * Sets the URL users are redirected to after PayPal Payments has received onboarding information from PayPal.
+	 *
+	 * @param string $url the current redirect url.
+	 * @return string redirect url redirecting to WC Admin home screen.
+	 */
+	public static function ppcp_ob_after_onboarding_redirect_url( $url ) {
+		if ( isset( $_GET['ppcpobw'] ) && 1 === absint( $_GET['ppcpobw'] ) ) { // phpcs:ignore csrf ok, sanitization ok.
+			$url = wc_admin_url( '&task=payments&method=paypal&onboarding=complete' );
+		}
+
+		return $url;
+	}
+
 
 	/**
 	 * Hooks into the product page to add a notice to return to the task list if a product was added.

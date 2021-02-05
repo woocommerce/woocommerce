@@ -132,7 +132,8 @@ class Options extends \WC_REST_Data_Controller {
 			'theme_mods_' . get_stylesheet()     => current_user_can( 'edit_theme_options' ),
 			'woocommerce_setup_jetpack_opted_in' => current_user_can( 'manage_woocommerce' ),
 			'woocommerce_stripe_settings'        => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_ppec_paypal_settings'   => current_user_can( 'manage_woocommerce' ),
+			'woocommerce-ppcp-settings'          => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_ppcp-gateway_setting'   => current_user_can( 'manage_woocommerce' ),
 			'woocommerce_demo_store'             => current_user_can( 'manage_woocommerce' ),
 			'woocommerce_demo_store_notice'      => current_user_can( 'manage_woocommerce' ),
 		);

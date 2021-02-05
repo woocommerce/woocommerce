@@ -201,6 +201,13 @@ export function formatErrors( response ) {
 	return response;
 }
 
+export function setPaypalOnboardingStatus( status ) {
+	return {
+		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS,
+		paypalOnboardingStatus: status,
+	};
+}
+
 const formatErrorMessage = ( pluginErrors, actionType = 'install' ) => {
 	return sprintf(
 		/* translators: %(actionType): install or activate (the plugin). %(pluginName): a plugin slug (e.g. woocommerce-services). %(error): a single error message or in plural a comma separated error message list.*/

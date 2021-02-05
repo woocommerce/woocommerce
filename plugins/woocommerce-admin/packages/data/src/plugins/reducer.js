@@ -26,6 +26,7 @@ const plugins = (
 		jetpackConnection,
 		redirectUrl,
 		jetpackConnectUrl,
+		paypalOnboardingStatus,
 		replace,
 	}
 ) => {
@@ -100,6 +101,13 @@ const plugins = (
 					[ redirectUrl ]: jetpackConnectUrl,
 				},
 			};
+			break;
+		case TYPES.SET_PAYPAL_ONBOARDING_STATUS:
+			state = {
+				...state,
+				paypalOnboardingStatus,
+			};
+			break;
 	}
 	return state;
 };

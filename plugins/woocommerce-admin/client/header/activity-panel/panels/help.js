@@ -147,7 +147,7 @@ function getPaymentsItems( props ) {
 				'woocommerce-admin'
 			),
 			link:
-				'https://docs.woocommerce.com/document/paypal-express-checkout/?utm_source=help_panel',
+				'https://docs.woocommerce.com/document/2-0/woocommerce-paypal-payments/#section-3',
 		},
 		showSquare && {
 			title: __( 'Square - Get started', 'woocommerce-admin' ),

@@ -29,3 +29,6 @@ export const getPluginInstallState = ( state, plugin ) => {
 
 	return 'unavailable';
 };
+
+export const getPaypalOnboardingStatus = ( state ) =>
+	state.paypalOnboardingStatus;
