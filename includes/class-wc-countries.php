@@ -65,7 +65,7 @@ class WC_Countries {
 	 * @return bool True if the country is known to us, false otherwise.
 	 */
 	public function country_exists( $country_code ) {
-		return array_key_exists( $country_code, $this->get_countries() );
+		return isset( $this->get_countries()[ $country_code ] );
 	}
 
 	/**
