@@ -850,9 +850,11 @@ class WC_Checkout {
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
-			} elseif ( $this->is_country_we_dont_ship_to( $shipping_country ) ) {
-				/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
-				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
+			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
+				if ( WC()->countries->country_exists( $shipping_country ) ) {
+					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
+					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
+				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -875,17 +877,6 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
-	}
-
-	/**
-	 * Checks if a given country is one which exists but we don't ship to.
-	 *
-	 * @param string $country ISO 3166-1 alpha-2 country code to check.
-	 * @return true if the country exists AND we don't ship to it (note that if country doesn't exist will return false).
-	 */
-	private function is_country_we_dont_ship_to( $country ) {
-		return WC()->countries->country_exists( $country ) &&
-			! in_array( $country, array_keys( WC()->countries->get_shipping_countries() ), true );
 	}
 
 	/**
