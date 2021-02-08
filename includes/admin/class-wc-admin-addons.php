@@ -704,7 +704,9 @@ class WC_Admin_Addons {
 			'repo-slug' => 'woocommerce-payments',
 		);
 
-		WC_Install::background_installer( $services_plugin_id, $wcpay_plugin );
+		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
+
+		do_action( 'wc_addons_woocommerce_payments_installed' );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;
