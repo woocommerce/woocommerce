@@ -8,5 +8,5 @@
  */
 
 return array(
-	// 'get_option'
+	'wc_get_shipping_method_count',
 );

@@ -881,7 +881,7 @@ class WC_Checkout {
 	 * Checks if a given country is one which exists but we don't ship to.
 	 *
 	 * @param string $country ISO 3166-1 alpha-2 country code to check.
-	 * @return true if the country exists AND we don't ship to it (not that if country doesn't exist will return false).
+	 * @return true if the country exists AND we don't ship to it (note that if country doesn't exist will return false).
 	 */
 	private function is_country_we_dont_ship_to( $country ) {
 		return WC()->countries->country_exists( $country ) &&
