@@ -746,6 +746,13 @@ class WC_Checkout {
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
+				if ( 'country' === $field['type'] &&
+					! ( 'shipping' === $fieldset_key && ! $data ['ship_to_different_address'] ) &&
+					! WC()->countries->country_exists( $data[ $key ] ) ) {
+						/* translators: ISO 3166-1 alpha-2 country code */
+						$errors->add( $key . '_validation', sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $data[ $key ] ) );
+				}
+
 				switch ( $fieldset_key ) {
 					case 'shipping':
 						/* translators: %s: field name */
@@ -833,28 +840,19 @@ class WC_Checkout {
 		$this->validate_posted_data( $data, $errors );
 		$this->check_cart_items();
 
-		$billing_country = WC()->customer->get_shipping_country();
-		if ( ! WC()->countries->country_exists( $billing_country ) ) {
-			/* translators: %s: ISO 3166-1 alpha-2 country code. */
-			throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $billing_country ) );
-		}
-
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) {
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
-			$shipping_country = WC()->customer->get_shipping_country();
+			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
-			} elseif ( ! WC()->countries->country_exists( $shipping_country, true ) ) {
-				/* translators: %s: ISO 3166-1 alpha-2 country code. */
-				throw new Exception( sprintf( __( "'%s' is not a valid country code", 'woocommerce' ), $billing_country ) );
-			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
-				/* translators: %s: shipping location */
-				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
+			} elseif ( $this->is_country_we_dont_ship_to( $shipping_country ) ) {
+				/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
+				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -877,6 +875,17 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
+	}
+
+	/**
+	 * Checks if a given country is one which exists but we don't ship to.
+	 *
+	 * @param string $country ISO 3166-1 alpha-2 country code to check.
+	 * @return true if the country exists AND we don't ship to it (not that if country doesn't exist will return false).
+	 */
+	private function is_country_we_dont_ship_to( $country ) {
+		return WC()->countries->country_exists( $country ) &&
+			! in_array( $country, array_keys( WC()->countries->get_shipping_countries() ), true );
 	}
 
 	/**
@@ -976,7 +985,7 @@ class WC_Checkout {
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 			if ( ! is_ajax() ) {
-				wp_redirect( $result['redirect'] );
+				wp_safe_redirect( $result['redirect'] );
 				exit;
 			}
 
