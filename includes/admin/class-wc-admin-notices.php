@@ -65,6 +65,51 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Parses query to create nonces when available.
+	 *
+	 * @param object $response The WP_REST_Response we're working with.
+	 * @return object $response The prepared WP_REST_Response object.
+	 */
+	public static function prepare_note_with_nonce( $response ) {
+		if ( 'wc-update-db-reminder' !== $response->data['name'] || ! isset( $response->data['actions'] ) ) {
+			return $response;
+		}
+
+		foreach ( $response->data['actions'] as $action_key => $action ) {
+			$url_parts = ! empty( $action->query ) ? wp_parse_url( $action->query ) : '';
+
+			if ( ! isset( $url_parts['query'] ) ) {
+				continue;
+			}
+
+			wp_parse_str( $url_parts['query'], $params );
+
+			if ( array_key_exists( '_nonce_action', $params ) && array_key_exists( '_nonce_name', $params ) ) {
+				$org_params = $params;
+
+				// Check to make sure we're acting on the whitelisted nonce actions.
+				if ( 'wc_db_update' !== $params['_nonce_action'] && 'woocommerce_hide_notices_nonce' !== $params['_nonce_action'] ) {
+					continue;
+				}
+
+				unset( $org_params['_nonce_action'] );
+				unset( $org_params['_nonce_name'] );
+
+				$url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'];
+
+				$nonce         = array( $params['_nonce_name'] => wp_create_nonce( $params['_nonce_action'] ) );
+				$merged_params = array_merge( $nonce, $org_params );
+				$parsed_query  = add_query_arg( $merged_params, $url );
+
+				$response->data['actions'][ $action_key ]->query = $parsed_query;
+				$response->data['actions'][ $action_key ]->url   = $parsed_query;
+			}
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Store notices to DB
 	 */
 	public static function store_notices() {

@@ -1,4 +1,4 @@
-import { Model } from '../models/model';
+import { Model } from '../models';
 
 /**
  * A dummy model that can be used in test files.

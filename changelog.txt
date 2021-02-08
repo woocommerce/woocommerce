@@ -1,6 +1,14 @@
 == Changelog ==
 
-= 4.9.0 =
+= 4.9.2 2021-01-25 =
+
+* Tweak - Disable untested plugin's notice from System Status and Plugin's page. #28840
+
+= 4.9.1 2021-01-19 =
+
+* Fix - Reverts #28204 to ensure compatibility with extensions using legacy do_action calls. #28835
+
+= 4.9.0 2021-01-12 =
 
 **WooCommerce**
 * Localization - Add 'Ladakh' to the list of Indian states. #28458
@@ -28,6 +36,9 @@
 * Fix - Better error messages when usage limit are reached. #28592
 * Fix - Adjust stock items only for statuses which reduces the stock. #28620
 * Fix - Named parameter to fix DB update routine on PHP8. #28537
+* Fix - Add protection around func_get_args_call for backwards compatibility. #28677
+* Fix - Restore stock_status in REST API V3 response. #28731
+* Fix - Revert some of the changes related to perf enhancements (27735) as it was breaking stock_status filter. #28745
 * Dev - Hook for intializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
@@ -70,6 +81,7 @@
 * Fix - Preventing desktop-sized navigation placeholder from appearing on mobile during load. #5616
 * Fix - Completed tasks tracking causing infinite loop #5941
 * Fix - Remove Navigation access #5940
+* Fix - Compile the debug module so it can be used in older browsers like IE11. #5968
 * Tweak - Fix inconsistent REST API parameter name for customer type filtering. #5823
 * Tweak - Improve styles of the tax task. #5709
 * Tweak - Do not show store setup link on the homescreen. #5801

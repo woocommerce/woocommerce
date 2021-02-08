@@ -352,30 +352,122 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get order counts
-	 *
-	 * @return array
-	 */
-	private static function get_order_counts() {
-		$order_count      = array();
-		$order_count_data = wp_count_posts( 'shop_order' );
-		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
-			$order_count[ $status_slug ] = $order_count_data->{ $status_slug };
-		}
-		return $order_count;
-	}
-
-	/**
-	 * Combine all order data.
+	 * Get all order data.
 	 *
 	 * @return array
 	 */
 	private static function get_orders() {
-		$order_dates  = self::get_order_dates();
-		$order_counts = self::get_order_counts();
-		$order_totals = self::get_order_totals();
+		$args = array(
+			'type'  => array( 'shop_order', 'shop_order_refund' ),
+			'limit' => get_option( 'posts_per_page' ),
+			'paged' => 1,
+		);
 
-		return array_merge( $order_dates, $order_counts, $order_totals );
+		$first            = time();
+		$processing_first = $first;
+		$first_time       = $first;
+		$last             = 0;
+		$processing_last  = 0;
+		$order_data       = array();
+
+		$orders       = wc_get_orders( $args );
+		$orders_count = count( $orders );
+
+		while ( $orders_count ) {
+
+			foreach ( $orders as $order ) {
+
+				$date_created = (int) $order->get_date_created()->getTimestamp();
+				$type         = $order->get_type();
+				$status       = $order->get_status();
+
+				if ( 'shop_order' == $type ) {
+
+					// Find the first and last order dates for completed and processing statuses.
+					if ( 'completed' == $status && $date_created < $first ) {
+						$first = $date_created;
+					}
+					if ( 'completed' == $status && $date_created > $last ) {
+						$last = $date_created;
+					}
+					if ( 'processing' == $status && $date_created < $processing_first ) {
+						$processing_first = $date_created;
+					}
+					if ( 'processing' == $status && $date_created > $processing_last ) {
+						$processing_last = $date_created;
+					}
+
+					// Get order counts by status.
+					$status = 'wc-' . $status;
+
+					if ( ! isset( $order_data[ $status ] ) ) {
+						$order_data[ $status ]  = 1;
+					} else {
+						$order_data[ $status ] += 1;
+					}
+
+					// Count number of orders by gateway used.
+					$gateway = $order->get_payment_method();
+
+					if ( ! empty( $gateway ) && in_array( $status, array( 'wc-completed', 'wc-refunded', 'wc-processing' ) ) ) {
+						$gateway = 'gateway_' . $gateway;
+
+						if ( ! isset( $order_data[ $gateway ] ) ) {
+							$order_data[ $gateway ]  = 1;
+						} else {
+							$order_data[ $gateway ] += 1;
+						}
+					}
+				} else {
+					// If it is a refunded order (shop_order_refunnd type), add the prefix as this prefix gets
+					// added midway in the if clause.
+					$status = 'wc-' . $status;
+				}
+
+				// Calculate the gross total for 'completed' and 'processing' orders.
+				$total = $order->get_total();
+
+				if ( in_array( $status, array( 'wc-completed', 'wc-refunded' ) ) ) {
+					if ( ! isset( $order_data['gross'] ) ) {
+						$order_data['gross']  = $total;
+					} else {
+						$order_data['gross'] += $total;
+					}
+				} elseif ( 'wc-processing' == $status ) {
+					if ( ! isset( $order_data['processing_gross'] ) ) {
+						$order_data['processing_gross']  = $total;
+					} else {
+						$order_data['processing_gross'] += $total;
+					}
+				}
+			}
+			$args['paged']++;
+
+			$orders       = wc_get_orders( $args );
+			$orders_count = count( $orders );
+		}
+
+		if ( $first !== $first_time ) {
+			$order_data['first'] = gmdate( 'Y-m-d H:i:s', $first );
+		}
+
+		if ( $processing_first !== $first_time ) {
+			$order_data['processing_first'] = gmdate( 'Y-m-d H:i:s', $processing_first );
+		}
+
+		if ( $last ) {
+			$order_data['last'] = gmdate( 'Y-m-d H:i:s', $last );
+		}
+
+		if ( $processing_last ) {
+			$order_data['processing_last']  = gmdate( 'Y-m-d H:i:s', $processing_last );
+		}
+
+		foreach ( $order_data as $key => $value ) {
+			$order_data[ $key ] = (string) $value;
+		}
+
+		return $order_data;
 	}
 
 	/**
@@ -543,94 +635,12 @@ class WC_Tracker {
 	/**
 	 * Get order totals
 	 *
+	 * @deprecated 5.1.0 Logic moved to get_orders.
 	 * @return array
 	 */
 	public static function get_order_totals() {
-		global $wpdb;
-
-		$gross_total = $wpdb->get_var(
-			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
-			GROUP BY order_meta.meta_key
-		"
-		);
-
-		if ( is_null( $gross_total ) ) {
-			$gross_total = 0;
-		}
-
-		$processing_gross_total = $wpdb->get_var(
-			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status = 'wc-processing'
-			GROUP BY order_meta.meta_key
-		"
-		);
-
-		if ( is_null( $processing_gross_total ) ) {
-			$processing_gross_total = 0;
-		}
-
-		return array(
-			'gross'            => $gross_total,
-			'processing_gross' => $processing_gross_total,
-		);
-	}
-
-	/**
-	 * Get last order date
-	 *
-	 * @return string
-	 */
-	private static function get_order_dates() {
-		global $wpdb;
-
-		$min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-completed'
-		",
-			ARRAY_A
-		);
-
-		if ( is_null( $min_max ) ) {
-			$min_max = array(
-				'first' => '-',
-				'last'  => '-',
-			);
-		}
-
-		$processing_min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-processing'
-		",
-			ARRAY_A
-		);
-
-		if ( is_null( $processing_min_max ) ) {
-			$processing_min_max = array(
-				'processing_first' => '-',
-				'processing_last'  => '-',
-			);
-		}
-
-		return array_merge( $min_max, $processing_min_max );
+		wc_deprecated_function( 'WC_Tracker::get_order_totals', '5.1.0', '' );
+		return self::get_orders();
 	}
 
 	/**
@@ -660,49 +670,6 @@ class WC_Tracker {
 		return ( '0' !== $result ) ? 'Yes' : 'No';
 	}
 
-	/**
-	 * Get blocks from a woocommerce page.
-	 *
-	 * @param string $woo_page_name A woocommerce page e.g. `checkout` or `cart`.
-	 * @return array Array of blocks as returned by parse_blocks().
-	 */
-	private static function get_all_blocks_from_page( $woo_page_name ) {
-		$page_id = wc_get_page_id( $woo_page_name );
-
-		$page = get_post( $page_id );
-		if ( ! $page ) {
-			return array();
-		}
-
-		$blocks = parse_blocks( $page->post_content );
-		if ( ! $blocks ) {
-			return array();
-		}
-
-		return $blocks;
-	}
-
-	/**
-	 * Get all instances of the specified block on a specific woo page
-	 * (e.g. `cart` or `checkout` page).
-	 *
-	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
-	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
-	 * @return array Array of blocks as returned by parse_blocks().
-	 */
-	private static function get_blocks_from_page( $block_name, $woo_page_name ) {
-		$page_blocks = self::get_all_blocks_from_page( $woo_page_name );
-
-		// Get any instances of the specified block.
-		return array_values(
-			array_filter(
-				$page_blocks,
-				function ( $block ) use ( $block_name ) {
-					return ( $block_name === $block['blockName'] );
-				}
-			)
-		);
-	}
 
 	/**
 	 * Get tracker data for a specific block type on a woocommerce page.
@@ -714,7 +681,7 @@ class WC_Tracker {
 	 * - block_attributes
 	 */
 	public static function get_block_tracker_data( $block_name, $woo_page_name ) {
-		$blocks = self::get_blocks_from_page( $block_name, $woo_page_name );
+		$blocks = WC_Blocks_Utils::get_blocks_from_page( $block_name, $woo_page_name );
 
 		$block_present = false;
 		$attributes    = array();

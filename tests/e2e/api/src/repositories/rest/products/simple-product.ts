@@ -1,17 +1,23 @@
 import { HTTPClient } from '../../../http';
-import { ModelRepository } from '../../../framework/model-repository';
-import { SimpleProduct } from '../../../models';
+import { ModelRepository } from '../../../framework';
 import {
+	SimpleProduct,
+	ModelID,
 	CreatesSimpleProducts,
 	DeletesSimpleProducts,
 	ListsSimpleProducts,
 	ReadsSimpleProducts,
 	SimpleProductRepositoryParams,
 	UpdatesSimpleProducts,
-} from '../../../models/products/simple-product';
+} from '../../../models';
 import { createProductTransformer } from './shared';
-import { restCreate, restDelete, restList, restRead, restUpdate } from '../shared';
-import { ModelID } from '../../../models/model';
+import {
+	restCreate,
+	restDelete,
+	restList,
+	restRead,
+	restUpdate,
+} from '../shared';
 
 /**
  * Creates a new ModelRepository instance for interacting with models via the REST API.

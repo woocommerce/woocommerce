@@ -651,7 +651,7 @@ function wc_get_product_id_by_sku( $sku ) {
 }
 
 /**
- * Get attibutes/data for an individual variation from the database and maintain it's integrity.
+ * Get attributes/data for an individual variation from the database and maintain it's integrity.
  *
  * @since  2.4.0
  * @param  int $variation_id Variation ID.

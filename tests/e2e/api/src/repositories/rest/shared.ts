@@ -1,6 +1,3 @@
-import { ModelTransformer } from '../../framework/model-transformer';
-import { MetaData, ModelConstructor } from '../../models/shared-types';
-import { IgnorePropertyTransformation } from '../../framework/transformations/ignore-property-transformation';
 import { HTTPClient } from '../../http';
 import {
 	ListFn,
@@ -16,8 +13,16 @@ import {
 	UpdateChildFn,
 	DeleteChildFn,
 	CreateFn,
-} from '../../framework/model-repository';
-import { ModelID } from '../../models/model';
+	ModelTransformer,
+	IgnorePropertyTransformation,
+	// @ts-ignore
+	ModelParentID,
+} from '../../framework';
+import {
+	ModelID,
+	MetaData,
+	ModelConstructor,
+} from '../../models';
 
 /**
  * Creates a new transformer for metadata models.

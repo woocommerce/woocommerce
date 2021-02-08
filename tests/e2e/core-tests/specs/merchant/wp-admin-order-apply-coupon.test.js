@@ -10,6 +10,7 @@ const {
 	createCoupon,
 	uiUnblocked,
 	addProductToOrder,
+	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -55,7 +56,7 @@ const runOrderApplyCouponTest = () => {
 			// Verify the coupon list is showing
 			await page.waitForSelector('.wc-used-coupons');
 			await expect(page).toMatchElement('.wc_coupon_list', { text: 'Coupon(s)' });
-			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode });
+			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
 
 			// Check that the coupon has been applied
 			await expect(page).toMatchElement('.wc-order-item-discount', { text: '5.00' });
@@ -65,16 +66,13 @@ const runOrderApplyCouponTest = () => {
 		it('can remove a coupon', async () => {
 			// Make sure we have a coupon on the page to use
 			await page.waitForSelector('.wc-used-coupons');
-			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode });
-
-			// We need to use this here as `expect(page).toClick()` was unable to find the element
-			// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
-			page.$eval('a.remove-coupon', elem => elem.click());
+			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
+			await evalAndClick( 'a.remove-coupon' );
 
 			await uiUnblocked();
 
 			// Verify the coupon pricing has been removed
-			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode });
+			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
 			await expect(page).not.toMatchElement('.wc-order-item-discount', { text: '5.00' });
 			await expect(page).not.toMatchElement('.line-cost .view .woocommerce-Price-amount', { text: discountedPrice });
 

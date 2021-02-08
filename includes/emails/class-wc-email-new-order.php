@@ -92,10 +92,25 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+
+				$email_already_sent = $order->get_meta( '_new_order_email_sent' );
+			}
+
+			/**
+			 * Controls if new order emails can be resend multiple times.
+			 *
+			 * @since 5.0.0
+			 * @param bool $allows Defaults to true.
+			 */
+			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
+				return;
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+
+				$order->update_meta_data( '_new_order_email_sent', 'true' );
+				$order->save();
 			}
 
 			$this->restore_locale();
