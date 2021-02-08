@@ -31,12 +31,12 @@ PHPUnit flags can be passed to the npm script. To limit testing to a single test
 npm run test:php -- --filter=<name of test>
 ```
 
-## Selecting the WooCommerce Version
+## Selecting the WordPress and WooCommerce Versions
 
-By default, the minimum supported version of WooCommerce is used to build the test suite. This can be overridden with an environment variable.
+By default, the minimum supported versions of WordPress and WooCommerce are used to build the test suite. This can be overridden with environment variables.
 
 ```shell
-WC_VERSION=4.9.0 npm run test:php
+WP_VERSION=5.6 WC_VERSION=4.9.0 npm run test:php
 ```
 
 ## Development

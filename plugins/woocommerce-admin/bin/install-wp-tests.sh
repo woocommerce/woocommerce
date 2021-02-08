@@ -17,14 +17,6 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
-# Error if WP < 5
-if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
-	if [ "5.3" -gt "${BASH_REMATCH[1]}" ]; then
-		echo "You must use WordPress 5.3 or greater."
-		exit 1
-	fi
-fi
-
 download() {
     if [ `which curl` ]; then
         curl -s "$1" > "$2";
