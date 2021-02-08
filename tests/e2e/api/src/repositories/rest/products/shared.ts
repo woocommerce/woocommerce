@@ -1,16 +1,23 @@
-import { ModelTransformation, ModelTransformer, TransformationOrder } from '../../../framework/model-transformer';
-import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
-import { AbstractProduct } from '../../../models/products/abstract-product';
-import { AddPropertyTransformation } from '../../../framework/transformations/add-property-transformation';
-import { IgnorePropertyTransformation } from '../../../framework/transformations/ignore-property-transformation';
 import {
+	ModelTransformation,
+	ModelTransformer,
+	TransformationOrder,
+	KeyChangeTransformation,
+	AddPropertyTransformation,
+	IgnorePropertyTransformation,
 	PropertyType,
 	PropertyTypeTransformation,
-} from '../../../framework/transformations/property-type-transformation';
-import { CustomTransformation } from '../../../framework/transformations/custom-transformation';
-import { ProductAttribute, ProductDownload, ProductImage, ProductTerm } from '../../../models/products/shared-types';
-import { ModelTransformerTransformation } from '../../../framework/transformations/model-transformer-transformation';
-import { MetaData } from '../../../models/shared-types';
+	CustomTransformation,
+	ModelTransformerTransformation,
+} from '../../../framework';
+import {
+	AbstractProduct,
+	ProductAttribute,
+	ProductDownload,
+	ProductImage,
+	ProductTerm,
+	MetaData,
+} from '../../../models';
 import { createMetaDataTransformer } from '../shared';
 
 /**
