@@ -1,6 +1,16 @@
 .wc-block-checkout__add-note {
-	padding: $gap $gap 0 9px;
-	margin-bottom: $gap;
+	margin: em($gap-large) 0 em($gap-large) 9px;
+}
+
+.is-mobile,
+.is-small,
+.is-medium {
+	.wc-block-checkout__add-note {
+		@include with-translucent-border(1px 0);
+		margin-bottom: em($gap);
+		margin-top: em($gap);
+		padding: em($gap) 0;
+	}
 }
 
 .wc-block-checkout__add-note .wc-block-components-textarea {
