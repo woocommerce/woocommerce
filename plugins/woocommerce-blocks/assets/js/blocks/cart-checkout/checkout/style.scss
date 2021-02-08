@@ -14,15 +14,14 @@
 
 .wc-block-checkout__actions {
 	display: flex;
-	flex-direction: column;
-	margin: 0 0 $gap-large*2;
-	padding-left: 9px;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: 9px;
 
 	.wc-block-components-checkout-place-order-button {
 		width: 50%;
 		padding: 1em;
 		height: auto;
-		margin-bottom: 44px;
 
 		.wc-block-components-button__text {
 			line-height: 24px;
@@ -147,10 +146,8 @@
 
 .is-large {
 	.wc-block-checkout__actions {
-		padding-right: 36px;
+		@include with-translucent-border(1px 0 0);
+		margin-right: $gap-large;
+		padding-top: em($gap-large);
 	}
-}
-
-.wc-block-checkout__actions {
-	margin-top: $gap;
 }
