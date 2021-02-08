@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 7.0
-Stable tag: 4.9.2
+Stable tag: 5.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -190,6 +190,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Use a custom fork of PHPUnit 7 in PHP 8 to workaround compatibility issues. #27844
 * Dev - Introduced `woocommerce_activated_plugin` hook. #28698
 * Dev - Clean up the `WC_Shipping_Zone_Data_Store::read()` method, documenting the `woocommerce_shipping_zone_loaded` hook. #28801
+* Dev - Updated the Jetpack Autoloader to 2.9.1. #29057
 * Localization - Adding states for Dominican Republic. #28713
 * Localization - Restored list of Serbia districts #28778
 * Localization - Update Indian state name from `Orissa` to `Odisha`. #28740
