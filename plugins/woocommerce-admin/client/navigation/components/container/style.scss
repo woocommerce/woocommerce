@@ -1,12 +1,16 @@
 .woocommerce-navigation {
+	display: grid;
+	grid-template-rows: min-content 1fr;
+	height: 100%;
+
 	h2 {
 		color: inherit; // This should be handled at component level.
 	}
 
 	.components-navigation__menu {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
+		overflow-y: auto;
+		margin-bottom: 0;
+		padding-bottom: $gap-large;
 	}
 
 	.components-navigation__group + .components-navigation__group {
@@ -17,7 +21,23 @@
 		margin-bottom: 0;
 	}
 
-	.woocommerce-navigation__back-to-dashboard {
-		margin-top: 24px;
+	.components-navigation {
+		height: 100%;
+	}
+
+	.components-navigation > div {
+		height: 100%;
+		display: grid;
+		grid-template-rows: 1fr min-content;
+	}
+
+	&.is-root {
+		padding-bottom: 100px;
+
+		.components-navigation__menu-secondary {
+			border-top: 1px solid $gray-700;
+			margin: 0 -#{$gap-smaller};
+			padding: $gap $gap-smaller;
+		}
 	}
 }
