@@ -834,7 +834,6 @@ class WC_Checkout {
 	 * @since  3.0.0
 	 * @param  array    $data   An array of posted data.
 	 * @param  WP_Error $errors Validation errors.
-	 * @throws Exception Invalid country code in billing or shipping address.
 	 */
 	protected function validate_checkout( &$data, &$errors ) {
 		$this->validate_posted_data( $data, $errors );
