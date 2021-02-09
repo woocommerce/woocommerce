@@ -34,7 +34,7 @@ const runMerchantOrdersCustomerPaymentPage = () => {
 				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			]);
 
-			// Verify the customer payment page link it showing
+			// Verify the customer payment page link is displayed
 			await expect(page).toMatchElement( 'label[for=order_status] > a' , { text: 'Customer payment page →' });
 
 			// Visit the page
