@@ -19,6 +19,39 @@
 
 	.components-navigation__item {
 		margin-bottom: 0;
+
+		/*
+		* <-------- Start Temporary Code -------->
+		*
+		* A change to Gutenberg base Navigation component in version 9.8.3
+		* requires these overrides. As of this comment, the problematic code
+		* was published to .org but not shipped as part of WP 5.7.
+		*
+		* A fix in Gutenberg is https://github.com/WordPress/gutenberg/pull/28619
+		*
+		* Criteria for removal
+		* 1. https://github.com/WordPress/gutenberg/pull/28619 is merged and deployed to .org
+		* 2. https://github.com/WordPress/gutenberg/pull/28619 is included in the Gutenberg version associated with WP 5.7
+		* 3. If not part of WP 5.7, this code will be required until WP 6.0 is released and WC Admin no longer supports 5.7
+		*/
+		a.components-button {
+			padding: 6px 16px;
+		}
+		&:not(:hover) {
+			a.components-button {
+				// ${ G2.lightGray.ui };
+				color: #949494;
+			}
+		}
+		&.is-active {
+			a.components-button {
+				// ${ UI.textDark };
+				color: #fff;
+			}
+		}
+		/*
+		* <-------- End Temporary Code -------->
+		*/
 	}
 
 	.components-navigation {
