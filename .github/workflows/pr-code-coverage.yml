@@ -47,5 +47,5 @@ jobs:
 
       - name: Run unit tests with code coverage. Allow to fail.
         run: |
-          RUN_CODE_COVERAGE=1 sh ./tests/bin/phpunit.sh
+          RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
           exit 0

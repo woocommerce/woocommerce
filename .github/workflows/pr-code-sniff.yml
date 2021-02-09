@@ -46,4 +46,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
       - name: Run code sniff
-        run: RUN_PHPCS=1 sh ./tests/bin/phpcs.sh
+        run: RUN_PHPCS=1 bash ./tests/bin/phpcs.sh
