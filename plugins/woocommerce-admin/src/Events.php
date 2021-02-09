@@ -12,6 +12,7 @@ use \Automattic\WooCommerce\Admin\Notes\AddingAndManangingProducts;
 use \Automattic\WooCommerce\Admin\Notes\ChooseNiche;
 use \Automattic\WooCommerce\Admin\Notes\ChoosingTheme;
 use \Automattic\WooCommerce\Admin\Notes\CustomizingProductCatalog;
+use Automattic\WooCommerce\Admin\Notes\FirstDownlaodableProduct;
 use \Automattic\WooCommerce\Admin\Notes\GivingFeedbackNotes;
 use \Automattic\WooCommerce\Admin\Notes\InsightFirstProductAndPayment;
 use \Automattic\WooCommerce\Admin\Notes\MobileApp;
@@ -144,6 +145,7 @@ class Events {
 		AddingAndManangingProducts::possibly_add_note();
 		CustomizingProductCatalog::possibly_add_note();
 		GettingStartedInEcommerceWebinar::possibly_add_note();
+		FirstDownlaodableProduct::possibly_add_note();
 	}
 
 	/**
