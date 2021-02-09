@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
+/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
 import {createSimpleProduct} from "@woocommerce/e2e-utils";
 
 /**
@@ -10,6 +10,7 @@ const {
 	addProductToOrder,
 } = require( '@woocommerce/e2e-utils' );
 
+// TODO create a function for the logic below getConfigSimpleProduct(), see: https://github.com/woocommerce/woocommerce/issues/29072
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
@@ -23,10 +24,6 @@ const runMerchantOrdersCustomerPaymentPage = () => {
 			await createSimpleProduct();
 			orderId = await createSimpleOrder();
 			await addProductToOrder( orderId, simpleProductName );
-		});
-
-		it('should be able to view the customer order page and complete payment', async () => {
-			await merchant.goToOrder( orderId );
 
 			// We first need to click "Update" otherwise the link doesn't show
 			await Promise.all([
@@ -34,6 +31,20 @@ const runMerchantOrdersCustomerPaymentPage = () => {
 				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			]);
 
+		});
+
+		it('should show the customer payment page link on a pending payment order', async () => {
+			await merchant.goToOrder( orderId );
+
+			// Verify the order is still pending payment
+			await expect( page ).toMatchElement( '#order_status', { text: 'Pending payment' } );
+
+			// Verify the customer payment page link is displayed
+			await expect(page).toMatchElement( 'label[for=order_status] > a' , { text: 'Customer payment page →' });
+		});
+
+
+		it('should load the customer payment page', async () => {
 			// Verify the customer payment page link is displayed
 			await expect(page).toMatchElement( 'label[for=order_status] > a' , { text: 'Customer payment page →' });
 
@@ -47,6 +58,11 @@ const runMerchantOrdersCustomerPaymentPage = () => {
 			await expect(page).toMatchElement( 'h1.entry-title' , { text: 'Pay for order' });
 			await expect(page).toMatchElement( 'td.product-name' , { text: simpleProductName });
 			await expect(page).toMatchElement( 'span.woocommerce-Price-amount.amount' , { text: simpleProductPrice });
+		});
+
+		it('can pay for the order through the customer payment page', async () => {
+			// Make sure we're still on the customer payment page
+			await expect(page).toMatchElement( 'h1.entry-title' , { text: 'Pay for order' });
 
 			// Pay for the order
 			await Promise.all([
@@ -58,7 +74,6 @@ const runMerchantOrdersCustomerPaymentPage = () => {
 			await expect(page).toMatchElement( 'h1.entry-title', { text: 'Order received' });
 			await expect(page).toMatchElement( 'li.woocommerce-order-overview__order.order' , { text: orderId.toString() });
 			await expect(page).toMatchElement( 'span.woocommerce-Price-amount.amount' , { text: simpleProductPrice });
-
 		});
 
 	});
