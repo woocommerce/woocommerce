@@ -503,7 +503,7 @@ class Menu {
 		global $submenu;
 
 		if ( ! isset( $submenu['woocommerce'] ) && ! isset( $submenu['edit.php?post_type=product'] ) ) {
-			return;
+			return $menu;
 		}
 
 		$submenu_items = array_merge(
