@@ -195,6 +195,14 @@ class Checkout extends AbstractRoute {
 	 */
 	protected function get_route_post_response( WP_REST_Request $request ) {
 		/**
+		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
+		 * the customer.
+		 */
+		$cart_controller = new CartController();
+		$cart_controller->validate_cart_items();
+		$cart_controller->validate_cart_coupons();
+
+		/**
 		 * Obtain Draft Order and process request data.
 		 *
 		 * Note: Customer data is persisted from the request first so that OrderController::update_addresses_from_cart
@@ -340,14 +348,9 @@ class Checkout extends AbstractRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order() {
-		$cart_controller  = new CartController();
 		$order_controller = new OrderController();
 		$reserve_stock    = new ReserveStock();
 		$this->order      = $this->get_draft_order_id() ? wc_get_order( $this->get_draft_order_id() ) : null;
-
-		// Validate items etc are allowed in the order before it gets created.
-		$cart_controller->validate_cart_items();
-		$cart_controller->validate_cart_coupons();
 
 		if ( ! $this->is_valid_draft_order( $this->order ) ) {
 			$this->order = $order_controller->create_order_from_cart();
