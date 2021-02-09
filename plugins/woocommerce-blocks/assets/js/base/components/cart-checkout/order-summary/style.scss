@@ -1,10 +1,3 @@
-.wc-block-components-order-summary {
-	.wc-blocks-components-panel__button {
-		margin-top: 0;
-		padding-top: 0;
-	}
-}
-
 .wc-block-components-order-summary__content {
 	display: table;
 	width: 100%;
@@ -17,6 +10,10 @@
 	padding-bottom: 1px;
 	padding-top: $gap;
 	width: 100%;
+
+	&:first-child {
+		padding-top: 0;
+	}
 
 	&:last-child {
 		> div {
@@ -65,7 +62,7 @@
 	justify-content: center;
 	min-width: 20px;
 	right: 0;
-	top: $gap;
+	top: 0;
 	transform: translate(50%, -50%);
 	white-space: nowrap;
 	z-index: 1;
@@ -73,6 +70,7 @@
 
 .wc-block-components-order-summary-item__description {
 	padding-left: $gap-large;
+	padding-right: $gap-small;
 	padding-bottom: $gap;
 
 	p,
