@@ -13,11 +13,13 @@ const alerts = [
 	{
 		title: 'Alert title 1',
 		content: 'Alert content 1',
+		status: 'unactioned',
 		actions: [],
 	},
 	{
 		title: 'Alert title 2',
 		content: 'Alert content 2',
+		status: 'unactioned',
 		actions: [
 			{
 				id: 'action-1',

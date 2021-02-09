@@ -13,6 +13,15 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
  */
 import { getUnreadNotesCount } from '../../inbox-panel/utils';
 
+const UNREAD_NOTES_QUERY = {
+	page: 1,
+	per_page: QUERY_DEFAULTS.pageSize,
+	status: 'unactioned',
+	type: QUERY_DEFAULTS.noteTypes,
+	orderby: 'date',
+	order: 'desc',
+};
+
 export function getUnreadNotes( select ) {
 	const { getNotes, getNotesError, isResolving } = select( NOTES_STORE_NAME );
 
@@ -29,28 +38,17 @@ export function getUnreadNotes( select ) {
 		return null;
 	}
 
-	// @todo This method would be more performant if we ask only for 1 item per page with status "unactioned".
-	// This change should be applied after having pagination implemented.
-	const notesQuery = {
-		page: 1,
-		per_page: QUERY_DEFAULTS.pageSize,
-		status: 'unactioned',
-		type: QUERY_DEFAULTS.noteTypes,
-		orderby: 'date',
-		order: 'desc',
-	};
-
-	// Disable eslint rule requiring `latestNotes` to be defined below because the next two statements
-	// depend on `getNotes` to have been called.
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const latestNotes = getNotes( notesQuery );
-	const isError = Boolean( getNotesError( 'getNotes', [ notesQuery ] ) );
-	const isRequesting = isResolving( 'getNotes', [ notesQuery ] );
+	getNotes( UNREAD_NOTES_QUERY );
+	const isError = Boolean(
+		getNotesError( 'getNotes', [ UNREAD_NOTES_QUERY ] )
+	);
+	const isRequesting = isResolving( 'getNotes', [ UNREAD_NOTES_QUERY ] );
 
 	if ( isError || isRequesting ) {
 		return null;
 	}
 
+	const latestNotes = getNotes( UNREAD_NOTES_QUERY );
 	const unreadNotesCount = getUnreadNotesCount( latestNotes, lastRead );
 
 	return unreadNotesCount > 0;

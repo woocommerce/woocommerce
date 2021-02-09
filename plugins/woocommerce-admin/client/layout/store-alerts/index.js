@@ -34,10 +34,10 @@ import './style.scss';
 export class StoreAlerts extends Component {
 	constructor( props ) {
 		super( props );
-		const { alerts } = this.props;
+		const alerts = this.getAlerts();
 
 		this.state = {
-			currentIndex: alerts ? 0 : null,
+			currentIndex: alerts.length > 0 ? 0 : null,
 		};
 
 		this.previousAlert = this.previousAlert.bind( this );
@@ -57,7 +57,7 @@ export class StoreAlerts extends Component {
 
 	nextAlert( event ) {
 		event.stopPropagation();
-		const { alerts } = this.props;
+		const alerts = this.getAlerts();
 		const { currentIndex } = this.state;
 
 		if ( currentIndex < alerts.length - 1 ) {
@@ -176,8 +176,14 @@ export class StoreAlerts extends Component {
 		}
 	}
 
+	getAlerts() {
+		return ( this.props.alerts || [] ).filter(
+			( note ) => note.status === 'unactioned'
+		);
+	}
+
 	render() {
-		const alerts = this.props.alerts || [];
+		const alerts = this.getAlerts();
 		const preloadAlertCount = getSetting( 'alertCount', 0, ( count ) =>
 			parseInt( count, 10 )
 		);
@@ -275,20 +281,21 @@ export class StoreAlerts extends Component {
 	}
 }
 
+const ALERTS_QUERY = {
+	page: 1,
+	per_page: QUERY_DEFAULTS.pageSize,
+	type: 'error,update',
+	status: 'unactioned',
+};
+
 export default compose(
 	withSelect( ( select ) => {
 		const { getNotes, isResolving } = select( NOTES_STORE_NAME );
-		const alertsQuery = {
-			page: 1,
-			per_page: QUERY_DEFAULTS.pageSize,
-			type: 'error,update',
-			status: 'unactioned',
-		};
 
 		// Filter out notes that may have been marked actioned or not delayed after the initial request
-		const filterNotes = ( note ) => note.status === 'unactioned';
-		const alerts = getNotes( alertsQuery ).filter( filterNotes );
-		const isLoading = isResolving( 'getNotes', [ alertsQuery ] );
+
+		const alerts = getNotes( ALERTS_QUERY );
+		const isLoading = isResolving( 'getNotes', [ ALERTS_QUERY ] );
 
 		return {
 			alerts,
