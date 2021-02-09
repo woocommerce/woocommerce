@@ -38,7 +38,7 @@
 		"@wordpress/keycodes": "2.11.0",
 		"@wordpress/viewport": "2.15.1",
 		"classnames": "2.2.6",
-		"core-js": "3.7.0",
+		"core-js": "3.8.3",
 		"d3-axis": "1.0.12",
 		"d3-format": "1.4.5",
 		"d3-scale": "2.2.2",
