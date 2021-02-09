@@ -9,9 +9,9 @@
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
 - Added new config variable for Simple Product price to `tests/e2e/env/config/default.json`. Defaults to 9.99
-- Shopper Shop Browse Search Sort
+- Shopper Single Product tests
 - Shopper Checkout Apply Coupon
-
+- Shopper Shop Browse Search Sort
 
 - Shopper Cart Apply Coupon
 

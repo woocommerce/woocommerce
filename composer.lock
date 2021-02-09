@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c02ead9a6d919588e422cfe4c59d68c2",
+    "content-hash": "c5ebe496c9f97d9748856d33070681e0",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.7.1",
+            "version": "v2.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73"
+                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/5437697a56aefbdf707849b9833e1b36093d7a73",
-                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
+                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
                 "shasum": ""
             },
             "require": {
@@ -28,7 +28,8 @@
             },
             "type": "composer-plugin",
             "extra": {
-                "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin"
+                "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin",
+                "mirror-repo": "Automattic/jetpack-autoloader"
             },
             "autoload": {
                 "classmap": [
@@ -44,9 +45,9 @@
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.7.1"
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.9.1"
             },
-            "time": "2020-12-18T22:33:59+00:00"
+            "time": "2021-02-05T19:07:06+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -670,5 +671,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
