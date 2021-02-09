@@ -1,6 +1,30 @@
 .wc-block-components-shipping-rates-control__package {
+	.wc-blocks-components-panel__button {
+		margin-bottom: 0;
+		margin-top: 0;
+		padding-bottom: em($gap-small);
+		padding-top: em($gap-small);
+	}
+
 	.wc-block-components-shipping-rates-control__package-title {
+		@include text-heading();
+		font-weight: bold;
 		margin: 0;
+	}
+
+	// Remove panel padding because we are adding bottom padding to `.wc-block-components-radio-control`
+	// and `.wc-block-components-radio-control__option-layout` in the next ruleset.
+	.wc-blocks-components-panel__content {
+		padding-bottom: 0;
+	}
+
+	.wc-block-components-radio-control,
+	.wc-block-components-radio-control__option-layout {
+		padding-bottom: em($gap);
+	}
+
+	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
+		padding-bottom: 0;
 	}
 }
 
@@ -22,14 +46,4 @@
 .wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
 	content: ", ";
 	white-space: pre;
-}
-
-.wc-block-checkout__shipping-option .wc-block-components-shipping-rates-control__no-results-notice {
-	margin-bottom: 0;
-}
-
-.wc-block-components-shipping-rates-control {
-	.wc-blocks-components-panel__content {
-		padding-bottom: 0;
-	}
 }

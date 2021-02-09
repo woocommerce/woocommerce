@@ -121,6 +121,12 @@
 }
 
 .theme-twentytwentyone {
+	// Extra classes for specificity.
+	&.theme-twentytwentyone.theme-twentytwentyone .components-custom-select-control__button {
+		background-color: #fff;
+		color: $input-text-active;
+	}
+
 	&.is-dark-theme {
 		// If the theme is in dark mode, as well as the block, then this selector will match.
 		.has-dark-controls {

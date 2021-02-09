@@ -184,13 +184,10 @@
 	}
 }
 
-.wc-block-components-radio-control__option-checked.wc-block-components-radio-control__option-checked {
-	font-weight: bold;
-}
-
 .wc-block-checkout__payment-method {
 	.wc-block-components-radio-control__option {
 		padding-left: 56px;
+
 		&::after {
 			content: none;
 		}
@@ -198,6 +195,19 @@
 		.wc-block-components-radio-control__input {
 			left: 16px;
 		}
+	}
+
+	// We need to add the first-child and last-child pseudoclasses for specificity.
+	.wc-block-components-radio-control__option,
+	.wc-block-components-radio-control__option:first-child,
+	.wc-block-components-radio-control__option:last-child {
+		margin: 0;
+		padding-bottom: em($gap);
+		padding-top: em($gap);
+	}
+
+	.wc-block-components-radio-control__option-checked {
+		font-weight: bold;
 	}
 
 	.wc-block-components-radio-control__option:last-child,
@@ -239,7 +249,7 @@
 }
 
 .wc-block-components-radio-control-accordion-content {
-	padding: 8px 16px 16px 16px;
+	padding: 0 $gap em($gap) $gap;
 }
 
 .wc-block-checkout__order-notes {

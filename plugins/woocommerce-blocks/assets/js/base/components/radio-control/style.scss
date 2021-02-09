@@ -1,12 +1,19 @@
 .wc-block-components-radio-control__option {
 	@include reset-typography();
-	@include with-translucent-border( 0 0 1px );
 	display: block;
-	padding: em($gap) 0 em($gap) em($gap-largest);
+	margin: em($gap) 0;
+	padding: 0 0 0 em($gap-largest);
+	position: relative;
+
+	&:first-child {
+		margin-top: 0;
+	}
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
 .wc-block-components-radio-control__option-layout {
-	@include with-translucent-border( 0 0 1px );
 	display: table;
 	width: 100%;
 }

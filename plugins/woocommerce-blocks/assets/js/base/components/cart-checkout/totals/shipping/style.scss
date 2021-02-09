@@ -1,6 +1,4 @@
 .wc-block-components-totals-shipping {
-	@include with-translucent-border(1px 0 0);
-
 	// Added extra label for specificity.
 	fieldset.wc-block-components-totals-shipping__fieldset {
 		background-color: transparent;
@@ -19,15 +17,8 @@
 		}
 	}
 
-	.wc-block-components-radio-control__option,
-	.wc-block-components-radio-control__option-layout {
-		&:last-child::after {
-			display: none;
-		}
-	}
-
 	.wc-block-components-shipping-rates-control__no-results-notice {
-		margin-bottom: em($gap-small);
+		margin: 0 0 em($gap-small);
 	}
 
 	.wc-block-components-totals-shipping__change-address-button {
@@ -39,8 +30,9 @@
 			opacity: 0.8;
 		}
 	}
+}
 
-	.wc-blocks-components-panel:last-child::after {
-		border-bottom-width: 0;
-	}
+// Extra classes for specificity.
+.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone .wc-block-components-totals-shipping__change-address-button {
+	@include link-button();
 }

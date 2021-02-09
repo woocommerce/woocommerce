@@ -89,6 +89,10 @@ table.wc-block-cart-items {
 	}
 }
 
+.wc-block-cart .wc-block-components-shipping-rates-control__package {
+	@include with-translucent-border(1px 0 0);
+}
+
 // Loading placeholder state.
 .wc-block-cart--is-loading {
 	th span,
@@ -241,8 +245,18 @@ table.wc-block-cart-items {
 		left: 0;
 	}
 
+	.wc-block-cart__totals-title {
+		@include with-translucent-border(0 0 1px);
+		@include text-heading();
+		@include font-size(smaller);
+		display: block;
+		font-weight: 600;
+		padding: 0.25rem 0;
+		text-align: right;
+		text-transform: uppercase;
+	}
+
 	.wc-block-components-sidebar {
-		> .wc-block-cart__totals-title,
 		.wc-block-components-shipping-calculator,
 		.wc-block-components-shipping-rates-control__package:not(.wc-blocks-components-panel) {
 			padding-left: $gap;

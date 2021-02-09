@@ -18,11 +18,9 @@
 	padding-left: percentage($gap-large / 1060px);
 	width: 35%;
 
-	.wc-blocks-components-panel {
-		> h2 {
-			@include font-size(large);
-			@include reset-box();
-		}
+	.wc-blocks-components-panel > h2 {
+		@include font-size(regular);
+		@include reset-box();
 	}
 }
 
