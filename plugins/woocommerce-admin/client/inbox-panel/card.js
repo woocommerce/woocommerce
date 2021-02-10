@@ -32,6 +32,7 @@ class InboxNoteCard extends Component {
 		this.openDismissModal = this.openDismissModal.bind( this );
 		this.closeDismissModal = this.closeDismissModal.bind( this );
 		this.bodyNotificationRef = createRef();
+		this.toggleButtonRef = createRef();
 		this.screen = getScreenName();
 	}
 
@@ -116,9 +117,13 @@ class InboxNoteCard extends Component {
 			'components-popover__content',
 		];
 		// This line is for IE compatibility.
-		const relatedTarget = event.relatedTarget
-			? event.relatedTarget
-			: document.activeElement;
+		let relatedTarget;
+		if ( event.relatedTarget ) {
+			relatedTarget = event.relatedTarget;
+		} else if ( this.toggleButtonRef.current ) {
+			const ownerDoc = this.toggleButtonRef.current.ownerDocument;
+			relatedTarget = ownerDoc ? ownerDoc.activeElement : null;
+		}
 		const isClickOutsideDropdown = relatedTarget
 			? dropdownClasses.some( ( className ) =>
 					relatedTarget.className.includes( className )
@@ -146,6 +151,7 @@ class InboxNoteCard extends Component {
 					<Button
 						isTertiary
 						onClick={ onToggle }
+						ref={ this.toggleButtonRef }
 						onBlur={ ( event ) =>
 							this.handleBlur( event, onClose )
 						}

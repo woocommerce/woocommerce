@@ -22,7 +22,7 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@babel/runtime": "7.12.5",
-		"@wordpress/components": "10.0.0"
+		"@wordpress/components": "10.2.0"
 	},
 	"publishConfig": {
 		"access": "public"

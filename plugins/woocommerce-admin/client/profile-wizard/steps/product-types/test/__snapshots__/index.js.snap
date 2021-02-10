@@ -26,10 +26,10 @@ exports[`ProductTypes should render product types 1`] = `
         class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
       >
         <div
-          class="components-base-control woocommerce-profile-wizard__checkbox"
+          class="components-base-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u0"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
           >
             <span
               class="components-checkbox-control__input-container"
@@ -79,10 +79,10 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-base-control woocommerce-profile-wizard__checkbox"
+          class="components-base-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u0"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
           >
             <span
               class="components-checkbox-control__input-container"
@@ -104,7 +104,7 @@ you can purchase and install it later.
         </div>
       </div>
       <div
-        class="components-flex components-card__footer is-borderless is-size-medium e1q7k77g4 css-5hda2c-Flex-FooterUI eboqfv50"
+        class="components-flex components-card__footer is-borderless is-size-medium e1q7k77g4 css-1fpr7ir-Flex-FooterUI eboqfv50"
       >
         <button
           class="components-button is-primary"
@@ -183,10 +183,10 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
         class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
       >
         <div
-          class="components-base-control woocommerce-profile-wizard__checkbox"
+          class="components-base-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u0"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
           >
             <span
               class="components-checkbox-control__input-container"
@@ -236,10 +236,10 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-base-control woocommerce-profile-wizard__checkbox"
+          class="components-base-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u0"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
           >
             <span
               class="components-checkbox-control__input-container"
@@ -261,7 +261,7 @@ you can purchase and install it later.
         </div>
       </div>
       <div
-        class="components-flex components-card__footer is-borderless is-size-medium e1q7k77g4 css-5hda2c-Flex-FooterUI eboqfv50"
+        class="components-flex components-card__footer is-borderless is-size-medium e1q7k77g4 css-1fpr7ir-Flex-FooterUI eboqfv50"
       >
         <button
           class="components-button is-primary"

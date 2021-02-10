@@ -4,6 +4,7 @@ module.exports = {
 		require.resolve( './custom.js' ),
 		'plugin:@wordpress/eslint-plugin/recommended',
 	],
+	parser: '@typescript-eslint/parser',
 	globals: {
 		wcSettings: 'readonly',
 	},

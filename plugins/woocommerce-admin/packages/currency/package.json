@@ -24,7 +24,7 @@
 		"@babel/runtime-corejs2": "7.12.5",
 		"@woocommerce/number": "2.0.0",
 		"@wordpress/deprecated": "^2.9.0",
-		"@wordpress/html-entities": "2.7.0"
+		"@wordpress/html-entities": "2.10.0"
 	},
 	"publishConfig": {
 		"access": "public"
