@@ -65,10 +65,8 @@ const runCartApplyCouponsTest = () => {
 			await applyCouponToCart( couponFixedCart );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
-			// Wait for page to expand total calculations to avoid flakyness
-			await page.waitForSelector('.order-total');
-
 			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
 			await removeCouponFromCart();
@@ -79,6 +77,7 @@ const runCartApplyCouponsTest = () => {
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
 			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.cart-discount .amount', {text: '$4.99'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$5.00'});
 			await removeCouponFromCart();
@@ -87,6 +86,9 @@ const runCartApplyCouponsTest = () => {
 		it('allows customer to apply fixed product coupon', async () => {
 			await applyCouponToCart( couponFixedProduct );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+
+			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
 			await removeCouponFromCart();
@@ -105,6 +107,9 @@ const runCartApplyCouponsTest = () => {
 		it('allows customer to apply multiple coupons', async () => {
 			await applyCouponToCart( couponFixedProduct );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+
+			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.order-total .amount', {text: '$0.00'});
 		});
 
