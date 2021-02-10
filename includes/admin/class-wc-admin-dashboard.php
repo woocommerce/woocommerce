@@ -254,8 +254,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$outofstock_link  = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
 
 			if ( false === $is_wc_admin_disabled ) {
-				$lowstock_link   = 'wp-admin/admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock';
-				$outofstock_link = 'wp-admin/admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock';
+				$lowstock_link   = 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock';
+				$outofstock_link = 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock';
 			}
 
 			if ( false === $outofstock_count ) {
