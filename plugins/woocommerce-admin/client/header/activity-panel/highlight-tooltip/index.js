@@ -12,7 +12,12 @@ import {
 	Button,
 	IsolatedEventContainer,
 } from '@wordpress/components';
-import { useState, useEffect, createPortal } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	createPortal,
+	useLayoutEffect,
+} from '@wordpress/element';
 import { close } from '@wordpress/icons';
 import { noop } from 'lodash';
 
@@ -31,29 +36,39 @@ function HighlightTooltip( {
 	onClose,
 	delay,
 	onShow = noop,
+	useAnchor = false,
 } ) {
 	const [ showHighlight, setShowHighlight ] = useState(
 		delay > 0 ? null : show
 	);
 	const [ node, setNode ] = useState( null );
+	const [ anchorRect, setAnchorRect ] = useState( null );
 
 	useEffect( () => {
 		const element = document.getElementById( id );
-		let container;
+		let container, parent;
 		if ( element && ! node ) {
 			// Add tooltip container
-			const parent = element.parentElement;
+			if ( ! useAnchor ) {
+				parent = element.parentElement;
+			} else {
+				parent = document.createElement( 'div' );
+				document.body.appendChild( parent );
+			}
 			container = document.createElement( 'div' );
 			container.classList.add( 'highlight-tooltip__container' );
 			parent.appendChild( container );
 			setNode( container );
 		}
-		const timeoutId = showTooltip( container );
+		const timeoutId = triggerShowTooltip( container );
 
 		return () => {
 			if ( container ) {
-				const parent = container.parentElement;
-				parent.removeChild( container );
+				const parentElement = container.parentElement;
+				parentElement.removeChild( container );
+				if ( useAnchor ) {
+					parentElement.remove();
+				}
 			}
 			if ( timeoutId ) {
 				clearTimeout( timeoutId );
@@ -73,30 +88,46 @@ function HighlightTooltip( {
 			if ( ! show ) {
 				node.classList.remove( SHOW_CLASS );
 			} else if ( node ) {
-				showTooltip( node );
+				triggerShowTooltip( node );
 			}
 		}
 	}, [ show ] );
 
-	const showTooltip = ( container ) => {
+	useLayoutEffect( () => {
+		window.addEventListener( 'resize', updateSize );
+		return () => window.removeEventListener( 'resize', updateSize );
+	}, [] );
+
+	function updateSize() {
+		if ( useAnchor ) {
+			const element = document.getElementById( id );
+			setAnchorRect( element.getBoundingClientRect() );
+		}
+	}
+
+	const triggerShowTooltip = ( container ) => {
 		let timeoutId = null;
 		if ( delay > 0 ) {
 			timeoutId = setTimeout( () => {
 				timeoutId = null;
-				if ( container ) {
-					container.classList.add( SHOW_CLASS );
-				}
-				setShowHighlight( show );
-				onShow();
+				showTooltip( container );
 			}, delay );
 		} else if ( ! showHighlight ) {
-			if ( container ) {
-				container.classList.add( SHOW_CLASS );
-			}
-			setShowHighlight( true );
-			onShow();
+			showTooltip( container );
 		}
 		return timeoutId;
+	};
+
+	const showTooltip = ( container ) => {
+		const element = document.getElementById( id );
+		if ( element && useAnchor ) {
+			setAnchorRect( element.getBoundingClientRect() );
+		}
+		if ( container ) {
+			container.classList.add( SHOW_CLASS );
+		}
+		setShowHighlight( true );
+		onShow();
 	};
 
 	const triggerClose = () => {
@@ -118,6 +149,7 @@ function HighlightTooltip( {
 					<Popover
 						className="highlight-tooltip__popover"
 						noArrow={ false }
+						anchorRect={ anchorRect }
 						focusOnMount="container"
 					>
 						<Card size="medium">
@@ -182,6 +214,11 @@ HighlightTooltip.propTypes = {
 	 * A callback for when the tooltip is shown.
 	 */
 	onShow: PropTypes.func,
+	/**
+	 * useAnchor, will append the tooltip to the body tag, and make use of the anchorRect to display the tooltip.
+	 * Defaults to false.
+	 */
+	useAnchor: PropTypes.bool,
 };
 
 export { HighlightTooltip };

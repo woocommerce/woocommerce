@@ -382,6 +382,7 @@ export class ActivityPanel extends Component {
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }
+						useAnchor={ true }
 						title={ __(
 							"We're here for help",
 							'woocommerce-admin'

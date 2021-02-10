@@ -91,6 +91,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Onboarding - Fixed "Business Details" error. #6271
 - Enhancement: Use the new Paypal payments plugin for onboarding. #6261
 - Fix: Show management links when only main task list is hidden. #6291
+- Dev: Allow highlight tooltip to use body tag as parent. #6309
 
 == Changelog ==
 
