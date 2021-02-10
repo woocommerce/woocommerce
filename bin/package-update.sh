@@ -25,17 +25,19 @@ output 3 "Updating autoloader classmaps..."
 composer dump-autoload
 output 2 "Done"
 
-# Convert textdomains
-output 3 "Updating package PHP textdomains..."
+if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then
+	# Convert textdomains
+	output 3 "Updating package PHP textdomains..."
 
-# Replace text domains within packages with woocommerce
-npm run packages:fix:textdomain
-output 2 "Done!"
+	# Replace text domains within packages with woocommerce
+	npm run packages:fix:textdomain
+	output 2 "Done!"
 
-output 3 "Updating package JS textdomains..."
-find ./packages/woocommerce-blocks -iname '*.js' -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" -e "s/\"woo-gutenberg-products-block\"/'woocommerce'/g" {} \;
-find ./packages/woocommerce-blocks -iname '*.js' -exec sed -i.bak -e "s/'woocommerce-admin'/'woocommerce'/g" -e "s/\"woocommerce-admin\"/'woocommerce'/g" {} \;
-find ./packages/woocommerce-admin -iname '*.js' -exec sed -i.bak -e "s/'woocommerce-admin'/'woocommerce'/g" -e "s/\"woocommerce-admin\"/'woocommerce'/g" {} \;
+	output 3 "Updating package JS textdomains..."
+	find ./packages/woocommerce-blocks -iname '*.js' -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" -e "s/\"woo-gutenberg-products-block\"/'woocommerce'/g" {} \;
+	find ./packages/woocommerce-blocks -iname '*.js' -exec sed -i.bak -e "s/'woocommerce-admin'/'woocommerce'/g" -e "s/\"woocommerce-admin\"/'woocommerce'/g" {} \;
+	find ./packages/woocommerce-admin -iname '*.js' -exec sed -i.bak -e "s/'woocommerce-admin'/'woocommerce'/g" -e "s/\"woocommerce-admin\"/'woocommerce'/g" {} \;
+fi
 
 # Cleanup backup files
 find ./packages -name "*.bak" -type f -delete
