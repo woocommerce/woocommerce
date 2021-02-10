@@ -183,6 +183,10 @@ const createSimpleProduct = async () => {
  * Create variable product.
  */
 const createVariableProduct = async () => {
+
+	// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialogs below
+	page.removeAllListeners('dialog');
+
 	// Go to "add product" page
 	await merchant.openNewProduct();
 
