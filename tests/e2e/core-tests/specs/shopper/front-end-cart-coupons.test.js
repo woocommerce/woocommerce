@@ -27,8 +27,6 @@ const {
  * @returns {Promise<void>}
  */
 const applyCouponToCart = async ( couponCode ) => {
-	await expect(page).toClick('a', {text: 'Click here to enter your code'});
-	await uiUnblocked();
 	await clearAndFillInput('#coupon_code', couponCode);
 	await expect(page).toClick('button', {text: 'Apply coupon'});
 	await uiUnblocked();
@@ -49,7 +47,7 @@ const runCartApplyCouponsTest = () => {
 		let couponFixedCart;
 		let couponPercentage;
 		let couponFixedProduct;
-		
+
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
