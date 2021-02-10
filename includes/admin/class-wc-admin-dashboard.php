@@ -107,6 +107,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function status_widget() {
 			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+
 			$reports = new WC_Admin_Report();
 
 			echo '<ul class="wc_status_list">';
@@ -151,7 +153,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			$this->status_widget_order_rows();
-			$this->status_widget_stock_rows();
+			$this->status_widget_stock_rows( $is_wc_admin_disabled );
 
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';
@@ -200,8 +202,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 		/**
 		 * Show stock data is status widget.
+		 *
+		 * @param bool $is_wc_admin_disabled if woocommerce admin is disabled.
 		 */
-		private function status_widget_stock_rows() {
+		private function status_widget_stock_rows( $is_wc_admin_disabled ) {
 			global $wpdb;
 
 			// Requires lookup table added in 3.6.
@@ -246,6 +250,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
+			$lowstock_link    = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
+			$outofstock_link  = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
+
+			if ( false === $is_wc_admin_disabled ) {
+				$lowstock_link   = 'wp-admin/admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock';
+				$outofstock_link = 'wp-admin/admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock';
+			}
 
 			if ( false === $outofstock_count ) {
 				/**
@@ -274,7 +285,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 			?>
 			<li class="low-in-stock">
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=stock&report=low_in_stock' ) ); ?>">
+			<a href="<?php echo esc_url( admin_url( $lowstock_link ) ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
@@ -285,7 +296,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				</a>
 			</li>
 			<li class="out-of-stock">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=stock&report=out_of_stock' ) ); ?>">
+				<a href="<?php echo esc_url( admin_url( $outofstock_link ) ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
