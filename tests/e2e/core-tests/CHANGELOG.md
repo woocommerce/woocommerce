@@ -11,8 +11,7 @@
 - Added new config variable for Simple Product price to `tests/e2e/env/config/default.json`. Defaults to 9.99
 - Shopper Single Product tests
 - Shopper Checkout Apply Coupon
-
-
+- Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
 
 ## Fixed
