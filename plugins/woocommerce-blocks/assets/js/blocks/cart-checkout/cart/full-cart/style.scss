@@ -26,7 +26,6 @@ table.wc-block-cart-items td {
 
 .editor-styles-wrapper table.wc-block-cart-items,
 table.wc-block-cart-items {
-	table-layout: fixed;
 	width: 100%;
 
 	.wc-block-cart-items__header {
@@ -38,10 +37,6 @@ table.wc-block-cart-items {
 		}
 		.wc-block-cart-items__header-product {
 			visibility: hidden;
-			min-width: 300px;
-		}
-		.wc-block-cart-items__header-quantity {
-			width: 116px;
 		}
 		.wc-block-cart-items__header-total {
 			width: 100px;
@@ -70,12 +65,6 @@ table.wc-block-cart-items {
 			@include font-size(regular);
 			text-align: right;
 			line-height: 1.25;
-
-			.wc-block-components-product-price__regular,
-			.wc-block-components-product-price__value {
-				display: block;
-				font-weight: bold;
-			}
 		}
 		.wc-block-components-product-metadata {
 			margin-bottom: 0.75em;
