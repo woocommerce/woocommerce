@@ -1102,6 +1102,7 @@ class Loader {
 		$settings['wcVersion']       = WC_VERSION;
 		$settings['siteUrl']         = site_url();
 		$settings['shopUrl']         = get_permalink( wc_get_page_id( 'shop' ) );
+		$settings['homeUrl']         = home_url();
 		$settings['dateFormat']      = get_option( 'date_format' );
 		$settings['plugins']         = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
