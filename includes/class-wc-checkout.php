@@ -746,8 +746,8 @@ class WC_Checkout {
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
-				if ( 'country' === $field['type'] &&
-					! ( 'shipping' === $fieldset_key && ! $data ['ship_to_different_address'] ) &&
+				if ( $validate_fieldset &&
+					'country' === $field['type'] &&
 					! WC()->countries->country_exists( $data[ $key ] ) ) {
 						/* translators: ISO 3166-1 alpha-2 country code */
 						$errors->add( $key . '_validation', sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $data[ $key ] ) );

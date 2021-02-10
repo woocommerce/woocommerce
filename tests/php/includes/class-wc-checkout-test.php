@@ -51,6 +51,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		);
 		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
+		add_filter(
+			'woocommerce_cart_needs_shipping_address',
+			function() {
+				return true;
+			}
+		);
+
 		$errors = new WP_Error();
 
 		$this->sut->validate_posted_data( $data, $errors );
