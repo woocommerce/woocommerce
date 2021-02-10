@@ -1,6 +1,6 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 import { HTTPClient, HTTPResponse } from '../../../http';
-import { ModelTransformer } from '../../../framework/model-transformer';
+import { ModelTransformer, ModelRepositoryParams } from '../../../framework';
 import { DummyModel } from '../../../__test_data__/dummy-model';
 import {
 	restCreate,
@@ -12,8 +12,7 @@ import {
 	restUpdate,
 	restUpdateChild,
 } from '../shared';
-import { ModelRepositoryParams } from '../../../framework/model-repository';
-import { Model } from '../../../models/model';
+import { Model } from '../../../models';
 
 type DummyModelParams = ModelRepositoryParams< DummyModel, never, { search: string }, 'name' >
 

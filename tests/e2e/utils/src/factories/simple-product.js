@@ -1,6 +1,6 @@
 import { SimpleProduct } from '@woocommerce/api';
-import { AsyncFactory } from './async-factory';
 import faker from 'faker/locale/en';
+import { Factory } from 'fishery';
 
 /**
  * Creates a new factory for creating models.
@@ -11,13 +11,14 @@ import faker from 'faker/locale/en';
 export function simpleProductFactory( httpClient ) {
 	const repository = SimpleProduct.restRepository( httpClient );
 
-	return new AsyncFactory(
-		( { params } ) => {
-			return {
-				name: params.name ?? faker.commerce.productName(),
-				regularPrice: params.regularPrice ?? faker.commerce.price(),
-			};
-		},
-		( params ) => repository.create( params ),
-	);
+	return Factory.define( ( { params, onCreate } ) => {
+		onCreate( ( model ) => {
+			return repository.create( model );
+		} );
+
+		return {
+			name: params.name ?? faker.commerce.productName(),
+			regularPrice: params.regularPrice ?? faker.commerce.price(),
+		};
+	} );
 }

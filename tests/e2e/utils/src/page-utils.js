@@ -196,6 +196,19 @@ const evalAndClick = async ( selector ) => {
 	page.$eval( selector, elem => elem.click() );
 };
 
+/**
+ * Select a value from select2 input field.
+ *
+ * @param {string} value Value of what to be selected
+ * @param {string} selector Selector of the select2
+ */
+const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
+	await page.waitForSelector(selector);
+	await page.type(selector, value);
+	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
+	await page.keyboard.press('Enter');
+};
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -211,4 +224,5 @@ export {
 	clickFilter,
 	moveAllItemsToTrash,
 	evalAndClick,
+	selectOptionInSelect2,
 };

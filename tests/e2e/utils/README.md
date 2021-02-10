@@ -98,6 +98,7 @@ describe( 'Cart page', () => {
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
 
 ### Test Utilities
 
