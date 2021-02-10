@@ -15,7 +15,7 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
 const runMyAccountPayOrderTest = () => {
-	describe('Customer can pay for his order through my account', () => {
+	describe('Customer can pay for their order through My Account', () => {
 		beforeAll(async () => {
 			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
@@ -36,7 +36,7 @@ const runMyAccountPayOrderTest = () => {
 			await merchant.logout();
 		});
 
-		it('allows customer to pay for his order in my account', async () => {
+		it('allows customer to pay for their order in My Account', async () => {
 			await shopper.login();
 			await shopper.goToOrders();
 			await expect(page).toClick('a.woocommerce-button.button.pay');
