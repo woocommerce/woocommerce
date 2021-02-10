@@ -135,7 +135,7 @@
 		"@octokit/graphql": "4.5.9",
 		"@storybook/addon-a11y": "6.1.14",
 		"@storybook/addon-actions": "6.1.14",
-		"@storybook/addon-console": "1.2.2",
+		"@storybook/addon-console": "1.2.3",
 		"@storybook/addon-docs": "6.1.14",
 		"@storybook/addon-knobs": "6.1.14",
 		"@storybook/addon-links": "6.1.14",
