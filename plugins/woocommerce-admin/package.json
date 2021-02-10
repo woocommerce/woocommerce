@@ -124,7 +124,7 @@
 		"redux": "4.0.5"
 	},
 	"devDependencies": {
-		"@automattic/color-studio": "2.3.1",
+		"@automattic/color-studio": "2.4.0",
 		"@automattic/mini-css-extract-plugin-with-rtl": "0.8.0",
 		"@babel/cli": "7.12.10",
 		"@babel/core": "7.12.10",
