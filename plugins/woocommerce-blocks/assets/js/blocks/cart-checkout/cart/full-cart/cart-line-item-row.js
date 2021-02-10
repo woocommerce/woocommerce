@@ -17,6 +17,7 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import { getCurrency } from '@woocommerce/price-format';
 import Dinero from 'dinero.js';
+import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
@@ -99,6 +100,27 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 	const isProductHiddenFromCatalog =
 		catalogVisibility === 'hidden' || catalogVisibility === 'search';
 
+	const subtotalPriceFormat = __experimentalApplyCheckoutFilter( {
+		filterName: 'subtotalPriceFormat',
+		defaultValue: '<price/>',
+		arg: {
+			lineItem,
+		},
+		// Only accept strings.
+		validation: ( value ) =>
+			typeof value === 'string' && value.includes( '<price/>' ),
+	} );
+	const saleBadgePriceFormat = __experimentalApplyCheckoutFilter( {
+		filterName: 'saleBadgePriceFormat',
+		defaultValue: '<price/>',
+		arg: {
+			lineItem,
+		},
+		// Only accept strings.
+		validation: ( value ) =>
+			typeof value === 'string' && value.includes( '<price/>' ),
+	} );
+
 	return (
 		<tr
 			className={ classnames( 'wc-block-cart-items__row', {
@@ -146,6 +168,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 							purchaseAmountSingle,
 							currency
 						) }
+						format={ subtotalPriceFormat }
 					/>
 				</div>
 
@@ -155,6 +178,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 						saleAmountSingle,
 						currency
 					) }
+					format={ saleBadgePriceFormat }
 				/>
 
 				<ProductMetadata
@@ -194,6 +218,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 							saleAmount,
 							currency
 						) }
+						format={ saleBadgePriceFormat }
 					/>
 				) }
 			</td>

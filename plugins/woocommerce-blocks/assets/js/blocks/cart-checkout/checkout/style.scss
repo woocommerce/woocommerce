@@ -4,6 +4,7 @@
 
 .wc-block-checkout__sidebar {
 	.wc-block-components-product-name {
+		display: block;
 		color: inherit;
 		flex-grow: 1;
 		// Required by IE11.
