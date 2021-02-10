@@ -93,7 +93,7 @@
 
 		if ( -1 !== $.inArray( 'variation', $( this ).val() ) ) {
 			exportCategory.closest( 'tr' ).hide();
-			exportCategory.val( '' ).change(); // Reset WooSelect selected value.
+			exportCategory.val( '' ).trigger( 'change' ); // Reset WooSelect selected value.
 		} else {
 			exportCategory.closest( 'tr' ).show();
 		}

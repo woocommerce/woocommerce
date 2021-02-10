@@ -101,6 +101,7 @@ describe( 'Cart page', () => {
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
 
 ### Test Utilities
 

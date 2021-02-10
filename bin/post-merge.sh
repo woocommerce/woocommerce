@@ -9,5 +9,5 @@ runOnChange() {
 	fi
 }
 
-runOnChange "package-lock.json" "npm install"
-runOnChange "composer.lock" "composer install"
+runOnChange "package-lock.json" "npm run install:no-e2e"
+runOnChange "composer.lock" "SKIP_UPDATE_TEXTDOMAINS=true composer install"

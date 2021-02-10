@@ -1,13 +1,14 @@
 import { AbstractProduct, ProductSearchParams, ProductUpdateParams } from './abstract-product';
 import { HTTPClient } from '../../http';
-import { simpleProductRESTRepository } from '../../repositories/rest/products/simple-product';
+import { simpleProductRESTRepository } from '../../repositories';
 import {
 	CreatesModels,
-	DeletesModels, ListsModels,
+	DeletesModels,
+	ListsModels,
 	ModelRepositoryParams,
 	ReadsModels,
 	UpdatesModels,
-} from '../../framework/model-repository';
+} from '../../framework';
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give

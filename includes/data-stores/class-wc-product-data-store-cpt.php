@@ -272,6 +272,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$product->apply_changes();
 
+		// Any time we update the product, we should flush the term count cache.
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
+		$tools_controller->execute_tool( 'recount_terms' );
 		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
