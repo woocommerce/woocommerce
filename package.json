@@ -13,13 +13,16 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
-    "install": "lerna bootstrap --hoist",
+    "install": " if [ -z \"$SKIP_LERNA_BOOTSTRAP\" ]; then npx lerna bootstrap --hoist; fi",
+    "check:subset-installed": "npm list --depth 1 install-subset > /dev/null 2>&1",
+    "install:subset-only": "npm install --no-package-lock --no-save install-subset",
+    "install:no-e2e": "npm run check:subset-installed --silent || npm run install:subset-only && SKIP_LERNA_BOOTSTRAP=true npx install-subset i no-e2e",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && npm run makepot",
     "build:dev": "npm run build:core && npm run build:packages",
     "build-watch": "grunt watch",
     "build:packages": "lerna run build",
-    "build:zip": "npm run build && composer install && npm run build:dev",
+    "build:zip": "npm run build",
     "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
     "docker:down": "npx wc-e2e docker:down",
@@ -125,5 +128,16 @@
     "> 0.1%",
     "ie 8",
     "ie 9"
-  ]
+  ],
+  "subsets": {
+    "no-e2e": {
+      "exclude": [
+        "@woocommerce/api",
+        "@woocommerce/e2e-core-tests",
+        "@woocommerce/e2e-environment",
+        "@woocommerce/e2e-utils",
+        "@wordpress/e2e-test-utils"
+      ]
+    }
+  }
 }
