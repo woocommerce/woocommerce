@@ -46,23 +46,32 @@ class Favorites {
 	 *
 	 * @param string        $item_id Identifier of item to add.
 	 * @param string|number $user_id Identifier of user to add to.
+	 * @return WP_Error|Boolean   Throws exception if item already exists.
 	 */
 	public static function add_item( $item_id, $user_id = null ) {
-		$user = $user_id ? $user_id : get_current_user_id();
+		$user = $user_id ?? get_current_user_id();
 
 		if ( ! $user || ! $item_id ) {
-			return;
+			return new \WP_Error(
+				'woocommerce_favorites_invalid_request',
+				__( 'Sorry, invalid request', 'woocommerce-admin' )
+			);
 		}
 
 		$all_favorites = self::get_all( $user );
 
 		if ( in_array( $item_id, $all_favorites, true ) ) {
-			return;
+			return new \WP_Error(
+				'woocommerce_favorites_already_exists',
+				__( 'Favorite already exists', 'woocommerce-admin' )
+			);
 		}
 
 		$all_favorites[] = $item_id;
 
 		self::set_meta_value( $user, $all_favorites );
+
+		return true;
 	}
 
 	/**
@@ -70,35 +79,48 @@ class Favorites {
 	 *
 	 * @param string        $item_id Identifier of item to remove.
 	 * @param string|number $user_id Identifier of user to remove from.
+	 * @return \WP_Error|Boolean   Throws exception if item does not exist.
 	 */
 	public static function remove_item( $item_id, $user_id = null ) {
-		$user = $user_id ? $user_id : get_current_user_id();
+		$user = $user_id ?? get_current_user_id();
 
 		if ( ! $user || ! $item_id ) {
-			return;
+			return new \WP_Error(
+				'woocommerce_favorites_invalid_request',
+				__( 'Sorry, invalid request', 'woocommerce-admin' )
+			);
 		}
 
 		$all_favorites = self::get_all( $user );
 
 		if ( ! in_array( $item_id, $all_favorites, true ) ) {
-			return;
+			return new \WP_Error(
+				'woocommerce_favorites_does_not_exist',
+				__( 'Favorite item not found', 'woocommerce-admin' )
+			);
 		}
 
-		$remaining = array_diff( $all_favorites, [ $item_id ] );
+		$remaining = array_values( array_diff( $all_favorites, [ $item_id ] ) );
 
-		self::set_meta_value( $user, array_values( $remaining ) );
+		self::set_meta_value( $user, $remaining );
+
+		return true;
 	}
 
 	/**
 	 * Get all registered favorites.
 	 *
 	 * @param string|number $user_id Identifier of user to query.
+	 * @return WP_Error|Array
 	 */
 	public static function get_all( $user_id = null ) {
-		$user = $user_id ? $user_id : get_current_user_id();
+		$user = $user_id ?? get_current_user_id();
 
 		if ( ! $user ) {
-			return;
+			return new \WP_Error(
+				'woocommerce_favorites_invalid_request',
+				__( 'Sorry, invalid request', 'woocommerce-admin' )
+			);
 		}
 
 		$response = Loader::get_user_data_field( $user, self::META_NAME );
