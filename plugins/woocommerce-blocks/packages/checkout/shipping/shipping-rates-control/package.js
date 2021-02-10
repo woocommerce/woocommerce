@@ -48,7 +48,7 @@ const Package = ( {
 						const quantity = v.quantity;
 						return (
 							<li
-								key={ name }
+								key={ v.key }
 								className="wc-block-components-shipping-rates-control__package-item"
 							>
 								<Label
