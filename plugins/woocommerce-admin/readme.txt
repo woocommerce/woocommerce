@@ -90,6 +90,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Fixed the Add First Product email note checks. #6260
 - Fix: Onboarding - Fixed "Business Details" error. #6271
 - Enhancement: Use the new Paypal payments plugin for onboarding. #6261
+- Fix: Show management links when only main task list is hidden. #6291
 
 == Changelog ==
 

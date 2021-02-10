@@ -48,6 +48,7 @@ export const Layout = ( {
 	isBatchUpdating,
 	query,
 	requestingTaskList,
+	isTaskListHidden,
 	bothTaskListsHidden,
 	shouldShowWelcomeModal,
 	shouldShowWelcomeFromCalypsoModal,
@@ -100,7 +101,7 @@ export const Layout = ( {
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					<StatsOverview />
-					{ ! isTaskListEnabled && <StoreManagementLinks /> }
+					{ isTaskListHidden && <StoreManagementLinks /> }
 				</Column>
 			</>
 		);
@@ -221,14 +222,17 @@ export default compose(
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
 			'single_column';
+		const isTaskListHidden =
+			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
 
 		return {
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
+			isTaskListHidden,
 			bothTaskListsHidden:
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes' &&
+				isTaskListHidden &&
 				getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
 			requestingTaskList:
 				isResolving( 'getOption', [

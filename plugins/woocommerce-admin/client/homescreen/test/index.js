@@ -20,6 +20,10 @@ jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
 // We aren't testing the <InboxPanel /> component here.
 jest.mock( 'inbox-panel', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
 
+jest.mock( '../../store-management-links', () => ( {
+	StoreManagementLinks: jest.fn().mockReturnValue( '[StoreManagementLinks]' ),
+} ) );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUserPreferences: jest.fn().mockReturnValue( {} ),
@@ -236,6 +240,51 @@ describe( 'Homescreen Layout', () => {
 
 		expect(
 			within( secondColumn ).getByText( /\[StatsOverview\]/ )
+		).toBeInTheDocument();
+		expect(
+			within( firstColumn ).queryByText( /\[StatsOverview\]/ )
+		).toBeNull();
+	} );
+
+	it( 'should display the correct blocks in each column when task list is hidden', () => {
+		useUserPreferences.mockReturnValue( {
+			homepage_layout: 'two_columns',
+		} );
+		const { container } = render(
+			<Layout
+				requestingTaskList={ false }
+				bothTaskListsHidden={ false }
+				isTaskListHidden={ true }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		const columns = container.getElementsByClassName(
+			'woocommerce-homescreen-column'
+		);
+		expect( columns ).toHaveLength( 2 );
+		const firstColumn = columns[ 0 ];
+		const secondColumn = columns[ 1 ];
+
+		expect(
+			within( firstColumn ).getByText( /\[TaskList\]/ )
+		).toBeInTheDocument();
+		expect(
+			within( firstColumn ).getByText( /\[InboxPanel\]/ )
+		).toBeInTheDocument();
+		expect(
+			within( secondColumn ).queryByText( /\[TaskList\]/ )
+		).toBeNull();
+		expect(
+			within( secondColumn ).queryByText( /\[InboxPanel\]/ )
+		).toBeNull();
+
+		expect(
+			within( secondColumn ).getByText( /\[StatsOverview\]/ )
+		).toBeInTheDocument();
+		expect(
+			within( secondColumn ).getByText( /\[StoreManagementLinks\]/ )
 		).toBeInTheDocument();
 		expect(
 			within( firstColumn ).queryByText( /\[StatsOverview\]/ )
