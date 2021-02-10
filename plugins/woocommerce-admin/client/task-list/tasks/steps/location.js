@@ -46,7 +46,7 @@ export default class StoreLocation extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem saving your store location.',
+					'There was a problem saving your store location',
 					'woocommerce-admin'
 				)
 			);

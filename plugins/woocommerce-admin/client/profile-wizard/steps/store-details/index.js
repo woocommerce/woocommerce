@@ -177,7 +177,7 @@ class StoreDetails extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem saving your store details.',
+					'There was a problem saving your store details',
 					'woocommerce-admin'
 				)
 			);

@@ -121,7 +121,7 @@ class ShippingRates extends Component {
 
 		createNotice(
 			'success',
-			__( 'Your shipping rates have been updated.', 'woocommerce-admin' )
+			__( 'Your shipping rates have been updated', 'woocommerce-admin' )
 		);
 
 		this.props.onComplete();

@@ -116,7 +116,7 @@ class Appearance extends Component {
 					createNotice(
 						'error',
 						__(
-							'There was an error importing some of the sample products.',
+							'There was an error importing some of the sample products',
 							'woocommerce-admin'
 						)
 					);
@@ -124,7 +124,7 @@ class Appearance extends Component {
 					createNotice(
 						'success',
 						__(
-							'All sample products have been imported.',
+							'All sample products have been imported',
 							'woocommerce-admin'
 						)
 					);
@@ -210,7 +210,7 @@ class Appearance extends Component {
 			this.setState( { isUpdatingLogo: false } );
 			createNotice(
 				'success',
-				__( 'Store logo updated sucessfully.', 'woocommerce-admin' )
+				__( 'Store logo updated sucessfully', 'woocommerce-admin' )
 			);
 			this.completeStep();
 		} else {
@@ -244,7 +244,7 @@ class Appearance extends Component {
 			createNotice(
 				'success',
 				__(
-					"🎨 Your store is looking great! Don't forget to continue personalizing it.",
+					"🎨 Your store is looking great! Don't forget to continue personalizing it",
 					'woocommerce-admin'
 				)
 			);

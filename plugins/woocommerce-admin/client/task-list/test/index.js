@@ -104,7 +104,7 @@ describe( 'TaskDashboard and TaskList', () => {
 		isDismissable: true,
 	};
 
-	it( 'renders the "Finish setup" and "Extensions setup" tasks lists', async () => {
+	it( 'renders the "Get ready to start selling" and "Extensions setup" tasks lists', async () => {
 		apiFetch.mockResolvedValue( {} );
 		getAllTasks.mockReturnValue( tasks );
 		const { container } = render(
@@ -117,7 +117,9 @@ describe( 'TaskDashboard and TaskList', () => {
 		);
 
 		// Wait for the setup task list to render.
-		expect( await findByText( container, 'Finish setup' ) ).toBeDefined();
+		expect(
+			await findByText( container, 'Get ready to start selling' )
+		).toBeDefined();
 
 		// Wait for the extension task list to render.
 		expect(
@@ -183,7 +185,7 @@ describe( 'TaskDashboard and TaskList', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeNull();
+		expect( queryByText( 'Get ready to start selling' ) ).toBeNull();
 
 		expect( queryByText( 'Extensions setup' ) ).not.toBeNull();
 	} );
@@ -249,7 +251,7 @@ describe( 'TaskDashboard and TaskList', () => {
 			/>
 		);
 
-		expect( queryByText( 'Finish setup' ) ).toBeNull();
+		expect( queryByText( 'Get ready to start selling' ) ).toBeNull();
 	} );
 
 	it( 'hides the extended task list if there are no visible tasks', () => {

@@ -147,7 +147,7 @@ export class Shipping extends Component {
 			createNotice(
 				'success',
 				__(
-					"📦 Shipping is done! Don't worry, you can always change it later.",
+					"📦 Shipping is done! Don't worry, you can always change it later",
 					'woocommerce-admin'
 				)
 			);

@@ -21,7 +21,7 @@ const page = {
 	content: (
 		<PageContent
 			title={ __(
-				'Welcome to your new store management experience.',
+				'Welcome to your new store management experience',
 				'woocommerce-admin'
 			) }
 			body={ interpolateComponents( {

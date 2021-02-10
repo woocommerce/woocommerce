@@ -74,7 +74,7 @@ class Theme extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem selecting your store theme.',
+					'There was a problem selecting your store theme',
 					'woocommerce-admin'
 				)
 			);
@@ -115,7 +115,7 @@ class Theme extends Component {
 					'success',
 					sprintf(
 						__(
-							'%s was installed on your site.',
+							'%s was installed on your site',
 							'woocommerce-admin'
 						),
 						response.name
@@ -141,7 +141,7 @@ class Theme extends Component {
 					'success',
 					sprintf(
 						__(
-							'%s was activated on your site.',
+							'%s was activated on your site',
 							'woocommerce-admin'
 						),
 						response.name

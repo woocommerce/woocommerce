@@ -48,7 +48,7 @@ class InboxNoteAction extends Component {
 					.then( () => {
 						createNotice(
 							'success',
-							__( 'Message dismissed.', 'woocommerce-admin' ),
+							__( 'Message dismissed', 'woocommerce-admin' ),
 							{
 								actions: [
 									{
@@ -70,7 +70,7 @@ class InboxNoteAction extends Component {
 						createNotice(
 							'error',
 							__(
-								'Message could not be dismissed.',
+								'Message could not be dismissed',
 								'woocommerce-admin'
 							)
 						);
@@ -80,10 +80,7 @@ class InboxNoteAction extends Component {
 					.then( ( notes ) => {
 						createNotice(
 							'success',
-							__(
-								'All messages dismissed.',
-								'woocommerce-admin'
-							),
+							__( 'All messages dismissed', 'woocommerce-admin' ),
 							{
 								actions: [
 									{
@@ -110,7 +107,7 @@ class InboxNoteAction extends Component {
 						createNotice(
 							'error',
 							__(
-								'Message could not be dismissed.',
+								'Message could not be dismissed',
 								'woocommerce-admin'
 							)
 						);

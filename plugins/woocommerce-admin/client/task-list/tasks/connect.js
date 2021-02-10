@@ -18,7 +18,7 @@ class Connect extends Component {
 		if ( query.deny === '1' ) {
 			this.errorMessage(
 				__(
-					'You must click approve to install your extensions and connect to WooCommerce.com.',
+					'You must click approve to install your extensions and connect to WooCommerce.com',
 					'woocommerce-admin'
 				)
 			);
@@ -45,7 +45,7 @@ class Connect extends Component {
 
 	errorMessage(
 		message = __(
-			'There was an error connecting to WooCommerce.com. Please try again.',
+			'There was an error connecting to WooCommerce.com. Please try again',
 			'woocommerce-admin'
 		)
 	) {
@@ -88,7 +88,7 @@ class Connect extends Component {
 					this.props.createNotice(
 						'success',
 						__(
-							'Store connected to WooCommerce.com and extensions are being installed.',
+							'Store connected to WooCommerce.com and extensions are being installed',
 							'woocommerce-admin'
 						)
 					);

@@ -221,7 +221,7 @@ class BusinessDetails extends Component {
 				createNotice(
 					'error',
 					__(
-						'There was a problem updating your business details.',
+						'There was a problem updating your business details',
 						'woocommerce-admin'
 					)
 				);

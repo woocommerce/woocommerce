@@ -51,7 +51,7 @@ const subTasks = [
 	},
 	{
 		key: 'importProducts',
-		title: __( 'Import', 'woocommerce-admin' ),
+		title: __( 'Import via CSV', 'woocommerce-admin' ),
 		content: __(
 			'For larger stores we recommend importing all products at once via CSV file',
 			'woocommerce-admin'
@@ -66,7 +66,7 @@ const subTasks = [
 	},
 	{
 		key: 'migrateProducts',
-		title: __( 'Migrate', 'woocommerce-admin' ),
+		title: __( 'Import from another service', 'woocommerce-admin' ),
 		content: __(
 			'For stores currently selling elsewhere we suggest using a product migration service',
 			'woocommerce-admin'

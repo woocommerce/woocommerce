@@ -20,8 +20,12 @@ describe( 'products', () => {
 				screen.queryByText( 'Start with a template' )
 			).toBeInTheDocument();
 			expect( screen.queryByText( 'Add manually' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Import' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Migrate' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Import via CSV' )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Import from another service' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should not render the product template modal right away', () => {

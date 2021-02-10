@@ -58,7 +58,7 @@ class ProfileWizard extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem finishing the profile wizard.',
+					'There was a problem finishing the setup wizard',
 					'woocommerce-admin'
 				)
 			);
@@ -269,7 +269,7 @@ class ProfileWizard extends Component {
 				createNotice(
 					'error',
 					__(
-						'There was a problem skipping the setup wizard.',
+						'There was a problem skipping the setup wizard',
 						'woocommerce-admin'
 					)
 				);

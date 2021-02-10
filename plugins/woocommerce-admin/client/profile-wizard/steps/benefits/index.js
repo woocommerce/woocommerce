@@ -67,7 +67,7 @@ class Benefits extends Component {
 			createNotice(
 				'error',
 				__(
-					'There was a problem updating your preferences.',
+					'There was a problem updating your preferences',
 					'woocommerce-admin'
 				)
 			);
@@ -112,7 +112,7 @@ class Benefits extends Component {
 					createNotice(
 						'error',
 						__(
-							'There was a problem updating your preferences.',
+							'There was a problem updating your preferences',
 							'woocommerce-admin'
 						)
 					);

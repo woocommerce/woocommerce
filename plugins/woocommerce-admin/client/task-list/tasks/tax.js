@@ -155,7 +155,7 @@ class Tax extends Component {
 				createNotice(
 					'error',
 					__(
-						'There was a problem updating your tax settings.',
+						'There was a problem updating your tax settings',
 						'woocommerce-admin'
 					)
 				);

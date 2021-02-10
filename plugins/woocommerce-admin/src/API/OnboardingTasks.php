@@ -502,7 +502,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 			return array(
 				'status'         => 'success',
-				'message'        => __( 'Homepage created.', 'woocommerce-admin' ),
+				'message'        => __( 'Homepage created', 'woocommerce-admin' ),
 				'post_id'        => $post_id,
 				'edit_post_link' => htmlspecialchars_decode( get_edit_post_link( $post_id ) ),
 			);

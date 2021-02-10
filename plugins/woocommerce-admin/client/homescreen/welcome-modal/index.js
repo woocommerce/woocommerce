@@ -36,7 +36,7 @@ const pages = [
 		content: (
 			<PageContent
 				title={ __(
-					'A personalized inbox full of relevant advice.',
+					'A personalized inbox full of relevant advice',
 					'woocommerce-admin'
 				) }
 				body={ __(
@@ -51,7 +51,7 @@ const pages = [
 		content: (
 			<PageContent
 				title={ __(
-					'Good data leads to smart business decisions.',
+					'Good data leads to smart business decisions',
 					'woocommerce-admin'
 				) }
 				body={

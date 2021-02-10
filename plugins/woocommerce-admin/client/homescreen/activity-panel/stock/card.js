@@ -93,7 +93,7 @@ export class ProductStockCard extends Component {
 				'success',
 				sprintf(
 					/* translators: %s = name of the product having stock updated */
-					__( '%s stock updated.', 'woocommerce-admin' ),
+					__( '%s stock updated', 'woocommerce-admin' ),
 					product.name
 				),
 				{
@@ -117,7 +117,7 @@ export class ProductStockCard extends Component {
 				'error',
 				sprintf(
 					/* translators: %s = name of the product having stock updated */
-					__( '%s stock could not be updated.', 'woocommerce-admin' ),
+					__( '%s stock could not be updated', 'woocommerce-admin' ),
 					product.name
 				)
 			);
