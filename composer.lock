@@ -4,15 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "content-hash": "c5ebe496c9f97d9748856d33070681e0",
-=======
-    "content-hash": "e725128c4bb286a1f8602546ea9bd9a1",
->>>>>>> Cmposer update after rebase
-=======
-    "content-hash": "281091feb4b7d76b71e95c02ec19851d",
->>>>>>> Bump to 4.4.2
+    "content-hash": "f23fa9d52b28222172880619e3bbd8f3",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -580,20 +572,20 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v4.4.2",
+            "version": "v4.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "4fa88b98204c9cafd2c8db5e5536a51e0c85f5fd"
+                "reference": "1eade21846e81d5aaf9bf40cdd1be60778849244"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/4fa88b98204c9cafd2c8db5e5536a51e0c85f5fd",
-                "reference": "4fa88b98204c9cafd2c8db5e5536a51e0c85f5fd",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/1eade21846e81d5aaf9bf40cdd1be60778849244",
+                "reference": "1eade21846e81d5aaf9bf40cdd1be60778849244",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-autoloader": "2.7.1",
+                "automattic/jetpack-autoloader": "^2.9.1",
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
@@ -625,9 +617,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.4.2"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.4.3"
             },
-            "time": "2021-02-05T16:32:03+00:00"
+            "time": "2021-02-11T18:07:48+00:00"
         }
     ],
     "packages-dev": [
