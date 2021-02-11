@@ -4,7 +4,7 @@
  *
  * @class    WC_Admin_Taxonomies
  * @version  2.3.10
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -387,13 +387,13 @@ class WC_Admin_Taxonomies {
 	 * @param object $term Term object.
 	 * @return array
 	 */
-	public function product_cat_row_actions( $actions = array(), $term ) {
+	public function product_cat_row_actions( $actions, $term ) {
 		$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
 
 		if ( $default_category_id !== $term->term_id && current_user_can( 'edit_term', $term->term_id ) ) {
 			$actions['make_default'] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
-				wp_nonce_url( 'edit-tags.php?action=make_default&amp;taxonomy=product_cat&amp;tag_ID=' . absint( $term->term_id ), 'make_default_' . absint( $term->term_id ) ),
+				wp_nonce_url( 'edit-tags.php?action=make_default&amp;taxonomy=product_cat&amp;post_type=product&amp;tag_ID=' . absint( $term->term_id ), 'make_default_' . absint( $term->term_id ) ),
 				/* translators: %s: taxonomy term name */
 				esc_attr( sprintf( __( 'Make &#8220;%s&#8221; the default category', 'woocommerce' ), $term->name ) ),
 				__( 'Make default', 'woocommerce' )

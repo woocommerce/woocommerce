@@ -8,4 +8,4 @@
 
 defined( 'ABSPATH' ) || exit;
 
-return include 'class-wc-settings-advanced.php';
+return include __DIR__ . '/class-wc-settings-advanced.php';

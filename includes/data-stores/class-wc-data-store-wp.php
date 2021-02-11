@@ -6,7 +6,7 @@
  * your own meta handling functions.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -85,7 +85,7 @@ class WC_Data_Store_WP {
 		$db_info       = $this->get_db_info();
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
 				FROM {$db_info['table']}
 				WHERE {$db_info['object_id_field']} = %d
@@ -94,7 +94,20 @@ class WC_Data_Store_WP {
 				$object->get_id()
 			)
 		);
+		return $this->filter_raw_meta_data( $object, $raw_meta_data );
+	}
 
+	/**
+	 * Helper method to filter internal meta keys from all meta data rows for the object.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param WC_Data $object        WC_Data object.
+	 * @param array   $raw_meta_data Array of std object of meta data to be filtered.
+	 *
+	 * @return mixed|void
+	 */
+	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
 		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
 		return apply_filters( "woocommerce_data_store_wp_{$this->meta_type}_read_meta", $meta_data, $object, $this );
@@ -120,7 +133,7 @@ class WC_Data_Store_WP {
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		return add_metadata( $this->meta_type, $object->get_id(), $meta->key, is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
+		return add_metadata( $this->meta_type, $object->get_id(), wp_slash( $meta->key ), is_string( $meta->value ) ? wp_slash( $meta->value ) : $meta->value, false );
 	}
 
 	/**
@@ -629,5 +642,17 @@ class WC_Data_Store_WP {
 			)
 		);
 		wp_cache_delete( 'lookup_table', 'object_' . $id );
+	}
+
+	/**
+	 * Converts a WP post date string into a timestamp.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param  string $time_string The WP post date string.
+	 * @return int|null The date string converted to a timestamp or null.
+	 */
+	protected function string_to_timestamp( $time_string ) {
+		return '0000-00-00 00:00:00' !== $time_string ? wc_string_to_timestamp( $time_string ) : null;
 	}
 }

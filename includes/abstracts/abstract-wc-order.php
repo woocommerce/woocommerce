@@ -7,8 +7,10 @@
  *
  * @class       WC_Abstract_Order
  * @version     3.0.0
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  */
+
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +20,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php';
  * WC_Abstract_Order class.
  */
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
+	use WC_Item_Totals;
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
@@ -86,8 +89,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
-	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
-	 * should be used. It is possible, but the aforementioned are preferred and are the only.
+	 * This class should NOT be instantiated, but the wc_get_order function or new WC_Order_Factory
+	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
 	 * @param  int|object|WC_Order $order Order to read.
@@ -165,8 +168,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+		if ( ! $this->data_store ) {
+			return $this->get_id();
+		}
+
+		try {
+			/**
+			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+			 *
+			 * @param WC_Data          $this The object being saved.
+			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 */
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 			if ( $this->get_id() ) {
@@ -174,9 +186,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			} else {
 				$this->data_store->create( $this );
 			}
+
+			$this->save_items();
+
+			/**
+			 * Trigger action after saving to the DB.
+			 *
+			 * @param WC_Data          $this The object being saved.
+			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 */
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		} catch ( Exception $e ) {
+			$this->handle_exception( $e, __( 'Error saving order.', 'woocommerce' ) );
 		}
-		$this->save_items();
+
 		return $this->get_id();
+	}
+
+	/**
+	 * Log an error about this order is exception is encountered.
+	 *
+	 * @param Exception $e Exception object.
+	 * @param string    $message Message regarding exception thrown.
+	 * @since 3.7.0
+	 */
+	protected function handle_exception( $e, $message = 'Error' ) {
+		wc_get_logger()->error(
+			$message,
+			array(
+				'order' => $this,
+				'error' => $e,
+			)
+		);
 	}
 
 	/**
@@ -388,7 +430,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
 		}
-		return apply_filters( 'woocommerce_order_get_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
+		return apply_filters( 'woocommerce_order_get_total_discount', NumberUtil::round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
 	/**
@@ -397,12 +439,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_subtotal() {
-		$subtotal = 0;
-
-		foreach ( $this->get_items() as $item ) {
-			$subtotal += $item->get_subtotal();
-		}
-
+		$subtotal = NumberUtil::round( $this->get_cart_subtotal_for_order(), wc_get_price_decimals() );
 		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
@@ -427,7 +464,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->is_compound      = $tax->is_compound();
 			$tax_totals[ $code ]->label            = $tax->get_label();
 			$tax_totals[ $code ]->amount          += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
+			$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount, array( 'currency' => $this->get_currency() ) );
 		}
 
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
@@ -636,7 +673,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		// We round here because this is a total entry, as opposed to line items in other setters.
+		$this->set_prop( 'total_tax', wc_format_decimal( NumberUtil::round( $value, wc_get_price_decimals() ) ) );
 	}
 
 	/**
@@ -728,6 +766,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
+	}
+
+	/**
+	 * Return array of values for calculations.
+	 *
+	 * @param string $field Field name to return.
+	 *
+	 * @return array Array of values.
+	 */
+	protected function get_values_for_total( $field ) {
+		$items = array_map(
+			function ( $item ) use ( $field ) {
+				return wc_add_number_precision( $item[ $field ], false );
+			},
+			array_values( $this->get_items() )
+		);
+		return $items;
 	}
 
 	/**
@@ -923,6 +978,128 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Check and records coupon usage tentatively so that counts validation is correct. Display an error if coupon usage limit has been reached.
+	 *
+	 * If you are using this method, make sure to `release_held_coupons` in case an Exception is thrown.
+	 *
+	 * @throws Exception When not able to apply coupon.
+	 *
+	 * @param string $billing_email Billing email of order.
+	 */
+	public function hold_applied_coupons( $billing_email ) {
+		$held_keys          = array();
+		$held_keys_for_user = array();
+		$error              = null;
+
+		try {
+			foreach ( WC()->cart->get_applied_coupons() as $code ) {
+				$coupon = new WC_Coupon( $code );
+				if ( ! $coupon->get_data_store() ) {
+					continue;
+				}
+
+				// Hold coupon for when global coupon usage limit is present.
+				if ( 0 < $coupon->get_usage_limit() ) {
+					$held_key = $this->hold_coupon( $coupon );
+					if ( $held_key ) {
+						$held_keys[ $coupon->get_id() ] = $held_key;
+					}
+				}
+
+				// Hold coupon for when usage limit per customer is enabled.
+				if ( 0 < $coupon->get_usage_limit_per_user() ) {
+
+					if ( ! isset( $user_ids_and_emails ) ) {
+						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+					}
+
+					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
+
+					if ( $held_key_for_user ) {
+						$held_keys_for_user[ $coupon->get_id() ] = $held_key_for_user;
+					}
+				}
+			}
+		} catch ( Exception $e ) {
+			$error = $e;
+		} finally {
+			// Even in case of error, we will save keys for whatever coupons that were held so our data remains accurate.
+			// We save them in bulk instead of one by one for performance reasons.
+			if ( 0 < count( $held_keys_for_user ) || 0 < count( $held_keys ) ) {
+				$this->get_data_store()->set_coupon_held_keys( $this, $held_keys, $held_keys_for_user );
+			}
+			if ( $error instanceof Exception ) {
+				throw $error;
+			}
+		}
+	}
+
+
+	/**
+	 * Hold coupon if a global usage limit is defined.
+	 *
+	 * @param WC_Coupon $coupon Coupon object.
+	 *
+	 * @return string    Meta key which indicates held coupon.
+	 * @throws Exception When can't be held.
+	 */
+	private function hold_coupon( $coupon ) {
+		$result = $coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		if ( false === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'An unexpected error happened while applying the Coupon %s.', 'woocommerce' ), esc_html( $coupon->get_code() ) ) );
+		} elseif ( 0 === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'Coupon %s was used in another transaction during this checkout, and coupon usage limit is reached. Please remove the coupon and try again.', 'woocommerce' ), esc_html( $coupon->get_code() ) ) );
+		}
+		return $result;
+	}
+
+	/**
+	 * Hold coupon if usage limit per customer is defined.
+	 *
+	 * @param WC_Coupon $coupon              Coupon object.
+	 * @param array     $user_ids_and_emails Array of user Id and emails to check for usage limit.
+	 * @param string    $user_alias          User ID or email to use to record current usage.
+	 *
+	 * @return string    Meta key which indicates held coupon.
+	 * @throws Exception When coupon can't be held.
+	 */
+	private function hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias ) {
+		$result = $coupon->get_data_store()->check_and_hold_coupon_for_user( $coupon, $user_ids_and_emails, $user_alias );
+		if ( false === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'An unexpected error happened while applying the Coupon %s.', 'woocommerce' ), esc_html( $coupon->get_code() ) ) );
+		} elseif ( 0 === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'You have used this coupon %s in another transaction during this checkout, and coupon usage limit is reached. Please remove the coupon and try again.', 'woocommerce' ), esc_html( $coupon->get_code() ) ) );
+		}
+		return $result;
+	}
+
+	/**
+	 * Helper method to get all aliases for current user and provide billing email.
+	 *
+	 * @param string $billing_email Billing email provided in form.
+	 *
+	 * @return array     Array of all aliases.
+	 * @throws Exception When validation fails.
+	 */
+	private function get_billing_and_current_user_aliases( $billing_email ) {
+		$emails = array( $billing_email );
+		if ( get_current_user_id() ) {
+			$emails[] = wp_get_current_user()->user_email;
+		}
+		$emails              = array_unique(
+			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
+		);
+		$customer_data_store = WC_Data_Store::load( 'customer' );
+		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		return array_merge( $user_ids, $emails );
+	}
+
+	/**
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
@@ -938,13 +1115,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			if ( $coupon->get_code() !== $code ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
-			}
-
-			$discounts = new WC_Discounts( $this );
-			$valid     = $discounts->is_coupon_valid( $coupon );
-
-			if ( is_wp_error( $valid ) ) {
-				return $valid;
 			}
 		} else {
 			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
@@ -1031,10 +1201,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Apply all coupons in this order again to all line items.
+	 * This method is public since WooCommerce 3.8.0.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 */
-	protected function recalculate_coupons() {
+	public function recalculate_coupons() {
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
@@ -1099,24 +1270,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
+		$tax_location   = $this->get_tax_location();
+		$tax_location   = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
 
 		if ( $item_discounts ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
 				$item = $this->get_item( $item_id, false );
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
-				if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-					$taxes = WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+				if ( $this->get_prices_include_tax() && wc_tax_enabled() && 'taxable' === $item->get_tax_status() ) {
+					$taxes = WC_Tax::calc_tax( $amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), true );
 
-					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-						$taxes = array_map( 'wc_round_tax_total', $taxes );
-					}
-
+					// Use unrounded taxes so totals will be re-calculated accurately, like in cart.
 					$amount = $amount - array_sum( $taxes );
-					$item->set_total( max( 0, round( $item->get_total() - $amount, wc_get_price_decimals() ) ) );
-				} else {
-					$item->set_total( max( 0, $item->get_total() - $amount ) );
 				}
+
+				$item->set_total( max( 0, $item->get_total() - $amount ) );
 			}
 		}
 	}
@@ -1132,6 +1301,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
+		$tax_location      = $this->get_tax_location();
+		$tax_location      = array(
+			$tax_location['country'],
+			$tax_location['state'],
+			$tax_location['postcode'],
+			$tax_location['city'],
+		);
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
@@ -1150,23 +1326,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+					if ( 'taxable' !== $item->get_tax_status() || ! wc_tax_enabled() ) {
+						continue;
+					}
 
-						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-							$taxes = array_map( 'wc_round_tax_total', $taxes );
-						}
+					$taxes = array_sum( WC_Tax::calc_tax( $item_discount_amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), $this->get_prices_include_tax() ) );
+					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+						$taxes = wc_round_tax_total( $taxes );
+					}
 
-						$discount_tax += array_sum( $taxes );
-						$amount        = $amount - array_sum( $taxes );
-					} else {
-						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) );
+					$discount_tax += $taxes;
 
-						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-							$taxes = array_map( 'wc_round_tax_total', $taxes );
-						}
-
-						$discount_tax += array_sum( $taxes );
+					if ( $this->get_prices_include_tax() ) {
+						$amount = $amount - $taxes;
 					}
 				}
 
@@ -1186,7 +1358,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product.
 	 * @return int
-	 * @throws WC_Data_Exception Exception thrown if the item cannot be added to the cart.
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
@@ -1349,7 +1520,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = WC()->countries->get_base_city();
 		}
 
-		return $args;
+		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+	}
+
+	/**
+	 * Get tax rates for an order. Use order's shipping or billing address, defaults to base location.
+	 *
+	 * @param string $tax_class     Tax class to get rates for.
+	 * @param array  $location_args Location to compute rates for. Should be in form: array( country, state, postcode, city).
+	 * @param object $customer      Only used to maintain backward compatibility for filter `woocommerce-matched_rates`.
+	 *
+	 * @return mixed|void Tax rates.
+	 */
+	protected function get_tax_rates( $tax_class, $location_args = array(), $customer = null ) {
+		$tax_location = $this->get_tax_location( $location_args );
+		$tax_location = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
+		return WC_Tax::get_rates_from_location( $tax_class, $tax_location, $customer );
 	}
 
 	/**
@@ -1396,6 +1582,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Calculate fees for all line items.
+	 *
+	 * @return float Fee total.
+	 */
+	public function get_total_fees() {
+		return array_reduce(
+			$this->get_fees(),
+			function( $carry, $item ) {
+				return $carry + $item->get_total();
+			}
+		);
+	}
+
+	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
 	 */
 	public function update_taxes() {
@@ -1407,11 +1607,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$tax_amount = (float) $tax;
-
-				if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-					$tax_amount = wc_round_tax_total( $tax_amount );
-				}
+				$tax_amount = $this->round_line_tax( $tax, false );
 
 				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
@@ -1438,6 +1634,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 			$saved_rate_ids[] = $tax->get_rate_id();
 			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
+			$tax->set_label( WC_Tax::get_rate_label( $tax->get_rate_id() ) );
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );
 			$tax->save();
 		}
@@ -1453,9 +1650,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
-		$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
+		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+		$this->set_cart_tax( array_sum( $cart_taxes ) );
 		$this->save();
+	}
+
+	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart subtotal (assuming all other settings are same).
+	 *
+	 * @return float Cart subtotal.
+	 */
+	protected function get_cart_subtotal_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'subtotal' )
+			)
+		);
+	}
+
+	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart total (assuming all other settings are same).
+	 *
+	 * @return float Cart total.
+	 */
+	protected function get_cart_total_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'total' )
+			)
+		);
 	}
 
 	/**
@@ -1468,22 +1693,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
-		$fees_total         = 0;
+		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += round( $item->get_subtotal(), wc_get_price_decimals() );
-			$cart_total    += round( $item->get_total(), wc_get_price_decimals() );
-		}
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += round( $shipping->get_total(), wc_get_price_decimals() );
+			$shipping_total += NumberUtil::round( $shipping->get_total(), wc_get_price_decimals() );
 		}
 
 		$this->set_shipping_total( $shipping_total );
@@ -1493,13 +1713,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total = $item->get_total();
 
 			if ( 0 > $fee_total ) {
-				$max_discount = round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
+				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
-				if ( $fee_total < $max_discount ) {
+				if ( $fee_total < $max_discount && 0 > $max_discount ) {
 					$item->set_total( $max_discount );
 				}
 			}
-
 			$fees_total += $item->get_total();
 		}
 
@@ -1521,9 +1740,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$this->set_discount_total( $cart_subtotal - $cart_total );
+		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
-		$this->set_total( round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_total( NumberUtil::round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
@@ -1574,7 +1793,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$subtotal = $item->get_subtotal();
 			}
 
-			$subtotal = $round ? round( $subtotal, wc_get_price_decimals() ) : $subtotal;
+			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
 		return apply_filters( 'woocommerce_order_amount_line_subtotal', $subtotal, $this, $item, $inc_tax, $round );
@@ -1598,7 +1817,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$total = floatval( $item->get_total() ) / $item->get_quantity();
 			}
 
-			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;
+			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_total', $total, $this, $item, $inc_tax, $round );
@@ -1620,7 +1839,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = $inc_tax ? $item->get_total() + $item->get_total_tax() : $item->get_total();
 
 			// Check if we need to round.
-			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;
+			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
 		return apply_filters( 'woocommerce_order_amount_line_total', $total, $this, $item, $inc_tax, $round );
@@ -1700,15 +1919,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$subtotal    = 0;
+		$subtotal    = $this->get_cart_subtotal_for_order();
 
 		if ( ! $compound ) {
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 
-				if ( 'incl' === $tax_display ) {
-					$subtotal += $item->get_subtotal_tax();
+			if ( 'incl' === $tax_display ) {
+				$subtotal_taxes = 0;
+				foreach ( $this->get_items() as $item ) {
+					$subtotal_taxes += self::round_line_tax( $item->get_subtotal_tax(), false );
 				}
+				$subtotal += wc_round_tax_total( $subtotal_taxes );
 			}
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
@@ -1719,10 +1939,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			if ( 'incl' === $tax_display ) {
 				return '';
-			}
-
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 			}
 
 			// Add Shipping Costs.

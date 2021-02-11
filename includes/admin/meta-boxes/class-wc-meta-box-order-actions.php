@@ -6,7 +6,7 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @package     WooCommerce\Admin\Meta Boxes
  * @version     2.1.0
  */
 
@@ -33,7 +33,8 @@ class WC_Meta_Box_Order_Actions {
 		}
 
 		$order_actions = apply_filters(
-			'woocommerce_order_actions', array(
+			'woocommerce_order_actions',
+			array(
 				'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
 				'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
 				'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
@@ -62,7 +63,7 @@ class WC_Meta_Box_Order_Actions {
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete permanently', 'woocommerce' );
 						} else {
-							$delete_text = __( 'Move to trash', 'woocommerce' );
+							$delete_text = __( 'Move to Trash', 'woocommerce' );
 						}
 						?>
 						<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
@@ -117,7 +118,9 @@ class WC_Meta_Box_Order_Actions {
 
 				WC()->payment_gateways();
 				WC()->shipping();
-				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order );
+				add_filter( 'woocommerce_new_order_email_allows_resend', '__return_true' );
+				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order, true );
+				remove_filter( 'woocommerce_new_order_email_allows_resend', '__return_true' );
 
 				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 

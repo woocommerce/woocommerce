@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy Customer.
  *
  * @version  3.0.0
- * @package  WooCommerce/Classes
+ * @package  WooCommerce\Classes
  * @category Class
  * @author   WooThemes
  */

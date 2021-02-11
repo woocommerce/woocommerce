@@ -2,7 +2,7 @@
 /**
  * WC_Report_Sales_By_Date
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 
@@ -251,7 +251,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		);
 
 		foreach ( $this->report_data->full_refunds as $key => $order ) {
-			$this->report_data->full_refunds[ $key ]->net_refund = $order->total_refund - ( $order->total_shipping + $order->total_tax + $order->total_shipping_tax );
+			$total_refund       = is_numeric( $order->total_refund ) ? $order->total_refund : 0;
+			$total_shipping     = is_numeric( $order->total_shipping ) ? $order->total_shipping : 0;
+			$total_tax          = is_numeric( $order->total_tax ) ? $order->total_tax : 0;
+			$total_shipping_tax = is_numeric( $order->total_shipping_tax ) ? $order->total_shipping_tax : 0;
+
+			$this->report_data->full_refunds[ $key ]->net_refund = $total_refund - ( $total_shipping + $total_tax + $total_shipping_tax );
 		}
 
 		/**
@@ -587,7 +592,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'refund_amount'    => '#e74c3c',
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ), true ) ) {
 			$current_range = '7day';
@@ -603,7 +608,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 * Output an export link.
 	 */
 	public function get_export_button() {
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<a
 			href="#"

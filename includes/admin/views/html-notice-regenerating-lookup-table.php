@@ -2,13 +2,15 @@
 /**
  * Admin View: Notice - Regenerating product lookup table.
  *
- * @package WooCommerce/admin
+ * @package WooCommerce\Admin
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
 $pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=wc_update_product_lookup_tables&status=pending' );
-$cron_disabled       = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
 $cron_cta            = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress &rarr;', 'woocommerce' );
 ?>
 <div id="message" class="updated woocommerce-message">

@@ -4,9 +4,11 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -41,7 +43,7 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 
 			$sections = array();
 
-			if ( ! defined( 'WC_INSTALLING' ) ) {
+			if ( ! Constants::is_defined( 'WC_INSTALLING' ) ) {
 				$integrations = WC()->integrations->get_integrations();
 
 				if ( ! $current_section && ! empty( $integrations ) ) {

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @deprecated  2.6.0
  * @version     2.4.0
- * @package     WooCommerce/Classes/Shipping
+ * @package     WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_Rate {
 

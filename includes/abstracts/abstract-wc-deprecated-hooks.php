@@ -7,6 +7,8 @@
  * @version 3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -94,7 +96,7 @@ abstract class WC_Deprecated_Hooks {
 	 * @return string
 	 */
 	protected function get_deprecated_version( $old_hook ) {
-		return ! empty( $this->deprecated_version[ $old_hook ] ) ? $this->deprecated_version[ $old_hook ] : WC_VERSION;
+		return ! empty( $this->deprecated_version[ $old_hook ] ) ? $this->deprecated_version[ $old_hook ] : Constants::get_constant( 'WC_VERSION' );
 	}
 
 	/**

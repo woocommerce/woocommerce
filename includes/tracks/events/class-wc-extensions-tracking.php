@@ -27,7 +27,7 @@ class WC_Extensions_Tracking {
 	 * Send a Tracks event when an Extensions page is viewed.
 	 */
 	public function track_extensions_page() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$event      = 'extensions_view';
 		$properties = array(
 			'section' => empty( $_REQUEST['section'] ) ? '_featured' : wc_clean( wp_unslash( $_REQUEST['section'] ) ),

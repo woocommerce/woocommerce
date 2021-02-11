@@ -4,7 +4,7 @@
  *
  * Functions for account specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.6.0
  */
 
@@ -99,7 +99,7 @@ function wc_get_account_menu_items() {
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
-		'edit-address'    => __( 'Addresses', 'woocommerce' ),
+		'edit-address'    => _n( 'Addresses', 'Address', (int) wc_shipping_enabled(), 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
@@ -151,6 +151,8 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
 	} elseif ( 'orders' === $endpoint && isset( $wp->query_vars['view-order'] ) ) {
 		$current = true; // When looking at individual order, highlight Orders list item (to signify where in the menu the user currently is).
+	} elseif ( 'payment-methods' === $endpoint && isset( $wp->query_vars['add-payment-method'] ) ) {
+		$current = true;
 	}
 
 	if ( $current ) {

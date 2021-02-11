@@ -7,7 +7,7 @@
  *
  * @class       WC_Settings_API
  * @version     2.6.0
- * @package     WooCommerce/Abstracts
+ * @package     WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class    WC_Integration
  * @extends  WC_Settings_API
  * @version  2.6.0
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 abstract class WC_Integration extends WC_Settings_API {
 
@@ -80,6 +80,6 @@ abstract class WC_Integration extends WC_Settings_API {
 	 */
 	public function init_settings() {
 		parent::init_settings();
-		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
+		$this->enabled = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
 	}
 }

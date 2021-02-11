@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -17,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Gateway_COD
  * @extends     WC_Payment_Gateway
  * @version     2.1.0
- * @package     WooCommerce/Classes/Payment
+ * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_COD extends WC_Payment_Gateway {
 
@@ -62,47 +64,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
-
-		$options    = array();
-		$data_store = WC_Data_Store::load( 'shipping-zone' );
-		$raw_zones  = $data_store->get_zones();
-
-		foreach ( $raw_zones as $raw_zone ) {
-			$zones[] = new WC_Shipping_Zone( $raw_zone );
-		}
-
-		$zones[] = new WC_Shipping_Zone( 0 );
-
-		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
-
-			$options[ $method->get_method_title() ] = array();
-
-			// Translators: %1$s shipping method name.
-			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
-
-			foreach ( $zones as $zone ) {
-
-				$shipping_method_instances = $zone->get_shipping_methods();
-
-				foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
-
-					if ( $shipping_method_instance->id !== $method->id ) {
-						continue;
-					}
-
-					$option_id = $shipping_method_instance->get_rate_id();
-
-					// Translators: %1$s shipping method title, %2$s shipping method id.
-					$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
-
-					// Translators: %1$s zone name, %2$s shipping method instance name.
-					$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
-
-					$options[ $method->get_method_title() ][ $option_id ] = $option_title;
-				}
-			}
-		}
-
 		$this->form_fields = array(
 			'enabled'            => array(
 				'title'       => __( 'Enable/Disable', 'woocommerce' ),
@@ -139,7 +100,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'css'               => 'width: 400px;',
 				'default'           => '',
 				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
-				'options'           => $options,
+				'options'           => $this->load_shipping_method_options(),
 				'desc_tip'          => true,
 				'custom_attributes' => array(
 					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' ),
@@ -206,6 +167,92 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		}
 
 		return parent::is_available();
+	}
+
+	/**
+	 * Checks to see whether or not the admin settings are being accessed by the current request.
+	 *
+	 * @return bool
+	 */
+	private function is_accessing_settings() {
+		if ( is_admin() ) {
+			// phpcs:disable WordPress.Security.NonceVerification
+			if ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) {
+				return false;
+			}
+			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
+				return false;
+			}
+			if ( ! isset( $_REQUEST['section'] ) || 'cod' !== $_REQUEST['section'] ) {
+				return false;
+			}
+			// phpcs:enable WordPress.Security.NonceVerification
+
+			return true;
+		}
+
+		if ( Constants::is_true( 'REST_REQUEST' ) ) {
+			global $wp;
+			if ( isset( $wp->query_vars['rest_route'] ) && false !== strpos( $wp->query_vars['rest_route'], '/payment_gateways' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Loads all of the shipping method options for the enable_for_methods field.
+	 *
+	 * @return array
+	 */
+	private function load_shipping_method_options() {
+		// Since this is expensive, we only want to do it if we're actually on the settings page.
+		if ( ! $this->is_accessing_settings() ) {
+			return array();
+		}
+
+		$data_store = WC_Data_Store::load( 'shipping-zone' );
+		$raw_zones  = $data_store->get_zones();
+
+		foreach ( $raw_zones as $raw_zone ) {
+			$zones[] = new WC_Shipping_Zone( $raw_zone );
+		}
+
+		$zones[] = new WC_Shipping_Zone( 0 );
+
+		$options = array();
+		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
+
+			$options[ $method->get_method_title() ] = array();
+
+			// Translators: %1$s shipping method name.
+			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
+
+			foreach ( $zones as $zone ) {
+
+				$shipping_method_instances = $zone->get_shipping_methods();
+
+				foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
+
+					if ( $shipping_method_instance->id !== $method->id ) {
+						continue;
+					}
+
+					$option_id = $shipping_method_instance->get_rate_id();
+
+					// Translators: %1$s shipping method title, %2$s shipping method id.
+					$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
+
+					// Translators: %1$s zone name, %2$s shipping method instance name.
+					$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
+
+					$options[ $method->get_method_title() ][ $option_id ] = $option_title;
+				}
+			}
+		}
+
+		return $options;
 	}
 
 	/**
@@ -319,7 +366,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	/**
 	 * Add content to the WC emails.
 	 *
-	 * @access public
 	 * @param WC_Order $order Order object.
 	 * @param bool     $sent_to_admin  Sent to admin.
 	 * @param bool     $plain_text Email format: plain text or HTML.

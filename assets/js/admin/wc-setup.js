@@ -1,6 +1,7 @@
 /*global wc_setup_params */
 /*global wc_setup_currencies */
 /*global wc_base_state */
+/* @deprecated 4.6.0 */
 jQuery( function( $ ) {
 	function blockWizardUI() {
 		$('.wc-setup-content').block({
@@ -18,6 +19,35 @@ jQuery( function( $ ) {
 		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
 			blockWizardUI();
 		}
+
+		return true;
+	} );
+
+	$( 'form.address-step' ).on( 'submit', function( e ) {
+		var form = $( this );
+		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
+			blockWizardUI();
+		}
+
+		e.preventDefault();
+		$('.wc-setup-content').unblock();
+
+		$( this ).WCBackboneModal( {
+			template: 'wc-modal-tracking-setup'
+		} );
+
+		$( document.body ).on( 'wc_backbone_modal_response', function() {
+			form.unbind( 'submit' ).trigger( 'submit' );
+		} );
+
+		$( '#wc_tracker_checkbox_dialog' ).on( 'change', function( e ) {
+			var eventTarget = $( e.target );
+			$( '#wc_tracker_checkbox' ).prop( 'checked', eventTarget.prop( 'checked' ) );
+		} );
+
+		$( '#wc_tracker_submit' ).on( 'click', function () {
+			form.unbind( 'submit' ).trigger( 'submit' );
+		} );
 
 		return true;
 	} );
@@ -42,16 +72,35 @@ jQuery( function( $ ) {
 			} );
 
 			$( '.store-state-container' ).show();
-			$state_select.selectWoo().val( wc_base_state ).change().prop( 'required', true );
+			$state_select.selectWoo().val( wc_base_state ).trigger( 'change' ).prop( 'required', true );
 		} else {
 			$( '.store-state-container' ).hide();
-			$state_select.empty().val( '' ).change().prop( 'required', false );
+			$state_select.empty().val( '' ).trigger( 'change' ).prop( 'required', false );
 		}
 
-		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).change();
+		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).trigger( 'change' );
 	} );
 
-	$( '#store_country' ).change();
+	/* Setup postcode field and validations */
+	$( '#store_country' ).on( 'change', function() {
+		if ( ! wc_setup_params.postcodes ) {
+			return;
+		}
+
+		var $this                 = $( this ),
+			country               = $this.val(),
+			$store_postcode_input = $( '#store_postcode' ),
+			country_postcode_obj  = wc_setup_params.postcodes[ country ];
+
+		// Default to required, if its unknown whether postcode is required or not.
+		if ( $.isEmptyObject( country_postcode_obj ) || country_postcode_obj.required  ) {
+			$store_postcode_input.attr( 'required', 'true' );
+		} else {
+			$store_postcode_input.removeAttr( 'required' );
+		}
+	} );
+
+	$( '#store_country' ).trigger( 'change' );
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-service-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
@@ -72,7 +121,7 @@ jQuery( function( $ ) {
 			$focused = $( document.activeElement );
 
 		if ( $focused.is( '.wc-wizard-service-toggle, .wc-wizard-service-enable' ) && ( 13 === code || 32 === code ) ) {
-			$focused.find( ':input' ).click();
+			$focused.find( ':input' ).trigger( 'click' );
 		}
 	} );
 
@@ -86,7 +135,7 @@ jQuery( function( $ ) {
 
 		var $checkbox = $( this ).find( 'input[type="checkbox"]' );
 
-		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
+		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).trigger( 'change' );
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
@@ -116,11 +165,14 @@ jQuery( function( $ ) {
 			.removeClass( 'hide' )
 			.find( '.shipping-method-required-field' )
 			.prop( 'required', $checkbox.prop( 'checked' ) );
-	} ).find( '.wc-wizard-shipping-method-select .method' ).change();
+	} ).find( '.wc-wizard-shipping-method-select .method' ).trigger( 'change' );
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
-		var selectedMethod = $( '.wc-wizard-shipping-method-select .method' ).val();
+		var selectedMethod = $( this )
+			.closest( '.wc-wizard-service-item' )
+			.find( '.wc-wizard-shipping-method-select .method' )
+			.val();
 
 		$( this )
 			.closest( '.wc-wizard-service-item' )
@@ -130,7 +182,7 @@ jQuery( function( $ ) {
 	} );
 
 	function submitActivateForm() {
-		$( 'form.activate-jetpack' ).submit();
+		$( 'form.activate-jetpack' ).trigger( 'submit' );
 	}
 
 	function waitForJetpackInstall() {
@@ -168,6 +220,11 @@ jQuery( function( $ ) {
 		waitForJetpackInstall();
 	} );
 
+	$( '.activate-new-onboarding' ).on( 'click', '.button-primary', function() {
+		// Show pending spinner while activate happens.
+		blockWizardUI();
+	} );
+
 	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account, input#ppec_paypal_reroute_requests', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
@@ -182,7 +239,7 @@ jQuery( function( $ ) {
 				.prop( 'disabled', true )
 				.prop( 'required', false );
 		}
-	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
+	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).trigger( 'change' );
 
 	function addPlugins( bySlug, $el, hover ) {
 		var plugins = $el.data( 'plugins' );

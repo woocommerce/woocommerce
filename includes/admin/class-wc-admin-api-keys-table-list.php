@@ -103,8 +103,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 					add_query_arg(
 						array(
 							'revoke-key' => $key['key_id'],
-						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
-					), 'revoke'
+						),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
+					),
+					'revoke'
 				)
 			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>';
 		}
@@ -221,7 +223,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
 		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
 		submit_button(
-			$text, '', '', false,
+			$text,
+			'',
+			'',
+			false,
 			array(
 				'id' => 'search-submit',
 			)
@@ -253,7 +258,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		// Get the API keys.
 		$keys = $wpdb->get_results(
 			"SELECT key_id, user_id, description, permissions, truncated_key, last_access FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search}" .
-			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ), ARRAY_A
+			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ),
+			ARRAY_A
 		); // WPCS: unprepared SQL ok.
 
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" ); // WPCS: unprepared SQL ok.

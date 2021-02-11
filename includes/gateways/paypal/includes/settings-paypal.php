@@ -1,8 +1,8 @@
 <?php
 /**
- * Settings for PayPal Gateway.
+ * Settings for PayPal Standard Gateway.
  *
- * @package WooCommerce/Classes/Payment
+ * @package WooCommerce\Classes\Payment
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -112,14 +112,6 @@ return array(
 			'sale'          => __( 'Capture', 'woocommerce' ),
 			'authorization' => __( 'Authorize', 'woocommerce' ),
 		),
-	),
-	'page_style'            => array(
-		'title'       => __( 'Page style', 'woocommerce' ),
-		'type'        => 'text',
-		'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account. This affects classic PayPal checkout screens.', 'woocommerce' ),
-		'default'     => '',
-		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 	'image_url'             => array(
 		'title'       => __( 'Image url', 'woocommerce' ),

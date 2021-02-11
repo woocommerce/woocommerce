@@ -4,7 +4,7 @@
  *
  * Functions for REST specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 2.6.0
  */
 
@@ -46,7 +46,8 @@ function wc_rest_prepare_date_response( $date, $utc = true ) {
  */
 function wc_rest_allowed_image_mime_types() {
 	return apply_filters(
-		'woocommerce_rest_allowed_image_mime_types', array(
+		'woocommerce_rest_allowed_image_mime_types',
+		array(
 			'jpg|jpeg|jpe' => 'image/jpeg',
 			'gif'          => 'image/gif',
 			'png'          => 'image/png',
@@ -89,11 +90,13 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	// If error storing temporarily, return the error.
 	if ( is_wp_error( $file_array['tmp_name'] ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url',
+		return new WP_Error(
+			'woocommerce_rest_invalid_remote_image_url',
 			/* translators: %s: image URL */
 			sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' '
 			/* translators: %s: error message */
-			. sprintf( __( 'Error: %s', 'woocommerce' ), $file_array['tmp_name']->get_error_message() ), array( 'status' => 400 )
+			. sprintf( __( 'Error: %s', 'woocommerce' ), $file_array['tmp_name']->get_error_message() ),
+			array( 'status' => 400 )
 		);
 	}
 

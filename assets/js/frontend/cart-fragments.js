@@ -115,7 +115,7 @@ jQuery( function( $ ) {
 		} );
 
 		try {
-			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
+			var wc_fragments = JSON.parse( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
 				cart_hash    = sessionStorage.getItem( cart_hash_key ),
 				cookie_hash  = Cookies.get( 'woocommerce_cart_hash'),
 				cart_created = sessionStorage.getItem( 'wc_cart_created' );

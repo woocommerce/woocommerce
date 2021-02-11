@@ -4,9 +4,11 @@
  *
  * Generates a range slider to filter products by price.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.3.0
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,10 +32,11 @@ class WC_Widget_Price_Filter extends WC_Widget {
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 		);
-		$suffix                   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version                  = Constants::get_constant( 'WC_VERSION' );
 		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
-		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
-		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
+		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), $version, true );
+		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), $version, true );
 		wp_localize_script(
 			'wc-price-slider',
 			'woocommerce_price_slider_params',
@@ -120,21 +123,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		echo '<form method="get" action="' . esc_url( $form_action ) . '">
-			<div class="price_slider_wrapper">
-				<div class="price_slider" style="display:none;"></div>
-				<div class="price_slider_amount" data-step="' . esc_attr( $step ) . '">
-					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $current_min_price ) . '" data-min="' . esc_attr( $min_price ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
-					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $current_max_price ) . '" data-max="' . esc_attr( $max_price ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
-					<button type="submit" class="button">' . esc_html__( 'Filter', 'woocommerce' ) . '</button>
-					<div class="price_label" style="display:none;">
-						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
-					</div>
-					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price', 'paged' ), '', true ) . '
-					<div class="clear"></div>
-				</div>
-			</div>
-		</form>'; // WPCS: XSS ok.
+		wc_get_template(
+			'content-widget-price-filter.php',
+			array(
+				'form_action'       => $form_action,
+				'step'              => $step,
+				'min_price'         => $min_price,
+				'max_price'         => $max_price,
+				'current_min_price' => $current_min_price,
+				'current_max_price' => $current_max_price,
+			)
+		);
 
 		$this->widget_end( $args );
 	}

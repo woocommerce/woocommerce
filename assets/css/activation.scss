@@ -9,7 +9,10 @@
 div.woocommerce-message {
 	overflow: hidden;
 	position: relative;
-	border-left-color: #cc99c2 !important;
+
+	&.updated {
+		border-left-color: #cc99c2 !important;
+	}
 }
 
 p.woocommerce-actions,

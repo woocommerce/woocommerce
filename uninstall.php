@@ -26,6 +26,10 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
  * and to ensure only the site owner can perform this action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
+	// Drop WC Admin tables.
+	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
+	\Automattic\WooCommerce\Admin\Install::drop_tables();
+
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
 
 	// Roles + caps.
@@ -70,21 +74,21 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $taxonomy ) {
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(
-					'taxonomy' => $taxonomy,
+					'taxonomy' => $_taxonomy,
 				)
 			);
 		}
 
 		// Delete term attributes.
-		foreach ( $wc_attributes as $taxonomy ) {
+		foreach ( $wc_attributes as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(
-					'taxonomy' => 'pa_' . $taxonomy,
+					'taxonomy' => 'pa_' . $_taxonomy,
 				)
 			);
 		}

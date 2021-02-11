@@ -2,11 +2,11 @@
 /**
  * Addons Page
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  2.5.0
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,12 +23,27 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		if ( false === ( $featured = get_transient( 'wc_addons_featured' ) ) ) {
-			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured-v2.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+		$featured = get_transient( 'wc_addons_featured' );
+		if ( false === $featured ) {
+			$headers = array();
+			$auth    = WC_Helper_Options::get( 'auth' );
+
+			if ( ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+
+			$raw_featured = wp_safe_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				array(
+					'headers'    => $headers,
+					'user-agent' => 'WooCommerce Addons Page',
+				)
+			);
+
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, WEEK_IN_SECONDS );
+					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
 				}
 			}
 		}
@@ -42,37 +57,47 @@ class WC_Admin_Addons {
 	/**
 	 * Build url parameter string
 	 *
-	 * @param  string $category
-	 * @param  string $term
-	 * @param  string $country
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return string url parameter string
 	 */
 	public static function build_parameter_string( $category, $term, $country ) {
 
-		$paramters = array(
+		$parameters = array(
 			'category' => $category,
 			'term'     => $term,
 			'country'  => $country,
 		);
 
-		return '?' . http_build_query( $paramters );
+		return '?' . http_build_query( $parameters );
 	}
 
 	/**
 	 * Call API to get extensions
 	 *
-	 * @param  string $category
-	 * @param  string $term
-	 * @param  string $country
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return array of extensions
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
 		$parameters     = self::build_parameter_string( $category, $term, $country );
-		$raw_extensions = wp_remote_get(
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters
+
+		$headers = array();
+		$auth    = WC_Helper_Options::get( 'auth' );
+
+		if ( ! empty( $auth['access_token'] ) ) {
+			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+		}
+
+		$raw_extensions = wp_safe_remote_get(
+			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+			array( 'headers' => $headers )
 		);
+
 		if ( ! is_wp_error( $raw_extensions ) ) {
 			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
 		}
@@ -103,7 +128,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param  string $section_id
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return object|bool
 	 */
@@ -118,7 +143,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param  string $section_id
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return array
 	 */
@@ -127,7 +152,8 @@ class WC_Admin_Addons {
 		$section_data = '';
 
 		if ( ! empty( $section->endpoint ) ) {
-			if ( false === ( $section_data = get_transient( 'wc_addons_section_' . $section_id ) ) ) {
+			$section_data = get_transient( 'wc_addons_section_' . $section_id );
+			if ( false === $section_data ) {
 				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
 
 				if ( ! is_wp_error( $raw_section ) ) {
@@ -172,7 +198,8 @@ class WC_Admin_Addons {
 				'utm_medium'   => 'product',
 				'utm_campaign' => 'woocommerceplugin',
 				'utm_content'  => $utm_content,
-			), $url
+			),
+			$url
 		);
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
@@ -181,7 +208,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a banner block.
 	 *
-	 * @param object $block
+	 * @param object $block Banner data.
 	 */
 	public static function output_banner_block( $block ) {
 		?>
@@ -218,7 +245,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column.
 	 *
-	 * @param object $block
+	 * @param object $block Column data.
 	 */
 	public static function output_column( $block ) {
 		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
@@ -245,7 +272,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column block.
 	 *
-	 * @param object $block
+	 * @param object $block Column block data.
 	 */
 	public static function output_column_block( $block ) {
 		?>
@@ -281,7 +308,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small light block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_small_light_block( $block ) {
 		?>
@@ -309,7 +336,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small dark block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_small_dark_block( $block ) {
 		?>
@@ -341,7 +368,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
@@ -367,9 +394,9 @@ class WC_Admin_Addons {
 
 		$defaults = array(
 			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
-			'image_alt'   => __( 'WooCommerce Services', 'woocommerce' ),
+			'image_alt'   => __( 'WooCommerce Shipping', 'woocommerce' ),
 			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Services.', 'woocommerce' ),
+			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Shipping.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 			'logos'       => array(),
@@ -380,9 +407,10 @@ class WC_Admin_Addons {
 				$local_defaults = array(
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
 					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
+					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Shipping.', 'woocommerce' ),
 					'logos'       => array_merge(
-						$defaults['logos'], array(
+						$defaults['logos'],
+						array(
 							array(
 								'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
 								'alt'  => 'Canada Post logo',
@@ -394,7 +422,8 @@ class WC_Admin_Addons {
 			case 'US':
 				$local_defaults = array(
 					'logos' => array_merge(
-						$defaults['logos'], array(
+						$defaults['logos'],
+						array(
 							array(
 								'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
 								'alt'  => 'USPS logo',
@@ -424,7 +453,7 @@ class WC_Admin_Addons {
 					<?php foreach ( $block_data['logos'] as $logo ) : ?>
 						<li>
 							<img
-								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								alt="<?php echo esc_attr( $logo['alt'] ); ?>"
 								class="wcs-service-logo"
 								src="<?php echo esc_url( $logo['link'] ); ?>"
 							>
@@ -435,18 +464,80 @@ class WC_Admin_Addons {
 					self::output_button(
 						$block_data['href'],
 						$block_data['button'],
-						'addons-button-outline-green'
+						'addons-button-outline-purple'
 					);
 				?>
 			</div>
 		</div>
-	<?php
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of the WooCommerce Pay banner block.
+	 *
+	 * @param object $block Block data.
+	 */
+	public static function output_wcpay_banner_block( $block = array() ) {
+		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
+		$location  = wc_get_base_location();
+
+		if (
+			! in_array( $location['country'], array( 'US' ), true ) ||
+			$is_active ||
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$button_url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'install-addon' => 'woocommerce-payments',
+				)
+			),
+			'install-addon_woocommerce-payments'
+		);
+
+		$defaults = array(
+			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
+			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
+			'title'       => __( 'Payments made simple, with no monthly fees &mdash; exclusively for WooCommerce stores.', 'woocommerce' ),
+			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
+			'button'      => __( 'Free - Install now', 'woocommerce' ),
+			'href'        => $button_url,
+			'logos'       => array(),
+		);
+
+		$block_data = array_merge( $defaults, $block );
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $block_data['image'] ); ?>"
+					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
+				<p><?php echo esc_html( $block_data['description'] ); ?></p>
+				<?php
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
+					);
+				?>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
 	 * Handles the outputting of featured sections
 	 *
-	 * @param array $sections
+	 * @param array $sections Section data.
 	 */
 	public static function output_featured_sections( $sections ) {
 		foreach ( $sections as $section ) {
@@ -472,25 +563,59 @@ class WC_Admin_Addons {
 				case 'wcs_banner_block':
 					self::output_wcs_banner_block( (array) $section );
 					break;
+				case 'wcpay_banner_block':
+					self::output_wcpay_banner_block( (array) $section );
+					break;
 			}
 		}
 	}
 
 	/**
+	 * Returns in-app-purchase URL params.
+	 */
+	public static function get_in_app_purchase_url_params() {
+		// Get url (from path onward) for the current page,
+		// so WCCOM "back" link returns user to where they were.
+		$back_admin_path = add_query_arg( array() );
+		return array(
+			'wccom-site'          => site_url(),
+			'wccom-back'          => rawurlencode( $back_admin_path ),
+			'wccom-woo-version'   => Constants::get_constant( 'WC_VERSION' ),
+			'wccom-connect-nonce' => wp_create_nonce( 'connect' ),
+		);
+	}
+
+	/**
+	 * Add in-app-purchase URL params to link.
+	 *
+	 * Adds various url parameters to a url to support a streamlined
+	 * flow for obtaining and setting up WooCommerce extensons.
+	 *
+	 * @param string $url    Destination URL.
+	 */
+	public static function add_in_app_purchase_url_params( $url ) {
+		return add_query_arg(
+			self::get_in_app_purchase_url_params(),
+			$url
+		);
+	}
+
+	/**
 	 * Outputs a button.
 	 *
-	 * @param string $url
-	 * @param string $text
-	 * @param string $theme
-	 * @param string $plugin
+	 * @param string $url    Destination URL.
+	 * @param string $text   Button label text.
+	 * @param string $style  Button style class.
+	 * @param string $plugin The plugin the button is promoting.
 	 */
-	public static function output_button( $url, $text, $theme, $plugin = '' ) {
-		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
-		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
+	public static function output_button( $url, $text, $style, $plugin = '' ) {
+		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-purple' : $style;
+		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
+		$url   = self::add_in_app_purchase_url_params( $url );
 		?>
 		<a
-			class="addons-button <?php echo esc_attr( $theme ); ?>"
+			class="addons-button <?php echo esc_attr( $style ); ?>"
 			href="<?php echo esc_url( $url ); ?>">
 			<?php echo esc_html( $text ); ?>
 		</a>
@@ -502,23 +627,36 @@ class WC_Admin_Addons {
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
+		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_featured';
+		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			do_action( 'woocommerce_helper_output' );
 			return;
 		}
 
-		if ( isset( $_GET['install-addon'] ) && 'woocommerce-services' === $_GET['install-addon'] ) {
-			self::install_woocommerce_services_addon();
+		if ( isset( $_GET['install-addon'] ) ) {
+			switch ( $_GET['install-addon'] ) {
+				case 'woocommerce-services':
+					self::install_woocommerce_services_addon();
+					break;
+				case 'woocommerce-payments':
+					self::install_woocommerce_payments_addon();
+					break;
+				default:
+					// Do nothing.
+					break;
+			}
 		}
 
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
-		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '_featured';
+		$current_section = isset( $_GET['section'] ) ? $section : '_featured';
 		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
-			$category = isset( $_GET['section'] ) ? $_GET['section'] : null;
-			$term     = isset( $_GET['search'] ) ? $_GET['search'] : null;
+			$category = $section ? $section : null;
+			$term     = $search ? $search : null;
 			$country  = WC()->countries->get_base_country();
 			$addons   = self::get_extension_data( $category, $term, $country );
 		}
@@ -553,9 +691,29 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Install WooCommerce Payments from the Extensions screens.
+	 *
+	 * @return void
+	 */
+	public static function install_woocommerce_payments_addon() {
+		check_admin_referer( 'install-addon_woocommerce-payments' );
+
+		$wcpay_plugin_id = 'woocommerce-payments';
+		$wcpay_plugin    = array(
+			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-payments',
+		);
+
+		WC_Install::background_installer( $services_plugin_id, $wcpay_plugin );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
 	 * Should an extension be shown on the featured page.
 	 *
-	 * @param object $item
+	 * @param object $item Item data.
 	 * @return boolean
 	 */
 	public static function show_extension( $item ) {

@@ -93,7 +93,9 @@ class WC_CLI_Tool_Command {
 			$rest_command = new WC_CLI_REST_Command( 'system_status_tool', $route, $response_data['schema'] );
 
 			WP_CLI::add_command(
-				"{$parent} {$command}", array( $rest_command, $method ), array(
+				"{$parent} {$command}",
+				array( $rest_command, $method ),
+				array(
 					'synopsis'      => $synopsis,
 					'when'          => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
 					'before_invoke' => $before_invoke,

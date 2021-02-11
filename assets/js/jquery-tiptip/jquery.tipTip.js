@@ -66,7 +66,7 @@
 					org_elem.hover(function(){
 						active_tiptip();
 					}, function(){
-						if(!opts.keepAlive){
+						if(!opts.keepAlive || !tiptip_holder.is(':hover')){
 							deactive_tiptip();
 						}
 					});

@@ -1,10 +1,11 @@
 <?php
 /**
- * WooCommerce Admin
+ * WooCommerce Admin Helper
  *
- * @class    WC_Helper
- * @package  WooCommerce/Admin
+ * @package WooCommerce\Admin\Helper
  */
+
+use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -468,7 +469,8 @@ class WC_Helper {
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
 		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
-			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
+			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), Constants::get_constant( 'WC_VERSION' ) );
+			wp_style_add_data( 'woocommerce-helper', 'rtl', 'replace' );
 		}
 	}
 
@@ -799,6 +801,13 @@ class WC_Helper {
 			WC_Tracker::send_tracking_data( true );
 		}
 
+		// If connecting through in-app purchase, redirects back to WooCommerce.com
+		// for product installation.
+		if ( ! empty( $_GET['wccom-install-url'] ) ) {
+			wp_redirect( wp_unslash( $_GET['wccom-install-url'] ) );
+			exit;
+		}
+
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -1099,6 +1108,20 @@ class WC_Helper {
 	}
 
 	/**
+	 * Checks whether current site has product subscription of a given ID.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $product_id The product id.
+	 *
+	 * @return bool Returns true if product subscription exists, false otherwise.
+	 */
+	public static function has_product_subscription( $product_id ) {
+		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		return ! empty( $subscription );
+	}
+
+	/**
 	 * Get a subscription entry from product_id. If multiple subscriptions are
 	 * found with the same product id and $single is set to true, will return the
 	 * first one in the list, so you can use this method to get things like extension
@@ -1126,7 +1149,18 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$plugins     = get_plugins();
+		$plugins = get_plugins();
+
+		/**
+		 * Check if plugins have WC headers, if not then clear cache and fetch again.
+		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call -- for example when WC is activated/updated.
+		 * Also, get_plugins call is expensive so we should clear this cache very conservatively.
+		 */
+		if ( ! empty( $plugins ) && ! array_key_exists( 'Woo', current( $plugins ) ) ) {
+			wp_clean_plugins_cache( false );
+			$plugins = get_plugins();
+		}
+
 		$woo_plugins = array();
 
 		// Backwards compatibility for woothemes_queue_update().
@@ -1444,8 +1478,6 @@ class WC_Helper {
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
 
-		self::_prompt_helper_connect( $screen_id );
-
 		if ( 'update-core' !== $screen_id ) {
 			return;
 		}
@@ -1459,56 +1491,6 @@ class WC_Helper {
 		$notice = self::_get_extensions_update_notice();
 		if ( ! empty( $notice ) ) {
 			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		}
-	}
-
-	/**
-	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
-	 *
-	 * @param string $screen_id Current screen ID.
-	 */
-	private static function _prompt_helper_connect( $screen_id ) {
-		if ( apply_filters( 'woocommerce_helper_suppress_connect_notice', false ) ) {
-			return;
-		}
-
-		$screens   = wc_get_screen_ids();
-		$screens[] = 'plugins';
-
-		if ( ! in_array( $screen_id, $screens, true ) ) {
-			return;
-		}
-
-		// Don't show the notice on the Helper screens.
-		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
-
-		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
-			return;
-		}
-
-		// We believe we have an active connection.
-		$auth = WC_Helper_Options::get( 'auth' );
-		if ( ! empty( $auth['access_token'] ) ) {
-			return;
-		}
-
-		$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
-		if ( empty( $active_plugins ) ) {
-			return;
-		}
-
-		$woo_plugins = self::get_local_woo_plugins();
-		if ( empty( $woo_plugins ) ) {
-			return;
-		}
-
-		$active_woo_plugins = array_intersect_key( $woo_plugins, array_flip( $active_plugins ) );
-
-		if ( count( $active_woo_plugins ) > 0 ) {
-			/* translators: %s: helper screen url */
-			$notice = __( '<a href="%s">Connect your store</a> to WooCommerce.com to receive extensions updates and support.', 'woocommerce' );
-			$notice = sprintf( $notice, admin_url( 'admin.php?page=wc-addons&section=helper' ) );
-			echo '<div class="updated woocommerce-message"><p>' . wp_kses_post( $notice ) . '</p></div>';
 		}
 	}
 
@@ -1561,7 +1543,7 @@ class WC_Helper {
 		}
 
 		$data = $updates->response['woocommerce/woocommerce.php'];
-		if ( version_compare( WC_VERSION, $data->new_version, '>=' ) ) {
+		if ( version_compare( Constants::get_constant( 'WC_VERSION' ), $data->new_version, '>=' ) ) {
 			return false;
 		}
 
@@ -1571,7 +1553,7 @@ class WC_Helper {
 	/**
 	 * Flush subscriptions cache.
 	 */
-	private static function _flush_subscriptions_cache() {
+	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
 	}
 
@@ -1644,7 +1626,7 @@ class WC_Helper {
 	 * @param string $level Optional, defaults to info, valid levels: emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public static function log( $message, $level = 'info' ) {
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {
 			return;
 		}
 

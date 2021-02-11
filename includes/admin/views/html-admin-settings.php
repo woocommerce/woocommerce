@@ -18,6 +18,7 @@ if ( ! $tab_exists ) {
 }
 ?>
 <div class="wrap woocommerce">
+	<?php do_action( 'woocommerce_before_settings_' . $current_tab ); ?>
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
 		<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
@@ -37,7 +38,7 @@ if ( ! $tab_exists ) {
 			self::show_messages();
 
 			do_action( 'woocommerce_settings_' . $current_tab );
-			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated hook. @todo remove in 4.0.
+			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
 		?>
 		<p class="submit">
 			<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>
@@ -46,4 +47,5 @@ if ( ! $tab_exists ) {
 			<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 		</p>
 	</form>
+	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>

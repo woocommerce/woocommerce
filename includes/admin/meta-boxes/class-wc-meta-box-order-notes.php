@@ -2,7 +2,7 @@
 /**
  * Order Notes
  *
- * @package WooCommerce/Admin/Meta Boxes
+ * @package WooCommerce\Admin\Meta Boxes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +28,7 @@ class WC_Meta_Box_Order_Notes {
 
 		$notes = wc_get_order_notes( $args );
 
-		include 'views/html-order-notes.php';
+		include __DIR__ . '/views/html-order-notes.php';
 		?>
 		<div class="add_note">
 			<p>

@@ -3,7 +3,7 @@
  * Twenty Eleven support.
  *
  * @since   3.3.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -29,10 +29,13 @@ class WC_Twenty_Eleven {
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
-		add_theme_support( 'woocommerce', array(
-			'thumbnail_image_width' => 150,
-			'single_image_width'    => 300,
-		) );
+		add_theme_support(
+			'woocommerce',
+			array(
+				'thumbnail_image_width' => 150,
+				'single_image_width'    => 300,
+			)
+		);
 	}
 
 	/**

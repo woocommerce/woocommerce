@@ -79,5 +79,10 @@ jQuery( function( $ ) {
 	$( document.body ).on( 'added_to_cart', function() {
 		$append_hashes();
 	});
+	
+	// Enable user to trigger manual append hashes on AJAX operations
+	$( document.body ).on( 'woocommerce_append_geo_hashes', function() {
+		$append_hashes();
+	});
 
 });

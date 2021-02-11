@@ -3,7 +3,7 @@
  * Action Queue
  *
  * @version 3.5.0
- * @package WooCommerce/Interface
+ * @package WooCommerce\Interface
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -126,7 +126,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 
 		$next_timestamp = as_next_scheduled_action( $hook, $args, $group );
 
-		if ( $next_timestamp ) {
+		if ( is_numeric( $next_timestamp ) ) {
 			return new WC_DateTime( "@{$next_timestamp}", new DateTimeZone( 'UTC' ) );
 		}
 

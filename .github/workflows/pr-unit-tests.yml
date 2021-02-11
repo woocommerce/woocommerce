@@ -1,0 +1,70 @@
+name: Run unit tests on PR
+on: 
+  pull_request
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
+        wp: [ "latest" ]
+        include:
+          - wp: nightly
+            php: '7.4'
+          - wp: '5.5'
+            php: 7.2
+          - wp: '5.4'
+            php: 7.2
+    services:
+      database:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+          extensions: mysql
+          coverage: none
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Get cached composer directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+
+      - name: Setup and install composer
+        run: composer install
+
+      - name: Add PHP8 Compatibility.
+        run: |
+          if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+             curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+             unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+             composer bin phpunit config --unset platform
+             composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+             composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+           fi 
+
+      - name: Init DB and WP
+        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+
+      - name: Run tests
+        run: ./vendor/bin/phpunit -c ./phpunit.xml

@@ -3,7 +3,7 @@
  * Customer Download Data Store Interface
  *
  * @version 3.0.0
- * @package WooCommerce/Interface
+ * @package WooCommerce\Interface
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

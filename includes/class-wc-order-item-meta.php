@@ -4,7 +4,7 @@
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
- * @package     WooCommerce/Classes
+ * @package     WooCommerce\Classes
  * @deprecated  3.0.0 wc_display_item_meta function is used instead.
  * @version     2.4
  */

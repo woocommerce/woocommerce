@@ -2,7 +2,7 @@
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @since   3.0.0
  * @version 3.0.0
  */
@@ -29,7 +29,6 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
-		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
@@ -194,15 +193,19 @@ class WC_Structured_Data {
 		$shop_url  = home_url();
 		$currency  = get_woocommerce_currency();
 		$permalink = get_permalink( $product->get_id() );
+		$image     = wp_get_attachment_url( $product->get_image_id() );
 
 		$markup = array(
 			'@type'       => 'Product',
 			'@id'         => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
 			'name'        => $product->get_name(),
 			'url'         => $permalink,
-			'image'       => wp_get_attachment_url( $product->get_image_id() ),
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
+
+		if ( $image ) {
+			$markup['image'] = $image;
+		}
 
 		// Declare SKU or fallback to ID.
 		if ( $product->get_sku() ) {
@@ -213,7 +216,7 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
-			$price_valid_until = date( 'Y-12-31', current_time( 'timestamp', true ) + YEAR_IN_SECONDS );
+			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
@@ -240,7 +243,7 @@ class WC_Structured_Data {
 				}
 			} else {
 				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
-					$price_valid_until = date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 				}
 				$markup_offer = array(
 					'@type'              => 'Offer',
@@ -275,38 +278,43 @@ class WC_Structured_Data {
 				'reviewCount' => $product->get_review_count(),
 			);
 
-			// Markup most recent rating/review.
+			// Markup 5 most recent rating/review.
 			$comments = get_comments(
 				array(
-					'number'      => 1,
+					'number'      => 5,
 					'post_id'     => $product->get_id(),
 					'status'      => 'approve',
 					'post_status' => 'publish',
 					'post_type'   => 'product',
 					'parent'      => 0,
-					'meta_key'    => 'rating',
-					'orderby'     => 'meta_value_num',
+					'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'rating',
+							'type'    => 'NUMERIC',
+							'compare' => '>',
+							'value'   => 0,
+						),
+					),
 				)
 			);
 
 			if ( $comments ) {
+				$markup['review'] = array();
 				foreach ( $comments as $comment ) {
-					$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
-
-					if ( ! $rating ) {
-						continue;
-					}
-
-					$markup['review'] = array(
-						'@type'        => 'Review',
-						'reviewRating' => array(
+					$markup['review'][] = array(
+						'@type'         => 'Review',
+						'reviewRating'  => array(
 							'@type'       => 'Rating',
-							'ratingValue' => $rating,
+							'bestRating'  => '5',
+							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
+							'worstRating' => '1',
 						),
-						'author'       => array(
+						'author'        => array(
 							'@type' => 'Person',
-							'name'  => get_comment_author( $comment->comment_ID ),
+							'name'  => get_comment_author( $comment ),
 						),
+						'reviewBody'    => get_comment_text( $comment ),
+						'datePublished' => get_comment_date( 'c', $comment ),
 					);
 				}
 			}
@@ -344,7 +352,9 @@ class WC_Structured_Data {
 		if ( $rating ) {
 			$markup['reviewRating'] = array(
 				'@type'       => 'Rating',
+				'bestRating'  => '5',
 				'ratingValue' => $rating,
+				'worstRating' => '1',
 			);
 		} elseif ( $comment->comment_parent ) {
 			return;
@@ -449,7 +459,7 @@ class WC_Structured_Data {
 				continue;
 			}
 
-			$product        = $order->get_product_from_item( $item );
+			$product        = $item->get_product();
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
 
@@ -462,12 +472,12 @@ class WC_Structured_Data {
 					'priceCurrency'    => $order->get_currency(),
 					'eligibleQuantity' => array(
 						'@type' => 'QuantitativeValue',
-						'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ),
+						'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ),
 					),
 				),
 				'itemOffered'        => array(
 					'@type' => 'Product',
-					'name'  => apply_filters( 'woocommerce_order_item_name', $item['name'], $item, $is_visible ),
+					'name'  => apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible ),
 					'sku'   => $product_exists ? $product->get_sku() : '',
 					'image' => $product_exists ? wp_get_attachment_image_url( $product->get_image_id() ) : '',
 					'url'   => $is_visible ? get_permalink( $product->get_id() ) : get_home_url(),

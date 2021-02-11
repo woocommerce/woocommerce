@@ -4,7 +4,7 @@
  *
  * @author      WooThemes
  * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @package     WooCommerce\Admin\Meta Boxes
  * @version     2.1.0
  */
 
@@ -56,7 +56,7 @@ class WC_Meta_Box_Order_Downloads {
 						$file       = $product->get_file( $download->get_download_id() );
 						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 
-						include 'views/html-order-download-permission.php';
+						include __DIR__ . '/views/html-order-download-permission.php';
 
 						$loop++;
 						$file_counter++;

@@ -58,7 +58,7 @@
 					} else {
 						$( '#copy-error' ).text( '' );
 						wcClearClipboard();
-						wcSetClipboard( $.trim( $( this ).prev( 'input' ).val() ), $( css_class ) );
+						wcSetClipboard( $( this ).prev( 'input' ).val().trim(), $( css_class ) );
 					}
 				} )
 				.on( 'aftercopy', css_class, function() {
@@ -142,7 +142,9 @@
 							$( '#key_permissions', self.el ).val( data.permissions );
 						}
 					} else {
-						$( 'h2, h3', self.el ).first().append( '<div class="wc-api-message error"><p>' + response.data.message + '</p></div>' );
+						$( 'h2, h3', self.el )
+							.first()
+							.append( '<div class="wc-api-message error"><p>' + response.data.message + '</p></div>' );
 					}
 
 					self.unblock();

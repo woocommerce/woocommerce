@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class          WC_Log_Handler_Email
  * @version        1.0.0
- * @package        WooCommerce/Classes/Log_Handlers
+ * @package        WooCommerce\Classes\Log_Handlers
  */
 class WC_Log_Handler_Email extends WC_Log_Handler {
 

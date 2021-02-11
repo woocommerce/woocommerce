@@ -2,7 +2,7 @@
 /**
  * WC_Report_Low_In_Stock.
  *
- * @package WooCommerce/Admin/Reports
+ * @package WooCommerce\Admin\Reports
  */
 
 defined( 'ABSPATH' ) || exit;

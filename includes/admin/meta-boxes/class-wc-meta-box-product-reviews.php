@@ -4,7 +4,7 @@
  *
  * Functions for displaying product reviews data meta box.
  *
- * @package WooCommerce/Admin/Meta Boxes
+ * @package WooCommerce\Admin\Meta Boxes
  */
 
 defined( 'ABSPATH' ) || exit;

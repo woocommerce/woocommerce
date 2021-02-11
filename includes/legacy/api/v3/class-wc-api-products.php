@@ -6,7 +6,7 @@
  *
  * @author      WooThemes
  * @category    API
- * @package     WooCommerce/API
+ * @package     WooCommerce\RestApi
  * @since       2.1
  * @version     3.0
  */
@@ -2577,7 +2577,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			$this->server->send_status( 201 );
 
@@ -2664,7 +2664,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			return $this->get_product_attribute( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -2727,7 +2727,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {
@@ -2752,6 +2752,7 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
 			}
 
+			$attribute_id = absint( $attribute_id );
 			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
 			if ( ! $taxonomy ) {
@@ -2792,6 +2793,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		try {
 			$id = absint( $id );
+			$attribute_id = absint( $attribute_id );
 
 			// Validate ID
 			if ( empty( $id ) ) {

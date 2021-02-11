@@ -73,7 +73,7 @@ class WC_CLI_Update_Command {
 
 		$progress->finish();
 
-		WC_Admin_Notices::remove_notice( 'update' );
+		WC_Admin_Notices::remove_notice( 'update', true );
 
 		/* translators: 1: Number of database updates performed 2: Database version number */
 		WP_CLI::success( sprintf( __( '%1$d update functions completed. Database version is %2$s', 'woocommerce' ), absint( $update_count ), get_option( 'woocommerce_db_version' ) ) );

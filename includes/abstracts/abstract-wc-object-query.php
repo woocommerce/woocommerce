@@ -2,7 +2,7 @@
 /**
  * Query abstraction layer functionality.
  *
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by classes to provide a query abstraction layer for safe object searching.
  *
  * @version  3.1.0
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 abstract class WC_Object_Query {
 

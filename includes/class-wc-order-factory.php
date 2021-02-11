@@ -5,7 +5,7 @@
  * The WooCommerce order factory creating the right order objects.
  *
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,7 +46,7 @@ class WC_Order_Factory {
 		try {
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
-			wc_caught_exception( $e, __FUNCTION__, func_get_args() );
+			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
 		}
 	}

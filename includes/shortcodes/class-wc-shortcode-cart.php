@@ -4,7 +4,7 @@
  *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *
- * @package WooCommerce/Shortcodes/Cart
+ * @package WooCommerce\Shortcodes\Cart
  * @version 2.3.0
  */
 
@@ -40,7 +40,9 @@ class WC_Shortcode_Cart {
 			}
 
 			if ( $address['country'] ) {
-				WC()->customer->set_billing_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+				if ( ! WC()->customer->get_billing_first_name() ) {
+					WC()->customer->set_billing_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+				}
 				WC()->customer->set_shipping_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
 			} else {
 				WC()->customer->set_billing_address_to_base();
@@ -67,6 +69,10 @@ class WC_Shortcode_Cart {
 	 * @param array $atts Shortcode attributes.
 	 */
 	public static function output( $atts ) {
+		if ( ! apply_filters( 'woocommerce_output_cart_shortcode_content', true ) ) {
+			return;
+		}
+
 		// Constants.
 		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 

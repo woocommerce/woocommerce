@@ -2,7 +2,7 @@
 /**
  * List tables.
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.3.0
  */
 
@@ -72,7 +72,7 @@ abstract class WC_Admin_List_Table {
 
 			$this->render_blank_state();
 
-			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions, .wrap .subsubsub  { display: none; } </style>';
+			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions, .wrap .subsubsub  { display: none; } #posts-filter .tablenav.bottom { height: auto; } </style>';
 		}
 	}
 

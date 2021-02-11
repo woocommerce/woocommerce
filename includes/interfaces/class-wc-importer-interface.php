@@ -2,7 +2,7 @@
 /**
  * WooCommerce Importer Interface
  *
- * @package  WooCommerce/Interface
+ * @package  WooCommerce\Interface
  * @version  3.1.0
  */
 

@@ -2,7 +2,7 @@
 /**
  * Coupon usage report functionality
  *
- * @package WooCommerce/Admin/Reports
+ * @package WooCommerce\Admin\Reports
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,9 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Coupon_Usage
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
@@ -205,7 +203,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					);
 
 					if ( ! empty( $used_coupons ) && is_array( $used_coupons ) ) :
-					?>
+						?>
 						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php esc_attr_e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php esc_html_e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php
@@ -330,25 +328,26 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			</table>
 		</div>
 		<script type="text/javascript">
-			jQuery('.section_title').click(function(){
-				var next_section = jQuery(this).next('.section');
+			jQuery( '.section_title' ).on( 'click', function() {
+				var next_section = jQuery( this ).next( '.section' );
 
-				if ( jQuery(next_section).is(':visible') )
+				if ( jQuery( next_section ).is( ':visible' ) ) {
 					return false;
+				}
 
-				jQuery('.section:visible').slideUp();
-				jQuery('.section_title').removeClass('open');
-				jQuery(this).addClass('open').next('.section').slideDown();
+				jQuery( '.section:visible' ).slideUp();
+				jQuery( '.section_title' ).removeClass( 'open' );
+				jQuery( this ).addClass( 'open' ).next( '.section' ).slideDown();
 
 				return false;
-			});
-			jQuery('.section').slideUp( 100, function() {
+			} );
+			jQuery( '.section' ).slideUp( 100, function() {
 				<?php if ( empty( $this->coupon_codes ) ) : ?>
-					jQuery('.section_title:eq(1)').click();
+					jQuery( '.section_title:eq(1)' ).click();
 				<?php else : ?>
-					jQuery('.section_title:eq(0)').click();
+					jQuery( '.section_title:eq(0)' ).click();
 				<?php endif; ?>
-			});
+			} );
 		</script>
 		<?php
 	}

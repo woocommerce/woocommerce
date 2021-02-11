@@ -5,7 +5,7 @@
  * Attributes can be global (taxonomy based) or local to the product itself.
  * Uses ArrayAccess to be BW compatible with previous ways of reading attributes.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   3.0.0
  */

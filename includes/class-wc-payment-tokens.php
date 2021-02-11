@@ -4,7 +4,7 @@
  *
  * An API for storing and managing tokens for gateways and customers.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   2.6.0
  */
@@ -20,7 +20,7 @@ class WC_Payment_Tokens {
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
-	 * @param  array $args Query argyments {
+	 * @param  array $args Query arguments {
 	 *     Array of query parameters.
 	 *
 	 *     @type string $token_id   Token ID.
@@ -32,7 +32,8 @@ class WC_Payment_Tokens {
 	 */
 	public static function get_tokens( $args ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'token_id'   => '',
 				'user_id'    => '',
 				'gateway_id' => '',
@@ -150,7 +151,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		$token_class = 'WC_Payment_Token_' . $token_result->type;
+		$token_class = self::get_token_classname( $token_result->type );
 
 		if ( class_exists( $token_class ) ) {
 			$meta        = $data_store->get_metadata( $token_id );
@@ -175,7 +176,7 @@ class WC_Payment_Tokens {
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
 		if ( ! empty( $type ) ) {
-			$class = 'WC_Payment_Token_' . $type;
+			$class = self::get_token_classname( $type );
 			$token = new $class( $token_id );
 			$token->delete();
 		}
@@ -211,5 +212,23 @@ class WC_Payment_Tokens {
 	public static function get_token_type_by_id( $token_id ) {
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		return $data_store->get_token_type_by_id( $token_id );
+	}
+
+	/**
+	 * Get classname based on token type.
+	 *
+	 * @since 3.8.0
+	 * @param string $type Token type.
+	 * @return string
+	 */
+	protected static function get_token_classname( $type ) {
+		/**
+		 * Filter payment token class per type.
+		 *
+		 * @since 3.8.0
+		 * @param string $class Payment token class.
+		 * @param string $type Token type.
+		 */
+		return apply_filters( 'woocommerce_payment_token_class', 'WC_Payment_Token_' . $type, $type );
 	}
 }

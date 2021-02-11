@@ -2,7 +2,7 @@
 /**
  * List tables: coupons.
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.3.0
  */
 
@@ -15,7 +15,7 @@ if ( class_exists( 'WC_Admin_List_Table_Coupons', false ) ) {
 }
 
 if ( ! class_exists( 'WC_Admin_List_Table', false ) ) {
-	include_once 'abstract-class-wc-admin-list-table.php';
+	include_once __DIR__ . '/abstract-class-wc-admin-list-table.php';
 }
 
 /**

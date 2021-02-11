@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Gateway_BACS
  * @extends     WC_Payment_Gateway
  * @version     2.1.0
- * @package     WooCommerce/Classes/Payment
+ * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
 
@@ -205,7 +205,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		$accounts = array();
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification -- Nonce verification already handled in WC_Admin_Settings::save()
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification already handled in WC_Admin_Settings::save()
 		if ( isset( $_POST['bacs_account_name'] ) && isset( $_POST['bacs_account_number'] ) && isset( $_POST['bacs_bank_name'] )
 			 && isset( $_POST['bacs_sort_code'] ) && isset( $_POST['bacs_iban'] ) && isset( $_POST['bacs_bic'] ) ) {
 
@@ -289,7 +289,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Get sortcode label in the $locale array and use appropriate one.
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort code', 'woocommerce' );
 
-		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
+		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details, $order_id );
 
 		if ( ! empty( $bacs_accounts ) ) {
 			$account_html = '';
