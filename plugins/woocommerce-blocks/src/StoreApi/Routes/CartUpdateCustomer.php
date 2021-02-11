@@ -15,33 +15,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ShippingAddressSchema;
  */
 class CartUpdateCustomer extends AbstractCartRoute {
 	/**
-	 * Billing address schema instance.
-	 *
-	 * @var BillingAddressSchema
-	 */
-	protected $billing_address_schema;
-
-	/**
-	 * Shipping address schema instance.
-	 *
-	 * @var ShippingAddressSchema
-	 */
-	protected $shipping_address_schema;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param CartSchema            $schema Schema class for this route.
-	 * @param ShippingAddressSchema $shipping_address_schema Billing address schema class for this route.
-	 * @param BillingAddressSchema  $billing_address_schema Billing address schema class for this route.
-	 */
-	public function __construct( CartSchema $schema, ShippingAddressSchema $shipping_address_schema, BillingAddressSchema $billing_address_schema ) {
-		$this->schema                  = $schema;
-		$this->shipping_address_schema = $shipping_address_schema;
-		$this->billing_address_schema  = $billing_address_schema;
-	}
-
-	/**
 	 * Get the namespace for this route.
 	 *
 	 * @return string
@@ -75,17 +48,17 @@ class CartUpdateCustomer extends AbstractCartRoute {
 						'description'       => __( 'Billing address.', 'woo-gutenberg-products-block' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
-						'properties'        => $this->billing_address_schema->get_properties(),
-						'sanitize_callback' => [ $this->billing_address_schema, 'sanitize_callback' ],
-						'validate_callback' => [ $this->billing_address_schema, 'validate_callback' ],
+						'properties'        => $this->schema->billing_address_schema->get_properties(),
+						'sanitize_callback' => [ $this->schema->billing_address_schema, 'sanitize_callback' ],
+						'validate_callback' => [ $this->schema->billing_address_schema, 'validate_callback' ],
 					],
 					'shipping_address' => [
 						'description'       => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
-						'properties'        => $this->shipping_address_schema->get_properties(),
-						'sanitize_callback' => [ $this->shipping_address_schema, 'sanitize_callback' ],
-						'validate_callback' => [ $this->shipping_address_schema, 'validate_callback' ],
+						'properties'        => $this->schema->shipping_address_schema->get_properties(),
+						'sanitize_callback' => [ $this->schema->shipping_address_schema, 'sanitize_callback' ],
+						'validate_callback' => [ $this->schema->shipping_address_schema, 'validate_callback' ],
 					],
 				],
 			],
