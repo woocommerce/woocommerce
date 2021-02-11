@@ -2,8 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use Exception;
-use WC_Stripe_Payment_Request;
-use WC_Stripe_Helper;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 
 /**
