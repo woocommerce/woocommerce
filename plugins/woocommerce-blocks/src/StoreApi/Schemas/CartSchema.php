@@ -31,49 +31,49 @@ class CartSchema extends AbstractSchema {
 	 *
 	 * @var CartItemSchema
 	 */
-	protected $item_schema;
+	public $item_schema;
 
 	/**
 	 * Coupon schema instance.
 	 *
 	 * @var CartCouponSchema
 	 */
-	protected $coupon_schema;
+	public $coupon_schema;
 
 	/**
 	 * Fee schema instance.
 	 *
 	 * @var CartFeeSchema
 	 */
-	protected $fee_schema;
+	public $fee_schema;
 
 	/**
 	 * Shipping rates schema instance.
 	 *
 	 * @var CartShippingRateSchema
 	 */
-	protected $shipping_rate_schema;
+	public $shipping_rate_schema;
 
 	/**
 	 * Shipping address schema instance.
 	 *
 	 * @var ShippingAddressSchema
 	 */
-	protected $shipping_address_schema;
+	public $shipping_address_schema;
 
 	/**
 	 * Billing address schema instance.
 	 *
 	 * @var BillingAddressSchema
 	 */
-	protected $billing_address_schema;
+	public $billing_address_schema;
 
 	/**
 	 * Error schema instance.
 	 *
 	 * @var ErrorSchema
 	 */
-	protected $error_schema;
+	public $error_schema;
 
 	/**
 	 * Constructor.

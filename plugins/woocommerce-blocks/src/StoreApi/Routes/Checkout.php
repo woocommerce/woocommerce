@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
-class Checkout extends AbstractRoute {
+class Checkout extends AbstractCartRoute {
 	/**
 	 * Holds the current order being processed.
 	 *
@@ -39,23 +39,13 @@ class Checkout extends AbstractRoute {
 	}
 
 	/**
-	 * Enforce nonces for all checkout endpoints.
+	 * Checks if a nonce is required for the route.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|WP_REST_Response
+	 * @param \WP_REST_Request $request Request.
+	 * @return bool
 	 */
-	public function get_response( WP_REST_Request $request ) {
-		$this->maybe_load_cart();
-		$response = null;
-		try {
-			$this->check_nonce( $request );
-			$response = parent::get_response( $request );
-		} catch ( RouteException $error ) {
-			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode() );
-		} catch ( Exception $error ) {
-			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
-		}
-		return $response;
+	protected function requires_nonce( \WP_REST_Request $request ) {
+		return true;
 	}
 
 	/**
