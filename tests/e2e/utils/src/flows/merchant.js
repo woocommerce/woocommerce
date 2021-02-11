@@ -17,7 +17,8 @@ const {
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
-	WP_ADMIN_WC_SETTINGS
+	WP_ADMIN_WC_SETTINGS,
+	WP_ADMIN_NEW_SHIPPING_ZONE
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );

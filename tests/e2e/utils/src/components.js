@@ -440,16 +440,15 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await expect(page).toFill('input#zone_name', zoneName);
 
 	// Select shipping zone location
-	await expect(page).toSelect('#zone_locations', "   " + zoneLocation);
+	await expect(page).toFill('#zone_locations', zoneLocation);
+	await page.keyboard.press('Tab');
+	await page.keyboard.press('Enter');
 
 	// Add shipping zone method
 	await expect(page).toClick('button.button.wc-shipping-zone-add-method', {text:'Add shipping method'});
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
-
-	// Save the shipping zone with method
-	await expect(page).toClick('#submit');
 };
 
 export {
