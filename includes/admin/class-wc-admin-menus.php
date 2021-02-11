@@ -22,6 +22,8 @@ class WC_Admin_Menus {
 	 */
 	public function __construct() {
 		// Add menus.
+		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
+		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
@@ -31,8 +33,6 @@ class WC_Admin_Menus {
 			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
 		}
 
-		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
-		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
