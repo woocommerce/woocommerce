@@ -40,8 +40,14 @@ class Homescreen {
 	public function __construct() {
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
-		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
-		add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
+		// In WC Core 5.1 $submenu manipulation occurs in admin_menu, not admin_head. See https://github.com/woocommerce/woocommerce/pull/29088.
+		if ( version_compare( WC_VERSION, '5.1', '>=' ) ) {
+			// priority is 20 to run after admin_menu hook for woocommerce runs, so that submenu is populated.
+			add_action( 'admin_menu', array( $this, 'update_link_structure' ), 20 );
+		} else {
+			// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
+			add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
+		}
 		add_filter( 'woocommerce_admin_plugins_whitelist', array( $this, 'get_homescreen_allowed_plugins' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
