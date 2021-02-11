@@ -1607,9 +1607,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$tax_amount = $this->round_line_tax( $tax, false );
+				$tax_amount = (float) $this->round_line_tax( $tax, false );
 
-				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
+				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? (float) $cart_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
 		}
 
