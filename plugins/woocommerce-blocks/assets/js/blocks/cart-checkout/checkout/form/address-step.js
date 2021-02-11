@@ -41,21 +41,14 @@ const AddressStep = ( {
 	const addressFieldsConfig = useMemo( () => {
 		return {
 			company: {
-				...defaultAddressFields.company,
 				hidden: ! showCompanyField,
 				required: requireCompanyField,
 			},
 			address_2: {
-				...defaultAddressFields.address_2,
 				hidden: ! showApartmentField,
 			},
 		};
-	}, [
-		defaultAddressFields,
-		showCompanyField,
-		requireCompanyField,
-		showApartmentField,
-	] );
+	}, [ showCompanyField, requireCompanyField, showApartmentField ] );
 
 	return (
 		<>

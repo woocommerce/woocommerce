@@ -29,7 +29,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: true,
 		hidden: false,
-		index: 1,
+		index: 10,
 	},
 	last_name: {
 		label: __( 'Last name', 'woo-gutenberg-products-block' ),
@@ -41,7 +41,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: true,
 		hidden: false,
-		index: 2,
+		index: 20,
 	},
 	company: {
 		label: __( 'Company', 'woo-gutenberg-products-block' ),
@@ -53,7 +53,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: false,
 		hidden: false,
-		index: 3,
+		index: 30,
 	},
 	address_1: {
 		label: __( 'Address', 'woo-gutenberg-products-block' ),
@@ -65,7 +65,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: true,
 		hidden: false,
-		index: 4,
+		index: 40,
 	},
 	address_2: {
 		label: __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
@@ -77,7 +77,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: false,
 		hidden: false,
-		index: 5,
+		index: 50,
 	},
 	country: {
 		label: __( 'Country/Region', 'woo-gutenberg-products-block' ),
@@ -88,7 +88,7 @@ const AddressFields = {
 		autocomplete: 'country',
 		required: true,
 		hidden: false,
-		index: 6,
+		index: 60,
 	},
 	city: {
 		label: __( 'City', 'woo-gutenberg-products-block' ),
@@ -97,7 +97,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: true,
 		hidden: false,
-		index: 7,
+		index: 70,
 	},
 	state: {
 		label: __( 'State/County', 'woo-gutenberg-products-block' ),
@@ -109,7 +109,7 @@ const AddressFields = {
 		autocapitalize: 'sentences',
 		required: true,
 		hidden: false,
-		index: 8,
+		index: 80,
 	},
 	postcode: {
 		label: __( 'Postal code', 'woo-gutenberg-products-block' ),
@@ -121,7 +121,7 @@ const AddressFields = {
 		autocapitalize: 'characters',
 		required: true,
 		hidden: false,
-		index: 9,
+		index: 90,
 	},
 };
 

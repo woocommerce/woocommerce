@@ -95,7 +95,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address['address_2']  = wc_clean( wp_unslash( $address['address_2'] ) );
 		$address['city']       = wc_clean( wp_unslash( $address['city'] ) );
 		$address['state']      = $this->format_state( wc_clean( wp_unslash( $address['state'] ) ), $address['country'] );
-		$address['postcode']   = wc_format_postcode( wc_clean( wp_unslash( $address['postcode'] ) ), $address['country'] );
+		$address['postcode']   = $address['postcode'] ? wc_format_postcode( wc_clean( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 		return $address;
 	}
 

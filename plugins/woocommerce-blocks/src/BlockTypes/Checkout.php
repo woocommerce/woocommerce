@@ -101,6 +101,20 @@ class Checkout extends AbstractBlock {
 			$data_registry->add( 'shippingStates', $this->deep_sort_with_accents( WC()->countries->get_shipping_country_states() ) );
 		}
 
+		if ( ! $data_registry->exists( 'countryLocale' ) ) {
+			// Merge country and state data to work around https://github.com/woocommerce/woocommerce/issues/28944.
+			$country_locale = wc()->countries->get_country_locale();
+			$states         = wc()->countries->get_states();
+
+			foreach ( $states as $country => $states ) {
+				if ( empty( $states ) ) {
+					$country_locale[ $country ]['state']['required'] = false;
+					$country_locale[ $country ]['state']['hidden']   = true;
+				}
+			}
+			$data_registry->add( 'countryLocale', $country_locale );
+		}
+
 		$permalink = ! empty( $attributes['cartPageId'] ) ? get_permalink( $attributes['cartPageId'] ) : false;
 
 		if ( $permalink && ! $data_registry->exists( 'page-' . $attributes['cartPageId'] ) ) {
