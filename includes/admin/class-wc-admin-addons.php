@@ -706,7 +706,7 @@ class WC_Admin_Addons {
 
 		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
 
-		do_action( 'wc_addons_woocommerce_payments_installed' );
+		do_action( 'woocommerce_addon_installed', $wcpay_plugin_id );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;

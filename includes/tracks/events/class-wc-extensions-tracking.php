@@ -21,7 +21,7 @@ class WC_Extensions_Tracking {
 		add_action( 'woocommerce_helper_connected', array( $this, 'track_helper_connection_complete' ) );
 		add_action( 'woocommerce_helper_disconnected', array( $this, 'track_helper_disconnected' ) );
 		add_action( 'woocommerce_helper_subscriptions_refresh', array( $this, 'track_helper_subscriptions_refresh' ) );
-		add_action( 'wc_addons_woocommerce_payments_installed', array( $this, 'track_woocommerce_payments_install' ) );
+		add_action( 'woocommerce_addon_installed', array( $this, 'track_addon_install' ) );
 	}
 
 	/**
@@ -79,12 +79,19 @@ class WC_Extensions_Tracking {
 	}
 
 	/**
-	 * Send a Tracks event when WooCommerce Payments is installed from the Extensions page.
+	 * Send a Tracks event when addon is installed via the Extensions page.
+	 *
+	 * @param string $addon_id Addon slug.
 	 */
-	public function track_woocommerce_payments_install() {
+	public function track_addon_install( $addon_id = '' ) {
+		if ( empty( $addon_id ) ) {
+			return;
+		}
 
 		$properties = array( 'context' => 'extensions' );
 
-		WC_Tracks::record_event( 'woocommerce_payments_install', $properties );
+		if ( 'woocommerce-payments' === $addon_id ) {
+			WC_Tracks::record_event( 'woocommerce_payments_install', $properties );
+		}
 	}
 }
