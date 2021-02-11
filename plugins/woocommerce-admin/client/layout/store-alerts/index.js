@@ -34,10 +34,9 @@ import './style.scss';
 export class StoreAlerts extends Component {
 	constructor( props ) {
 		super( props );
-		const alerts = this.getAlerts();
 
 		this.state = {
-			currentIndex: alerts.length > 0 ? 0 : null,
+			currentIndex: 0,
 		};
 
 		this.previousAlert = this.previousAlert.bind( this );
