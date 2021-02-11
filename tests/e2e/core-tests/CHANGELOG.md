@@ -13,6 +13,7 @@
 - Shopper Checkout Apply Coupon
 - Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
+- Merchant Settings Shipping Zones
 
 ## Fixed
 

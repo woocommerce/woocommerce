@@ -426,6 +426,32 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	return couponCode;
 };
 
+/**
+ * Adds a shipping zone along with a shipping method.
+ *
+ * @param zoneName Shipping zone name.
+ * @param zoneLocation Shiping zone location. Defaults to United States (US).
+ * @param zoneMethod Shipping method type. Defaults to Flat rate method.
+ */
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zoneMethod = 'flat_rate' ) => {
+	await merchant.openNewShipping();
+	
+	// Fill shipping zone name
+	await expect(page).toFill('input#zone_name', zoneName);
+
+	// Select shipping zone location
+	await expect(page).toSelect('#zone_locations', "   " + zoneLocation);
+
+	// Add shipping zone method
+	await expect(page).toClick('button.button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
+	await expect(page).toClick('button#btn-ok');
+	await page.waitForSelector('#zone_locations');
+
+	// Save the shipping zone with method
+	await expect(page).toClick('#submit');
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -435,4 +461,5 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	addShippingZoneAndMethod,
 };

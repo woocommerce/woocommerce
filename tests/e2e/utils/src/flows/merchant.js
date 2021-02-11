@@ -156,6 +156,12 @@ const merchant = {
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
 	},
+
+	openNewShipping: async () => {
+		await page.goto( WP_ADMIN_NEW_SHIPPING_ZONE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
 };
 
 module.exports = merchant;

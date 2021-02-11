@@ -56,6 +56,7 @@ The functions to access the core tests are:
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
 
 ### Shopper
 
