@@ -1,6 +1,5 @@
 {
   "url": "http://localhost:8084/",
-  "appName": "woocommerce_e2e",
   "users": {
     "admin": {
       "username": "admin",

@@ -76,6 +76,7 @@ const runMerchantTests = () => {
 	runProductEditDetailsTest();
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
+	runAddNewShippingZoneTest();
 }
 
 const runApiTests = () => {
