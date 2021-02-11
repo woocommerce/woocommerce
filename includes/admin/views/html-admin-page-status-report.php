@@ -1018,3 +1018,19 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 </table>
 
 <?php do_action( 'woocommerce_system_status_report' ); ?>
+
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+	<tr>
+		<th colspan="3" data-export-label="Status report information"><h2><?php esc_html_e( 'Status report information', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows information about this status report.', 'woocommerce' ) ); ?></h2></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td data-export-label="Generated at"><?php esc_html_e( 'Generated at', 'woocommerce' ); ?>:</td>
+		<td class="help">&nbsp;</td>
+		<td><?php echo esc_html( current_time( 'Y-m-d H:i:s P' ) ); ?></td>
+
+	</tr>
+	</tbody>
+</table>
