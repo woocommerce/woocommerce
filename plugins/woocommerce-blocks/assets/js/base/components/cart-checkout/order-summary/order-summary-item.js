@@ -6,6 +6,7 @@ import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
 import { getCurrency } from '@woocommerce/price-format';
+import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
@@ -23,7 +24,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		images,
 		low_stock_remaining: lowStockRemaining = null,
 		show_backorder_badge: showBackorderBadge = false,
-		name,
+		name: initialName,
 		permalink,
 		prices,
 		quantity,
@@ -31,7 +32,18 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		description: fullDescription,
 		item_data: itemData = [],
 		variation,
+		extensions,
 	} = cartItem;
+
+	const name = __experimentalApplyCheckoutFilter( {
+		filterName: 'itemName',
+		defaultValue: initialName,
+		arg: {
+			extensions,
+			context: 'summary',
+		},
+		validation: ( value ) => typeof value === 'string',
+	} );
 
 	const currency = getCurrency( prices );
 	const regularPriceSingle = Dinero( {
