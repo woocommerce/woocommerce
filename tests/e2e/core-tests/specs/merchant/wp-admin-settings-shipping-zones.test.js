@@ -5,6 +5,7 @@
 const {
 	merchant,
 	addShippingZoneAndMethod,
+	clearAndFillInput,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -17,12 +18,12 @@ const {
 } = require( '@jest/globals' );
 
 // Shipping Zone Names
-const nameUSFlatRate = 'US with Flat rate';
-const nameCAFreeShipping = 'CA with Free shipping';
-const nameSFLocalPickup = 'SF with Local pickup';
+const shippingZoneNameUS = 'US with Flat rate';
+const shippingZoneNameCA = 'CA with Free shipping';
+const shippingZoneNameSF = 'SF with Local pickup';
 // Shipping Zone Locations
-const californiaUS = 'California, United States (US)';
-const sanFranciscoCA = 'San Francisco';
+const california = 'California, United States (US)';
+const sanFranciscoZIP = '94110';
 
 const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
@@ -30,28 +31,31 @@ const runAddNewShippingZoneTest = () => {
 			await merchant.login();
 		});
 
-		it('add new shipping zone for the US with Flat rate', async () => {
+		it('add shipping zone for the US with Flat rate', async () => {
 			// Add a new shipping zone for the US with Flat rate
-			await addShippingZoneAndMethod(shippingZoneNameUSFlatRate);
+			await addShippingZoneAndMethod(shippingZoneNameUS);
 
-			// Verify that settings have been saved
-			await Promise.all([
-				verifyValueOfInputField('input#zone_name', nameUSFlatRate),
-				expect(page).toMatchElement('li.select2-selection__choice', {text: shippingZoneNameUSFlatRate}),
-				expect(page).toMatchElement('a.wc-shipping-zone-method-settings', {text: 'Flat rate'})
-			]);
+			// Set Flat rate cost
+			await expect(page).toClick('a.wc-shipping-zone-method-settings', {text: 'Edit'});
+			await clearAndFillInput('#woocommerce_flat_rate_cost', '10');
+			await expect(page).toClick('button#btn-ok');
 		});
 
-		it('add new shipping zone for California with Free shipping', async () => {
+		it('add shipping zone for California with Free shipping', async () => {
 			// Add a new shipping zone for California with Free shipping
-			await addShippingZoneAndMethod(nameCAFreeShipping, californiaUS, 'Free shipping');
-
+			await addShippingZoneAndMethod(shippingZoneNameCA, california, 'free_shipping');
 		});
 
-		it('add new shipping zone for San Francisco with Local pickup for free', async () => {
+		it('add shipping zone for San Francisco with free Local pickup', async () => {
 			// Add a new shipping zone for the US with Flat Rate
-			await addShippingZoneAndMethod(nameSFLocalPickup, sanFranciscoCA, 'Local pickup');
+			await addShippingZoneAndMethod(shippingZoneNameSF, california, 'local_pickup');
 
+			// Set San Francisco as a local pickup city
+			await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
+			await expect(page).toFill('#zone_postcodes', sanFranciscoZIP);
+
+			// Save the shipping zone
+			await expect(page).toClick('button#submit');
 		});
 	});
 };
