@@ -12,6 +12,7 @@
 - Shopper Single Product tests
 - Shopper My Account Pay Order
 - Shopper Checkout Apply Coupon
+- Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
 
 ## Fixed
