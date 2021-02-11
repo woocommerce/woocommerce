@@ -16,6 +16,8 @@
 - `createCoupon( couponAmount )` component which accepts a coupon amount string (it defaults to 5) and creates a basic coupon. Returns the generated coupon code.
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 - `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
+- `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
+- `removeCoupon()` util helper method that removes a single coupon within cart or checkout
 
 ## Changes
 
