@@ -18,7 +18,6 @@ import {
 import { getCurrency } from '@woocommerce/price-format';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
