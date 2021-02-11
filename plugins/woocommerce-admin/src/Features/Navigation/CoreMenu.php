@@ -37,7 +37,7 @@ class CoreMenu {
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'register_post_types' ) );
 		// Add this after we've finished migrating menu items to avoid hiding these items.
-		add_action( 'add_menu_classes', array( $this, 'add_dashboard_menu_items' ), PHP_INT_MAX );
+		add_action( 'admin_menu', array( $this, 'add_dashboard_menu_items' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -279,18 +279,14 @@ class CoreMenu {
 
 	/**
 	 * Add the dashboard items to the WP menu to create a quick-access flyout menu.
-	 *
-	 * @param array $menu Menu.
-	 * @returna array
 	 */
-	public function add_dashboard_menu_items( $menu ) {
+	public function add_dashboard_menu_items() {
+		global $submenu, $menu;
 		$top_level_items = Menu::get_category_items( 'woocommerce' );
 
 		// phpcs:disable
-		global $submenu;
-
 		if ( ! isset( $submenu['woocommerce'] ) ) {
-			return $menu;
+			return;
 		}
 
 		foreach( $top_level_items as $item ) {
@@ -336,8 +332,6 @@ class CoreMenu {
 			);
 		}
 		// phpcs:enable
-
-		return $menu;
 	}
 
 	/**
