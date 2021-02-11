@@ -6,7 +6,7 @@ const {
 	shopper,
 	merchant,
 	createSimpleProductWithCategory,
-	uiUnblocked
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
