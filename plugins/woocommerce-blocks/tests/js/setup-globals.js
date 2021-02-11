@@ -38,6 +38,20 @@ global.wcSettings = {
 			ON: 'Ontario',
 		},
 	},
+	countryLocale: {
+		GB: {
+			postcode: { label: 'Postcode' },
+			state: { label: 'County', required: false },
+		},
+		AT: {
+			postcode: { priority: 65 },
+			state: { required: false, hidden: true },
+		},
+		CA: {
+			postcode: { label: 'Postal code' },
+			state: { label: 'Province' },
+		},
+	},
 };
 
 global.jQuery = () => ( {
