@@ -9,7 +9,6 @@ import { getCurrency } from '@woocommerce/price-format';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
