@@ -76,3 +76,7 @@ i18n/languages/woocommerce.pot
 # Build
 build/
 woocommerce.zip
+.babelrc
+*.yml
+.codeclimate.yml
+.babelrc
