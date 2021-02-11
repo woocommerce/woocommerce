@@ -4,7 +4,7 @@
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *
- * @package WooCommerce/Shortcodes/My_Account
+ * @package WooCommerce\Shortcodes\My_Account
  * @version 2.0.0
  */
 
@@ -39,7 +39,7 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -133,7 +133,7 @@ class WC_Shortcode_My_Account {
 	public static function view_order( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! current_user_can( 'view_order', $order_id ) ) {
+		if ( ! $order || ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . esc_html__( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="wc-forward">' . esc_html__( 'My account', 'woocommerce' ) . '</a></div>';
 
 			return;
@@ -147,8 +147,8 @@ class WC_Shortcode_My_Account {
 			'myaccount/view-order.php',
 			array(
 				'status'   => $status, // @deprecated 2.2.
-				'order'    => wc_get_order( $order_id ),
-				'order_id' => $order_id,
+				'order'    => $order,
+				'order_id' => $order->get_id(),
 			)
 		);
 	}
@@ -293,7 +293,7 @@ class WC_Shortcode_My_Account {
 
 		$errors = new WP_Error();
 
-		do_action( 'lostpassword_post', $errors );
+		do_action( 'lostpassword_post', $errors, $user_data );
 
 		if ( $errors->get_error_code() ) {
 			wc_add_notice( $errors->get_error_message(), 'error' );
@@ -376,7 +376,9 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		self::set_reset_password_cookie();
 
-		wp_password_change_notification( $user );
+		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
+			wp_password_change_notification( $user );
+		}
 	}
 
 	/**

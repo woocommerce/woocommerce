@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -125,7 +127,6 @@ class WC_Gateway_Paypal_Request {
 				'upload'        => 1,
 				'return'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
-				'page_style'    => $this->gateway->get_option( 'page_style' ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
 				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
@@ -249,24 +250,23 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_shipping_args( $order ) {
 		$shipping_args = array();
-
-		if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
+		if ( $order->needs_shipping_address() ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
 			$shipping_args['no_shipping']      = 0;
-
-			// If we are sending shipping, send shipping address instead of billing.
-			$shipping_args['first_name'] = $this->limit_length( $order->get_shipping_first_name(), 32 );
-			$shipping_args['last_name']  = $this->limit_length( $order->get_shipping_last_name(), 64 );
-			$shipping_args['address1']   = $this->limit_length( $order->get_shipping_address_1(), 100 );
-			$shipping_args['address2']   = $this->limit_length( $order->get_shipping_address_2(), 100 );
-			$shipping_args['city']       = $this->limit_length( $order->get_shipping_city(), 40 );
-			$shipping_args['state']      = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
-			$shipping_args['country']    = $this->limit_length( $order->get_shipping_country(), 2 );
-			$shipping_args['zip']        = $this->limit_length( wc_format_postcode( $order->get_shipping_postcode(), $order->get_shipping_country() ), 32 );
+			if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
+				// If we are sending shipping, send shipping address instead of billing.
+				$shipping_args['first_name'] = $this->limit_length( $order->get_shipping_first_name(), 32 );
+				$shipping_args['last_name']  = $this->limit_length( $order->get_shipping_last_name(), 64 );
+				$shipping_args['address1']   = $this->limit_length( $order->get_shipping_address_1(), 100 );
+				$shipping_args['address2']   = $this->limit_length( $order->get_shipping_address_2(), 100 );
+				$shipping_args['city']       = $this->limit_length( $order->get_shipping_city(), 40 );
+				$shipping_args['state']      = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
+				$shipping_args['country']    = $this->limit_length( $order->get_shipping_country(), 2 );
+				$shipping_args['zip']        = $this->limit_length( wc_format_postcode( $order->get_shipping_postcode(), $order->get_shipping_country() ), 32 );
+			}
 		} else {
 			$shipping_args['no_shipping'] = 1;
 		}
-
 		return $shipping_args;
 	}
 
@@ -558,7 +558,7 @@ class WC_Gateway_Paypal_Request {
 			$precision = 0;
 		}
 
-		return round( $price, $precision );
+		return NumberUtil::round( $price, $precision );
 	}
 
 	/**

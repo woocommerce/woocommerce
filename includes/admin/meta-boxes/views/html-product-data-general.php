@@ -2,7 +2,7 @@
 /**
  * Product general data panel.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -65,7 +65,7 @@ defined( 'ABSPATH' ) || exit;
 				<label for="_sale_price_dates_from">' . esc_html__( 'Sale price dates', 'woocommerce' ) . '</label>
 				<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . esc_html( _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 				<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_html( _x( 'To&hellip;', 'placeholder', 'woocommerce' ) ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
-				<a href="#" class="description cancel_sale_schedule">' . esc_html__( 'Cancel', 'woocommerce' ) . '</a>' . wc_help_tip( __( 'The sale will end at the beginning of the set date.', 'woocommerce' ) ) . '
+				<a href="#" class="description cancel_sale_schedule">' . esc_html__( 'Cancel', 'woocommerce' ) . '</a>' . wc_help_tip( __( 'The sale will start at 00:00:00 of "From" date and end at 23:59:59 of "To" date.', 'woocommerce' ) ) . '
 			</p>';
 
 		do_action( 'woocommerce_product_options_pricing' );
@@ -89,7 +89,7 @@ defined( 'ABSPATH' ) || exit;
 					$downloadable_files = $product_object->get_downloads( 'edit' );
 					if ( $downloadable_files ) {
 						foreach ( $downloadable_files as $key => $file ) {
-							include 'html-product-download.php';
+							include __DIR__ . '/html-product-download.php';
 						}
 					}
 					?>
@@ -105,7 +105,7 @@ defined( 'ABSPATH' ) || exit;
 									'name' => '',
 								);
 								ob_start();
-								require 'html-product-download.php';
+								require __DIR__ . '/html-product-download.php';
 								echo esc_attr( ob_get_clean() );
 								?>
 							"><?php esc_html_e( 'Add File', 'woocommerce' ); ?></a>

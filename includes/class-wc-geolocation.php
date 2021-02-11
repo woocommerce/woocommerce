@@ -6,8 +6,8 @@
  *
  * This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com.
  *
- * @package WooCommerce/Classes
- * @version 3.4.0
+ * @package WooCommerce\Classes
+ * @version 3.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +35,7 @@ class WC_Geolocation {
 	 * GeoLite2 DB.
 	 *
 	 * @since 3.4.0
+	 * @deprecated 3.9.0
 	 */
 	const GEOLITE2_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz';
 
@@ -61,16 +62,6 @@ class WC_Geolocation {
 	);
 
 	/**
-	 * Check if server supports MaxMind GeoLite2 Reader.
-	 *
-	 * @since 3.4.0
-	 * @return bool
-	 */
-	private static function supports_geolite2() {
-		return version_compare( PHP_VERSION, '5.4.0', '>=' );
-	}
-
-	/**
 	 * Check if geolocation is enabled.
 	 *
 	 * @since 3.4.0
@@ -82,66 +73,19 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Prevent geolocation via MaxMind when using legacy versions of php.
-	 *
-	 * @since 3.4.0
-	 * @param string $default_customer_address current value.
-	 * @return string
-	 */
-	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
-		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
-			$default_customer_address = 'base';
-		}
-
-		return $default_customer_address;
-	}
-
-	/**
-	 * Hook in geolocation functionality.
-	 */
-	public static function init() {
-		if ( self::supports_geolite2() ) {
-			// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-			if ( self::is_geolocation_enabled( get_option( 'woocommerce_default_customer_address' ) ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
-				add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
-			}
-
-			// Trigger database update when settings are changed to enable geolocation.
-			add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
-		} else {
-			add_filter( 'pre_option_woocommerce_default_customer_address', array( __CLASS__, 'disable_geolocation_on_legacy_php' ) );
-		}
-	}
-
-	/**
-	 * Maybe trigger a DB update for the first time.
-	 *
-	 * @param  string $new_value New value.
-	 * @param  string $old_value Old value.
-	 * @return string
-	 */
-	public static function maybe_update_database( $new_value, $old_value ) {
-		if ( $new_value !== $old_value && self::is_geolocation_enabled( $new_value ) ) {
-			self::update_database();
-		}
-
-		return $new_value;
-	}
-
-	/**
 	 * Get current user IP Address.
 	 *
 	 * @return string
 	 */
 	public static function get_ip_address() {
-		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) { // WPCS: input var ok, CSRF ok.
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );  // WPCS: input var ok, CSRF ok.
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			return (string) rest_is_ip_address( trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) ); // WPCS: input var ok, CSRF ok.
-		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) { // @codingStandardsIgnoreLine
-			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ); // @codingStandardsIgnoreLine
+			return (string) rest_is_ip_address( trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) );
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		return '';
 	}
@@ -195,119 +139,114 @@ class WC_Geolocation {
 		// Filter to allow custom geolocation of the IP address.
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
-		if ( false === $country_code ) {
-			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview).
-			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) { // WPCS: input var ok, CSRF ok.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
-				// WP.com VIP has a variable available.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
-				// VIP Go has a variable available also.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} else {
-				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-				$database   = self::get_local_database_path();
+		if ( false !== $country_code ) {
+			return array(
+				'country'  => $country_code,
+				'state'    => '',
+				'city'     => '',
+				'postcode' => '',
+			);
+		}
 
-				if ( self::supports_geolite2() && file_exists( $database ) ) {
-					$country_code = self::geolocate_via_db( $ip_address, $database );
-				} elseif ( $api_fallback ) {
-					$country_code = self::geolocate_via_api( $ip_address );
-				} else {
-					$country_code = '';
-				}
+		if ( empty( $ip_address ) ) {
+			$ip_address = self::get_ip_address();
+		}
 
-				if ( ! $country_code && $fallback ) {
-					// May be a local environment - find external IP.
-					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
-				}
+		$country_code = self::get_country_code_from_headers();
+
+		/**
+		 * Get geolocation filter.
+		 *
+		 * @since 3.9.0
+		 * @param array  $geolocation Geolocation data, including country, state, city, and postcode.
+		 * @param string $ip_address  IP Address.
+		 */
+		$geolocation  = apply_filters(
+			'woocommerce_get_geolocation',
+			array(
+				'country'  => $country_code,
+				'state'    => '',
+				'city'     => '',
+				'postcode' => '',
+			),
+			$ip_address
+		);
+
+		// If we still haven't found a country code, let's consider doing an API lookup.
+		if ( '' === $geolocation['country'] && $api_fallback ) {
+			$geolocation['country'] = self::geolocate_via_api( $ip_address );
+		}
+
+		// It's possible that we're in a local environment, in which case the geolocation needs to be done from the
+		// external address.
+		if ( '' === $geolocation['country'] && $fallback ) {
+			$external_ip_address = self::get_external_ip_address();
+
+			// Only bother with this if the external IP differs.
+			if ( '0.0.0.0' !== $external_ip_address && $external_ip_address !== $ip_address ) {
+				return self::geolocate_ip( $external_ip_address, false, $api_fallback );
 			}
 		}
 
 		return array(
-			'country' => $country_code,
-			'state'   => '',
+			'country'  => $geolocation['country'],
+			'state'    => $geolocation['state'],
+			'city'     => $geolocation['city'],
+			'postcode' => $geolocation['postcode'],
 		);
 	}
 
 	/**
 	 * Path to our local db.
 	 *
+	 * @deprecated 3.9.0
 	 * @param  string $deprecated Deprecated since 3.4.0.
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		return apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', $deprecated );
+		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0' );
+		$integration = wc()->integrations->get_integration( 'maxmind_geolocation' );
+		return $integration->get_database_service()->get_database_path();
 	}
 
 	/**
 	 * Update geoip database.
 	 *
+	 * @deprecated 3.9.0
 	 * Extract files with PharData. Tool built into PHP since 5.3.
 	 */
 	public static function update_database() {
-		$logger = wc_get_logger();
-
-		if ( ! self::supports_geolite2() ) {
-			$logger->notice( 'Requires PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
-			return;
-		}
-
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-
-		$database             = 'GeoLite2-Country.mmdb';
-		$target_database_path = self::get_local_database_path();
-		$tmp_database_path    = download_url( self::GEOLITE2_DB );
-
-		if ( ! is_wp_error( $tmp_database_path ) ) {
-			WP_Filesystem();
-
-			global $wp_filesystem;
-
-			try {
-				// Make sure target dir exists.
-				$wp_filesystem->mkdir( dirname( $target_database_path ) );
-
-				// Extract files with PharData. Tool built into PHP since 5.3.
-				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.Classes.NewClasses.phardataFound
-				$file_path = trailingslashit( $file->current()->getFileName() ) . $database;
-				$file->extractTo( dirname( $tmp_database_path ), $file_path, true );
-
-				// Move file and delete temp.
-				$wp_filesystem->move( trailingslashit( dirname( $tmp_database_path ) ) . $file_path, $target_database_path, true );
-				$wp_filesystem->delete( trailingslashit( dirname( $tmp_database_path ) ) . $file->current()->getFileName() );
-			} catch ( Exception $e ) {
-				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
-
-				// Reschedule download of DB.
-				wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
-				wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
-			}
-			// Delete temp file regardless of success.
-			$wp_filesystem->delete( $tmp_database_path );
-		} else {
-			$logger->notice(
-				'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
-				array( 'source' => 'geolocation' )
-			);
-		}
+		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0' );
+		$integration = wc()->integrations->get_integration( 'maxmind_geolocation' );
+		$integration->update_database();
 	}
 
 	/**
-	 * Use MAXMIND GeoLite database to geolocation the user.
+	 * Fetches the country code from the request headers, if one is available.
 	 *
-	 * @param  string $ip_address IP address.
-	 * @param  string $database   Database path.
-	 * @return string
+	 * @since 3.9.0
+	 * @return string The country code pulled from the headers, or empty string if one was not found.
 	 */
-	private static function geolocate_via_db( $ip_address, $database ) {
-		if ( ! class_exists( 'WC_Geolite_Integration', false ) ) {
-			require_once WC_ABSPATH . 'includes/class-wc-geolite-integration.php';
+	private static function get_country_code_from_headers() {
+		$country_code = '';
+
+		$headers = array(
+			'MM_COUNTRY_CODE',
+			'GEOIP_COUNTRY_CODE',
+			'HTTP_CF_IPCOUNTRY',
+			'HTTP_X_COUNTRY_CODE',
+		);
+
+		foreach ( $headers as $header ) {
+			if ( empty( $_SERVER[ $header ] ) ) {
+				continue;
+			}
+
+			$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) );
+			break;
 		}
 
-		$geolite = new WC_Geolite_Integration( $database );
-
-		return $geolite->get_country_iso( $ip_address );
+		return $country_code;
 	}
 
 	/**
@@ -368,6 +307,50 @@ class WC_Geolocation {
 
 		return $country_code;
 	}
-}
 
-WC_Geolocation::init();
+	/**
+	 * Hook in geolocation functionality.
+	 *
+	 * @deprecated 3.9.0
+	 * @return null
+	 */
+	public static function init() {
+		wc_deprecated_function( 'WC_Geolocation::init', '3.9.0' );
+		return null;
+	}
+
+	/**
+	 * Prevent geolocation via MaxMind when using legacy versions of php.
+	 *
+	 * @deprecated 3.9.0
+	 * @since 3.4.0
+	 * @param string $default_customer_address current value.
+	 * @return string
+	 */
+	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
+		wc_deprecated_function( 'WC_Geolocation::disable_geolocation_on_legacy_php', '3.9.0' );
+
+		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
+			$default_customer_address = 'base';
+		}
+
+		return $default_customer_address;
+	}
+
+	/**
+	 * Maybe trigger a DB update for the first time.
+	 *
+	 * @deprecated 3.9.0
+	 * @param  string $new_value New value.
+	 * @param  string $old_value Old value.
+	 * @return string
+	 */
+	public static function maybe_update_database( $new_value, $old_value ) {
+		wc_deprecated_function( 'WC_Geolocation::maybe_update_database', '3.9.0' );
+		if ( $new_value !== $old_value && self::is_geolocation_enabled( $new_value ) ) {
+			self::update_database();
+		}
+
+		return $new_value;
+	}
+}

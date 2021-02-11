@@ -2,7 +2,7 @@
 /**
  * Tag Cloud Widget.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 3.4.0
  */
 
@@ -56,7 +56,8 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 
 		wp_tag_cloud(
 			apply_filters(
-				'woocommerce_product_tag_cloud_widget_args', array(
+				'woocommerce_product_tag_cloud_widget_args',
+				array(
 					'taxonomy'                  => $current_taxonomy,
 					'topic_count_text_callback' => array( $this, 'topic_count_text' ),
 				)

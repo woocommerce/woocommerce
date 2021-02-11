@@ -2,7 +2,7 @@
 /**
  * Order notes HTML for meta box.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 					<?php echo wpautop( wptexturize( wp_kses_post( $note->content ) ) ); // @codingStandardsIgnoreLine ?>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">
 						<?php
 						/* translators: %1$s: note date %2$s: note time */
 						echo esc_html( sprintf( __( '%1$s at %2$s', 'woocommerce' ), $note->date_created->date_i18n( wc_date_format() ), $note->date_created->date_i18n( wc_time_format() ) ) );
@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 		}
 	} else {
 		?>
-		<li><?php esc_html_e( 'There are no notes yet.', 'woocommerce' ); ?></li>
+		<li class="no-items"><?php esc_html_e( 'There are no notes yet.', 'woocommerce' ); ?></li>
 		<?php
 	}
 	?>

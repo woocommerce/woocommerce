@@ -2,7 +2,7 @@
 /**
  * Template Loader
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -83,7 +83,12 @@ class WC_Template_Loader {
 			$template     = locate_template( $search_files );
 
 			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
-				$template = WC()->plugin_path() . '/templates/' . $default_file;
+				if ( false !== strpos( $default_file, 'product_cat' ) || false !== strpos( $default_file, 'product_tag' ) ) {
+					$cs_template = str_replace( '_', '-', $default_file );
+					$template    = WC()->plugin_path() . '/templates/' . $cs_template;
+				} else {
+					$template = WC()->plugin_path() . '/templates/' . $default_file;
+				}
 			}
 		}
 
@@ -127,7 +132,16 @@ class WC_Template_Loader {
 		$templates[] = 'woocommerce.php';
 
 		if ( is_page_template() ) {
-			$templates[] = get_page_template_slug();
+			$page_template = get_page_template_slug();
+
+			if ( $page_template ) {
+				$validated_file = validate_file( $page_template );
+				if ( 0 === $validated_file ) {
+					$templates[] = $page_template;
+				} else {
+					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." );
+				}
+			}
 		}
 
 		if ( is_singular( 'product' ) ) {
@@ -140,14 +154,28 @@ class WC_Template_Loader {
 		}
 
 		if ( is_product_taxonomy() ) {
-			$object      = get_queried_object();
+			$object = get_queried_object();
+
 			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+
+			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
+				$cs_default  = str_replace( '_', '-', $default_file );
+				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
+				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
+				$templates[] = $cs_default;
+			}
 		}
 
 		$templates[] = $default_file;
+		if ( isset( $cs_default ) ) {
+			$templates[] = WC()->template_path() . $cs_default;
+		}
 		$templates[] = WC()->template_path() . $default_file;
 
 		return array_unique( $templates );
@@ -454,7 +482,8 @@ class WC_Template_Loader {
 						'cache'    => false,
 					)
 				),
-			'products' );
+				'products'
+			);
 
 			// Allow queries to run e.g. layered nav.
 			add_action( 'pre_get_posts', array( WC()->query, 'product_query' ) );

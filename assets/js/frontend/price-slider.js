@@ -6,7 +6,7 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	$( document.body ).bind( 'price_slider_create price_slider_slide', function( event, min, max ) {
+	$( document.body ).on( 'price_slider_create price_slider_slide', function( event, min, max ) {
 
 		$( '.price_slider_amount span.from' ).html( accounting.formatMoney( min, {
 			symbol:    woocommerce_price_slider_params.currency_format_symbol,
@@ -66,6 +66,7 @@ jQuery( function( $ ) {
 	}
 
 	init_price_filter();
+	$( document.body ).on( 'init_price_filter', init_price_filter );
 
 	var hasSelectiveRefresh = (
 		'undefined' !== typeof wp &&

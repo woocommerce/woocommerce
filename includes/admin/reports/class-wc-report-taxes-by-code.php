@@ -2,7 +2,7 @@
 /**
  * Taxes by tax code report.
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Taxes_By_Code
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {
@@ -122,13 +122,13 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		// We exclude on-hold orders as they are still pending payment.
 		$tax_rows_orders = $this->get_order_report_data(
 			array(
-				'data'                => $query_data,
-				'where'               => $query_where,
-				'order_by'            => 'posts.post_date ASC',
-				'query_type'          => 'get_results',
-				'filter_range'        => true,
-				'order_types'         => wc_get_order_types( 'sales-reports' ),
-				'order_status'        => array( 'completed', 'processing', 'refunded' ),
+				'data'         => $query_data,
+				'where'        => $query_where,
+				'order_by'     => 'posts.post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+				'order_types'  => wc_get_order_types( 'sales-reports' ),
+				'order_status' => array( 'completed', 'processing', 'refunded' ),
 			)
 		);
 
@@ -160,8 +160,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
-			$key              = $tax_row->rate_id;
-			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+			$key                                    = $tax_row->rate_id;
+			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,
@@ -173,8 +173,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		}
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {
-			$key              = $tax_row->rate_id;
-			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+			$key                                    = $tax_row->rate_id;
+			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,

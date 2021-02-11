@@ -2,7 +2,7 @@
 /**
  * Sales By Product Reporting
  *
- * @package WooCommerce/Admin/Reporting
+ * @package WooCommerce\Admin\Reporting
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Product
  *
- * @package     WooCommerce/Admin/Reports
+ * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
@@ -150,7 +150,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'item_count'   => '#d4d9dc',
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ), true ) ) {
 			$current_range = '7day';
@@ -374,23 +374,24 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			</table>
 		</div>
 		<script type="text/javascript">
-			jQuery('.section_title').click(function(){
-				var next_section = jQuery(this).next('.section');
+			jQuery( '.section_title' ).on( 'click', function() {
+				var next_section = jQuery( this ).next( '.section' );
 
-				if ( jQuery(next_section).is(':visible') )
+				if ( jQuery( next_section ).is( ':visible' ) ) {
 					return false;
+				}
 
-				jQuery('.section:visible').slideUp();
-				jQuery('.section_title').removeClass('open');
-				jQuery(this).addClass('open').next('.section').slideDown();
+				jQuery( '.section:visible' ).slideUp();
+				jQuery( '.section_title' ).removeClass( 'open' );
+				jQuery( this ).addClass( 'open' ).next( '.section' ).slideDown();
 
 				return false;
-			});
-			jQuery('.section').slideUp( 100, function() {
+			} );
+			jQuery( '.section' ).slideUp( 100, function() {
 				<?php if ( empty( $this->product_ids ) ) : ?>
-					jQuery('.section_title:eq(1)').click();
+					jQuery( '.section_title:eq(1)' ).click();
 				<?php endif; ?>
-			});
+			} );
 		</script>
 		<?php
 	}
@@ -400,7 +401,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day'; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<a
 			href="#"

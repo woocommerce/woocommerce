@@ -35,7 +35,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -60,7 +60,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -74,33 +74,41 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	public function read( &$zone ) {
 		global $wpdb;
 
-		$zone_data = false;
-
-		if ( 0 !== $zone->get_id() || '0' !== $zone->get_id() ) {
-			$zone_data = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1",
-					$zone->get_id()
-				)
-			);
-		}
-
+		// Zone 0 is used as a default if no other zones fit.
 		if ( 0 === $zone->get_id() || '0' === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
 			$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
 			$zone->read_meta_data();
 			$zone->set_object_read( true );
+
+			/**
+			 * Indicate that the WooCommerce shipping zone has been loaded.
+			 *
+			 * @param WC_Shipping_Zone $zone The shipping zone that has been loaded.
+			 */
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
-		} elseif ( $zone_data ) {
-			$zone->set_zone_name( $zone_data->zone_name );
-			$zone->set_zone_order( $zone_data->zone_order );
-			$this->read_zone_locations( $zone );
-			$zone->read_meta_data();
-			$zone->set_object_read( true );
-			do_action( 'woocommerce_shipping_zone_loaded', $zone );
-		} else {
+			return;
+		}
+
+		$zone_data = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1",
+				$zone->get_id()
+			)
+		);
+
+		if ( ! $zone_data ) {
 			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
+
+		$zone->set_zone_name( $zone_data->zone_name );
+		$zone->set_zone_order( $zone_data->zone_order );
+		$this->read_zone_locations( $zone );
+		$zone->read_meta_data();
+		$zone->set_object_read( true );
+
+		/** This action is documented in includes/datastores/class-wc-shipping-zone-data-store.php. */
+		do_action( 'woocommerce_shipping_zone_loaded', $zone );
 	}
 
 	/**
@@ -132,7 +140,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 
 			$zone->set_id( null );
 
-			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 			do_action( 'woocommerce_delete_shipping_zone', $zone_id );
@@ -267,12 +275,22 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			}
 		}
 
+		/**
+		 * Get shipping zone criteria
+		 *
+		 * @since 3.6.6
+		 * @param array $criteria Get zone criteria.
+		 * @param array $package Package information.
+		 * @param array $postcode_locations Postcode range and wildcard matching.
+		 */
+		$criteria = apply_filters( 'woocommerce_get_zone_criteria', $criteria, $package, $postcode_locations );
+
 		// Get matching zones.
 		return $wpdb->get_var(
 			"SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
 			WHERE " . implode( ' ', $criteria ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			. ' ORDER BY zone_order ASC, zone_id ASC LIMIT 1'
+			. ' ORDER BY zone_order ASC, zones.zone_id ASC LIMIT 1'
 		);
 	}
 

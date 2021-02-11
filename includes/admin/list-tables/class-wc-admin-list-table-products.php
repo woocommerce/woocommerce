@@ -2,7 +2,7 @@
 /**
  * List tables: products.
  *
- * @package  WooCommerce/Admin
+ * @package  WooCommerce\Admin
  * @version  3.3.0
  */
 
@@ -15,7 +15,7 @@ if ( class_exists( 'WC_Admin_List_Table_Products', false ) ) {
 }
 
 if ( ! class_exists( 'WC_Admin_List_Table', false ) ) {
-	include_once 'abstract-class-wc-admin-list-table.php';
+	include_once __DIR__ . '/abstract-class-wc-admin-list-table.php';
 }
 
 /**
@@ -124,11 +124,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
 
-		$show_columns['price']        = __( 'Price', 'woocommerce' );
-		$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['date']         = __( 'Date', 'woocommerce' );
+		$show_columns['price']       = __( 'Price', 'woocommerce' );
+		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
+		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
+		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['date']        = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
 	}
@@ -351,7 +351,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_products_type_filter() {
 		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
-		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
+		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . esc_html__( 'Filter by product type', 'woocommerce' ) . '</option>';
 
 		foreach ( wc_get_product_types() as $value => $label ) {
 			$output .= '<option value="' . esc_attr( $value ) . '" ';
@@ -362,11 +362,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 				$output .= '<option value="downloadable" ';
 				$output .= selected( 'downloadable', $current_product_type, false );
-				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Downloadable', 'woocommerce' ) . '</option>';
+				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . esc_html__( 'Downloadable', 'woocommerce' ) . '</option>';
 
 				$output .= '<option value="virtual" ';
 				$output .= selected( 'virtual', $current_product_type, false );
-				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Virtual', 'woocommerce' ) . '</option>';
+				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . esc_html__( 'Virtual', 'woocommerce' ) . '</option>';
 			}
 		}
 
@@ -395,11 +395,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Search by SKU or ID for products.
 	 *
-	 * @deprecated Logic moved to query_filters.
+	 * @deprecated 4.4.0 Logic moved to query_filters.
 	 * @param string $where Where clause SQL.
 	 * @return string
 	 */
 	public function sku_search( $where ) {
+		wc_deprecated_function( 'WC_Admin_List_Table_Products::sku_search', '4.4.0', 'Logic moved to query_filters.' );
 		return $where;
 	}
 
@@ -416,7 +417,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		unset( $views['mine'] );
 
 		// Add sorting link.
-		if ( current_user_can( 'edit_others_pages' ) ) {
+		if ( current_user_can( 'edit_others_products' ) ) {
 			$class            = ( isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) ? 'current' : '';
 			$query_string     = remove_query_arg( array( 'orderby', 'order' ) );
 			$query_string     = add_query_arg( 'orderby', rawurlencode( 'menu_order title' ), $query_string );
@@ -479,12 +480,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		// Stock status filter.
-		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
 		}
 
 		// Shipping class taxonomy.
-		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_vars['tax_query'][] = array(
 				'taxonomy' => 'product_shipping_class',
 				'field'    => 'slug',
@@ -614,9 +615,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
-		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		return $args;
 	}

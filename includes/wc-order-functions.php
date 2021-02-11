@@ -4,7 +4,7 @@
  *
  * Functions for order specific things.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.4.0
  */
 
@@ -71,7 +71,7 @@ function wc_get_orders( $args ) {
  *
  * @since  2.2
  *
- * @param  mixed $the_order Post object or post ID of the order.
+ * @param mixed $the_order       Post object or post ID of the order.
  *
  * @return bool|WC_Order|WC_Order_Refund
  */
@@ -149,13 +149,18 @@ function wc_get_order_status_name( $status ) {
 }
 
 /**
- * Generate an order key.
+ * Generate an order key with prefix.
  *
  * @since 3.5.4
+ * @param string $key Order key without a prefix. By default generates a 13 digit secret.
  * @return string The order key.
  */
-function wc_generate_order_key() {
-	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . wp_generate_password( 13, false ) );
+function wc_generate_order_key( $key = '' ) {
+	if ( '' === $key ) {
+		$key = wp_generate_password( 13, false );
+	}
+
+	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 }
 
 /**
@@ -375,7 +380,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp', true ) );
+	$download->set_access_granted( time() );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
@@ -451,11 +456,12 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		delete_transient( $transient );
 	}
 
-	// Clear money spent for user associated with order.
+	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
 		delete_user_meta( $order->get_customer_id(), '_money_spent' );
 		delete_user_meta( $order->get_customer_id(), '_order_count' );
+		delete_user_meta( $order->get_customer_id(), '_last_order' );
 	} else {
 		$order_id = 0;
 	}
@@ -464,7 +470,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	// Do the same for regular cache.
-	WC_Cache_Helper::incr_cache_prefix( 'orders' );
+	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
@@ -683,6 +689,10 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
  * @param array    $refunded_line_items Refunded items list.
  */
 function wc_restock_refunded_items( $order, $refunded_line_items ) {
+	if ( ! apply_filters( 'woocommerce_can_restock_refunded_items', true, $order, $refunded_line_items ) ) {
+		return;
+	}
+
 	$line_items = $order->get_items();
 
 	foreach ( $line_items as $item_id => $item ) {
@@ -769,6 +779,7 @@ function wc_order_fully_refunded( $order_id ) {
 	}
 
 	// Create the refund object.
+	wc_switch_to_site_locale();
 	wc_create_refund(
 		array(
 			'amount'     => $max_refund,
@@ -777,6 +788,7 @@ function wc_order_fully_refunded( $order_id ) {
 			'line_items' => array(),
 		)
 	);
+	wc_restore_locale();
 
 	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
 }
@@ -813,7 +825,7 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
 			}
 		}
 	}
@@ -852,6 +864,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+	} elseif ( $order->has_status( 'cancelled' ) ) {
+		$order->get_data_store()->release_held_coupons( $order, true );
+		return;
 	} else {
 		return;
 	}
@@ -874,10 +889,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					$coupon->decrease_usage_count( $used_by );
 					break;
 				case 'increase':
-					$coupon->increase_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by, $order );
 					break;
 			}
 		}
+		$order->get_data_store()->release_held_coupons( $order, true );
 	}
 }
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
@@ -909,7 +925,8 @@ function wc_cancel_unpaid_orders() {
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
+	wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 

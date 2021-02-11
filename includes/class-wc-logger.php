@@ -4,8 +4,10 @@
  *
  * @class          WC_Logger
  * @version        2.0.0
- * @package        WooCommerce/Classes
+ * @package        WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,12 +63,16 @@ class WC_Logger implements WC_Logger_Interface {
 			}
 		}
 
+		// Support the constant as long as a valid log level has been set for it.
+		if ( null === $threshold ) {
+			$threshold = Constants::get_constant( 'WC_LOG_THRESHOLD' );
+			if ( null !== $threshold && ! WC_Log_Levels::is_valid_level( $threshold ) ) {
+				$threshold = null;
+			}
+		}
+
 		if ( null !== $threshold ) {
 			$threshold = WC_Log_Levels::get_level_severity( $threshold );
-		} elseif ( defined( 'WC_LOG_THRESHOLD' ) && WC_Log_Levels::is_valid_level( WC_LOG_THRESHOLD ) ) {
-			$threshold = WC_Log_Levels::get_level_severity( WC_LOG_THRESHOLD );
-		} else {
-			$threshold = null;
 		}
 
 		$this->handlers  = $register_handlers;

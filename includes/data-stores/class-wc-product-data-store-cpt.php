@@ -2,8 +2,12 @@
 /**
  * WC_Product_Data_Store_CPT class file.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
+
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -105,7 +109,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$id = wp_insert_post(
@@ -145,7 +149,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->save_meta_data();
 			$product->apply_changes();
 
-			do_action( 'woocommerce_new_product', $id );
+			do_action( 'woocommerce_new_product', $id, $product );
 		}
 	}
 
@@ -167,8 +171,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			array(
 				'name'              => $post_object->post_title,
 				'slug'              => $post_object->post_name,
-				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'      => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified'     => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'            => $post_object->post_status,
 				'description'       => $post_object->post_content,
 				'short_description' => $post_object->post_excerpt,
@@ -185,6 +189,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
 		$product->set_object_read( true );
+
+		do_action( 'woocommerce_product_read', $product->get_id() );
 	}
 
 	/**
@@ -260,9 +266,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->handle_updated_props( $product );
 		$this->clear_caches( $product );
 
+		wc_get_container()
+			->get( DownloadPermissionsAdjuster::class )
+			->maybe_schedule_adjust_download_permissions( $product );
+
 		$product->apply_changes();
 
-		do_action( 'woocommerce_update_product', $product->get_id() );
+		// Any time we update the product, we should flush the term count cache.
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
+		$tools_controller->execute_tool( 'recount_terms' );
+		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
 	/**
@@ -564,6 +577,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'date_on_sale_to':
 					$value = $value ? $value->getTimestamp() : '';
 					break;
+				case 'stock_quantity':
+					// Fire actions to let 3rd parties know the stock is about to be changed.
+					if ( $product->is_type( 'variation' ) ) {
+						/**
+						* Action to signal that the value of 'stock_quantity' for a variation is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The variation whose stock is about to change.
+						*/
+						do_action( 'woocommerce_variation_before_set_stock', $product );
+					} else {
+						/**
+						* Action to signal that the value of 'stock_quantity' for a product is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The product whose stock is about to change.
+						*/
+						do_action( 'woocommerce_product_before_set_stock', $product );
+					}
+					break;
 			}
 
 			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
@@ -642,7 +677,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual' ) ) ) {
+		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -702,7 +737,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$terms[] = 'outofstock';
 			}
 
-			$rating = min( 5, round( $product->get_average_rating(), 0 ) );
+			$rating = min( 5, NumberUtil::round( $product->get_average_rating(), 0 ) );
 
 			if ( $rating > 0 ) {
 				$terms[] = 'rated-' . $rating;
@@ -821,7 +856,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$new_type = $product->get_type();
 
 		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
@@ -840,10 +875,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		wc_delete_product_transients( $product->get_id() );
 		if ( $product->get_parent_id( 'edit' ) ) {
 			wc_delete_product_transients( $product->get_parent_id( 'edit' ) );
-			WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_parent_id( 'edit' ) );
+			WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_parent_id( 'edit' ) );
 		}
 		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
-		WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_id() );
+		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
 	}
 
 	/*
@@ -877,8 +912,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			"
 			SELECT posts.ID as id, posts.post_parent as parent_id
 			FROM {$wpdb->posts} AS posts
@@ -896,8 +931,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 			GROUP BY posts.ID
 			"
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -947,7 +982,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		return $wpdb->get_var(
+		return (bool) $wpdb->get_var(
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
@@ -1017,7 +1052,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}
@@ -1043,7 +1078,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}
@@ -1066,32 +1101,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( ! $attribute->get_variation() ) {
 				continue;
 			}
-
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
-
-			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
-				return 0;
-			}
-
-			$meta_attribute_names[] = $attribute_field_name;
+			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );
 		}
 
 		// Get the attributes of the variations.
 		$query = $wpdb->prepare(
 			"
-			SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta}
-			WHERE post_id IN (
+			SELECT postmeta.post_id, postmeta.meta_key, postmeta.meta_value, posts.menu_order FROM {$wpdb->postmeta} as postmeta
+			LEFT JOIN {$wpdb->posts} as posts ON postmeta.post_id=posts.ID
+			WHERE postmeta.post_id IN (
 				SELECT ID FROM {$wpdb->posts}
 				WHERE {$wpdb->posts}.post_parent = %d
 				AND {$wpdb->posts}.post_status = 'publish'
 				AND {$wpdb->posts}.post_type = 'product_variation'
-				ORDER BY menu_order ASC, ID ASC
 			)
 			",
 			$product->get_id()
 		);
 
-		$query .= ' AND meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" );';
+		$query .= ' AND postmeta.meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" )';
+
+		$query .= ' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
 
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
@@ -1113,10 +1143,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		foreach ( $sorted_meta as $variation_id => $variation ) {
 			$match = true;
 
-			foreach ( $match_attributes as $attribute_key => $attribute_value ) {
-				if ( array_key_exists( $attribute_key, $variation ) ) {
-					if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
-						$match = false;
+			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
+			foreach ( $variation as $attribute_key => $attribute_value ) {
+				$match_any_value = '' === $attribute_value;
+
+				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
+					$match = false; // Requires a selection but no value was provide.
+				}
+
+				if ( array_key_exists( $attribute_key, $match_attributes ) ) { // Value to match was provided.
+					if ( ! $match_any_value && $match_attributes[ $attribute_key ] !== $attribute_value ) {
+						$match = false; // Provided value does not match variation.
 					}
 				}
 			}
@@ -1133,6 +1170,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 */
 			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
 		}
+
+		return 0;
 	}
 
 	/**
@@ -1172,7 +1211,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( in_array( $possible_attribute, $existing_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				continue;
 			}
-			$variation = new WC_Product_Variation();
+			$variation = wc_get_product_object( 'variation' );
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
@@ -1348,9 +1387,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( 'set' === $operation ) {
 			$new_stock = wc_stock_amount( $stock_quantity );
+
+			// Generate SQL.
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+				$new_stock,
+				$product_id_with_stock
+			);
 		} else {
-			// @todo: potential race condition.
-			// Read current stock level and lock the row. If the lock can't be acquired, don't wait.
 			$current_stock = wc_stock_amount(
 				$wpdb->get_var(
 					$wpdb->prepare(
@@ -1360,25 +1404,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				)
 			);
 
-			// Calculate new value.
+			// Calculate new value for filter below. Set multiplier to subtract or add the meta_value.
 			switch ( $operation ) {
 				case 'increase':
-					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock + wc_stock_amount( $stock_quantity );
+					$multiplier = 1;
 					break;
 				default:
-					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					$new_stock  = $current_stock - wc_stock_amount( $stock_quantity );
+					$multiplier = -1;
 					break;
 			}
+
+			// Generate SQL.
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = meta_value %+f WHERE post_id = %d AND meta_key='_stock'",
+				wc_stock_amount( $stock_quantity ) * $multiplier, // This will either subtract or add depending on operation.
+				$product_id_with_stock
+			);
 		}
 
-		// Generate SQL.
-		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$new_stock,
-			$product_id_with_stock
-		);
-
-		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $new_stock, $operation );
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 
@@ -1544,10 +1590,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$post_types   = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$join_query   = '';
 		$type_where   = '';
 		$status_where = '';
 		$limit_query  = '';
-		$term         = wc_strtolower( $term );
+
+		// When searching variations we should include the parent's meta table for use in searches.
+		if ( $include_variations ) {
+			$join_query = " LEFT JOIN {$wpdb->wc_product_meta_lookup} parent_wc_product_meta_lookup
+			 ON posts.post_type = 'product_variation' AND parent_wc_product_meta_lookup.product_id = posts.post_parent ";
+		}
 
 		/**
 		 * Hook woocommerce_search_products_post_statuses.
@@ -1561,8 +1613,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		// See if search term contains OR keywords.
-		if ( strstr( $term, ' or ' ) ) {
-			$term_groups = explode( ' or ', $term );
+		if ( stristr( $term, ' or ' ) ) {
+			$term_groups = preg_split( '/\s+or\s+/i', $term );
 		} else {
 			$term_groups = array( $term );
 		}
@@ -1588,8 +1640,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$searchand        = '';
 
 			foreach ( $search_terms as $search_term ) {
-				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+				// Variations should also search the parent's meta table for fallback fields.
+				if ( $include_variations ) {
+					$variation_query = $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s ) ", $like );
+				} else {
+					$variation_query = '';
+				}
+
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) $variation_query)", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$searchand         = ' AND ';
 			}
 
@@ -1629,6 +1689,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// phpcs:disable
 			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+			 $join_query
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
 			$search_where
 			$status_where
@@ -1678,7 +1739,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product_type = 'variation';
 		} elseif ( 'product' === $post_type ) {
 			$terms        = get_the_terms( $product_id, 'product_type' );
-			$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+			$product_type = ! empty( $terms ) && ! is_wp_error( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
 		} else {
 			$product_type = false;
 		}
@@ -1952,6 +2013,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			add_filter( 'posts_where', array( $this, 'reviews_allowed_query_where' ), 10, 2 );
 		}
 
+		// Handle orderby.
+		if ( isset( $query_vars['orderby'] ) && 'include' === $query_vars['orderby'] ) {
+			$wp_query_args['orderby'] = 'post__in';
+		}
+
 		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
 	}
 
@@ -2023,6 +2089,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
+				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
 		}
 		return array();
@@ -2040,5 +2108,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return 'product_id';
 		}
 		return '';
+	}
+
+	/**
+	 * Returns query statement for getting current `_stock` of a product.
+	 *
+	 * @internal MAX function below is used to make sure result is a scalar.
+	 * @param int $product_id Product ID.
+	 * @return string|void Query statement.
+	 */
+	public function get_query_for_stock( $product_id ) {
+		global $wpdb;
+		return $wpdb->prepare(
+			"
+			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			WHERE meta_table.meta_key = '_stock'
+			AND meta_table.post_id = %d
+			",
+			$product_id
+		);
 	}
 }

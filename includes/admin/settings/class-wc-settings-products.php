@@ -2,7 +2,7 @@
 /**
  * WooCommerce Product Settings
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.4.0
  */
 
@@ -63,6 +63,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		$settings = $this->get_settings( $current_section );
 		WC_Admin_Settings::save_fields( $settings );
+
+		// Any time we update the product settings, we should flush the term count cache.
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
+		$tools_controller->execute_tool( 'recount_terms' );
 
 		if ( $current_section ) {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
@@ -218,7 +222,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 					array(
 						'title'    => __( 'File download method', 'woocommerce' ),
-						'desc'     => sprintf(
+						'desc_tip' => sprintf(
 							/* translators: 1: X-Accel-Redirect 2: X-Sendfile 3: mod_xsendfile */
 							__( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, %1$s / %2$s can be used to serve downloads instead (server requires %3$s).', 'woocommerce' ),
 							'<code>X-Accel-Redirect</code>',
@@ -230,11 +234,15 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'class'    => 'wc-enhanced-select',
 						'css'      => 'min-width:300px;',
 						'default'  => 'force',
-						'desc_tip' => true,
+						'desc'     => sprintf(
+							// translators: Link to WooCommerce Docs.
+							__( "If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='%s'>Digital/Downloadable Product Handling</a> guide.", 'woocommerce' ),
+							'https://docs.woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'
+						),
 						'options'  => array(
 							'force'     => __( 'Force downloads', 'woocommerce' ),
 							'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-							'redirect'  => __( 'Redirect only', 'woocommerce' ),
+							'redirect'  => apply_filters( 'woocommerce_redirect_only_method_is_secure', false ) ? __( 'Redirect only', 'woocommerce' ) : __( 'Redirect only (Insecure)', 'woocommerce' ),
 						),
 						'autoload' => false,
 					),
@@ -258,6 +266,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
 						'checkboxgroup' => 'end',
 						'autoload'      => false,
+					),
+
+					array(
+						'title' => __( 'Filename', 'woocommerce' ),
+						'desc' => __( 'Append a unique string to filename for security', 'woocommerce' ),
+						'id' => 'woocommerce_downloads_add_hash_to_filename',
+						'type' => 'checkbox',
+						'default' => 'yes',
+						'desc_tip' => sprintf(
+							// translators: Link to WooCommerce Docs.
+							__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
+							'https://docs.woocommerce.com/document/digital-downloadable-product-handling#unique-string'
+						),
 					),
 
 					array(
@@ -287,6 +308,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 							'id'       => 'woocommerce_shop_page_id',
 							'type'     => 'single_select_page',
 							'default'  => '',
+							'args'     => array( 'post_status' => 'publish,private' ),
 							'class'    => 'wc-enhanced-select-nostd',
 							'css'      => 'min-width:300px;',
 							'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),

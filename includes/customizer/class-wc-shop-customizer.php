@@ -29,12 +29,15 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public function add_sections( $wp_customize ) {
-		$wp_customize->add_panel( 'woocommerce', array(
-			'priority'       => 200,
-			'capability'     => 'manage_woocommerce',
-			'theme_supports' => '',
-			'title'          => __( 'WooCommerce', 'woocommerce' ),
-		) );
+		$wp_customize->add_panel(
+			'woocommerce',
+			array(
+				'priority'       => 200,
+				'capability'     => 'manage_woocommerce',
+				'theme_supports' => '',
+				'title'          => __( 'WooCommerce', 'woocommerce' ),
+			)
+		);
 
 		$this->add_store_notice_section( $wp_customize );
 		$this->add_product_catalog_section( $wp_customize );
@@ -99,7 +102,7 @@ class WC_Shop_Customizer {
 		$max_notice = __( 'The maximum allowed setting is %d', 'woocommerce' );
 		?>
 		<script type="text/javascript">
-			jQuery( document ).ready( function( $ ) {
+			jQuery( function( $ ) {
 				$( document.body ).on( 'change', '.woocommerce-cropping-control input[type="radio"]', function() {
 					var $wrapper = $( this ).closest( '.woocommerce-cropping-control' ),
 						value    = $wrapper.find( 'input:checked' ).val();
@@ -223,7 +226,7 @@ class WC_Shop_Customizer {
 								'max_rows_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( $min_notice, $max_rows ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $max_notice, $max_rows ) ); ?>'
 								}
 							) );
 						} else {
@@ -267,14 +270,17 @@ class WC_Shop_Customizer {
 	 * @return string
 	 */
 	public function sanitize_default_catalog_orderby( $value ) {
-		$options = apply_filters( 'woocommerce_default_catalog_orderby_options', array(
-			'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
-			'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
-			'rating'     => __( 'Average rating', 'woocommerce' ),
-			'date'       => __( 'Sort by most recent', 'woocommerce' ),
-			'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
-			'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
-		) );
+		$options = apply_filters(
+			'woocommerce_default_catalog_orderby_options',
+			array(
+				'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+				'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+				'rating'     => __( 'Average rating', 'woocommerce' ),
+				'date'       => __( 'Sort by most recent', 'woocommerce' ),
+				'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+				'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+			)
+		);
 
 		return array_key_exists( $value, $options ) ? $value : 'menu_order';
 	}
@@ -339,7 +345,8 @@ class WC_Shop_Customizer {
 
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial(
-				'woocommerce_demo_store_notice', array(
+				'woocommerce_demo_store_notice',
+				array(
 					'selector'            => '.woocommerce-store-notice',
 					'container_inclusive' => true,
 					'render_callback'     => 'woocommerce_demo_store',
@@ -433,14 +440,17 @@ class WC_Shop_Customizer {
 				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
-				'choices'     => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
-					'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
-					'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
-					'rating'     => __( 'Average rating', 'woocommerce' ),
-					'date'       => __( 'Sort by most recent', 'woocommerce' ),
-					'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
-					'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
-				) ),
+				'choices'     => apply_filters(
+					'woocommerce_default_catalog_orderby_options',
+					array(
+						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+						'rating'     => __( 'Average rating', 'woocommerce' ),
+						'date'       => __( 'Sort by most recent', 'woocommerce' ),
+						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+					)
+				),
 			)
 		);
 
@@ -752,23 +762,31 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		$choose_pages = array(
-			'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
-			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+		if ( current_user_can( 'manage_privacy_options' ) ) {
+			$choose_pages = array(
+				'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
+				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+			);
+		} else {
+			$choose_pages = array(
+				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+			);
+		}
+		$pages        = get_pages(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish,private,draft',
+				'child_of'    => 0,
+				'parent'      => -1,
+				'exclude'     => array(
+					wc_get_page_id( 'cart' ),
+					wc_get_page_id( 'checkout' ),
+					wc_get_page_id( 'myaccount' ),
+				),
+				'sort_order'  => 'asc',
+				'sort_column' => 'post_title',
+			)
 		);
-		$pages        = get_pages( array(
-			'post_type'   => 'page',
-			'post_status' => 'publish,private,draft',
-			'child_of'    => 0,
-			'parent'      => -1,
-			'exclude'     => array(
-				wc_get_page_id( 'cart' ),
-				wc_get_page_id( 'checkout' ),
-				wc_get_page_id( 'myaccount' ),
-			),
-			'sort_order'  => 'asc',
-			'sort_column' => 'post_title',
-		) );
 		$page_choices = array( '' => __( 'No page set', 'woocommerce' ) ) + array_combine( array_map( 'strval', wp_list_pluck( $pages, 'ID' ) ), wp_list_pluck( $pages, 'post_title' ) );
 
 		foreach ( $choose_pages as $id => $name ) {
@@ -800,7 +818,7 @@ class WC_Shop_Customizer {
 				'description'     => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
 				'section'         => 'woocommerce_checkout',
 				'settings'        => 'woocommerce_checkout_privacy_policy_text',
-				'active_callback' => 'wc_privacy_policy_page_id',
+				'active_callback' => array( $this, 'has_privacy_policy_page_id' ),
 				'type'            => 'textarea',
 			)
 		);
@@ -812,21 +830,23 @@ class WC_Shop_Customizer {
 				'description'     => __( 'Optionally add some text for the terms checkbox that customers must accept.', 'woocommerce' ),
 				'section'         => 'woocommerce_checkout',
 				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
-				'active_callback' => 'wc_terms_and_conditions_page_id',
+				'active_callback' => array( $this, 'has_terms_and_conditions_page_id' ),
 				'type'            => 'text',
 			)
 		);
 
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial(
-				'woocommerce_checkout_privacy_policy_text', array(
+				'woocommerce_checkout_privacy_policy_text',
+				array(
 					'selector'            => '.woocommerce-privacy-policy-text',
 					'container_inclusive' => true,
 					'render_callback'     => 'wc_checkout_privacy_policy_text',
 				)
 			);
 			$wp_customize->selective_refresh->add_partial(
-				'woocommerce_checkout_terms_and_conditions_checkbox_text', array(
+				'woocommerce_checkout_terms_and_conditions_checkbox_text',
+				array(
 					'selector'            => '.woocommerce-terms-and-conditions-checkbox-text',
 					'container_inclusive' => false,
 					'render_callback'     => 'wc_terms_and_conditions_checkbox_text',
@@ -844,6 +864,24 @@ class WC_Shop_Customizer {
 	public function sanitize_checkout_field_display( $value ) {
 		$options = array( 'hidden', 'optional', 'required' );
 		return in_array( $value, $options, true ) ? $value : '';
+	}
+
+	/**
+	 * Whether or not a page has been chose for the privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function has_privacy_policy_page_id() {
+		return wc_privacy_policy_page_id() > 0;
+	}
+
+	/**
+	 * Whether or not a page has been chose for the terms and conditions.
+	 *
+	 * @return bool
+	 */
+	public function has_terms_and_conditions_page_id() {
+		return wc_terms_and_conditions_page_id() > 0;
 	}
 }
 
