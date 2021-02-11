@@ -99,6 +99,7 @@ describe( 'Cart page', () => {
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
+| `addShippingZoneAndMethod` | `zoneName, zoneLocation, zoneMethod` | util helper method for adding shipping zones with shipping methods
 
 ### Test Utilities
 

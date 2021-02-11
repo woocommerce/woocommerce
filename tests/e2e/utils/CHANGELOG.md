@@ -16,6 +16,7 @@
 - `createCoupon( couponAmount )` component which accepts a coupon amount string (it defaults to 5) and creates a basic coupon. Returns the generated coupon code.
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 - `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
+- `addShippingZoneAndMethod( zoneName, zoneLocation, zoneMethod )` util helper method for adding shipping zones with shipping methods
 
 ## Changes
 
