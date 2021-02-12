@@ -358,7 +358,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		$max_pages = ceil( $total_terms / $per_page );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base  = str_replace( '(?P<attribute_id>[\d]+)', $request['attribute_id'], $this->rest_base );
+		$base = str_replace( '(?P<attribute_id>[\d]+)', $request['attribute_id'], $this->rest_base );
 		$base = add_query_arg( $request->get_query_params(), rest_url( '/' . $this->namespace . '/' . $base ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -700,7 +700,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		$params['context']['default'] = 'view';
 
-		$params['exclude'] = array(
+		$params['exclude']    = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -709,7 +709,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['include'] = array(
+		$params['include']    = array(
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -763,13 +763,13 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product'] = array(
+		$params['product']    = array(
 			'description'       => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => null,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['slug']    = array(
+		$params['slug']       = array(
 			'description'       => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -797,7 +797,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		$taxonomy = WC()->call_function( 'wc_attribute_taxonomy_name_by_id', (int) $request['attribute_id'] );
 		if ( ! empty( $taxonomy ) ) {
-			$this->taxonomy = $taxonomy;
+			$this->taxonomy                          = $taxonomy;
 			$this->taxonomies_by_id[ $attribute_id ] = $taxonomy;
 		}
 
