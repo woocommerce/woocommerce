@@ -89,8 +89,8 @@ class Menu {
 		add_action( 'admin_menu', array( $this, 'add_core_items' ) );
 		add_filter( 'admin_enqueue_scripts', array( $this, 'enqueue_data' ), 20 );
 
-		add_filter( 'admin_menu', array( $this, 'migrate_core_child_items' ) );
-		add_filter( 'admin_menu', array( $this, 'migrate_menu_items' ), PHP_INT_MAX - 1 );
+		add_filter( 'admin_menu', array( $this, 'migrate_core_child_items' ), PHP_INT_MAX - 1 );
+		add_filter( 'admin_menu', array( $this, 'migrate_menu_items' ), PHP_INT_MAX - 2 );
 	}
 
 	/**
@@ -618,12 +618,15 @@ class Menu {
 
 		// Remove excluded submenu items
 		if ( isset( $submenu['woocommerce'] ) ) {
-			$submenu['woocommerce'] = array_filter(
-				$submenu['woocommerce'],
-				function ( $submenu_item ) {
-					return ! in_array( $submenu_item[2], CoreMenu::get_excluded_items(), true );
+			foreach ( $submenu['woocommerce'] as $key => $submenu_item ) {
+				if ( in_array( $submenu_item[ self::CALLBACK ], CoreMenu::get_excluded_items(), true ) ) {
+					if ( isset( $submenu['woocommerce'][ $key ][ self::CSS_CLASSES ] ) ) {
+						$submenu['woocommerce'][ $key ][ self::CSS_CLASSES ] .= ' hide-if-js';
+					} else {
+						$submenu['woocommerce'][ $key ][] = 'hide-if-js';
+					}
 				}
-			);
+			}
 		}
 
 		foreach ( $submenu as $parent_key => $parent ) {
