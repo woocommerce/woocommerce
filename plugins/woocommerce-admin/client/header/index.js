@@ -51,7 +51,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		debounceTimer = setTimeout( function () {
 			const wpBody = document.querySelector( '#wpbody' );
 
-			if ( ! wpBody ) {
+			if ( ! wpBody || ! headerElement.current ) {
 				return;
 			}
 

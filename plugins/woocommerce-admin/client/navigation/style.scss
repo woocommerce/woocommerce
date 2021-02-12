@@ -2,6 +2,69 @@
 @import './components/container/style';
 @import './components/header/style';
 
+.woocommerce-navigation {
+	position: relative;
+	width: $navigation-width;
+	box-sizing: border-box;
+	background-color: $gray-900;
+	z-index: 1100; //Must be greater than z-index on .woocommerce-layout__header
+
+	@media ( max-width: 960px ) {
+		width: $header-height;
+		height: $header-height;
+	}
+
+	.components-navigation {
+		box-sizing: border-box;
+	}
+}
+
+.woocommerce-navigation__wrapper {
+	background-color: $gray-900;
+	position: absolute;
+	top: $header-height;
+	width: 100%;
+	height: calc(100vh - #{$header-height});
+	overflow-y: auto;
+}
+
+body.is-wc-nav-expanded {
+	.woocommerce-navigation {
+		width: $navigation-width;
+		height: 100%;
+	}
+}
+
+body.is-wc-nav-folded {
+	.woocommerce-navigation {
+		width: $header-height;
+		height: $header-height;
+		overflow: hidden;
+
+		.woocommerce-navigation-header {
+			> * {
+				display: none;
+			}
+		}
+
+		.woocommerce-navigation-header__site-icon {
+			display: block;
+		}
+
+		.components-navigation {
+			display: none;
+		}
+	}
+
+	.woocommerce-transient-notices {
+		left: $gap;
+	}
+
+	#wpbody {
+		margin-left: 0;
+	}
+}
+
 .has-woocommerce-navigation {
 	#wpadminbar,
 	#adminmenuwrap,
@@ -34,69 +97,6 @@
 		margin-left: $navigation-width;
 
 		@media ( max-width: 960px ) {
-			margin-left: 0;
-		}
-	}
-
-	.woocommerce-navigation {
-		position: relative;
-		width: $navigation-width;
-		box-sizing: border-box;
-		background-color: $gray-900;
-		z-index: 1100; //Must be greater than z-index on .woocommerce-layout__header
-
-		@media ( max-width: 960px ) {
-			width: $header-height;
-			height: $header-height;
-		}
-	}
-
-	.woocommerce-navigation__wrapper {
-		background-color: $gray-900;
-		position: absolute;
-		top: $header-height;
-		width: 100%;
-		height: calc(100vh - #{$header-height});
-		overflow-y: auto;
-	}
-
-	.components-navigation {
-		box-sizing: border-box;
-	}
-
-	&.is-wc-nav-expanded {
-		.woocommerce-navigation {
-			width: $navigation-width;
-			height: 100%;
-		}
-	}
-
-	&.is-wc-nav-folded {
-		.woocommerce-navigation {
-			width: $header-height;
-			height: $header-height;
-			overflow: hidden;
-
-			.woocommerce-navigation-header {
-				> * {
-					display: none;
-				}
-			}
-
-			.woocommerce-navigation-header__site-icon {
-				display: block;
-			}
-
-			.components-navigation {
-				display: none;
-			}
-		}
-
-		.woocommerce-transient-notices {
-			left: $gap;
-		}
-
-		#wpbody {
 			margin-left: 0;
 		}
 	}

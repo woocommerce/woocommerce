@@ -26,6 +26,7 @@ const Container = ( { menuItems } ) => {
 	useEffect( () => {
 		// Collapse the original WP Menu.
 		document.documentElement.classList.remove( 'wp-toolbar' );
+		document.body.classList.add( 'has-woocommerce-navigation' );
 		const adminMenu = document.getElementById( 'adminmenumain' );
 
 		if ( ! adminMenu ) {

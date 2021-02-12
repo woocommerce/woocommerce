@@ -86,7 +86,7 @@ class Menu {
 	 * Init.
 	 */
 	public function init() {
-		add_action( 'admin_menu', array( $this, 'add_core_items' ), PHP_INT_MAX );
+		add_action( 'admin_menu', array( $this, 'add_core_items' ), 100 );
 		add_filter( 'admin_enqueue_scripts', array( $this, 'enqueue_data' ), 20 );
 
 		add_filter( 'admin_menu', array( $this, 'migrate_core_child_items' ), PHP_INT_MAX - 1 );
