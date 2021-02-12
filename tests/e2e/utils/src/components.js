@@ -440,6 +440,7 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await expect(page).toFill('input#zone_name', zoneName);
 
 	// Select shipping zone location
+	// (.toSelect is not best option here because a lot of &nbsp are present in country/state names)
 	await expect(page).toFill('#zone_locations', zoneLocation);
 	await page.keyboard.press('Tab');
 	await page.keyboard.press('Enter');
