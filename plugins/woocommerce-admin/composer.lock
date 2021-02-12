@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be2325a8d3371fcbab8739c0a1b7fac1",
+    "content-hash": "3e5c1a9a478f74d0571db2156383ac47",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.7.1",
+            "version": "v2.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73"
+                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/5437697a56aefbdf707849b9833e1b36093d7a73",
-                "reference": "5437697a56aefbdf707849b9833e1b36093d7a73",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
+                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
                 "shasum": ""
             },
             "require": {
@@ -28,7 +28,8 @@
             },
             "type": "composer-plugin",
             "extra": {
-                "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin"
+                "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin",
+                "mirror-repo": "Automattic/jetpack-autoloader"
             },
             "autoload": {
                 "classmap": [
@@ -43,10 +44,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.7.1"
-            },
-            "time": "2020-12-18T22:33:59+00:00"
+            "time": "2021-02-05T19:07:06+00:00"
         },
         {
             "name": "composer/installers",
@@ -2162,12 +2160,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozarts/assert.git",
+                "url": "https://github.com/webmozart/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },
