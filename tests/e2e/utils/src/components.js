@@ -431,12 +431,14 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  *
  * @param zoneName Shipping zone name.
  * @param zoneLocation Shiping zone location. Defaults to United States (US).
+ * @param zipCode TBD
  * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
-const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zoneMethod = 'flat_rate' ) => {
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
 	await merchant.openNewShipping();
 	
 	// Fill shipping zone name
+	await page.waitForSelector('input#zone_name');
 	await expect(page).toFill('input#zone_name', zoneName);
 
 	// Select shipping zone location
@@ -445,9 +447,15 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await page.keyboard.press('Tab');
 	await page.keyboard.press('Enter');
 
+	// Fill shipping zone postcode if needed otherwise just put empty space
+	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toFill('#zone_postcodes', zipCode);
+	await expect(page).toClick('button#submit');
+
 	// Add shipping zone method
-	await expect(page).toClick('button.button.wc-shipping-zone-add-method', {text:'Add shipping method'});
-	await page.waitForSelector('woocommerce_flat_rate_cost');
+	await page.waitFor(1000); // avoiding flakiness
+	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await page.waitFor(1000); // avoiding flakiness
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
