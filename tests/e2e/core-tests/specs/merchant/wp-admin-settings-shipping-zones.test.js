@@ -29,19 +29,12 @@ const runAddNewShippingZoneTest = () => {
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
 			// Add a new shipping zone for the US with Flat Rate
-			await addShippingZoneAndMethod(shippingZoneNameSF, california, 'local_pickup');
-
-			// Set San Francisco as a local pickup city
-			await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
-			await expect(page).toFill('#zone_postcodes', sanFranciscoZIP);
-
-			// Save the shipping zone
-			await expect(page).toClick('button#submit');
+			await addShippingZoneAndMethod(shippingZoneNameSF, california, sanFranciscoZIP, 'local_pickup');
 		});
 
 		it('add shipping zone for California with Free shipping', async () => {
 			// Add a new shipping zone for California with Free shipping
-			await addShippingZoneAndMethod(shippingZoneNameFL, california, 'free_shipping');
+			await addShippingZoneAndMethod(shippingZoneNameFL, california, ' ', 'free_shipping');
 		});
 
 		it('add shipping zone for the US with Flat rate', async () => {
