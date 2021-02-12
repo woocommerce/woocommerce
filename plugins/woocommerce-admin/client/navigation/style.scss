@@ -3,12 +3,6 @@
 @import './components/header/style';
 
 .has-woocommerce-navigation {
-	margin-top: -$admin-bar-height;
-
-	.screen-reader-shortcut:focus {
-		top: 7px;
-	}
-
 	#wpadminbar,
 	#adminmenuwrap,
 	#adminmenuback {
@@ -29,6 +23,14 @@
 
 	#wpcontent,
 	#wpfooter {
+		margin-left: 0;
+
+		@media ( max-width: 960px ) {
+			margin-left: 0;
+		}
+	}
+
+	#wpbody {
 		margin-left: $navigation-width;
 
 		@media ( max-width: 960px ) {
@@ -36,12 +38,9 @@
 		}
 	}
 
-	#woocommerce-embedded-navigation {
-		position: fixed;
-		top: 0;
-		left: 0;
+	.woocommerce-navigation {
+		position: relative;
 		width: $navigation-width;
-		height: 100%;
 		box-sizing: border-box;
 		background-color: $gray-900;
 		z-index: 1100; //Must be greater than z-index on .woocommerce-layout__header
@@ -53,6 +52,11 @@
 	}
 
 	.woocommerce-navigation__wrapper {
+		background-color: $gray-900;
+		position: absolute;
+		top: $header-height;
+		width: 100%;
+		height: calc(100vh - #{$header-height});
 		overflow-y: auto;
 	}
 
@@ -61,31 +65,19 @@
 	}
 
 	&.is-wc-nav-expanded {
-		#woocommerce-embedded-navigation {
+		.woocommerce-navigation {
 			width: $navigation-width;
 			height: 100%;
 		}
 	}
 
 	&.is-wc-nav-folded {
-		#wpcontent,
-		#wpfooter {
-			margin-left: 0;
-		}
-
-		.woocommerce-layout__header {
-			margin-left: $header-height;
-		}
-
-		#woocommerce-embedded-navigation {
+		.woocommerce-navigation {
 			width: $header-height;
 			height: $header-height;
+			overflow: hidden;
 
 			.woocommerce-navigation-header {
-				&.is-scrolled {
-					box-shadow: $header-scroll-shadow;
-				}
-
 				> * {
 					display: none;
 				}
@@ -103,13 +95,36 @@
 		.woocommerce-transient-notices {
 			left: $gap;
 		}
+
+		#wpbody {
+			margin-left: 0;
+		}
 	}
 
-	.woocommerce-transient-notices {
-		left: $navigation-width + $gap;
+	.woocommerce-layout__header.is-embed-loading {
+		&::before {
+			content: '';
+			position: fixed;
+			width: $navigation-width;
+			height: 100%;
+			background: $gray-900;
 
-		@include breakpoint( '<782px' ) {
-			left: $gap;
+			@include breakpoint( '<960px' ) {
+				width: $header-height;
+				height: $header-height;
+			}
 		}
+
+		.woocommerce-layout__header-heading {
+			margin-left: $navigation-width;
+
+			@include breakpoint( '<960px' ) {
+				margin-left: $header-height;
+			}
+		}
+	}
+
+	#woocommerce-embedded-root.is-embed-loading {
+		margin-bottom: -$adminbar-height;
 	}
 }

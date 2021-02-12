@@ -1,7 +1,12 @@
 .woocommerce-embed-page {
+	#wpbody {
+		margin-top: $header-height;
+		padding-top: 0;
+	}
+
 	#wpbody .woocommerce-layout,
 	.woocommerce-layout__notice-list-hide + .wrap {
-		padding-top: $header-height + 10;
+		padding-top: 10px;
 	}
 
 	#wpcontent,
@@ -28,19 +33,6 @@
 		.wrap {
 			padding: 0;
 		}
-	}
-
-	#woocommerce-embedded-root.is-embed-loading + #wpbody .wrap {
-		padding-top: $header-height + 40;
-
-		@include breakpoint( '<782px' ) {
-			padding-top: 30px;
-		}
-	}
-
-	#screen-meta,
-	#screen-meta-links {
-		top: $header-height;
 	}
 
 	#screen-meta {
@@ -109,12 +101,6 @@
 
 		@include breakpoint( '600px-782px' ) {
 			margin-top: 32px;
-		}
-	}
-
-	.woocommerce-layout__activity-panel-mobile-toggle {
-		@include breakpoint( '>782px' ) {
-			display: none;
 		}
 	}
 

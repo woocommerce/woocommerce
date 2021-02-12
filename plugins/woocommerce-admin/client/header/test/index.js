@@ -19,6 +19,17 @@ jest.mock( '@woocommerce/data', () => ( {
 	} ),
 } ) );
 
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -28,6 +39,8 @@ import { render, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import { Header } from '../index.js';
+
+global.window.wcNavigation = {};
 
 const encodedBreadcrumb = [
 	[ 'admin.php?page=wc-settings', 'Settings' ],

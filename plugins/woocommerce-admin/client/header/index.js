@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useUserPreferences } from '@woocommerce/data';
@@ -16,6 +16,7 @@ import './style.scss';
 import ActivityPanel from './activity-panel';
 import { MobileAppBanner } from '../mobile-banner';
 import useIsScrolled from '../hooks/useIsScrolled';
+import Navigation from '../navigation';
 
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
@@ -23,12 +24,40 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const pageTitle = sections.slice( -1 )[ 0 ];
 	const isScrolled = useIsScrolled();
 	const { updateUserPreferences, ...userData } = useUserPreferences();
-
 	const isModalDismissed = userData.android_app_banner_dismissed === 'yes';
+	let debounceTimer = null;
 
 	const className = classnames( 'woocommerce-layout__header', {
 		'is-scrolled': isScrolled,
 	} );
+
+	useLayoutEffect( () => {
+		updateBodyMargin();
+		window.addEventListener( 'resize', updateBodyMargin );
+		return () => {
+			window.removeEventListener( 'resize', updateBodyMargin );
+			const wpBody = document.querySelector( '#wpbody' );
+
+			if ( ! wpBody ) {
+				return;
+			}
+
+			wpBody.style.marginTop = null;
+		};
+	}, [ isModalDismissed ] );
+
+	const updateBodyMargin = () => {
+		clearTimeout( debounceTimer );
+		debounceTimer = setTimeout( function () {
+			const wpBody = document.querySelector( '#wpbody' );
+
+			if ( ! wpBody ) {
+				return;
+			}
+
+			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
+		}, 200 );
+	};
 
 	useEffect( () => {
 		if ( ! isEmbedded ) {
@@ -72,23 +101,28 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				/>
 			) }
 
-			<Text
-				className="woocommerce-layout__header-heading"
-				as="h1"
-				variant="subtitle.small"
-			>
-				{ decodeEntities( pageTitle ) }
-			</Text>
-			{ window.wcAdminFeatures[ 'activity-panels' ] && (
-				<ActivityPanel
-					isEmbedded={ isEmbedded }
-					query={ query }
-					userPreferencesData={ {
-						...userData,
-						updateUserPreferences,
-					} }
-				/>
-			) }
+			<div className="woocommerce-layout__header-wrapper">
+				{ window.wcAdminFeatures.navigation && <Navigation /> }
+
+				<Text
+					className="woocommerce-layout__header-heading"
+					as="h1"
+					variant="subtitle.small"
+				>
+					{ decodeEntities( pageTitle ) }
+				</Text>
+
+				{ window.wcAdminFeatures[ 'activity-panels' ] && (
+					<ActivityPanel
+						isEmbedded={ isEmbedded }
+						query={ query }
+						userPreferencesData={ {
+							...userData,
+							updateUserPreferences,
+						} }
+					/>
+				) }
+			</div>
 		</div>
 	);
 };

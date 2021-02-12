@@ -2,19 +2,18 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	position: fixed;
-	right: 0;
-	top: 32px;
 	height: $header-height;
 
 	@include breakpoint( '<782px' ) {
-		position: relative;
+		position: absolute;
+		top: 100%;
 		background: $studio-white;
 		margin: 0;
 		padding: 0;
 		width: 100vw;
 		display: none;
 		flex: 1 100%;
+		right: 0;
 	}
 
 	@include breakpoint( '782px-960px' ) {
@@ -183,15 +182,13 @@
 	}
 }
 
-.woocommerce-layout__activity-panel-mobile-toggle {
+.woocommerce-layout__activity-panel-mobile-toggle.components-button {
 	margin-right: 10px;
 	max-width: 48px;
-	height: $header-height;
-	position: absolute;
-	right: 0;
-	bottom: 0;
+
 	@include breakpoint( '>782px' ) {
 		display: none;
+		height: 100%;
 	}
 }
 
@@ -294,8 +291,4 @@
 
 .woocommerce-layout__notice-list-hide {
 	display: none;
-}
-
-.has-woocommerce-navigation .woocommerce-layout__activity-panel {
-	top: 0;
 }

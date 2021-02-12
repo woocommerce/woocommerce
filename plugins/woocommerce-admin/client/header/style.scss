@@ -2,9 +2,8 @@
 	background: $studio-white;
 	box-sizing: border-box;
 	padding: 0;
-	min-height: $header-height;
 	position: fixed;
-	width: 100%;
+	width: calc(100% - 160px);
 	top: $adminbar-height;
 	z-index: 1001; /* on top of #wp-content-editor-tools */
 
@@ -12,9 +11,20 @@
 		box-shadow: $header-scroll-shadow;
 	}
 
+	.woocommerce-layout__header-wrapper {
+		display: flex;
+		align-items: center;
+		min-height: $header-height;
+	}
+
 	@include breakpoint( '<782px' ) {
 		flex-flow: row wrap;
 		top: $adminbar-height-mobile;
+		width: 100%;
+	}
+
+	@include breakpoint( '782px-960px' ) {
+		width: calc(100% - 36px);
 	}
 
 	.woocommerce-layout__header-breadcrumbs-wrapper {
@@ -30,7 +40,6 @@
 		padding: 0 0 0 $gutter-large;
 		flex: 1 auto;
 		height: $header-height;
-		line-height: $header-height;
 		background: $studio-white;
 		font-weight: 600;
 		font-size: 14px;
@@ -40,6 +49,8 @@
 
 .has-woocommerce-navigation .woocommerce-layout__header {
 	top: 0;
+	left: 0;
+	width: 100%;
 }
 
 .woocommerce-page {

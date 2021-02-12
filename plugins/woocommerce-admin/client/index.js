@@ -14,7 +14,6 @@ import {
 import './stylesheets/_index.scss';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
-import Navigation from './navigation';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -73,14 +72,6 @@ if ( appRoot ) {
 		</div>,
 		wpBody.insertBefore( noticeContainer, wrap )
 	);
-}
-
-const navigationRoot = document.getElementById(
-	'woocommerce-embedded-navigation'
-);
-
-if ( navigationRoot ) {
-	render( <Navigation />, navigationRoot );
 }
 
 // Render the CustomerEffortScoreTracksContainer only if

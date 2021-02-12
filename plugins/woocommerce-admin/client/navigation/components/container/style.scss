@@ -65,8 +65,6 @@
 	}
 
 	&.is-root {
-		padding-bottom: 100px;
-
 		.components-navigation__menu-secondary {
 			border-top: 1px solid $gray-700;
 			margin: 0 -#{$gap-smaller};
