@@ -24,9 +24,6 @@ class WC_Twenty_Twenty_One {
 		remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
 		remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
 
-		add_action( 'woocommerce_before_main_content', array( __CLASS__, 'output_content_wrapper' ), 10 );
-		add_action( 'woocommerce_after_main_content', array( __CLASS__, 'output_content_wrapper_end' ), 10 );
-
 		// This theme doesn't have a traditional sidebar.
 		remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
@@ -34,7 +31,7 @@ class WC_Twenty_Twenty_One {
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 
 		// Enqueue wp-admin compatibility styles.
-		add_action( 'admin_enqueue_scripts', array( __CLASS__ , 'enqueue_admin_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles' ) );
 
 		// Register theme features.
 		add_theme_support( 'wc-product-gallery-zoom' );
@@ -48,22 +45,6 @@ class WC_Twenty_Twenty_One {
 			)
 		);
 
-	}
-
-	/**
-	 * Open the Twenty Twenty One wrapper.
-	 */
-	public static function output_content_wrapper() {
-		echo '<section id="primary" class="content-area">';
-		echo '<main id="main" class="site-main">';
-	}
-
-	/**
-	 * Close the Twenty Twenty One wrapper.
-	 */
-	public static function output_content_wrapper_end() {
-		echo '</main>';
-		echo '</section>';
 	}
 
 	/**
