@@ -1,34 +1,30 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
+
 /**
  * Internal dependencies
  */
 const {
+	shopper,
 	merchant,
+	createSimpleProduct,
 	addShippingZoneAndMethod,
 	clearAndFillInput,
+	selectOptionInSelect2,
 } = require( '@woocommerce/e2e-utils' );
 
-/**
- * External dependencies
- */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
-
-// Shipping Zone Names
+const config = require( 'config' );
+const simpleProductName = config.get( 'products.simple.name' );
+const california = 'California, United States (US)';
+const sanFranciscoZIP = '94107';
 const shippingZoneNameUS = 'US with Flat rate';
 const shippingZoneNameCA = 'CA with Free shipping';
 const shippingZoneNameSF = 'SF with Local pickup';
-// Shipping Zone Locations
-const california = 'California, United States (US)';
-const sanFranciscoZIP = '94110';
 
 const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		beforeAll(async () => {
 			await merchant.login();
+			await createSimpleProduct();
 		});
 
 		it('add shipping zone for the US with Flat rate', async () => {
@@ -56,7 +52,35 @@ const runAddNewShippingZoneTest = () => {
 
 			// Save the shipping zone
 			await expect(page).toClick('button#submit');
+			await merchant.logout();
 		});
+
+		it('allows customer to pay for a Flat rate shipping method', async() => {
+			await shopper.login();
+
+			// Add product to cart as a shopper
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.goToCart();
+
+			// Set shipping country to United States (US)
+			await expect(page).toClick('a.shipping-calculator-button');
+			await expect(page).toClick('#select2-calc_shipping_state-container');
+			await selectOptionInSelect2('United States (US)');
+
+			// Set shipping state to New York
+			await expect(page).toClick('#select2-calc_shipping_state-container');
+			await selectOptionInSelect2('New York');
+			await expect(page).toClick('button[name="calc_shipping"]');
+		})
+
+		it('allows customer to benefit from a Free shipping if in CA', async () => {
+			//test
+		})
+
+		it('allows customer to benefit from a Free shipping if in SF', async () => {
+			//test
+		})
 	});
 };
 
