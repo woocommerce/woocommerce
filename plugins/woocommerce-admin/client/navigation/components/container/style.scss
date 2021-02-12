@@ -3,8 +3,8 @@
 	grid-template-rows: min-content 1fr;
 	height: 100%;
 
-	h2 {
-		color: inherit; // This should be handled at component level.
+	h2 > span {
+		width: 100%;
 	}
 
 	.components-navigation__menu {
