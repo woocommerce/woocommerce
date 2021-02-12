@@ -171,7 +171,7 @@ const webpackConfig = {
 			),
 			'@woocommerce/wc-admin-settings': path.resolve(
 				__dirname,
-				'client/settings/index.js'
+				'client/wc-admin-settings/index.js'
 			),
 		},
 	},

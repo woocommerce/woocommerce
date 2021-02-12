@@ -3,12 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import { lazy } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
-import { getSetting } from '../../settings';
 
 const manageStock = getSetting( 'manageStock', 'no' );
 const REPORTS_FILTER = 'woocommerce_admin_reports_list';

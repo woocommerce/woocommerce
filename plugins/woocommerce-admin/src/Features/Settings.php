@@ -50,8 +50,31 @@ class Settings {
 			return;
 		}
 
+		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
+	}
+
+	/**
+	 * Add the necessary data to initially load the WooCommerce Settings pages.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array Array of component settings.
+	 */
+	public static function add_component_settings( $settings ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
+		$setting_pages = \WC_Admin_Settings::get_settings_pages();
+		$pages         = array();
+		foreach ( $setting_pages as $setting_page ) {
+			$pages = $setting_page->add_settings_page( $pages );
+		}
+
+		$settings['settingsPages'] = $pages;
+
+		return $settings;
 	}
 
 	/**
