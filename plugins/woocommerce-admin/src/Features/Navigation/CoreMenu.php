@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 
@@ -44,6 +45,11 @@ class CoreMenu {
 	 * Add registered admin settings as menu items.
 	 */
 	public static function get_setting_items() {
+		// Let the Settings feature add pages to the navigation if enabled.
+		if ( Features::is_enabled( 'settings' ) ) {
+			return array();
+		}
+
 		// Calling this method adds pages to the below tabs filter on non-settings pages.
 		\WC_Admin_Settings::get_settings_pages();
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );

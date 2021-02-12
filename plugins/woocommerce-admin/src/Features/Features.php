@@ -60,8 +60,10 @@ class Features {
 		$features = [];
 
 		$navigation_class = self::get_feature_class( 'navigation' );
+		$settings_class = self::get_feature_class( 'settings' );
 		if ( $navigation_class ) {
 			$features['navigation'] = $navigation_class::TOGGLE_OPTION_NAME;
+			$features['settings'] = $settings_class::TOGGLE_OPTION_NAME;
 		}
 
 		return $features;
