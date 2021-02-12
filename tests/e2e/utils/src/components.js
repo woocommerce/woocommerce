@@ -431,7 +431,7 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  *
  * @param zoneName Shipping zone name.
  * @param zoneLocation Shiping zone location. Defaults to United States (US).
- * @param zoneMethod Shipping method type. Defaults to Flat rate method.
+ * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
 const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zoneMethod = 'flat_rate' ) => {
 	await merchant.openNewShipping();
@@ -447,6 +447,7 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 
 	// Add shipping zone method
 	await expect(page).toClick('button.button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await page.waitForSelector('woocommerce_flat_rate_cost');
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
