@@ -44,6 +44,13 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	protected $attribute = '';
 
 	/**
+	 * Cached taxonomies by attribute id.
+	 *
+	 * @var array
+	 */
+	protected $taxonomies_by_id = array();
+
+	/**
 	 * Register the routes for product attributes.
 	 */
 	public function register_routes() {
@@ -525,17 +532,22 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return string
 	 */
 	protected function get_taxonomy( $request ) {
-		if ( '' !== $this->attribute ) {
-			return $this->attribute;
+		$attribute_id = $request['id'];
+
+		if ( empty( $attribute_id ) ) {
+			return '';
 		}
 
-		if ( $request['id'] ) {
-			$name = wc_attribute_taxonomy_name_by_id( (int) $request['id'] );
-
-			$this->attribute = $name;
+		if ( isset( $this->taxonomies_by_id[ $attribute_id ] ) ) {
+			return $this->taxonomies_by_id[ $attribute_id ];
 		}
 
-		return $this->attribute;
+		$taxonomy = WC()->call_function( 'wc_attribute_taxonomy_name_by_id', (int) $request['id'] );
+		if ( ! empty( $taxonomy ) ) {
+			$this->taxonomies_by_id[ $attribute_id ] = $taxonomy;
+		}
+
+		return $taxonomy;
 	}
 
 	/**

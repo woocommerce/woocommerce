@@ -30,6 +30,13 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	protected $taxonomy = '';
 
 	/**
+	 * Cached taxonomies by attribute id.
+	 *
+	 * @var array
+	 */
+	protected $taxonomies_by_id = array();
+
+	/**
 	 * Register the routes for terms.
 	 */
 	public function register_routes() {
@@ -691,13 +698,6 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		if ( '' !== $this->taxonomy && taxonomy_exists( $this->taxonomy ) ) {
-			$taxonomy = get_taxonomy( $this->taxonomy );
-		} else {
-			$taxonomy               = new stdClass();
-			$taxonomy->hierarchical = true;
-		}
-
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
@@ -718,14 +718,12 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		if ( ! $taxonomy->hierarchical ) {
-			$params['offset'] = array(
-				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			);
-		}
+		$params['offset']     = array(
+			'description'       => __( 'Offset the result set by a specific number of items. Applies to hierarchical taxonomies only.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['order']      = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
@@ -759,14 +757,12 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'default'           => false,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		if ( $taxonomy->hierarchical ) {
-			$params['parent'] = array(
-				'description'       => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			);
-		}
+		$params['parent']     = array(
+			'description'       => __( 'Limit result set to resources assigned to a specific parent. Applies to hierarchical taxonomies only.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['product'] = array(
 			'description'       => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
 			'type'              => 'integer',
@@ -789,18 +785,22 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @return int|WP_Error
 	 */
 	protected function get_taxonomy( $request ) {
-		// Check if taxonomy is defined.
-		// Prevents check for attribute taxonomy more than one time for each query.
-		if ( '' !== $this->taxonomy ) {
+		$attribute_id = $request['attribute_id'];
+
+		if ( empty( $attribute_id ) ) {
 			return $this->taxonomy;
 		}
 
-		if ( ! empty( $request['attribute_id'] ) ) {
-			$taxonomy = wc_attribute_taxonomy_name_by_id( (int) $request['attribute_id'] );
-
-			$this->taxonomy = $taxonomy;
+		if ( isset( $this->taxonomies_by_id[ $attribute_id ] ) ) {
+			return $this->taxonomies_by_id[ $attribute_id ];
 		}
 
-		return $this->taxonomy;
+		$taxonomy = WC()->call_function( 'wc_attribute_taxonomy_name_by_id', (int) $request['attribute_id'] );
+		if ( ! empty( $taxonomy ) ) {
+			$this->taxonomy = $taxonomy;
+			$this->taxonomies_by_id[ $attribute_id ] = $taxonomy;
+		}
+
+		return $taxonomy;
 	}
 }
