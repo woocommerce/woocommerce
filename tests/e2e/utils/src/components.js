@@ -431,7 +431,7 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  *
  * @param zoneName Shipping zone name.
  * @param zoneLocation Shiping zone location. Defaults to United States (US).
- * @param zipCode TBD
+ * @param zipCode Shipping zone zip code. Defaults to empty one space.
  * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
 const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zipCode = ' ', zoneMethod = 'flat_rate' ) => {

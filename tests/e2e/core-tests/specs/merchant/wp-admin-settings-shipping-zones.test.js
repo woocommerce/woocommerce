@@ -28,12 +28,12 @@ const runAddNewShippingZoneTest = () => {
 		});
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
-			// Add a new shipping zone for the US with Flat Rate
+			// Add a new shipping zone for San Francisco 94107, CA, US with Local pickup
 			await addShippingZoneAndMethod(shippingZoneNameSF, california, sanFranciscoZIP, 'local_pickup');
 		});
 
 		it('add shipping zone for California with Free shipping', async () => {
-			// Add a new shipping zone for California with Free shipping
+			// Add a new shipping zone for CA, US with Free shipping
 			await addShippingZoneAndMethod(shippingZoneNameFL, california, ' ', 'free_shipping');
 		});
 
@@ -66,7 +66,7 @@ const runAddNewShippingZoneTest = () => {
 			await selectOptionInSelect2('New York');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
-			// Verify shipping method and costs
+			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$19.99'});
@@ -84,11 +84,11 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toClick('#select2-calc_shipping_state-container');
 			await selectOptionInSelect2('California');
 
-			// Set shipping postcode to 99000
+			// Set shipping postcode to 94000
 			await clearAndFillInput('#calc_shipping_postcode', '94000');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
-			// Verify shipping method and costs
+			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Free shipping'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
@@ -106,7 +106,7 @@ const runAddNewShippingZoneTest = () => {
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
-			// Verify shipping method and costs
+			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Local pickup'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
