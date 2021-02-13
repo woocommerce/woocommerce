@@ -68,7 +68,7 @@ const runAddNewShippingZoneTest = () => {
 
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
-			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
+			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'}, 2000);
 			await expect(page).toMatchElement('.order-total .amount', {text: '$19.99'});
 
 			await shopper.removeFromCart(simpleProductName);
@@ -91,7 +91,7 @@ const runAddNewShippingZoneTest = () => {
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Free shipping'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'}, 2000);
 			
 			await shopper.removeFromCart(simpleProductName);
 		})
@@ -108,7 +108,7 @@ const runAddNewShippingZoneTest = () => {
 
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
-			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Local pickup'});
+			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Local pickup'}, 2000);
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
 
 			await shopper.removeFromCart(simpleProductName);
