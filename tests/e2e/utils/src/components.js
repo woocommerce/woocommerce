@@ -450,6 +450,7 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	// Fill shipping zone postcode if needed otherwise just put empty space
 	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toFill('#zone_postcodes', zipCode);
+	await expect(page).toMatchElement('#zone_postcodes', zipCode);
 	await expect(page).toClick('button#submit');
 
 	// Add shipping zone method
