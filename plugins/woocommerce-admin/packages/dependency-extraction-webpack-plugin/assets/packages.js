@@ -16,5 +16,5 @@ module.exports = [
 	// wc-blocks packages
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-registry',
-	'@woocommerce/blocks-settings',
+	'@woocommerce/settings',
 ];
