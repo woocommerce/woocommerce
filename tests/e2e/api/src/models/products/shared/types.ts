@@ -21,6 +21,11 @@ export type ProductCommonUpdateParams = 'name' | 'slug' | 'created' | 'postStatu
 export type ProductCrossUpdateParams = 'crossSellIds';
 
 /**
+ * Upsells property.
+ */
+export type ProductUpSellUpdateParams = 'upSellIds';
+
+/**
  * Properties exclusive to the External product type.
  */
 export type ProductExternalTypeUpdateParams = 'buttonText' | 'externalUrl';

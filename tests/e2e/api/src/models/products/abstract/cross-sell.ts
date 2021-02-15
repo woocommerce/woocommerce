@@ -5,7 +5,7 @@ import { Model } from '../../model';
  */
 abstract class AbstractProductCrossSells extends Model {
 	/**
-	 * An array of the categories this product is in.
+	 * An array of cross sell product ids.
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */

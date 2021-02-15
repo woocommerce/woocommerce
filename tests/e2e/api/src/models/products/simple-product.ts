@@ -6,6 +6,7 @@ import {
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
+	IProductUpSells,
 	ProductSearchParams,
 } from './abstract';
 import {
@@ -15,6 +16,7 @@ import {
 	ProductSalesTaxUpdateParams,
 	ProductCrossUpdateParams,
 	ProductShippingUpdateParams,
+	ProductUpSellUpdateParams,
 	ProductDownload,
 	StockStatus,
 	BackorderStatus,
@@ -39,7 +41,8 @@ type SimpleProductUpdateParams = ProductDeliveryUpdateParams
 	& ProductCrossUpdateParams
 	& ProductInventoryUpdateParams
 	& ProductSalesTaxUpdateParams
-	& ProductShippingUpdateParams;
+	& ProductShippingUpdateParams
+	& ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
@@ -95,11 +98,17 @@ export class SimpleProduct extends AbstractProduct implements
 	IProductDelivery,
 	IProductInventory,
 	IProductSalesTax,
-	IProductShipping {
+	IProductShipping,
+	IProductUpSells {
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */
 	public readonly crossSellIds: Array<number> = [];
+
+	/**
+	 * @see ./abstracts/upsell.ts
+	 */
+	public readonly upSellIds: Array<number> = [];
 
 	/**
 	 * @see ./abstracts/delivery.ts

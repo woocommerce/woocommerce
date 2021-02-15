@@ -227,6 +227,13 @@ export abstract class AbstractProduct extends Model {
 	public readonly numRatings: number = -1;
 
 	/**
+	 * An array of IDs of related products.
+	 *
+	 * @type {ReadonlyArray.<number>}
+	 */
+	public readonly relatedIds: Array<number> = [];
+
+	/**
 	 * The extra metadata for the product.
 	 *
 	 * @type {ReadonlyArray.<MetaData>}

@@ -17,6 +17,7 @@ import {
 	createProductInventoryTransformation,
 	createProductSalesTaxTransformation,
 	createProductShippingTransformation,
+	createProductUpSellsTransformation,
 } from './shared';
 import {
 	restCreate,
@@ -50,12 +51,14 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	const inventory = createProductInventoryTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const shipping = createProductShippingTransformation();
+	const upsells = createProductUpSellsTransformation();
 	const transformations = [
 		...crossSells,
 		...delivery,
 		...inventory,
 		...salesTax,
 		...shipping,
+		...upsells,
 	];
 
 	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );

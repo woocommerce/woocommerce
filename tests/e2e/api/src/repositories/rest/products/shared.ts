@@ -17,6 +17,7 @@ import {
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
+	IProductUpSells,
 	MetaData,
 	ProductAttribute,
 	ProductDownload,
@@ -153,6 +154,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 				menuOrder: PropertyType.Integer,
 				permalink: PropertyType.String,
 				priceHtml: PropertyType.String,
+				relatedIds: PropertyType.Integer,
 			},
 		),
 		new KeyChangeTransformation< AbstractProduct >(
@@ -177,6 +179,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 				parentId: 'parent_id',
 				menuOrder: 'menu_order',
 				priceHtml: 'price_html',
+				relatedIds: 'related_ids',
 			},
 		),
 	);
@@ -194,6 +197,23 @@ export function createProductCrossSellsTransformation(): ModelTransformation[] {
 		new KeyChangeTransformation< IProductCrossSells >(
 			{
 				crossSellIds: 'cross_sell_ids',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+export function createProductUpSellsTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				upSellIds: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< IProductUpSells >(
+			{
+				upSellIds: 'upsell_ids',
 			},
 		),
 	];
