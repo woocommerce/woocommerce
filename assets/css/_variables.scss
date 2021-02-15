@@ -2,37 +2,37 @@
  * WooCommerce CSS Variables
  */
 
-$woocommerce:   	#a46497 !default;
-$green:         	#7ad03a !default;
-$red:           	#a00 !default;
-$orange:        	#ffba00 !default;
-$blue:          	#2ea2cc !default;
+$wc-brand:   	    #a46497 !default;
+$wc-green:         	#7ad03a !default;
+$wc-red:           	#a00 !default;
+$wc-orange:        	#ffba00 !default;
+$wc-blue:          	#2ea2cc !default;
 
-$primary:           #a46497 !default;                                  // Primary color for buttons (alt)
-$primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color bg
+$wc-primary:        #a46497 !default;                                     // Primary color for buttons (alt)
+$wc-primary-text:   desaturate(lighten($wc-primary, 50%), 18%) !default;    // Text on primary color bg
 
-$secondary:         desaturate(lighten($primary, 40%), 21%) !default;    // Secondary buttons
-$secondarytext:     desaturate(darken($secondary, 60%), 21%) !default;   // Text on secondary color bg
+$wc-secondary:      desaturate(lighten($wc-primary, 40%), 21%) !default;    // Secondary buttons
+$wc-secondary-text: desaturate(darken($wc-secondary, 60%), 21%) !default;   // Text on secondary color bg
 
-$highlight:         adjust-hue($primary, 150deg) !default;               // Prices, In stock labels, sales flash
-$highlightext:      desaturate(lighten($highlight, 50%), 18%) !default;  // Text on highlight color bg
+$wc-highlight:      adjust-hue($wc-primary, 150deg) !default;               // Prices, In stock labels, sales flash
+$wc-highligh-text:  desaturate(lighten($wc-highlight, 50%), 18%) !default;  // Text on highlight color bg
 
-$contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
-$subtext:           #767676 !default;                                  // small, breadcrumbs etc
+$wc-content-bg:     #fff !default;                                        // Content BG - Tabs (active state)
+$wc-subtext:        #767676 !default;                                     // small, breadcrumbs etc
 
 // export vars as CSS vars
 :root {
-	--woocommerce: $woocommerce;
-	--wc-green: $green;
-	--wc-red: $red;
-	--wc-orange: $orange;
-	--wc-blue: $blue;
-	--wc-primary: $primary;
-	--wc-primary-text: $primarytext;
-	--wc-secondary: $secondary;
-	--wc-secondary-text: $secondarytext;
-	--wc-highlight: $highlight;
-	--wc-highligh-text: $highlightext;
-	--wc-content-bg: $contentbg;
-	--wc-subtext: $subtext;
+	--wc-brand: $wc-brand;
+	--wc-green: $wc-green;
+	--wc-red: $wc-red;
+	--wc-orange: $wc-orange;
+	--wc-blue: $wc-blue;
+	--wc-primary: $wc-primary;
+	--wc-primary-text: $wc-primary-text;
+	--wc-secondary: $wc-secondary;
+	--wc-secondary-text: $wc-secondary-text;
+	--wc-highlight: $wc-highlight;
+	--wc-highligh-text: $wc-highligh-text;
+	--wc-content-bg: $wc-content-bg;
+	--wc-subtext: $wc-subtext;
 }
