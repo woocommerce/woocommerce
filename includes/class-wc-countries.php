@@ -708,7 +708,7 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'label'        => esc_attr( $address_2_label ),
+				'label'        => $address_2_label,
 				'label_class'  => array( 'screen-reader-text' ),
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
