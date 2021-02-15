@@ -24,6 +24,7 @@ jobs:
 
       - name: Add comment
         uses: actions/github-script@v3
+        if: "woocommerce" == {{ github.repository_owner }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

@@ -13,8 +13,7 @@
 - Merchant Product Search tests
 - Shopper Single Product tests
 - Shopper Checkout Apply Coupon
-
-
+- Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
 
 ## Fixed

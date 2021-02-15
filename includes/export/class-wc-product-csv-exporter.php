@@ -55,7 +55,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->set_product_types_to_export( array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ) );
+		$this->set_product_types_to_export( array_keys( WC_Admin_Exporters::get_product_types() ) );
 	}
 
 	/**

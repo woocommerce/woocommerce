@@ -57,6 +57,7 @@ The functions to access the core tests are:
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
   - `runProductEditDetailsTest` - Merchant can edit an existing product
   - `runProductSearchTest` - Merchant can search for a product and view it
+  - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
 
 ### Shopper
 
