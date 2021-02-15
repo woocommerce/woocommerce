@@ -38,6 +38,27 @@ export abstract class AbstractProduct extends Model {
 	public readonly permalink: string = '';
 
 	/**
+	 * The Id of the product.
+	 *
+	 * @type {number}
+	 */
+	public readonly id: number = 0;
+
+	/**
+	 * The parent Id of the product.
+	 *
+	 * @type {number}
+	 */
+	public readonly parentId: number = 0;
+
+	/**
+	 * The menu order assigned to the product.
+	 *
+	 * @type {number}
+	 */
+	public readonly menuOrder: number = 0;
+
+	/**
 	 * The GMT datetime when the product was created.
 	 *
 	 * @type {Date}
@@ -136,6 +157,13 @@ export abstract class AbstractProduct extends Model {
 	public readonly price: string = '';
 
 	/**
+	 * The rendered HTML for the current price of the product.
+	 *
+	 * @type {string}
+	 */
+	public readonly priceHtml: string = '';
+
+	/**
 	 * The regular price of the product when not discounted.
 	 *
 	 * @type {string}
@@ -169,6 +197,13 @@ export abstract class AbstractProduct extends Model {
 	 * @type {Date|null}
 	 */
 	public readonly saleEnd: Date | null = null;
+
+	/**
+	 * The count of sales of the product
+	 *
+	 * @type {number}
+	 */
+	public readonly totalSales: number = 0;
 
 	/**
 	 * Indicates whether or not a product allows reviews.

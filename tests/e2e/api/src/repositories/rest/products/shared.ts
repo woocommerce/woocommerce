@@ -148,6 +148,11 @@ export function createProductTransformer< T extends AbstractProduct >(
 				allowReviews: PropertyType.Boolean,
 				averageRating: PropertyType.Integer,
 				numRatings: PropertyType.Integer,
+				totalSales: PropertyType.Integer,
+				parentId: PropertyType.Integer,
+				menuOrder: PropertyType.Integer,
+				permalink: PropertyType.String,
+				priceHtml: PropertyType.String,
 			},
 		),
 		new KeyChangeTransformation< AbstractProduct >(
@@ -168,6 +173,10 @@ export function createProductTransformer< T extends AbstractProduct >(
 				averageRating: 'average_rating',
 				numRatings: 'rating_count',
 				metaData: 'meta_data',
+				totalSales: 'total_sales',
+				parentId: 'parent_id',
+				menuOrder: 'menu_order',
+				priceHtml: 'price_html',
 			},
 		),
 	);
@@ -303,7 +312,7 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 				isShippingTaxable: PropertyType.Boolean,
 				shippingClass: PropertyType.String,
 				shippingClassId: PropertyType.Integer,
-				weight: PropertyType.Float,
+				weight: PropertyType.String,
 			},
 		),
 		new KeyChangeTransformation< IProductShipping >(
