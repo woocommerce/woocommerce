@@ -180,6 +180,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 				menuOrder: 'menu_order',
 				priceHtml: 'price_html',
 				relatedIds: 'related_ids',
+				links: '_links',
 			},
 		),
 	);
