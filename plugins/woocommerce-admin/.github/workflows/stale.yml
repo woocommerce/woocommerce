@@ -19,5 +19,5 @@ jobs:
                   close-pr-message: 'This PR was automatically closed due to being stale.'
                   stale-pr-label: 'status: stale'
                   stale-issue-label: 'status: stale'
-                  exempt-issue-labels: 'cooldown period,priority: high,priority: critical'
+                  exempt-issue-labels: 'cooldown period,priority: high,priority: critical,feature: inbox,feature: components,feature: analytics,feature: marketing,feature: onboarding,feature: navigation,feature: wcpay,feature: settings,feature: home screen,feature: customer effort score,feature: setup checklist,feature: activity panel,feature: rest api'
                   ascending: true
