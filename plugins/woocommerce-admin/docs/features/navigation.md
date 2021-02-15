@@ -28,9 +28,8 @@ Clicking on a category will not navigate to a new page, but instead open the chi
 ```php
 \Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_category(
     array(
-        'id'         => 'example-category',
-        'title'      => 'Example Category',
-        'capability' => 'view_woocommerce_reports',
+        'id'     => 'example-category',
+        'title'  => 'Example Category',
     )
 );
 ```
@@ -40,10 +39,9 @@ Categories can also contain more categories by specifying the `parent` property 
 ```php
 \Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_category(
     array(
-        'id'         => 'example-nested-category',
-        'parent'     => 'example-category',
-        'title'      => 'Example Nested Category',
-        'capability' => 'view_woocommerce_reports',
+        'id'     => 'example-nested-category',
+        'parent' => 'example-category',
+        'title'  => 'Example Nested Category',
     )
 );
 ```

@@ -147,13 +147,12 @@ class Menu {
 	 *
 	 * @param array $args Array containing the necessary arguments.
 	 *    $args = array(
-	 *      'id'         => (string) The unique ID of the menu item. Required.
-	 *      'title'      => (string) Title of the menu item. Required.
-	 *      'capability' => (string) Capability to view this menu item.
-	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'order'      => (int) Menu item order.
-	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'menuId'     => (string) The ID of the menu to add the category to.
+	 *      'id'      => (string) The unique ID of the menu item. Required.
+	 *      'title'   => (string) Title of the menu item. Required.
+	 *      'url'     => (string) URL or callback to be used. Required.
+	 *      'order'   => (int) Menu item order.
+	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
+	 *      'menuId'  => (string) The ID of the menu to add the category to.
 	 *    ).
 	 */
 	private static function add_category( $args ) {
@@ -164,7 +163,6 @@ class Menu {
 		$defaults           = array(
 			'id'         => '',
 			'title'      => '',
-			'capability' => 'manage_woocommerce',
 			'order'      => 100,
 			'migrate'    => true,
 			'menuId'     => 'primary',
@@ -173,6 +171,7 @@ class Menu {
 		$menu_item          = wp_parse_args( $args, $defaults );
 		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
 		unset( $menu_item['url'] );
+		unset( $menu_item['capability'] );
 
 		if ( ! isset( $menu_item['parent'] ) ) {
 			$menu_item['parent']          = 'woocommerce';
@@ -269,25 +268,24 @@ class Menu {
 	 *
 	 * @param array $args Array containing the necessary arguments.
 	 *    $args = array(
-	 *      'id'         => (string) The unique ID of the menu item. Required.
-	 *      'title'      => (string) Title of the menu item. Required.
-	 *      'capability' => (string) Capability to view this menu item.
-	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'      => (int) Menu item order.
+	 *      'id'      => (string) The unique ID of the menu item. Required.
+	 *      'title'   => (string) Title of the menu item. Required.
+	 *      'url'     => (string) URL or callback to be used. Required.
+	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
+	 *      'order'   => (int) Menu item order.
 	 *    ).
 	 */
 	public static function add_plugin_category( $args ) {
-		if ( ! isset( $args['parent'] ) ) {
-			unset( $args['order'] );
-		}
-
 		$category_args = array_merge(
 			$args,
 			array(
 				'menuId' => 'plugins',
 			)
 		);
+
+		if ( ! isset( $category_args['parent'] ) ) {
+			unset( $category_args['order'] );
+		}
 
 		$menu_id = self::get_item_menu_id( $category_args );
 		if ( 'plugins' !== $menu_id ) {
@@ -711,7 +709,7 @@ class Menu {
 	 */
 	public static function get_prepared_menu_item_data( $menu_items ) {
 		foreach ( $menu_items as $index => $menu_item ) {
-			if ( $menu_item[ 'capability' ] && ! current_user_can( $menu_item[ 'capability' ] ) ) {
+			if ( isset( $menu_item[ 'capability' ] ) && ! current_user_can( $menu_item[ 'capability' ] ) ) {
 				unset( $menu_items[ $index ] );
 			}
 		}
