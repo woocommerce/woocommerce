@@ -177,6 +177,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Terms and Policy checkbox wording settings not shown in customizer. #28735
 * Fix - Admin notices sometimes were persisting even after dismissing. #28500
 * Fix - Calculate discount based on order location in the admin view. #26983
+* Fix - SASS variables not being compile correctly due to recent SASS version. #29120
 * Dev - Updated admin bar icons to use SVG and Dashicons instead of custom font. #29094
 * Dev - Admin menu modification has been moved from admin_head hooks to admin_menu hooks. #29088
 * Dev - status report generation time to the Status Report. #28980
@@ -187,6 +188,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - jQuery 3 deprecated functions update. #28753
 * Dev - Add Woo Version as global prop in track events. #28627
 * Dev - Added orders count by payment method to Tracker data and replaced direct DB calls with CRUD. #28584
+* Dev - WC_Tax::get_tax_rate_classes() is now public. #27671
 * Tweak - Updated WooCommerce logo color. #29054
 * Tweak - Correctly aligns content in the checkout with Twenty Twenty-One. #28951
 * Tweak - Use assigned variable for $post_thumbnail_id instead of calling function more than once. #28919
