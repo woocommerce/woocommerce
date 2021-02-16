@@ -156,6 +156,6 @@ class WC_Tests_Product_Download extends WC_Unit_Test_Case {
 		$download = new WC_Product_Download();
 
 		$download->set_file( '////////test/path' );
-		$this->assertEquals( '//test/path', $download->get_file() );
+		$this->assertEquals( '/test/path', $download->get_file() );
 	}
 }
