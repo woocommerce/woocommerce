@@ -22,10 +22,9 @@ jobs:
           path: ${{ steps.build.outputs.zip_path }}
           retention-days: 7
 
-
       - name: Add comment
         uses: actions/github-script@v3
-        if: "woocommerce" == {{ github.repository_owner }}
+        if: github.repository_owner == 'woocommerce'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
