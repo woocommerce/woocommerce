@@ -97,6 +97,7 @@ describe( 'navigation reducer', () => {
 	it( 'should add a favorite', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				favorites: [ 'favorite1', 'favorite2' ],
 			},
 			{
@@ -115,6 +116,7 @@ describe( 'navigation reducer', () => {
 	it( 'should remove a favorite', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				favorites: [ 'favorite1', 'favorite2' ],
 			},
 			{

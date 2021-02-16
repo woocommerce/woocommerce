@@ -15,9 +15,12 @@ import './style.scss';
 export const CategoryTitle = ( { category } ) => {
 	const { id, title } = category;
 
-	const { favorites } = useSelect( ( select ) => {
+	const { favorites, isResolving } = useSelect( ( select ) => {
 		return {
 			favorites: select( NAVIGATION_STORE_NAME ).getFavorites(),
+			isResolving: select( NAVIGATION_STORE_NAME ).isResolving(
+				'getFavorites'
+			),
 		};
 	} );
 
@@ -25,7 +28,7 @@ export const CategoryTitle = ( { category } ) => {
 		NAVIGATION_STORE_NAME
 	);
 
-	const isFavorited = favorites.includes( id );
+	const isFavorited = ( favorites || [] ).includes( id );
 	const className = 'woocommerce-navigation-category-title';
 
 	const toggleFavorite = () => {
@@ -37,27 +40,29 @@ export const CategoryTitle = ( { category } ) => {
 		} );
 	};
 
-	if ( category.menuId === 'plugins' ) {
+	if ( [ 'plugins', 'favorites' ].includes( category.menuId ) ) {
 		return (
 			<span className={ className }>
 				<span className={ `${ className }__text` }>{ title }</span>
-				<Button
-					className={ `${ className }__favorite-button` }
-					isTertiary
-					onClick={ toggleFavorite }
-					icon={ isFavorited ? 'star-filled' : 'star-empty' }
-					aria-label={
-						isFavorited
-							? __(
-									'Add this item to your favorites.',
-									'woocommerce-admin'
-							  )
-							: __(
-									'Remove this item from your favorites.',
-									'woocommerce-admin'
-							  )
-					}
-				/>
+				{ ! isResolving && (
+					<Button
+						className={ `${ className }__favorite-button` }
+						isTertiary
+						onClick={ toggleFavorite }
+						icon={ isFavorited ? 'star-filled' : 'star-empty' }
+						aria-label={
+							isFavorited
+								? __(
+										'Add this item to your favorites.',
+										'woocommerce-admin'
+								  )
+								: __(
+										'Remove this item from your favorites.',
+										'woocommerce-admin'
+								  )
+						}
+					/>
+				) }
 			</span>
 		);
 	}

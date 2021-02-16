@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
+use Automattic\WooCommerce\Admin\Features\Navigation\Favorites;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
 
@@ -256,8 +257,16 @@ class Menu {
 	 * @return string
 	 */
 	public static function get_item_menu_id( $item ) {
+		$favorites = Favorites::get_all();
+		if ( ! empty( $favorites ) && in_array( $item['id'], $favorites, true ) ) {
+			return 'favorites';
+		}
+
 		if ( isset( $item['parent'] ) && isset( self::$menu_items[ $item['parent'] ] ) ) {
-			return self::$menu_items[ $item['parent'] ]['menuId'];
+			$menu_id = self::$menu_items[ $item['parent'] ]['menuId'];
+			return 'favorites' === $menu_id
+				? 'plugins'
+				: $menu_id;
 		}
 
 		return $item['menuId'];
@@ -288,9 +297,11 @@ class Menu {
 		}
 
 		$menu_id = self::get_item_menu_id( $category_args );
-		if ( 'plugins' !== $menu_id ) {
+		if ( ! in_array( $menu_id, array( 'plugins', 'favorites' ), true ) ) {
 			return;
 		}
+
+		$category_args['menuId'] = $menu_id;
 
 		self::add_category( $category_args );
 	}
@@ -719,6 +730,7 @@ class Menu {
 			'primary'   => 0,
 			'secondary' => 1,
 			'plugins'   => 2,
+			'favorites' => 3,
 		);
 		$menu      = array_map( function( $item ) use( $menuOrder ) { return $menuOrder[ $item['menuId'] ]; }, $menu_items );
 		$order     = array_column( $menu_items, 'order' );

@@ -66,7 +66,7 @@ const Container = ( { menuItems } ) => {
 
 	useEffect( () => {
 		const initialMatchedItem = getMatchingItem( menuItems );
-		if ( initialMatchedItem ) {
+		if ( initialMatchedItem && activeItem !== initialMatchedItem ) {
 			setActiveItem( initialMatchedItem );
 			setActiveLevel( initialMatchedItem.parent );
 		}
@@ -94,7 +94,9 @@ const Container = ( { menuItems } ) => {
 			if (
 				item.parent !== 'woocommerce' &&
 				categoriesMap[ item.parent ] &&
-				categoriesMap[ item.parent ].menuId !== item.menuId
+				categoriesMap[ item.parent ].menuId !== item.menuId &&
+				// Allow favorites to exist under any menu.
+				categoriesMap[ item.parent ].menuId !== 'favorites'
 			) {
 				return acc;
 			}
@@ -147,11 +149,19 @@ const Container = ( { menuItems } ) => {
 					{ categories.map( ( category ) => {
 						const {
 							primary: primaryItems,
+							favorites: favoriteItems,
 							secondary: secondaryItems,
 							plugins: pluginItems,
 						} = categorizedItems[ category.id ] || {};
+
+						const primaryAndFavoriteItems = [
+							...( primaryItems || [] ),
+							...( favoriteItems || [] ),
+						];
+
 						return [
-							( !! primaryItems || !! pluginItems ) && (
+							( !! primaryAndFavoriteItems ||
+								!! pluginItems ) && (
 								<NavigationMenu
 									key={ category.id }
 									title={
@@ -178,14 +188,16 @@ const Container = ( { menuItems } ) => {
 													)
 									}
 								>
-									{ !! primaryItems && (
+									{ !! primaryAndFavoriteItems && (
 										<NavigationGroup>
-											{ primaryItems.map( ( item ) => (
-												<Item
-													key={ item.id }
-													item={ item }
-												/>
-											) ) }
+											{ primaryAndFavoriteItems.map(
+												( item ) => (
+													<Item
+														key={ item.id }
+														item={ item }
+													/>
+												)
+											) }
 										</NavigationGroup>
 									) }
 									{ !! pluginItems && (

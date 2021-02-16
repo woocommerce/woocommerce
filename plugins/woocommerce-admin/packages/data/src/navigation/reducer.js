@@ -87,6 +87,15 @@ const reducer = (
 			state = {
 				...state,
 				favorites: newFavorites,
+				menuItems: state.menuItems.map( ( item ) => {
+					if ( item.id === favorite ) {
+						return {
+							...item,
+							menuId: 'favorites',
+						};
+					}
+					return item;
+				} ),
 				requesting: {
 					...state.requesting,
 					addFavorite: false,
@@ -120,6 +129,15 @@ const reducer = (
 			state = {
 				...state,
 				favorites: filteredFavorites,
+				menuItems: state.menuItems.map( ( item ) => {
+					if ( item.id === favorite ) {
+						return {
+							...item,
+							menuId: 'plugins',
+						};
+					}
+					return item;
+				} ),
 				requesting: {
 					...state.requesting,
 					removeFavorite: false,
