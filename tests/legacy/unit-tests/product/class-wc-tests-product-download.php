@@ -51,6 +51,7 @@ class WC_Tests_Product_Download extends WC_Unit_Test_Case {
 		$this->assertEquals( 'absolute', $download->get_type_of_file_path( site_url( '/wp-content/uploads/test.jpg' ) ) );
 		$this->assertEquals( 'relative', $download->get_type_of_file_path( trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
 		$this->assertEquals( 'relative', $download->get_type_of_file_path( '//' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
+		$this->assertEquals( 'relative', $download->get_type_of_file_path( '/////' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
 		$this->assertEquals( 'shortcode', $download->get_type_of_file_path( '[s3 bucket ="" file=""]' ) );
 	}
 

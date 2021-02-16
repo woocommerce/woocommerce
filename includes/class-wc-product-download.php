@@ -52,11 +52,13 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_type_of_file_path( $file_path = '' ) {
 		$file_path = $file_path ? $file_path : $this->get_file();
+		$parsed_url = parse_url( $file_path );
 		if (
-			0 === strpos( $file_path, 'http' ) ||
-			(
-				0 === strpos( $file_path, '//' ) &&
-				substr( $file_path, 0, 3 ) !== '///' // This will prevent local file paths to be treated as "absolute".
+			$parsed_url &&
+			isset( $parsed_url['host'] ) && // Absolute url means that it has a host.
+			( // Theoretically we could permit any scheme (like ftp as well), but that has not been the case before. So we allow none or http(s).
+				! isset( $parsed_url['scheme'] ) ||
+				in_array( $parsed_url['scheme'], array( 'http', 'https' ) )
 			)
 		) {
 			return 'absolute';
