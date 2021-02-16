@@ -72,14 +72,18 @@ class RestApiUtil {
 			$request['line_items'] = self::adjust_line_items_for_create_refund_request( $request['line_items'] );
 		}
 
-		self::maybe_calculate_refund_amount_from_line_items( $request );
+		if ( ! isset( $request['amount'] ) ) {
+			$amount = self::calculate_refund_amount_from_line_items( $request );
+			if ( null !== $amount ) {
+				$request['amount'] = strval( $amount );
+			}
+		}
 	}
 
 	/**
-	 * Calculate and set the "amount" parameter in the request based on the amounts found in line items.
-	 * This will ONLY happen if ALL of the following is true:
+	 * Calculate the "amount" parameter for the request based on the amounts found in line items.
+	 * This will ONLY be possible if ALL of the following is true:
 	 *
-	 * - The request doesn't have an "amount" parameter already.
 	 * - "line_items" in the request is a non-empty array.
 	 * - All line items have a "refund_total" field with a numeric value.
 	 * - All values inside "refund_tax" in all line items are a numeric value.
@@ -87,23 +91,20 @@ class RestApiUtil {
 	 * The request is assumed to be in internal format already.
 	 *
 	 * @param \WP_REST_Request $request The request to maybe calculate the total amount for.
+	 * @return number|null The calculated amount, or null if it can't be calculated.
 	 */
-	private static function maybe_calculate_refund_amount_from_line_items( &$request ) {
-		if ( isset( $request['amount'] ) ) {
-			return;
-		}
-
+	private static function calculate_refund_amount_from_line_items( $request ) {
 		$line_items = $request['line_items'];
 
 		if ( ! is_array( $line_items ) || empty( $line_items ) ) {
-			return;
+			return null;
 		}
 
 		$amount = 0;
 
 		foreach ( $line_items as $item ) {
 			if ( ! isset( $item['refund_total'] ) || ! is_numeric( $item['refund_total'] ) ) {
-				return;
+				return null;
 			}
 
 			$amount += $item['refund_total'];
@@ -114,13 +115,13 @@ class RestApiUtil {
 
 			foreach ( $item['refund_tax'] as $tax ) {
 				if ( ! is_numeric( $tax ) ) {
-					return;
+					return null;
 				}
 				$amount += $tax;
 			}
 		}
 
-		$request['amount'] = strval( $amount );
+		return $amount;
 	}
 
 	/**
