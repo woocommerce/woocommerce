@@ -43,6 +43,14 @@
 	box-sizing: border-box;
 }
 
+#wpbody {
+	display: inline-block;
+	width: 100%;
+	box-sizing: border-box;
+	padding-top: 0;
+	margin-top: $header-height;
+}
+
 #wpfooter {
 	display: none;
 }

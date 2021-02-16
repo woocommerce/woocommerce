@@ -61,7 +61,7 @@ body.is-wc-nav-folded {
 	}
 
 	#wpbody {
-		margin-left: 0;
+		padding-left: 0;
 	}
 }
 
@@ -94,10 +94,10 @@ body.is-wc-nav-folded {
 	}
 
 	#wpbody {
-		margin-left: $navigation-width;
+		padding-left: $navigation-width;
 
 		@media ( max-width: 960px ) {
-			margin-left: 0;
+			padding-left: 0;
 		}
 	}
 
@@ -112,14 +112,6 @@ body.is-wc-nav-folded {
 			@include breakpoint( '<960px' ) {
 				width: $header-height;
 				height: $header-height;
-			}
-		}
-
-		.woocommerce-layout__header-heading {
-			margin-left: $navigation-width;
-
-			@include breakpoint( '<960px' ) {
-				margin-left: $header-height;
 			}
 		}
 	}
