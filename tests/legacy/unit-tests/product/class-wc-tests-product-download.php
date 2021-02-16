@@ -145,4 +145,17 @@ class WC_Tests_Product_Download extends WC_Unit_Test_Case {
 		$download->set_file( '//' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/woocommerce.php' );
 		$this->assertEquals( false, $download->is_allowed_filetype() );
 	}
+
+	/**
+	 * Tests if we are trimming prepending slashes which can confuse system and change the file type to a filesystem path.
+	 * @see https://github.com/woocommerce/woocommerce/pull/28699
+	 *
+	 * @since 5.0.1
+	 */
+	public function test_trim_extra_prepending_slashes() {
+		$download = new WC_Product_Download();
+
+		$download->set_file( '////////test/path' );
+		$this->assertEquals( '//test/path', $download->get_file() );
+	}
 }
