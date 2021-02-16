@@ -133,7 +133,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 					?>
 					</a>
-					</li>
+				</li>
 					<?php
 				}
 
@@ -313,7 +313,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			</li>
 			<?php
 		}
-
 
 		/**
 		 * Recent reviews widget.
