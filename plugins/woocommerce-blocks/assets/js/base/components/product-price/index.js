@@ -126,7 +126,6 @@ const ProductPrice = ( {
 	}
 
 	const isDiscounted = regularPrice && price !== regularPrice;
-
 	let priceComponent = (
 		<span
 			className={ classNames(
@@ -148,9 +147,7 @@ const ProductPrice = ( {
 				regularPriceStyle={ regularPriceStyle }
 			/>
 		);
-	}
-
-	if ( minPrice !== null && maxPrice !== null ) {
+	} else if ( minPrice !== null && maxPrice !== null ) {
 		priceComponent = (
 			<PriceRange
 				currency={ currency }
@@ -160,9 +157,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	}
-
-	if ( price !== null ) {
+	} else if ( price !== null ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ classNames(
