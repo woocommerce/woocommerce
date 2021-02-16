@@ -16,7 +16,7 @@ class Screen {
 	/**
 	 * Class instance.
 	 *
-	 * @var Menu instance
+	 * @var Screen instance
 	 */
 	protected static $instance = null;
 
