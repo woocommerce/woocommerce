@@ -10,10 +10,46 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { PayPal, PAYPAL_PLUGIN } from '../tasks/payments/paypal';
 import { getPaymentMethods } from '../tasks/payments/methods';
+import { setMethodEnabledOption } from '../../task-list/tasks/payments';
 
 jest.mock( '@wordpress/api-fetch' );
 
 describe( 'TaskList > Payments', () => {
+	describe( 'Payments', () => {
+		const optionName = 'woocommerce_mollie_payments_settings';
+
+		it( 'does not update an option if the value is the same as the current one', async () => {
+			const mockProps = {
+				clearTaskStatusCache: jest.fn(),
+				updateOptions: jest.fn(),
+				options: {
+					woocommerce_klarna_payments_settings: false,
+					woocommerce_mollie_payments_settings: { enabled: 'yes' },
+				},
+			};
+
+			await setMethodEnabledOption( optionName, 'yes', mockProps );
+			expect( mockProps.updateOptions ).not.toHaveBeenCalled();
+		} );
+
+		it( 'does update an option if the value is different to the current one', async () => {
+			const mockProps = {
+				clearTaskStatusCache: jest.fn(),
+				updateOptions: jest.fn(),
+				options: {
+					woocommerce_klarna_payments_settings: false,
+					woocommerce_mollie_payments_settings: { enabled: 'no' },
+				},
+			};
+
+			await setMethodEnabledOption( optionName, 'yes', mockProps );
+
+			expect( mockProps.updateOptions ).toHaveBeenCalledWith( {
+				woocommerce_mollie_payments_settings: { enabled: 'yes' },
+			} );
+		} );
+	} );
+
 	describe( 'Methods', () => {
 		const params = {
 			activePlugins: [],

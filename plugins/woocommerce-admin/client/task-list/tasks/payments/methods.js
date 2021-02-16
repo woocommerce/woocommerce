@@ -20,6 +20,7 @@ import CodLogo from './images/cod';
 import WCPayLogo from './images/wcpay';
 import RazorpayLogo from './images/razorpay';
 import { MollieLogo } from './images/mollie';
+import { PayUIndiaLogo } from './images/payu-india';
 import Stripe from './stripe';
 import Square from './square';
 import WCPay from './wcpay';
@@ -29,6 +30,7 @@ import PayFast from './payfast';
 import EWay from './eway';
 import Razorpay from './razorpay';
 import { Mollie } from './mollie';
+import { PayUIndia } from './payu-india';
 import WCPayUsageModal from './wcpay-usage-modal';
 import { createNoticesFromResponse } from '../../../lib/notices';
 
@@ -373,6 +375,25 @@ export function getPaymentMethods( {
 				options.woocommerce_razorpay_settings &&
 				options.woocommerce_razorpay_settings.enabled === 'yes',
 			optionName: 'woocommerce_razorpay_settings',
+		},
+		{
+			key: 'payubiz',
+			title: __( 'PayU for WooCommerce', 'woocommerce-admin' ),
+			content: (
+				<>
+					{ __(
+						'Enable PayU’s exclusive plugin for WooCommerce to start accepting payments in 100+ payment methods available in India including credit cards, debit cards, UPI, & more!',
+						'woocommerce-admin'
+					) }
+				</>
+			),
+			before: <PayUIndiaLogo />,
+			visible: countryCode === 'IN' && ! hasCbdIndustry,
+			plugins: [ 'payu-india' ],
+			container: <PayUIndia />,
+			isConfigured: activePlugins.includes( 'payu-india' ),
+			isEnabled: enabledPaymentGateways.includes( 'payubiz' ),
+			optionName: 'woocommerce_payubiz_settings',
 		},
 		{
 			key: 'cod',
