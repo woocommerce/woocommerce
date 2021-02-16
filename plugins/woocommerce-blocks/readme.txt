@@ -105,11 +105,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Ensure special characters are displayed properly in the Cart sidebar. ([3721](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3721))
 - Fix a bug where the total price of items did not include tax in the cart and checkout blocks. ([3851](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3851))
 
-#### Documentation
-
-- Improvements to experimental interfaces documentation. ([3785](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3785))
-
-
 = 4.4.0 - 2021-02-02 =
 
 #### Enhancements
