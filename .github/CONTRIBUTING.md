@@ -42,6 +42,7 @@ If you have questions about the process to contribute code or want to discuss de
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
 
 If you are contributing code to the (Javascript-driven) WooCommerce Admin project or to Gutenberg blocks, note that these are developed in external packages.
+
 - [WooCommerce Admin](https://github.com/woocommerce/woocommerce-admin)
 - [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
 
