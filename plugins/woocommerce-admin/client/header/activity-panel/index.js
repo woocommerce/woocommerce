@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import clickOutside from 'react-click-outside';
-import { Component, lazy, Suspense } from '@wordpress/element';
+import { Component, lazy } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -12,7 +11,7 @@ import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { H, Section, Spinner } from '@woocommerce/components';
+import { H, Section } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -28,6 +27,7 @@ import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
 import { HighlightTooltip } from './highlight-tooltip';
+import { Panel } from './panel';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -133,6 +133,7 @@ export class ActivityPanel extends Component {
 			isEmbedded,
 			setupTaskListComplete,
 			setupTaskListHidden,
+			updateOptions,
 		} = this.props;
 
 		const isPerformingSetupTask = this.isPerformingSetupTask();
@@ -167,6 +168,27 @@ export class ActivityPanel extends Component {
 					name: 'setup',
 					title: __( 'Store Setup', 'woocommerce-admin' ),
 					icon: <SetupProgress />,
+					onClick: () => {
+						const currentLocation = window.location.href;
+						const homescreenLocation = getAdminLink(
+							'admin.php?page=wc-admin'
+						);
+
+						// Don't navigate if we're already on the homescreen, this will cause an infinite loop
+						if ( currentLocation !== homescreenLocation ) {
+							// Ensure that if the user is trying to get to the task list they can see it even if
+							// it was dismissed.
+							if ( setupTaskListHidden === 'no' ) {
+								this.redirectToHomeScreen();
+							} else {
+								updateOptions( {
+									woocommerce_task_list_hidden: 'no',
+								} ).then( this.redirectToHomeScreen );
+							}
+						}
+
+						return null;
+					},
 			  }
 			: null;
 
@@ -199,77 +221,6 @@ export class ActivityPanel extends Component {
 			default:
 				return null;
 		}
-	}
-
-	renderPanel() {
-		const { updateOptions, setupTaskListHidden } = this.props;
-		const { isPanelOpen, currentTab, isPanelSwitching } = this.state;
-		const tab = find( this.getTabs(), { name: currentTab } );
-
-		if ( ! tab ) {
-			return (
-				<div className="woocommerce-layout__activity-panel-wrapper" />
-			);
-		}
-
-		const clearPanel = () => {
-			this.clearPanel();
-		};
-
-		if ( currentTab === 'display-options' ) {
-			return null;
-		}
-
-		if ( currentTab === 'setup' ) {
-			const currentLocation = window.location.href;
-			const homescreenLocation = getAdminLink(
-				'admin.php?page=wc-admin'
-			);
-
-			// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-			if ( currentLocation !== homescreenLocation ) {
-				// Ensure that if the user is trying to get to the task list they can see it even if
-				// it was dismissed.
-				if ( setupTaskListHidden === 'no' ) {
-					this.redirectToHomeScreen();
-				} else {
-					updateOptions( {
-						woocommerce_task_list_hidden: 'no',
-					} ).then( this.redirectToHomeScreen );
-				}
-			}
-
-			return null;
-		}
-
-		const classNames = classnames(
-			'woocommerce-layout__activity-panel-wrapper',
-			{
-				'is-open': isPanelOpen,
-				'is-switching': isPanelSwitching,
-			}
-		);
-
-		return (
-			<div
-				className={ classNames }
-				tabIndex={ 0 }
-				role="tabpanel"
-				aria-label={ tab.title }
-				onTransitionEnd={ clearPanel }
-				onAnimationEnd={ clearPanel }
-			>
-				<div
-					className="woocommerce-layout__activity-panel-content"
-					key={ 'activity-panel-' + currentTab }
-					id={ 'activity-panel-' + currentTab }
-				>
-					<Suspense fallback={ <Spinner /> }>
-						{ this.getPanelContent( currentTab ) }
-					</Suspense>
-				</div>
-			</div>
-		);
 	}
 
 	redirectToHomeScreen() {
@@ -373,10 +324,22 @@ export class ActivityPanel extends Component {
 							tabOpen={ isPanelOpen }
 							selectedTab={ currentTab }
 							onTabClick={ ( tab, tabOpen ) => {
+								if ( tab.onClick ) {
+									tab.onClick();
+									return;
+								}
 								this.togglePanel( tab, tabOpen );
 							} }
 						/>
-						{ this.renderPanel() }
+						<Panel
+							isPanelOpen
+							currentTab
+							isPanelSwitching
+							tab={ find( this.getTabs(), { name: currentTab } ) }
+							content={ this.getPanelContent( currentTab ) }
+							closePanel={ () => this.closePanel() }
+							clearPanel={ () => this.clearPanel() }
+						/>
 					</div>
 				</Section>
 				{ showHelpHighlightTooltip ? (
@@ -431,6 +394,5 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => ( {
 		updateOptions: dispatch( OPTIONS_STORE_NAME ).updateOptions,
-	} ) ),
-	clickOutside
+	} ) )
 )( ActivityPanel );
