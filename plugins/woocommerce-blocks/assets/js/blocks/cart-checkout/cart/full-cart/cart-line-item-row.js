@@ -18,6 +18,7 @@ import {
 import { getCurrency } from '@woocommerce/price-format';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
+import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
@@ -81,6 +82,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			currency_decimal_separator: '.',
 			currency_thousand_separator: ',',
 			line_total: '0',
+			line_total_tax: '0',
 		},
 		extensions,
 	} = lineItem;
@@ -117,8 +119,12 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 	);
 	const saleAmount = saleAmountSingle.multiply( quantity );
 	const totalsCurrency = getCurrency( totals );
+	let lineTotal = parseInt( totals.line_total, 10 );
+	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
+		lineTotal += parseInt( totals.line_total_tax, 10 );
+	}
 	const totalsPrice = Dinero( {
-		amount: parseInt( totals.line_total, 10 ),
+		amount: lineTotal,
 	} );
 
 	const firstImage = images.length ? images[ 0 ] : {};

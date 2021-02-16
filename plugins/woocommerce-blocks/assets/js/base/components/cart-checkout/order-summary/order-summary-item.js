@@ -9,6 +9,7 @@ import { getCurrency } from '@woocommerce/price-format';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
+import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -60,8 +61,13 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		.convertPrecision( priceCurrency.minorUnit )
 		.getAmount();
 	const totalsCurrency = getCurrency( totals );
+
+	let lineTotal = parseInt( totals.line_total, 10 );
+	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
+		lineTotal += parseInt( totals.line_total_tax, 10 );
+	}
 	const totalsPrice = Dinero( {
-		amount: parseInt( totals.line_total, 10 ),
+		amount: lineTotal,
 	} )
 		.convertPrecision( totals.currency_minor_unit )
 		.getAmount();
