@@ -105,20 +105,25 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Show status widget.
 		 */
 		public function status_widget() {
-			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
+			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report-v2.php';
 
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 
-			$reports = new WC_Admin_Report();
+			$reports = new WC_Admin_Report_V2();
+
+			$net_sales_link = 'admin.php?page=wc-reports&tab=orders&range=month';
+			$report_data = $is_wc_admin_disabled ? $this->get_sales_report_data() : $reports->get_performance_data();
+			if ( ! $is_wc_admin_disabled ) {
+				$net_sales_link = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
+			}
 
 			echo '<ul class="wc_status_list">';
 
 			if ( current_user_can( 'view_woocommerce_reports' ) ) {
-				$report_data = $this->get_sales_report_data();
 				if ( $report_data ) {
 					?>
 				<li class="sales-this-month">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ) ); ?>">
+				<a href="<?php echo esc_url( admin_url( $net_sales_link ) ); ?>">
 					<?php echo $reports->sales_sparkline( '', max( 7, gmdate( 'd', current_time( 'timestamp' ) ) ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
@@ -128,7 +133,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 					?>
 					</a>
-				</li>
+					</li>
 					<?php
 				}
 
@@ -308,6 +313,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			</li>
 			<?php
 		}
+
 
 		/**
 		 * Recent reviews widget.
