@@ -55,7 +55,7 @@
 		&:focus,
 		&:active {
 			@include font-size(regular);
-			background-color: #fff;
+			background: #fff;
 			box-shadow: none;
 			color: $input-text-active;
 			font-family: inherit;
@@ -71,7 +71,7 @@
 			white-space: nowrap;
 			width: 100%;
 			.has-dark-controls & {
-				background-color: $input-background-dark;
+				background: $input-background-dark;
 				border-color: $input-border-dark;
 				color: $input-text-dark;
 			}
