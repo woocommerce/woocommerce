@@ -91,8 +91,6 @@ This release fixes an error that some users experienced when their site automati
 
 = 4.5.0 - 2021-02-16 =
 
-This release fixes an error that some users experienced when their site automatically updated to a temporarily broken version of the 4.5.0 release.
-
 #### Enhancements
 
 - Login links on the checkout should use the account page. ([3844](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3844))
