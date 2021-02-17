@@ -65,7 +65,7 @@ class Api {
 		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend' ], true ) ) {
 			return $dependencies;
 		}
-		return array_merge( $dependencies, $this->payment_method_registry->get_all_registered_script_handles() );
+		return array_merge( $dependencies, $this->payment_method_registry->get_all_active_payment_method_script_dependencies() );
 	}
 
 	/**

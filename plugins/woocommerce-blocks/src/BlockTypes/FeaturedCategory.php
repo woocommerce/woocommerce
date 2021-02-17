@@ -31,20 +31,21 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	/**
 	 * Render the Featured Category block.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
+	 * @param array  $attributes Block attributes.
+	 * @param string $content    Block content.
 	 * @return string Rendered block type output.
 	 */
-	public function render( $attributes = array(), $content = '' ) {
-		$id       = isset( $attributes['categoryId'] ) ? (int) $attributes['categoryId'] : 0;
+	protected function render( $attributes, $content ) {
+		$id       = absint( isset( $attributes['categoryId'] ) ? $attributes['categoryId'] : 0 );
 		$category = get_term( $id, 'product_cat' );
+
 		if ( ! $category || is_wp_error( $category ) ) {
 			return '';
 		}
+
 		$attributes = wp_parse_args( $attributes, $this->defaults );
-		if ( ! $attributes['height'] ) {
-			$attributes['height'] = wc_get_theme_support( 'featured_block::default_height', 500 );
-		}
+
+		$attributes['height'] = $attributes['height'] ? $attributes['height'] : wc_get_theme_support( 'featured_block::default_height', 500 );
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-category__title">%s</h2>',

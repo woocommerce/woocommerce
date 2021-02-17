@@ -48,11 +48,12 @@ class Assets {
 
 		self::register_style( 'wc-block-vendors-style', plugins_url( $asset_api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), $block_style_dependencies );
 		self::register_style( 'wc-block-editor', plugins_url( $asset_api->get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
-		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
 		self::register_style( 'wc-block-style', plugins_url( $asset_api->get_block_asset_build_path( 'style', 'css' ), __DIR__ ), array( 'wc-block-vendors-style' ) );
+
+		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
 		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
 
-		// Shared libraries and components across all blocks.
+		// Shared libraries and components across multiple blocks.
 		$asset_api->register_script( 'wc-blocks-middleware', 'build/wc-blocks-middleware.js', [], false );
 		$asset_api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ], false );
 		$asset_api->register_script( 'wc-blocks', $asset_api->get_block_asset_build_path( 'blocks' ), [], false );
@@ -60,8 +61,12 @@ class Assets {
 		$asset_api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
 		$asset_api->register_script( 'wc-shared-context', 'build/wc-shared-context.js', [], false );
 		$asset_api->register_script( 'wc-shared-hocs', 'build/wc-shared-hocs.js', [], false );
+		$asset_api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
-		// Inline data.
+		if ( Package::feature()->is_feature_plugin_build() ) {
+			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [], false );
+		}
+
 		wp_add_inline_script(
 			'wc-blocks-middleware',
 			"
@@ -70,40 +75,6 @@ class Assets {
 			",
 			'before'
 		);
-
-		// Individual blocks.
-		$block_dependencies = array( 'wc-vendors', 'wc-blocks' );
-
-		$asset_api->register_script( 'wc-handpicked-products', $asset_api->get_block_asset_build_path( 'handpicked-products' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-best-sellers', $asset_api->get_block_asset_build_path( 'product-best-sellers' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-category', $asset_api->get_block_asset_build_path( 'product-category' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-new', $asset_api->get_block_asset_build_path( 'product-new' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-on-sale', $asset_api->get_block_asset_build_path( 'product-on-sale' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-top-rated', $asset_api->get_block_asset_build_path( 'product-top-rated' ), $block_dependencies );
-		$asset_api->register_script( 'wc-products-by-attribute', $asset_api->get_block_asset_build_path( 'products-by-attribute' ), $block_dependencies );
-		$asset_api->register_script( 'wc-featured-product', $asset_api->get_block_asset_build_path( 'featured-product' ), $block_dependencies );
-		$asset_api->register_script( 'wc-featured-category', $asset_api->get_block_asset_build_path( 'featured-category' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-categories', $asset_api->get_block_asset_build_path( 'product-categories' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-tag', $asset_api->get_block_asset_build_path( 'product-tag' ), $block_dependencies );
-		$asset_api->register_script( 'wc-all-reviews', $asset_api->get_block_asset_build_path( 'all-reviews' ), $block_dependencies );
-		$asset_api->register_script( 'wc-reviews-by-product', $asset_api->get_block_asset_build_path( 'reviews-by-product' ), $block_dependencies );
-		$asset_api->register_script( 'wc-reviews-by-category', $asset_api->get_block_asset_build_path( 'reviews-by-category' ), $block_dependencies );
-		$asset_api->register_script( 'wc-product-search', $asset_api->get_block_asset_build_path( 'product-search' ), $block_dependencies );
-		$asset_api->register_script( 'wc-all-products', $asset_api->get_block_asset_build_path( 'all-products' ), $block_dependencies );
-		$asset_api->register_script( 'wc-price-filter', $asset_api->get_block_asset_build_path( 'price-filter' ), $block_dependencies );
-		$asset_api->register_script( 'wc-attribute-filter', $asset_api->get_block_asset_build_path( 'attribute-filter' ), $block_dependencies );
-		$asset_api->register_script( 'wc-active-filters', $asset_api->get_block_asset_build_path( 'active-filters' ), $block_dependencies );
-
-		if ( Package::feature()->is_experimental_build() ) {
-			$asset_api->register_script( 'wc-single-product-block', $asset_api->get_block_asset_build_path( 'single-product' ), $block_dependencies );
-		}
-		$asset_api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
-
-		if ( Package::feature()->is_feature_plugin_build() ) {
-			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [], false );
-			$asset_api->register_script( 'wc-checkout-block', $asset_api->get_block_asset_build_path( 'checkout' ), $block_dependencies );
-			$asset_api->register_script( 'wc-cart-block', $asset_api->get_block_asset_build_path( 'cart' ), $block_dependencies );
-		}
 	}
 
 	/**
@@ -272,12 +243,14 @@ class Assets {
 	 * @since 2.3.0
 	 * @since 2.6.0 Changed $name to $script_name and added $handle argument.
 	 * @since 2.9.0 Made it so scripts are not loaded in admin pages.
+	 * @deprecated 4.5.0 Block types register the scripts themselves.
 	 *
 	 * @param string $script_name  Name of the script used to identify the file inside build folder.
 	 * @param string $handle       Optional. Provided if the handle should be different than the script name. `wc-` prefix automatically added.
 	 * @param array  $dependencies Optional. An array of registered script handles this script depends on. Default empty array.
 	 */
 	public static function register_block_script( $script_name, $handle = '', $dependencies = [] ) {
+		_deprecated_function( 'register_block_script', '4.5.0' );
 		$asset_api = Package::container()->get( AssetApi::class );
 		$asset_api->register_block_script( $script_name, $handle, $dependencies );
 	}

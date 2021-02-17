@@ -32,20 +32,19 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	/**
 	 * Render the Featured Product block.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
+	 * @param array  $attributes Block attributes.
+	 * @param string $content    Block content.
 	 * @return string Rendered block type output.
 	 */
-	public function render( $attributes = array(), $content = '' ) {
-		$id      = isset( $attributes['productId'] ) ? (int) $attributes['productId'] : 0;
+	protected function render( $attributes, $content ) {
+		$id      = absint( isset( $attributes['productId'] ) ? $attributes['productId'] : 0 );
 		$product = wc_get_product( $id );
 		if ( ! $product ) {
 			return '';
 		}
 		$attributes = wp_parse_args( $attributes, $this->defaults );
-		if ( ! $attributes['height'] ) {
-			$attributes['height'] = wc_get_theme_support( 'featured_block::default_height', 500 );
-		}
+
+		$attributes['height'] = $attributes['height'] ? $attributes['height'] : wc_get_theme_support( 'featured_block::default_height', 500 );
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-product__title">%s</h2>',
