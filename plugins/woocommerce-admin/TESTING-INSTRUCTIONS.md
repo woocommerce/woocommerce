@@ -3,6 +3,12 @@ Testing instructions
 
 ## Unreleased
 
+### Remove CES actions for adding and editing a product and editing an order #6355
+
+1. Add a product. The customer effort score survey should not appear.
+2. Edit a product. The customer effort score survey should not appear.
+3. Edit an order. The customer effort score survey should not appear.
+
 ## 2.0.0
 
 ### Add the Mollie payment provider setup task #6257

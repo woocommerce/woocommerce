@@ -76,6 +76,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Dev: Allow highlight tooltip to use body tag as parent. #6309
+- Add: Remove CES actions for adding and editing a product and editing an order #6355
 
 == 2.0.0 02/05/2021 ==
 
