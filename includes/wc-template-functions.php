@@ -303,11 +303,11 @@ function wc_body_class( $classes ) {
 
 	if ( is_shop() ) {
 
-		$classes[] = 'woocommerce';
 		$classes[] = 'woocommerce-shop';
-		$classes[] = 'woocommerce-page';
 
-	} elseif ( is_woocommerce() ) {
+	} 
+	
+	if ( is_woocommerce() ) {
 
 		$classes[] = 'woocommerce';
 		$classes[] = 'woocommerce-page';
