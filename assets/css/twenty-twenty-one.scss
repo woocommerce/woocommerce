@@ -1482,7 +1482,7 @@ a.reset_variations {
 		}
 	}
 
-	table.cart img, .woocommerce table.cart img, .woocommerce-page #content table.cart img, .woocommerce-page table.cart img {
+	table.cart img.woocommerce-placeholder {
 		height: auto !important;
 	}
 }
