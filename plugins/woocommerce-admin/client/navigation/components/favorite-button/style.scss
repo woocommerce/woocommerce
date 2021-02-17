@@ -1,0 +1,13 @@
+.woocommerce-navigation-favorite-button.components-button {
+	.dashicon {
+		margin: 0;
+	}
+
+	.dashicons-star-empty {
+		color: $gray-600;
+	}
+
+	.dashicons-star-filled {
+		color: $alert-yellow;
+	}
+}

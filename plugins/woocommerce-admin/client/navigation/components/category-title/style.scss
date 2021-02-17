@@ -2,19 +2,7 @@
 	display: flex;
 	align-items: center;
 
-	.woocommerce-navigation-category-title__favorite-button {
+	.woocommerce-navigation-favorite-button {
 		margin-left: auto;
-
-		.dashicon {
-			margin: 0;
-		}
-
-		.dashicons-star-empty {
-			color: $gray-600;
-		}
-
-		.dashicons-star-filled {
-			color: $alert-yellow;
-		}
 	}
 }
