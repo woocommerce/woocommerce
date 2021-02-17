@@ -18,7 +18,7 @@
 	padding-left: percentage($gap-large / 1060px);
 	width: 35%;
 
-	.wc-blocks-components-panel > h2 {
+	.wc-block-components-panel > h2 {
 		@include font-size(regular);
 		@include reset-box();
 	}
@@ -45,7 +45,7 @@
 .is-large {
 	.wc-block-components-sidebar {
 		.wc-block-components-totals-item,
-		.wc-blocks-components-panel {
+		.wc-block-components-panel {
 			padding-left: $gap;
 			padding-right: $gap;
 		}
@@ -54,7 +54,7 @@
 
 // For Twenty Twenty we need to increase specificity a bit more.
 .theme-twentytwenty {
-	.wc-block-components-sidebar .wc-blocks-components-panel > h2 {
+	.wc-block-components-sidebar .wc-block-components-panel > h2 {
 		@include font-size(large);
 		@include reset-box();
 	}

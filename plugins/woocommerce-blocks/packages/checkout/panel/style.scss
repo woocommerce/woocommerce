@@ -1,12 +1,12 @@
-.wc-blocks-components-panel.has-border {
+.wc-block-components-panel.has-border {
 	@include with-translucent-border( 1px 0 );
 
-	+ .wc-blocks-components-panel.has-border::after {
+	+ .wc-block-components-panel.has-border::after {
 		border-top-width: 0;
 	}
 }
 
-.wc-blocks-components-panel__button {
+.wc-block-components-panel__button {
 	@include reset-box();
 	height: auto;
 	line-height: 1;
@@ -28,7 +28,7 @@
 		box-shadow: none;
 	}
 
-	> .wc-blocks-components-panel__button-icon {
+	> .wc-block-components-panel__button-icon {
 		fill: currentColor;
 		position: absolute;
 		right: 0;
@@ -38,7 +38,7 @@
 	}
 }
 
-.wc-blocks-components-panel__content {
+.wc-block-components-panel__content {
 	padding-bottom: em($gap);
 
 	// Ensures the panel contents are not visible for any theme that tweaked the
@@ -49,13 +49,13 @@
 }
 
 // Extra classes for specificity.
-.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone .wc-blocks-components-panel__button {
+.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone .wc-block-components-panel__button {
 	background-color: inherit;
 	color: inherit;
 }
 
-.theme-twentytwenty .wc-blocks-components-panel__button,
-.theme-twentyseventeen .wc-blocks-components-panel__button {
+.theme-twentytwenty .wc-block-components-panel__button,
+.theme-twentyseventeen .wc-block-components-panel__button {
 	background: transparent;
 	color: inherit;
 }

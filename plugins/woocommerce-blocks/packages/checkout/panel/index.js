@@ -23,26 +23,26 @@ const Panel = ( {
 
 	return (
 		<div
-			className={ classNames( className, 'wc-blocks-components-panel', {
+			className={ classNames( className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
 			} ) }
 		>
 			<TitleTag>
 				<button
 					aria-expanded={ isOpen }
-					className="wc-blocks-components-panel__button"
+					className="wc-block-components-panel__button"
 					onClick={ () => setIsOpen( ! isOpen ) }
 				>
 					<Icon
 						aria-hidden="true"
-						className="wc-blocks-components-panel__button-icon"
+						className="wc-block-components-panel__button-icon"
 						srcElement={ isOpen ? chevronUp : chevronDown }
 					/>
 					{ title }
 				</button>
 			</TitleTag>
 			<div
-				className="wc-blocks-components-panel__content"
+				className="wc-block-components-panel__content"
 				hidden={ ! isOpen }
 			>
 				{ children }
