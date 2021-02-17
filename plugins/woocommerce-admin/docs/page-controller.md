@@ -70,10 +70,10 @@ WooCommerce Admin implements it's own version of `get_current_screen()` to allow
 
 Some screen ID formats that the function will generate are:
 
--   -   `{$current_screen->action}-{$current_screen->action}-tab-section`
--   -   `{$current_screen->action}-{$current_screen->action}-tab`
--   -   `{$current_screen->action}-{$current_screen->action}` if no tab is present
--   -   `{$current_screen->action}` if no action or tab is present
+- `{$current_screen->action}-{$current_screen->action}-tab-section`
+- `{$current_screen->action}-{$current_screen->action}-tab`
+- `{$current_screen->action}-{$current_screen->action}` if no tab is present
+- `{$current_screen->action}` if no action or tab is present
 
 WooCommerce Admin can recognize WooCommerce pages that have both tabs and sub sections. For example, `woocommerce_page_wc-settings-products-inventory` is the `WooCommerce > Settings > Products > Inventory` page.
 
@@ -94,9 +94,9 @@ Register pages with `wc_admin_register_page()` using these parameters:
 -   `capability` - User capability needed to access this page. Optional (defaults to `manage_options`).
 -   `icon` - Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. This is optional and won't be included in WC Navigation.
 -   `position` - Menu item position for parent pages. Optional. See: `add_menu_page()`.
--   'nav_args` - Arguments for registering items in WooCommerce Navigation.
--   'nav_args[ 'order' ]` - Order number for presentation.
--   'nav_args[ 'parent' ]`- Menu for item to fall under.`woocommerce`,`woocommerce-settings`,`woocommerce-analytics`, or another category added by an extension are available.
+-   `nav_args` - Arguments for registering items in WooCommerce Navigation.
+-   `nav_args[ 'order' ]` - Order number for presentation.
+-   `nav_args[ 'parent' ]`- Menu for item to fall under.`woocommerce`,`woocommerce-settings`,`woocommerce-analytics`, or another category added by an extension are available.
 
 #### Example - Adding a New Analytics Report
 
