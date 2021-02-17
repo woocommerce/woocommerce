@@ -55,7 +55,7 @@
 	$background-color-hover: $gray-100;
 	$border-color: $gray-100;
 	$foreground-color: var(--wp-admin-theme-color);
-	$foreground-color-hover: color($foreground-color shade(20%));
+	$foreground-color-hover: var(--wp-admin-theme-color);
 
 	background-color: $background-color;
 

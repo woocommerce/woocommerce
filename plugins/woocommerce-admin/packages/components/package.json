@@ -35,6 +35,7 @@
 		"@wordpress/element": "2.19.0",
 		"@wordpress/html-entities": "2.10.0",
 		"@wordpress/i18n": "3.17.0",
+		"@wordpress/icons": "^2.9.1",
 		"@wordpress/keycodes": "2.18.0",
 		"@wordpress/viewport": "2.24.0",
 		"classnames": "2.2.6",

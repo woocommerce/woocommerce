@@ -7,6 +7,7 @@ import { Fragment, useState } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';
 import { Link, Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Icon, info } from '@wordpress/icons';
 
 export default function ProductTypeLabel( {
 	annualPrice,
@@ -43,9 +44,7 @@ export default function ProductTypeLabel( {
 					setIsPopoverVisible( true );
 				} }
 			>
-				<i className="material-icons-outlined" aria-hidden="true">
-					info
-				</i>
+				<Icon icon={ info } />
 			</Button>
 			{ isPopoverVisible && (
 				<Popover

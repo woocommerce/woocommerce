@@ -4,7 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
-import { Icon, templatePartSidebar } from '@wordpress/icons';
+import {
+	Icon,
+	templatePartSidebar,
+	chevronRight,
+	plusCircle,
+	archive,
+	download,
+} from '@wordpress/icons';
 import { List, Pill } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -28,7 +35,7 @@ const subTasks = [
 			'woocommerce-admin'
 		),
 		before: <Icon icon={ templatePartSidebar }></Icon>,
-		after: <i className="material-icons-outlined">chevron_right</i>,
+		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', {
 				method: 'product_template',
@@ -41,8 +48,8 @@ const subTasks = [
 			'For small stores we recommend adding products manually',
 			'woocommerce-admin'
 		),
-		before: <i className="material-icons-outlined">add_box</i>,
-		after: <i className="material-icons-outlined">chevron_right</i>,
+		before: <Icon icon={ plusCircle } />,
+		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', { method: 'manually' } ),
 		href: getAdminLink(
@@ -56,8 +63,8 @@ const subTasks = [
 			'For larger stores we recommend importing all products at once via CSV file',
 			'woocommerce-admin'
 		),
-		before: <i className="material-icons-outlined">import_export</i>,
-		after: <i className="material-icons-outlined">chevron_right</i>,
+		before: <Icon icon={ archive } />,
+		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', { method: 'import' } ),
 		href: getAdminLink(
@@ -71,8 +78,8 @@ const subTasks = [
 			'For stores currently selling elsewhere we suggest using a product migration service',
 			'woocommerce-admin'
 		),
-		before: <i className="material-icons-outlined">cloud_download</i>,
-		after: <i className="material-icons-outlined">chevron_right</i>,
+		before: <Icon icon={ download } />,
+		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', { method: 'migrate' } ),
 		// @todo This should be replaced with the in-app purchase iframe when ready.

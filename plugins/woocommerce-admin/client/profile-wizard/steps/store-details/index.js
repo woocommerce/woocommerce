@@ -19,6 +19,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
+import { Icon, info } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -229,12 +230,7 @@ class StoreDetails extends Component {
 								} )
 							}
 						>
-							<i
-								className="material-icons-outlined"
-								aria-hidden="true"
-							>
-								info
-							</i>
+							<Icon icon={ info } />
 						</Button>
 					</Text>
 					{ isStoreDetailsPopoverVisible && (
@@ -342,12 +338,7 @@ class StoreDetails extends Component {
 							this.setState( { isSkipSetupPopoverVisible: true } )
 						}
 					>
-						<i
-							className="material-icons-outlined"
-							aria-hidden="true"
-						>
-							info
-						</i>
+						<Icon icon={ info } />
 					</Button>
 					{ isSkipSetupPopoverVisible && (
 						<Popover

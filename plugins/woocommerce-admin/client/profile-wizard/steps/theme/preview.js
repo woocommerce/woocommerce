@@ -8,6 +8,10 @@ import { Component } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';
 import { WebPreview } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Icon, close } from '@wordpress/icons';
+import Phone from 'gridicons/dist/phone';
+import Tablet from 'gridicons/dist/tablet';
+import Computer from 'gridicons/dist/computer';
 
 /**
  * Internal dependencies
@@ -16,15 +20,15 @@ import { recordEvent } from '@woocommerce/tracks';
 const devices = [
 	{
 		key: 'mobile',
-		icon: 'phone_android',
+		icon: Phone,
 	},
 	{
 		key: 'tablet',
-		icon: 'tablet_android',
+		icon: Tablet,
 	},
 	{
 		key: 'desktop',
-		icon: 'desktop_windows',
+		icon: Computer,
 	},
 ];
 
@@ -60,7 +64,7 @@ class ThemePreview extends Component {
 						className="woocommerce-theme-preview__close"
 						onClick={ onClose }
 					>
-						<i className="material-icons-outlined">close</i>
+						<Icon icon={ close } />
 					</Button>
 					<div className="woocommerce-theme-preview__theme-name">
 						{ interpolateComponents( {
@@ -78,25 +82,26 @@ class ThemePreview extends Component {
 						} ) }
 					</div>
 					<div className="woocommerce-theme-preview__devices">
-						{ devices.map( ( device ) => (
-							<Button
-								key={ device.key }
-								className={ classnames(
-									'woocommerce-theme-preview__device',
-									{
-										'is-selected':
-											device.key === currentDevice,
+						{ devices.map( ( device ) => {
+							const DeviceTag = device.icon;
+							return (
+								<Button
+									key={ device.key }
+									className={ classnames(
+										'woocommerce-theme-preview__device',
+										{
+											'is-selected':
+												device.key === currentDevice,
+										}
+									) }
+									onClick={ () =>
+										this.handleDeviceClick( device.key )
 									}
-								) }
-								onClick={ () =>
-									this.handleDeviceClick( device.key )
-								}
-							>
-								<i className="material-icons-outlined">
-									{ device.icon }
-								</i>
-							</Button>
-						) ) }
+								>
+									<DeviceTag />
+								</Button>
+							);
+						} ) }
 					</div>
 					<Button
 						isPrimary

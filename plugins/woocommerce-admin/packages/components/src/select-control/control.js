@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { Component, createRef } from '@wordpress/element';
+import { Icon, search } from '@wordpress/icons';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -216,7 +217,10 @@ class Control extends Component {
 				} }
 			>
 				{ isSearchable && (
-					<i className="material-icons-outlined">search</i>
+					<Icon
+						className="woocommerce-select-control__control-icon"
+						icon={ search }
+					/>
 				) }
 				{ inlineTags && <Tags { ...this.props } /> }
 

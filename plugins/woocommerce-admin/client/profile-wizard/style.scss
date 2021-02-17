@@ -441,9 +441,10 @@
 			font-size: 14px;
 			display: inline-flex;
 
-			i {
-				color: var(--wp-admin-theme-color);
+			.woocommerce-business-extensions__benefit__check-icon {
+				fill: var(--wp-admin-theme-color);
 				margin-right: $gap;
+				min-width: 24px;
 			}
 		}
 	}

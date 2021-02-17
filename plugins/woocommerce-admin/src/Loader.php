@@ -481,13 +481,6 @@ class Loader {
 			array( WC_ADMIN_APP ),
 			$css_file_version
 		);
-
-		wp_register_style(
-			'wc-material-icons',
-			'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined',
-			array(),
-			$css_file_version
-		);
 	}
 
 	/**

@@ -9,7 +9,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
-import { Icon, help as helpIcon } from '@wordpress/icons';
+import { Icon, help as helpIcon, inbox as inboxIcon } from '@wordpress/icons';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -158,7 +158,7 @@ export class ActivityPanel extends Component {
 			? {
 					name: 'inbox',
 					title: __( 'Inbox', 'woocommerce-admin' ),
-					icon: <i className="material-icons-outlined">inbox</i>,
+					icon: <Icon icon={ inboxIcon } />,
 					unread: hasUnreadNotes,
 			  }
 			: null;
