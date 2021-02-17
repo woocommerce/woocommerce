@@ -4,54 +4,23 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * AbstractDynamicBlock class.
  */
-abstract class AbstractDynamicBlock {
-
+abstract class AbstractDynamicBlock extends AbstractBlock {
 	/**
-	 * Block namespace.
+	 * Get the frontend script handle for this block type.
 	 *
-	 * @var string
+	 * @param string $key Data to get, or default to everything.
+	 * @return null
 	 */
-	protected $namespace = 'woocommerce';
-
-	/**
-	 * Block namespace.
-	 *
-	 * @var string
-	 */
-	protected $block_name = '';
-
-	/**
-	 * Registers the block type with WordPress.
-	 */
-	public function register_block_type() {
-		register_block_type(
-			$this->namespace . '/' . $this->block_name,
-			array(
-				'render_callback' => array( $this, 'render' ),
-				'editor_script'   => 'wc-' . $this->block_name,
-				'editor_style'    => 'wc-block-editor',
-				'style'           => 'wc-block-style',
-				'attributes'      => $this->get_attributes(),
-				'supports'        => [],
-			)
-		);
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
-
-	/**
-	 * Include and render a dynamic block.
-	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
-	 * @return string Rendered block type output.
-	 */
-	abstract public function render( $attributes = array(), $content = '' );
 
 	/**
 	 * Get block attributes.
 	 *
 	 * @return array
 	 */
-	protected function get_attributes() {
+	protected function get_block_type_attributes() {
 		return array();
 	}
 

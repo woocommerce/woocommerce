@@ -44,13 +44,3 @@ protected function enqueue_data( array $attributes = [] ) {
     $data_registry->add( 'some-asset-data', 'data-value' );
 }
 ```
-
-### AbstractBlock::enqueue_scripts
-
-If extending `AbstractBlock` this method can be overridden. It should register scripts used by the block. This is more commonly used for frontend scripts.
-
-```php
-protected function enqueue_scripts( array $attributes = [] ) {
-    Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
-}
-```

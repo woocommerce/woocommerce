@@ -88,4 +88,37 @@ abstract class AbstractPaymentMethodType implements PaymentMethodTypeInterface {
 	public function get_payment_method_data() {
 		return [];
 	}
+
+	/**
+	 * Returns an array of script handles to enqueue in the frontend context.
+	 *
+	 * Alias of get_payment_method_script_handles. Defined by IntegrationInterface.
+	 *
+	 * @return string[]
+	 */
+	public function get_script_handles() {
+		return $this->get_payment_method_script_handles();
+	}
+
+	/**
+	 * Returns an array of script handles to enqueue in the admin context.
+	 *
+	 * Alias of get_payment_method_script_handles_for_admin. Defined by IntegrationInterface.
+	 *
+	 * @return string[]
+	 */
+	public function get_editor_script_handles() {
+		return $this->get_payment_method_script_handles_for_admin();
+	}
+
+	/**
+	 * An array of key, value pairs of data made available to the block on the client side.
+	 *
+	 * Alias of get_payment_method_data. Defined by IntegrationInterface.
+	 *
+	 * @return array
+	 */
+	public function get_script_data() {
+		return $this->get_payment_method_data();
+	}
 }
