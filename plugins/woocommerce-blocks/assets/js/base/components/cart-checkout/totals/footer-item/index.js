@@ -11,6 +11,7 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import PropTypes from 'prop-types';
 import {
 	__experimentalApplyCheckoutFilter,
+	mustBeString,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-hooks';
@@ -28,11 +29,9 @@ const TotalsFooterItem = ( { currency, values } ) => {
 	const label = __experimentalApplyCheckoutFilter( {
 		filterName: 'totalLabel',
 		defaultValue: __( 'Total', 'woo-gutenberg-products-block' ),
-		arg: {
-			extensions,
-		},
+		extensions,
 		// Only accept strings.
-		validation: ( value ) => typeof value === 'string',
+		validation: mustBeString,
 	} );
 
 	return (

@@ -6,10 +6,15 @@ import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
 import { getCurrency } from '@woocommerce/price-format';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import {
+	__experimentalApplyCheckoutFilter,
+	mustBeString,
+	mustContain,
+} from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import { useCallback, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -36,16 +41,27 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		extensions,
 	} = cartItem;
 
+	const productPriceValidation = useCallback(
+		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		[]
+	);
+
+	const arg = useMemo(
+		() => ( {
+			context: 'summary',
+			cartItem,
+		} ),
+		[ cartItem ]
+	);
+
 	const priceCurrency = getCurrency( prices );
 
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',
 		defaultValue: initialName,
-		arg: {
-			extensions,
-			context: 'summary',
-		},
-		validation: ( value ) => typeof value === 'string',
+		extensions,
+		arg,
+		validation: mustBeString,
 	} );
 
 	const regularPriceSingle = Dinero( {
@@ -74,24 +90,18 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	const subtotalPriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
 		defaultValue: '<price/>',
-		arg: {
-			lineItem: cartItem,
-		},
-		// Only accept strings.
-		validation: ( value ) =>
-			typeof value === 'string' && value.includes( '<price/>' ),
+		extensions,
+		arg,
+		validation: productPriceValidation,
 	} );
 
 	// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
 	const productPriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'cartItemPrice',
 		defaultValue: '<price/>',
-		arg: {
-			cartItem,
-			block: 'checkout',
-		},
-		validation: ( value ) =>
-			typeof value === 'string' && value.includes( '<price/>' ),
+		extensions,
+		arg,
+		validation: productPriceValidation,
 	} );
 
 	return (

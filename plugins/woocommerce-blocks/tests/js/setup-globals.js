@@ -11,6 +11,7 @@ global.wcSettings = {
 		precision: 2,
 		symbol: '&#36;',
 	},
+	currentUserIsAdmin: false,
 	date: {
 		dow: 0,
 	},

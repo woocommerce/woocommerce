@@ -16,9 +16,14 @@ import {
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
 import { getCurrency } from '@woocommerce/price-format';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import {
+	__experimentalApplyCheckoutFilter,
+	mustBeString,
+	mustContain,
+} from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import { useCallback, useMemo } from '@wordpress/element';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
@@ -94,16 +99,24 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		isPendingDelete,
 	} = useStoreCartItemQuantity( lineItem );
 
+	const productPriceValidation = useCallback(
+		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		[]
+	);
+	const arg = useMemo(
+		() => ( {
+			context: 'cart',
+			cartItem: lineItem,
+		} ),
+		[ lineItem ]
+	);
 	const priceCurrency = getCurrency( prices );
-
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',
 		defaultValue: initialName,
-		arg: {
-			extensions,
-			context: 'cart',
-		},
-		validation: ( value ) => typeof value === 'string',
+		extensions,
+		arg,
+		validation: mustBeString,
 	} );
 
 	const regularAmountSingle = Dinero( {
@@ -132,37 +145,29 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		catalogVisibility === 'hidden' || catalogVisibility === 'search';
 
 	// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
+
 	const productPriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'cartItemPrice',
 		defaultValue: '<price/>',
-		arg: {
-			cartItem: lineItem,
-			block: 'cart',
-		},
-		validation: ( value ) =>
-			typeof value === 'string' && value.includes( '<price/>' ),
+		extensions,
+		arg,
+		validation: productPriceValidation,
 	} );
 
 	const subtotalPriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
 		defaultValue: '<price/>',
-		arg: {
-			lineItem,
-		},
-		// Only accept strings.
-		validation: ( value ) =>
-			typeof value === 'string' && value.includes( '<price/>' ),
+		extensions,
+		arg,
+		validation: productPriceValidation,
 	} );
 
 	const saleBadgePriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'saleBadgePriceFormat',
 		defaultValue: '<price/>',
-		arg: {
-			lineItem,
-		},
-		// Only accept strings.
-		validation: ( value ) =>
-			typeof value === 'string' && value.includes( '<price/>' ),
+		extensions,
+		arg,
+		validation: productPriceValidation,
 	} );
 
 	return (

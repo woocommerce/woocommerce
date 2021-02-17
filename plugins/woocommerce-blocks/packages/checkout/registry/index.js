@@ -1,3 +1,14 @@
+/**
+ * External dependencies
+ */
+import { useMemo } from '@wordpress/element';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+
+/**
+ * Internal dependencies
+ */
+import { returnTrue } from '../';
+
 let checkoutFilters = {};
 
 /**
@@ -32,33 +43,42 @@ const getCheckoutFilters = ( filterName ) => {
 /**
  * Apply a filter.
  *
- * @param {Object}   o              Object of arguments.
- * @param {string}   o.filterName   Name of the filter to apply.
- * @param {any}      o.defaultValue Default value to filter.
- * @param {any}      [o.arg]        Argument to pass to registered functions. If
- *                                  several arguments need to be passed, use an
- *                                  object.
- * @param {Function} [o.validation] Function that needs to return true when the
- *                                  filtered value is passed in order for the
- *                                  filter to be applied.
+ * @param {Object} o                Object of arguments.
+ * @param {string} o.filterName     Name of the filter to apply.
+ * @param {any}    o.defaultValue   Default value to filter.
+ * @param {Object} [o.extensions]   Values extend to REST API response.
+ * @param {any}    [o.arg]          Argument to pass to registered functions.
+ *                                  If several arguments need to be passed, use
+ *                                  an object.
+ * @param {Function} [o.validation] Function that needs to return true when
+ *                                  the filtered value is passed in order for
+ *                                  the filter to be applied.
  * @return {any} Filtered value.
  */
 export const __experimentalApplyCheckoutFilter = ( {
 	filterName,
 	defaultValue,
+	extensions,
 	arg = null,
-	validation = () => true,
+	validation = returnTrue,
 } ) => {
-	const filters = getCheckoutFilters( filterName );
-	let value = defaultValue;
-	filters.forEach( ( filter ) => {
-		try {
-			const newValue = filter( value, arg );
-			value = validation( newValue ) ? newValue : value;
-		} catch ( e ) {
-			// eslint-disable-next-line no-console
-			console.log( e );
-		}
-	} );
-	return value;
+	return useMemo( () => {
+		const filters = getCheckoutFilters( filterName );
+
+		let value = defaultValue;
+		filters.forEach( ( filter ) => {
+			try {
+				const newValue = filter( value, extensions, arg );
+				value = validation( newValue ) ? newValue : value;
+			} catch ( e ) {
+				if ( CURRENT_USER_IS_ADMIN ) {
+					throw e;
+				} else {
+					// eslint-disable-next-line no-console
+					console.error( e );
+				}
+			}
+		} );
+		return value;
+	}, [ filterName, defaultValue, extensions, arg, validation ] );
 };
