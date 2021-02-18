@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { EmptyContent, Section } from '@woocommerce/components';
 import {
@@ -74,17 +74,15 @@ const renderNotes = ( { hasNotes, isBatchUpdating, lastRead, notes } ) => {
 const InboxPanel = ( props ) => {
 	const { isError, isResolving, isBatchUpdating, notes } = props;
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
-	const lastRead = userPrefs.activity_panel_inbox_last_read;
+	const [ lastRead ] = useState( userPrefs.activity_panel_inbox_last_read );
 
 	useEffect( () => {
 		const mountTime = Date.now();
 
-		return () => {
-			const userDataFields = {
-				activity_panel_inbox_last_read: mountTime,
-			};
-			updateUserPreferences( userDataFields );
+		const userDataFields = {
+			activity_panel_inbox_last_read: mountTime,
 		};
+		updateUserPreferences( userDataFields );
 	}, [] );
 
 	if ( isError ) {
