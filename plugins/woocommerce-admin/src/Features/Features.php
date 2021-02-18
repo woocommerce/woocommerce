@@ -36,7 +36,7 @@ class Features {
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_filter( 'woocommerce_get_sections_advanced', array( __CLASS__, 'add_features_section' ) );
 		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'add_features_settings' ), 10, 2 );
-		add_filter( 'woocommerce_get_settings_advanced', array( __CLASS__, 'maybe_load_beta_features_modal' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'update_option_woocommerce_allow_tracking', array( __CLASS__, 'maybe_disable_features' ), 10, 2 );
@@ -60,10 +60,10 @@ class Features {
 		$features = [];
 
 		$navigation_class = self::get_feature_class( 'navigation' );
-		$settings_class = self::get_feature_class( 'settings' );
+		$settings_class   = self::get_feature_class( 'settings' );
 		if ( $navigation_class ) {
 			$features['navigation'] = $navigation_class::TOGGLE_OPTION_NAME;
-			$features['settings'] = $settings_class::TOGGLE_OPTION_NAME;
+			$features['settings']   = $settings_class::TOGGLE_OPTION_NAME;
 		}
 
 		return $features;
@@ -232,14 +232,20 @@ class Features {
 	/**
 	 * Conditionally loads the beta features tracking modal.
 	 *
-	 * @param array $settings Settings.
-	 * @return array
+	 * @param string $hook Page hook.
 	 */
-	public static function maybe_load_beta_features_modal( $settings ) {
+	public static function maybe_load_beta_features_modal( $hook ) {
+		if (
+			'woocommerce_page_wc-settings' !== $hook ||
+			! isset( $_GET['tab'] ) || 'advanced' !== $_GET['tab'] || // phpcs:ignore CSRF ok.
+			! isset( $_GET['section'] ) || 'features' !== $_GET['section'] // phpcs:ignore CSRF ok.
+		) {
+			return;
+		}
 		$tracking_enabled = get_option( 'woocommerce_allow_tracking', 'no' );
 
 		if ( 'yes' === $tracking_enabled ) {
-			return $settings;
+			return;
 		}
 
 		$rtl = is_rtl() ? '.rtl' : '';
@@ -258,8 +264,6 @@ class Features {
 			Loader::get_file_version( 'js' ),
 			true
 		);
-
-		return $settings;
 	}
 
 	/**
