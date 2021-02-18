@@ -137,9 +137,9 @@
         // SLIDSESHOW
         if (slider.vars.slideshow) {
           if (slider.vars.pauseOnHover) {
-            slider.hover(function() {
+            slider.on( 'mouseenter', function() {
               if (!slider.manualPlay && !slider.manualPause) { slider.pause(); }
-            }, function() {
+            } ).on( 'mouseleave', function() {
               if (!slider.manualPause && !slider.manualPlay && !slider.stopped) { slider.play(); }
             });
           }

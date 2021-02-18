@@ -615,10 +615,10 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 					drawGraph();
 
-					jQuery('.highlight_series').hover(
+					jQuery('.highlight_series').on( 'mouseenter',
 						function() {
 							drawGraph( jQuery(this).data('series') );
-						},
+						} ).on( 'mouseleave',
 						function() {
 							drawGraph();
 						}

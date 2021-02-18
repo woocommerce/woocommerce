@@ -788,10 +788,10 @@
 					return false;
 				});
 
-				$pp_pic_holder.find('.pp_content').hover(
+				$pp_pic_holder.find('.pp_content').on( 'mouseenter',
 					function(){
 						$pp_pic_holder.find('.pp_gallery:not(.disabled)').fadeIn();
-					},
+					} ).on( 'mouseleave',
 					function(){
 						$pp_pic_holder.find('.pp_gallery:not(.disabled)').fadeOut();
 					});
