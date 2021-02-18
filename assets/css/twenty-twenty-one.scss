@@ -1481,6 +1481,10 @@ a.reset_variations {
 			border: 1px solid #ddd;
 		}
 	}
+
+	table.cart img.woocommerce-placeholder {
+		height: auto !important;
+	}
 }
 
 /**
@@ -1871,7 +1875,7 @@ a.reset_variations {
 			}
 		}
 	}
-	
+
 	tfoot {
 		text-align: left;
 	}
