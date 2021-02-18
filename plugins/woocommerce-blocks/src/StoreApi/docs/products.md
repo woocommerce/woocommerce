@@ -27,7 +27,7 @@ GET /products?attributes[0][attribute]=pa_color&attributes[0][slug]=red
 GET /products?on_sale=true
 GET /products?min_price=5000
 GET /products?max_price=10000
-GET /products?stock_status=outofstock
+GET /products?stock_status=['outofstock']
 GET /products?catalog_visibility=search
 GET /products?rating=4,5
 GET /products?return_price_range=true
@@ -58,7 +58,7 @@ GET /products?return_rating_counts=true
 | `on_sale`            | boolean |    no    | Limit result set to products on sale.                                                                                                                                     |
 | `min_price`          | string  |    no    | Limit result set to products based on a minimum price, provided using the smallest unit of the currency.                                                                  |
 | `max_price`          | string  |    no    | Limit result set to products based on a maximum price, provided using the smallest unit of the currency.                                                                  |
-| `stock_status`       | string  |    no    | Limit result set to products with specified stock status.                                                                                                                 |
+| `stock_status`       | array   |    no    | Limit result set to products with specified stock statuses. Expects an array of strings containing 'instock', 'outofstock' or 'onbackorder'.                              |
 | `attributes`         | array   |    no    | Limit result set to specific attribute terms. Expects an array of objects containing `attribute` (taxonomy), `term_id` or `slug`, and optional `operator` for comparison. |
 | `attribute_relation` | string  |    no    | The logical relationship between attributes when filtering across multiple at once.                                                                                       |
 | `catalog_visibility` | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                               |
