@@ -10,6 +10,10 @@
         recordEvent( 'net-sales' );
     });
 
+	$( '.best-seller-this-month a' ).on( 'click', function() {
+		recordEvent( 'best-seller-this-month' );
+	});
+
     $( '.processing-orders a' ).on( 'click' , function() {
         recordEvent( 'orders-processing' );
     });
