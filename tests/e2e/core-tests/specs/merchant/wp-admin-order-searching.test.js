@@ -8,8 +8,8 @@ const {
 	clearAndFillInput,
 	selectOptionInSelect2,
 	searchForOrder,
-    createSimpleProduct,
-    addProductToOrder,
+	createSimpleProduct,
+	addProductToOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 let orderId;
@@ -19,7 +19,7 @@ const runOrderSearchingTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 
-            await createSimpleProduct('Wanted Product');
+			await createSimpleProduct('Wanted Product');
 
 			// Create new order for testing
 			await merchant.openNewOrder();
@@ -52,7 +52,7 @@ const runOrderSearchingTest = () => {
 
 			await addProductToOrder(orderId, 'Wanted Product');
 
-            await merchant.openAllOrdersView();
+			await merchant.openAllOrdersView();
 		});
 
 		it('can search for order by order id', async () => {
