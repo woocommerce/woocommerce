@@ -1,22 +1,32 @@
 <?php
 /**
- *  Tests for the WC_Admin_Dashboard_Finish_Setup class.
+ *  Tests for the WC_Admin_Dashboard_Setup class.
  *
  * @package WooCommerce\Tests\Admin
  */
 
 /**
- * Class WC_Admin_Dashboard_Finish_Setup_Test
+ * Class WC_Admin_Dashboard_Setup_Test
  */
-class WC_Admin_Dashboard_Finish_Setup_Test extends WC_Unit_Test_Case {
+class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up
+	 */
+	public function setUp() {
+		// set default country to US so that 'payments' task does not get added.
+		// we want to remove payment tasks as they depend on installation & activation.
+		update_option( 'woocommerce_default_country', 'US' );
+		parent::setUp();
+	}
 
 	/**
 	 * Includes widget class and return the class.
 	 *
-	 * @return WC_Admin_Dashboard_Finish_Setup
+	 * @return WC_Admin_Dashboard_Setup
 	 */
 	public function get_widget() {
-		return include __DIR__ . '/../../../../includes/admin/class-wc-admin-dashboard-finish-setup.php';
+		return include __DIR__ . '/../../../../includes/admin/class-wc-admin-dashboard-setup.php';
 	}
 
 	/**
@@ -25,8 +35,7 @@ class WC_Admin_Dashboard_Finish_Setup_Test extends WC_Unit_Test_Case {
 	 * @return string Render widget HTML
 	 */
 	public function get_widget_output() {
-		update_option( 'woocommerce_task_list_complete', false );
-		update_option( 'woocommerce_task_list_hidden', false );
+		update_option( 'woocommerce_task_list_hidden', 'no' );
 
 		ob_start();
 		$this->get_widget()->render();
@@ -62,7 +71,7 @@ class WC_Admin_Dashboard_Finish_Setup_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_task_list_hidden', false );
 
 		$this->get_widget();
-		$this->assertArrayHasKey( 'wc_admin_dasbharod_finish_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
+		$this->assertArrayHasKey( 'wc_admin_dasbharod_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
 	}
 
 	/**
@@ -109,19 +118,17 @@ class WC_Admin_Dashboard_Finish_Setup_Test extends WC_Unit_Test_Case {
 	 * Provides dataset that controls output of `should_display_widget`
 	 */
 	public function should_display_widget_data_provider() {
-		// these dataset should not render the widget
-		// we only want to render the widget when both options are set to false.
 		return array(
 			array(
 				array(
-					'woocommerce_task_list_complete' => true,
-					'woocommerce_task_list_hidden'   => false,
+					'woocommerce_task_list_complete' => 'yes',
+					'woocommerce_task_list_hidden' => 'no',
 				),
 			),
 			array(
 				array(
-					'woocommerce_task_list_complete' => false,
-					'woocommerce_task_list_hidden'   => true,
+					'woocommerce_task_list_complete' => 'no',
+					'woocommerce_task_list_hidden' => 'yes',
 				),
 			),
 		);
