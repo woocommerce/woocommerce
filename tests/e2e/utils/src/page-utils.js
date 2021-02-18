@@ -209,6 +209,19 @@ const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__f
 	await page.keyboard.press('Enter');
 };
 
+/**
+ * Search by any term for an order
+ *
+ * @param {string} value Value to be entered into the search field
+ * @param {string} orderId Order ID
+ */
+const searchForOrder = async (value, orderId) => {
+	await clearAndFillInput('#post-search-input', value);
+	await expect(page).toClick('#search-submit');
+    await page.waitForSelector('#the-list');
+    await expect(page).toMatchElement('.order_number > a.order-view', {text: '#'+orderId+' John Doe'});
+};
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -225,4 +238,5 @@ export {
 	moveAllItemsToTrash,
 	evalAndClick,
 	selectOptionInSelect2,
+	searchForOrder,
 };
