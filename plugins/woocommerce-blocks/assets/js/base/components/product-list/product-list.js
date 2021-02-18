@@ -18,6 +18,7 @@ import {
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { speak } from '@wordpress/a11y';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -50,11 +51,17 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 				};
 		}
 	};
+
+	const hideOutOfStockItems = getSetting( 'hideOutOfStockItems', false );
+
 	return {
 		...getSortArgs( sortValue ),
 		catalog_visibility: 'catalog',
 		per_page: columns * rows,
 		page: currentPage,
+		...( hideOutOfStockItems && {
+			stock_status: [ 'instock', 'onbackorder' ],
+		} ),
 	};
 };
 
