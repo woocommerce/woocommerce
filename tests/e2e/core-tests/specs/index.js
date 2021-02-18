@@ -51,13 +51,13 @@ const runMerchantTests = () => {
 	runAddSimpleProductTest();
 	runAddVariableProductTest();
 	runUpdateGeneralSettingsTest();
+	runAddNewShippingZoneTest();
 	runProductSettingsTest();
 	runTaxSettingsTest();
 	runOrderStatusFiltersTest();
 	runOrderRefundTest();
 	runOrderApplyCouponTest();
 	runMerchantOrdersCustomerPaymentPage();
-	runAddNewShippingZoneTest();
 }
 
 module.exports = {
