@@ -4,7 +4,7 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 ## Prerequisites
 
-[WordPress 5.3 or greater](https://wordpress.org/download/) and [WooCommerce 3.6.0 or greater](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin.
+[WordPress 5.4 or greater](https://wordpress.org/download/) and [WooCommerce 4.8.0 or greater](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin.
 
 For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', true );` to your wp-config. This will load the unminified version of all libraries, and specifically the development build of React.
 
@@ -12,15 +12,15 @@ For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', tru
 
 After cloning the repo, install dependencies:
 
- - `npm install` to install JavaScript dependencies.
- - `composer install` to gather PHP dependencies.
+-   `npm install` to install JavaScript dependencies.
+-   `composer install` to gather PHP dependencies.
 
 Now you can build the files using one of these commands:
 
- - `npm run build` : Build a production version
- - `npm run dev` : Build a development version
- - `npm start` : Build a development version, watch files for changes
- - `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
+-   `npm run build` : Build a production version
+-   `npm run dev` : Build a development version
+-   `npm start` : Build a development version, watch files for changes
+-   `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
 
 For more helper scripts [see here](./CONTRIBUTING.md#helper-scripts)
 

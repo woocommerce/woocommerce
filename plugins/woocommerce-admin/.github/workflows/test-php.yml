@@ -12,7 +12,7 @@ jobs:
             fail-fast: false
             matrix:
                 php: ['7.1', '7.2', '7.3']
-                wordpress: ['5.3', '5.6']
+                wordpress: ['5.4', '5.6']
                 woocommerce: ['4.8.0', '4.9.1']
                 phpunit: ['7.5.20']
                 composer: ['2.0.6']
