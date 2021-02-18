@@ -160,7 +160,7 @@ const Container = ( { menuItems } ) => {
 						];
 
 						return [
-							( !! primaryAndFavoriteItems ||
+							( !! primaryAndFavoriteItems.length ||
 								!! pluginItems ) && (
 								<NavigationMenu
 									key={ category.id }
@@ -188,7 +188,7 @@ const Container = ( { menuItems } ) => {
 													)
 									}
 								>
-									{ !! primaryAndFavoriteItems && (
+									{ !! primaryAndFavoriteItems.length && (
 										<NavigationGroup>
 											{ primaryAndFavoriteItems.map(
 												( item ) => (
