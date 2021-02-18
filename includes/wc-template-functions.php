@@ -305,8 +305,8 @@ function wc_body_class( $classes ) {
 
 		$classes[] = 'woocommerce-shop';
 
-	} 
-	
+	}
+
 	if ( is_woocommerce() ) {
 
 		$classes[] = 'woocommerce';
