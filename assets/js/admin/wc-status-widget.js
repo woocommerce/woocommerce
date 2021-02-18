@@ -6,7 +6,7 @@
         } );
     };
 
-    $( '.sales-this-month a' ).on( 'click' , function(e) {
+    $( '.sales-this-month a' ).on( 'click' , function() {
         recordEvent( 'net-sales' );
     });
 
