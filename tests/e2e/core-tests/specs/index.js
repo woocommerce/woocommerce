@@ -78,6 +78,7 @@ const runMerchantTests = () => {
 	runProductEditDetailsTest();
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
+	runOrderSearchingTest();
 }
 
 const runApiTests = () => {
