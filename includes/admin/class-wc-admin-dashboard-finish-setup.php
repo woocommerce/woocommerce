@@ -51,24 +51,17 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Finish_Setup', false ) ) :
 		 * WC_Admin_Dashboard_Finish_Setup constructor.
 		 */
 		public function __construct() {
-			if ( $this->should_display_widget() ) {
-				$this->populate_tasks();
-				$this->hook_meta_box();
-			}
+			$this->should_display_widget() && $this->init();
 		}
 
 		/**
 		 * Hook meta_box
 		 */
-		public function hook_meta_box() {
-			$version = Constants::get_constant( 'WC_VERSION' );
-
-			wp_enqueue_style( 'wc-dashboard-finish-setup', WC()->plugin_url() . '/assets/css/dashboard-finish-setup.css', array(), $version );
-
+		public function init() {
 			add_meta_box(
 				'wc_admin_dasbharod_finish_setup',
 				__( 'WooCommerce Setup', 'woocommerce' ),
-				array( $this, 'render_meta_box' ),
+				array( $this, 'render' ),
 				'dashboard',
 				'normal',
 				'high'
@@ -78,7 +71,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Finish_Setup', false ) ) :
 		/**
 		 * Render meta box output.
 		 */
-		public function render_meta_box() {
+		public function render() {
+			$version = Constants::get_constant( 'WC_VERSION' );
+			wp_enqueue_style( 'wc-dashboard-finish-setup', WC()->plugin_url() . '/assets/css/dashboard-finish-setup.css', array(), $version );
+
+			$this->populate_tasks();
+
 			$total_number_of_tasks           = count( $this->tasks );
 			$total_number_of_completed_tasks = count( $this->get_completed_tasks() );
 
@@ -94,7 +92,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Finish_Setup', false ) ) :
 			$circle_r            = 6.5;
 			$circle_dashoffset   = ( ( 100 - $progress_percentage ) / 100 ) * ( pi() * ( $circle_r * 2 ) );
 
-			require_once __DIR__ . '/views/html-admin-dashboard-finish-setup.php';
+			include __DIR__ . '/views/html-admin-dashboard-finish-setup.php';
 		}
 
 		/**
@@ -108,6 +106,15 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Finish_Setup', false ) ) :
 					$this->tasks[ $task ]['button_link'] = wc_admin_url( $this->tasks[ $task ]['button_link'] );
 				}
 			}
+		}
+
+		/**
+		 * Getter for $tasks
+		 *
+		 * @return array
+		 */
+		public function get_tasks() {
+			return $this->tasks;
 		}
 
 		/**
@@ -130,7 +137,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Finish_Setup', false ) ) :
 		 * @return array|null
 		 */
 		private function get_next_task() {
-			foreach ( $this->tasks as $task ) {
+			foreach ( $this->get_tasks() as $task ) {
 				if ( false === $task['completed'] ) {
 					return $task;
 				}
