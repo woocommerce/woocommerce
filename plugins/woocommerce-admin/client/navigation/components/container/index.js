@@ -22,6 +22,70 @@ import CategoryTitle from '../category-title';
 import Header from '../header';
 import Item from '../../components/Item';
 
+/**
+ * Get a map of all categories, including the topmost WooCommerce parentCategory
+ *
+ * @param {Array} menuItems Array of menuItems
+ * @return {Object} Map of categories by id
+ */
+export const getCategoriesMap = ( menuItems ) => {
+	return menuItems.reduce(
+		( acc, item ) => {
+			if ( item.isCategory ) {
+				return { ...acc, [ item.id ]: item };
+			}
+			return acc;
+		},
+		{
+			woocommerce: {
+				capability: 'manage_woocommerce',
+				id: 'woocommerce',
+				isCategory: true,
+				menuId: 'primary',
+				migrate: true,
+				order: 10,
+				parent: '',
+				title: 'WooCommerce',
+			},
+		}
+	);
+};
+
+/**
+ * Get a flat tree structure of all Categories and thier children grouped by menuId
+ *
+ * @param {Object} categoriesMap Map of categories by id
+ * @param {Array} menuItems Array of menuItems
+ * @return {Object} a;dslkfj
+ */
+export const getMenuItemsByCategory = ( categoriesMap, menuItems ) => {
+	return menuItems.reduce( ( acc, item ) => {
+		// Set up the category if it doesn't yet exist.
+		if ( ! acc[ item.parent ] ) {
+			acc[ item.parent ] = {};
+		}
+
+		// Check if parent category is in the same menu.
+		if (
+			item.parent !== 'woocommerce' &&
+			categoriesMap[ item.parent ] &&
+			categoriesMap[ item.parent ].menuId !== item.menuId &&
+			// Allow favorites to exist under any menu.
+			categoriesMap[ item.parent ].menuId !== 'favorites'
+		) {
+			return acc;
+		}
+
+		// Create the menu object if it doesn't exist in this category.
+		if ( ! acc[ item.parent ][ item.menuId ] ) {
+			acc[ item.parent ][ item.menuId ] = [];
+		}
+
+		acc[ item.parent ][ item.menuId ].push( item );
+		return acc;
+	}, {} );
+};
+
 const Container = ( { menuItems } ) => {
 	useEffect( () => {
 		// Collapse the original WP Menu.
@@ -38,27 +102,7 @@ const Container = ( { menuItems } ) => {
 
 	const { rootBackLabel, rootBackUrl } = window.wcNavigation;
 
-	const parentCategory = {
-		capability: 'manage_woocommerce',
-		id: 'woocommerce',
-		isCategory: true,
-		menuId: 'primary',
-		migrate: true,
-		order: 10,
-		parent: '',
-		title: 'WooCommerce',
-	};
-	const categoriesMap = menuItems.reduce(
-		( acc, item ) => {
-			if ( item.isCategory ) {
-				return { ...acc, [ item.id ]: item };
-			}
-			return acc;
-		},
-		{
-			woocommerce: parentCategory,
-		}
-	);
+	const categoriesMap = getCategoriesMap( menuItems );
 	const categories = Object.values( categoriesMap );
 
 	const [ activeItem, setActiveItem ] = useState( 'woocommerce-home' );
@@ -83,37 +127,9 @@ const Container = ( { menuItems } ) => {
 		return removeListener;
 	}, [ menuItems ] );
 
-	const getMenuItemsByCategory = ( items ) => {
-		return items.reduce( ( acc, item ) => {
-			// Set up the category if it doesn't yet exist.
-			if ( ! acc[ item.parent ] ) {
-				acc[ item.parent ] = {};
-			}
-
-			// Check if parent category is in the same menu.
-			if (
-				item.parent !== 'woocommerce' &&
-				categoriesMap[ item.parent ] &&
-				categoriesMap[ item.parent ].menuId !== item.menuId &&
-				// Allow favorites to exist under any menu.
-				categoriesMap[ item.parent ].menuId !== 'favorites'
-			) {
-				return acc;
-			}
-
-			// Create the menu object if it doesn't exist in this category.
-			if ( ! acc[ item.parent ][ item.menuId ] ) {
-				acc[ item.parent ][ item.menuId ] = [];
-			}
-
-			acc[ item.parent ][ item.menuId ].push( item );
-			return acc;
-		}, {} );
-	};
-
 	const categorizedItems = useMemo(
-		() => getMenuItemsByCategory( menuItems ),
-		[ menuItems ]
+		() => getMenuItemsByCategory( categoriesMap, menuItems ),
+		[ categoriesMap, menuItems ]
 	);
 
 	const navDomRef = useRef( null );
