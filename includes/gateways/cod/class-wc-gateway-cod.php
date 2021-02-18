@@ -64,6 +64,15 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
+
+		if ( ! is_admin() || defined('DOING_AJAX') ) {
+
+			// Don't initialize form fields if we are not in the backend, as this initialization slows down the site.
+			$this->form_fields = array();
+			return;
+
+		}
+
 		$this->form_fields = array(
 			'enabled'            => array(
 				'title'       => __( 'Enable/Disable', 'woocommerce' ),
