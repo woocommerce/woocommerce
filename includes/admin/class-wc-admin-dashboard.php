@@ -105,6 +105,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Show status widget.
 		 */
 		public function status_widget() {
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
+
+			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery' ), $version, true );
+
 			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
