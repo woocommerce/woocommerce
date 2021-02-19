@@ -3,6 +3,46 @@ Testing instructions
 
 ## Unreleased
 
+### Email notes now are turned off by default #6324
+
+-   Create a zip for testing with `npm run zip:test`.
+-   Create a `jurassic.ninja` instance.
+-   Upload the plugin and activate it.
+-   Update the installation date (we need a 10-day old store). You can do it with an SQL statement like this:
+
+```
+UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
+```
+
+-   Confirm that `woocommerce_merchant_email_notifications` was not set before by `core` with a SQL statement like:
+
+```
+DELETE FROM `wp_options` WHERE `wp_options`.`option_name` = 'woocommerce_merchant_email_notifications';
+```
+
+or with wp-cli:
+
+```
+wp option delete 'woocommerce_merchant_email_notifications';
+```
+
+-   Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   You should have not received an email note.
+-   Verify the note `wc-admin-add-first-product-note` was added in the DB and its `status` is `unactioned`. You can use a statement like this:
+
+```
+SELECT `status` FROM `wp_wc_admin_notes` WHERE `name` = 'wc-admin-add-first-product-note';
+```
+
+or with wp-cli:
+
+```
+wp db query 'SELECT status FROM wp_wc_admin_notes WHERE name = "wc-admin-add-first-product-note"' --skip-column-names
+```
+
+-   Run the cron again.
+-   The note's status should continue being `unactioned`.
+
 ### Remove CES actions for adding and editing a product and editing an order #6355
 
 1. Add a product. The customer effort score survey should not appear.
