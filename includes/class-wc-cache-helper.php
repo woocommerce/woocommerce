@@ -26,6 +26,7 @@ class WC_Cache_Helper {
 		add_filter( 'nocache_headers', array( __CLASS__, 'additional_nocache_headers' ), 10 );
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
+		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
@@ -187,6 +188,24 @@ class WC_Cache_Helper {
 				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Updates the `woocommerce_geo_hash` cookie, which is used to help ensure we display
+	 * the correct pricing etc to customers, according to their billing country.
+	 *
+	 * Note that:
+	 *
+	 * A) This only sets the cookie if the default customer address is set to "Geolocate (with
+	 *    Page Caching Support)".
+	 *
+	 * B) It is hooked into the `wc_ajax_update_order_review` action, which has the benefit of
+	 *    ensuring we update the cookie any time the billing country is changed.
+	 */
+	public static function update_geolocation_hash() {
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+			wc_setcookie( 'woocommerce_geo_hash', static::geolocation_ajax_get_location_hash(), time() + HOUR_IN_SECONDS );
 		}
 	}
 
