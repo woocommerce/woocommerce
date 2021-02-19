@@ -10,7 +10,15 @@ import {
 	SimpleProductRepositoryParams,
 	UpdatesSimpleProducts,
 } from '../../../models';
-import { createProductTransformer } from './shared';
+import {
+	createProductTransformer,
+	createProductCrossSellsTransformation,
+	createProductDeliveryTransformation,
+	createProductInventoryTransformation,
+	createProductSalesTaxTransformation,
+	createProductShippingTransformation,
+	createProductUpSellsTransformation,
+} from './shared';
 import {
 	restCreate,
 	restDelete,
@@ -37,7 +45,23 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	& UpdatesSimpleProducts
 	& DeletesSimpleProducts {
 	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
-	const transformer = createProductTransformer( 'simple' );
+
+	const crossSells = createProductCrossSellsTransformation();
+	const delivery = createProductDeliveryTransformation();
+	const inventory = createProductInventoryTransformation();
+	const salesTax = createProductSalesTaxTransformation();
+	const shipping = createProductShippingTransformation();
+	const upsells = createProductUpSellsTransformation();
+	const transformations = [
+		...crossSells,
+		...delivery,
+		...inventory,
+		...salesTax,
+		...shipping,
+		...upsells,
+	];
+
+	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );
 
 	return new ModelRepository(
 		restList< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),

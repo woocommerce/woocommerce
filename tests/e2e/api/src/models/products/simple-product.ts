@@ -1,4 +1,27 @@
-import { AbstractProduct, ProductSearchParams, ProductUpdateParams } from './abstract-product';
+import {
+	AbstractProduct,
+	IProductCommon,
+	IProductCrossSells,
+	IProductDelivery,
+	IProductInventory,
+	IProductSalesTax,
+	IProductShipping,
+	IProductUpSells,
+	ProductSearchParams,
+} from './abstract';
+import {
+	ProductDeliveryUpdateParams,
+	ProductInventoryUpdateParams,
+	ProductCommonUpdateParams,
+	ProductSalesTaxUpdateParams,
+	ProductCrossUpdateParams,
+	ProductShippingUpdateParams,
+	ProductUpSellUpdateParams,
+	ProductDownload,
+	StockStatus,
+	BackorderStatus,
+	Taxability,
+} from './shared';
 import { HTTPClient } from '../../http';
 import { simpleProductRESTRepository } from '../../repositories';
 import {
@@ -11,10 +34,20 @@ import {
 } from '../../framework';
 
 /**
+ * The parameters that simple products can update.
+ */
+type SimpleProductUpdateParams = ProductDeliveryUpdateParams
+	& ProductCommonUpdateParams
+	& ProductCrossUpdateParams
+	& ProductInventoryUpdateParams
+	& ProductSalesTaxUpdateParams
+	& ProductShippingUpdateParams
+	& ProductUpSellUpdateParams;
+/**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, ProductSearchParams, ProductUpdateParams >;
+export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, ProductSearchParams, SimpleProductUpdateParams >;
 
 /**
  * An interface for listing simple products using the repository.
@@ -57,9 +90,65 @@ export type UpdatesSimpleProducts = UpdatesModels< SimpleProductRepositoryParams
 export type DeletesSimpleProducts = DeletesModels< SimpleProductRepositoryParams >;
 
 /**
- * A simple product object.
+ * The base for the simple product object.
  */
-export class SimpleProduct extends AbstractProduct {
+export class SimpleProduct extends AbstractProduct implements
+	IProductCommon,
+	IProductCrossSells,
+	IProductDelivery,
+	IProductInventory,
+	IProductSalesTax,
+	IProductShipping,
+	IProductUpSells {
+	/**
+	 * @see ./abstracts/cross-sells.ts
+	 */
+	public readonly crossSellIds: Array<number> = [];
+
+	/**
+	 * @see ./abstracts/upsell.ts
+	 */
+	public readonly upSellIds: Array<number> = [];
+
+	/**
+	 * @see ./abstracts/delivery.ts
+	 */
+	public readonly isVirtual: boolean = false;
+	public readonly isDownloadable: boolean = false;
+	public readonly downloads: readonly ProductDownload[] = [];
+	public readonly downloadLimit: number = -1;
+	public readonly daysToDownload: number = -1;
+	public readonly purchaseNote: string = '';
+
+	/**
+	 * @see ./abstracts/inventory.ts
+	 */
+	public readonly onePerOrder: boolean = false;
+	public readonly trackInventory: boolean = false;
+	public readonly remainingStock: number = -1;
+	public readonly stockStatus: StockStatus = ''
+	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
+	public readonly canBackorder: boolean = false;
+	public readonly isOnBackorder: boolean = false;
+
+	/**
+	 * @see ./abstracts/sales-tax.ts
+	 */
+	public readonly taxStatus: Taxability = Taxability.ProductAndShipping;
+	public readonly taxClass: string = '';
+
+	/**
+	 * @see ./abstracts/shipping.ts
+	 */
+	public readonly weight: string = '';
+	public readonly length: string = '';
+	public readonly width: string = '';
+	public readonly height: string = '';
+	public readonly requiresShipping: boolean = false;
+	public readonly isShippingTaxable: boolean = false;
+	public readonly shippingClass: string = '';
+	public readonly shippingClassId: number = 0;
+
 	/**
 	 * Creates a new simple product instance with the given properties
 	 *
