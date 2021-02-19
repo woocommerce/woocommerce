@@ -25,14 +25,17 @@ jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
 	);
 } );
 
-jest.mock( '../../radio-control-accordion', () => ( { onChange } ) => (
-	<>
-		<span>Payment method options</span>
-		<button onClick={ () => onChange( 'stripe' ) }>
-			Select new payment
-		</button>
-	</>
-) );
+jest.mock(
+	'@woocommerce/base-components/radio-control-accordion',
+	() => ( { onChange } ) => (
+		<>
+			<span>Payment method options</span>
+			<button onClick={ () => onChange( 'stripe' ) }>
+				Select new payment
+			</button>
+		</>
+	)
+);
 
 const registerMockPaymentMethods = () => {
 	[ 'stripe' ].forEach( ( name ) => {

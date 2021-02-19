@@ -16,7 +16,6 @@ import {
 	useValidationContext,
 } from '@woocommerce/base-context';
 import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
-import { CheckoutExpressPayment } from '@woocommerce/base-components/payment-methods';
 import {
 	Sidebar,
 	SidebarLayout,
@@ -35,6 +34,7 @@ import { isWcVersion, getSetting } from '@woocommerce/settings';
 import CheckoutForm from './form';
 import CheckoutSidebar from './sidebar';
 import CheckoutOrderError from './checkout-order-error';
+import { CheckoutExpressPayment } from '../payment-methods';
 import { LOGIN_TO_CHECKOUT_URL } from './utils';
 import './style.scss';
 

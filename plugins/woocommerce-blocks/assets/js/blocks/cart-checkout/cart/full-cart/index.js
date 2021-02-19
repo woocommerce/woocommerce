@@ -22,7 +22,6 @@ import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
-import { CartExpressPayment } from '@woocommerce/base-components/payment-methods';
 import {
 	useStoreCartCoupons,
 	useStoreCart,
@@ -46,6 +45,7 @@ import { CartProvider } from '@woocommerce/base-context';
 import CheckoutButton from '../checkout-button';
 import CartLineItemsTitle from './cart-line-items-title';
 import CartLineItemsTable from './cart-line-items-table';
+import { CartExpressPayment } from '../../payment-methods';
 
 import './style.scss';
 

@@ -13,12 +13,12 @@ import {
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
 import classNames from 'classnames';
+import RadioControlAccordion from '@woocommerce/base-components/radio-control-accordion';
 
 /**
  * Internal dependencies
  */
 import PaymentMethodCard from './payment-method-card';
-import RadioControlAccordion from '../radio-control-accordion';
 
 /**
  * Component used to render all non-saved payment method options.
