@@ -287,7 +287,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		setAttributes( {
 			attributeId: selectedId,
 			heading: sprintf(
-				// Translators: %s attribute name.
+				/* translators: %s attribute name. */
 				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
 				attributeName
 			),
@@ -311,7 +311,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			),
 			selected: ( n ) =>
 				sprintf(
-					// Translators: %d is the number of attributes selected.
+					/* translators: %d is the number of attributes selected. */
 					_n(
 						'%d attribute selected',
 						'%d attributes selected',

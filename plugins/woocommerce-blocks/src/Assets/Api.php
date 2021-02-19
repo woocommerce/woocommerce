@@ -93,7 +93,7 @@ class Api {
 						'admin_notices',
 						function() use ( $handle ) {
 								echo '<div class="error"><p>';
-								// Translators: %s file handle name.
+								/* translators: %s file handle name. */
 								printf( esc_html__( 'Script with handle %s had a dependency on itself which has been removed. This is an indicator that your JS code has a circular dependency that can cause bugs.', 'woo-gutenberg-products-block' ), esc_html( $handle ) );
 								echo '</p></div>';
 						}

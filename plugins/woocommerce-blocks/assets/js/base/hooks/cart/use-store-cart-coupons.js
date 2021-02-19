@@ -45,7 +45,7 @@ export const useStoreCartCoupons = () => {
 						if ( result === true ) {
 							addSnackbarNotice(
 								sprintf(
-									// translators: %s coupon code.
+									/* translators: %s coupon code. */
 									__(
 										'Coupon code "%s" has been applied to your cart.',
 										'woo-gutenberg-products-block'
@@ -76,7 +76,7 @@ export const useStoreCartCoupons = () => {
 						if ( result === true ) {
 							addSnackbarNotice(
 								sprintf(
-									// translators: %s coupon code.
+									/* translators: %s coupon code. */
 									__(
 										'Coupon code "%s" has been removed from your cart.',
 										'woo-gutenberg-products-block'

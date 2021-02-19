@@ -60,7 +60,7 @@ export const Block = ( {
 	const image = hasProductImages ? product.images[ 0 ] : null;
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = sprintf(
-		/* Translators: %s is referring to the product name */
+		/* translators: %s is referring to the product name */
 		__( 'Link to %s', 'woo-gutenberg-products-block' ),
 		product.name
 	);

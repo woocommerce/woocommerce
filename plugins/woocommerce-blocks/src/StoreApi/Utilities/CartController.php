@@ -244,48 +244,48 @@ class CartController {
 	private function get_error_message_for_stock_exception_type( $exception_type, $singular_or_plural ) {
 		$stock_error_messages = [
 			'out_of_stock'         => [
-				// translators: %s: product name.
+				/* translators: %s: product name. */
 				'singular' => __(
 					'%s is out of stock and cannot be purchased. Please remove it from your cart.',
 					'woo-gutenberg-products-block'
 				),
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'plural'   => __(
 					'%s are out of stock and cannot be purchased. Please remove them from your cart.',
 					'woo-gutenberg-products-block'
 				),
 			],
 			'not_purchasable'      => [
-				// translators: %s: product name.
+				/* translators: %s: product name. */
 				'singular' => __(
 					'%s cannot be purchased.  Please remove it from your cart.',
 					'woo-gutenberg-products-block'
 				),
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'plural'   => __(
 					'%s cannot be purchased. Please remove them from your cart.',
 					'woo-gutenberg-products-block'
 				),
 			],
 			'too_many_in_cart'     => [
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'singular' => __(
 					'There are too many %s in the cart. Only 1 can be purchased. Please reduce the quantity in your cart.',
 					'woo-gutenberg-products-block'
 				),
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'plural'   => __(
 					'There are too many %s in the cart. Only 1 of each can be purchased. Please reduce the quantities in your cart.',
 					'woo-gutenberg-products-block'
 				),
 			],
 			'partial_out_of_stock' => [
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'singular' => __(
 					'There is not enough %s in stock. Please reduce the quantity in your cart.',
 					'woo-gutenberg-products-block'
 				),
-				// translators: %s: product names.
+				/* translators: %s: product names. */
 				'plural'   => __(
 					'There are not enough %s in stock. Please reduce the quantities in your cart.',
 					'woo-gutenberg-products-block'
@@ -772,7 +772,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
-					/* Translators: %s coupon code */
+					/* translators: %s coupon code */
 					__( '"%s" is an invalid coupon code.', 'woo-gutenberg-products-block' ),
 					esc_html( $coupon_code )
 				),
@@ -784,7 +784,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
-					/* Translators: %s coupon code */
+					/* translators: %s coupon code */
 					__( 'Coupon code "%s" has already been applied.', 'woo-gutenberg-products-block' ),
 					esc_html( $coupon_code )
 				),
@@ -855,7 +855,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
-					// translators: %1$s coupon code, %2$s reason.
+					/* translators: %1$s coupon code, %2$s reason. */
 					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woo-gutenberg-products-block' ),
 					$coupon->get_code(),
 					wp_strip_all_tags( $coupon->get_error_message() )

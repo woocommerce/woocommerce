@@ -19,7 +19,7 @@ const AttributeFilterLabel = ( { name, count } ) => {
 				<Label
 					label={ count }
 					screenReaderLabel={ sprintf(
-						// translators: %s number of products.
+						/* translators: %s number of products. */
 						_n(
 							'%s product',
 							'%s products',

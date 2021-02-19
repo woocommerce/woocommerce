@@ -90,7 +90,7 @@ const announceLoadingCompletion = ( totalProducts ) => {
 	} else {
 		speak(
 			sprintf(
-				// translators: %s is an integer higher than 0 (1, 2, 3...)
+				/* translators: %s is an integer higher than 0 (1, 2, 3...) */
 				_n(
 					'%d product found',
 					'%d products found',

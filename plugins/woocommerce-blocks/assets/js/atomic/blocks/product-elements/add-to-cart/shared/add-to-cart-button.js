@@ -127,7 +127,7 @@ const ButtonComponent = ( {
 		>
 			{ isDone && quantityInCart > 0
 				? sprintf(
-						// translators: %s number of products in cart.
+						/* translators: %s number of products in cart. */
 						_n(
 							'%d in cart',
 							'%d in cart',

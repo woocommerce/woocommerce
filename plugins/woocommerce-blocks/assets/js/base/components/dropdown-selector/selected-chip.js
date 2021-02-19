@@ -13,7 +13,7 @@ const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 				onRemoveItem( option.value );
 			} }
 			ariaLabel={ sprintf(
-				/* Translators: %s is referring to the filter option being removed. */
+				/* translators: %s is referring to the filter option being removed. */
 				__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
 				option.name
 			) }

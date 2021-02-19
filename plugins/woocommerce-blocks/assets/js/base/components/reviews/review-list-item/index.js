@@ -125,7 +125,7 @@ function getReviewRating( review ) {
 		width: ( rating / 5 ) * 100 + '%' /* stylelint-disable-line */,
 	};
 	const ratingText = sprintf(
-		/* Translators: %f is referring to the average rating value */
+		/* translators: %f is referring to the average rating value */
 		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
 		rating
 	);

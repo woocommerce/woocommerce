@@ -84,7 +84,7 @@ const QuantitySelector = ( {
 					}
 				} }
 				aria-label={ sprintf(
-					/* Translators: %s refers to the item name in the cart. */
+					/* translators: %s refers to the item name in the cart. */
 					__(
 						'Quantity of %s in your cart.',
 						'woo-gutenberg-products-block'
@@ -104,7 +104,7 @@ const QuantitySelector = ( {
 					onChange( newQuantity );
 					speak(
 						sprintf(
-							/* Translators: %s refers to the item name in the cart. */
+							/* translators: %s refers to the item name in the cart. */
 							__(
 								'Quantity reduced to %s.',
 								'woo-gutenberg-products-block'
@@ -128,7 +128,7 @@ const QuantitySelector = ( {
 					onChange( newQuantity );
 					speak(
 						sprintf(
-							/* Translators: %s refers to the item name in the cart. */
+							/* translators: %s refers to the item name in the cart. */
 							__(
 								'Quantity increased to %s.',
 								'woo-gutenberg-products-block'
