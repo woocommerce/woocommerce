@@ -2992,7 +2992,15 @@ class WC_AJAX {
 					$gateway->update_option( 'enabled', 'no' );
 				}
 
-				wp_send_json_success( ! wc_string_to_bool( $enabled ) );
+				$is_enabled = ! wc_string_to_bool( $enabled );
+
+				/**
+				 * Fires after on/off payment gateway
+				 * Here, $enabled is old status and $is_enabled is new status for the gateway
+				 */
+				do_action( 'woocommerce_after_toggle_gateway_enabled', $gateway_id, $enabled, $is_enabled );
+
+				wp_send_json_success( $is_enabled );
 				wp_die();
 			}
 		}
