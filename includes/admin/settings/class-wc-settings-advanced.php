@@ -94,9 +94,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						/* Translators: %s Page contents. */
 						'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
 						'id'       => 'woocommerce_checkout_page_id',
-						'type'     => 'single_select_page',
-						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
+						'type'     => 'select',
+						'default'  => wc_get_page_id( 'checkout' ),
+						'class'    => 'wc-page-search',
 						'css'      => 'min-width:300px;',
 						'args'     => array(
 							'exclude' =>
