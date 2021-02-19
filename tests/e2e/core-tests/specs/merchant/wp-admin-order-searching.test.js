@@ -28,11 +28,9 @@ const runOrderSearchingTest = () => {
 			await selectOptionInSelect2('Customer', 'input.select2-search__field');
 
 			// Change the shipping data
-			const input = await page.$('#_shipping_first_name'); // to avoid flakiness
-			await input.click({ clickCount: 3 }); // to avoid flakiness
-			await page.keyboard.press('Backspace'); // to avoid flakiness
-			await clearAndFillInput('#_shipping_first_name', 'Jane');
-			await clearAndFillInput('#_shipping_last_name', 'Doherty');
+			await page.waitFor(1000); // to avoid flakiness
+			await clearAndFillInput('#_shipping_first_name', 'Tim');
+			await clearAndFillInput('#_shipping_last_name', 'Clark');
 			await clearAndFillInput('#_shipping_address_1', 'Oxford Ave');
 			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
@@ -40,7 +38,6 @@ const runOrderSearchingTest = () => {
 			await page.select('#_shipping_state', 'NY');
 
 			// Save new order
-			await page.waitFor(2000); // wait for autosave
 			await page.click('button.save_order');
 			await page.waitForSelector('#message');
 
@@ -100,11 +97,11 @@ const runOrderSearchingTest = () => {
 		})
 
 		it('can search for order by shipping first name', async () => {
-			await searchForOrder('Jane', orderId);
+			await searchForOrder('Tim', orderId);
 		})
 
 		it('can search for order by shipping last name', async () => {
-			await searchForOrder('Doherty', orderId);
+			await searchForOrder('Clark', orderId);
 		})
 
 		it('can search for order by shipping first address', async () => {
