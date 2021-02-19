@@ -78,6 +78,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Allow highlight tooltip to use body tag as parent. #6309
 - Dev: Remove Google fonts and material icons. #6343
 - Add: Remove CES actions for adding and editing a product and editing an order #6355
+- Dev: Add filter to allow enabling the WP toolbar within the new navigation. #6371
 - Dev: Add unit tests to Navigation's Container component. #6344
 - Fix: Enqueue scripts called incorrectly in php unit tests #6358
 

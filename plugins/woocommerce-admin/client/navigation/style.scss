@@ -24,8 +24,12 @@
 	position: absolute;
 	top: $header-height;
 	width: 100%;
-	height: calc(100vh - #{$header-height});
+	height: calc(100vh - #{$header-height + $adminbar-height});
 	overflow-y: auto;
+}
+
+.is-wp-toolbar-disabled .woocommerce-navigation__wrapper {
+	height: calc(100vh - #{$header-height});
 }
 
 body.is-wc-nav-expanded {
@@ -66,7 +70,6 @@ body.is-wc-nav-folded {
 }
 
 .has-woocommerce-navigation {
-	#wpadminbar,
 	#adminmenuwrap,
 	#adminmenuback {
 		display: none !important;
@@ -118,5 +121,11 @@ body.is-wc-nav-folded {
 
 	#woocommerce-embedded-root.is-embed-loading {
 		margin-bottom: -$adminbar-height;
+	}
+
+	&:not(.is-wp-toolbar-disabled) {
+		#wpbody-content {
+			margin-top: $adminbar-height;
+		}
 	}
 }

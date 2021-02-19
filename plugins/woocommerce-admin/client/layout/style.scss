@@ -85,7 +85,13 @@
 	}
 }
 
-.wp-toolbar .woocommerce-admin-full-screen {
+.is-wp-toolbar-disabled {
+	#wpadminbar {
+		display: none !important;
+	}
+}
+
+.wp-toolbar .is-wp-toolbar-disabled {
 	margin-top: -$adminbar-height;
 	@include breakpoint( '<600px' ) {
 		margin-top: -$adminbar-height-mobile;

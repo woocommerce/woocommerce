@@ -80,6 +80,7 @@ class ProfileWizard extends Component {
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
 		document.body.classList.add( 'woocommerce-admin-full-screen' );
+		document.body.classList.add( 'is-wp-toolbar-disabled' );
 
 		recordEvent( 'storeprofiler_step_view', {
 			step: this.getCurrentStep().key,
@@ -104,6 +105,7 @@ class ProfileWizard extends Component {
 		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
 		document.body.classList.remove( 'woocommerce-admin-full-screen' );
+		document.body.classList.remove( 'is-wp-toolbar-disabled' );
 	}
 
 	getSteps() {

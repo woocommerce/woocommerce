@@ -14,6 +14,10 @@ The fastest way to get started is by creating an example plugin from WooCommerce
 
 This will create a new plugin that covers various features of the navigation and helps to register some intial items and categories within the new navigation menu.  After running the command above, you can make edits directly to the files at `docs/examples/extensions/add-navigation-items` and they will be built and copied to your `wp-content/add-navigation-items` folder on save.
 
+If you need to enable the WP Toolbar for debugging purposes in the new navigation, you can add the following filter to do so:
+
+`add_filter( 'woocommerce_navigation_wp_toolbar_disabled', '__return_false' );`
+
 ### Adding a menu category
 
 Categories in the new navigation are menu items that house child menu items.
