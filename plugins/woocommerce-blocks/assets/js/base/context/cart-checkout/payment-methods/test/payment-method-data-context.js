@@ -11,10 +11,7 @@ import {
 	__experimentalDeRegisterPaymentMethod,
 	__experimentalDeRegisterExpressPaymentMethod,
 } from '@woocommerce/blocks-registry';
-import {
-	CheckoutExpressPayment,
-	SavedPaymentMethodOptions,
-} from '@woocommerce/base-components/payment-methods';
+
 /**
  * Internal dependencies
  */
@@ -22,10 +19,15 @@ import {
 	usePaymentMethodDataContext,
 	PaymentMethodDataProvider,
 } from '../payment-method-data-context';
+import {
+	CheckoutExpressPayment,
+	SavedPaymentMethodOptions,
+} from '../../../../../blocks/cart-checkout/payment-methods';
 import { defaultCartState } from '../../../../../data/default-states';
 
 jest.mock( '@woocommerce/settings', () => {
 	const originalModule = jest.requireActual( '@woocommerce/settings' );
+
 	return {
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
