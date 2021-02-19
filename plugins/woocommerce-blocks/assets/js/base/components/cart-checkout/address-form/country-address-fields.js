@@ -41,7 +41,7 @@ const getSupportedProps = ( localeField ) => {
 
 	if ( localeField.label !== undefined && ! localeField.optionalLabel ) {
 		fields.optionalLabel = sprintf(
-			/* Translators: %s Field label. */
+			/* translators: %s Field label. */
 			__( '%s (optional)', 'woo-gutenberg-products-block' ),
 			localeField.label
 		);

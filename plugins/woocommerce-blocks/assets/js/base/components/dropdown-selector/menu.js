@@ -38,7 +38,7 @@ const DropdownSelectorMenu = ( {
 							item: option.value,
 							'aria-label': selected
 								? sprintf(
-										/* Translators: %s is referring to the filter option being removed. */
+										/* translators: %s is referring to the filter option being removed. */
 										__(
 											'Remove %s filter',
 											'woo-gutenberg-products-block'

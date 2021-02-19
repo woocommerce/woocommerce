@@ -42,7 +42,7 @@ const ProductsControl = ( {
 		),
 		selected: ( n ) =>
 			sprintf(
-				// Translators: %d is the number of selected products.
+				/* translators: %d is the number of selected products. */
 				_n(
 					'%d product selected',
 					'%d products selected',

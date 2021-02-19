@@ -155,7 +155,7 @@ const DropdownSelector = ( {
 								checked.length > 0 && multiple
 									? null
 									: sprintf(
-											// Translators: %s attribute name.
+											/* translators: %s attribute name. */
 											__(
 												'Any %s',
 												'woo-gutenberg-products-block'

@@ -61,7 +61,7 @@ const ReviewsByCategoryEditor = ( {
 				{ ...args }
 				showCount
 				aria-label={ sprintf(
-					// Translators: %1$s is the search term name, %2$d is the number of products returned for search query.
+					/* translators: %1$s is the search term name, %2$d is the number of products returned for search query. */
 					_n(
 						'%1$s, has %2$d product',
 						'%1$s, has %2$d products',

@@ -14,7 +14,7 @@ export const mustBeString = ( value ) => {
 	if ( typeof value !== 'string' ) {
 		throw Error(
 			sprintf(
-				// translators: %s is type of value passed
+				/* translators: %s is type of value passed */
 				__(
 					'Returned value must be a string, you passed "%s"',
 					'woo-gutenberg-products-block'
@@ -38,7 +38,7 @@ export const mustContain = ( value, label ) => {
 	if ( ! value.includes( label ) ) {
 		throw Error(
 			sprintf(
-				// translators: %1$s value passed to filter, %2$s : value that must be included.
+				/* translators: %1$s value passed to filter, %2$s : value that must be included. */
 				__(
 					'Returned value must include %1$s, you passed "%2$s"',
 					'woo-gutenberg-products-block'

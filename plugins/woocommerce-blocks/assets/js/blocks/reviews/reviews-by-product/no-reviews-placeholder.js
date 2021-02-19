@@ -27,7 +27,7 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 			<Spinner />
 		) : (
 			sprintf(
-				// Translators: %s is the product name.
+				/* translators: %s is the product name. */
 				__(
 					"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
 					'woo-gutenberg-products-block'

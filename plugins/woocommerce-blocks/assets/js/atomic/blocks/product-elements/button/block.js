@@ -80,7 +80,7 @@ const AddToCartButton = ( { product } ) => {
 	);
 	const buttonText = addedToCart
 		? sprintf(
-				// translators: %s number of products in cart.
+				/* translators: %s number of products in cart. */
 				_n(
 					'%d in cart',
 					'%d in cart',

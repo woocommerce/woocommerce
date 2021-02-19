@@ -56,7 +56,7 @@ const TotalsDiscount = ( {
 									className="wc-block-components-totals-discount__coupon-list-item"
 									text={ cartCoupon.code }
 									screenReaderText={ sprintf(
-										/* Translators: %s Coupon code. */
+										/* translators: %s Coupon code. */
 										__(
 											'Coupon: %s',
 											'woo-gutenberg-products-block'
@@ -69,7 +69,7 @@ const TotalsDiscount = ( {
 									} }
 									radius="large"
 									ariaLabel={ sprintf(
-										/* Translators: %s is a coupon code. */
+										/* translators: %s is a coupon code. */
 										__(
 											'Remove coupon "%s"',
 											'woo-gutenberg-products-block'

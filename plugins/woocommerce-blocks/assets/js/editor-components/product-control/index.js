@@ -128,7 +128,7 @@ const ProductControl = ( {
 					{ variationsCount ? (
 						<span className="woocommerce-search-list__item-variation-count">
 							{ sprintf(
-								// Translators: %d is the count of variations.
+								/* translators: %d is the count of variations. */
 								_n(
 									'%d variation',
 									'%d variations',

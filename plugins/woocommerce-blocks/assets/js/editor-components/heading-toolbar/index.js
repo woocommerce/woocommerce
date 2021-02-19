@@ -21,7 +21,7 @@ class HeadingToolbar extends Component {
 		const isActive = targetLevel === selectedLevel;
 		return {
 			icon: <HeadingLevelIcon level={ targetLevel } />,
-			// translators: %s: heading level e.g: "2", "3", "4"
+			/* translators: %s: heading level e.g: "2", "3", "4" */
 			title: sprintf( __( 'Heading %d' ), targetLevel ),
 			isActive,
 			onClick: () => onChange( targetLevel ),

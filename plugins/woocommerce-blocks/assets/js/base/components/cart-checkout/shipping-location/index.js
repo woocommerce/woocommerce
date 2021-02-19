@@ -46,7 +46,7 @@ const ShippingLocation = ( { address } ) => {
 		formattedLocation && (
 			<span className="wc-block-components-shipping-address">
 				{ sprintf(
-					/* Translators: %s location. */
+					/* translators: %s location. */
 					__( 'Shipping to %s', 'woo-gutenberg-products-block' ),
 					formattedLocation
 				) + ' ' }

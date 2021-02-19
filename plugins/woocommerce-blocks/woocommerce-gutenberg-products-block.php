@@ -91,7 +91,7 @@ if ( woocommerce_blocks_is_development_version() && ! defined( 'JETPACK_AUTOLOAD
 		function() {
 			echo '<div class="error"><p>';
 			printf(
-				/* Translators: %1$s is referring to a php constant name, %2$s is referring to the wp-config.php file. */
+				/* translators: %1$s is referring to a php constant name, %2$s is referring to the wp-config.php file. */
 				esc_html__( 'WooCommerce Blocks development mode requires the %1$s constant to be defined and true in your %2$s file. Otherwise you are loading the blocks package from WooCommerce core.', 'woo-gutenberg-products-block' ),
 				'JETPACK_AUTOLOAD_DEV',
 				'wp-config.php'

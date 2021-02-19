@@ -47,7 +47,7 @@ const ShippingRatesControl = ( {
 		if ( packageCount === 1 ) {
 			speak(
 				sprintf(
-					// translators: %d number of shipping options found.
+					/* translators: %d number of shipping options found. */
 					_n(
 						'%d shipping option was found.',
 						'%d shipping options were found.',
@@ -60,7 +60,7 @@ const ShippingRatesControl = ( {
 		} else {
 			speak(
 				sprintf(
-					// translators: %d number of shipping packages packages.
+					/* translators: %d number of shipping packages packages. */
 					_n(
 						'Shipping option searched for %d package.',
 						'Shipping options searched for %d packages.',
@@ -71,7 +71,7 @@ const ShippingRatesControl = ( {
 				) +
 					' ' +
 					sprintf(
-						// translators: %d number of shipping options available.
+						/* translators: %d number of shipping options available. */
 						_n(
 							'%d shipping option was found',
 							'%d shipping options were found',

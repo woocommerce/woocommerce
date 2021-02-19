@@ -58,7 +58,7 @@ const CheckboxList = ( {
 						} }
 						aria-expanded={ false }
 						aria-label={ sprintf(
-							/* Translators: %s is referring the remaining count of options */
+							/* translators: %s is referring the remaining count of options */
 							_n(
 								'Show %s more option',
 								'Show %s more options',
@@ -69,7 +69,7 @@ const CheckboxList = ( {
 						) }
 					>
 						{ sprintf(
-							// translators: %s number of options to reveal.
+							/* translators: %s number of options to reveal. */
 							_n(
 								'Show %s more',
 								'Show %s more',
