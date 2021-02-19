@@ -2,17 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, lazy } from '@wordpress/element';
+import { lazy, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
 import { Icon, help as helpIcon, inbox as inboxIcon } from '@wordpress/icons';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, useUser } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -39,178 +38,148 @@ const InboxPanel = lazy( () =>
 	)
 );
 
-export class ActivityPanel extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isPanelOpen: false,
-			mobileOpen: false,
-			currentTab: '',
-			isPanelSwitching: false,
+export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
+	const [ currentTab, setCurrentTab ] = useState( '' );
+	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
+	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
+	const [ mobileOpen, setMobileOpen ] = useState( false );
+
+	const {
+		hasUnreadNotes,
+		requestingTaskListOptions,
+		setupTaskListComplete,
+		setupTaskListHidden,
+		trackedCompletedTasks,
+	} = useSelect( ( select ) => {
+		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+
+		return {
+			hasUnreadNotes: getUnreadNotes( select ),
+			requestingTaskListOptions:
+				isResolving( 'getOption', [
+					'woocommerce_task_list_complete',
+				] ) ||
+				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] ),
+			setupTaskListComplete:
+				getOption( 'woocommerce_task_list_complete' ) === 'yes',
+			setupTaskListHidden:
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+			trackedCompletedTasks:
+				getOption( 'woocommerce_task_list_tracked_completed_tasks' ) ||
+				[],
 		};
-	}
+	} );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { currentUserCan } = useUser();
 
-	togglePanel( { name: tabName }, isTabOpen ) {
-		this.setState( ( state ) => {
-			const isPanelSwitching =
-				tabName !== state.currentTab &&
-				state.currentTab !== '' &&
-				isTabOpen &&
-				state.isPanelOpen;
+	const togglePanel = ( { name: tabName }, isTabOpen ) => {
+		const panelSwitching =
+			tabName !== currentTab &&
+			currentTab !== '' &&
+			isTabOpen &&
+			isPanelOpen;
 
-			return {
-				isPanelOpen: isTabOpen,
-				mobileOpen: isTabOpen,
-				currentTab: tabName,
-				isPanelSwitching,
-			};
-		} );
-	}
+		setCurrentTab( tabName );
+		setMobileOpen( isTabOpen );
+		setIsPanelOpen( isTabOpen );
+		setIsPanelSwitching( panelSwitching );
+	};
 
-	closePanel() {
-		this.setState( () => ( {
-			isPanelOpen: false,
-			currentTab: '',
-		} ) );
-	}
+	const closePanel = () => {
+		setCurrentTab( '' );
+		setIsPanelOpen( false );
+	};
 
-	clearPanel() {
-		this.setState( () => ( {
-			isPanelSwitching: false,
-		} ) );
-	}
+	const clearPanel = () => {
+		setIsPanelSwitching( 'false' );
+	};
 
 	// On smaller screen, the panel buttons are hidden behind a toggle.
-	toggleMobile() {
-		const tabs = this.getTabs();
-		this.setState( ( state ) => ( {
-			mobileOpen: ! state.mobileOpen,
-			currentTab: state.mobileOpen ? '' : tabs[ 0 ].name,
-			isPanelOpen: ! state.mobileOpen,
-		} ) );
-	}
+	const toggleMobile = () => {
+		const tabs = getTabs();
+		setCurrentTab( mobileOpen ? '' : tabs[ 0 ].name );
+		setMobileOpen( ! mobileOpen );
+		setIsPanelOpen( ! mobileOpen );
+	};
 
-	handleClickOutside( event ) {
-		const { isPanelOpen } = this.state;
-		const isClickOnModalOrSnackbar =
-			event.target.closest(
-				'.woocommerce-inbox-dismiss-confirmation_modal'
-			) || event.target.closest( '.components-snackbar__action' );
+	const isHomescreen = () => {
+		return query.page === 'wc-admin' && ! query.path;
+	};
 
-		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
-			this.closePanel();
-		}
-	}
-
-	isHomescreen() {
-		const { location } = this.props.getHistory();
-
-		return location.pathname === '/';
-	}
-
-	isPerformingSetupTask() {
-		const {
-			requestingTaskListOptions,
-			setupTaskListComplete,
-			setupTaskListHidden,
-			query,
-		} = this.props;
-
-		const isPerformingSetupTask =
+	const isPerformingSetupTask = () => {
+		return (
 			query.task &&
 			! query.path &&
 			( requestingTaskListOptions === true ||
 				( setupTaskListHidden === false &&
-					setupTaskListComplete === false ) );
-
-		return isPerformingSetupTask;
-	}
+					setupTaskListComplete === false ) )
+		);
+	};
 
 	// @todo Pull in dynamic unread status/count
-	getTabs() {
-		const {
-			hasUnreadNotes,
-			isEmbedded,
-			setupTaskListComplete,
-			setupTaskListHidden,
-			updateOptions,
-		} = this.props;
+	const getTabs = () => {
+		const inbox = {
+			name: 'inbox',
+			title: __( 'Inbox', 'woocommerce-admin' ),
+			icon: <Icon icon={ inboxIcon } />,
+			unread: hasUnreadNotes,
+			visible:
+				( isEmbedded || ! isHomescreen() ) && ! isPerformingSetupTask(),
+		};
 
-		const isPerformingSetupTask = this.isPerformingSetupTask();
+		const setup = {
+			name: 'setup',
+			title: __( 'Store Setup', 'woocommerce-admin' ),
+			icon: <SetupProgress />,
+			onClick: () => {
+				const currentLocation = window.location.href;
+				const homescreenLocation = getAdminLink(
+					'admin.php?page=wc-admin'
+				);
 
-		// Don't show the inbox on the Home screen.
-		const showInbox =
-			( isEmbedded || ! this.isHomescreen() ) && ! isPerformingSetupTask;
+				// Don't navigate if we're already on the homescreen, this will cause an infinite loop
+				if ( currentLocation !== homescreenLocation ) {
+					// Ensure that if the user is trying to get to the task list they can see it even if
+					// it was dismissed.
+					if ( setupTaskListHidden === 'no' ) {
+						redirectToHomeScreen();
+					} else {
+						updateOptions( {
+							woocommerce_task_list_hidden: 'no',
+						} ).then( redirectToHomeScreen );
+					}
+				}
 
-		const showHelp =
-			( this.isHomescreen() && ! isEmbedded ) || isPerformingSetupTask;
+				return null;
+			},
+			visible:
+				currentUserCan( 'manage_woocommerce' ) &&
+				! setupTaskListComplete &&
+				! setupTaskListHidden &&
+				! isPerformingSetupTask() &&
+				( ! isHomescreen() || isEmbedded ),
+		};
 
-		const showDisplayOptions =
-			! isEmbedded && this.isHomescreen() && ! isPerformingSetupTask;
+		const help = {
+			name: 'help',
+			title: __( 'Help', 'woocommerce-admin' ),
+			icon: <Icon icon={ helpIcon } />,
+			visible:
+				( isHomescreen() && ! isEmbedded ) || isPerformingSetupTask(),
+		};
 
-		const showStoreSetup =
-			! setupTaskListComplete &&
-			! setupTaskListHidden &&
-			! isPerformingSetupTask &&
-			( ! this.isHomescreen() || isEmbedded );
+		const displayOptions = {
+			component: DisplayOptions,
+			visible:
+				! isEmbedded && isHomescreen() && ! isPerformingSetupTask(),
+		};
 
-		const inbox = showInbox
-			? {
-					name: 'inbox',
-					title: __( 'Inbox', 'woocommerce-admin' ),
-					icon: <Icon icon={ inboxIcon } />,
-					unread: hasUnreadNotes,
-			  }
-			: null;
+		return [ inbox, setup, displayOptions, help ].filter(
+			( tab ) => tab.visible
+		);
+	};
 
-		const setup = showStoreSetup
-			? {
-					name: 'setup',
-					title: __( 'Store Setup', 'woocommerce-admin' ),
-					icon: <SetupProgress />,
-					onClick: () => {
-						const currentLocation = window.location.href;
-						const homescreenLocation = getAdminLink(
-							'admin.php?page=wc-admin'
-						);
-
-						// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-						if ( currentLocation !== homescreenLocation ) {
-							// Ensure that if the user is trying to get to the task list they can see it even if
-							// it was dismissed.
-							if ( setupTaskListHidden === 'no' ) {
-								this.redirectToHomeScreen();
-							} else {
-								updateOptions( {
-									woocommerce_task_list_hidden: 'no',
-								} ).then( this.redirectToHomeScreen );
-							}
-						}
-
-						return null;
-					},
-			  }
-			: null;
-
-		const help = showHelp
-			? {
-					name: 'help',
-					title: __( 'Help', 'woocommerce-admin' ),
-					icon: <Icon icon={ helpIcon } />,
-			  }
-			: null;
-
-		const displayOptions = showDisplayOptions
-			? {
-					component: DisplayOptions,
-			  }
-			: null;
-
-		return [ inbox, setup, displayOptions, help ].filter( Boolean );
-	}
-
-	getPanelContent( tab ) {
-		const { query } = this.props;
+	const getPanelContent = ( tab ) => {
 		const { task } = query;
 
 		switch ( tab ) {
@@ -221,18 +190,17 @@ export class ActivityPanel extends Component {
 			default:
 				return null;
 		}
-	}
+	};
 
-	redirectToHomeScreen() {
+	const redirectToHomeScreen = () => {
 		if ( isWCAdmin( window.location.href ) ) {
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		} else {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		}
-	}
+	};
 
-	closedHelpPanelHighlight() {
-		const { userPreferencesData } = this.props;
+	const closedHelpPanelHighlight = () => {
 		recordEvent( 'help_tooltip_click' );
 		if (
 			userPreferencesData &&
@@ -242,14 +210,9 @@ export class ActivityPanel extends Component {
 				help_panel_highlight_shown: 'yes',
 			} );
 		}
-	}
+	};
 
-	shouldShowHelpTooltip() {
-		const {
-			userPreferencesData,
-			trackedCompletedTasks,
-			query,
-		} = this.props;
+	const shouldShowHelpTooltip = () => {
 		const { task } = query;
 		const startedTasks =
 			userPreferencesData &&
@@ -266,133 +229,96 @@ export class ActivityPanel extends Component {
 			return true;
 		}
 		return false;
-	}
+	};
 
-	render() {
-		const tabs = this.getTabs();
-		const { mobileOpen, currentTab, isPanelOpen } = this.state;
-		const headerId = uniqueId( 'activity-panel-header_' );
-		const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
-			'is-mobile-open': this.state.mobileOpen,
-		} );
+	const tabs = getTabs();
+	const headerId = uniqueId( 'activity-panel-header_' );
+	const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
+		'is-mobile-open': mobileOpen,
+	} );
 
-		const showHelpHighlightTooltip = this.shouldShowHelpTooltip();
-		const hasUnread = tabs.some( ( tab ) => tab.unread );
-		const viewLabel = hasUnread
-			? __(
-					'View Activity Panel, you have unread activity',
-					'woocommerce-admin'
-			  )
-			: __( 'View Activity Panel', 'woocommerce-admin' );
+	const showHelpHighlightTooltip = shouldShowHelpTooltip();
+	const hasUnread = tabs.some( ( tab ) => tab.unread );
+	const viewLabel = hasUnread
+		? __(
+				'View Activity Panel, you have unread activity',
+				'woocommerce-admin'
+		  )
+		: __( 'View Activity Panel', 'woocommerce-admin' );
 
-		return (
-			<div>
-				<H id={ headerId } className="screen-reader-text">
-					{ __( 'Store Activity', 'woocommerce-admin' ) }
-				</H>
-				<Section
-					component="aside"
-					id="woocommerce-activity-panel"
-					aria-labelledby={ headerId }
+	return (
+		<div>
+			<H id={ headerId } className="screen-reader-text">
+				{ __( 'Store Activity', 'woocommerce-admin' ) }
+			</H>
+			<Section
+				component="aside"
+				id="woocommerce-activity-panel"
+				aria-labelledby={ headerId }
+			>
+				<Button
+					onClick={ () => {
+						toggleMobile();
+					} }
+					label={
+						mobileOpen
+							? __( 'Close Activity Panel', 'woocommerce-admin' )
+							: viewLabel
+					}
+					aria-expanded={ mobileOpen }
+					className="woocommerce-layout__activity-panel-mobile-toggle"
 				>
-					<Button
-						onClick={ () => {
-							this.toggleMobile();
+					{ mobileOpen ? (
+						<CrossIcon />
+					) : (
+						<ActivityPanelToggleBubble hasUnread={ hasUnread } />
+					) }
+				</Button>
+				<div className={ panelClasses }>
+					<Tabs
+						tabs={ tabs }
+						tabOpen={ isPanelOpen }
+						selectedTab={ currentTab }
+						onTabClick={ ( tab, tabOpen ) => {
+							if ( tab.onClick ) {
+								tab.onClick();
+								return;
+							}
+							togglePanel( tab, tabOpen );
 						} }
-						label={
-							mobileOpen
-								? __(
-										'Close Activity Panel',
-										'woocommerce-admin'
-								  )
-								: viewLabel
-						}
-						aria-expanded={ mobileOpen }
-						className="woocommerce-layout__activity-panel-mobile-toggle"
-					>
-						{ mobileOpen ? (
-							<CrossIcon />
-						) : (
-							<ActivityPanelToggleBubble
-								hasUnread={ hasUnread }
-							/>
-						) }
-					</Button>
-					<div className={ panelClasses }>
-						<Tabs
-							tabs={ tabs }
-							tabOpen={ isPanelOpen }
-							selectedTab={ currentTab }
-							onTabClick={ ( tab, tabOpen ) => {
-								if ( tab.onClick ) {
-									tab.onClick();
-									return;
-								}
-								this.togglePanel( tab, tabOpen );
-							} }
-						/>
-						<Panel
-							isPanelOpen
-							currentTab
-							isPanelSwitching
-							tab={ find( this.getTabs(), { name: currentTab } ) }
-							content={ this.getPanelContent( currentTab ) }
-							closePanel={ () => this.closePanel() }
-							clearPanel={ () => this.clearPanel() }
-						/>
-					</div>
-				</Section>
-				{ showHelpHighlightTooltip ? (
-					<HighlightTooltip
-						delay={ 1000 }
-						useAnchor={ true }
-						title={ __(
-							"We're here for help",
-							'woocommerce-admin'
-						) }
-						content={ __(
-							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-							'woocommerce-admin'
-						) }
-						closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
-						id="activity-panel-tab-help"
-						onClose={ () => this.closedHelpPanelHighlight() }
-						onShow={ () => recordEvent( 'help_tooltip_view' ) }
 					/>
-				) : null }
-			</div>
-		);
-	}
-}
+					<Panel
+						currentTab
+						isPanelOpen={ isPanelOpen }
+						isPanelSwitching={ isPanelSwitching }
+						tab={ find( getTabs(), { name: currentTab } ) }
+						content={ getPanelContent( currentTab ) }
+						closePanel={ () => closePanel() }
+						clearPanel={ () => clearPanel() }
+					/>
+				</div>
+			</Section>
+			{ showHelpHighlightTooltip ? (
+				<HighlightTooltip
+					delay={ 1000 }
+					useAnchor={ true }
+					title={ __( "We're here for help", 'woocommerce-admin' ) }
+					content={ __(
+						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+						'woocommerce-admin'
+					) }
+					closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
+					id="activity-panel-tab-help"
+					onClose={ () => closedHelpPanelHighlight() }
+					onShow={ () => recordEvent( 'help_tooltip_view' ) }
+				/>
+			) : null }
+		</div>
+	);
+};
 
 ActivityPanel.defaultProps = {
 	getHistory,
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const hasUnreadNotes = getUnreadNotes( select );
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
-
-		const setupTaskListComplete =
-			getOption( 'woocommerce_task_list_complete' ) === 'yes';
-		const setupTaskListHidden =
-			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
-		const requestingTaskListOptions =
-			isResolving( 'getOption', [ 'woocommerce_task_list_complete' ] ) ||
-			isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] );
-		const trackedCompletedTasks =
-			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
-
-		return {
-			hasUnreadNotes,
-			requestingTaskListOptions,
-			setupTaskListComplete,
-			setupTaskListHidden,
-			trackedCompletedTasks,
-		};
-	} ),
-	withDispatch( ( dispatch ) => ( {
-		updateOptions: dispatch( OPTIONS_STORE_NAME ).updateOptions,
-	} ) )
-)( ActivityPanel );
+export default ActivityPanel;

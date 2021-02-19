@@ -274,10 +274,6 @@ class Features {
 			return;
 		}
 
-		if ( ! Loader::user_can_analytics() ) {
-			return;
-		}
-
 		$features         = self::get_features();
 		$enabled_features = array();
 		foreach ( $features as $key ) {

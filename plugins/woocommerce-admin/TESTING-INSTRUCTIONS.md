@@ -48,6 +48,19 @@ Testing instructions
 - Go to WooCommerce home page
 - Click on Display and Help button back and forth, check that the popover and the panel close as expected.
 - Check that the setup store tab continues to work.
+### Move capability checks to client #6365
+
+1. Create various non-admin users with custom capabilities.  Make sure to not include the `view_woocommerce_reports` for at least one role.  https://wordpress.org/plugins/leira-roles/
+2. Log in as the non-admin users.
+3. Check that the correct menu items are shown.
+4. Check that there aren't items shown to the user they should not be able to use or interact with.
+5. Enable the new navigation under WooCommerce -> Settings -> Advanced -> Features.
+6. Check that the users are able to see the new navigation menu.
+7. Click on various tabs in the activity panel.
+8. Make sure the tabs work as expected.
+9. Make sure that users without the `manage_woocommerce` permission are not able to see the "Store Setup" tab.
+10. With a user that can `manage_woocommerce`, navigate to the homepage via URL and make sure the homescreen is shown. `/wp-admin/admin.php?page=wc-admin`
+11. With a user that cannot `view_woocommerce_reports` make sure navigating to an analytics report does not work. `/wp-admin/admin.php?page=wc-admin&path=/analytics/overview`
 
 ## 2.0.0
 

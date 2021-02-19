@@ -6,8 +6,8 @@ import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	PLUGINS_STORE_NAME,
+	useUser,
 	useUserPreferences,
-	USER_STORE_NAME,
 } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -81,6 +81,7 @@ export const JetpackCTA = ( {
 };
 
 export const InstallJetpackCTA = () => {
+	const { currentUserCan } = useUser();
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
 		( select ) => {
@@ -92,15 +93,11 @@ export const InstallJetpackCTA = () => {
 				isPluginsRequesting( 'getJetpackConnectUrl' ) ||
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' );
-			const { getCurrentUser } = select( USER_STORE_NAME );
-			const currentUser = getCurrentUser() || {};
 
 			return {
 				isBusy: busyState,
 				jetpackInstallState: installState,
-				canUserInstallPlugins:
-					currentUser.capabilities &&
-					currentUser.capabilities.install_plugins,
+				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
 			};
 		}
 	);

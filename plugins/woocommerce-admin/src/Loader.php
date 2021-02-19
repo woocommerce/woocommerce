@@ -147,6 +147,7 @@ class Loader {
 	 * Gets WordPress capability required to use analytics features.
 	 *
 	 * @return string
+	 * @deprecated since 2.1.0, use value 'view_woocommerce_reports'
 	 */
 	public static function get_analytics_capability() {
 		if ( null === static::$required_capability ) {
@@ -164,6 +165,7 @@ class Loader {
 	 * Helper function indicating whether the current user has the required analytics capability.
 	 *
 	 * @return bool
+	 * @deprecated since 2.1.0, use current_user_can( 'view_woocommerce_reports' )
 	 */
 	public static function user_can_analytics() {
 		return current_user_can( static::get_analytics_capability() );
@@ -698,10 +700,6 @@ class Loader {
 			return;
 		}
 
-		if ( ! static::user_can_analytics() ) {
-			return;
-		}
-
 		// Grab translation strings from Webpack-generated chunks.
 		add_filter( 'load_script_translation_file', array( __CLASS__, 'load_script_translation_file' ), 10, 3 );
 
@@ -845,10 +843,6 @@ class Loader {
 	 * @param array $section Section to create breadcrumb from.
 	 */
 	private static function output_heading( $section ) {
-		if ( ! static::user_can_analytics() ) {
-			return;
-		}
-
 		echo esc_html( $section );
 	}
 
@@ -858,10 +852,6 @@ class Loader {
 	 */
 	public static function embed_page_header() {
 		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
-			return;
-		}
-
-		if ( ! static::user_can_analytics() ) {
 			return;
 		}
 
