@@ -9,6 +9,46 @@ Testing instructions
 2. Edit a product. The customer effort score survey should not appear.
 3. Edit an order. The customer effort score survey should not appear.
 
+### Center the activity panel #6289
+
+1. Narrow your screen to <782px
+2. Go to WooCommerce home and orders page
+3. Click on 'w' button, see that the activity panel renders as expected.
+
+### Make sure that industry is defined in payment methods #6281
+
+- Start a new store, and skip the initial onboarding flow, there is a button `Skip store details` at the bottom
+- Load the `Set up payments` task, the payment options should load correctly.
+
+### Add a new note with a link to the downloadable product doc #6277
+
+1. Make sure your store does not have any download products.
+2. Install WP Crontrol plugin.
+3. Add a new download product.
+4. Navigate to Tools -> Cron Events and run `wc_admin_daily`
+5. Navigate to WooCommerce -> Home and confirm that the note has been added.
+
+### Onboarding - Fixed "Business Details" error #6271
+
+- Check out this branch.
+- Go to the "Industry" step in the OBW and select `Food and drink`.
+- Go to the "Business Details" step and press `Free features`.
+- Press `Continue`.
+- It should work.
+- Try also selecting and unselecting some checkboxes before pressing `Continue`.
+
+### Change `siteUrl` to `homeUrl` on navigation site title #6240
+
+- Go to WP settings and set the home page to My account
+- Go to WC settings and use the new navigation feature
+- Click on the header site title My Site and see that the page direct to My account
+
+### Refactor panel with withFocusOutside #6233
+
+- Go to WooCommerce home page
+- Click on Display and Help button back and forth, check that the popover and the panel close as expected.
+- Check that the setup store tab continues to work.
+
 ## 2.0.0
 
 ### Add the Mollie payment provider setup task #6257
