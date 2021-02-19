@@ -81,6 +81,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add filter to allow enabling the WP toolbar within the new navigation. #6371
 - Dev: Add unit tests to Navigation's Container component. #6344
 - Fix: Enqueue scripts called incorrectly in php unit tests #6358
+- Fix: Removed @woocommerce/components/card from OBW #6374
 
 == 2.0.0 02/05/2021 ==
 
