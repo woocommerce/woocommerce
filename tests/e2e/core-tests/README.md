@@ -55,6 +55,8 @@ The functions to access the core tests are:
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
+  - `runProductEditDetailsTest` - Merchant can edit an existing product
+  - `runProductSearchTest` - Merchant can search for a product and view it
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
 
 ### Shopper
