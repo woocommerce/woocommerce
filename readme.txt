@@ -190,6 +190,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Add Woo Version as global prop in track events. #28627
 * Dev - Added orders count by payment method to Tracker data and replaced direct DB calls with CRUD. #28584
 * Dev - WC_Tax::get_tax_rate_classes() is now public. #27671
+* Dev - "Store management insights" option now is turned off by default. #29105
 * Tweak - Updated WooCommerce logo color. #29054
 * Tweak - Correctly aligns content in the checkout with Twenty Twenty-One. #28951
 * Tweak - Use assigned variable for $post_thumbnail_id instead of calling function more than once. #28919
