@@ -6,8 +6,6 @@ import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Pagination from '@woocommerce/base-components/pagination';
-import ProductSortSelect from '@woocommerce/base-components/product-sort-select';
-import ProductListItem from '@woocommerce/base-components/product-list-item';
 import { useEffect } from '@wordpress/element';
 import {
 	usePrevious,
@@ -23,9 +21,11 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import NoProducts from './no-products';
 import NoMatchingProducts from './no-matching-products';
+import ProductSortSelect from './product-sort-select';
+import ProductListItem from './product-list-item';
+import './style.scss';
 
 const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 	const { columns, rows } = attributes;
