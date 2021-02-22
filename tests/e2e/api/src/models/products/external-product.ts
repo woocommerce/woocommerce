@@ -39,7 +39,7 @@ export type ExternalProductRepositoryParams =
 	ModelRepositoryParams< ExternalProduct, never, ProductSearchParams, ExternalProductUpdateParams >;
 
 /**
- * An interface for listing simple products using the repository.
+ * An interface for listing external products using the repository.
  *
  * @typedef ListsExternalProducts
  * @alias ListsModels.<ExternalProduct>
@@ -47,7 +47,7 @@ export type ExternalProductRepositoryParams =
 export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams >;
 
 /**
- * An interface for creating simple products using the repository.
+ * An interface for external simple products using the repository.
  *
  * @typedef CreatesExternalProducts
  * @alias CreatesModels.<ExternalProduct>
@@ -55,7 +55,7 @@ export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams
 export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryParams >;
 
 /**
- * An interface for reading simple products using the repository.
+ * An interface for reading external products using the repository.
  *
  * @typedef ReadsExternalProducts
  * @alias ReadsModels.<ExternalProduct>
@@ -63,7 +63,7 @@ export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryPa
 export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams >;
 
 /**
- * An interface for updating simple products using the repository.
+ * An interface for updating external products using the repository.
  *
  * @typedef UpdatesExternalProducts
  * @alias UpdatesModels.<ExternalProduct>
@@ -71,7 +71,7 @@ export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams
 export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryParams >;
 
 /**
- * An interface for deleting simple products using the repository.
+ * An interface for deleting external products using the repository.
  *
  * @typedef DeletesExternalProducts
  * @alias DeletesModels.<ExternalProduct>
@@ -79,7 +79,7 @@ export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryPa
 export type DeletesExternalProducts = DeletesModels< ExternalProductRepositoryParams >;
 
 /**
- * The base for the simple product object.
+ * The base for the external product object.
  */
 export class ExternalProduct extends AbstractProduct implements
 	IProductCommon,

@@ -235,6 +235,9 @@ export function createProductCrossSellsTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for the product upsells property.
+ */
 export function createProductUpSellsTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -298,6 +301,9 @@ export function createProductDeliveryTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product inventory properties.
+ */
 export function createProductInventoryTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -327,6 +333,9 @@ export function createProductInventoryTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product sales tax properties.
+ */
 export function createProductSalesTaxTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -346,6 +355,9 @@ export function createProductSalesTaxTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product shipping properties.
+ */
 export function createProductShippingTransformation(): ModelTransformation[] {
 	const transformations = [
 		new CustomTransformation(
