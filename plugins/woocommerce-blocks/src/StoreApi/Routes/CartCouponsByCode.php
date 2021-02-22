@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-
 /**
  * CartCouponsByCode class.
  *
@@ -56,9 +54,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$controller = new CartController();
-
-		if ( ! $controller->has_coupon( $request['code'] ) ) {
+		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
@@ -73,13 +69,12 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
-		$controller = new CartController();
-
-		if ( ! $controller->has_coupon( $request['code'] ) ) {
+		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		$cart = $controller->get_cart_instance();
+		$cart = $this->cart_controller->get_cart_instance();
+
 		$cart->remove_coupon( $request['code'] );
 		$cart->calculate_totals();
 

@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-
 /**
  * CartCoupons class.
  *
@@ -56,8 +54,7 @@ class CartCoupons extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$controller   = new CartController();
-		$cart_coupons = $controller->get_cart_coupons();
+		$cart_coupons = $this->cart_controller->get_cart_coupons();
 		$items        = [];
 
 		foreach ( $cart_coupons as $coupon_code ) {
@@ -85,10 +82,8 @@ class CartCoupons extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		$controller = new CartController();
-
 		try {
-			$controller->apply_coupon( $request['code'] );
+			$this->cart_controller->apply_coupon( $request['code'] );
 		} catch ( \WC_REST_Exception $e ) {
 			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 		}
@@ -107,8 +102,8 @@ class CartCoupons extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
-		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
+		$cart = $this->cart_controller->get_cart_instance();
+
 		$cart->remove_coupons();
 		$cart->calculate_totals();
 

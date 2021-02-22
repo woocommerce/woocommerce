@@ -10,6 +10,8 @@ use \WP_REST_Response;
 use \WC_Order;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
@@ -29,6 +31,29 @@ class Checkout extends AbstractCartRoute {
 	 * @var WC_Order
 	 */
 	private $order = null;
+
+	/**
+	 * Order controller class instance.
+	 *
+	 * @var OrderController
+	 */
+	protected $order_controller;
+
+	/**
+	 * Constructor accepts two types of schema; one for the item being returned, and one for the cart as a whole. These
+	 * may be the same depending on the route.
+	 *
+	 * @param CartSchema      $cart_schema Schema class for the cart.
+	 * @param AbstractSchema  $item_schema Schema class for this route's items if it differs from the cart schema.
+	 * @param CartController  $cart_controller Cart controller class.
+	 * @param OrderController $order_controller Order controller class.
+	 */
+	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null, CartController $cart_controller, OrderController $order_controller ) {
+		$this->schema           = is_null( $item_schema ) ? $cart_schema : $item_schema;
+		$this->cart_schema      = $cart_schema;
+		$this->cart_controller  = $cart_controller;
+		$this->order_controller = $order_controller;
+	}
 
 	/**
 	 * Get the path of this REST route.
@@ -192,9 +217,8 @@ class Checkout extends AbstractCartRoute {
 		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
 		 * the customer.
 		 */
-		$cart_controller = new CartController();
-		$cart_controller->validate_cart_items();
-		$cart_controller->validate_cart_coupons();
+		$this->cart_controller->validate_cart_items();
+		$this->cart_controller->validate_cart_coupons();
 
 		/**
 		 * Obtain Draft Order and process request data.
@@ -218,8 +242,7 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This logic ensures the order is valid before payment is attempted.
 		 */
-		$order_controller = new OrderController();
-		$order_controller->validate_order_before_payment( $this->order );
+		$this->order_controller->validate_order_before_payment( $this->order );
 
 		/**
 		 * WooCommerce Blocks Checkout Order Processed (experimental).
@@ -357,14 +380,12 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order() {
-		$order_controller = new OrderController();
-		$reserve_stock    = new ReserveStock();
-		$this->order      = $this->get_draft_order_id() ? wc_get_order( $this->get_draft_order_id() ) : null;
+		$this->order = $this->get_draft_order_id() ? wc_get_order( $this->get_draft_order_id() ) : null;
 
 		if ( ! $this->is_valid_draft_order( $this->order ) ) {
-			$this->order = $order_controller->create_order_from_cart();
+			$this->order = $this->order_controller->create_order_from_cart();
 		} else {
-			$order_controller->update_order_from_cart( $this->order );
+			$this->order_controller->update_order_from_cart( $this->order );
 		}
 
 		/**
@@ -398,6 +419,7 @@ class Checkout extends AbstractCartRoute {
 
 		// Try to reserve stock for 10 mins, if available.
 		try {
+			$reserve_stock = new ReserveStock();
 			$reserve_stock->reserve_stock_for_order( $this->order, 10 );
 		} catch ( ReserveStockException $e ) {
 			$error_data = $e->getErrorData();
@@ -580,15 +602,11 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @internal CreateAccount class includes feature gating logic (i.e. this may not create an account depending on build).
 	 * @internal Checkout signup is feature gated to WooCommerce 4.7 and newer; Because it requires updated my-account/lost-password screen in 4.7+ for setting initial password.
-
-	 * @todo OrderController (and CartController) should be injected into Checkout Route Class.
 	 *
 	 * @throws RouteException API error object with error details.
 	 * @param WP_REST_Request $request Request object.
 	 */
 	private function process_customer( WP_REST_Request $request ) {
-		$order_controller = new OrderController();
-
 		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '4.7', '>=' ) ) {
 			try {
 				$create_account = Package::container()->get( CreateAccount::class );
@@ -614,7 +632,7 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		// Persist customer address data to account.
-		$order_controller->sync_customer_data_with_order( $this->order );
+		$this->order_controller->sync_customer_data_with_order( $this->order );
 	}
 
 }

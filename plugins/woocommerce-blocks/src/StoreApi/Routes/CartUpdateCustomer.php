@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\BillingAddressSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ShippingAddressSchema;
@@ -74,10 +73,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
-		$billing    = isset( $request['billing_address'] ) ? $request['billing_address'] : [];
-		$shipping   = isset( $request['shipping_address'] ) ? $request['shipping_address'] : [];
+		$cart     = $this->cart_controller->get_cart_instance();
+		$billing  = isset( $request['billing_address'] ) ? $request['billing_address'] : [];
+		$shipping = isset( $request['shipping_address'] ) ? $request['shipping_address'] : [];
 
 		// If the cart does not need shipping, shipping address is forced to match billing address unless defined.
 		if ( ! $cart->needs_shipping() && ! isset( $request['shipping_address'] ) ) {

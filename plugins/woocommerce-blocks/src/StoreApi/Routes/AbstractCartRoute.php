@@ -26,15 +26,24 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected $cart_schema;
 
 	/**
+	 * Cart controller class instance.
+	 *
+	 * @var CartController
+	 */
+	protected $cart_controller;
+
+	/**
 	 * Constructor accepts two types of schema; one for the item being returned, and one for the cart as a whole. These
 	 * may be the same depending on the route.
 	 *
 	 * @param CartSchema     $cart_schema Schema class for the cart.
 	 * @param AbstractSchema $item_schema Schema class for this route's items if it differs from the cart schema.
+	 * @param CartController $cart_controller Cart controller class.
 	 */
-	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null ) {
-		$this->schema      = is_null( $item_schema ) ? $cart_schema : $item_schema;
-		$this->cart_schema = $cart_schema;
+	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null, CartController $cart_controller ) {
+		$this->schema          = is_null( $item_schema ) ? $cart_schema : $item_schema;
+		$this->cart_schema     = $cart_schema;
+		$this->cart_controller = $cart_controller;
 	}
 
 	/**
@@ -44,7 +53,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->maybe_load_cart();
+		$this->cart_controller->load_cart();
 		$this->calculate_totals();
 
 		try {
@@ -145,8 +154,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		switch ( $http_status_code ) {
 			case 409:
 				// If there was a conflict, return the cart so the client can resolve it.
-				$controller = new CartController();
-				$cart       = $controller->get_cart_instance();
+				$cart = $this->cart_controller->get_cart_instance();
 
 				return new \WP_Error(
 					$error_code,
@@ -161,16 +169,5 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				);
 		}
 		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
-	}
-
-	/**
-	 * Makes the cart and sessions available to a route by loading them from core.
-	 */
-	protected function maybe_load_cart() {
-		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
-			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
-			include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
-			wc_load_cart();
-		}
 	}
 }
