@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
-import { getCurrency } from '@woocommerce/price-format';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
@@ -36,7 +36,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		extensions,
 	} = cartItem;
 
-	const priceCurrency = getCurrency( prices );
+	const priceCurrency = getCurrencyFromPriceResponse( prices );
 
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',
@@ -60,7 +60,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	} )
 		.convertPrecision( priceCurrency.minorUnit )
 		.getAmount();
-	const totalsCurrency = getCurrency( totals );
+	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 
 	let lineTotal = parseInt( totals.line_total, 10 );
 	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
@@ -68,9 +68,8 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	}
 	const totalsPrice = Dinero( {
 		amount: lineTotal,
-	} )
-		.convertPrecision( totals.currency_minor_unit )
-		.getAmount();
+		precision: totalsCurrency.minorUnit,
+	} ).getAmount();
 	const subtotalPriceFormat = __experimentalApplyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
 		defaultValue: '<price/>',
