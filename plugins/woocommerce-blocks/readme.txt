@@ -85,6 +85,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 4.5.2 - 2021-02-22 =
+
+#### Bug Fixes
+
+- Fix cart items showing a price of 0 when currency format didn't have decimals. ([3876](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3876))
+
 = 4.5.1 - 2021-02-16 =
 
 This release fixes an error that some users experienced when their site automatically updated to a temporarily broken version of the 4.5.0 release.
