@@ -84,6 +84,38 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Removed @woocommerce/components/card from OBW #6374
 - Fix: Email notes now are turned off by default #6324
 - Add: CES track settings tab on updating settings #6368
+- Fix: Top bar slightly overlaps wp-admin navigation on mobile #6292
+- Fix: Hide tooltip in welcome modal #6142
+- Fix: update single column home screen width to 680px #6297
+- Fix: Recommended Payment Banner missing in Safari #6375
+- Tweak: Order and styles updates to nav footer #6373
+- Enhancement: Move capability checks to client #6365
+- Tweak: Enqueue beta features scripts on enqueue_scripts action instead of filter  #6358
+- Enhancement: Navigation: Add test to container component #6344
+- Fix: Empty nav menu #6366
+- Enhancement: override wpbody styles when nav present #6354
+- Fix: Check if tax was successfully added before displaying notice #6229
+- Fix: Update timing of InboxPanel state changes for the unread indicator #6246
+- Tweak: Set `is_deleted` from the database when instantiating a `Note` #6322
+- Tweak: New Settings: Turn off in dev mode #6348
+- Add: Favorites tooltip to the navigation #6312
+- Fix: Display" option fails to collapse upon invoking "Help" option #6233
+- Enhancement: Move favorited menu items to primary menu #6290
+- Dev: Use box sizing and padding to fix nav and admin menu styling #6335
+- Tweak: Update inline documentation for navigation Screen class #6173
+- Tweak: Remove categories without menu items #6329
+- Add: Core settings redirection to new settings pages #6091
+- Add: Settings feature and pages #6089
+- Add: Settings client pages #6092
+- Add: Favoriting extensions client UI #6287
+- Dev: Refactor head and body heights #6247
+- Fix: Removal of core settings pages #6328
+- Dev: Fix the react state update error on homescreen. #6320
+- Tweak: Navigation: Migrate methods to `admin_menu` hook #6319
+- Tweak: Move admin menu manipulation from admin_head to admin_menu #6310
+- Tweak: Updates to copy and punctuation to be more conversational and consistent. #6298
+- Dev: Change `siteUrl` to `homeUrl` on navigation site title #6240
+- Dev: Add navigation favorites data store #6275
 - Add: Add navigation intro modal. #6367
 
 == 2.0.0 02/05/2021 ==
