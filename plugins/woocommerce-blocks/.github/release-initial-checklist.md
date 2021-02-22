@@ -39,12 +39,19 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
 * [ ] Ask a team member to review the changes in the release pull request and for anyone who has done testing that they approve the pull request.
 
+## Ensure hub is set up and you're authenticated
+* [ ] Make sure you've got `hub` installed (`brew install hub`)
+* [ ] Make sure `hub api user` returns JSON with information about your GitHub user account, if it doesn't:
+  * [ ] Create a [GitHub access token](https://github.com/settings/tokens) with the `repo` permission.
+  * [ ] Set the environment variables: `GITHUB_USERNAME` with your GitHub Username, and `GITHUB_TOKEN` with the token you just generated. (You may want to add these to `.bashrc` or the equivalent)
+  * [ ] Run `hub api user` again and ensure JSON with information about your GitHub user account is returned.
+
 ## Push the button - Deploy!
 
 * [ ] Execute `npm run deploy`
   * Note: the script automatically updates version numbers (commits on your behalf).
   * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release. A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
-* [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes.
+* [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version (i.e. the one we're releasing right now). Do not publish any dev tags as a release.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
 
 ## After Workflow completes
