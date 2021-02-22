@@ -23,25 +23,26 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import StatsOverview from './stats-overview';
-import TaskListPlaceholder from '../task-list/placeholder';
-import InboxPanel from '../inbox-panel';
-import { WelcomeModal } from './welcome-modal';
-import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import ActivityHeader from '../header/activity-panel/activity-header';
 import { ActivityPanel } from './activity-panel';
-
+import { Column } from './column';
+import InboxPanel from '../inbox-panel';
+import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
+import StatsOverview from './stats-overview';
+import { StoreManagementLinks } from '../store-management-links';
+import TaskListPlaceholder from '../task-list/placeholder';
+import {
+	WELCOME_MODAL_DISMISSED_OPTION_NAME,
+	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
+} from './constants';
+import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
+import { WelcomeModal } from './welcome-modal';
 import './style.scss';
 import '../dashboard/style.scss';
-import { StoreManagementLinks } from '../store-management-links';
-import { Column } from './column';
 
 const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
 );
-
-const WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME =
-	'woocommerce_welcome_from_calypso_modal_dismissed';
 
 export const Layout = ( {
 	defaultHomescreenLayout,
@@ -130,8 +131,7 @@ export const Layout = ( {
 				<WelcomeModal
 					onClose={ () => {
 						updateOptions( {
-							woocommerce_task_list_welcome_modal_dismissed:
-								'yes',
+							[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
 						} );
 					} }
 				/>
@@ -146,6 +146,7 @@ export const Layout = ( {
 					} }
 				/>
 			) }
+			{ window.wcAdminFeatures.navigation && <NavigationIntroModal /> }
 		</div>
 	);
 };
@@ -205,12 +206,11 @@ export default compose(
 			fromCalypsoUrlArgIsPresent;
 
 		const welcomeModalDismissed =
-			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ===
-			'yes';
+			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) === 'yes';
 
 		const welcomeModalDismissedHasResolved = hasFinishedResolution(
 			'getOption',
-			[ 'woocommerce_task_list_welcome_modal_dismissed' ]
+			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
 		);
 
 		const shouldShowWelcomeModal =

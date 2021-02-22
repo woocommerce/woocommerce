@@ -121,6 +121,19 @@ localStorage.setItem( 'debug', 'wc-admin:tracks' );
 -   Click on `Save changes`.
 -   Observe in developer console, `wcadmin_ces_snackbar_view` is logged when CES prompt is displayed.
 -   In the event props, it should have a new `settings_area` key followed by the value of the settings tab you have selected.
+### Add navigation intro modal #6367
+
+1. Visit the homescreen and dismiss the original welcome modal if you haven't already.
+2. Enable the new navigation under WooCommerce -> Settings -> Advanced -> Features. (This will also require opting into tracking).
+3. Visit the WooCommerce Admin homescreen.
+4. Note the new modal.
+5. Check that pagination works as expected and modal styling is as expected.
+6. Dismiss the modal.
+7. Refresh the page to verify the modal does not reappear.
+8. On a new site, enable the navigation before visiting the homescreen.
+9. Navigate to the homescreen.
+10. Note the welcome modal is shown and the navigation intro modal is not shown.
+11. Refresh the page and note the nav intro modal was dismissed and never shown.
 
 ## 2.0.0
 
