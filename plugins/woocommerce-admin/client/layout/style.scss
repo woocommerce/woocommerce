@@ -158,6 +158,11 @@
 	}
 }
 
+// @todo Remove this after https://github.com/WordPress/gutenberg/issues/28311 is fixed
+.components-modal__header .components-button svg + span {
+	display: none;
+}
+
 .components-modal__frame.woocommerce-usage-modal {
 	width: 600px;
 	max-width: 100%;
