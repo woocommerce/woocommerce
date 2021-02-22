@@ -27,6 +27,8 @@ const runTaxSettingsTest = require( './merchant/wp-admin-settings-tax.test' );
 const runOrderStatusFiltersTest = require( './merchant/wp-admin-order-status-filters.test' );
 const runOrderRefundTest = require( './merchant/wp-admin-order-refund.test' );
 const runOrderApplyCouponTest = require( './merchant/wp-admin-order-apply-coupon.test' );
+const runProductEditDetailsTest = require( './merchant/wp-admin-product-edit-details.test' );
+const runProductSearchTest = require( './merchant/wp-admin-product-search.test' );
 const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order-customer-payment-page.test' );
 
 const runSetupOnboardingTests = () => {
@@ -57,6 +59,8 @@ const runMerchantTests = () => {
 	runOrderStatusFiltersTest();
 	runOrderRefundTest();
 	runOrderApplyCouponTest();
+	runProductEditDetailsTest();
+	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
 }
 
@@ -84,6 +88,8 @@ module.exports = {
 	runOrderStatusFiltersTest,
 	runOrderRefundTest,
 	runOrderApplyCouponTest,
+	runProductEditDetailsTest,
+	runProductSearchTest,
 	runMerchantOrdersCustomerPaymentPage,
 	runMerchantTests,
 };

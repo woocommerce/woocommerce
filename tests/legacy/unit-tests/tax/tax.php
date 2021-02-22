@@ -474,8 +474,25 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_classes = WC_Tax::get_tax_classes();
 		$this->assertEquals( $tax_classes, array( 'Reduced rate', 'Zero rate' ) );
 
-		$tax_classes = WC_Tax::get_tax_class_slugs();
-		$this->assertEquals( $tax_classes, array( 'reduced-rate', 'zero-rate' ) );
+		$tax_class_slugs = WC_Tax::get_tax_class_slugs();
+		$this->assertEquals( $tax_class_slugs, array( 'reduced-rate', 'zero-rate' ) );
+
+		$tax_rate_classes = WC_Tax::get_tax_rate_classes();
+		$this->assertEquals(
+			$tax_rate_classes,
+			array(
+				(object) array(
+					'tax_rate_class_id' => '1',
+					'name'              => 'Reduced rate',
+					'slug'              => 'reduced-rate',
+				),
+				(object) array(
+					'tax_rate_class_id' => '2',
+					'name'              => 'Zero rate',
+					'slug'              => 'zero-rate',
+				),
+			)
+		);
 	}
 
 	/**

@@ -301,6 +301,12 @@ function wc_generator_tag( $gen, $type ) {
 function wc_body_class( $classes ) {
 	$classes = (array) $classes;
 
+	if ( is_shop() ) {
+
+		$classes[] = 'woocommerce-shop';
+
+	}
+
 	if ( is_woocommerce() ) {
 
 		$classes[] = 'woocommerce';
