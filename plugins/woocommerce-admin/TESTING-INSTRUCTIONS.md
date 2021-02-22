@@ -3,6 +3,8 @@ Testing instructions
 
 ## Unreleased
 
+## 2.1.0
+
 ### Email notes now are turned off by default #6324
 
 -   Create a zip for testing with `npm run zip:test`.
