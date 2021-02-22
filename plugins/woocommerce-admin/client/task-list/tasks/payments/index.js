@@ -295,19 +295,17 @@ class Payments extends Component {
 
 					return (
 						<Card key={ key } className={ classes }>
-							<CardMedia isBorderless>
-								{ showRecommendedRibbon && (
-									<div className="woocommerce-task-payment__recommended-ribbon">
-										<span>
-											{ __(
-												'Recommended',
-												'woocommerce-admin'
-											) }
-										</span>
-									</div>
-								) }
-								{ before }
-							</CardMedia>
+							{ showRecommendedRibbon && (
+								<div className="woocommerce-task-payment__recommended-ribbon">
+									<span>
+										{ __(
+											'Recommended',
+											'woocommerce-admin'
+										) }
+									</span>
+								</div>
+							) }
+							<CardMedia isBorderless>{ before }</CardMedia>
 							<CardBody>
 								<H className="woocommerce-task-payment__title">
 									{ title }
