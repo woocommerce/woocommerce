@@ -15,7 +15,7 @@ import {
 	ProductMetadata,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
-import { getCurrency } from '@woocommerce/price-format';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	__experimentalApplyCheckoutFilter,
 	mustBeString,
@@ -110,7 +110,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		} ),
 		[ lineItem ]
 	);
-	const priceCurrency = getCurrency( prices );
+	const priceCurrency = getCurrencyFromPriceResponse( prices );
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',
 		defaultValue: initialName,
@@ -131,13 +131,14 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		purchaseAmountSingle
 	);
 	const saleAmount = saleAmountSingle.multiply( quantity );
-	const totalsCurrency = getCurrency( totals );
+	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 	let lineTotal = parseInt( totals.line_total, 10 );
 	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
 		lineTotal += parseInt( totals.line_total_tax, 10 );
 	}
 	const totalsPrice = Dinero( {
 		amount: lineTotal,
+		precision: totalsCurrency.minorUnit,
 	} );
 
 	const firstImage = images.length ? images[ 0 ] : {};
@@ -258,10 +259,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				<ProductPrice
 					currency={ totalsCurrency }
 					format={ productPriceFormat }
-					price={ getAmountFromRawPrice(
-						totalsPrice,
-						totalsCurrency
-					) }
+					price={ totalsPrice.getAmount() }
 				/>
 
 				{ quantity > 1 && (

@@ -22,9 +22,11 @@ describe( 'Testing cart', () => {
 		await dispatch( storeKey ).invalidateResolutionForStore();
 		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 	} );
+
 	afterEach( () => {
 		fetchMock.resetMocks();
 	} );
+
 	it( 'renders cart if there are items in the cart', async () => {
 		render(
 			<CartBlock
@@ -41,6 +43,7 @@ describe( 'Testing cart', () => {
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
+
 	it( 'renders empty cart if there are no items in the cart', async () => {
 		fetchMock.mockResponse( ( req ) => {
 			if ( req.url.match( /wc\/store\/cart/ ) ) {
@@ -61,5 +64,36 @@ describe( 'Testing cart', () => {
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
+		fetchMock.mockResponse( ( req ) => {
+			if ( req.url.match( /wc\/store\/cart/ ) ) {
+				const cart = {
+					...previewCart,
+					// Make it so there is only one item to simplify things.
+					items: [
+						{
+							...previewCart.items[ 0 ],
+							totals: {
+								...previewCart.items[ 0 ].totals,
+								// Change price format so there are no decimals.
+								currency_minor_unit: 0,
+								currency_prefix: '',
+								currency_suffix: '€',
+								line_subtotal: '16',
+								line_total: '16',
+							},
+						},
+					],
+				};
+
+				return Promise.resolve( JSON.stringify( cart ) );
+			}
+		} );
+		render( <CartBlock emptyCart={ null } attributes={ {} } /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent( '16€' );
 	} );
 } );
