@@ -134,7 +134,7 @@ class WC_Query {
 				$title = __( 'Add payment method', 'woocommerce' );
 				break;
 			case 'lost-password':
-				if ( in_array( $action, array( 'rp', 'resetpass', 'newaccount' ) ) ) {
+				if ( in_array( $action, array( 'rp', 'resetpass', 'newaccount' ), true ) ) {
 					$title = __( 'Set password', 'woocommerce' );
 				} else {
 					$title = __( 'Lost password', 'woocommerce' );
@@ -487,7 +487,7 @@ class WC_Query {
 		self::$product_query = $q;
 
 		// Additonal hooks to change WP Query.
-		add_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
@@ -581,6 +581,91 @@ class WC_Query {
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args, $orderby, $order );
+	}
+
+	/**
+	 * Add extra clauses to the product query.
+	 *
+	 * @param array    $args Product query clauses.
+	 * @param WP_Query $wp_query The current product query.
+	 * @return array The updated product query clauses array.
+	 */
+	public function product_query_post_clauses( $args, $wp_query ) {
+		$args = $this->price_filter_post_clauses( $args, $wp_query );
+		$args = $this->filter_by_attribute_post_clauses( $args, $wp_query );
+
+		$search = $this->get_main_search_query_sql();
+		if ( $search ) {
+			$args['where'] .= ' AND ' . $search;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Add the filter by attribute clauses to the product query.
+	 *
+	 * @param array    $args Product query clauses.
+	 * @param WP_Query $wp_query The current product query.
+	 * @return array The updated product query clauses array.
+	 */
+	public function filter_by_attribute_post_clauses( $args, $wp_query ) {
+		global $wpdb;
+
+		if ( ! $wp_query->is_main_query() ) {
+			return $args;
+		}
+
+		$lookup_table_name = "{$wpdb->prefix}wc_product_attributes_lookup";
+		$clause_root       = ' wp_posts.ID IN (';
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$in_stock_clause = ' AND in_stock = 1';
+		} else {
+			$in_stock_clause = '';
+		}
+
+		$attributes_to_filter_by = $this->get_layered_nav_chosen_attributes();
+		$term_ids_to_filter_by   = array();
+		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
+			$all_terms                  = get_terms( $taxonomy );
+			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
+			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
+			$is_and_query               = 'and' === $data['query_type'];
+
+			$count = count( $term_ids_to_filter_by );
+			if ( $is_and_query ) {
+				$clauses[] = "
+				{$clause_root}
+				SELECT product_or_parent_id
+				FROM {$lookup_table_name} lt
+				WHERE in_stock=1
+				AND is_variation_attribute=0
+				AND term_id in {$term_ids_to_filter_by_list}
+				GROUP BY product_id
+				HAVING COUNT(product_id)={$count}
+				UNION
+				SELECT product_or_parent_id
+				FROM {$lookup_table_name} lt
+				WHERE is_variation_attribute=1
+				{$in_stock_clause}
+				AND term_id in {$term_ids_to_filter_by_list}
+				)";
+			} else {
+				$clauses[] = "
+				{$clause_root}
+				SELECT product_or_parent_id
+				FROM {$lookup_table_name} lt
+				WHERE term_id in {$term_ids_to_filter_by_list}
+				{$in_stock_clause}
+				)";
+			}
+		}
+
+		if ( ! empty( $clauses ) ) {
+			$args['where'] .= ' AND (' . join( ' AND ', $clauses ) . ')';
+		}
+		return $args;
 	}
 
 	/**
@@ -720,19 +805,6 @@ class WC_Query {
 			$tax_query = array(
 				'relation' => 'AND',
 			);
-		}
-
-		// Layered nav filters on terms.
-		if ( $main_query ) {
-			foreach ( $this->get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
-				$tax_query[] = array(
-					'taxonomy'         => $taxonomy,
-					'field'            => 'slug',
-					'terms'            => $data['terms'],
-					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
-					'include_children' => false,
-				);
-			}
 		}
 
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
