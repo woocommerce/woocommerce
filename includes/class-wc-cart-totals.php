@@ -750,8 +750,8 @@ final class WC_Cart_Totals {
 
 		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
-		$this->set_total( 'items_subtotal', NumberUtil::round( $items_subtotal ) );
-		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
+		$this->set_total( 'items_subtotal', $items_subtotal );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
