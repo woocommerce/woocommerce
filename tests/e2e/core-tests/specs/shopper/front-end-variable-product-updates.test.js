@@ -13,14 +13,14 @@ let variablePostIdValue;
 const cartDialogMessage = 'Please select some product options before adding this product to your cart.';
 
 const runVariableProductUpdateTest = () => {
-	describe('Update variable product',() => {
+	describe('Shopper > Update variable product',() => {
 		beforeAll(async () => {
 			await merchant.login();
 			variablePostIdValue = await createVariableProduct();
 			await merchant.logout();
 		});
 
-		it('can change variable attributes to the same value', async () => {
+		it('shopper can change variable attributes to the same value', async () => {
 			await shopper.goToProduct(variablePostIdValue);
 			await expect(page).toSelect('#attr-1', 'val1');
 			await expect(page).toSelect('#attr-2', 'val1');
@@ -29,7 +29,7 @@ const runVariableProductUpdateTest = () => {
 			await expect(page).toMatchElement('.woocommerce-variation-price', { text: '9.99' });
 		});
 
-		it('can change attributes to combination with dimensions and weight', async () => {
+		it('shopper can change attributes to combination with dimensions and weight', async () => {
 			await shopper.goToProduct(variablePostIdValue);
 			await expect(page).toSelect('#attr-1', 'val1');
 			await expect(page).toSelect('#attr-2', 'val2');
@@ -41,7 +41,7 @@ const runVariableProductUpdateTest = () => {
 			await expect(page).toMatchElement('.woocommerce-product-attributes-item--dimensions', { text: '10 × 20 × 15 cm' });
 		});
 
-		it('can change variable product attributes to variation with a different price', async () => {
+		it('shopper can change variable product attributes to variation with a different price', async () => {
 			await shopper.goToProduct(variablePostIdValue);
 			await expect(page).toSelect('#attr-1', 'val1');
 			await expect(page).toSelect('#attr-2', 'val1');
@@ -50,7 +50,7 @@ const runVariableProductUpdateTest = () => {
 			await expect(page).toMatchElement('.woocommerce-variation-price', { text: '11.99' });
 		});
 
-		it('can reset variations', async () => {
+		it('shopper can reset variations', async () => {
 			await shopper.goToProduct(variablePostIdValue);
 			await expect(page).toSelect('#attr-1', 'val1');
 			await expect(page).toSelect('#attr-2', 'val2');
