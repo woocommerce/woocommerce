@@ -14,6 +14,7 @@ import {
 	AbstractProduct,
 	IProductCrossSells,
 	IProductDelivery,
+	IProductExternal,
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
@@ -348,3 +349,26 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 
 	return transformations;
 }
+
+/**
+ * Transformer for the properties unique to the external product type.
+ */
+export function createProductExternalTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				buttonText: PropertyType.String,
+				externalUrl: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< IProductExternal >(
+			{
+				buttonText: 'button_text',
+				externalUrl: 'external_url',
+			},
+		),
+	];
+
+	return transformations;
+}
+
