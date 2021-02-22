@@ -165,7 +165,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce**
 
 * Update - WooCommerce Admin package 2.0.1. #29111
-* Update - WooCommerce Blocks package 4.4.3
+* Update - WooCommerce Blocks package 4.4.3. #29016
 * Fix - Error in notice message of reports when WC Admin is disabled via a filter. #29095
 * Fix - Error when calculating orders with tax option rounding at subtotal level in PHP 8. #29089
 * Fix - price filtering not working properly with variable products whose variations have different prices. #29043
@@ -178,6 +178,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Admin notices sometimes were persisting even after dismissing. #28500
 * Fix - Calculate discount based on order location in the admin view. #26983
 * Fix - SASS variables not being compile correctly due to recent SASS version. #29120
+* Fix - Placeholder image height in cart. #29139
 * Dev - Updated admin bar icons to use SVG and Dashicons instead of custom font. #29094
 * Dev - Admin menu modification has been moved from admin_head hooks to admin_menu hooks. #29088
 * Dev - status report generation time to the Status Report. #28980
