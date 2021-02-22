@@ -452,9 +452,9 @@ jQuery( function( $ ) {
 			$( window ).off('beforeunload', this.handleUnloadEvent);
 		},
 		blockOnSubmit: function( $form ) {
-			var form_data = $form.data();
+			var isBlocked = $form.data( 'blockUI.isBlocked' );
 
-			if ( 1 !== form_data['blockUI.isBlocked'] ) {
+			if ( 1 !== isBlocked ) {
 				$form.block({
 					message: null,
 					overlayCSS: {
