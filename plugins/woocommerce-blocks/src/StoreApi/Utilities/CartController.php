@@ -15,6 +15,16 @@ use WP_Error;
  * @since 2.5.0
  */
 class CartController {
+	/**
+	 * Makes the cart and sessions available to a route by loading them from core.
+	 */
+	public function load_cart() {
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
+			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+			include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+			wc_load_cart();
+		}
+	}
 
 	/**
 	 * Based on the core cart class but returns errors rather than rendering notices directly.

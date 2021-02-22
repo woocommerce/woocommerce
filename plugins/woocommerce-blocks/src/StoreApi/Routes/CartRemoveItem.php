@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-
 /**
  * CartRemoveItem class.
  *
@@ -48,9 +46,8 @@ class CartRemoveItem extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
-		$cart_item  = $controller->get_cart_item( $request['key'] );
+		$cart      = $this->cart_controller->get_cart_instance();
+		$cart_item = $this->cart_controller->get_cart_item( $request['key'] );
 
 		if ( empty( $cart_item ) ) {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item no longer exists or is invalid.', 'woo-gutenberg-products-block' ), 409 );
