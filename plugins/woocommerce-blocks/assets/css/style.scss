@@ -201,6 +201,9 @@
 	.wc-block-components-product-sale-badge {
 		line-height: 1;
 	}
+	.editor-styles-wrapper .wp-block-button .wp-block-button__link:not(.has-text-color) {
+		color: #fff;
+	}
 }
 
 .theme-twentytwenty {
