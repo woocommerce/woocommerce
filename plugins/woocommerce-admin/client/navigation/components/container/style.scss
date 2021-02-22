@@ -66,9 +66,9 @@
 
 	&.is-root {
 		.components-navigation__menu-secondary {
-			border-top: 1px solid $gray-700;
+			border-top: 1px solid $studio-gray-80;
 			margin: 0 -#{$gap-smaller};
-			padding: $gap $gap-smaller;
+			padding: $gap $gap-smaller $gap-small $gap-smaller;
 		}
 	}
 }
