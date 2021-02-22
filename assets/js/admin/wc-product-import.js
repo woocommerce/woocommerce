@@ -23,7 +23,7 @@
 		// Initial state.
 		this.$form.find('.woocommerce-importer-progress').val( 0 );
 
-		this.run_import = this.run_import.on( this );
+		this.run_import = this.run_import.bind( this );
 
 		// Start importing.
 		this.run_import();
