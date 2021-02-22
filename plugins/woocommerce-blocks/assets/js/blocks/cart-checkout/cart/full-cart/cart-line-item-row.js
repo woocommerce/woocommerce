@@ -16,11 +16,7 @@ import {
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import {
-	__experimentalApplyCheckoutFilter,
-	mustBeString,
-	mustContain,
-} from '@woocommerce/blocks-checkout';
+import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { useCallback, useMemo } from '@wordpress/element';
@@ -99,17 +95,6 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		isPendingDelete,
 	} = useStoreCartItemQuantity( lineItem );
 
-	const productPriceValidation = useCallback(
-		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
-		[]
-	);
-	const arg = useMemo(
-		() => ( {
-			context: 'cart',
-			cartItem: lineItem,
-		} ),
-		[ lineItem ]
-	);
 	const priceCurrency = getCurrencyFromPriceResponse( prices );
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',
@@ -256,11 +241,20 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				</div>
 			</td>
 			<td className="wc-block-cart-item__total">
-				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
-					<ProductPrice
-						currency={ totalsCurrency }
-						format={ productPriceFormat }
-						price={ totalsPrice.getAmount() }
+				<ProductPrice
+					currency={ totalsCurrency }
+					format={ productPriceFormat }
+					price={ totalsPrice.getAmount() }
+				/>
+
+				{ quantity > 1 && (
+					<ProductSaleBadge
+						currency={ priceCurrency }
+						saleAmount={ getAmountFromRawPrice(
+							saleAmount,
+							priceCurrency
+						) }
+						format={ saleBadgePriceFormat }
 					/>
 
 					{ quantity > 1 && (

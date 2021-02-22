@@ -6,11 +6,7 @@ import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import {
-	__experimentalApplyCheckoutFilter,
-	mustBeString,
-	mustContain,
-} from '@woocommerce/blocks-checkout';
+import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
@@ -40,19 +36,6 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		totals,
 		extensions,
 	} = cartItem;
-
-	const productPriceValidation = useCallback(
-		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
-		[]
-	);
-
-	const arg = useMemo(
-		() => ( {
-			context: 'summary',
-			cartItem,
-		} ),
-		[ cartItem ]
-	);
 
 	const priceCurrency = getCurrencyFromPriceResponse( prices );
 
