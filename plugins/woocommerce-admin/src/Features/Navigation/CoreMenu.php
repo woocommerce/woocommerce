@@ -282,56 +282,63 @@ class CoreMenu {
 	 */
 	public function add_dashboard_menu_items() {
 		global $submenu, $menu;
-		$top_level_items = Menu::get_category_items( 'woocommerce' );
+		$mapped_items = Menu::get_mapped_menu_items();
+		$top_level    = $mapped_items['woocommerce'];
 
 		// phpcs:disable
-		if ( ! isset( $submenu['woocommerce'] ) ) {
+		if ( ! isset( $submenu['woocommerce'] ) || empty( $top_level ) ) {
 			return;
 		}
 
-		foreach( $top_level_items as $item ) {
-			// Skip extensions.
-			if ( ! isset( $item['menuId'] ) || $item['menuId'] === 'plugins' ) {
-				continue;
-			}
+		$menuIds = array(
+			'primary',
+			'secondary',
+			'favorites',
+		);
 
-			// Skip specific categories.
-			if (
-				in_array(
-					$item['id'],
-					array(
-						'woocommerce-tools',
-					),
-					true
-				)
-			) {
-				continue;
-			}
-
-			// Use the link from the first item if it's a category.
-			if ( ! isset( $item['url'] ) ) {
-				$category_items = Menu::get_category_items( $item['id'] );
-				if ( ! empty( $category_items ) ) {
-					$first_item     = $category_items[0];
-
-					$submenu['woocommerce'][] = array(
-						$item['title'],
-						$first_item['capability'],
-						isset( $first_item['url'] ) ? $first_item['url'] : null,
-						$item['title'],
-					);
+		foreach ( $menuIds as $menuId ) {
+			foreach( $top_level[ $menuId ] as $item ) {
+				// Skip specific categories.
+				if (
+					in_array(
+						$item['id'],
+						array(
+							'woocommerce-tools',
+						),
+						true
+					)
+				) {
+					continue;
 				}
+	
+				// Use the link from the first item if it's a category.
+				if ( ! isset( $item['url'] ) ) {
+					$categoryMenuId = $menuId === 'favorites' ? 'plugins' : $menuId;
+					$category_items = $mapped_items[ $item['id'] ][ $categoryMenuId ];
 
-				continue;
+					if ( ! empty( $category_items ) ) {
+						$first_item = $category_items[0];
+
+	
+						$submenu['woocommerce'][] = array(
+							$item['title'],
+							$first_item['capability'],
+							isset( $first_item['url'] ) ? $first_item['url'] : null,
+							$item['title'],
+						);
+					}
+	
+					continue;
+				}
+	
+				// Show top-level items.
+				$submenu['woocommerce'][] = array(
+					$item['title'],
+					$item['capability'],
+					isset( $item['url'] ) ? $item['url'] : null,
+					$item['title'],
+				);
 			}
-
-			// Show top-level items.
-			$submenu['woocommerce'][] = array(
-				$item['title'],
-				$item['capability'],
-				isset( $item['url'] ) ? $item['url'] : null,
-				$item['title'],
-			);
 		}
 		// phpcs:enable
 	}

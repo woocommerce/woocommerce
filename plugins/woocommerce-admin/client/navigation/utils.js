@@ -132,3 +132,90 @@ export const getMatchingItem = ( items ) => {
 
 	return matchedItem || null;
 };
+
+/**
+ * Available menu IDs.
+ */
+export const menuIds = [ 'primary', 'favorites', 'plugins', 'secondary' ];
+
+/**
+ * Default categories for the menu.
+ */
+export const defaultCategories = {
+	woocommerce: {
+		id: 'woocommerce',
+		isCategory: true,
+		menuId: 'primary',
+		migrate: true,
+		order: 10,
+		parent: '',
+		title: 'WooCommerce',
+	},
+};
+
+/**
+ * Sort an array of menu items by their order property.
+ *
+ * @param {Array} menuItems Array of menu items.
+ * @return {Array} Sorted menu items.
+ */
+export const sortMenuItems = ( menuItems ) => {
+	return menuItems.sort( ( a, b ) => {
+		if ( a.order === b.order ) {
+			return a.title.localeCompare( b.title );
+		}
+
+		return a.order - b.order;
+	} );
+};
+
+/**
+ * Get a flat tree structure of all Categories and thier children grouped by menuId
+ *
+ * @param {Array} menuItems Array of menu items.
+ * @param {Function} currentUserCan Callback method passed the capability to determine if a menu item is visible.
+ * @return {Object} Mapped menu items and categories.
+ */
+export const getMappedItemsCategories = (
+	menuItems,
+	currentUserCan = null
+) => {
+	const categories = { ...defaultCategories };
+
+	const items = sortMenuItems( menuItems ).reduce( ( acc, item ) => {
+		// Set up the category if it doesn't yet exist.
+		if ( ! acc[ item.parent ] ) {
+			acc[ item.parent ] = {};
+			menuIds.forEach( ( menuId ) => {
+				acc[ item.parent ][ menuId ] = [];
+			} );
+		}
+
+		// Incorrect menu ID.
+		if ( ! acc[ item.parent ][ item.menuId ] ) {
+			return acc;
+		}
+
+		// User does not have permission to view this item.
+		if (
+			currentUserCan &&
+			item.capability &&
+			! currentUserCan( item.capability )
+		) {
+			return acc;
+		}
+
+		// Add categories.
+		if ( item.isCategory ) {
+			categories[ item.id ] = item;
+		}
+
+		acc[ item.parent ][ item.menuId ].push( item );
+		return acc;
+	}, {} );
+
+	return {
+		items,
+		categories,
+	};
+};

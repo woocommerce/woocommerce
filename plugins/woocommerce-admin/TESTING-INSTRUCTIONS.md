@@ -43,6 +43,16 @@ wp db query 'SELECT status FROM wp_wc_admin_notes WHERE name = "wc-admin-add-fir
 -   Run the cron again.
 -   The note's status should continue being `unactioned`.
 
+### Refactor menu item mapping and sorting #6382
+
+1. Enable the new navigation under WooCommerce -> Settings -> Advanced -> Features.
+2. Navigate to a WooCommerce page.
+3. Make sure all items and categories continue to work as expected.
+4. Activate multiple extensions that register WooCommerce extension categories. (e.g., WooCommerce Bookings and WooCommerce Payments).
+5. Favorite and unfavorite menu items.
+6. Make sure the menu item order is correct after unfavoriting.
+7. Create a user with permissions to see some but not all registered WooCommerce pages.
+8. Check that a user without permission to access a menu item cannot see said menu item.
 ### Remove CES actions for adding and editing a product and editing an order #6355
 
 1. Add a product. The customer effort score survey should not appear.

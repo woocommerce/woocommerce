@@ -51,6 +51,16 @@ class Menu {
 	const CSS_CLASSES = 4;
 
 	/**
+	 * Array of usable menu IDs.
+	 */
+	const MENU_IDS = array(
+		'primary',
+		'favorites',
+		'plugins',
+		'secondary',
+	);
+
+	/**
 	 * Store menu items.
 	 *
 	 * @var array
@@ -675,8 +685,7 @@ class Menu {
 	 * @return array
 	 */
 	public static function get_items() {
-		$menu_items = self::get_prepared_menu_item_data( self::$menu_items );
-		return apply_filters( 'woocommerce_navigation_menu_items', $menu_items );
+		return apply_filters( 'woocommerce_navigation_menu_items', self::$menu_items );
 	}
 
 	/**
@@ -691,7 +700,6 @@ class Menu {
 
 		$menu_item_ids = self::$categories[ $category ];
 
-		
 		$category_menu_items = array();
 		foreach ( $menu_item_ids as $id ) {
 			if ( isset( self::$menu_items[ $id ] ) ) {
@@ -699,7 +707,6 @@ class Menu {
 			}
 		}
 
-		$category_menu_items = self::get_prepared_menu_item_data( $category_menu_items );
 		return apply_filters( 'woocommerce_navigation_menu_category_items', $category_menu_items );
 	}
 
@@ -713,31 +720,43 @@ class Menu {
 	}
 
 	/**
-	 * Gets the menu item data for use in the client.
+	 * Gets the menu item data mapped by category and menu ID.
 	 *
-	 * @param array $menu_items Menu items to prepare.
 	 * @return array
 	 */
-	public static function get_prepared_menu_item_data( $menu_items ) {
-		foreach ( $menu_items as $index => $menu_item ) {
-			if ( isset( $menu_item[ 'capability' ] ) && ! current_user_can( $menu_item[ 'capability' ] ) ) {
-				unset( $menu_items[ $index ] );
-			}
-		}
+	public static function get_mapped_menu_items() {
+		$menu_items   = self::get_items();
+		$mapped_items = array();
 
-		// Sort the menu items.
-		$menuOrder = array(
-			'primary'   => 0,
-			'secondary' => 1,
-			'plugins'   => 2,
-			'favorites' => 3,
-		);
-		$menu      = array_map( function( $item ) use( $menuOrder ) { return $menuOrder[ $item['menuId'] ]; }, $menu_items );
+		// Sort the items by order and title.
 		$order     = array_column( $menu_items, 'order' );
 		$title     = array_column( $menu_items, 'title' );
-		array_multisort( $menu, SORT_ASC, $order, SORT_ASC, $title, SORT_ASC, $menu_items );
+		array_multisort( $order, SORT_ASC, $title, SORT_ASC, $menu_items );
 
-		return $menu_items;
+		foreach ( $menu_items as $id => $menu_item ) {
+			$category_id = $menu_item[ 'parent' ];
+			$menu_id     = $menu_item[ 'menuId' ];
+			if ( ! isset( $mapped_items[ $category_id ] ) ) {
+				$mapped_items[ $category_id ] = array();
+				foreach ( self::MENU_IDS as $available_menu_id ) {
+					$mapped_items[ $category_id ][ $available_menu_id ] = array();
+				}
+			}
+
+			// Incorrect menu ID.
+			if ( ! isset( $mapped_items[ $category_id ][ $menu_id ] ) ) {
+				continue;
+			}
+
+			// Remove the item if the user cannot access it.
+			if ( isset( $menu_item[ 'capability' ] ) && ! current_user_can( $menu_item[ 'capability' ] ) ) {
+				continue;
+			}
+
+			$mapped_items[ $category_id ][ $menu_id ][] = $menu_item;
+		}
+
+		return $mapped_items;
 	}
 
 	/**
