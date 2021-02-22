@@ -788,7 +788,7 @@ final class WC_Cart_Totals {
 
 					if ( $item->product->is_taxable() ) {
 						// Item subtotals were sent, so set 3rd param.
-						$item_tax = wc_round_tax_total( array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) ), 0 );
+						$item_tax = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
 
 						// Sum total tax.
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
