@@ -211,6 +211,9 @@ class CustomerEffortScoreTracks {
 	 * Enqueue the CES survey trigger for setting changes.
 	 */
 	public function run_on_update_options() {
+		// $current_tab is set when WC_Admin_Settings::save_settings is called.
+		global $current_tab;
+
 		if ( $this->has_been_shown( self::SETTINGS_CHANGE_ACTION_NAME ) ) {
 			return;
 		}
@@ -225,7 +228,9 @@ class CustomerEffortScoreTracks {
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'woocommerce_page_wc-settings',
 				'adminpage'      => 'woocommerce_page_wc-settings',
-				'props'          => (object) array(),
+				'props'          => (object) array(
+					'settings_area' => $current_tab,
+				),
 			)
 		);
 	}

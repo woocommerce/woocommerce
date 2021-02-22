@@ -102,6 +102,26 @@ wp db query 'SELECT status FROM wp_wc_admin_notes WHERE name = "wc-admin-add-fir
 10. With a user that can `manage_woocommerce`, navigate to the homepage via URL and make sure the homescreen is shown. `/wp-admin/admin.php?page=wc-admin`
 11. With a user that cannot `view_woocommerce_reports` make sure navigating to an analytics report does not work. `/wp-admin/admin.php?page=wc-admin&path=/analytics/overview`
 
+### Add CES track settings tab on updating settings #6368
+
+-   Make sure tracking is enabled in settings:
+
+```
+/wp-admin/admin.php?page=wc-settings&tab=advanced&section=woocommerce_com
+```
+
+-   Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+-   Enable the logging of Tracks events to your browser dev console:
+
+```
+localStorage.setItem( 'debug', 'wc-admin:tracks' );
+```
+
+-   Go to WooCommerce > Settings, and select a top-level tab such as Products, Shipping, etc.
+-   Click on `Save changes`.
+-   Observe in developer console, `wcadmin_ces_snackbar_view` is logged when CES prompt is displayed.
+-   In the event props, it should have a new `settings_area` key followed by the value of the settings tab you have selected.
+
 ## 2.0.0
 
 ### Add the Mollie payment provider setup task #6257

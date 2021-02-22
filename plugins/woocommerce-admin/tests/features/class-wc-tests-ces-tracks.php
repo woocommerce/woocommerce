@@ -50,7 +50,7 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Verify that the queue does not add duplicate item by cehcking
+	 * Verify that the queue does not add duplicate item by checking
 	 * action and label values.
 	 */
 	public function test_the_queue_does_not_allow_duplicate() {
@@ -86,5 +86,33 @@ class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
 
 		$this->assertEmpty( $queue_items );
+	}
+
+	/**
+	 * Verify that it adds `settings_area` prop.
+	 */
+	public function test_settings_area_included_in_event_props() {
+		// Global assignment to mimic what's done in WC_Admin_Settings::save_settings.
+		global $current_tab;
+		$current_tab = 'test_tab';
+		$ces         = new CustomerEffortScoreTracks();
+
+		do_action( 'woocommerce_update_options' );
+
+		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
+		$this->assertNotEmpty( $queue_items );
+
+		$expected_queue_item = array_filter(
+			$queue_items,
+			function ( $item ) use ( $ces ) {
+				return $ces::SETTINGS_CHANGE_ACTION_NAME === $item['action'];
+			}
+		);
+
+		// Remove global assignment.
+		unset( $GLOBALS['current_tab'] );
+
+		$this->assertCount( 1, $expected_queue_item );
+		$this->assertEquals( 'test_tab', $expected_queue_item[0]['props']->settings_area );
 	}
 }
