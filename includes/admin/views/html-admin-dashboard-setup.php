@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo esc_html_e( 'You\'re almost there! Once you complete store setup you can start receiving orders.', 'woocommerce' ); ?>
 			<div><a href='<?php echo esc_attr( $button_link ); ?>' class='button button-primary'><?php echo esc_html_e( 'Start selling', 'woocommerce' ); ?></a></div>
 		</div>
-		<img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/dashboard-widget-setup.png"" />
+		<img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/dashboard-widget-setup.png" />
 	</div>
 	<div class="clear"></div>
 </div>

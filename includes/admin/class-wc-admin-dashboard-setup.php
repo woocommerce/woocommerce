@@ -70,22 +70,15 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				$this->populate_general_tasks();
 				$this->populate_payment_tasks();
 				$this->completed_tasks_count = $this->get_completed_tasks_count();
-				$this->init();
+				add_meta_box(
+					'wc_admin_dashboard_setup',
+					__( 'WooCommerce Setup', 'woocommerce' ),
+					array( $this, 'render' ),
+					'dashboard',
+					'normal',
+					'high'
+				);
 			}
-		}
-
-		/**
-		 * Hook meta_box
-		 */
-		public function init() {
-			add_meta_box(
-				'wc_admin_dasbharod_setup',
-				__( 'WooCommerce Setup', 'woocommerce' ),
-				array( $this, 'render' ),
-				'dashboard',
-				'normal',
-				'high'
-			);
 		}
 
 		/**
