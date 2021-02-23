@@ -46,7 +46,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		);
 		$notices = WC()->session->get( 'wc_notices', array() );
 
-		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		// Check for cart contents.
 		$this->assertCount( 0, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
@@ -80,7 +80,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		);
 		$notices = WC()->session->get( 'wc_notices', array() );
 
-		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		// Check for cart contents.
 		$this->assertCount( 0, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
