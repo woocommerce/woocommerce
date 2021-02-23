@@ -50,7 +50,6 @@ const runExternalProductAPITest = () => {
 				button_text: defaultExternalProduct.buttonText,
 				external_url: defaultExternalProduct.externalUrl,
 				price: defaultExternalProduct.regularPrice,
-				sale_price: '',
 			};
 
 			// Read product directly from api.
@@ -64,7 +63,6 @@ const runExternalProductAPITest = () => {
 				...defaultExternalProduct,
 				id: product.id,
 				price: defaultExternalProduct.regularPrice,
-				salePrice: ''
 			};
 
 			// Read product via the repository.
