@@ -256,22 +256,24 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				</div>
 			</td>
 			<td className="wc-block-cart-item__total">
-				<ProductPrice
-					currency={ totalsCurrency }
-					format={ productPriceFormat }
-					price={ totalsPrice.getAmount() }
-				/>
-
-				{ quantity > 1 && (
-					<ProductSaleBadge
-						currency={ priceCurrency }
-						saleAmount={ getAmountFromRawPrice(
-							saleAmount,
-							priceCurrency
-						) }
-						format={ saleBadgePriceFormat }
+				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+					<ProductPrice
+						currency={ totalsCurrency }
+						format={ productPriceFormat }
+						price={ totalsPrice.getAmount() }
 					/>
-				) }
+
+					{ quantity > 1 && (
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ getAmountFromRawPrice(
+								saleAmount,
+								priceCurrency
+							) }
+							format={ saleBadgePriceFormat }
+						/>
+					) }
+				</div>
 			</td>
 		</tr>
 	);

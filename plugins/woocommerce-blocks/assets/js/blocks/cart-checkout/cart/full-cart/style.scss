@@ -150,6 +150,25 @@ table.wc-block-cart-items {
 	display: flex;
 }
 
+.wc-block-cart-item__total-price-and-sale-badge-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+
+	.wc-block-components-sale-badge {
+		margin-top: $gap-smallest;
+	}
+}
+
+.is-small,
+.is-mobile {
+	.wc-block-cart-item__total {
+		.wc-block-components-sale-badge {
+			display: none;
+		}
+	}
+}
+
 .is-medium,
 .is-small,
 .is-mobile {
@@ -201,10 +220,6 @@ table.wc-block-cart-items {
 
 				.wc-block-components-formatted-money-amount {
 					display: inline-block;
-				}
-
-				.wc-block-components-sale-badge {
-					display: none;
 				}
 			}
 		}
