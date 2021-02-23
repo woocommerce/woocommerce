@@ -73,9 +73,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '13.58', WC()->cart->get_total( 'edit' ) );
 		$this->assertEquals( 0.66, WC()->cart->get_total_tax() );
-		$this->assertEquals( 4.17, WC()->cart->get_discount_total() );
-		$this->assertEquals( 0.83, WC()->cart->get_discount_tax() );
-
+		$this->assertEquals( 0.83, wc_round_tax_total( WC()->cart->get_discount_tax() ) );
+		$this->assertEquals( 4.17, \Automattic\WooCommerce\Utilities\NumberUtil::round( WC()->cart->get_discount_total(), 2 ) );
 	}
 
 	/**
