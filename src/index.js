@@ -1,4 +1,16 @@
-// Import SCSS entry file so that webpack picks up changes
+/**
+ * External dependencies
+ */
+import { render } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { App } from './App';
 import './index.scss';
 
-console.log( 'hello world' );
+const appRoot = document.getElementById( 'woocommerce-admin-test-helper-app-root' );
+
+if ( appRoot ) {
+    render( <App/>, appRoot );
+}

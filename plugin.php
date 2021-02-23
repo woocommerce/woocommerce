@@ -6,7 +6,7 @@ add_action( 'admin_menu', function() {
 		'install_plugins',
 		'woocommerce-admin-test-helper',
 		function() {
-			?><div id="woocommerce-admin-test-helper">YEAAAAA</div><?php
+			?><div id="woocommerce-admin-test-helper-app-root"></div><?php
 		}
 	);
 } );
