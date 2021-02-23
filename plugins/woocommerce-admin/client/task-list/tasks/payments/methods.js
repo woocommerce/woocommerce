@@ -10,6 +10,7 @@ import {
 } from '@woocommerce/wc-admin-settings';
 import { Link } from '@woocommerce/components';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -60,7 +61,13 @@ export function installActivateAndConnectWcpay(
 	};
 
 	installAndActivatePlugins( [ 'woocommerce-payments' ] )
-		.then( () => connect() )
+		.then( () => {
+			recordEvent( 'woocommerce_payments_install', {
+				context: 'tasklist',
+			} );
+
+			connect();
+		} )
 		.catch( ( error ) => {
 			createNoticesFromResponse( error );
 			reject();
