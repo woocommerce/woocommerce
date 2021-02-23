@@ -21,3 +21,5 @@ wp-cli.local.yml
 
 # Composer
 /vendor/
+
+*.swp
