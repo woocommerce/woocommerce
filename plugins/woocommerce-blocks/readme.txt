@@ -85,11 +85,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 4.5.2 - 2021-02-22 =
+= 4.5.2 - 2021-02-23 =
 
 #### Bug Fixes
 
 - Fix cart items showing a price of 0 when currency format didn't have decimals. ([3876](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3876))
+- Ensure the sale badge is displayed well when a product price is short in the Cart block. ([3879](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3879))
 
 = 4.5.1 - 2021-02-16 =
 
