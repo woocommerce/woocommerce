@@ -29,6 +29,12 @@ export type ProductCommonUpdateParams = 'name' | 'slug' | 'shortDescription'
 export type ProductCrossUpdateParams = 'crossSellIds';
 
 /**
+ * Price properties.
+ */
+export type ProductPriceUpdateParams = 'price' | 'priceHtml' | 'regularPrice'
+	| 'salePrice' | 'saleStart' | 'saleEnd';
+
+/**
  * Upsells property.
  */
 export type ProductUpSellUpdateParams = 'upSellIds';
