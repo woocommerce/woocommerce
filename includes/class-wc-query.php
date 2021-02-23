@@ -625,7 +625,6 @@ class WC_Query {
 		}
 
 		$attributes_to_filter_by = $this->get_layered_nav_chosen_attributes();
-		$term_ids_to_filter_by   = array();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
@@ -634,31 +633,33 @@ class WC_Query {
 			$is_and_query               = 'and' === $data['query_type'];
 
 			$count = count( $term_ids_to_filter_by );
-			if ( $is_and_query ) {
-				$clauses[] = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$lookup_table_name} lt
-				WHERE in_stock=1
-				AND is_variation_attribute=0
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_id
-				HAVING COUNT(product_id)={$count}
-				UNION
-				SELECT product_or_parent_id
-				FROM {$lookup_table_name} lt
-				WHERE is_variation_attribute=1
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				)";
-			} else {
-				$clauses[] = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$lookup_table_name} lt
-				WHERE term_id in {$term_ids_to_filter_by_list}
-				{$in_stock_clause}
-				)";
+			if ( 0 !== $count ) {
+				if ( $is_and_query ) {
+					$clauses[] = "
+						{$clause_root}
+						SELECT product_or_parent_id
+						FROM {$lookup_table_name} lt
+						WHERE is_variation_attribute=0
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_id
+						HAVING COUNT(product_id)={$count}
+						UNION
+						SELECT product_or_parent_id
+						FROM {$lookup_table_name} lt
+						WHERE is_variation_attribute=1
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+					)";
+				} else {
+					$clauses[] = "
+							{$clause_root}
+							SELECT product_or_parent_id
+							FROM {$lookup_table_name} lt
+							WHERE term_id in {$term_ids_to_filter_by_list}
+							{$in_stock_clause}
+						)";
+				}
 			}
 		}
 

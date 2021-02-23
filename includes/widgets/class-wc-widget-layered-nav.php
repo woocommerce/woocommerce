@@ -362,6 +362,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$meta_query_sql    = $meta_query->get_sql( 'post', $lookup_table_name, 'product_or_parent_id' );
 		$tax_query_sql     = $tax_query->get_sql( $lookup_table_name, 'product_or_parent_id' );
 		$term_ids_sql      = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
 
 		$query           = array();
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
@@ -375,35 +376,54 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			AND {$wpdb->posts}.post_status = 'publish'
 			{$tax_query_sql['where']} {$meta_query_sql['where']}
 			AND {$lookup_table_name}.taxonomy='{$taxonomy}'
-			AND {$lookup_table_name}.term_id IN $term_ids_sql";
+			AND {$lookup_table_name}.term_id IN $term_ids_sql
+			{$in_stock_clause}";
 
-		if ( $hide_out_of_stock ) {
-			$query['where'] .= " AND {$lookup_table_name}.in_stock=1";
-		}
-
-		if ( 'and' === $query_type && ! empty( $term_ids ) ) {
+		if ( ! empty( $term_ids ) ) {
 			$attributes_to_filter_by = WC_Query::get_layered_nav_chosen_attributes();
+
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				$all_terms_to_filter_by = array();
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-					$all_terms              = get_terms( $taxonomy );
-					$term_ids_by_slug       = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$term_ids_to_filter_by  = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					$all_terms_to_filter_by = array_merge( $all_terms_to_filter_by, $term_ids_to_filter_by );
+					$all_terms                  = get_terms( $taxonomy );
+					$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
+					$all_terms_to_filter_by     = array_merge( $all_terms_to_filter_by, $term_ids_to_filter_by );
+					$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
+
+					$count = count( $all_terms_to_filter_by );
+					if ( 0 !== $count ) {
+						$query['where'] .= ' AND product_or_parent_id IN (';
+						if ( 'and' === $attributes_to_filter_by[ $taxonomy ]['query_type'] ) {
+							$query['where'] .= "
+								SELECT product_or_parent_id
+								FROM {$lookup_table_name} lt
+								WHERE is_variation_attribute=0
+								{$in_stock_clause}
+								AND term_id in {$term_ids_to_filter_by_list}
+								GROUP BY product_id
+								HAVING COUNT(product_id)={$count}
+								UNION
+								SELECT product_or_parent_id
+								FROM {$lookup_table_name} lt
+								WHERE is_variation_attribute=1
+								{$in_stock_clause}
+								AND term_id in {$term_ids_to_filter_by_list}
+							)";
+						} else {
+							$query['where'] .= "
+								SELECT product_or_parent_id FROM {$lookup_table_name}
+								WHERE term_id in {$term_ids_to_filter_by_list}
+								{$in_stock_clause}
+							)";
+						}
+					}
 				}
-				$term_ids_to_filter_by_list = '(' . join( ',', $all_terms_to_filter_by ) . ')';
-
-				$query['where'] .= "
-					AND product_or_parent_id IN
-					(SELECT product_or_parent_id FROM {$lookup_table_name} lt2
-				 	WHERE lt2.term_id in {$term_ids_to_filter_by_list}";
-
-				if ( $hide_out_of_stock ) {
-					$query['where'] .= ' AND lt2.in_stock=1';
-				}
-
-				$query['where'] .= ')';
+			} else {
+				$query['where'] .= $in_stock_clause;
 			}
+		} elseif ( $hide_out_of_stock ) {
+			$query['where'] .= " AND {$lookup_table_name}.in_stock=1";
 		}
 
 		$search = $this->get_main_search_query_sql();
