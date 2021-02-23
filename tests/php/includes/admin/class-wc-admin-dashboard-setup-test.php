@@ -71,7 +71,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_task_list_hidden', false );
 
 		$this->get_widget();
-		$this->assertArrayHasKey( 'wc_admin_dasbharod_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
+		$this->assertArrayHasKey( 'wc_admin_dashboard_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
 	}
 
 	/**

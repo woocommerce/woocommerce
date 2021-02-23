@@ -12,15 +12,17 @@
 
 	.progress-wrapper {
 		border: 1px solid #757575;
-		border-radius: 20px;
+		border-radius: 16px;
 		font-size: 0.9em;
-		padding: 2px 10px 2px 7px;
+		padding: 2px 8px 2px 8px;
 		display: inline-block;
+		box-sizing: border-box;
 	}
 
 	.progress-wrapper span {
 		position: relative;
-		top: -2px;
+		top: -3px;
+		color: #757575;
 	}
 
 	.description div {
@@ -35,14 +37,16 @@
 	}
 
 	.circle-progress {
+		margin-top: 1px;
+		margin-left: -3px;
 
 		circle {
-			stroke: #949494;
+			stroke: #f0f0f0;
 			stroke-width: 1px;
 		}
 
 		.bar {
-			stroke: #f0f0f0;
+			stroke: #949494;
 		}
 	}
 }
