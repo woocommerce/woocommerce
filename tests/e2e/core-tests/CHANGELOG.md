@@ -15,6 +15,7 @@
 - Shopper Checkout Apply Coupon
 - Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
+- Shopper Variable product info updates on different variations
 
 ## Fixed
 
