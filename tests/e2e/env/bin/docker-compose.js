@@ -34,7 +34,7 @@ const envVars = getAdminConfig();
 if ( appPath ) {
     if ( 'up' === command ) {
         // Look for an initialization script in the dependent app.
-        if ( customInitFile ) {
+        if ( customInitFile && typeof customInitFile === 'string' ) {
             const possibleInitFile = customInitFile;
             customInitFile = path.resolve( possibleInitFile );
             if ( ! fs.existsSync( customInitFile ) ) {
