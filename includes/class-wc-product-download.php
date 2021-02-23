@@ -52,7 +52,15 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_type_of_file_path( $file_path = '' ) {
 		$file_path = $file_path ? $file_path : $this->get_file();
-		if ( 0 === strpos( $file_path, 'http' ) || 0 === strpos( $file_path, '//' ) ) {
+		$parsed_url = parse_url( $file_path );
+		if (
+			$parsed_url &&
+			isset( $parsed_url['host'] ) && // Absolute url means that it has a host.
+			( // Theoretically we could permit any scheme (like ftp as well), but that has not been the case before. So we allow none or http(s).
+				! isset( $parsed_url['scheme'] ) ||
+				in_array( $parsed_url['scheme'], array( 'http', 'https' ) )
+			)
+		) {
 			return 'absolute';
 		} elseif ( '[' === substr( $file_path, 0, 1 ) && ']' === substr( $file_path, -1 ) ) {
 			return 'shortcode';
@@ -164,6 +172,11 @@ class WC_Product_Download implements ArrayAccess {
 	 * @param string $value File URL/Path.
 	 */
 	public function set_file( $value ) {
+		// A `///` is recognized as an "absolute", but on the filesystem, so it bypasses the mime check in `self::is_allowed_filetype`.
+		// This will strip extra prepending / to the maximum of 2.
+		if ( preg_match( '#^//+(/[^/].+)$#i', $value, $matches ) ) {
+			$value = $matches[1];
+		}
 		switch ( $this->get_type_of_file_path( $value ) ) {
 			case 'absolute':
 				$this->data['file'] = esc_url_raw( $value );
