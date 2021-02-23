@@ -17,7 +17,7 @@
 -   Create a zip for testing with `npm run zip:test`.
 -   Create a `jurassic.ninja` instance.
 -   Upload the plugin and activate it.
--   Update the installation date (we need a 10-day old store). You can do it with an SQL statement like this:
+-   Update the installation date (we need a 10-day old store). You can do it with an SQL statement like this (using the WP phpMyAdmin plugin):
 
 ```
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
@@ -35,7 +35,10 @@ or with wp-cli:
 wp option delete 'woocommerce_merchant_email_notifications';
 ```
 
--   Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   Run the cron job `wc_admin_daily` (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+    - Go to **Tools > Cron Events** and scroll down to the `wc_admin_daily`.
+    -  Hover over the item and click `Edit` change the **Next Run** to `Now` and click `Update Event`.
+    - It will redirect you to the cron event list, and `wc_admin_daily` should be near the top, if you wait 10 seconds and refresh the page the `wc_admin_daily` should be near the bottom again, this means it has been run, and scheduled again to run tomorrow.
 -   You should have not received an email note.
 -   Verify the note `wc-admin-add-first-product-note` was added in the DB and its `status` is `unactioned`. You can use a statement like this:
 
