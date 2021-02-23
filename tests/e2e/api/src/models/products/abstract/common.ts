@@ -11,6 +11,14 @@ import {
 export type ProductSearchParams = { search: string };
 
 /**
+ * A common URL builder.
+ *
+ * @param {ModelID} id the id of the product.
+ * @return {string} RESTful Url.
+ */
+export const buildProductURL = ( id: ModelID ) => '/wc/v3/products/' + id;
+
+/**
  * The base for all product types.
  */
 export abstract class AbstractProduct extends AbstractProductData {
