@@ -180,9 +180,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();
-		} elseif ( 'options' === $current_section ) {
-			$settings = $this->get_settings( 'options' );
-			$this->output_fields( $settings );
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
