@@ -17,6 +17,23 @@
     },
     "variable": {
       "name": "Variable Product with Three Variations"
+    },
+    "grouped": {
+      "name": "Grouped Product with Three Children",
+      "groupedProducts": [
+        {
+          "name": "Base Unit",
+          "regularPrice": "29.99"
+        },
+        {
+          "name": "Add-on A",
+          "regularPrice": "11.95"
+        },
+        {
+          "name": "Add-on B",
+          "regularPrice": "18.97"
+        }
+      ]
     }
   },
   "addresses": {
