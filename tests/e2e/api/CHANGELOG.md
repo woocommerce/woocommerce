@@ -1,5 +1,7 @@
 # Unreleased
 
+- Added support for grouped product type
+
 # 0.1.1
 
 ## Breaking Changes
