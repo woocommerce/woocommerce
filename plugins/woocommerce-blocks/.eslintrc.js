@@ -52,6 +52,7 @@ module.exports = {
 		'import/resolver': {
 			node: {},
 			webpack: {},
+			typescript: {},
 		},
 	},
 	rules: {
@@ -65,6 +66,21 @@ module.exports = {
 			files: [ '**/bin/**.js', '**/storybook/**.js', '**/stories/**.js' ],
 			rules: {
 				'you-dont-need-lodash-underscore/omit': 'off',
+			},
+		},
+		{
+			files: [ '*.ts', '*.tsx' ],
+			parser: '@typescript-eslint/parser',
+			extends: [
+				'plugin:@woocommerce/eslint-plugin/recommended',
+				'plugin:you-dont-need-lodash-underscore/compatible',
+				'plugin:@typescript-eslint/recommended',
+			],
+			rules: {
+				'@typescript-eslint/no-explicit-any': 'error',
+				'no-use-before-define': 'off',
+				'@typescript-eslint/no-use-before-define': [ 'error' ],
+				'jsdoc/require-param': 'off',
 			},
 		},
 	],

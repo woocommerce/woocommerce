@@ -1,26 +1,30 @@
 /**
  * External dependencies
  */
-import { camelCase, mapKeys } from 'lodash';
+import type { CartItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
-import { defaultCartState } from '../default-states';
+import { defaultCartState, CartState } from '../default-states';
+import type { CartAction } from './actions';
 
 /**
  * Sub-reducer for cart items array.
  *
- * @param   {Array}  state   cartData.items state slice.
- * @param   {Object}  action  Action object.
+ * @param   {Array<CartItem>}  state   cartData.items state slice.
+ * @param   {CartAction}  action  Action object.
  */
-const cartItemsReducer = ( state = [], action ) => {
+const cartItemsReducer = (
+	state: Array< CartItem > = [],
+	action: CartAction
+) => {
 	switch ( action.type ) {
 		case types.RECEIVE_CART_ITEM:
 			// Replace specified cart element with the new data from server.
 			return state.map( ( cartItem ) => {
-				if ( cartItem.key === action.cartItem.key ) {
+				if ( cartItem.key === action.cartItem?.key ) {
 					return action.cartItem;
 				}
 				return cartItem;
@@ -32,51 +36,62 @@ const cartItemsReducer = ( state = [], action ) => {
 /**
  * Reducer for receiving items related to the cart.
  *
- * @param   {Object}  state   The current state in the store.
- * @param   {Object}  action  Action object.
+ * @param   {CartState}  state   The current state in the store.
+ * @param   {CartAction}  action  Action object.
  *
- * @return  {Object}          New or existing state.
+ * @return  {CartState}          New or existing state.
  */
-const reducer = ( state = defaultCartState, action ) => {
+const reducer = (
+	state: CartState = defaultCartState,
+	action: CartAction
+): CartState => {
 	switch ( action.type ) {
 		case types.RECEIVE_ERROR:
-			state = {
-				...state,
-				errors: state.errors.concat( action.error ),
-			};
+			if ( action.error ) {
+				state = {
+					...state,
+					errors: state.errors.concat( action.error ),
+				};
+			}
 			break;
 		case types.REPLACE_ERRORS:
-			state = {
-				...state,
-				errors: [ action.error ],
-			};
+			if ( action.error ) {
+				state = {
+					...state,
+					errors: [ action.error ],
+				};
+			}
 			break;
 		case types.RECEIVE_CART:
-			state = {
-				...state,
-				errors: [],
-				cartData: mapKeys( action.response, ( _, key ) =>
-					camelCase( key )
-				),
-			};
+			if ( action.response ) {
+				state = {
+					...state,
+					errors: [],
+					cartData: action.response,
+				};
+			}
 			break;
 		case types.APPLYING_COUPON:
-			state = {
-				...state,
-				metaData: {
-					...state.metaData,
-					applyingCoupon: action.couponCode,
-				},
-			};
+			if ( action.couponCode || action.couponCode === '' ) {
+				state = {
+					...state,
+					metaData: {
+						...state.metaData,
+						applyingCoupon: action.couponCode,
+					},
+				};
+			}
 			break;
 		case types.REMOVING_COUPON:
-			state = {
-				...state,
-				metaData: {
-					...state.metaData,
-					removingCoupon: action.couponCode,
-				},
-			};
+			if ( action.couponCode || action.couponCode === '' ) {
+				state = {
+					...state,
+					metaData: {
+						...state.metaData,
+						removingCoupon: action.couponCode,
+					},
+				};
+			}
 			break;
 
 		case types.ITEM_PENDING_QUANTITY:
@@ -85,7 +100,7 @@ const reducer = ( state = defaultCartState, action ) => {
 			const keysPendingQuantity = state.cartItemsPendingQuantity.filter(
 				( key ) => key !== action.cartItemKey
 			);
-			if ( action.isPendingQuantity ) {
+			if ( action.isPendingQuantity && action.cartItemKey ) {
 				keysPendingQuantity.push( action.cartItemKey );
 			}
 			state = {
@@ -97,7 +112,7 @@ const reducer = ( state = defaultCartState, action ) => {
 			const keysPendingDelete = state.cartItemsPendingDelete.filter(
 				( key ) => key !== action.cartItemKey
 			);
-			if ( action.isPendingDelete ) {
+			if ( action.isPendingDelete && action.cartItemKey ) {
 				keysPendingDelete.push( action.cartItemKey );
 			}
 			state = {
@@ -121,7 +136,7 @@ const reducer = ( state = defaultCartState, action ) => {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingCustomerData: action.isResolving,
+					updatingCustomerData: !! action.isResolving,
 				},
 			};
 			break;
@@ -130,7 +145,7 @@ const reducer = ( state = defaultCartState, action ) => {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingSelectedRate: action.isResolving,
+					updatingSelectedRate: !! action.isResolving,
 				},
 			};
 	}
