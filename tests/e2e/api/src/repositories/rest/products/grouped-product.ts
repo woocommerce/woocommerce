@@ -50,7 +50,7 @@ export function groupedProductRESTRepository( httpClient: HTTPClient ): ListsGro
 		...grouped,
 	];
 
-	const transformer = createProductTransformer<GroupedProduct>( 'Grouped', transformations );
+	const transformer = createProductTransformer<GroupedProduct>( 'grouped', transformations );
 
 	return new ModelRepository(
 		restList< GroupedProductRepositoryParams >( () => '/wc/v3/products', GroupedProduct, httpClient, transformer ),
