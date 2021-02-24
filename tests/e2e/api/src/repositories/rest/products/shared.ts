@@ -14,6 +14,7 @@ import {
 	AbstractProduct,
 	IProductCrossSells,
 	IProductDelivery,
+	IProductGrouped,
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
@@ -215,6 +216,26 @@ export function createProductUpSellsTransformation(): ModelTransformation[] {
 		new KeyChangeTransformation< IProductUpSells >(
 			{
 				upSellIds: 'upsell_ids',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
+ * Transformer for the grouped products property.
+ */
+export function createProductGroupedTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				groupedProducts: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< IProductGrouped >(
+			{
+				groupedProducts: 'grouped_products',
 			},
 		),
 	];
