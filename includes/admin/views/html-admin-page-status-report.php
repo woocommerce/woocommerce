@@ -5,15 +5,11 @@
  * @package WooCommerce
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
-
-if ( ! defined( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
-	// Define if we're checking against major or minor versions.
-	// Since 5.0 all versions are backwards compatible, so there's no more check.
-	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
-}
 
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
@@ -27,7 +23,7 @@ $security           = $report['security'];
 $settings           = $report['settings'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
-$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE );
+$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) );
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
