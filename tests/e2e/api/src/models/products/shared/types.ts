@@ -47,7 +47,7 @@ export type ProductExternalTypeUpdateParams = 'buttonText' | 'externalUrl';
 /**
  * Properties exclusive to the Grouped product type.
  */
-export type ProductGroupedTypeUpdateParams = 'groupedProducts';
+export type ProductGroupedUpdateParams = 'groupedProducts';
 
 /**
  * Properties related to tracking inventory.
