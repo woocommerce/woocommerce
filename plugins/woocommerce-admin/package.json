@@ -144,7 +144,7 @@
 		"@storybook/addons": "6.1.14",
 		"@storybook/react": "6.1.14",
 		"@testing-library/jest-dom": "5.11.9",
-		"@testing-library/react": "11.2.3",
+		"@testing-library/react": "11.2.5",
 		"@testing-library/react-hooks": "3.7.0",
 		"@testing-library/user-event": "12.7.3",
 		"@woocommerce/components": "file:packages/components",
