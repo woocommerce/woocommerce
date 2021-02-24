@@ -119,8 +119,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add navigation favorites data store #6275
 - Add: Add navigation intro modal. #6367
 - Fix: Reset Navigation submenu before making Flyout #6396
+- Dev: Add a changelog lint check to PRs. #6414
 - Fix: Move the shipping input and text 1px lower. #6408
-
 
 == 2.0.0 02/05/2021 ==
 

@@ -1,0 +1,25 @@
+name: Lint the changelog
+on: [pull_request]
+
+jobs:
+    lint-changelog:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Cancel Previous Runs
+              uses: styfle/cancel-workflow-action@0.7.0
+              with:
+                  access_token: ${{ github.token }}
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Check for changelog entry
+              env:
+                  PR_NUMBER: ${{github.event.number}}
+              run: bin/ci/lint-changelog.sh
+              shell: bash
+            - name: Add a reminder label to the PR
+              uses: ./.github/actions/pr-labeler
+              if: ${{ always() }}
+              with:
+                  access_token: ${{ github.token }}
+                  label: ${{ env.label }}
+                  action: ${{ env.label_action }}

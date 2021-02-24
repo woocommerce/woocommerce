@@ -1,0 +1,17 @@
+name: 'PR labeler'
+description: 'Add or remove a label from a PR'
+inputs:
+    access_token:
+        description: 'Github token used to access the API'
+        required: true
+    label:
+        description: 'Label to add or remove'
+        required: true
+        default: ''
+    action:
+        description: 'Add or remove the label'
+        required: true
+        default: 'add'
+runs:
+    using: 'node12'
+    main: 'dist/index.js'
