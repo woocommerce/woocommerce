@@ -1122,10 +1122,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			// Validate variation ID.
 			if (
-				0 < $variation_id && // Only check if variation_id exists.
+				0 < $variation_id && // Only check if there's any variation_id.
 				(
-					'product_variation' !== get_post_type( $variation_id ) || // Check if doesn't belong to a product variation.
-					wp_get_post_parent_id( $variation_id ) !== $product_id // Check if belongs to the selected variable product.
+					! $product_data->is_type( 'variation' ) || // Check if isn't a variation, it suppose to be a variation at this point.
+					$product_data->get_parent_id() !== $product_id // Check if belongs to the selected variable product.
 				)
 			) {
 				$product = wc_get_product( $product_id );
