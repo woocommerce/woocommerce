@@ -110,7 +110,6 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 	 * @testDox 'output' for a predefined section invokes the appropriate internal method.
 	 *
 	 * @testWith ["", "output_zones_screen"]
-	 *           ["options", "output_fields"]
 	 *           ["classes", "output_shipping_class_screen"]
 	 *
 	 * @param string $section_name Current section name.
@@ -131,13 +130,6 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 			$this->returnCallback(
 				function() use ( &$method_invoked ) {
 					$method_invoked = 'output_zones_screen';
-				}
-			)
-		);
-		$sut->method( 'output_fields' )->will(
-			$this->returnCallback(
-				function( $settings ) use ( &$method_invoked ) {
-					$method_invoked = 'output_fields';
 				}
 			)
 		);
