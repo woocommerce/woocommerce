@@ -1,0 +1,55 @@
+{
+  "exclude": [ "node_modules"],
+  "compilerOptions": {
+	"outDir": "./build",
+	"sourceMap": true,
+	"baseUrl": ".",
+	"module": "esnext",
+	"emitDeclarationOnly": true,
+	// Import non-ES modules as default imports.
+	"esModuleInterop": true,
+	"resolveJsonModule": true,
+	// Preserve JSX, allows compatibility with wp-element jsx babel transforms
+	"jsx": "preserve",
+	"target": "esnext",
+	"allowJs": true,
+	"moduleResolution": "node",
+	"lib": [ "dom", "esnext" ],
+	"checkJs": true,
+	"strict": true,
+	"strictNullChecks": true,
+	"allowSyntheticDefaultImports": true,
+	"composite": true,
+	"rootDir": ".",
+	"typeRoots": [ "./node_modules/@types" ],
+	"types": [],
+	"paths": {
+	  "@woocommerce/atomic-blocks": [ "assets/js/base/atomic/blocks" ],
+	  "@woocommerce/atomic-blocks/*": [
+		"assets/js/base/atomic/blocks/*"
+	  ],
+	  "@woocommerce/atomic-utils": [ "assets/js/atomic/utils" ],
+	  "@woocommerce/base-components/*": [ "assets/js/base/components/*" ],
+	  "@woocommerce/base-context": [ "assets/js/base/context" ],
+	  "@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
+	  "@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
+	  "@woocommerce/base-utils": [ "assets/js/base/utils" ],
+	  "@woocommerce/editor-components/*": [
+		"assets/js/editor-components/*"
+	  ],
+	  "@woocommerce/block-data": [ "assets/js/data" ],
+	  "@woocommerce/block-hocs": [ "assets/js/hocs" ],
+	  "@woocommerce/blocks-registry": [ "assets/js/blocks-registry" ],
+	  "@woocommerce/blocks-checkout": [ "packages/checkout" ],
+	  "@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
+	  "@woocommerce/e2e-tests": [ "node_modules/woocommerce/tests/e2e" ],
+	  "@woocommerce/icons": [ "assets/js/icons" ],
+	  "@woocommerce/resource-previews": [ "assets/js/previews" ],
+	  "@woocommerce/knobs": [ "storybook/knobs" ],
+	  "@woocommerce/settings": [ "assets/js/settings/shared" ],
+	  "@woocommerce/shared-context": [ "assets/js/shared/context" ],
+	  "@woocommerce/type-defs/*": [ "assets/js/type-defs/*" ],
+	  "@woocommerce/types": [ "assets/js/type-defs" ]
+	}
+  }
+}

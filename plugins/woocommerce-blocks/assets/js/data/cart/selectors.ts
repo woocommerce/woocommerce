@@ -1,0 +1,155 @@
+/**
+ * External dependencies
+ */
+import type { Cart, CartTotals, CartMeta, CartItem } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import { CartState, defaultCartState } from '../default-states';
+import { ResponseError } from '../types';
+
+/**
+ * Retrieves cart data from state.
+ *
+ * @param {CartState} state The current state.
+ * @return {Cart} The data to return.
+ */
+export const getCartData = ( state: CartState ): Cart => {
+	return state.cartData;
+};
+
+/**
+ * Retrieves cart totals from state.
+ *
+ * @param {CartState} state The current state.
+ * @return {CartTotals} The data to return.
+ */
+export const getCartTotals = ( state: CartState ): CartTotals => {
+	return state.cartData.totals || defaultCartState.cartData.totals;
+};
+
+/**
+ * Retrieves cart meta from state.
+ *
+ * @param {CartState} state The current state.
+ * @return {CartMeta} The data to return.
+ */
+export const getCartMeta = ( state: CartState ): CartMeta => {
+	return state.metaData || defaultCartState.metaData;
+};
+
+/**
+ * Retrieves cart errors from state.
+ *
+ * @param {CartState} state The current state.
+ * @return {Array<ResponseError>} Array of errors.
+ */
+export const getCartErrors = ( state: CartState ): Array< ResponseError > => {
+	return state.errors || [];
+};
+
+/**
+ * Returns true if any coupon is being applied.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} True if a coupon is being applied.
+ */
+export const isApplyingCoupon = ( state: CartState ): boolean => {
+	return !! state.metaData.applyingCoupon;
+};
+
+/**
+ * Retrieves the coupon code currently being applied.
+ *
+ * @param {CartState} state The current state.
+ * @return {string} The data to return.
+ */
+export const getCouponBeingApplied = ( state: CartState ): string => {
+	return state.metaData.applyingCoupon || '';
+};
+
+/**
+ * Returns true if any coupon is being removed.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} True if a coupon is being removed.
+ */
+export const isRemovingCoupon = ( state: CartState ): boolean => {
+	return !! state.metaData.removingCoupon;
+};
+
+/**
+ * Retrieves the coupon code currently being removed.
+ *
+ * @param {CartState} state The current state.
+ * @return {string} The data to return.
+ */
+export const getCouponBeingRemoved = ( state: CartState ): string => {
+	return state.metaData.removingCoupon || '';
+};
+
+/**
+ * Returns cart item matching specified key.
+ *
+ * @param {CartState} state The current state.
+ * @param {string} cartItemKey Key for a cart item.
+ * @return {CartItem | void} Cart item object, or undefined if not found.
+ */
+export const getCartItem = (
+	state: CartState,
+	cartItemKey: string
+): CartItem | void => {
+	return state.cartData.items.find(
+		( cartItem ) => cartItem.key === cartItemKey
+	);
+};
+
+/**
+ * Returns true if the specified cart item quantity is being updated.
+ *
+ * @param {CartState} state The current state.
+ * @param {string} cartItemKey Key for a cart item.
+ * @return {boolean} True if a item has a pending request to be updated.
+ */
+export const isItemPendingQuantity = (
+	state: CartState,
+	cartItemKey: string
+): boolean => {
+	return state.cartItemsPendingQuantity.includes( cartItemKey );
+};
+
+/**
+ * Returns true if the specified cart item quantity is being updated.
+ *
+ * @param {CartState} state The current state.
+ * @param {string} cartItemKey Key for a cart item.
+ * @return {boolean} True if a item has a pending request to be updated.
+ */
+export const isItemPendingDelete = (
+	state: CartState,
+	cartItemKey: string
+): boolean => {
+	return state.cartItemsPendingDelete.includes( cartItemKey );
+};
+/**
+ * Retrieves if the address is being applied for shipping.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} are shipping rates loading.
+ */
+export const isCustomerDataUpdating = ( state: CartState ): boolean => {
+	return !! state.metaData.updatingCustomerData;
+};
+
+/**
+ * Retrieves if the shipping rate selection is being persisted.
+ *
+ * @param {CartState} state The current state.
+ *
+ * @return {boolean} True if the shipping rate selection is being persisted to
+ *                   the server.
+ */
+export const isShippingRateBeingSelected = ( state: CartState ): boolean => {
+	return !! state.metaData.updatingSelectedRate;
+};

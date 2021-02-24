@@ -5,6 +5,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { default as fetchMock } from 'jest-fetch-mock';
+
 /**
  * Internal dependencies
  */
@@ -17,6 +19,7 @@ describe( 'Testing cart', () => {
 			if ( req.url.match( /wc\/store\/cart/ ) ) {
 				return Promise.resolve( JSON.stringify( previewCart ) );
 			}
+			return Promise.resolve( '' );
 		} );
 		// need to clear the store resolution state between tests.
 		await dispatch( storeKey ).invalidateResolutionForStore();
@@ -51,6 +54,7 @@ describe( 'Testing cart', () => {
 					JSON.stringify( defaultCartState.cartData )
 				);
 			}
+			return Promise.resolve( '' );
 		} );
 		render(
 			<CartBlock
