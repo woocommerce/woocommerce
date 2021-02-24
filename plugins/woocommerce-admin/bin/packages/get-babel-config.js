@@ -25,6 +25,8 @@ const babelConfigs = {
 		presets: map( babelDefaultConfig.presets, ( preset ) =>
 			overrideOptions( preset, '@babel/preset-env', {
 				modules: 'commonjs',
+				corejs: '3',
+				useBuiltIns: 'usage',
 			} )
 		),
 	} ),
@@ -37,6 +39,8 @@ const babelConfigs = {
 		presets: map( babelDefaultConfig.presets, ( preset ) =>
 			overrideOptions( preset, '@babel/preset-env', {
 				modules: false,
+				corejs: '3',
+				useBuiltIns: 'usage',
 			} )
 		),
 	} ),

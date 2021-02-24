@@ -84,6 +84,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Removed @woocommerce/components/card from OBW #6374
 - Fix: Email notes now are turned off by default #6324
 - Add: CES track settings tab on updating settings #6368
+- Dev: support use of Array.flat in client and packages. #6411
 - Fix: Top bar slightly overlaps wp-admin navigation on mobile #6292
 - Fix: Hide tooltip in welcome modal #6142
 - Fix: update single column home screen width to 680px #6297

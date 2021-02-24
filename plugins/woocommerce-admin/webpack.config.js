@@ -121,7 +121,16 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [ '@wordpress/babel-preset-default' ],
+						presets: [
+							'@wordpress/babel-preset-default',
+							[
+								'@babel/preset-env',
+								{
+									corejs: '3',
+									useBuiltIns: 'usage',
+								},
+							],
+						],
 					},
 				},
 			},
