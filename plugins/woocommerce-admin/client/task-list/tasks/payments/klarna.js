@@ -18,7 +18,7 @@ class Klarna extends Component {
 		const { markConfigured, plugin } = this.props;
 
 		const slug =
-			plugin === 'checkout' ? 'klarna-checkout' : 'klarna-payments';
+			plugin === 'checkout' ? 'klarna_checkout' : 'klarna_payments';
 
 		markConfigured( slug );
 	}
