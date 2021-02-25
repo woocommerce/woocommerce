@@ -162,4 +162,4 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 5.1.0 2021-03-xx =
 
-[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/changelog.txt).
+[See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
