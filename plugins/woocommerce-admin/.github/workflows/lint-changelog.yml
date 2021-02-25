@@ -1,5 +1,7 @@
 name: Lint the changelog
-on: [pull_request]
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, edited]
 
 jobs:
     lint-changelog:
@@ -11,14 +13,24 @@ jobs:
                   access_token: ${{ github.token }}
             - name: Check out repository code
               uses: actions/checkout@v2
+              if: github.event.pull_request.user.login != 'renovate'
+            - name: skip-workflow
+              id: skip-workflow
+              uses: saulmaldonado/skip-workflow@v1.1.0
+              with:
+                  phrase: /no changelog/i
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  pr-message: 'body'
+                  search: '["pull_request"]'
             - name: Check for changelog entry
+              if: github.event.pull_request.user.login != 'renovate' && !steps.skip-workflow.outputs.skip
               env:
                   PR_NUMBER: ${{github.event.number}}
               run: bin/ci/lint-changelog.sh
               shell: bash
             - name: Add a reminder label to the PR
               uses: ./.github/actions/pr-labeler
-              if: ${{ always() }}
+              if: github.event.pull_request.user.login != 'renovate' && !steps.skip-workflow.outputs.skip && always()
               with:
                   access_token: ${{ github.token }}
                   label: ${{ env.label }}
