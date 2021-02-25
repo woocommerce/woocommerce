@@ -1,14 +1,22 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import {
+	render,
+	screen,
+	fireEvent,
+	act,
+	createEvent,
+} from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import { useUser } from '@woocommerce/data';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ActivityPanel } from '../';
+import { Panel } from '../panel';
 
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
@@ -35,6 +43,15 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '../panel', () => {
+	const originalModule = jest.requireActual( '../panel' );
+	return {
+		__esModule: true,
+		...originalModule,
+		Panel: jest.fn(),
+	};
+} );
+
 describe( 'Activity Panel', () => {
 	beforeEach( () => {
 		useSelect.mockImplementation( () => ( {
@@ -44,6 +61,7 @@ describe( 'Activity Panel', () => {
 			setupTaskListHidden: false,
 			trackedCompletedTasks: [],
 		} ) );
+		Panel.mockImplementation( jest.requireActual( '../panel' ).Panel );
 	} );
 
 	it( 'should render inbox tab on embedded pages', () => {
@@ -272,6 +290,158 @@ describe( 'Activity Panel', () => {
 			);
 
 			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
+		} );
+	} );
+
+	describe( 'panel', () => {
+		it( 'should set focus when panel opened/closed without removing element when onTransitionEnd is triggered', () => {
+			const content = 'test';
+			const TestComponent = () => {
+				const [ panelOpen, setPanelOpen ] = useState( true );
+				return (
+					<div>
+						<button onClick={ () => setPanelOpen( ! panelOpen ) }>
+							Toggle
+						</button>
+						<Panel
+							isPanelOpen={ panelOpen }
+							tab={ {} }
+							content={ content }
+							clearPanel={ () => {} }
+						/>
+					</div>
+				);
+			};
+			const { container, queryByText, getByRole } = render(
+				<TestComponent />
+			);
+			expect( queryByText( 'test' ) ).toBeInTheDocument();
+			expect( document.activeElement ).toEqual(
+				container.getElementsByClassName(
+					'woocommerce-layout__activity-panel-wrapper'
+				)[ 0 ]
+			);
+			getByRole( 'button' ).focus();
+			expect( document.activeElement ).not.toEqual(
+				container.getElementsByClassName(
+					'woocommerce-layout__activity-panel-wrapper'
+				)[ 0 ]
+			);
+			fireEvent.click( getByRole( 'button' ) );
+			fireEvent.click( getByRole( 'button' ) );
+			const event = createEvent.transitionEnd(
+				container.getElementsByClassName(
+					'woocommerce-layout__activity-panel-wrapper'
+				)[ 0 ]
+			);
+			Object.defineProperty( event, 'propertyName', {
+				value: 'transform',
+			} );
+
+			fireEvent(
+				container.getElementsByClassName(
+					'woocommerce-layout__activity-panel-wrapper'
+				)[ 0 ],
+				event
+			);
+			expect( document.activeElement ).toEqual(
+				container.getElementsByClassName(
+					'woocommerce-layout__activity-panel-wrapper'
+				)[ 0 ]
+			);
+		} );
+	} );
+
+	describe( 'panel open and closing', () => {
+		let clearPanel;
+		beforeEach( () => {
+			Panel.mockImplementation(
+				( { isPanelOpen, isPanelSwitching, tab, ...props } ) => {
+					clearPanel = props.clearPanel;
+					return (
+						<div>
+							<span>[panel]</span>
+							<span>[panelOpen={ isPanelOpen.toString() }]</span>
+							<span>
+								[panelSwitching={ isPanelSwitching.toString() }]
+							</span>
+							<span>[hasTab={ tab ? 'true' : 'false' }]</span>
+						</div>
+					);
+				}
+			);
+		} );
+
+		it( 'should have panel open and panel switching as false by default', () => {
+			const { queryByText, getByRole } = render(
+				<ActivityPanel
+					query={ {
+						task: 'products',
+					} }
+				/>
+			);
+			expect( queryByText( '[panel]' ) ).toBeInTheDocument();
+			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+		} );
+
+		it( 'should allow user to toggle, an individual panel without setting panelSwitching to true', () => {
+			const { queryByText, getByRole } = render(
+				<ActivityPanel
+					query={ {
+						task: '',
+						page: 'wc-admin',
+					} }
+				/>
+			);
+			expect( queryByText( '[panel]' ) ).toBeInTheDocument();
+			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+			// toggle open
+			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+			// toggle close
+			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'should remove panel element after clearPanel is triggered', () => {
+			const { queryByText, getByRole } = render(
+				<ActivityPanel
+					query={ {
+						task: '',
+						page: 'wc-admin',
+					} }
+				/>
+			);
+			// toggle open
+			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+			// toggle close
+			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
+			expect( queryByText( '[hasTab=true]' ) ).toBeInTheDocument();
+			expect(
+				queryByText( '[panelSwitching=false]' )
+			).toBeInTheDocument();
+			act( () => {
+				clearPanel();
+			} );
+			expect( queryByText( '[hasTab=false]' ) ).toBeInTheDocument();
 		} );
 	} );
 } );

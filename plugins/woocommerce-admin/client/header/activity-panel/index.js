@@ -86,12 +86,14 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	};
 
 	const closePanel = () => {
-		setCurrentTab( '' );
 		setIsPanelOpen( false );
 	};
 
 	const clearPanel = () => {
-		setIsPanelSwitching( 'false' );
+		if ( ! isPanelOpen ) {
+			setIsPanelSwitching( false );
+			setCurrentTab( '' );
+		}
 	};
 
 	// On smaller screen, the panel buttons are hidden behind a toggle.
