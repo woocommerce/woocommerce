@@ -116,15 +116,23 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$reports = new WC_Admin_Report();
 
+			$net_sales_link = 'admin.php?page=wc-reports&tab=orders&range=month';
+			$top_seller_link = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
+			$report_data = $is_wc_admin_disabled ? $this->get_sales_report_data() : $this->get_wc_admin_performance_data();
+			if ( ! $is_wc_admin_disabled ) {
+				$net_sales_link = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
+				$top_seller_link = 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=';
+			}
+
 			echo '<ul class="wc_status_list">';
 
 			if ( current_user_can( 'view_woocommerce_reports' ) ) {
-				$report_data = $this->get_sales_report_data();
+
 				if ( $report_data ) {
 					?>
 				<li class="sales-this-month">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ) ); ?>">
-					<?php echo $reports->sales_sparkline( '', max( 7, gmdate( 'd', current_time( 'timestamp' ) ) ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+				<a href="<?php echo esc_url( admin_url( $net_sales_link ) ); ?>">
+					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, '' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: %s: net sales */
@@ -141,8 +149,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				if ( $top_seller && $top_seller->qty ) {
 					?>
 				<li class="best-seller-this-month">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ) ); ?>">
-					<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, gmdate( 'd', current_time( 'timestamp' ) ) ), 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+				<a href="<?php echo esc_url( admin_url( $top_seller_link . $top_seller->product_id ) ); ?>">
+					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, $top_seller->product_id, 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
@@ -431,6 +439,106 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<?php // @codingStandardsIgnoreEnd ?>
 		</div>
 			<?php
+		}
+
+		/**
+		 * Gets the sales performance data from the new WooAdmin store.
+		 *
+		 * @return stdClass|WP_Error|WP_REST_Response
+		 */
+		private function get_wc_admin_performance_data() {
+			$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/performance-indicators' );
+			$start_date = gmdate( 'Y-m-01 00:00:00', current_time( 'timestamp' ) );
+			$end_date   = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
+			$request->set_query_params(
+				array(
+					'before' => $end_date,
+					'after'  => $start_date,
+					'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+				)
+			);
+			$response = rest_do_request( $request );
+
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			if ( 200 !== $response->get_status() ) {
+				return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce' ) );
+			}
+			$report_keys      = array(
+				'net_revenue' => 'net_sales',
+			);
+			$performance_data = new stdClass();
+			foreach ( $response->get_data() as $indicator ) {
+				if ( isset( $indicator['chart'] ) && isset( $indicator['value'] ) ) {
+					$key                    = isset( $report_keys[ $indicator['chart'] ] ) ? $report_keys[ $indicator['chart'] ] : $indicator['chart'];
+					$performance_data->$key = $indicator['value'];
+				}
+			}
+			return $performance_data;
+		}
+
+		/**
+		 * Overwrites the original sparkline to use the new reports data if WooAdmin is enabled.
+		 * Prepares a sparkline to show sales in the last X days.
+		 *
+		 * @param  WC_Admin_Report $reports old class for getting reports.
+		 * @param  bool            $is_wc_admin_disabled If WC Admin is disabled or not.
+		 * @param  int             $id ID of the product to show. Blank to get all orders.
+		 * @param  string          $type Type of sparkline to get. Ignored if ID is not set.
+		 * @return string
+		 */
+		private function sales_sparkline( $reports, $is_wc_admin_disabled = false, $id = '', $type = 'sales' ) {
+			$days = max( 7, gmdate( 'd', current_time( 'timestamp' ) ) );
+			if ( $is_wc_admin_disabled ) {
+				return $reports->sales_sparkline( $id, $days, $type );
+			}
+			$sales_endpoint = '/wc-analytics/reports/revenue/stats';
+			$start_date     = gmdate( 'Y-m-d 00:00:00', current_time( 'timestamp' ) - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
+			$end_date       = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
+			$meta_key       = 'net_revenue';
+			$params         = array(
+				'order'    => 'asc',
+				'interval' => 'day',
+				'per_page' => 100,
+				'before'   => $end_date,
+				'after'    => $start_date,
+			);
+			if ( $id ) {
+				$sales_endpoint     = '/wc-analytics/reports/products/stats';
+				$meta_key           = ( 'sales' === $type ) ? 'net_revenue' : 'items_sold';
+				$params['products'] = $id;
+			}
+			$request          = new \WP_REST_Request( 'GET', $sales_endpoint );
+			$params['fields'] = array( $meta_key );
+			$request->set_query_params( $params );
+
+			$response = rest_do_request( $request );
+
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			$resp_data = $response->get_data();
+			$data      = $resp_data['intervals'];
+
+			$sparkline_data = array();
+			$total          = 0;
+			foreach ( $data as $d ) {
+				$total += $d['subtotals']->$meta_key;
+				array_push( $sparkline_data, array( strval( strtotime( $d['interval'] ) * 1000 ), $d['subtotals']->$meta_key ) );
+			}
+
+			if ( 'sales' === $type ) {
+				/* translators: 1: total income 2: days */
+				$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
+			} else {
+				/* translators: 1: total items sold 2: days */
+				$tooltip = sprintf( _n( 'Sold %1$d item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
+			}
+
+			return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . wc_esc_json( wp_json_encode( $sparkline_data ) ) . '"></span>';
 		}
 	}
 
