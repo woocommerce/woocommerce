@@ -31,7 +31,7 @@ jQuery( function( $ ) {
 	 * @returns {boolean}
 	 */
 	function needs_refresh() {
-		return geo_hash && ( new URLSearchParams( window.location.search ) ).get('v') !== geo_hash;
+		return geo_hash && ( new URLSearchParams( window.location.search ) ).get( 'v' ) !== geo_hash;
 	}
 
 	/**
