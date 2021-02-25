@@ -78,9 +78,9 @@ WooCommerce currently supports PHP versions from 7.0 up to 8.0, and this poses a
 To workaround this, the testing strategy used by WooCommerce is as follows:
 
 * We normally use PHPUnit 6.5.14
-* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). The Travis build is configured to use this fork instead of the old version 6 when running in PHP 8.
+* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). The GitHub Actions build is configured to use this fork instead of the old version 6 when running in PHP 8.
 
-If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the Travis setup script does. These are the commands that you'll need (run them after a regular `composer install`):
+If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the GitHub Actions setup script does. These are the commands that you'll need (run them after a regular `composer install`):
 
 ```shell
 curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
@@ -125,7 +125,7 @@ General guidelines for all the unit tests:
 
 ## Automated Tests
 
-Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
+Tests are automatically run with GitHub Actions for each commit and pull request.
 
 
 ## Code Coverage

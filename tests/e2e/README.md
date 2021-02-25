@@ -55,7 +55,7 @@ This section explains how e2e tests are working behind the scenes. These are not
 
 ### Test Environment
 
-We recommend using Docker for running tests locally in order for the test environment to match the setup on Travis CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
+We recommend using Docker for running tests locally in order for the test environment to match the setup on GitHub Actions (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
 
 ### Test Variables
 
