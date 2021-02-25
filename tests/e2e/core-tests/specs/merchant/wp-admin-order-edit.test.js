@@ -67,15 +67,17 @@ const runEditOrderTest = () => {
 			// Update order details
 			await expect(page).toFill('input[name=order_date]', '2018-12-14');
 
-				// Wait for auto save
+			// Wait for auto save
 			await page.waitFor( 2000 );
 
-			// Create the order
+			// Save the order changes
 			await expect( page ).toClick( 'button.save_order' );
 			await page.waitForSelector( '#message' );
 
 			// Verify
 			await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+			await expect( page ).toMatchElement( 'input[name=order_date]', { value: '2018-12-14' } );
+
 		});
 	});
 }
