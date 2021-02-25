@@ -665,7 +665,10 @@ class WC_Query {
 
 		if ( ! empty( $clauses ) ) {
 			$args['where'] .= ' AND (' . join( ' AND ', $clauses ) . ')';
+		} elseif ( ! empty( $attributes_to_filter_by ) ) {
+			$args['where'] .= ' AND 1=0';
 		}
+
 		return $args;
 	}
 
