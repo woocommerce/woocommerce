@@ -26,9 +26,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function( $pre, $args, $url ) use ( &$posted_data ) {
-				if ( $posted_data ) {
-					$posted_data = null;
-				}
 				$posted_data = $args;
 				return true;
 			},
@@ -41,10 +38,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test the default case of no filter for set for woocommerce_admin_disabled.
 		$this->assertArrayHasKey( 'wc_admin_disabled', $tracking_data );
 		$this->assertEquals( 'yes', $tracking_data['wc_admin_disabled'] );
-		$posted_data = null;
-
-		// Bypass time delay so we can invoke send_tracking_data again.
-		update_option( 'woocommerce_tracker_last_send', strtotime( '-2 weeks' ) );
 	}
 
 	/**
@@ -58,9 +51,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function( $pre, $args, $url ) use ( &$posted_data ) {
-				if ( $posted_data ) {
-					$posted_data = null;
-				}
 				$posted_data = $args;
 				return true;
 			},
