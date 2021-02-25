@@ -101,7 +101,7 @@ Puppeteer will still automatically download Chromium when needed.
 
 - `cd` to the WooCommerce plugin folder
 
-- `git checkout master` or checkout the branch where you need to run tests 
+- `git checkout trunk` or checkout the branch where you need to run tests 
 
 - Run `nvm use`
 
@@ -267,7 +267,7 @@ In the WooCommerce Core repository the tests are in `tests/e2e/core-tests/specs/
 The following packages are used in write tests:
 
 - `@automattic/puppeteer-utils` - utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
-- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/utils).
+- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/utils).
 
 ### Creating test structure
 

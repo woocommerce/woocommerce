@@ -1,6 +1,6 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
 
 
 ## Table of contents
@@ -108,7 +108,7 @@ Each test file should correspond to an associated source file and be named accor
         * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
 
 
-See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/master/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/master/includes/README.md#writing-unit-tests). 
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests). 
 
 General guidelines for all the unit tests:
 
