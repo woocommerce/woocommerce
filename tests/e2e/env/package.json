@@ -10,7 +10,7 @@
     "e2e",
     "puppeteer"
   ],
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/README.md",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/README.md",
   "bugs": {
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },

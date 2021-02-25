@@ -121,9 +121,9 @@ Jest provides setup and teardown functions similar to PHPUnit. The default setup
 
 Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` container supports using either the built in container or an external container. See the the appropriate readme for  details:
 
-- [Built In Container](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/builtin.md)
-- [External Container](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/external.md)
+- [Built In Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/builtin.md)
+- [External Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/external.md)
 
 ## Additional information
 
-Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) for general information on e2e tests.
+Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) for general information on e2e tests.
