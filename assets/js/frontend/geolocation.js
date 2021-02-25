@@ -109,7 +109,7 @@ jQuery( function( $ ) {
 			var method = $this.attr( 'method' );
 			var hasField = $this.find( 'input[name="v"]' ).length > 0;
 
-			if (method && 'get' === method.toLowerCase() && ! hasField) {
+			if ( method && 'get' === method.toLowerCase() && ! hasField ) {
 				$this.append( '<input type="hidden" name="v" value="' + geo_hash + '" />' );
 			} else {
 				var href = $this.attr( 'action' );
