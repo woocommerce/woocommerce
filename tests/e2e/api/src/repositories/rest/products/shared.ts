@@ -24,6 +24,7 @@ import {
 	ProductDownload,
 	ProductImage,
 	ProductTerm,
+	VariableProduct,
 } from '../../../models';
 import { createMetaDataTransformer } from '../shared';
 
@@ -372,6 +373,29 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 				isShippingTaxable: 'shipping_taxable',
 				shippingClass: 'shipping_class',
 				shippingClassId: 'shipping_class_id',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
+ * Variable product specific properties transformations
+ */
+export function createProductVariableTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				id: PropertyType.Integer,
+				name: PropertyType.String,
+				option: PropertyType.String,
+				variations: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< VariableProduct >(
+			{
+				defaultAttributes: 'default_attributes',
 			},
 		),
 	];
