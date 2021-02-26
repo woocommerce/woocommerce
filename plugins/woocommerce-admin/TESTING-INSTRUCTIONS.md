@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Navigation: Correct error thrown when enabling #6462
+
+1. Create a fresh store
+2. Navigate to WooCommerce -> Settings -> Advanced Tab -> Features
+3. Check the box to add the new navigation feature, and hit save
+4. Ensure that the new navigation appears on the left as expected
+
 ### Deprecate Onboarding::has_woocommerce_support #6401
 
 - Clear existing site transients. For example, by using the [Transients Manager](https://wordpress.org/plugins/transients-manager/) plugin, and pressing the "Delete all transients" button it provides.

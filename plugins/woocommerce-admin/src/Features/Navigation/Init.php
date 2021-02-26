@@ -111,6 +111,11 @@ class Init {
 		$has_option_disabled = 'yes' !== get_option( self::TOGGLE_OPTION_NAME, 'no' );
 		$is_not_compatible   = ! self::is_nav_compatible();
 
+		/* phpcs:disable WordPress.Security.NonceVerification */
+		if ( $has_option_disabled && isset( $_POST['woocommerce_navigation_enabled'] ) && '1' === $_POST['woocommerce_navigation_enabled'] ) {
+			$has_option_disabled = false;
+		}
+
 		if ( ( $has_feature_enabled && $has_option_disabled ) || $is_not_compatible ) {
 			$features = array_diff( $features, array( 'navigation' ) );
 		}
