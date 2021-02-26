@@ -171,7 +171,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - price filtering not working properly with variable products whose variations have different prices. #29043
 * Fix - Removed extra closing brace from the Zone regions help text. #29036
 * Fix - Tax name/label is not being updated in the order when it is changed. #28983
-* Fix - Product categories widget item count not always showing the correct number. #28974
 * Fix - Additional protection after wc_get_product to account for invalid ID. #28962
 * Fix - orders list from returning false values if orders are missing. #28927
 * Fix - Terms and Policy checkbox wording settings not shown in customizer. #28735
