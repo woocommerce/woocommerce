@@ -113,7 +113,7 @@ jobs:
 
       - name: Replace WooCommerce package.
         working-directory: tmp
-        run: mv woocommerce/* ../package/woocommerce/
+        run: mv woocommerce/ ../package/woocommerce/
 
       - name: Run tests command.
         working-directory: code/woocommerce
