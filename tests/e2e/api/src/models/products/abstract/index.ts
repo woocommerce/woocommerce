@@ -1,5 +1,6 @@
 export * from './common';
 export * from './cross-sell';
+export * from './data';
 export * from './delivery';
 export * from './inventory';
 export * from './sales-tax';
