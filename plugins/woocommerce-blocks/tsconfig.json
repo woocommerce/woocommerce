@@ -2,5 +2,8 @@
   "extends": "./tsconfig.base.json",
   "include": [ "./assets/js/**/*" ],
   "exclude": [ "./assets/js/data" ],
-  "references": [ { "path": "./assets/js/data" } ]
+  "references": [
+	{ "path": "./assets/js/data" },
+	{ "path":  "/assets/js/base/components" }
+  ]
 }

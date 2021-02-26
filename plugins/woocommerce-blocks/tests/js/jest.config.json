@@ -47,7 +47,7 @@
 	"testEnvironment": "jest-environment-jsdom-sixteen",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
-		"^.+\\.js$": "<rootDir>/tests/js/jestPreprocess.js"
+		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/jestPreprocess.js"
 	},
 	"verbose": true
 }
