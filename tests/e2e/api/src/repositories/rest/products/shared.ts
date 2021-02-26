@@ -12,6 +12,7 @@ import {
 } from '../../../framework';
 import {
 	AbstractProduct,
+	AbstractProductData,
 	IProductCrossSells,
 	IProductDelivery,
 	IProductInventory,
@@ -108,13 +109,13 @@ function createProductDownloadTransformer(): ModelTransformer< ProductDownload >
 }
 
 /**
- * Creates a transformer for the shared properties of all products.
+ * Creates a transformer for the base product property data.
  *
  * @param {string} type The product type.
  * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
  * @return {ModelTransformer} The created transformer.
  */
-export function createProductTransformer< T extends AbstractProduct >(
+export function createProductDataTransformation< T extends AbstractProductData >(
 	type: string,
 	transformations?: ModelTransformation[],
 ): ModelTransformer< T > {
@@ -132,8 +133,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 				'date_on_sale_to',
 			],
 		),
-		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
-		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
 		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
 		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
 		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
@@ -142,19 +141,13 @@ export function createProductTransformer< T extends AbstractProduct >(
 				created: PropertyType.Date,
 				modified: PropertyType.Date,
 				isPurchasable: PropertyType.Boolean,
-				isFeatured: PropertyType.Boolean,
 				onSale: PropertyType.Boolean,
 				saleStart: PropertyType.Date,
 				saleEnd: PropertyType.Date,
-				allowReviews: PropertyType.Boolean,
-				averageRating: PropertyType.Integer,
-				numRatings: PropertyType.Integer,
-				totalSales: PropertyType.Integer,
 				parentId: PropertyType.Integer,
 				menuOrder: PropertyType.Integer,
 				permalink: PropertyType.String,
 				priceHtml: PropertyType.String,
-				relatedIds: PropertyType.Integer,
 			},
 		),
 		new KeyChangeTransformation< AbstractProduct >(
@@ -162,30 +155,67 @@ export function createProductTransformer< T extends AbstractProduct >(
 				created: 'date_created_gmt',
 				modified: 'date_modified_gmt',
 				postStatus: 'status',
-				shortDescription: 'short_description',
 				isPurchasable: 'purchasable',
-				isFeatured: 'featured',
-				catalogVisibility: 'catalog_visibility',
 				regularPrice: 'regular_price',
 				onSale: 'on_sale',
 				salePrice: 'sale_price',
 				saleStart: 'date_on_sale_from_gmt',
 				saleEnd: 'date_on_sale_to_gmt',
-				allowReviews: 'reviews_allowed',
-				averageRating: 'average_rating',
-				numRatings: 'rating_count',
 				metaData: 'meta_data',
-				totalSales: 'total_sales',
 				parentId: 'parent_id',
 				menuOrder: 'menu_order',
 				priceHtml: 'price_html',
-				relatedIds: 'related_ids',
 				links: '_links',
 			},
 		),
 	);
 
 	return new ModelTransformer( transformations );
+}
+
+/**
+ * Creates a transformer for the shared properties of all products.
+ *
+ * @param {string} type The product type.
+ * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
+ * @return {ModelTransformer} The created transformer.
+ */
+export function createProductTransformer< T extends AbstractProduct >(
+	type: string,
+	transformations?: ModelTransformation[],
+): ModelTransformer< T > {
+	if ( ! transformations ) {
+		transformations = [];
+	}
+
+	transformations.push(
+		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
+		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
+		new PropertyTypeTransformation(
+			{
+				isFeatured: PropertyType.Boolean,
+				allowReviews: PropertyType.Boolean,
+				averageRating: PropertyType.Integer,
+				numRatings: PropertyType.Integer,
+				totalSales: PropertyType.Integer,
+				relatedIds: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< AbstractProduct >(
+			{
+				shortDescription: 'short_description',
+				isFeatured: 'featured',
+				catalogVisibility: 'catalog_visibility',
+				allowReviews: 'reviews_allowed',
+				averageRating: 'average_rating',
+				numRatings: 'rating_count',
+				totalSales: 'total_sales',
+				relatedIds: 'related_ids',
+			},
+		),
+	);
+
+	return createProductDataTransformation< T >( type, transformations );
 }
 
 export function createProductCrossSellsTransformation(): ModelTransformation[] {

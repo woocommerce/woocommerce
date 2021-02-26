@@ -7,15 +7,21 @@
 export type StockStatus = 'instock' | 'outofstock' | 'onbackorder' | string
 
 /**
+ * Base product properties.
+ */
+export type ProductDataUpdateParams = 'created' | 'postStatus'
+	| 'id' | 'permalink' | 'price' | 'priceHtml'
+	| 'description' | 'sku' | 'attributes' | 'images'
+	| 'regularPrice' | 'salePrice' | 'saleStart' | 'saleEnd'
+	| 'metaData' | 'menuOrder' | 'parentId' | 'links';
+
+/**
  * Properties common to all product types.
  */
-export type ProductCommonUpdateParams = 'name' | 'slug' | 'created' | 'postStatus' | 'shortDescription'
-	| 'id' | 'permalink' | 'price' | 'priceHtml' | 'type'
-	| 'description' | 'sku' | 'categories' | 'tags' | 'isFeatured'
-	| 'attributes' | 'images' | 'catalogVisibility' | 'allowReviews'
-	| 'regularPrice' | 'salePrice' | 'saleStart' | 'saleEnd'
-	| 'metaData' | 'menuOrder' | 'parentId' | 'relatedIds' | 'upsellIds'
-	| 'links' | 'relatedIds' | 'menuOrder' | 'parentId';
+export type ProductCommonUpdateParams = 'name' | 'slug' | 'shortDescription'
+	| 'categories' | 'tags' | 'isFeatured' | 'averageRating' | 'numRatings'
+	| 'catalogVisibility' | 'allowReviews' | 'upsellIds' | 'type'
+	& ProductDataUpdateParams;
 
 /**
  * Cross sells property.
