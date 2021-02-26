@@ -19,7 +19,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: woocommerce
-          path: ${{ steps.build.outputs.zip_path }}
+          path: ${{ steps.build.outputs.path }}
           retention-days: 7
 
       - name: Add comment
