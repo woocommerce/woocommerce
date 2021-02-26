@@ -2,6 +2,7 @@ import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
 	SimpleProduct,
+	baseProductURL,
 	buildProductURL,
 	CreatesSimpleProducts,
 	DeletesSimpleProducts,
@@ -62,8 +63,8 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );
 
 	return new ModelRepository(
-		restList< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
-		restCreate< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
+		restList< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
+		restCreate< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
 		restRead< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
 		restUpdate< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
 		restDelete< SimpleProductRepositoryParams >( buildProductURL, httpClient ),
