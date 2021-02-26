@@ -1,9 +1,9 @@
 version: ~> 1.0
 
-# Specifies that Travis should create builds for master and release branches and also tags.
+# Specifies that Travis should create builds for trunk and release branches and also tags.
 branches:
   only:
-    - master
+    - trunk
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
 
