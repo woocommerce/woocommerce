@@ -64,10 +64,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 		$settings = $this->get_settings( $current_section );
 		WC_Admin_Settings::save_fields( $settings );
 
-		// Any time we update the product settings, we should flush the term count cache.
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$tools_controller->execute_tool( 'recount_terms' );
-
 		if ( $current_section ) {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
