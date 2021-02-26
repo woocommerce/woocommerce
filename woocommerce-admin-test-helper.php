@@ -33,7 +33,9 @@ function add_extension_register_script() {
 		'woocommerce-admin-test-helper',
 		plugins_url( '/build/index.css', __FILE__ ),
 		// Add any dependencies styles may have, such as wp-components.
-		array(),
+		array(
+			'wp-components',
+		),
 		filemtime( dirname( __FILE__ ) . '/build/index.css' )
 	);
 
