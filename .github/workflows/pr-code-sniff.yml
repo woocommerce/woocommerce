@@ -46,7 +46,7 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
       - name: Run code sniff
-        run: ./tests/bin/phpcs.sh "${{ github.base.sha }}..${{ github.event.after }}"
+        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}..${{ github.event.after }}"
       
       - name: Dump GitHub context
         env:
