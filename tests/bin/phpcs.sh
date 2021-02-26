@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo '1'
-
+echo "arg1: $1"
 echo "git diff --name-only --diff-filter=ACMR ${COMMIT_RANGE}"
 CHANGED_FILES=`git diff --name-only --diff-filter=ACMR ${COMMIT_RANGE} | grep \\\\.php | awk '{print}' ORS=' '`
 IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
