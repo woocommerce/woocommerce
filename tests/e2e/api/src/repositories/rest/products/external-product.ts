@@ -14,6 +14,7 @@ import {
 import {
 	createProductTransformer,
 	createProductExternalTransformation,
+	createProductPriceTransformation,
 	createProductSalesTaxTransformation,
 	createProductUpSellsTransformation,
 } from './shared';
@@ -43,10 +44,12 @@ export function externalProductRESTRepository( httpClient: HTTPClient ): ListsEx
 	& UpdatesExternalProducts
 	& DeletesExternalProducts {
 	const external = createProductExternalTransformation();
+	const price = createProductPriceTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const upsells = createProductUpSellsTransformation();
 	const transformations = [
 		...external,
+		...price,
 		...salesTax,
 		...upsells,
 	];
