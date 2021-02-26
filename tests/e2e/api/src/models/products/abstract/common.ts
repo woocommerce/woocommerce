@@ -1,4 +1,4 @@
-import { Model } from '../../model';
+import { Model, ModelID } from '../../model';
 import { MetaData, PostStatus } from '../../shared-types';
 import {
 	CatalogVisibility,
@@ -12,6 +12,14 @@ import {
  * The common parameters that all products can use in search.
  */
 export type ProductSearchParams = { search: string };
+
+/**
+ * A common URL builder.
+ *
+ * @param {ModelID} id the id of the product.
+ * @return {string} RESTful Url.
+ */
+export const buildProductURL = ( id: ModelID ) => '/wc/v3/products/' + id;
 
 /**
  * The base for all product types.

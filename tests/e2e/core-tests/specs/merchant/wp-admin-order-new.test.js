@@ -8,7 +8,7 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const runCreateOrderTest = () => {
-	describe('Add New Order Page', () => {
+	describe('WooCommerce Orders > Add new order', () => {
 		beforeAll(async () => {
 			await merchant.login();
 		});

@@ -5,6 +5,7 @@
 ## Fixed
 
 - Missing `config` package dependency
+- Added `page.removeAllListeners('dialog')` to `createVariableProduct()` to fix dialog already handled errors
 
 ## Added
 

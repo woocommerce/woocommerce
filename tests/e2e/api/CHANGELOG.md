@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+
+- Support for the external product type.
 - Added support for grouped product type
 
 # 0.1.1
