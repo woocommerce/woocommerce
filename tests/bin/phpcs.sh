@@ -3,6 +3,8 @@
 echo '1'
 echo "arg1: $1"
 echo "git diff --name-only --diff-filter=ACMR ${1}"
+git status
+pwd
 CHANGED_FILES=`git diff --name-only --diff-filter=ACMR ${1} | grep \\\\.php | awk '{print}' ORS=' '`
 IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 echo "changed files: $CHANGED_FILES"
