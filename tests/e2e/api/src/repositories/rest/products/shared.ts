@@ -14,6 +14,7 @@ import {
 	AbstractProduct,
 	IProductCrossSells,
 	IProductDelivery,
+	IProductExternal,
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
@@ -188,6 +189,9 @@ export function createProductTransformer< T extends AbstractProduct >(
 	return new ModelTransformer( transformations );
 }
 
+/**
+ * Create a transformer for the product cross sells property.
+ */
 export function createProductCrossSellsTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -205,6 +209,9 @@ export function createProductCrossSellsTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for the product upsells property.
+ */
 export function createProductUpSellsTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -222,6 +229,9 @@ export function createProductUpSellsTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product delivery properties.
+ */
 export function createProductDeliveryTransformation(): ModelTransformation[] {
 	const transformations = [
 		new ModelTransformerTransformation( 'downloads', ProductDownload, createProductDownloadTransformer() ),
@@ -248,6 +258,9 @@ export function createProductDeliveryTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product inventory properties.
+ */
 export function createProductInventoryTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -277,6 +290,9 @@ export function createProductInventoryTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product sales tax properties.
+ */
 export function createProductSalesTaxTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -296,6 +312,9 @@ export function createProductSalesTaxTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product shipping properties.
+ */
 export function createProductShippingTransformation(): ModelTransformation[] {
 	const transformations = [
 		new CustomTransformation(
@@ -348,3 +367,26 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 
 	return transformations;
 }
+
+/**
+ * Transformer for the properties unique to the external product type.
+ */
+export function createProductExternalTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				buttonText: PropertyType.String,
+				externalUrl: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< IProductExternal >(
+			{
+				buttonText: 'button_text',
+				externalUrl: 'external_url',
+			},
+		),
+	];
+
+	return transformations;
+}
+

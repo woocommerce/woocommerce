@@ -17,6 +17,12 @@
     },
     "variable": {
       "name": "Variable Product with Three Variations"
+    },
+    "external": {
+      "name": "External product",
+      "regularPrice": "24.99",
+      "buttonText": "Buy now",
+      "externalUrl": "https://wordpress.org/plugins/woocommerce"
     }
   },
   "addresses": {

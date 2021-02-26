@@ -8,6 +8,9 @@ const runActivationTest = require( './activate-and-setup/activate.test' );
 const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setup/onboarding-tasklist.test' );
 const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' );
 
+// REST API tests
+const runExternalProductAPITest = require( './api/external-product' );
+
 // Shopper tests
 const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
 const runCartPageTest = require( './shopper/front-end-cart.test' );
@@ -72,6 +75,7 @@ module.exports = {
 	runTaskListTest,
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
+	runExternalProductAPITest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
 	runCheckoutApplyCouponsTest,
