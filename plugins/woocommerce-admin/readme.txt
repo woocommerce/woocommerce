@@ -80,6 +80,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: support use of Array.flat in client and packages. #6411
 - Fix: Correct the Klarna slug #6440
 - Tweak: Refactor autoloader to remove global variable. #6412
+- Dev: Deprecate Onboarding::has_woocommerce_support. #6401
 - Fix: Broken link anchors to online documentation. #6455
 
 == 2.1.0 ==
