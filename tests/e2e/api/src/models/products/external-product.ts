@@ -2,6 +2,7 @@ import {
 	AbstractProduct,
 	IProductCommon,
 	IProductExternal,
+	IProductPrice,
 	IProductSalesTax,
 	IProductUpSells,
 	ProductSearchParams,
@@ -9,6 +10,7 @@ import {
 import {
 	ProductCommonUpdateParams,
 	ProductExternalUpdateParams,
+	ProductPriceUpdateParams,
 	ProductSalesTaxUpdateParams,
 	ProductUpSellUpdateParams,
 	Taxability,
@@ -29,6 +31,7 @@ import {
  */
 type ExternalProductUpdateParams = ProductCommonUpdateParams
 	& ProductExternalUpdateParams
+	& ProductPriceUpdateParams
 	& ProductSalesTaxUpdateParams
 	& ProductUpSellUpdateParams;
 /**
@@ -84,6 +87,7 @@ export type DeletesExternalProducts = DeletesModels< ExternalProductRepositoryPa
 export class ExternalProduct extends AbstractProduct implements
 	IProductCommon,
 	IProductExternal,
+	IProductPrice,
 	IProductSalesTax,
 	IProductUpSells {
 	/**
@@ -91,6 +95,17 @@ export class ExternalProduct extends AbstractProduct implements
 	 */
 	public readonly buttonText: string = ''
 	public readonly externalUrl: string = ''
+
+	/**
+	 * @see ./abstracts/price.ts
+	 */
+	public readonly price: string = '';
+	public readonly priceHtml: string = '';
+	public readonly regularPrice: string = '';
+	public readonly onSale: boolean = false;
+	public readonly salePrice: string = '';
+	public readonly saleStart: Date | null = null;
+	public readonly saleEnd: Date | null = null;
 
 	/**
 	 * @see ./abstracts/upsell.ts

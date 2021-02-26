@@ -17,6 +17,7 @@ import {
 	IProductDelivery,
 	IProductGrouped,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping,
 	IProductUpSells,
@@ -128,8 +129,6 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 			[
 				'date_created',
 				'date_modified',
-				'date_on_sale_from',
-				'date_on_sale_to',
 			],
 		),
 		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
