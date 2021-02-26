@@ -1,5 +1,5 @@
 const babelOptions = {
-	presets: [ '@wordpress/babel-preset-default' ],
+	presets: [ '@babel/preset-typescript', '@wordpress/babel-preset-default' ],
 	plugins: [ '@babel/plugin-proposal-class-properties' ],
 };
 

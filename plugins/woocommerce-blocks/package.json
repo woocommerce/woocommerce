@@ -87,6 +87,7 @@
 		"@testing-library/react": "11.2.5",
 		"@testing-library/react-hooks": "5.0.3",
 		"@testing-library/user-event": "12.6.3",
+		"@types/classnames": "^2.2.11",
 		"@types/jest": "26.0.20",
 		"@types/lodash": "4.14.168",
 		"@types/react": "16.14.2",
