@@ -69,4 +69,4 @@ export type ProductDeliveryUpdateParams = 'daysToDownload' | 'downloadLimit' | '
 /**
  * Properties exclusive to the Variable product type.
  */
-export type ProductVariableTypeUpdateParams = 'defaultAttributes' | 'variations';
+export type ProductVariableUpdateParams = 'defaultAttributes' | 'variations';
