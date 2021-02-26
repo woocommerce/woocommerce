@@ -221,6 +221,13 @@ export class ProductLinks {
 	public readonly self: readonly ProductLinkItem[] = [];
 
 	/**
+	 * The link to the parent.
+	 *
+	 * @type {ReadonlyArray.<ProductLinkItem>}
+	 */
+	public readonly up?: readonly ProductLinkItem[] = [];
+
+	/**
 	 * Creates a new product link list.
 	 *
 	 * @param {Partial.<ProductLinks>} properties The properties to set.

@@ -1,9 +1,7 @@
-import { Model } from '../../model';
-import { MetaData, PostStatus } from '../../shared-types';
+import { AbstractProductData } from './data';
+import { PostStatus } from '../../shared-types';
 import {
 	CatalogVisibility,
-	ProductAttribute,
-	ProductImage,
 	ProductTerm,
 	ProductLinks,
 } from '../shared';
@@ -16,7 +14,7 @@ export type ProductSearchParams = { search: string };
 /**
  * The base for all product types.
  */
-export abstract class AbstractProduct extends Model {
+export abstract class AbstractProduct extends AbstractProductData {
 	/**
 	 * The name of the product.
 	 *
@@ -30,34 +28,6 @@ export abstract class AbstractProduct extends Model {
 	 * @type {string}
 	 */
 	public readonly slug: string = '';
-
-	/**
-	 * The permalink of the product.
-	 *
-	 * @type {string}
-	 */
-	public readonly permalink: string = '';
-
-	/**
-	 * The Id of the product.
-	 *
-	 * @type {number}
-	 */
-	public readonly id: number = 0;
-
-	/**
-	 * The parent Id of the product.
-	 *
-	 * @type {number}
-	 */
-	public readonly parentId: number = 0;
-
-	/**
-	 * The menu order assigned to the product.
-	 *
-	 * @type {number}
-	 */
-	public readonly menuOrder: number = 0;
 
 	/**
 	 * The GMT datetime when the product was created.
@@ -88,20 +58,6 @@ export abstract class AbstractProduct extends Model {
 	public readonly shortDescription: string = '';
 
 	/**
-	 * The product's full description.
-	 *
-	 * @type {string}
-	 */
-	public readonly description: string = '';
-
-	/**
-	 * The product's SKU.
-	 *
-	 * @type {string}
-	 */
-	public readonly sku: string = '';
-
-	/**
 	 * An array of the categories this product is in.
 	 *
 	 * @type {ReadonlyArray.<ProductTerm>}
@@ -116,32 +72,11 @@ export abstract class AbstractProduct extends Model {
 	public readonly tags: readonly ProductTerm[] = [];
 
 	/**
-	 * Indicates whether or not the product is currently able to be purchased.
-	 *
-	 * @type {boolean}
-	 */
-	public readonly isPurchasable: boolean = true;
-
-	/**
 	 * Indicates whether or not the product should be featured.
 	 *
 	 * @type {boolean}
 	 */
 	public readonly isFeatured: boolean = false;
-
-	/**
-	 * The attributes for the product.
-	 *
-	 * @type {ReadonlyArray.<ProductAttribute>}
-	 */
-	public readonly attributes: readonly ProductAttribute[] = [];
-
-	/**
-	 * The images for the product.
-	 *
-	 * @type {ReadonlyArray.<ProductImage>}
-	 */
-	public readonly images: readonly ProductImage[] = [];
 
 	/**
 	 * Indicates whether or not the product should be visible in the catalog.
@@ -233,13 +168,6 @@ export abstract class AbstractProduct extends Model {
 	 * @type {ReadonlyArray.<number>}
 	 */
 	public readonly relatedIds: Array<number> = [];
-
-	/**
-	 * The extra metadata for the product.
-	 *
-	 * @type {ReadonlyArray.<MetaData>}
-	 */
-	public readonly metaData: readonly MetaData[] = [];
 
 	/**
 	 * The products links.
