@@ -20,7 +20,7 @@ jobs:
             php: 7.2
     services:
       database:
-        image: mysql:5.6
+        image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: root
         ports:
