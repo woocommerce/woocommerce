@@ -128,10 +128,12 @@ class Coupons {
 			Loader::get_file_version( 'css' )
 		);
 
+		$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/marketing-coupons.min.asset.php';
+
 		wp_enqueue_script(
 			'wc-admin-marketing-coupons',
 			Loader::get_url( 'wp-admin-scripts/marketing-coupons', 'js' ),
-			array( 'wp-i18n', 'wp-data', 'wp-element', 'moment', 'wp-api-fetch', WC_ADMIN_APP ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
 			Loader::get_file_version( 'js' ),
 			true
 		);

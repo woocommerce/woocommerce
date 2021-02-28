@@ -263,7 +263,15 @@ class OnboardingTasks {
 			return;
 		}
 
-		wp_enqueue_script( 'onboarding-product-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ), array( 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+		$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/onboarding-product-notice.min.asset.php';
+
+		wp_enqueue_script(
+			'onboarding-product-notice',
+			Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WC_ADMIN_VERSION_NUMBER,
+			true
+		);
 	}
 
 	/**
@@ -273,8 +281,16 @@ class OnboardingTasks {
 	 */
 	public static function add_onboarding_homepage_notice_admin_script( $hook ) {
 		global $post;
-		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.
-			wp_enqueue_script( 'onboarding-homepage-notice', Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice', 'js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data', 'wc-tracks' ), WC_ADMIN_VERSION_NUMBER, true );
+		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.		
+			$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/onboarding-homepage-notice.min.asset.php';
+
+			wp_enqueue_script(
+				'onboarding-homepage-notice',
+				Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+				WC_ADMIN_VERSION_NUMBER,
+				true
+			);
 		}
 	}
 
@@ -291,7 +307,15 @@ class OnboardingTasks {
 			'tax' === self::get_active_task() &&
 			! self::is_active_task_complete()
 		) {
-			wp_enqueue_script( 'onboarding-tax-notice', Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice', 'js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+			$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/onboarding-tax-notice.min.asset.php';
+
+			wp_enqueue_script(
+				'onboarding-tax-notice',
+				Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+				WC_ADMIN_VERSION_NUMBER,
+				true
+			);
 		}
 	}
 
@@ -304,7 +328,16 @@ class OnboardingTasks {
 		$step = isset( $_GET['step'] ) ? $_GET['step'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 		if ( 'product_page_product_importer' === $hook && 'done' === $step && 'product-import' === self::get_active_task() ) {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
-			wp_enqueue_script( 'onboarding-product-import-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+
+			$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/onboarding-product-import-notice.min.asset.php';
+
+			wp_enqueue_script(
+				'onboarding-product-import-notice',
+				Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+				WC_ADMIN_VERSION_NUMBER,
+				true
+			);
 		}
 	}
 
