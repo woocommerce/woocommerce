@@ -78,6 +78,20 @@ export type ListChildFn< T extends ModelRepositoryParams > = (
 export type CreateFn< T extends ModelRepositoryParams > = ( properties: Partial< ModelClass< T > > ) => Promise< ModelClass< T > >;
 
 /**
+ * A callback for creating a child model using a data source.
+ *
+ * @callback CreateChildFn
+ * @param {ModelID} parent The parent identifier for the model.
+ * @param {Partial.<T>} properties The properties of the model to create.
+ * @return {Promise.<T>} Resolves to the created model.
+ * @template {Model} T
+ */
+export type CreateChildFn< T extends ModelRepositoryParams > = (
+	parent: ModelID,
+	properties: Partial< ModelClass< T > >
+) => Promise< ModelClass< T > >;
+
+/**
  * A callback for reading a model using a data source.
  *
  * @callback ReadFn
