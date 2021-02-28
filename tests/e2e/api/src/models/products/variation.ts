@@ -4,14 +4,83 @@ import {
 	IProductInventory,
 	IProductSalesTax,
 	IProductShipping,
+	ProductSearchParams,
 } from './abstract';
 import {
+	ProductDataUpdateParams,
+	ProductDeliveryUpdateParams,
+	ProductInventoryUpdateParams,
+	ProductSalesTaxUpdateParams,
+	ProductShippingUpdateParams,
 	ProductLinks,
 	Taxability,
 	ProductDownload,
 	StockStatus,
 	BackorderStatus,
 } from './shared';
+import {
+	CreatesModels,
+	DeletesModels,
+	ListsModels,
+	ModelRepositoryParams,
+	ReadsModels,
+	UpdatesModels,
+} from '../../framework';
+
+/**
+ * The parameters that product variations can update.
+ */
+type ProductVariationUpdateParams = ProductDataUpdateParams
+	& ProductDeliveryUpdateParams
+	& ProductInventoryUpdateParams
+	& ProductSalesTaxUpdateParams
+	& ProductShippingUpdateParams;
+/**
+ * The parameters embedded in this generic can be used in the ModelRepository in order to give
+ * type-safety in an incredibly granular way.
+ */
+export type ProductVariationRepositoryParams =
+	ModelRepositoryParams< ProductVariation, never, ProductSearchParams, ProductVariationUpdateParams >;
+
+/**
+ * An interface for listing variable products using the repository.
+ *
+ * @typedef ListsProductVariations
+ * @alias ListsModels.<ProductVariation>
+ */
+export type ListsProductVariations = ListsModels< ProductVariationRepositoryParams >;
+
+/**
+ * An interface for creating variable products using the repository.
+ *
+ * @typedef CreatesProductVariations
+ * @alias CreatesModels.<ProductVariation>
+ */
+export type CreatesProductVariations = CreatesModels< ProductVariationRepositoryParams >;
+
+/**
+ * An interface for reading variable products using the repository.
+ *
+ * @typedef ReadsProductVariations
+ * @alias ReadsModels.<ProductVariation>
+ */
+export type ReadsProductVariations = ReadsModels< ProductVariationRepositoryParams >;
+
+/**
+ * An interface for updating variable products using the repository.
+ *
+ * @typedef UpdatesProductVariations
+ * @alias UpdatesModels.<ProductVariation>
+ */
+export type UpdatesProductVariations = UpdatesModels< ProductVariationRepositoryParams >;
+
+/**
+ * An interface for deleting variable products using the repository.
+ *
+ * @typedef DeletesProductVariations
+ * @alias DeletesModels.<ProductVariation>
+ */
+export type DeletesProductVariations = DeletesModels< ProductVariationRepositoryParams >;
 
 /**
  * The base for the product variation object.
