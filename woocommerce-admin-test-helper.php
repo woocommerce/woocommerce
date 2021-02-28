@@ -10,6 +10,8 @@
  * @package WooCommerce\Admin\TestHelper
  */
 
+define( 'WC_ADMIN_TEST_HELPER_PLUGIN_FILE', 'woocommerce-admin-test-helper/woocommerce-admin-test-helper.php' );
+
 /**
  * Register the JS.
  */
@@ -28,18 +30,26 @@ function add_extension_register_script() {
 		$script_asset['version'],
 		true
 	);
+	wp_enqueue_script( 'woocommerce-admin-test-helper' );
+
+	$css_file_version = filemtime( dirname( __FILE__ ) . '/build/index.css' );
+
+	wp_register_style(
+		'wp-components',
+		plugins_url( 'dist/components/style.css', WC_ADMIN_TEST_HELPER_PLUGIN_FILE ),
+		array(),
+		$css_file_version
+	);
 
 	wp_register_style(
 		'woocommerce-admin-test-helper',
 		plugins_url( '/build/index.css', __FILE__ ),
 		// Add any dependencies styles may have, such as wp-components.
 		array(
-			'wp-components',
+			'wp-components'
 		),
-		filemtime( dirname( __FILE__ ) . '/build/index.css' )
+		$css_file_version
 	);
-
-	wp_enqueue_script( 'woocommerce-admin-test-helper' );
 	wp_enqueue_style( 'woocommerce-admin-test-helper' );
 }
 
