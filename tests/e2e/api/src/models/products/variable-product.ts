@@ -11,6 +11,7 @@ import {
 import {
 	ProductInventoryUpdateParams,
 	ProductCommonUpdateParams,
+	ProductDefaultAttribute,
 	ProductSalesTaxUpdateParams,
 	ProductCrossUpdateParams,
 	ProductShippingUpdateParams,
@@ -18,9 +19,8 @@ import {
 	ProductVariableUpdateParams,
 	StockStatus,
 	BackorderStatus,
-	Taxability, ProductDefaultAttribute,
+	Taxability,
 } from './shared';
-import { ProductVariation } from './variation';
 import { HTTPClient } from '../../http';
 import { variableProductRESTRepository } from '../../repositories';
 import {
@@ -148,9 +148,9 @@ export class VariableProduct extends AbstractProduct implements
 	/**
 	 * Product variations.
 	 *
-	 * @type {ReadonlyArray.<ProductVariation>}
+	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly variations: readonly ProductVariation[] = [];
+	public readonly variations: readonly Array<number> = [];
 
 	/**
 	 * Creates a new Variable product instance with the given properties

@@ -112,12 +112,10 @@ function createProductDownloadTransformer(): ModelTransformer< ProductDownload >
 /**
  * Creates a transformer for the base product property data.
  *
- * @param {string} type The product type.
  * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
  * @return {ModelTransformer} The created transformer.
  */
-export function createProductDataTransformation< T extends AbstractProductData >(
-	type: string,
+export function createProductDataTransformer< T extends AbstractProductData >(
 	transformations?: ModelTransformation[],
 ): ModelTransformer< T > {
 	if ( ! transformations ) {
@@ -125,7 +123,6 @@ export function createProductDataTransformation< T extends AbstractProductData >
 	}
 
 	transformations.push(
-		new AddPropertyTransformation( {}, { type } ),
 		new IgnorePropertyTransformation(
 			[
 				'date_created',
@@ -190,6 +187,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 	}
 
 	transformations.push(
+		new AddPropertyTransformation( {}, { type } ),
 		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
 		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
 		new PropertyTypeTransformation(
@@ -216,7 +214,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 		),
 	);
 
-	return createProductDataTransformation< T >( type, transformations );
+	return createProductDataTransformer< T >( transformations );
 }
 
 export function createProductCrossSellsTransformation(): ModelTransformation[] {
