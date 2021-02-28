@@ -355,6 +355,17 @@ class WC_AJAX {
 
 		// Calculate shipping before totals. This will ensure any shipping methods that affect things like taxes are chosen prior to final totals being calculated. Ref: #22708.
 		WC()->cart->calculate_shipping();
+
+		// Update chosen payment method
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		WC()->payment_gateways()->set_current_gateway( $available_gateways );
+		foreach ( $available_gateways as $gateway ) {
+			if ( $gateway->chosen == true ) {
+				WC()->session->set( 'chosen_payment_method', $gateway->id );
+				break;
+			}
+		}
+
 		WC()->cart->calculate_totals();
 
 		// Get order review fragment.
