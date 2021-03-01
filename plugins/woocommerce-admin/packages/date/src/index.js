@@ -148,6 +148,7 @@ export function getLastPeriod( period, compare ) {
 			secondaryEnd = secondaryStart.clone().endOf( period );
 		} else {
 			// Otherwise, use days in primary period to figure out how far to go back
+			// This is necessary for calculating weeks instead of using `endOf`.
 			const daysDiff = primaryEnd.diff( primaryStart, 'days' );
 			secondaryEnd = primaryStart.clone().subtract( 1, 'days' );
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
@@ -156,6 +157,12 @@ export function getLastPeriod( period, compare ) {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
 		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' );
 	}
+
+	// When the period is month, be sure to force end of month to take into account leap year
+	if ( period === 'month' ) {
+		secondaryEnd = secondaryEnd.clone().endOf( 'month' );
+	}
+
 	return {
 		primaryStart,
 		primaryEnd,

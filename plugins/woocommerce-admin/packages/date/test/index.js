@@ -552,7 +552,7 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 
-		it.skip( 'should return correct values for previous_year', () => {
+		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
 
 			const lastMonthkLastYearStart = lastMonthStart
@@ -561,7 +561,6 @@ describe( 'getLastPeriod', () => {
 			const lastMonthkLastYearEnd = lastMonthkLastYearStart
 				.clone()
 				.endOf( 'month' );
-
 			expect(
 				lastMonthkLastYearStart.isSame(
 					dateValue.secondaryStart,
