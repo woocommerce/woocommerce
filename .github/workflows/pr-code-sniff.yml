@@ -45,7 +45,7 @@ jobs:
         run: composer install
 
       - name: Log PHPCS debug information
-        run: phpcs -i
+        run: ./vendor/bin/phpcs -i
           
       - name: Run code sniff
         run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
