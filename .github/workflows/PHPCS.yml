@@ -10,3 +10,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: PHPCS check
         uses: chekalsky/phpcs-action@v1
+        with:
+          phpcs_bin_path: './vendor/bin/phpcs'
