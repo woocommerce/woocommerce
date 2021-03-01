@@ -11,4 +11,6 @@ add_action( 'admin_menu', function() {
 	);
 } );
 
-// add API.. want to be able to do this via a filter as well...
+add_action( 'wp_loaded', function() {
+	require( 'api/api.php' );
+} );

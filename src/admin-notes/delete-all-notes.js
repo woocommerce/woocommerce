@@ -4,8 +4,6 @@
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 export const DeleteAllNotes = () => {
     const [ isDeleting, setIsDeleting ] = useState( false );
@@ -14,16 +12,16 @@ export const DeleteAllNotes = () => {
     
     async function triggerDeleteAllNotes() {
         setIsDeleting( true );
+        setErrorMessage( false );
+        setDeleteStatus( false );
 
         try {
             const response = await apiFetch( {
-                path: `${ WC_ADMIN_NAMESPACE }/nothing-to-see-here`,
+                path: '/wc-admin-test-helper/v1/admin-notes/delete-all-notes',
                 method: 'POST',
             } );
 
-            console.log({x: response});
-            setErrorMessage( false );
-            //setDeleteStatus(...);
+            setDeleteStatus( response );
         } catch ( ex ) {
             setErrorMessage( ex.message );
         }
