@@ -150,7 +150,7 @@ export class VariableProduct extends AbstractProduct implements
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly variations: readonly Array<number> = [];
+	public readonly variations: Array<number> = [];
 
 	/**
 	 * Creates a new Variable product instance with the given properties
