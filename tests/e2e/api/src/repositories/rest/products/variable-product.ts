@@ -19,17 +19,12 @@ import {
 	createProductUpSellsTransformation,
 	createProductVariableTransformation,
 } from './shared';
-// @todo add child rest methods
 import {
 	restCreate,
 	restDelete,
-	//	restDeleteChild,
 	restList,
-	//	restListChild,
 	restRead,
-	//	restReadChild,
 	restUpdate,
-//	restUpdateChild,
 } from '../shared';
 
 /**
@@ -49,7 +44,6 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 	& ReadsVariableProducts
 	& UpdatesVariableProducts
 	& DeletesVariableProducts {
-	// @todo child url function
 	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
 
 	const crossSells = createProductCrossSellsTransformation();
@@ -69,7 +63,6 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 
 	const transformer = createProductTransformer<VariableProduct>( 'variable', transformations );
 
-	// @todo create and add variation repository params
 	return new ModelRepository(
 		restList< VariableProductRepositoryParams >( () => '/wc/v3/products', VariableProduct, httpClient, transformer ),
 		restCreate< VariableProductRepositoryParams >( () => '/wc/v3/products', VariableProduct, httpClient, transformer ),
