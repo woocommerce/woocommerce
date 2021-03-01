@@ -552,7 +552,7 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 
-		it( 'should return correct values for previous_year', () => {
+		it.skip( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
 
 			const lastMonthkLastYearStart = lastMonthStart
