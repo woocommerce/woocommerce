@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { CartItem } from '@woocommerce/types';
+import type { Reducer } from 'redux';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ import type { CartAction } from './actions';
  */
 const cartItemsReducer = (
 	state: Array< CartItem > = [],
-	action: CartAction
+	action: Partial< CartAction >
 ) => {
 	switch ( action.type ) {
 		case types.RECEIVE_CART_ITEM:
@@ -41,10 +42,10 @@ const cartItemsReducer = (
  *
  * @return  {CartState}          New or existing state.
  */
-const reducer = (
-	state: CartState = defaultCartState,
-	action: CartAction
-): CartState => {
+const reducer: Reducer< CartState > = (
+	state = defaultCartState,
+	action: Partial< CartAction >
+) => {
 	switch ( action.type ) {
 		case types.RECEIVE_ERROR:
 			if ( action.error ) {
@@ -151,5 +152,7 @@ const reducer = (
 	}
 	return state;
 };
+
+export type State = ReturnType< typeof reducer >;
 
 export default reducer;

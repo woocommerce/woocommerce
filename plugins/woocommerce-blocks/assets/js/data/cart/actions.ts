@@ -27,7 +27,7 @@ import type { ResponseError } from '../types';
  *
  * @param  {CartResponse}      response
  */
-export function receiveCart( response: CartResponse ) {
+export const receiveCart = ( response: CartResponse ) => {
 	const cart = ( mapKeys( response, ( _, key ) =>
 		camelCase( key )
 	) as unknown ) as Cart;
@@ -35,7 +35,7 @@ export function receiveCart( response: CartResponse ) {
 		type: types.RECEIVE_CART,
 		response: cart,
 	} as const;
-}
+};
 
 /**
  * Returns an action object used for receiving customer facing errors from the API.
@@ -45,51 +45,47 @@ export function receiveCart( response: CartResponse ) {
  * @param   {boolean}       [replace=true] Should existing errors be replaced,
  *                                         or should the error be appended.
  */
-export function receiveError(
+export const receiveError = (
 	error: ResponseError | null = null,
 	replace = true
-) {
-	return {
+) =>
+	( {
 		type: replace ? types.REPLACE_ERRORS : types.RECEIVE_ERROR,
 		error,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object used to track when a coupon is applying.
  *
  * @param  {string} [couponCode] Coupon being added.
  */
-export function receiveApplyingCoupon( couponCode: string ) {
-	return {
+export const receiveApplyingCoupon = ( couponCode: string ) =>
+	( {
 		type: types.APPLYING_COUPON,
 		couponCode,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object used to track when a coupon is removing.
  *
  * @param   {string} [couponCode] Coupon being removed..
  */
-export function receiveRemovingCoupon( couponCode: string ) {
-	return {
+export const receiveRemovingCoupon = ( couponCode: string ) =>
+	( {
 		type: types.REMOVING_COUPON,
 		couponCode,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object for updating a single cart item in the store.
  *
  * @param  {CartResponseItem} [response=null] A cart item API response.
  */
-export function receiveCartItem( response: CartResponseItem | null = null ) {
-	return {
+export const receiveCartItem = ( response: CartResponseItem | null = null ) =>
+	( {
 		type: types.RECEIVE_CART_ITEM,
 		cartItem: response,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object to indicate if the specified cart item quantity is
@@ -99,16 +95,15 @@ export function receiveCartItem( response: CartResponseItem | null = null ) {
  * @param   {boolean} [isPendingQuantity=true] Flag for update state; true if API
  *                                             request is pending.
  */
-export function itemIsPendingQuantity(
+export const itemIsPendingQuantity = (
 	cartItemKey: string,
 	isPendingQuantity = true
-) {
-	return {
+) =>
+	( {
 		type: types.ITEM_PENDING_QUANTITY,
 		cartItemKey,
 		isPendingQuantity,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object to remove a cart item from the store.
@@ -117,27 +112,25 @@ export function itemIsPendingQuantity(
  * @param   {boolean} [isPendingDelete=true] Flag for update state; true if API
  *                                           request is pending.
  */
-export function itemIsPendingDelete(
+export const itemIsPendingDelete = (
 	cartItemKey: string,
 	isPendingDelete = true
-) {
-	return {
+) =>
+	( {
 		type: types.RECEIVE_REMOVED_ITEM,
 		cartItemKey,
 		isPendingDelete,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object used to track when customer data is being updated
  * (billing and/or shipping).
  */
-export function updatingCustomerData( isResolving: boolean ) {
-	return {
+export const updatingCustomerData = ( isResolving: boolean ) =>
+	( {
 		type: types.UPDATING_CUSTOMER_DATA,
 		isResolving,
-	} as const;
-}
+	} as const );
 
 /**
  * Returns an action object used to track whether the shipping rate is being
@@ -145,12 +138,11 @@ export function updatingCustomerData( isResolving: boolean ) {
  *
  * @param  {boolean} isResolving True if shipping rate is being selected.
  */
-export function shippingRatesBeingSelected( isResolving: boolean ) {
-	return {
+export const shippingRatesBeingSelected = ( isResolving: boolean ) =>
+	( {
 		type: types.UPDATING_SELECTED_SHIPPING_RATE,
 		isResolving,
-	} as const;
-}
+	} as const );
 
 /**
  * Applies a coupon code and either invalidates caches, or receives an error if
