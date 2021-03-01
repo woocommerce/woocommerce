@@ -7,7 +7,33 @@ jobs:
     name: PHPCS
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer
+          extensions: mysql
+          coverage: none
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Get cached composer directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+
+      - name: Setup and install composer
+        run: composer install
+
       - name: PHPCS check
         uses: chekalsky/phpcs-action@v1
         with:
