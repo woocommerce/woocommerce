@@ -1,5 +1,4 @@
 import { AbstractProductData } from './data';
-import { PostStatus } from '../../shared-types';
 import {
 	CatalogVisibility,
 	ProductTerm,
@@ -42,13 +41,6 @@ export abstract class AbstractProduct extends AbstractProductData {
 	 * @type {Date}
 	 */
 	public readonly modified: Date = new Date();
-
-	/**
-	 * The product's current post status.
-	 *
-	 * @type {PostStatus}
-	 */
-	public readonly postStatus: PostStatus = '';
 
 	/**
 	 * The product's short description.

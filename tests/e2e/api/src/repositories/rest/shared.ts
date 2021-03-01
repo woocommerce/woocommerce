@@ -149,7 +149,7 @@ export function restCreate< T extends ModelRepositoryParams >(
  * @return {CreateChildFn} The callback for the repository.
  */
 export function restCreateChild< T extends ModelRepositoryParams >(
-	buildURL: ( parent: ModelID, properties: Partial< ModelClass< T > > ) => string,
+	buildURL: ( parent: ParentID< T >, properties: Partial< ModelClass< T > > ) => string,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
 	transformer: ModelTransformer< ModelClass< T > >,
