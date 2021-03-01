@@ -37,6 +37,29 @@ const invalidJsonError = {
 	),
 };
 
+const setNonceOnFetch = ( headers: Headers ): void => {
+	if (
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- this does exist because it's monkey patched in
+		// middleware/store-api-nonce.
+		triggerFetch.setNonce &&
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- this does exist because it's monkey patched in
+		// middleware/store-api-nonce.
+		typeof triggerFetch.setNonce === 'function'
+	) {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- this does exist because it's monkey patched in
+		// middleware/store-api-nonce.
+		triggerFetch.setNonce( headers );
+	} else {
+		// eslint-disable-next-line no-console
+		console.error(
+			'The monkey patched function on APIFetch, "setNonce", is not present, likely another plugin or some other code has removed this augmentation'
+		);
+	}
+};
+
 /**
  * Default export for registering the controls with the store.
  *
@@ -59,18 +82,14 @@ export const controls = {
 								response,
 								headers: fetchResponse.headers,
 							} );
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore -- this does exist but doesn't appear to be typed in the api-fetch types.
-							triggerFetch.setNonce( fetchResponse.headers );
+							setNonceOnFetch( fetchResponse.headers );
 						} )
 						.catch( () => {
 							reject( invalidJsonError );
 						} );
 				} )
 				.catch( ( errorResponse ) => {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore -- this does exist but doesn't appear to be typed in the api-fetch types.
-					triggerFetch.setNonce( errorResponse.headers );
+					setNonceOnFetch( errorResponse.headers );
 					if ( typeof errorResponse.json === 'function' ) {
 						// Parse error response before rejecting it.
 						errorResponse
