@@ -116,4 +116,38 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( '302', wc_format_decimal( WC()->cart->get_total(), 0 ) );
 		$this->assertEquals( '56', wc_format_decimal( WC()->cart->get_total_tax(), 0 ) );
 	}
+
+	/**
+	 * Test subtotal and total are rounded correctly when values are entered with more precision.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/24184#issue-469311323.
+	 */
+	public function test_total_rounding_with_price_entered_has_high_precision() {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		WC()->cart->empty_cart();
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX20',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+		$product_30_82500 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 30.82500 ) );
+
+		WC()->cart->add_to_cart( $product_30_82500->get_id() );
+
+		WC()->cart->calculate_totals();
+		// Since prices entered have higher precision, subtotal + tax will not equal to total.
+		$this->assertEquals( '30.83', wc_format_decimal( WC()->cart->get_subtotal(), 2 ) );
+		$this->assertEquals( '36.99', WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( '6.17', WC()->cart->get_total_tax() );
+	}
 }
