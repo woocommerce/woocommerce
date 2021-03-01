@@ -2,23 +2,25 @@
 
 The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
 
-> **Note:** This API is fairly stable, but we're still really early in the checkout block release plan so it _is_ possible this might slightly change as more payment methods are integrated and we discover areas needing improvement. So monitoring this API will be needed.
-
 ## Table of Contents <!-- omit in toc -->
 
 - [Client Side integration](#client-side-integration)
-  - [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-paymentmethodcreator-)
-  - [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-paymentmethodcreator-)
+  - [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
+  - [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
   - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
 - [Server Side Integration](#server-side-integration)
   - [Processing Payment](#processing-payment)
   - [Registering Assets](#registering-assets)
+  - [Hooking into the Checkout processing by the Store API.](#hooking-into-the-checkout-processing-by-the-store-api)
+  - [Putting it all together](#putting-it-all-together)
 
 ## Client Side integration
 
-The client side integration consists of an API for registering both _express_ payment methods (those that consist of a one button payment process initiated by the shopper such as Stripe ApplePay or GooglePay), and payment methods such as _cheque_, Paypal Standard, or Stripe Credit Card.
+The client side integration consists of an API for registering both _express_ payment methods (those that consist of a one-button payment process initiated by the shopper such as Stripe, ApplePay, or GooglePay), and payment methods such as _cheque_, PayPal Standard, or Stripe Credit Card.
 
-In both cases, the client side integration is done using registration methods exposed on the `blocks-registry` API. You can access this via the `wc` global in a WooCommerce environment (`wc.wcBlocksRegistry`). You'll see that we also Webpack configured in the blocks repository to expose this API on `@woocommerce/blocks-registry` which you can implement in your own build process as well.
+In both cases, the client side integration is done using registration methods exposed on the `blocks-registry` API. You can access this via the `wc` global in a WooCommerce environment (`wc.wcBlocksRegistry`).
+
+> Note: In your build process, you could do something similar to what is done in the blocks repository which [aliases this API as an external on `@woocommerce/blocks-registry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/bin/webpack-helpers.js#L16-L35).
 
 ### Express payment methods - `registerExpressPaymentMethod( options )`
 
@@ -48,10 +50,10 @@ The options you feed the configuration instance should be an object in this shap
 
 ```js
 const options = {
-	name: 'my_payment_method',
-	content: <div>A react node</div>,
-	edit: <div> A react node </div>,
-	canMakePayment: () => true,
+  name: 'my_payment_method',
+  content: <div>A React node</div>,
+  edit: <div>A React node</div>,
+  canMakePayment: () => true,
   paymentMethodId: 'new_payment_method',
   supports = {
       features: [],
@@ -62,15 +64,15 @@ const options = {
 Here's some more details on the configuration options:
 
 -   `name` (required): This should be a unique string (wise to try to pick something unique for your gateway that wouldn't be used by another implementation) that is used as the identifier for the gateway client side. If `paymentMethodId` is not provided, `name` is used for `paymentMethodId` as well.
--   `content` (required): This should be a react node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this react node will receive props from the payment method interface to checkout that will allow your component to interact with checkout data (more on this later).
--   `edit` (required): This should be a react node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this react node will receive props from the payment method interface to checkout (but they will contain preview data).
--   `canMakePayment` (required): A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order. Return a boolean value - true if payment method is available for use. If your gateway needs to perform async initialisation to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: `Cash on delivery`); or for payment methods to control whether they are available depending on other conditions. Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.
--   `paymentMethodId`: This is the only optional configuration object. The value of this property is what will accompany the checkout processing request to the server and used to identify what payment method gateway class to load for processing the payment (if the shopper selected the gateway). So for instance if this is `stripe`, then `WC_Gateway_Stripe::process_payment` will be invoked for processing the payment.
--   `supports:features`: This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature. If no value is provided then this assumes that ['products'] are supported.
+-   `content` (required): This should be a React node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this React node will receive props passed in from the checkout payment method interface that will allow your component to interact with checkout data (more on [these props later](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/payment-method-integration.md#props-fed-to-payment-method-nodes)).
+-   `edit` (required): This should be a React node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this React node will receive props from the payment method interface to checkout (but they will contain preview data).
+-   `canMakePayment` (required): A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order. Return a boolean value - true if payment method is available for use. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions. **Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.**
+-   `paymentMethodId`: This is the only optional configuration object. The value of this property is what will accompany the checkout processing request to the server and is used to identify what payment method gateway class to load for processing the payment (if the shopper selected the gateway). So for instance if this is `stripe`, then `WC_Gateway_Stripe::process_payment` will be invoked for processing the payment.
+-   `supports:features`: This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature. If no value is provided then this assumes that `['products']` are supported.
 
 ### Payment Methods - `registerPaymentMethod( options )`
 
-![Payment Method Area](https://user-images.githubusercontent.com/1429108/79565774-5d230700-807f-11ea-9335-0111ec306a47.png)
+![Image 2021-02-24 at 4 24 05 PM](https://user-images.githubusercontent.com/1429108/109067640-c7073680-76bc-11eb-98e5-f04d35ddef99.jpg)
 
 To register a payment method, you use the `registerPaymentMethod` function from the blocks registry. An example of importing this for use in your JavaScript file is:
 
@@ -94,9 +96,9 @@ registerPaymentMethod( options );
 
 The options you feed the configuration instance are the same as those for express payment methods with the following additions:
 
--   `label`: This should be a react node that will be used to output the label for the tab in the payment methods are. For example it might be `<strong>Credit/Debit Cart</strong>` or you might output images.
+-   `label`: This should be a React node that will be used to output the label for the option where the payment methods are. For example it might be `<strong>Credit/Debit Cart</strong>` or you might output images.
 -   `ariaLabel`: This is the label that will be read out via screen-readers when the payment method is selected.
--   `placeOrderButtonLabel`: This is an optional label which will change the default "Place Order" button text to something else when the payment method is selected.
+-   `placeOrderButtonLabel`: This is an optional label which will change the default "Place Order" button text to something else when the payment method is selected. As an example, the PayPal Standard payment method [changes the text of the button to "Proceed to PayPal"](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/paypal/index.js#L37-L40) when it is selected as the payment method for checkout because the payment method takes the shopper offsite to PayPal for completing the payment.
 -   `supports`: This is an object containing information about what features your payment method supports. The following keys are valid here:
     - `showSavedCards`: This value will determine whether saved cards associated with your payment method are shown to the customer.
     - `showSaveOption`: This value will control whether to show the checkbox which allows customers to save their payment method for future payments.
@@ -111,35 +113,37 @@ A big part of the payment method integration is the interface that is exposed fo
 -   `shippingData`: This object contains all shipping related data (outside of status) - `shippingRates`, `shippingRatesLoading`, `selectedRates`, `setSelectedRates`, `isSelectingRate`, `shippingAddress`, `setShippingAddress`, and `needsShipping`.
 -   `billing`: This object contains everything related to billing - `billingData`, `cartTotal`, `currency`, `cartTotalItems`, `displayPricesIncludingTax`, `appliedCoupons`, `customerId`
 -   `eventRegistration`: This object contains all the checkout event emitter registration functions. These are functions the payment method can register observers on to interact with various points in the checkout flow (see [this doc](./checkout-flow-and-events.md) for more info). The following properties are available - `onCheckoutBeforeProcessing`, `onCheckoutAfterProcessingWithSuccess`, `onCheckoutAfterProcessingWithError`, `onPaymentProcessing`, `onShippingRateSuccess`, `onShippingRateFail`, `onShippingRateSelectSuccess`, `onShippingRateSelectFail`
--   `components`: The properties on this object are exposed components that can be implemented by your payment method for various common interface elements used by payment methods. Currently the available components on this property are: `ValidationInputError` (a container for holding validation errors which typically you'll include after any inputs), and `CheckboxControl`(which is usually used for indicating to save the payment method). **Note: this last one is subject to change**
+-   `components`: The properties on this object are exposed components that can be implemented by your payment method for various common interface elements used by payment methods. Currently the available components on this property are:
+  - `ValidationInputError` — a container for holding validation errors which typically you'll include after any inputs
+  - [`PaymentMethodLabel`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/paypal/index.js#L37-L40) — use this component for the payment method label, including an optional icon
 -   `setExpressPaymentError`: This function receives a string and allows express payment methods to set an error notice for the express payment area on demand. This can be necessary because some express payment method processing might happen outside of checkout events.
 
 ## Server Side Integration
 
-> **Note:** This portion of the doc is still in development and there could be changes to the API here.
-
 ### Processing Payment
 
-Currently, the checkout block has legacy handling for payment processing (by converting incoming `payment_data` provided by the client side payment method to `$_POST` and calling the payment gateway's `process_payment` function ). So unless your payment method hooks into the core checkout `process_checkout` function in any way, this will take care of processing your payment for you.
+The checkout block currently has legacy handling for payment processing.  It converts incoming `payment_data` provided by the client-side payment method to `$_POST` and calls the payment gateway's `process_payment` function.  If you already have a WooCommerce Payment method extension integrated with the existing shortcode checkout flow, the checkout block's legacy handling will take care of processing your payment for you on the server side.  However, If your payment method hooks into the core checkout `process_checkout` function in any way, you will need to account for this behavior and make appropriate adjustments.  (See the section below about hooking into the checkout process via the Store API.)
 
 ### Registering Assets
 
-Since implementing the correct loading of your client side asset registration is tricky with the variables around the block loading process, there is an API for ensuring you can register any assets and data to pass along to your client side payment method from the server.
+Implementing the correct loading of your client side asset registration is tricky for the blocks integration. This is because there are some dependencies on the _loading order_ of dependent assets in the request. To remove the complexity of this for extension consumers here, the server side API interface helps with ensuring you can register any assets and data to pass along to your client side payment method from the server and handles the correct loading order of those assets.
 
 First, you create a class that extends `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` (or you can implement the `Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeInterface`, but you get some functionality for free via the abstract class).
 
 In your class:
 
 -   Define a `name` property (which is a string used to reference your payment method).
--   Define an `initialize` function. This function will get called during the server side initialization process and is a good place to put any settings population etc. Basically anything you need to do to initialize your gateway. Note, this will be called on every request so don't put anything expensive here.
+-   Define an `initialize` function. This function will get called during the server side initialization process and is a good place to put any settings population etc. Basically anything you need to do to initialize your gateway. **Note, this will be called on every request so don't put anything expensive here.**
 -   Define an `is_active` function. This should return whether the payment method is active or not.
--   Define a `get_payment_method_script_handles` function. In this function you should register your payment method scripts (using `wp_register_script`) and then return the script handles you registered with. This will be used to add your payment method as a dependency of the checkout script and thus take sure of loading it correctly.
+-   Define a `get_payment_method_script_handles` function. In this function you should register your payment method scripts (using `wp_register_script`) and then return the script handles you registered with. This will be used to add your payment method as a dependency of the checkout script and thus take sure of loading it correctly. **Note:** You should still make sure any other asset dependencies your script has are registered properly here, if you're using Webpack to build your assets, you may want to use the [WooCommerce Webpack Dependency Extraction Plugin](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) to make this easier for you.
 -   Define a `get_payment_method_script_handles_for_admin` function. Include this if your payment method has a script you _only_ want to load in the editor context for the checkout block.
 -   Define a `get_payment_method_data` function. You can return from this function an associative array of data you want to be exposed for your payment method client side. This data will be available client side via `wc.wcSettings.getSetting`. So for instance if you assigned `stripe` as the value of the `name` property for this class, client side you can access any data via: `wc.wcSettings.getSetting( 'stripe_data' )`. That would return an object matching the shape of the associative array you returned from this function.
 
-There is also a [hook you can implement to hook into the server side processing of the order](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/308e968c700028180cab391f2223eb0a43dd2d4d/src/RestApi/StoreApi/Routes/Checkout.php#L350-L361). **Note:** a good place to register your callback on this hook is in the `initialize` method of the payment method class you created from the above instructions.
+### Hooking into the Checkout processing by the Store API.
 
-This hook is the required place to hook in your payment processing and if you set a status on the provided `PaymentResult` object, then the legacy processing will be ignored for your payment method. Hook callbacks will receive:
+There may be some cases where the fallback legacy processing of Checkout requests from the StoreAPI mentioned earlier doesn't work for your existing payment method integration. For these cases, there is also an [action hook you can implement to hook into the server side processing of the order](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/308e968c700028180cab391f2223eb0a43dd2d4d/src/RestApi/StoreApi/Routes/Checkout.php#L350-L361). **Note:** a good place to register your callback on this hook is in the `initialize` method of the payment method class you created from the above instructions.
+
+This hook is the *preferred* place to hook in your payment processing and if you set a status on the provided `PaymentResult` object, then the legacy processing will be ignored for your payment method. Hook callbacks will receive:
 
 [`Automattic\WooCommerce\Blocks\Payments\PaymentContext`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Payments/PaymentContext.php)
 
@@ -152,3 +156,31 @@ This contains various details about the payment result returned to the client an
 -   set the status to return for the payment method (one of `success`, `failure`, `pending`, `error`).
 -   set a redirect url.
 -   set any additional payment details (in case you need to return something for your client to further process with).
+
+### Putting it all together
+
+So you've created a class extending `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType`, but you still need to *register* this with the server side handling of payment methods. In order to do this you need to register a callback on the `woocommerce_blocks_payment_method_type_registration` action. Your callback will receive an instance of `Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry` which has a `register` method for registering an instance of the class you created. It's also recommended that you register your callback on this action within the context of a callback on the `woocommerce_blocks_loaded` action.
+
+> Note: With Cart and Checkout Blocks currently only available in the WooCommerce Blocks Feature plugin, you will want to make sure you check for the availability of the `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` class before registering your payment method integration server side.
+
+So for example, assuming your class that extends `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` is named `MyPaymentMethod`. You would have this somewhere in your extension's bootstrap:
+
+```php
+use MyPlugin\MyPaymentMethod;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+
+add_action( 'woocommerce_blocks_loaded', 'my_extension_woocommerce_blocks_support' );
+
+function my_extension_woocommerce_blocks_support() {
+  if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+    add_action(
+      'woocommerce_blocks_payment_method_type_registration',
+      function( PaymentMethodRegistry $payment_method_registry ) {
+        $payment_method_registry->register( new MyPaymentMethod );
+      }
+    );
+  }
+}
+```
+
+As an example, you can see how the Stripe extension adds it's integration in this [pull request](https://github.com/woocommerce/woocommerce-gateway-stripe/pull/1467/files).
