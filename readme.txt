@@ -164,7 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Update - WooCommerce Admin package 2.0.1. #29111
+* Update - WooCommerce Admin package 2.0.2. #29111
 * Update - WooCommerce Blocks package 4.4.3. #29016
 * Fix - Error in notice message of reports when WC Admin is disabled via a filter. #29095
 * Fix - Error when calculating orders with tax option rounding at subtotal level in PHP 8. #29089
@@ -196,7 +196,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Ensure that all tracker values collected for orders are of string type. #28893
 * Tweak - Adjust CSS font size and spacing for Twenty Twenty One. #28827
 
-**WooCommerce Admin - 2.0.0 & 2.0.1**
+**WooCommerce Admin - 2.0.0 & 2.0.1 & 2.0.2**
 
 * Tweak - Bump minimum supported version of PHP to 7.0. #6046
 * Tweak - update the content and timing of the NeedSomeInspiration note. #6076
@@ -207,6 +207,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fixed the Add First Product email note checks. #6260
 * Fix - Onboarding - Fixed "Business Details" error. #6271
 * Fix - Show management links when only main task list is hidden. #6291
+* Fix - Correct the Klarna slug. #6440
 * Add - new inbox message - Getting started in Ecommerce - watch this webinar. #6086
 * Add - Remote inbox notifications contains comparison and fix product rule. #6073
 * Add - Task list payments - include Mollie as an option. #6257
