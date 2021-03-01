@@ -5,5 +5,6 @@ IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 echo "Changed files: $CHANGED_FILES"
 if [ "$CHANGED_FILES" != "" ]; then
 	echo "Running Code Sniffer."
-	./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
+	# ./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
+	echo "${CHANGED_FILES}" | xargs -rt ./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p --report=checkstyle
 fi
