@@ -10,3 +10,7 @@ add_action( 'admin_menu', function() {
 		}
 	);
 } );
+
+add_action( 'wp_loaded', function() {
+	require( 'api/api.php' );
+} );

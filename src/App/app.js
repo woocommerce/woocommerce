@@ -9,7 +9,7 @@ import { TabPanel } from '@wordpress/components';
 // TODO replace this with the actual controls
 // import { Options } from '../Options';
 const Options = () => <h2>Options</h2>;
-const AdminNotes = () => <h2>Admin notes</h2>;
+import { AdminNotes } from '../admin-notes';
 
 const tabs = [
     {
@@ -34,7 +34,7 @@ export function App() {
                 tabs={ tabs }
                 initialTabName={ tabs[0].name }
             >
-                { ( tab ) => <p>{ tab.content }</p> }
+                { ( tab ) => tab.content }
             </TabPanel>
         </div>
     );
