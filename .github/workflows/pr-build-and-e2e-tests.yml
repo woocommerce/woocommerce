@@ -22,9 +22,14 @@ jobs:
           path: ${{ steps.build.outputs.zip_path }}
           retention-days: 7
 
-      - name: Add comment
+  add-comment:
+    if: github.repository_owner == 'woocommerce'
+    name: Add comment
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Comment to PR
         uses: actions/github-script@v3
-        if: github.repository_owner == 'woocommerce'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -34,7 +39,7 @@ jobs:
               repo: context.repo.repo,
               body: ':package: Artifacts ready for [download](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})!'
             })
-  
+
   e2e-tests-cache:
     name: Set e2e caches for running tests
     runs-on: ubuntu-latest
