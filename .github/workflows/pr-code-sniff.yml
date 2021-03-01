@@ -48,4 +48,8 @@ jobs:
         run: ./vendor/bin/phpcs -i
           
       - name: Run code sniff
+        continue-on-error: true
         run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
+        
+      - name: Show PHPCS results in PR
+        run: cs2pr ./phpcs-report.xml
