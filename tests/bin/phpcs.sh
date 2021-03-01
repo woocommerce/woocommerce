@@ -2,10 +2,12 @@
 
 echo '1'
 echo "arg1: $1"
-echo "git diff --name-only --diff-filter=ACMR ${1}"
+echo "git diff --name-only --diff-filter=ACMR ${1}..${2}"
+git status
+git checkout ${1}
 git status
 pwd
-CHANGED_FILES=`git diff --name-only --diff-filter=ACMR ${1} | grep \\\\.php | awk '{print}' ORS=' '`
+CHANGED_FILES=`git diff --name-only --diff-filter=ACMR "${1}..${2}" | grep \\\\.php | awk '{print}' ORS=' '`
 IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 echo "changed files: $CHANGED_FILES"
 if [ "$CHANGED_FILES" != "" ]; then
