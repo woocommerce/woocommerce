@@ -2,6 +2,10 @@
 
 # 0.1.1
 
+## Added
+
+- Support for the external product type.
+
 ## Breaking Changes
 
 - The `HTTPClientFactory` API was changed to make it easier to configure instances with

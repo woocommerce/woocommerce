@@ -30,7 +30,7 @@ export type ProductUpSellUpdateParams = 'upSellIds';
 /**
  * Properties exclusive to the External product type.
  */
-export type ProductExternalTypeUpdateParams = 'buttonText' | 'externalUrl';
+export type ProductExternalUpdateParams = 'buttonText' | 'externalUrl';
 
 /**
  * Properties exclusive to the Grouped product type.
