@@ -47,9 +47,6 @@ To create a new package, add a new folder to `/packages`, containing…
     	"main": "build/index.js",
     	"module": "build-module/index.js",
     	"react-native": "src/index",
-    	"dependencies": {
-    		"@babel/runtime-corejs2": "7.1.5"
-    	},
     	"publishConfig": {
     		"access": "public"
     	}

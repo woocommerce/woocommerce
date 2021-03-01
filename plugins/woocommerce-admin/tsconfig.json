@@ -6,7 +6,7 @@
 		"moduleResolution": "node",
 		// Process & infer types from .js files.
 		"allowJs": true,
-		"jsx": "react",
+		"jsx": "preserve",
 		// Don't emit; allow Babel to transform files.
 		"noEmit": true,
 		// Enable strictest settings like strictNullChecks & noImplicitAny.
