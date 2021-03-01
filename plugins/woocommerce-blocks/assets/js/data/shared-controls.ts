@@ -4,27 +4,17 @@
 import { __ } from '@wordpress/i18n';
 import triggerFetch, { APIFetchOptions } from '@wordpress/api-fetch';
 
-export interface ApiFetchWithHeadersAction {
-	type: string;
-	options: APIFetchOptions;
-}
-
 /**
  * Dispatched a control action for triggering an api fetch call with no parsing.
  * Typically this would be used in scenarios where headers are needed.
  *
  * @param {APIFetchOptions} options The options for the API request.
- *
- * @return {ApiFetchWithHeadersAction} The control action descriptor.
  */
-export const apiFetchWithHeaders = (
-	options: APIFetchOptions
-): ApiFetchWithHeadersAction => {
-	return {
+export const apiFetchWithHeaders = ( options: APIFetchOptions ) =>
+	( {
 		type: 'API_FETCH_WITH_HEADERS',
 		options,
-	};
-};
+	} as const );
 
 /**
  * Error thrown when JSON cannot be parsed.
@@ -67,11 +57,9 @@ const setNonceOnFetch = ( headers: Headers ): void => {
  *                  the controls property of the registration object.
  */
 export const controls = {
-	API_FETCH_WITH_HEADERS( {
+	API_FETCH_WITH_HEADERS: ( {
 		options,
-	}: {
-		options: APIFetchOptions;
-	} ): Promise< unknown > {
+	}: ReturnType< typeof apiFetchWithHeaders > ): Promise< unknown > => {
 		return new Promise( ( resolve, reject ) => {
 			triggerFetch( { ...options, parse: false } )
 				.then( ( fetchResponse ) => {
