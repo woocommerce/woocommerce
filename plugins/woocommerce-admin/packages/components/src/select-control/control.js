@@ -42,14 +42,14 @@ class Control extends Component {
 			isSearchable,
 			setExpanded,
 			showAllOnFocus,
-			updateFilteredOptions,
+			updateSearchOptions,
 		} = this.props;
 
 		return ( event ) => {
 			this.setState( { isActive: true } );
 			if ( isSearchable && showAllOnFocus ) {
 				event.target.select();
-				updateFilteredOptions( '' );
+				updateSearchOptions( '' );
 			} else if ( isSearchable ) {
 				onSearch( event.target.value );
 			} else {
