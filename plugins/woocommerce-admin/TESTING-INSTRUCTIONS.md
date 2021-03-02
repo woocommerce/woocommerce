@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fix summary number style regression on analytics reports #5913
+
+- Go to Analytics
+- See that the active (selected) tab is white, with a highlight above the tab.
+- See that inactive tabs are a lighter shade of grey.
+
 ### Update payment card style on mobile #6413
 
 - Using a small size screen, go to your WooCommerce -> Home -> Choose payment methods.

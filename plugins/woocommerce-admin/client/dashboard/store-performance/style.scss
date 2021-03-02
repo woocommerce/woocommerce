@@ -5,6 +5,13 @@
 		border-width: 0;
 	}
 
+	.woocommerce-summary__item {
+		background-color: $studio-white;
+		&:hover {
+			background-color: $gray-100;
+		}
+	}
+
 	.woocommerce-summary {
 		background-color: $gray-100;
 		margin: 0;

@@ -260,7 +260,7 @@ $border: $gray-200;
 	flex-direction: column;
 	height: 100%;
 	padding: $gap-large;
-	background-color: $studio-white;
+	background-color: #f8f9fa;
 	border-bottom: 1px solid $border;
 	border-right: 1px solid $border;
 	line-height: 1.4em;
@@ -288,14 +288,14 @@ $border: $gray-200;
 
 	&:focus {
 		// !important to override button styles
-		box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700 !important;
+		box-shadow: inset -1px 1px 0 $gray-700, inset 1px -1px 0 $gray-700 !important;
 	}
 
 	&.is-selected {
 		&:focus {
 			// !important to override button styles
-			box-shadow: inset -1px 1px 0 $gray-700, inset 1px 0 0 $gray-700,
-				inset 0 -4px 0 var(--wp-admin-theme-color) !important;
+			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 0 0 $gray-700,
+				inset 0 4px 0 var(--wp-admin-theme-color) !important;
 		}
 	}
 
@@ -337,7 +337,7 @@ $border: $gray-200;
 
 	&.is-selected {
 		background: $studio-white;
-		box-shadow: inset 0 -4px 0 var(--wp-admin-theme-color);
+		box-shadow: inset 0 4px 0 var(--wp-admin-theme-color);
 
 		.woocommerce-summary__item-value {
 			font-weight: 600;

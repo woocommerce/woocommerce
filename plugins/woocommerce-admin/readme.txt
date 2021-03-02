@@ -86,6 +86,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add Dependency Extraction Webpack Plugin #5762
 - Fix: Update payment card style on mobile #6413
 - Fix: Missing i18n in Welcome modal. #6456
+- Fix: Restore visual styles back to Analytics tabs. #5913
 
 == 2.1.0 ==
 
