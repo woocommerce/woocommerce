@@ -13,6 +13,9 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
+import NavInto1 from './images/nav-intro-1.png';
+import NavInto2 from './images/nav-intro-2.png';
+import NavInto3 from './images/nav-intro-3.png';
 import { WELCOME_MODAL_DISMISSED_OPTION_NAME } from '../../../homescreen/constants';
 
 const INTRO_MODAL_DISMISSED_OPTION_NAME =
@@ -110,7 +113,7 @@ export const IntroModal = () => {
 						'All of your store management features in one place',
 						'woocommerce-admin'
 					),
-					'https://woocommerce.com/wp-content/uploads/2021/02/nav-intro-video-1-32.gif'
+					NavInto1
 				),
 				getPage(
 					__( 'Focus on managing your store', 'woocommerce-admin' ),
@@ -118,7 +121,7 @@ export const IntroModal = () => {
 						'Give your attention to key areas of WooCommerce with little distraction',
 						'woocommerce-admin'
 					),
-					'https://woocommerce.com/wp-content/uploads/2021/02/nav-intro-video-2-32.gif'
+					NavInto2
 				),
 				getPage(
 					__(
@@ -129,7 +132,7 @@ export const IntroModal = () => {
 						"They'll appear in the top level of the navigation for quick access",
 						'woocommerce-admin'
 					),
-					'https://woocommerce.com/wp-content/uploads/2021/02/nav-intro-video-3-32.gif'
+					NavInto3
 				),
 			] }
 		/>
