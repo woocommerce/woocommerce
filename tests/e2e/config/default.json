@@ -36,10 +36,12 @@
       ]
     }
   },
-  "coupon": {
-    "code": "20percent",
-    "discountType": "percent",
-    "amount": "20.00"
+  "coupons": {
+    "percentage": {
+      "code": "20percent",
+      "discountType": "percent",
+      "amount": "20.00"
+    }
   },
   "addresses": {
     "admin": {
