@@ -89,6 +89,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Update payment card style on mobile #6413
 - Fix: Missing i18n in Welcome modal. #6456
 - Fix: Restore visual styles back to Analytics tabs. #5913
+- Add: Add a "rather not say" option to revenue in the profile wizard. #6475
+
 
 == 2.1.0 ==
 

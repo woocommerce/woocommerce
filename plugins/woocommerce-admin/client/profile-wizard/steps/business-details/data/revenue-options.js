@@ -97,4 +97,8 @@ export const getRevenueOptions = ( numberConfig, country ) => [
 			formatAmount( convertCurrency( 250000, country ) )
 		),
 	},
+	{
+		key: 'rather-not-say',
+		label: __( "I'd rather not say", 'woocommerce-admin' ),
+	},
 ];

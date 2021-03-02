@@ -315,6 +315,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 					'10000-50000',
 					'50000-250000',
 					'more-than-250000',
+					'rather-not-say',
 				),
 			),
 			'other_platform'      => array(
