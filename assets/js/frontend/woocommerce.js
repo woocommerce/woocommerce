@@ -14,7 +14,7 @@ jQuery( function( $ ) {
 		}
 	});
 
-	var noticeID   = $( '.woocommerce-store-notice' ).data( 'notice-id' ) || '',
+	var noticeID   = $( '.woocommerce-store-notice' ).data( 'noticeId' ) || '',
 		cookieName = 'store_notice' + noticeID;
 
 	// Check the value of that cookie and show/hide the notice accordingly
