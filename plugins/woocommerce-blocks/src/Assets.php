@@ -25,6 +25,8 @@ class Assets {
 		add_action( 'admin_body_class', array( __CLASS__, 'add_theme_admin_body_class' ), 1 );
 		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'get_wc_block_data' ) );
 		add_action( 'woocommerce_login_form_end', array( __CLASS__, 'redirect_to_field' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 	}
 
 	/**
@@ -37,16 +39,6 @@ class Assets {
 	public static function register_assets() {
 		$asset_api = Package::container()->get( AssetApi::class );
 
-		// @todo Remove fix to load our stylesheets after editor CSS.
-		// See #3068 for the rationale of this fix. It should be no longer
-		// necessary when the editor is loaded in an iframe (https://github.com/WordPress/gutenberg/issues/20797).
-		if ( is_admin() ) {
-			$block_style_dependencies = array( 'wp-edit-post' );
-		} else {
-			$block_style_dependencies = array();
-		}
-
-		self::register_style( 'wc-block-vendors-style', plugins_url( $asset_api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), $block_style_dependencies );
 		self::register_style( 'wc-block-editor', plugins_url( $asset_api->get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
 		self::register_style( 'wc-block-style', plugins_url( $asset_api->get_block_asset_build_path( 'style', 'css' ), __DIR__ ), array( 'wc-block-vendors-style' ) );
 
@@ -75,6 +67,24 @@ class Assets {
 			",
 			'before'
 		);
+	}
+
+	/**
+	 * Register the vendors style file. We need to do it after the other files
+	 * because we need to check if `wp-edit-post` has been enqueued.
+	 */
+	public static function enqueue_scripts() {
+		$asset_api = Package::container()->get( AssetApi::class );
+
+		// @todo Remove fix to load our stylesheets after editor CSS.
+		// See #3068 and #3898 for the rationale of this fix. It should be no
+		// longer necessary when the editor is loaded in an iframe (https://github.com/WordPress/gutenberg/issues/20797).
+		if ( wp_style_is( 'wp-edit-post' ) ) {
+			$block_style_dependencies = array( 'wp-edit-post' );
+		} else {
+			$block_style_dependencies = array();
+		}
+		self::register_style( 'wc-block-vendors-style', plugins_url( $asset_api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), $block_style_dependencies );
 	}
 
 	/**
