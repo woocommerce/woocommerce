@@ -20,12 +20,12 @@ const {
 const runCouponApiTest = () => {
 	describe('REST API > Coupon', () => {
 		let client;
-		let defaultCoupon;
+		let percentageCoupon;
 		let coupon;
 		let repository;
 
 		beforeAll(async () => {
-			defaultCoupon = config.get( 'coupon' );
+			percentageCoupon = config.get( 'coupons.percentage' );
 			const admin = config.get( 'users.admin' );
 			const url = config.get( 'url' );
 
@@ -39,16 +39,16 @@ const runCouponApiTest = () => {
 			repository = Coupon.restRepository( client );
 
 			// Check properties of the coupon in the create coupon response.
-			coupon = await repository.create( defaultCoupon );
-			expect( coupon ).toEqual( expect.objectContaining( defaultCoupon ) );
+			coupon = await repository.create( percentageCoupon );
+			expect( coupon ).toEqual( expect.objectContaining( percentageCoupon ) );
 		});
 
 		it('can retrieve a coupon', async () => {
 			const couponProperties = {
 				id: coupon.id,
-				code: defaultCoupon.code,
-				discount_type: defaultCoupon.discountType,
-				amount: defaultCoupon.amount,
+				code: percentageCoupon.code,
+				discount_type: percentageCoupon.discountType,
+				amount: percentageCoupon.amount,
 			};
 
 			// Read coupon directly from API to compare.

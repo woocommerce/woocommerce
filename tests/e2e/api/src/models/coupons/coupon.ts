@@ -11,19 +11,13 @@ import {
 } from '../../framework';
 import {
 	CouponUpdateParams,
-	CouponDiscountTypeUpdateParams,
 } from './shared';
-
-/**
- * The parameters that coupons can update.
- */
-type UpdateParams = CouponUpdateParams & CouponDiscountTypeUpdateParams;
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type CouponRepositoryParams = ModelRepositoryParams< Coupon, never, never, UpdateParams >;
+export type CouponRepositoryParams = ModelRepositoryParams< Coupon, never, never, CouponUpdateParams >;
 
 /**
  * An interface for creating coupons using the repository.
@@ -68,7 +62,7 @@ export type DeletesCoupons = DeletesModels< CouponRepositoryParams >;
 /**
  * The type of discount that is available for the coupon.
  */
-type DiscountType = 'percent' | 'fixed_cart' | 'fixed_product';
+type DiscountType = 'percent' | 'fixed_cart' | 'fixed_product' | string;
 
 /**
  * A coupon object.
