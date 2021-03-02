@@ -1,6 +1,7 @@
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
+	baseProductURL,
 	buildProductURL,
 	ExternalProduct,
 	CreatesExternalProducts,
@@ -13,6 +14,7 @@ import {
 import {
 	createProductTransformer,
 	createProductExternalTransformation,
+	createProductPriceTransformation,
 	createProductSalesTaxTransformation,
 	createProductUpSellsTransformation,
 } from './shared';
@@ -42,10 +44,12 @@ export function externalProductRESTRepository( httpClient: HTTPClient ): ListsEx
 	& UpdatesExternalProducts
 	& DeletesExternalProducts {
 	const external = createProductExternalTransformation();
+	const price = createProductPriceTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const upsells = createProductUpSellsTransformation();
 	const transformations = [
 		...external,
+		...price,
 		...salesTax,
 		...upsells,
 	];
@@ -53,8 +57,8 @@ export function externalProductRESTRepository( httpClient: HTTPClient ): ListsEx
 	const transformer = createProductTransformer<ExternalProduct>( 'external', transformations );
 
 	return new ModelRepository(
-		restList< ExternalProductRepositoryParams >( () => '/wc/v3/products', ExternalProduct, httpClient, transformer ),
-		restCreate< ExternalProductRepositoryParams >( () => '/wc/v3/products', ExternalProduct, httpClient, transformer ),
+		restList< ExternalProductRepositoryParams >( baseProductURL, ExternalProduct, httpClient, transformer ),
+		restCreate< ExternalProductRepositoryParams >( baseProductURL, ExternalProduct, httpClient, transformer ),
 		restRead< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
 		restUpdate< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
 		restDelete< ExternalProductRepositoryParams >( buildProductURL, httpClient ),
