@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Update payment card style on mobile #6413
+
+- Using a small size screen, go to your WooCommerce -> Home -> Choose payment methods.
+- See that the text descriptions for payment methods have a margin between them and the edge of the screen.
+
 ### Navigation: Correct error thrown when enabling #6462
 
 1. Create a fresh store

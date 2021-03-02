@@ -303,13 +303,12 @@
 		.components-card__media {
 			order: 1;
 			margin-right: auto;
-			margin-bottom: $gap-large;
 		}
 
 		.components-card__footer {
 			position: absolute;
 			right: $gap-larger;
-			top: $gap-large;
+			top: $gap-smaller;
 
 			.components-form-toggle {
 				margin-top: $gap-smallest;
@@ -318,7 +317,9 @@
 
 		.components-card__body {
 			order: 3;
-			margin-top: $gap;
+			margin-right: auto;
+			margin-left: $gap-larger;
+			padding-top: $gap-smaller;
 		}
 	}
 }
