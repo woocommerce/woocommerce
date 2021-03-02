@@ -15,7 +15,9 @@ import {
 	IProductCrossSells,
 	IProductDelivery,
 	IProductExternal,
+	IProductGrouped,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping,
 	IProductUpSells,
@@ -129,8 +131,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 			[
 				'date_created',
 				'date_modified',
-				'date_on_sale_from',
-				'date_on_sale_to',
 			],
 		),
 		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
@@ -144,9 +144,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 				modified: PropertyType.Date,
 				isPurchasable: PropertyType.Boolean,
 				isFeatured: PropertyType.Boolean,
-				onSale: PropertyType.Boolean,
-				saleStart: PropertyType.Date,
-				saleEnd: PropertyType.Date,
 				allowReviews: PropertyType.Boolean,
 				averageRating: PropertyType.Integer,
 				numRatings: PropertyType.Integer,
@@ -154,7 +151,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 				parentId: PropertyType.Integer,
 				menuOrder: PropertyType.Integer,
 				permalink: PropertyType.String,
-				priceHtml: PropertyType.String,
 				relatedIds: PropertyType.Integer,
 			},
 		),
@@ -167,11 +163,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 				isPurchasable: 'purchasable',
 				isFeatured: 'featured',
 				catalogVisibility: 'catalog_visibility',
-				regularPrice: 'regular_price',
-				onSale: 'on_sale',
-				salePrice: 'sale_price',
-				saleStart: 'date_on_sale_from_gmt',
-				saleEnd: 'date_on_sale_to_gmt',
 				allowReviews: 'reviews_allowed',
 				averageRating: 'average_rating',
 				numRatings: 'rating_count',
@@ -179,7 +170,6 @@ export function createProductTransformer< T extends AbstractProduct >(
 				totalSales: 'total_sales',
 				parentId: 'parent_id',
 				menuOrder: 'menu_order',
-				priceHtml: 'price_html',
 				relatedIds: 'related_ids',
 				links: '_links',
 			},
@@ -187,6 +177,40 @@ export function createProductTransformer< T extends AbstractProduct >(
 	);
 
 	return new ModelTransformer( transformations );
+}
+
+/**
+ * Create a transformer for the product price properties.
+ */
+export function createProductPriceTransformation(): ModelTransformation[] {
+	const transformations = [
+		new IgnorePropertyTransformation(
+			[
+				'date_on_sale_from',
+				'date_on_sale_to',
+			],
+		),
+		new PropertyTypeTransformation(
+			{
+				onSale: PropertyType.Boolean,
+				saleStart: PropertyType.Date,
+				saleEnd: PropertyType.Date,
+				priceHtml: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< IProductPrice >(
+			{
+				regularPrice: 'regular_price',
+				onSale: 'on_sale',
+				salePrice: 'sale_price',
+				saleStart: 'date_on_sale_from_gmt',
+				saleEnd: 'date_on_sale_to_gmt',
+				priceHtml: 'price_html',
+			},
+		),
+	];
+
+	return transformations;
 }
 
 /**
@@ -222,6 +246,26 @@ export function createProductUpSellsTransformation(): ModelTransformation[] {
 		new KeyChangeTransformation< IProductUpSells >(
 			{
 				upSellIds: 'upsell_ids',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
+ * Transformer for the grouped products property.
+ */
+export function createProductGroupedTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				groupedProducts: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< IProductGrouped >(
+			{
+				groupedProducts: 'grouped_products',
 			},
 		),
 	];

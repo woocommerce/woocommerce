@@ -2,6 +2,7 @@ import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
 	SimpleProduct,
+	baseProductURL,
 	buildProductURL,
 	CreatesSimpleProducts,
 	DeletesSimpleProducts,
@@ -15,6 +16,7 @@ import {
 	createProductCrossSellsTransformation,
 	createProductDeliveryTransformation,
 	createProductInventoryTransformation,
+	createProductPriceTransformation,
 	createProductSalesTaxTransformation,
 	createProductShippingTransformation,
 	createProductUpSellsTransformation,
@@ -47,6 +49,7 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	const crossSells = createProductCrossSellsTransformation();
 	const delivery = createProductDeliveryTransformation();
 	const inventory = createProductInventoryTransformation();
+	const price = createProductPriceTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const shipping = createProductShippingTransformation();
 	const upsells = createProductUpSellsTransformation();
@@ -54,6 +57,7 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 		...crossSells,
 		...delivery,
 		...inventory,
+		...price,
 		...salesTax,
 		...shipping,
 		...upsells,
@@ -62,8 +66,8 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );
 
 	return new ModelRepository(
-		restList< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
-		restCreate< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
+		restList< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
+		restCreate< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
 		restRead< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
 		restUpdate< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
 		restDelete< SimpleProductRepositoryParams >( buildProductURL, httpClient ),

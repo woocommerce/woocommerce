@@ -1,11 +1,12 @@
 # Unreleased
 
-# 0.1.1
-
 ## Added
 
 - Support for the external product type.
+- Added support for grouped product type
 - Support for coupons.
+
+# 0.1.1
 
 ## Breaking Changes
 

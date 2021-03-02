@@ -35,6 +35,7 @@ const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order
 // REST API tests
 const runExternalProductAPITest = require( './api/external-product.test' );
 const runCouponApiTest = require( './api/coupon.test' );
+const runGroupedProductAPITest = require( './api/grouped-product.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -82,6 +83,7 @@ module.exports = {
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
 	runExternalProductAPITest,
+	runGroupedProductAPITest,
 	runCouponApiTest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
