@@ -2,7 +2,7 @@ import { Model } from '../../model';
 import { MetaData, PostStatus } from '../../shared-types';
 import {
 	ProductAttribute,
-	ProductImage,
+	ProductImage, ProductLinks,
 } from '../shared';
 
 /**
@@ -99,4 +99,14 @@ export abstract class AbstractProductData extends Model {
 	 * @type {ReadonlyArray.<MetaData>}
 	 */
 	public readonly metaData: readonly MetaData[] = [];
+
+	/**
+	 * The product data links.
+	 *
+	 * @type {ReadonlyArray.<ProductLinks>}
+	 */
+	public readonly links: ProductLinks = {
+		collection: [ { href: '' } ],
+		self: [ { href: '' } ],
+	};
 }
