@@ -127,8 +127,8 @@ fi
 status "Creating archive... 🎁"
 mkdir zip-file
 mkdir zip-file/build
-sh $SOURCE_PATH/bin/copy-plugin-files.sh $SOURCE_PATH "$SOURCE_PATH/zip-file"
-cd $(pwd)/zip-file
+sh "$SOURCE_PATH/bin/copy-plugin-files.sh" "$SOURCE_PATH" "$SOURCE_PATH/zip-file"
+cd "$(pwd)/zip-file"
 zip -r ../woocommerce-gutenberg-products-block.zip ./
 cd ..
 rm -r zip-file

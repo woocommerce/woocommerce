@@ -34,5 +34,6 @@ postcss.config.js
 README.md
 renovate.json
 tsconfig.json
+tsconfig.base.json
 webpack.config.js
 woocommerce-gutenberg-products-block.zip

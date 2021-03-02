@@ -27,4 +27,5 @@
 /docker-compose.yml export-ignore
 /globals.d.ts export-ignore
 /tsconfig.json export-ignore
+/tsconfig.base.json export-ignore
 /webpack.config.js export-ignore
