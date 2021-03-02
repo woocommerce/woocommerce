@@ -72,7 +72,7 @@ const runCouponApiTest = () => {
 			expect( response.data ).toEqual( expect.objectContaining( updatedCouponProperties ) );
 		});
 
-		it('can delete a coupon' ,async () => {
+		it('can delete a coupon', async () => {
 			// Delete the coupon
 			const deletedCoupon = await repository.delete( coupon.id );
 
