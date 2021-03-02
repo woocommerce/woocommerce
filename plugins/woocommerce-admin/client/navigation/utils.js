@@ -10,17 +10,11 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
  * @return {string} Full URL
  */
 export const getFullUrl = ( url ) => {
-	const { origin, pathname, search } = window.location;
-
-	if ( url.indexOf( '#' ) === 0 ) {
-		return origin + pathname + search + url;
-	}
-
 	if ( url.indexOf( 'http' ) === 0 ) {
 		return url;
 	}
 
-	return origin + url;
+	return getAdminLink( url );
 };
 
 /**
@@ -121,7 +115,7 @@ export const getMatchingItem = ( items ) => {
 	items.forEach( ( item ) => {
 		const score = getMatchScore(
 			window.location,
-			getAdminLink( item.url ),
+			item.url,
 			item.matchExpression
 		);
 		if ( score > 0 && score >= highestMatchScore ) {

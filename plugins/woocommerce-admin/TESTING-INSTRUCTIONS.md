@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Fix double prefixing of navigation URLs #6460
+
+1. Register a navigation menu item with a full URL or admin link.
+```
+	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(
+		array(
+			'id'         => 'my-page,
+			'title'      => 'My Page,
+			'capability' => 'manage_woocommerce',
+			'url'        => admin_url( 'my-page '),
+		)
+	);
+```
+2. Enable the navigation.
+3. Check that the menu item is marked active when visiting that page.
+4. Make sure old menu items are still correctly marked active.
+
 ### Fix summary number style regression on analytics reports #5913
 
 - Go to Analytics

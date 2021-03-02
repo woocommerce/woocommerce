@@ -267,11 +267,9 @@ describe( 'getFullUrl', () => {
 		window.location = originalLocation;
 	} );
 
-	const adminUrl = new URL( getAdminLink( '/' ) );
-
-	it( 'should get the full URL from a path', () => {
-		expect( getFullUrl( '/wp-admin/admin.php?page=testpage' ) ).toBe(
-			adminUrl.origin + '/wp-admin/admin.php?page=testpage'
+	it( 'should get the full admin URL from a path', () => {
+		expect( getFullUrl( 'admin.php?page=testpage' ) ).toBe(
+			getAdminLink( 'admin.php?page=testpage' )
 		);
 	} );
 
