@@ -76,7 +76,8 @@
 		"storybook": "./bin/import-wp-css-storybook.sh && start-storybook  -c ./storybook -p 6007 --ci",
 		"build-storybook": "build-storybook  -c ./storybook",
 		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
-		"bump-version": "npm run -s install-if-deps-outdated && php ./bin/update-version.php"
+		"bump-version": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
+		"wp-env-mysql-port": "node ./docker/wc-admin-wp-env/mysql-port.js"
 	},
 	"changelog": {
 		"labelPrefix": "[Type]",

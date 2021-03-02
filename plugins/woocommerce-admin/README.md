@@ -26,6 +26,8 @@ For more helper scripts [see here](./CONTRIBUTING.md#helper-scripts)
 
 For some debugging tools/help [see here](./CONTRIBUTING.md#debugging)
 
+For local development setup using Docker [see here](./docker/wc-admin-wp-env/README.md)
+
 ### Testing
 
 #### End-to-end tests
