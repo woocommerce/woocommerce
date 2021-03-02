@@ -54,9 +54,10 @@ const pages = [
 					'Good data leads to smart business decisions',
 					'woocommerce-admin'
 				) }
-				body={
-					'Monitor your stats to improve performance, increase sales, and track your progress toward revenue goals. The more you know, the better you can serve your customers and grow your store.'
-				}
+				body={ __(
+					'Monitor your stats to improve performance, increase sales, and track your progress toward revenue goals. The more you know, the better you can serve your customers and grow your store.',
+					'woocommerce-admin'
+				) }
 			/>
 		),
 	},
