@@ -76,6 +76,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Fix: Add check for navigating being enabled. #6462
+- Dev: Add nav favorite button tests #6446
 - Dev: Add a changelog lint check to PRs. #6414
 - Dev: Add navigation favorites tests #6409
 - Fix: Move the shipping input and text 1px lower. #6408
