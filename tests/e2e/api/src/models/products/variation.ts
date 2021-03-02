@@ -3,6 +3,7 @@ import {
 	AbstractProductData,
 	IProductDelivery,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping,
 	ProductSearchParams,
@@ -11,6 +12,7 @@ import {
 	ProductDataUpdateParams,
 	ProductDeliveryUpdateParams,
 	ProductInventoryUpdateParams,
+	ProductPriceUpdateParams,
 	ProductSalesTaxUpdateParams,
 	ProductShippingUpdateParams,
 	ProductLinks,
@@ -34,6 +36,7 @@ import {
 type ProductVariationUpdateParams = ProductDataUpdateParams
 	& ProductDeliveryUpdateParams
 	& ProductInventoryUpdateParams
+	& ProductPriceUpdateParams
 	& ProductSalesTaxUpdateParams
 	& ProductShippingUpdateParams;
 /**
@@ -89,6 +92,7 @@ export type DeletesProductVariations = DeletesChildModels< ProductVariationRepos
 export class ProductVariation extends AbstractProductData implements
 	IProductDelivery,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping {
 	/**
@@ -111,6 +115,17 @@ export class ProductVariation extends AbstractProductData implements
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
+
+	/**
+	 * @see ./abstracts/price.ts
+	 */
+	public readonly price: string = '';
+	public readonly priceHtml: string = '';
+	public readonly regularPrice: string = '';
+	public readonly onSale: boolean = false;
+	public readonly salePrice: string = '';
+	public readonly saleStart: Date | null = null;
+	public readonly saleEnd: Date | null = null;
 
 	/**
 	 * @see ./abstracts/sales-tax.ts

@@ -139,16 +139,13 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 				created: PropertyType.Date,
 				modified: PropertyType.Date,
 				isPurchasable: PropertyType.Boolean,
-				onSale: PropertyType.Boolean,
-				saleStart: PropertyType.Date,
-				saleEnd: PropertyType.Date,
 				parentId: PropertyType.Integer,
 				menuOrder: PropertyType.Integer,
 				permalink: PropertyType.String,
 				priceHtml: PropertyType.String,
 			},
 		),
-		new KeyChangeTransformation< AbstractProduct >(
+		new KeyChangeTransformation< AbstractProductData >(
 			{
 				created: 'date_created_gmt',
 				modified: 'date_modified_gmt',
