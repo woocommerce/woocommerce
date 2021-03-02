@@ -20,6 +20,7 @@ const runVariableProductUpdateTest = require( './shopper/front-end-variable-prod
 // Merchant tests
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
 const runCreateOrderTest = require( './merchant/wp-admin-order-new.test' );
+const runEditOrderTest = require( './merchant/wp-admin-order-edit.test' );
 const { runAddSimpleProductTest, runAddVariableProductTest } = require( './merchant/wp-admin-product-new.test' );
 const runUpdateGeneralSettingsTest = require( './merchant/wp-admin-settings-general.test' );
 const runProductSettingsTest = require( './merchant/wp-admin-settings-product.test' );
@@ -30,6 +31,11 @@ const runOrderApplyCouponTest = require( './merchant/wp-admin-order-apply-coupon
 const runProductEditDetailsTest = require( './merchant/wp-admin-product-edit-details.test' );
 const runProductSearchTest = require( './merchant/wp-admin-product-search.test' );
 const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order-customer-payment-page.test' );
+
+// REST API tests
+const runExternalProductAPITest = require( './api/external-product.test' );
+const runCouponApiTest = require( './api/coupon.test' );
+const runGroupedProductAPITest = require( './api/grouped-product.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -51,6 +57,7 @@ const runShopperTests = () => {
 const runMerchantTests = () => {
 	runCreateCouponTest();
 	runCreateOrderTest();
+	runEditOrderTest();
 	runAddSimpleProductTest();
 	runAddVariableProductTest();
 	runUpdateGeneralSettingsTest();
@@ -64,12 +71,20 @@ const runMerchantTests = () => {
 	runMerchantOrdersCustomerPaymentPage();
 }
 
+const runApiTests = () => {
+	runExternalProductAPITest();
+	runCouponApiTest();
+}
+
 module.exports = {
 	runActivationTest,
 	runOnboardingFlowTest,
 	runTaskListTest,
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
+	runExternalProductAPITest,
+	runGroupedProductAPITest,
+	runCouponApiTest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
 	runCheckoutApplyCouponsTest,
@@ -80,6 +95,7 @@ module.exports = {
 	runShopperTests,
 	runCreateCouponTest,
 	runCreateOrderTest,
+	runEditOrderTest,
 	runAddSimpleProductTest,
 	runAddVariableProductTest,
 	runUpdateGeneralSettingsTest,
@@ -92,4 +108,5 @@ module.exports = {
 	runProductSearchTest,
 	runMerchantOrdersCustomerPaymentPage,
 	runMerchantTests,
+	runApiTests,
 };

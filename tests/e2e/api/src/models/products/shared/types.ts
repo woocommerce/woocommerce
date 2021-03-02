@@ -29,6 +29,12 @@ export type ProductCommonUpdateParams = 'name' | 'slug' | 'shortDescription'
 export type ProductCrossUpdateParams = 'crossSellIds';
 
 /**
+ * Price properties.
+ */
+export type ProductPriceUpdateParams = 'price' | 'priceHtml' | 'regularPrice'
+	| 'salePrice' | 'saleStart' | 'saleEnd';
+
+/**
  * Upsells property.
  */
 export type ProductUpSellUpdateParams = 'upSellIds';
@@ -36,12 +42,12 @@ export type ProductUpSellUpdateParams = 'upSellIds';
 /**
  * Properties exclusive to the External product type.
  */
-export type ProductExternalTypeUpdateParams = 'buttonText' | 'externalUrl';
+export type ProductExternalUpdateParams = 'buttonText' | 'externalUrl';
 
 /**
  * Properties exclusive to the Grouped product type.
  */
-export type ProductGroupedTypeUpdateParams = 'groupedProducts';
+export type ProductGroupedUpdateParams = 'groupedProducts';
 
 /**
  * Properties related to tracking inventory.

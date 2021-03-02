@@ -1,4 +1,5 @@
 import { AbstractProductData } from './data';
+import { ModelID } from '../../model';
 import {
 	CatalogVisibility,
 	ProductTerm,
@@ -9,6 +10,21 @@ import {
  * The common parameters that all products can use in search.
  */
 export type ProductSearchParams = { search: string };
+
+/**
+ * The base product URL.
+ *
+ * @return {string} RESTful Url.
+ */
+export const baseProductURL = () => '/wc/v3/products/';
+
+/**
+ * A common product URL builder.
+ *
+ * @param {ModelID} id the id of the product.
+ * @return {string} RESTful Url.
+ */
+export const buildProductURL = ( id: ModelID ) => baseProductURL() + id;
 
 /**
  * The base for all product types.
