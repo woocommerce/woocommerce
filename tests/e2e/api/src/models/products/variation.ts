@@ -29,6 +29,8 @@ import {
 	ReadsChildModels,
 	UpdatesChildModels,
 } from '../../framework';
+import { HTTPClient } from '../../http';
+import { productVariationRESTRepository } from '../../repositories';
 
 /**
  * The parameters that product variations can update.
@@ -164,5 +166,14 @@ export class ProductVariation extends AbstractProductData implements
 	public constructor( properties?: Partial< ProductVariation > ) {
 		super();
 		Object.assign( this, properties );
+	}
+
+	/**
+	 * Creates a model repository configured for communicating via the REST API.
+	 *
+	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
+	 */
+	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof productVariationRESTRepository > {
+		return productVariationRESTRepository( httpClient );
 	}
 }
