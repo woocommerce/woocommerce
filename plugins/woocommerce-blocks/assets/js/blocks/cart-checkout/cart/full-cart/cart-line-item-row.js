@@ -86,8 +86,8 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			currency_suffix: '',
 			currency_decimal_separator: '.',
 			currency_thousand_separator: ',',
-			line_total: '0',
-			line_total_tax: '0',
+			line_subtotal: '0',
+			line_subtotal_tax: '0',
 		},
 		extensions,
 	} = lineItem;
@@ -132,12 +132,12 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 	);
 	const saleAmount = saleAmountSingle.multiply( quantity );
 	const totalsCurrency = getCurrencyFromPriceResponse( totals );
-	let lineTotal = parseInt( totals.line_total, 10 );
+	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
-		lineTotal += parseInt( totals.line_total_tax, 10 );
+		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 	}
-	const totalsPrice = Dinero( {
-		amount: lineTotal,
+	const subtotalPrice = Dinero( {
+		amount: lineSubtotal,
 		precision: totalsCurrency.minorUnit,
 	} );
 
@@ -260,7 +260,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 					<ProductPrice
 						currency={ totalsCurrency }
 						format={ productPriceFormat }
-						price={ totalsPrice.getAmount() }
+						price={ subtotalPrice.getAmount() }
 					/>
 
 					{ quantity > 1 && (

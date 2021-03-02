@@ -86,7 +86,7 @@ describe( 'Testing cart', () => {
 								currency_prefix: '',
 								currency_suffix: '€',
 								line_subtotal: '16',
-								line_total: '16',
+								line_total: '18',
 							},
 						},
 					],
