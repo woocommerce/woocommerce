@@ -8,10 +8,6 @@ const runActivationTest = require( './activate-and-setup/activate.test' );
 const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setup/onboarding-tasklist.test' );
 const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' );
 
-// REST API tests
-const runExternalProductAPITest = require( './api/external-product' );
-const runGroupedProductAPITest = require( './api/grouped-product' );
-
 // Shopper tests
 const runCartApplyCouponsTest = require( './shopper/front-end-cart-coupons.test');
 const runCartPageTest = require( './shopper/front-end-cart.test' );
@@ -35,6 +31,11 @@ const runOrderApplyCouponTest = require( './merchant/wp-admin-order-apply-coupon
 const runProductEditDetailsTest = require( './merchant/wp-admin-product-edit-details.test' );
 const runProductSearchTest = require( './merchant/wp-admin-product-search.test' );
 const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order-customer-payment-page.test' );
+
+// REST API tests
+const runExternalProductAPITest = require( './api/external-product.test' );
+const runCouponApiTest = require( './api/coupon.test' );
+const runGroupedProductAPITest = require( './api/grouped-product' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -70,6 +71,11 @@ const runMerchantTests = () => {
 	runMerchantOrdersCustomerPaymentPage();
 }
 
+const runApiTests = () => {
+	runExternalProductAPITest();
+	runCouponApiTest();
+}
+
 module.exports = {
 	runActivationTest,
 	runOnboardingFlowTest,
@@ -78,6 +84,7 @@ module.exports = {
 	runSetupOnboardingTests,
 	runExternalProductAPITest,
 	runGroupedProductAPITest,
+	runCouponApiTest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
 	runCheckoutApplyCouponsTest,
@@ -101,4 +108,5 @@ module.exports = {
 	runProductSearchTest,
 	runMerchantOrdersCustomerPaymentPage,
 	runMerchantTests,
+	runApiTests,
 };

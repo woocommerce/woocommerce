@@ -2,7 +2,7 @@
   "name": "@woocommerce/e2e-core-tests",
   "version": "0.1.1",
   "description": "End-To-End (E2E) tests for WooCommerce",
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/core-tests/README.md",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/woocommerce/woocommerce.git"

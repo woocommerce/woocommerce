@@ -42,6 +42,13 @@
       "externalUrl": "https://wordpress.org/plugins/woocommerce"
     }
   },
+  "coupons": {
+    "percentage": {
+      "code": "20percent",
+      "discountType": "percent",
+      "amount": "20.00"
+    }
+  },
   "addresses": {
     "admin": {
       "store": {
