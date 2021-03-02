@@ -33,11 +33,11 @@ jQuery( function ( $ ) {
 
 			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
 				if ( $( this ).is( 'thead' ) ) {
-					var label = $( this ).find( 'th:eq(0)' ).data( 'export-label' ) || $( this ).text();
+					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
 					report = report + '\n### ' + label.trim() + ' ###\n\n';
 				} else {
 					$( 'tr', $( this ) ).each( function() {
-						var label       = $( this ).find( 'td:eq(0)' ).data( 'export-label' ) || $( this ).find( 'td:eq(0)' ).text();
+						var label       = $( this ).find( 'td:eq(0)' ).data( 'exportLabel' ) || $( this ).find( 'td:eq(0)' ).text();
 						var the_name    = label.trim().replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
 
 						// Find value
