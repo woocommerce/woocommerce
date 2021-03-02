@@ -77,6 +77,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 - Fix: Add check for navigating being enabled. #6462
 - Dev: Add a changelog lint check to PRs. #6414
+- Dev: Add navigation favorites tests #6409
 - Fix: Move the shipping input and text 1px lower. #6408
 - Dev: support use of Array.flat in client and packages. #6411
 - Fix: Correct the Klarna slug #6440
