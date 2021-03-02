@@ -9,11 +9,13 @@ import {
 	ReadsProductVariations,
 	ProductVariationRepositoryParams,
 	UpdatesProductVariations,
+	buildProductURL,
 } from '../../../models';
 import {
 	createProductDataTransformer,
 	createProductDeliveryTransformation,
 	createProductInventoryTransformation,
+	createProductPriceTransformation,
 	createProductSalesTaxTransformation,
 	createProductShippingTransformation,
 } from './shared';
@@ -42,16 +44,19 @@ export function productVariationRESTRepository( httpClient: HTTPClient ): ListsP
 	& ReadsProductVariations
 	& UpdatesProductVariations
 	& DeletesProductVariations {
-	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
-	const buildChildURL = ( parent: ModelID, id: ModelID ) => '/wc/v3/products/' + parent + '/variations/' + id;
+	const buildURL = ( id: ModelID ) => buildProductURL( id ) + '/variations/';
+	const buildChildURL = ( parent: ModelID, id: ModelID ) => buildURL( parent ) + id;
+	const buildDeleteURL = ( parent: ModelID, id: ModelID ) => buildChildURL( parent, id ) + '?force=true';
 
 	const delivery = createProductDeliveryTransformation();
 	const inventory = createProductInventoryTransformation();
+	const price = createProductPriceTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const shipping = createProductShippingTransformation();
 	const transformations = [
 		...delivery,
 		...inventory,
+		...price,
 		...salesTax,
 		...shipping,
 	];
@@ -63,6 +68,6 @@ export function productVariationRESTRepository( httpClient: HTTPClient ): ListsP
 		restCreateChild< ProductVariationRepositoryParams >( buildURL, ProductVariation, httpClient, transformer ),
 		restReadChild< ProductVariationRepositoryParams >( buildChildURL, ProductVariation, httpClient, transformer ),
 		restUpdateChild< ProductVariationRepositoryParams >( buildChildURL, ProductVariation, httpClient, transformer ),
-		restDeleteChild< ProductVariationRepositoryParams >( buildChildURL, httpClient ),
+		restDeleteChild< ProductVariationRepositoryParams >( buildDeleteURL, httpClient ),
 	);
 }
