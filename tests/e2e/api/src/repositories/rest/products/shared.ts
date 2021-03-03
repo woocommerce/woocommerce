@@ -132,7 +132,6 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 				'date_modified',
 			],
 		),
-		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
 		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
 		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 		new PropertyTypeTransformation(
@@ -181,6 +180,7 @@ export function createProductTransformer< T extends AbstractProduct >(
 		new AddPropertyTransformation( {}, { type } ),
 		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
 		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
+		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
 		new PropertyTypeTransformation(
 			{
 				isFeatured: PropertyType.Boolean,
@@ -463,6 +463,7 @@ export function createProductVariableTransformation(): ModelTransformation[] {
 
 	return transformations;
 }
+
 /**
  * Transformer for the properties unique to the external product type.
  */

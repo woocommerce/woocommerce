@@ -1,9 +1,6 @@
 import { Model } from '../../model';
 import { MetaData, PostStatus } from '../../shared-types';
-import {
-	ProductAttribute,
-	ProductImage, ProductLinks,
-} from '../shared';
+import { ProductImage, ProductLinks } from '../shared';
 
 /**
  * Base product data.
@@ -78,13 +75,6 @@ export abstract class AbstractProductData extends Model {
 	 * @type {boolean}
 	 */
 	public readonly isPurchasable: boolean = true;
-
-	/**
-	 * The attributes for the product.
-	 *
-	 * @type {ReadonlyArray.<ProductAttribute>}
-	 */
-	public readonly attributes: readonly ProductAttribute[] = [];
 
 	/**
 	 * The images for the product.

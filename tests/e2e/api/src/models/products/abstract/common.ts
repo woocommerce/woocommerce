@@ -3,7 +3,7 @@ import { ModelID } from '../../model';
 import {
 	CatalogVisibility,
 	ProductTerm,
-	ProductLinks,
+	ProductLinks, ProductAttribute,
 } from '../shared';
 
 /**
@@ -127,6 +127,13 @@ export abstract class AbstractProduct extends AbstractProductData {
 	 * @type {ReadonlyArray.<number>}
 	 */
 	public readonly relatedIds: Array<number> = [];
+
+	/**
+	 * The attributes for the product.
+	 *
+	 * @type {ReadonlyArray.<ProductAttribute>}
+	 */
+	public readonly attributes: readonly ProductAttribute[] = [];
 
 	/**
 	 * The products links.

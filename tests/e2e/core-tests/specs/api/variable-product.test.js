@@ -68,6 +68,12 @@ const runVariableProductAPITest = () => {
 			expect(transformed).toEqual(expect.objectContaining(baseVariableProduct));
 		});
 
+		it('can retrieve a transformed product variations', async () => {
+			// Read variations via the repository.
+			const transformed = await variationRepository.list(product.id);
+			expect(transformed).toHaveLength(defaultVariations.length);
+		});
+
 		it('can delete a variation', async () => {
 			const variationId = baseVariableProduct.variations.pop();
 			const status = variationRepository.delete(product.id, variationId);
