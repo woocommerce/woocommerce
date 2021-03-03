@@ -3,7 +3,8 @@ import { ModelID } from '../../model';
 import {
 	CatalogVisibility,
 	ProductTerm,
-	ProductLinks, ProductAttribute,
+	ProductLinks,
+	ProductAttribute,
 } from '../shared';
 
 /**
