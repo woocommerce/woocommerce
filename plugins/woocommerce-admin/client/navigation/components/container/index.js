@@ -125,10 +125,9 @@ const Container = ( { menuItems } ) => {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getActiveItem, getMenuItems } = select( NAVIGATION_STORE_NAME );
+		const { getMenuItems } = select( NAVIGATION_STORE_NAME );
 
 		return {
-			activeItem: getActiveItem(),
 			menuItems: getMenuItems(),
 		};
 	} )

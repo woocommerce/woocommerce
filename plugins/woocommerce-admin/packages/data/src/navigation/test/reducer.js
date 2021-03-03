@@ -5,7 +5,6 @@ import reducer from '../reducer';
 import TYPES from '../action-types';
 
 const defaultState = {
-	activeItem: null,
 	error: null,
 	menuItems: [],
 	favorites: [],
@@ -73,15 +72,6 @@ describe( 'navigation reducer', () => {
 		expect( state.menuItems.length ).toBe( 2 );
 		expect( state.menuItems[ 0 ].id ).toBe( 'menu-item-1' );
 		expect( state.menuItems[ 1 ].id ).toBe( 'menu-item-2' );
-	} );
-
-	it( 'should set the active menu item', () => {
-		const state = reducer( defaultState, {
-			type: TYPES.SET_ACTIVE_ITEM,
-			activeItem: 'test-active-item',
-		} );
-
-		expect( state.activeItem ).toBe( 'test-active-item' );
 	} );
 
 	it( 'should set the favorites', () => {

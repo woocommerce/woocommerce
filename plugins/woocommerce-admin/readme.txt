@@ -76,6 +76,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Dev: Add initial tests for navigation Menu class #6492
+- Dev: Remove active item from navigation store #6486
 - Fix: Add check for navigating being enabled. #6462
 - Dev: Add nav favorite button tests #6446
 - Dev: Add a changelog lint check to PRs. #6414

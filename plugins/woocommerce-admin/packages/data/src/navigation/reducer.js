@@ -5,21 +5,14 @@ import TYPES from './action-types';
 
 const reducer = (
 	state = {
-		activeItem: null,
 		error: null,
 		menuItems: [],
 		favorites: [],
 		requesting: {},
 	},
-	{ type, activeItem, error, favorite, favorites, menuItems }
+	{ type, error, favorite, favorites, menuItems }
 ) => {
 	switch ( type ) {
-		case TYPES.SET_ACTIVE_ITEM:
-			state = {
-				...state,
-				activeItem,
-			};
-			break;
 		case TYPES.SET_MENU_ITEMS:
 			state = {
 				...state,

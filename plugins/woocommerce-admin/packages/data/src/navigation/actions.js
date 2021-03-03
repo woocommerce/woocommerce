@@ -9,13 +9,6 @@ import apiFetch from '@wordpress/api-fetch';
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 
-export function setActiveItem( activeItem ) {
-	return {
-		type: TYPES.SET_ACTIVE_ITEM,
-		activeItem,
-	};
-}
-
 export function setMenuItems( menuItems ) {
 	return {
 		type: TYPES.SET_MENU_ITEMS,
