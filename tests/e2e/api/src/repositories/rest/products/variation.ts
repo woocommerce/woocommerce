@@ -44,7 +44,7 @@ export function productVariationRESTRepository( httpClient: HTTPClient ): ListsP
 	& ReadsProductVariations
 	& UpdatesProductVariations
 	& DeletesProductVariations {
-	const buildURL = ( id: ModelID ) => buildProductURL( id ) + '/variations/';
+	const buildURL = ( parent: ModelID ) => buildProductURL( parent ) + '/variations/';
 	const buildChildURL = ( parent: ModelID, id: ModelID ) => buildURL( parent ) + id;
 	const buildDeleteURL = ( parent: ModelID, id: ModelID ) => buildChildURL( parent, id ) + '?force=true';
 

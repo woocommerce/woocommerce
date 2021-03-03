@@ -20,6 +20,7 @@ import {
 	ProductDownload,
 	StockStatus,
 	BackorderStatus,
+	ProductDefaultAttribute,
 } from './shared';
 import {
 	CreatesChildModels,
@@ -157,6 +158,13 @@ export class ProductVariation extends AbstractProductData implements
 		self: [ { href: '' } ],
 		up: [ { href: '' } ],
 	};
+
+	/**
+	 * The attributes for the variation.
+	 *
+	 * @type {ReadonlyArray.<ProductDefaultAttribute>}
+	 */
+	public readonly attributes: readonly ProductDefaultAttribute[] = [];
 
 	/**
 	 * Creates a new product variation instance with the given properties
