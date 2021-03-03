@@ -16,7 +16,7 @@ This package contains the automated end-to-end tests for WooCommerce.
 
 ### Setting up the test environment
 
-Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/master/tests/e2e/README.md).
+Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/trunk/tests/e2e/README.md).
 
 ### Setting up core tests
 
@@ -55,6 +55,8 @@ The functions to access the core tests are:
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
+  - `runProductEditDetailsTest` - Merchant can edit an existing product
+  - `runProductSearchTest` - Merchant can search for a product and view it
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
 
 ### Shopper
@@ -69,6 +71,7 @@ The functions to access the core tests are:
   - `runMyAccountPayOrderTest` - Shopper can pay for his order in My Account
   - `runCartApplyCouponsTest` - Shopper can apply coupons in the cart
   - `runCheckoutApplyCouponsTest` - Shopper can apply coupons in the checkout
+  - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
 
 ## Contributing a new test
 

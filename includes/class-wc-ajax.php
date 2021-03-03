@@ -1273,7 +1273,6 @@ class WC_AJAX {
 			}
 
 			if ( ! empty( $order_item_ids ) ) {
-				$order_notes = array();
 
 				foreach ( $order_item_ids as $item_id ) {
 					$item_id = absint( $item_id );
@@ -1299,6 +1298,18 @@ class WC_AJAX {
 			$order = wc_get_order( $order_id );
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
+
+			/**
+			 * Fires after order items are removed.
+			 *
+			 * @since 5.2.0
+			 *
+			 * @param int $item_id WC item ID.
+			 * @param WC_Order_Item|false $item As returned by $order->get_item( $item_id ).
+			 * @param bool|array|WP_Error $changed_store Result of wc_maybe_adjust_line_item_product_stock().
+			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
+			 */
+			do_action( 'woocommerce_ajax_order_items_removed', $item_id, $item, $changed_stock, $order );
 
 			// Get HTML to return.
 			ob_start();
@@ -1871,7 +1882,7 @@ class WC_AJAX {
 			$order      = wc_get_order( $order_id );
 			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
-			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
+			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new Exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 

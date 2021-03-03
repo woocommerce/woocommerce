@@ -1,22 +1,35 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
 
 
 ## Table of contents
 
-- [WooCommerce Unit Tests](#woocommerce-unit-tests)
+- [WooCommerce Tests](#woocommerce-tests)
+  - [Table of contents](#table-of-contents)
   - [Initial Setup](#initial-setup)
+    - [MySQL database](#mysql-database)
+    - [Setup instructions](#setup-instructions)
   - [Running Tests](#running-tests)
+    - [Running tests in PHP 8](#running-tests-in-php-8)
   - [Writing Tests](#writing-tests)
   - [Automated Tests](#automated-tests)
   - [Code Coverage](#code-coverage)
-- [WooCommerce E2E Tests](#woocommerce-e2e-tests)
 
 
 ## Initial Setup
 
-From the WooCommerce root directory (if you are using VVV you might need to `vagrant ssh` first), run the following:
+### MySQL database
+
+To run the tests, you need to create a test database. You can:
+- Access a database on a server
+- Connect to your local database on your machine
+- Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step) 
+
+### Setup instructions
+
+Once you have database, from the WooCommerce root directory run the following:
 
 1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
     ```
@@ -95,7 +108,7 @@ Each test file should correspond to an associated source file and be named accor
         * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
 
 
-See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/master/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/master/includes/README.md#writing-unit-tests). 
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests). 
 
 General guidelines for all the unit tests:
 

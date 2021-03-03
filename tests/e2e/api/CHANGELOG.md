@@ -1,5 +1,11 @@
 # Unreleased
 
+## Added
+
+- Support for the external product type.
+- Added support for grouped product type
+- Support for coupons.
+
 # 0.1.1
 
 ## Breaking Changes
@@ -14,7 +20,7 @@
 
 ## Changes
 
-- Added a tranformation layer between API responses and internal models
+- Added a transformation layer between API responses and internal models
 
 ## Fixed
 

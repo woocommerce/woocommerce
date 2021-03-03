@@ -21,19 +21,6 @@ jobs:
           name: woocommerce
           path: ${{ steps.build.outputs.zip_path }}
           retention-days: 7
-
-      - name: Add comment
-        uses: actions/github-script@v3
-        if: "woocommerce" == {{ github.repository_owner }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ':package: Artifacts ready for [download](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})!'
-            })
   
   e2e-tests-cache:
     name: Set e2e caches for running tests

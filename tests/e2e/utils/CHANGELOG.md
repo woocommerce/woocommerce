@@ -5,6 +5,7 @@
 ## Fixed
 
 - Missing `config` package dependency
+- Added `page.removeAllListeners('dialog')` to `createVariableProduct()` to fix dialog already handled errors
 
 ## Added
 
@@ -22,6 +23,7 @@
 - Deprecated `StoreOwnerFlow`, `CustomerFlow` in favour of `merchant`,`shopper`
 - `createSimpleOrder( status )` returns the ID of the order that was created
 - Updated `createCoupon( couponAmount )` component by adding a new parameter `discountType` which allows you to use any coupon discount type in tests
+- Updated `verifyAndPublish( noticeText )` component by add a new parameter, `noticeText`, that allows passing in the accepted update notice text. For example, with variations on creation or update.
 
 # 0.1.1
 

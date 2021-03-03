@@ -13,7 +13,12 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
-const verifyAndPublish = async () => {
+/**
+ * Verify and publish
+ *
+ * @param noticeText The text that appears in the notice after publishing.
+ */
+const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -22,7 +27,7 @@ const verifyAndPublish = async () => {
 	await page.waitForSelector( '.updated.notice' );
 
 	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
 };
 
 /**
@@ -183,6 +188,10 @@ const createSimpleProduct = async () => {
  * Create variable product.
  */
 const createVariableProduct = async () => {
+
+	// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialogs below
+	page.removeAllListeners('dialog');
+
 	// Go to "add product" page
 	await merchant.openNewProduct();
 
@@ -303,7 +312,7 @@ const createVariableProduct = async () => {
 	await page.focus( 'button.save-variation-changes' );
 	await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-	await verifyAndPublish();
+	await verifyAndPublish( 'Product published.' );
 
 	const variablePostId = await page.$( '#post_ID' );
 	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
