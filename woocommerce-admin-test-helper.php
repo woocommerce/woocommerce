@@ -50,7 +50,11 @@ function add_extension_register_script() {
 		),
 		$css_file_version
 	);
+
 	wp_enqueue_style( 'woocommerce-admin-test-helper' );
+
+    wp_enqueue_style('woocommerce-styles', '/wp-content/plugins/woocommerce-admin/dist/components/style.css');
+
 }
 
 add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
