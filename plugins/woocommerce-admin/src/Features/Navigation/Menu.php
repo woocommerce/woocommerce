@@ -268,7 +268,7 @@ class Menu {
 	 */
 	public static function get_item_menu_id( $item ) {
 		$favorites = Favorites::get_all();
-		if ( ! empty( $favorites ) && in_array( $item['id'], $favorites, true ) ) {
+		if ( is_array( $favorites ) && ! empty( $favorites ) && in_array( $item['id'], $favorites, true ) ) {
 			return 'favorites';
 		}
 
