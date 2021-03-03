@@ -67,7 +67,7 @@
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.4.0",
-		"@automattic/data-stores": "^1.0.0-alpha.0",
+		"@automattic/data-stores": "1.0.0-alpha.0",
 		"@babel/cli": "7.13.0",
 		"@babel/core": "7.13.8",
 		"@babel/plugin-proposal-class-properties": "7.13.0",
@@ -88,7 +88,7 @@
 		"@testing-library/react": "11.2.5",
 		"@testing-library/react-hooks": "5.0.3",
 		"@testing-library/user-event": "12.6.3",
-		"@types/classnames": "^2.2.11",
+		"@types/classnames": "2.2.11",
 		"@types/jest": "26.0.20",
 		"@types/lodash": "4.14.168",
 		"@types/react": "16.14.2",
