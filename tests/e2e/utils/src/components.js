@@ -439,10 +439,12 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  * Click the Update button on the order details page.
  *
  * @param noticeText The text that appears in the notice after updating the order.
+ * @param waitForSave Optionally wait for auto save.
  */
-const clickUpdateOrder = async ( noticeText ) => {
-	// Wait for auto save
-	await page.waitFor( 2000 );
+const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
+	if ( waitForSave ) {
+		await page.waitFor( 2000 );
+	}
 
 	// PUpdate order
 	await expect( page ).toClick( 'button.save_order' );

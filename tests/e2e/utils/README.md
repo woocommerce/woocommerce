@@ -104,7 +104,7 @@ describe( 'Cart page', () => {
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `selectOptionInSelect2` | `selector, value` | helper method that searches for select2 type fields and select plus insert value inside |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
-| `clickUpdateOrder` | | Helper method to click the Update button on the order details page
+| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page
 
 ### Test Utilities
 
