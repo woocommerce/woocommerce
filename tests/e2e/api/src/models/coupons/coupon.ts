@@ -12,6 +12,7 @@ import {
 import {
 	CouponUpdateParams,
 } from './shared';
+import { ObjectLinks } from '../shared-types';
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
@@ -221,6 +222,16 @@ export class Coupon extends Model {
 	 * @type {ReadonlyArray.<string>}
 	 */
 	public readonly usedBy: Array<string> = [];
+
+	/**
+	 * The coupon's links.
+	 *
+	 * @type {ReadonlyArray.<ObjectLinks>}
+	 */
+	public readonly links: ObjectLinks = {
+		collection: [ { href: '' } ],
+		self: [ { href: '' } ],
+	};
 
 	/**
 	 * Creates a new coupon instance with the given properties
