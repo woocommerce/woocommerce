@@ -207,7 +207,7 @@ export interface CreatesModels< T extends ModelRepositoryParams > {
  * An interface for repositories that can create child models.
  *
  * @typedef CreatesChildModels
- * @property {CreateChildFn.<T>} create Creates a model using the repository.
+ * @property {CreateChildFn.<T>} create Creates a child model using the repository.
  * @template {Model} T
  * @template {ModelParentID} P
  */

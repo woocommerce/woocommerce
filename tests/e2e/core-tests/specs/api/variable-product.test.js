@@ -52,6 +52,8 @@ const runVariableProductAPITest = () => {
 			variationRepository = ProductVariation.restRepository(client);
 			for (let v = 0; v < defaultVariations.length; v++) {
 				const variation = await variationRepository.create(product.id, defaultVariations[v]);
+				// Test that variation id is a number.
+				expect(variation.id).toBeGreaterThan(0);
 				variations.push(variation.id);
 			}
 
@@ -68,7 +70,7 @@ const runVariableProductAPITest = () => {
 			expect(transformed).toEqual(expect.objectContaining(baseVariableProduct));
 		});
 
-		it('can retrieve a transformed product variations', async () => {
+		it('can retrieve transformed product variations', async () => {
 			// Read variations via the repository.
 			const transformed = await variationRepository.list(product.id);
 			expect(transformed).toHaveLength(defaultVariations.length);
