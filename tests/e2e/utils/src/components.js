@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2 } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -435,6 +435,40 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	return couponCode;
 };
 
+/**
+ * Update an order.
+ *
+ * @param noticeText The text that appears in the notice after updating the order.
+ */
+const updateOrder = async ( noticeText ) => {
+	// Wait for auto save
+	await page.waitFor( 2000 );
+
+	// PUpdate order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+};
+
+/**
+ * Delete all email logs in the WP Mail Logging plugin page.
+ */
+const deleteAllEmailLogs = async () => {
+	await merchant.openEmailLog();
+
+	// Make sure we have emails to delete. If we don't, this selector will return null.
+	if ( await page.$( '#bulk-action-selector-top' ) !== null ) {
+		await setCheckbox( '#cb-select-all-1' );
+		await expect( page ).toSelect( '#bulk-action-selector-top', 'Delete' );
+		await Promise.all( [
+			page.click( '#doaction' ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+	}
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -444,4 +478,6 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	updateOrder,
+	deleteAllEmailLogs,
 };

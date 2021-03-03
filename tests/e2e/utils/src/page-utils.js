@@ -209,6 +209,21 @@ const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__f
 	await page.keyboard.press('Enter');
 };
 
+/**
+ *
+ * Select and perform an order action in the `Order actions` postbox.
+ *
+ * @param {string} action The action to take on the order.
+ */
+const selectOrderAction = async ( action ) => {
+	await page.select( 'select[name=wc_order_action]', action );
+	await Promise.all( [
+		page.click( '.wc-reload' ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+}
+
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -225,4 +240,5 @@ export {
 	moveAllItemsToTrash,
 	evalAndClick,
 	selectOptionInSelect2,
+	selectOrderAction,
 };
