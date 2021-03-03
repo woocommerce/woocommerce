@@ -2,13 +2,14 @@ import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
 	VariableProduct,
-	ModelID,
 	CreatesVariableProducts,
 	DeletesVariableProducts,
 	ListsVariableProducts,
 	ReadsVariableProducts,
 	VariableProductRepositoryParams,
 	UpdatesVariableProducts,
+	baseProductURL,
+	buildProductURL,
 } from '../../../models';
 import {
 	createProductTransformer,
@@ -44,8 +45,6 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 	& ReadsVariableProducts
 	& UpdatesVariableProducts
 	& DeletesVariableProducts {
-	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
-
 	const crossSells = createProductCrossSellsTransformation();
 	const inventory = createProductInventoryTransformation();
 	const salesTax = createProductSalesTaxTransformation();
@@ -64,10 +63,10 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 	const transformer = createProductTransformer<VariableProduct>( 'variable', transformations );
 
 	return new ModelRepository(
-		restList< VariableProductRepositoryParams >( () => '/wc/v3/products', VariableProduct, httpClient, transformer ),
-		restCreate< VariableProductRepositoryParams >( () => '/wc/v3/products', VariableProduct, httpClient, transformer ),
-		restRead< VariableProductRepositoryParams >( buildURL, VariableProduct, httpClient, transformer ),
-		restUpdate< VariableProductRepositoryParams >( buildURL, VariableProduct, httpClient, transformer ),
-		restDelete< VariableProductRepositoryParams >( buildURL, httpClient ),
+		restList< VariableProductRepositoryParams >( baseProductURL, VariableProduct, httpClient, transformer ),
+		restCreate< VariableProductRepositoryParams >( baseProductURL, VariableProduct, httpClient, transformer ),
+		restRead< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
+		restUpdate< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
+		restDelete< VariableProductRepositoryParams >( buildProductURL, httpClient ),
 	);
 }

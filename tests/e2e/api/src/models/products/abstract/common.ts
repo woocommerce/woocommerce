@@ -2,7 +2,8 @@ import { AbstractProductData } from './data';
 import {
 	CatalogVisibility,
 	ProductTerm,
-	ProductLinks, ProductAttribute,
+	ProductLinks,
+	ProductAttribute,
 } from '../shared';
 
 /**
