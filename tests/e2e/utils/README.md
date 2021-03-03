@@ -102,9 +102,11 @@ describe( 'Cart page', () => {
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
-| `selectOptionInSelect2` | `selector, value` | helper method that searches for select2 type fields and select plus insert value inside |
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout |
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
-| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page
+| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 
 ### Test Utilities
 

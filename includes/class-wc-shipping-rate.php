@@ -162,7 +162,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set ID for the rate. This is usually a combination of the method and instance IDs.
+	 * Get ID for the rate. This is usually a combination of the method and instance IDs.
 	 *
 	 * @since 3.2.0
 	 * @return string
@@ -172,7 +172,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set shipping method ID the rate belongs to.
+	 * Get shipping method ID the rate belongs to.
 	 *
 	 * @since 3.2.0
 	 * @return string
@@ -182,7 +182,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set instance ID the rate belongs to.
+	 * Get instance ID the rate belongs to.
 	 *
 	 * @since 3.2.0
 	 * @return int
@@ -192,7 +192,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set rate label.
+	 * Get rate label.
 	 *
 	 * @return string
 	 */
@@ -201,7 +201,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set rate cost.
+	 * Get rate cost.
 	 *
 	 * @since 3.2.0
 	 * @return string
@@ -211,7 +211,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Set rate taxes.
+	 * Get rate taxes.
 	 *
 	 * @since 3.2.0
 	 * @return array

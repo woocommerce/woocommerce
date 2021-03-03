@@ -210,6 +210,39 @@ const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__f
 };
 
 /**
+ * Apply a coupon code within cart or checkout.
+ * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
+ *
+ * @param couponCode string
+ * @returns {Promise<void>}
+ */
+const applyCoupon = async ( couponCode ) => {
+	try {
+		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await uiUnblocked();
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	} catch (error) {
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	};
+};
+
+/**
+ * Remove one coupon within cart or checkout.
+ *
+ * @param couponCode Coupon name.
+ * @returns {Promise<void>}
+ */
+const removeCoupon = async ( couponCode ) => {
+	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await uiUnblocked();
+	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
+};
+
+/**
  *
  * Select and perform an order action in the `Order actions` postbox.
  *
@@ -222,7 +255,6 @@ const selectOrderAction = async ( action ) => {
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
 }
-
 
 export {
 	clearAndFillInput,
@@ -240,5 +272,7 @@ export {
 	moveAllItemsToTrash,
 	evalAndClick,
 	selectOptionInSelect2,
+  applyCoupon,
+	removeCoupon,
 	selectOrderAction,
 };
