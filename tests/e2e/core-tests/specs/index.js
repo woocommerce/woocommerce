@@ -74,6 +74,7 @@ const runMerchantTests = () => {
 
 const runApiTests = () => {
 	runExternalProductAPITest();
+	runGroupedProductAPITest();
 	runVariableProductAPITest();
 	runCouponApiTest();
 }
