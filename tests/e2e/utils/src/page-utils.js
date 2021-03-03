@@ -233,10 +233,11 @@ const applyCoupon = async ( couponCode ) => {
 /**
  * Remove one coupon within cart or checkout.
  *
+ * @param couponCode Coupon name.
  * @returns {Promise<void>}
  */
-const removeCoupon = async () => {
-	await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
+const removeCoupon = async ( couponCode ) => {
+	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
 	await uiUnblocked();
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
 };
