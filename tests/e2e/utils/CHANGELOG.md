@@ -20,7 +20,7 @@
 - `selectOrderAction( action )` util helper method to select and initiate an order action in the Order Action postbox
 - `merchant.openEmailLog()` go to the WP Mail Log page
 - `deleteAllEmailLogs` delete all email logs in the WP Mail Log plugin
-- `updateOrder()` util helper that clicks the `Update` button on an order
+- `clickUpdateOrder()` util helper that clicks the `Update` button on an order
 
 ## Changes
 

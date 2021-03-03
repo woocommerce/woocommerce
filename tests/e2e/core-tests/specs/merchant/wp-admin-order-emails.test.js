@@ -4,7 +4,7 @@
  */
 const {
 	merchant,
-	updateOrder,
+	clickUpdateOrder,
 	createSimpleOrder,
 	selectOrderAction,
 	deleteAllEmailLogs,
@@ -33,7 +33,7 @@ const runMerchantOrderEmailsTest = () => {
 				// Select the billing email address field and add the customer billing email from the config
 				await page.click( 'div.order_data_column:nth-child(2) > h3:nth-child(1) > a:nth-child(1)' ),
 				await expect( page ).toFill( '#_billing_email', customerEmail ),
-				await updateOrder( 'Order updated.' ),
+				await clickUpdateOrder( 'Order updated.' ),
 			] );
 		} );
 

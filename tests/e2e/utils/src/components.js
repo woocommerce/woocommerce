@@ -436,11 +436,11 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 };
 
 /**
- * Update an order.
+ * Click the Update button on the order details page.
  *
  * @param noticeText The text that appears in the notice after updating the order.
  */
-const updateOrder = async ( noticeText ) => {
+const clickUpdateOrder = async ( noticeText ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -478,6 +478,6 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
-	updateOrder,
+	clickUpdateOrder,
 	deleteAllEmailLogs,
 };
