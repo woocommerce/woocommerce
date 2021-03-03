@@ -16,6 +16,7 @@ import {
 	CreateChildFn,
 	ModelTransformer,
 	IgnorePropertyTransformation,
+	KeyChangeTransformation,
 	// @ts-ignore
 	ModelParentID,
 } from '../../framework';
@@ -34,6 +35,12 @@ export function createMetaDataTransformer(): ModelTransformer< MetaData > {
 	return new ModelTransformer(
 		[
 			new IgnorePropertyTransformation( [ 'id' ] ),
+			new KeyChangeTransformation< MetaData >(
+				{
+					displayKey: 'display_key',
+					displayValue: 'display_value',
+				},
+			),
 		],
 	);
 }

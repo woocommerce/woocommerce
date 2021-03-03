@@ -15,13 +15,13 @@ import {
 	ProductPriceUpdateParams,
 	ProductSalesTaxUpdateParams,
 	ProductShippingUpdateParams,
-	ProductLinks,
 	Taxability,
 	ProductDownload,
 	StockStatus,
 	BackorderStatus,
 	ProductDefaultAttribute,
 } from './shared';
+import { ObjectLinks } from '../shared-types';
 import {
 	CreatesChildModels,
 	DeletesChildModels,
@@ -149,11 +149,11 @@ export class ProductVariation extends AbstractProductData implements
 	public readonly shippingClassId: number = 0;
 
 	/**
-	 * The variation links.
+	 * The variation's links.
 	 *
-	 * @type {ReadonlyArray.<ProductLinks>}
+	 * @type {ReadonlyArray.<ObjectLinks>}
 	 */
-	public readonly links: ProductLinks = {
+	public readonly links: ObjectLinks = {
 		collection: [ { href: '' } ],
 		self: [ { href: '' } ],
 		up: [ { href: '' } ],
