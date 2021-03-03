@@ -57,6 +57,7 @@ export function createCouponTransformer(): ModelTransformer< Coupon > {
 					maximumAmount: 'maximum_amount',
 					emailRestrictions: 'email_restrictions',
 					usedBy: 'used_by',
+					links: '_links',
 				},
 			),
 		],
