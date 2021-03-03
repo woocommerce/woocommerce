@@ -54,6 +54,7 @@ describe( 'Cart page', () => {
 | `openSettings` | | Go to WooCommerce -> Settings |
 | `runSetupWizard` | | Open the onboarding profiler |
 | `updateOrderStatus` | `orderId, status` | Update the status of an order |
+| `openEmailLog` | | Open the WP Mail Log page |
 
 ### Shopper `shopper`
 
@@ -101,7 +102,8 @@ describe( 'Cart page', () => {
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
-| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
+| `selectOptionInSelect2` | `selector, value` | helper method that searches for select2 type fields and select plus insert value inside |
+| `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 
 ### Test Utilities
 
