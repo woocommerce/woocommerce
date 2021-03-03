@@ -17,7 +17,7 @@
 - `createCoupon( couponAmount )` component which accepts a coupon amount string (it defaults to 5) and creates a basic coupon. Returns the generated coupon code.
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 - `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
-- `selectOrderAction( action )` util helper method to selcct and initiate an order action in the Order Action postbox
+- `selectOrderAction( action )` util helper method to select and initiate an order action in the Order Action postbox
 - `merchant.openEmailLog()` go to the WP Mail Log page
 - `deleteAllEmailLogs` delete all email logs in the WP Mail Log plugin
 - `updateOrder()` util helper that clicks the `Update` button on an order
