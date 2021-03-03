@@ -169,6 +169,12 @@ const merchant = {
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
 	},
+
+	openEmailLog: async () => {
+		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
+	}
 };
 
 module.exports = merchant;
