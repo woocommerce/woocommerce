@@ -47,6 +47,13 @@ const encodedBreadcrumb = [
 	'Accounts &amp; Privacy',
 ];
 
+const stubLocation = ( location ) => {
+	jest.spyOn( window, 'location', 'get' ).mockReturnValue( {
+		...window.location,
+		...location,
+	} );
+};
+
 describe( 'Header', () => {
 	beforeEach( () => {
 		// Mock RAF to be synchronous for testing
@@ -64,6 +71,22 @@ describe( 'Header', () => {
 
 	afterEach( () => {
 		window.requestAnimationFrame.mockRestore();
+	} );
+
+	it( 'should render a back button and a custom title on task list pages', () => {
+		stubLocation( { href: 'http://localhost?task=payments' } );
+
+		const { queryByTestId, queryByText } = render(
+			<Header sections={ encodedBreadcrumb } isEmbedded={ false } />
+		);
+
+		expect(
+			queryByTestId( 'header-back-button' )
+		).not.toBeEmptyDOMElement();
+
+		expect(
+			queryByText( 'Choose payment methods' )
+		).not.toBeEmptyDOMElement();
 	} );
 
 	it( 'should render decoded breadcrumb name', () => {
