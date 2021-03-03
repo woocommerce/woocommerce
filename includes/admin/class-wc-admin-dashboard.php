@@ -24,7 +24,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function __construct() {
 			// Only hook in admin parts if the user has admin access.
-			if ( $this->should_display_widget() && ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' ) ) ) {
+			if ( $this->should_display_widget() ) {
 				// If on network admin, only load the widget that works in that context and skip the rest.
 				if ( is_multisite() && is_network_admin() ) {
 					add_action( 'wp_network_dashboard_setup', array( $this, 'register_network_order_widget' ) );
@@ -63,7 +63,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * @return bool
 		 */
 		private function should_display_widget() {
-			return 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
+			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
+			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
+			return $task_completed_or_hidden && $has_permission;
 		}
 
 		/**
