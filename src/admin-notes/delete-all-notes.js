@@ -17,7 +17,7 @@ export const DeleteAllNotes = () => {
 
         try {
             const response = await apiFetch( {
-                path: '/wc-admin-test-helper/v1/admin-notes/delete-all-notes',
+                path: '/wc-admin-test-helper/admin-notes/delete-all-notes/v1',
                 method: 'POST',
             } );
 

@@ -1,23 +1,8 @@
 <?php
-add_action( 'rest_api_init', function() {
-	register_rest_route(
-		'wc-admin-test-helper/v1',
-		'/admin-notes/delete-all-notes',
-		array(
-			'methods'  => 'POST',
-			'callback' => 'admin_notes_delete_all_notes',
-			'permission_callback' => function( $request ) {
-				if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-					return new \WP_Error(
-						'woocommerce_rest_cannot_edit',
-						__( 'Sorry, you cannot perform this action', 'woocommerce-admin-test-helper' )
-					);
-				}
-				return true;
-			},
-		)
-	);
-} );
+register_woocommerce_admin_test_helper_rest_route(
+	'/admin-notes/delete-all-notes/v1',
+	'admin_notes_delete_all_notes'
+);
 
 function admin_notes_delete_all_notes() {
 	global $wpdb;
