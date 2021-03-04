@@ -96,6 +96,12 @@ class CoreMenu {
 				'order' => 30,
 			),
 			array(
+				'title'  => __( 'Reports', 'woocommerce-admin' ),
+				'id'     => 'woocommerce-reports',
+				'parent' => 'woocommerce-analytics',
+				'order'  => 200,
+			),
+			array(
 				'title' => __( 'Marketing', 'woocommerce-admin' ),
 				'id'    => 'woocommerce-marketing',
 				'order' => 40,
@@ -264,8 +270,35 @@ class CoreMenu {
 			// WooCommerce Admin items.
 			$wca_items,
 			// Settings category.
-			$setting_items
+			$setting_items,
+			// Legacy report items.
+			self::get_legacy_report_items()
 		);
+	}
+
+	/**
+	 * Get legacy report items.
+	 *
+	 * @return array
+	 */
+	public static function get_legacy_report_items() {
+		$reports    = \WC_Admin_Reports::get_reports();
+		$menu_items = array();
+
+		$order = 0;
+		foreach ( $reports as $key => $report ) {
+			$menu_items[] = array(
+				'parent'     => 'woocommerce-reports',
+				'title'      => $report['title'],
+				'capability' => 'view_woocommerce_reports',
+				'id'         => $key,
+				'url'        => 'wc-reports&tab=' . $key,
+				'order'      => $order,
+			);
+			$order++;
+		}
+
+		return $menu_items;
 	}
 
 	/**

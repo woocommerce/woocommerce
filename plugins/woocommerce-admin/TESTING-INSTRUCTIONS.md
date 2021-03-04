@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Add legacy report items to new navigation #6507
+
+1. Enable the new navigation experience.
+2. Navigate to Analytics->Reports.
+3. Note that all the reports exist and navigating to those reports works as expected.
+4. Check that report menu items are marked active when navigating to that page.
+
 ### Fix double prefixing of navigation URLs #6460
 
 1. Register a navigation menu item with a full URL or admin link.
