@@ -73,7 +73,6 @@ const runMerchantTests = () => {
 	runProductEditDetailsTest();
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
-	runMerchantOrderEmailsTest();
 }
 
 const runApiTests = () => {
