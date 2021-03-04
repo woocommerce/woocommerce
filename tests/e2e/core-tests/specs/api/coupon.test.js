@@ -74,10 +74,10 @@ const runCouponApiTest = () => {
 
 		it('can delete a coupon', async () => {
 			// Delete the coupon
-			const deletedCoupon = await repository.delete( coupon.id );
+			const status = await repository.delete( coupon.id );
 
 			// If the delete is successful, the response comes back truthy
-			expect( deletedCoupon ).toBeTruthy();
+			expect( status ).toBeTruthy();
 		});
 	});
 };
