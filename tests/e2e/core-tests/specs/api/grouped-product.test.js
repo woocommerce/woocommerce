@@ -57,7 +57,7 @@ const runGroupedProductAPITest = () => {
 			expect( product ).toEqual( expect.objectContaining( baseGroupedProduct ) );
 		});
 
-		it('can retrieve a raw external product', async () => {
+		it('can retrieve a raw grouped product', async () => {
 			let rawProperties = {
 				id: product.id,
 				grouped_products: baseGroupedProduct.groupedProducts,

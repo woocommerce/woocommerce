@@ -1,5 +1,12 @@
 # Unreleased
 
+## Added
+
+- api package test for variable products and product variations
+- api package test for grouped products
+- api package test for external products
+- api package test for coupons
+
 # 0.1.1
 
 ## Added

@@ -3,7 +3,8 @@
 ## Added
 
 - Support for the external product type.
-- Added support for grouped product type
+- Support for grouped product type.
+- Support for variable products and product variations.
 - Support for coupons.
 
 # 0.1.1
