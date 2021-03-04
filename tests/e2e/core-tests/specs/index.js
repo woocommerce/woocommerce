@@ -68,7 +68,6 @@ const runMerchantTests = () => {
 	runProductEditDetailsTest();
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
-	runMerchantOrderEmailsTest();
 }
 
 module.exports = {
