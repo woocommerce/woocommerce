@@ -1,22 +1,27 @@
 <?php
-function register_woocommerce_admin_test_helper_rest_route( $route, $callback ) {
-    add_action( 'rest_api_init', function() use ( $route, $callback ) {
+function register_woocommerce_admin_test_helper_rest_route( $route, $callback, $additional_options = array() ) {
+    add_action( 'rest_api_init', function() use ( $route, $callback, $additional_options ) {
+
+    	$default_options = array(
+		    'methods'  => 'POST',
+		    'callback' => $callback,
+		    'permission_callback' => function( $request ) {
+			    if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+				    return new \WP_Error(
+					    'woocommerce_rest_cannot_edit',
+					    __( 'Sorry, you cannot perform this action', 'woocommerce-admin-test-helper' )
+				    );
+			    }
+			    return true;
+		    },
+	    );
+
+    	$default_options = array_merge( $default_options, $additional_options );
+
         register_rest_route(
             'wc-admin-test-helper',
             $route,
-            array(
-                'methods'  => 'POST',
-                'callback' => $callback,
-                'permission_callback' => function( $request ) {
-                    if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-                        return new \WP_Error(
-                            'woocommerce_rest_cannot_edit',
-                            __( 'Sorry, you cannot perform this action', 'woocommerce-admin-test-helper' )
-                        );
-                    }
-                    return true;
-                },
-            )
+            $default_options
         );
     } );
 }

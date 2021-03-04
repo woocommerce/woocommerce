@@ -14,7 +14,6 @@ export function* getOptions( search ) {
 	if ( search ) {
 		path += `search=${ search }`;
 	}
-	console.log( path );
 
 	try {
 		const response = yield apiFetch( {
