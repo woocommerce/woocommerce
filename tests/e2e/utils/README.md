@@ -99,7 +99,7 @@ describe( 'Cart page', () => {
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
-| `searchForOrder` | `value, orderId` | helper method that searchs for an order via many different terms
+| `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms
 
 ### Test Utilities
 
