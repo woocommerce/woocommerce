@@ -10,6 +10,7 @@ const {
 	addShippingZoneAndMethod,
 	clearAndFillInput,
 	selectOptionInSelect2,
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -59,11 +60,15 @@ const runAddNewShippingZoneTest = () => {
 			// Set shipping country to United States (US)
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_country-container');
+			await uiUnblocked();
 			await selectOptionInSelect2('United States (US)');
 
 			// Set shipping state to New York
+			await uiUnblocked();
 			await expect(page).toClick('#select2-calc_shipping_state-container');
+			await uiUnblocked();
 			await selectOptionInSelect2('New York');
+			await uiUnblocked();
 			await expect(page).toClick('button[name="calc_shipping"]');
 
 			// Verify shipping costs
@@ -82,9 +87,11 @@ const runAddNewShippingZoneTest = () => {
 			// Set shipping state to California
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_state-container');
+			await uiUnblocked();
 			await selectOptionInSelect2('California');
 
 			// Set shipping postcode to 94000
+			await uiUnblocked();
 			await clearAndFillInput('#calc_shipping_postcode', '94000');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
@@ -103,7 +110,9 @@ const runAddNewShippingZoneTest = () => {
 
 			// Set shipping postcode to 94107
 			await expect(page).toClick('a.shipping-calculator-button');
+			await uiUnblocked();
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
+			await uiUnblocked();
 			await expect(page).toClick('button[name="calc_shipping"]');
 
 			// Verify shipping method and cost
