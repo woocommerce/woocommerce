@@ -3547,7 +3547,7 @@ S2.define('select2/data/ajax',[
 
     if (this._request != null) {
       // JSONP requests cannot always be aborted
-      if ($.isFunction(this._request.abort)) {
+      if ( typeof this._request.abort === 'function' ) {
         this._request.abort();
       }
 
@@ -5855,7 +5855,7 @@ S2.define('select2/compat/containerCss',[
 
     var containerCssClass = this.options.get('containerCssClass') || '';
 
-    if ($.isFunction(containerCssClass)) {
+    if ( typeof containerCssClass === 'function' ) {
       containerCssClass = containerCssClass(this.$element);
     }
 
@@ -5881,7 +5881,7 @@ S2.define('select2/compat/containerCss',[
 
     var containerCss = this.options.get('containerCss') || {};
 
-    if ($.isFunction(containerCss)) {
+    if ( typeof containerCss === 'function' ) {
       containerCss = containerCss(this.$element);
     }
 
@@ -5912,7 +5912,7 @@ S2.define('select2/compat/dropdownCss',[
 
     var dropdownCssClass = this.options.get('dropdownCssClass') || '';
 
-    if ($.isFunction(dropdownCssClass)) {
+    if ( typeof dropdownCssClass === 'function' ) {
       dropdownCssClass = dropdownCssClass(this.$element);
     }
 
@@ -5938,7 +5938,7 @@ S2.define('select2/compat/dropdownCss',[
 
     var dropdownCss = this.options.get('dropdownCss') || {};
 
-    if ($.isFunction(dropdownCss)) {
+    if ( typeof dropdownCss === 'function' ) {
       dropdownCss = dropdownCss(this.$element);
     }
 
