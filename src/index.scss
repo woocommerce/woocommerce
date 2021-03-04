@@ -10,3 +10,17 @@
     color: var(--wp-admin-theme-color);
     font-family: monospace;
 }
+
+
+#wc-admin-test-helper-options {
+    div.search-box {
+        float: right;
+        margin-bottom:10px;
+    }
+
+    .btn-danger {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+}

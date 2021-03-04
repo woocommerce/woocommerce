@@ -1,17 +1,15 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import { TabPanel } from '@wordpress/components';
-import { applyFilters, addFilter } from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
-// TODO replace this with the actual controls
-// import { Options } from '../Options';
-const Options = () => <h2>Options</h2>;
 import { AdminNotes } from '../admin-notes';
 import { Tools } from '../tools';
+import { default as Options } from '../options';
 
 const tabs = applyFilters(
 	'woocommerce_admin_test_helper_tabs',
@@ -42,13 +40,13 @@ export function App() {
 				className="woocommerce-admin-test-helper__main-tab-panel"
 				activeClass="active-tab"
 				tabs={ tabs }
-				initialTabName={ tabs[0].name }
+				initialTabName={ tabs[ 0 ].name }
 			>
 				{ ( tab ) => (
 					<>
 						{ tab.content }
 						{ applyFilters(
-							`woocommerce_admin_test_helper_tab_${tab.name}`,
+							`woocommerce_admin_test_helper_tab_${ tab.name }`,
 							[]
 						) }
 					</>

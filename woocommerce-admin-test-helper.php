@@ -50,6 +50,7 @@ function add_extension_register_script() {
 		),
 		$css_file_version
 	);
+
 	wp_enqueue_style( 'woocommerce-admin-test-helper' );
 }
 
