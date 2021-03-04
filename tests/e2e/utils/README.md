@@ -77,6 +77,7 @@ describe( 'Cart page', () => {
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
 | `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
+| `searchForProduct` | Searching for a product name and landing on its detail page |
 
 ### Page Utilities
 
@@ -102,6 +103,8 @@ describe( 'Cart page', () => {
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout
 
 ### Test Utilities
 

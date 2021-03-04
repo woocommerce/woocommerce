@@ -1,5 +1,12 @@
 # Unreleased
 
+## Added
+
+- api package test for variable products and product variations
+- api package test for grouped products
+- api package test for external products
+- api package test for coupons
+
 # 0.1.1
 
 ## Added
@@ -14,6 +21,7 @@
 - Shopper Single Product tests
 - Shopper My Account Pay Order
 - Shopper Checkout Apply Coupon
+- Shopper Shop Browse Search Sort
 - Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
 - Shopper Variable product info updates on different variations

@@ -71,6 +71,7 @@ The functions to access the core tests are:
   - `runMyAccountPayOrderTest` - Shopper can pay for his order in My Account
   - `runCartApplyCouponsTest` - Shopper can apply coupons in the cart
   - `runCheckoutApplyCouponsTest` - Shopper can apply coupons in the checkout
+  - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
   - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
 
 ## Contributing a new test

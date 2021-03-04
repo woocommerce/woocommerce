@@ -78,6 +78,20 @@ export type ListChildFn< T extends ModelRepositoryParams > = (
 export type CreateFn< T extends ModelRepositoryParams > = ( properties: Partial< ModelClass< T > > ) => Promise< ModelClass< T > >;
 
 /**
+ * A callback for creating a child model using a data source.
+ *
+ * @callback CreateChildFn
+ * @param {ModelID} parent The parent identifier for the model.
+ * @param {Partial.<T>} properties The properties of the model to create.
+ * @return {Promise.<T>} Resolves to the created model.
+ * @template {Model} T
+ */
+export type CreateChildFn< T extends ModelRepositoryParams > = (
+	parent: ParentID< T >,
+	properties: Partial< ModelClass< T > >
+) => Promise< ModelClass< T > >;
+
+/**
  * A callback for reading a model using a data source.
  *
  * @callback ReadFn
@@ -187,6 +201,21 @@ export interface ListsChildModels< T extends ModelRepositoryParams > {
  */
 export interface CreatesModels< T extends ModelRepositoryParams > {
 	create( properties: Partial< ModelClass< T > > ): Promise< ModelClass< T > >;
+}
+
+/**
+ * An interface for repositories that can create child models.
+ *
+ * @typedef CreatesChildModels
+ * @property {CreateChildFn.<T>} create Creates a child model using the repository.
+ * @template {Model} T
+ * @template {ModelParentID} P
+ */
+export interface CreatesChildModels< T extends ModelRepositoryParams > {
+	create(
+		parent: HasParent< T, ParentID< T >, never >,
+		properties: HasParent< T, Partial< ModelClass< T > >, never >,
+	): Promise< ModelClass< T > >;
 }
 
 /**
@@ -301,7 +330,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 * @type {CreateFn.<T>}
 	 * @private
 	 */
-	private readonly createHook: CreateFn< T > | null;
+	private readonly createHook: HasParent< T, CreateChildFn< T >, CreateFn< T > > | null;
 
 	/**
 	 * The hook used to read models.
@@ -338,7 +367,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	 */
 	public constructor(
 		listHook: HasParent< T, ListChildFn< T >, ListFn< T > > | null,
-		createHook: CreateFn< T > | null,
+		createHook: HasParent< T, CreateChildFn< T >, CreateFn< T > > | null,
 		readHook: HasParent< T, ReadChildFn< T >, ReadFn< T > > | null,
 		updateHook: HasParent< T, UpdateChildFn< T >, UpdateFn< T > > | null,
 		deleteHook: HasParent< T, DeleteChildFn< T >, DeleteFn > | null,
@@ -380,15 +409,28 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 	/**
 	 * Creates a new model using the repository.
 	 *
+	 * @param {P|ModelID} propertiesOrParent The properties to create the model with or the model parent.
 	 * @param {Partial.<T>} properties The properties to create the model with.
 	 * @return {Promise.<T>} Resolves to the created model.
 	 */
-	public create( properties: Partial< ModelClass< T > > ): Promise< ModelClass< T > > {
+	public create(
+		propertiesOrParent?: HasParent< T, ParentID< T >, Partial< ModelClass<T> > >,
+		properties?: HasParent< T, Partial< ModelClass<T> >, never >,
+	): Promise< ModelClass< T > > {
 		if ( ! this.createHook ) {
 			throw new Error( 'The \'create\' operation is not supported on this model.' );
 		}
 
-		return this.createHook( properties );
+		if ( properties === undefined ) {
+			return ( this.createHook as CreateFn< T > )(
+				propertiesOrParent as Partial< ModelClass<T> >,
+			);
+		}
+
+		return ( this.createHook as CreateChildFn< T > )(
+			propertiesOrParent as ParentID<T>,
+			properties as Partial< ModelClass<T> >,
+		);
 	}
 
 	/**

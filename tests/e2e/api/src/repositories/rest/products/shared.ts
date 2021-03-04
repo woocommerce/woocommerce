@@ -12,6 +12,7 @@ import {
 } from '../../../framework';
 import {
 	AbstractProduct,
+	AbstractProductData,
 	IProductCrossSells,
 	IProductDelivery,
 	IProductExternal,
@@ -26,6 +27,7 @@ import {
 	ProductDownload,
 	ProductImage,
 	ProductTerm,
+	VariableProduct,
 } from '../../../models';
 import { createMetaDataTransformer } from '../shared';
 
@@ -111,6 +113,55 @@ function createProductDownloadTransformer(): ModelTransformer< ProductDownload >
 }
 
 /**
+ * Creates a transformer for the base product property data.
+ *
+ * @param {Array.<ModelTransformation>} transformations Optional transformers to add to the transformer.
+ * @return {ModelTransformer} The created transformer.
+ */
+export function createProductDataTransformer< T extends AbstractProductData >(
+	transformations?: ModelTransformation[],
+): ModelTransformer< T > {
+	if ( ! transformations ) {
+		transformations = [];
+	}
+
+	transformations.push(
+		new IgnorePropertyTransformation(
+			[
+				'date_created',
+				'date_modified',
+			],
+		),
+		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
+		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
+		new PropertyTypeTransformation(
+			{
+				created: PropertyType.Date,
+				modified: PropertyType.Date,
+				isPurchasable: PropertyType.Boolean,
+				parentId: PropertyType.Integer,
+				menuOrder: PropertyType.Integer,
+				permalink: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< AbstractProductData >(
+			{
+				created: 'date_created_gmt',
+				modified: 'date_modified_gmt',
+				postStatus: 'status',
+				isPurchasable: 'purchasable',
+				metaData: 'meta_data',
+				parentId: 'parent_id',
+				menuOrder: 'menu_order',
+				links: '_links',
+			},
+		),
+	);
+
+	return new ModelTransformer( transformations );
+}
+
+/**
  * Creates a transformer for the shared properties of all products.
  *
  * @param {string} type The product type.
@@ -127,56 +178,34 @@ export function createProductTransformer< T extends AbstractProduct >(
 
 	transformations.push(
 		new AddPropertyTransformation( {}, { type } ),
-		new IgnorePropertyTransformation(
-			[
-				'date_created',
-				'date_modified',
-			],
-		),
 		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
 		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
 		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
-		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
-		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 		new PropertyTypeTransformation(
 			{
-				created: PropertyType.Date,
-				modified: PropertyType.Date,
-				isPurchasable: PropertyType.Boolean,
 				isFeatured: PropertyType.Boolean,
 				allowReviews: PropertyType.Boolean,
 				averageRating: PropertyType.Integer,
 				numRatings: PropertyType.Integer,
 				totalSales: PropertyType.Integer,
-				parentId: PropertyType.Integer,
-				menuOrder: PropertyType.Integer,
-				permalink: PropertyType.String,
 				relatedIds: PropertyType.Integer,
 			},
 		),
 		new KeyChangeTransformation< AbstractProduct >(
 			{
-				created: 'date_created_gmt',
-				modified: 'date_modified_gmt',
-				postStatus: 'status',
 				shortDescription: 'short_description',
-				isPurchasable: 'purchasable',
 				isFeatured: 'featured',
 				catalogVisibility: 'catalog_visibility',
 				allowReviews: 'reviews_allowed',
 				averageRating: 'average_rating',
 				numRatings: 'rating_count',
-				metaData: 'meta_data',
 				totalSales: 'total_sales',
-				parentId: 'parent_id',
-				menuOrder: 'menu_order',
 				relatedIds: 'related_ids',
-				links: '_links',
 			},
 		),
 	);
 
-	return new ModelTransformer( transformations );
+	return createProductDataTransformer< T >( transformations );
 }
 
 /**
@@ -413,6 +442,29 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 }
 
 /**
+ * Variable product specific properties transformations
+ */
+export function createProductVariableTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				id: PropertyType.Integer,
+				name: PropertyType.String,
+				option: PropertyType.String,
+				variations: PropertyType.Integer,
+			},
+		),
+		new KeyChangeTransformation< VariableProduct >(
+			{
+				defaultAttributes: 'default_attributes',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
  * Transformer for the properties unique to the external product type.
  */
 export function createProductExternalTransformation(): ModelTransformation[] {
@@ -433,4 +485,3 @@ export function createProductExternalTransformation(): ModelTransformation[] {
 
 	return transformations;
 }
-
