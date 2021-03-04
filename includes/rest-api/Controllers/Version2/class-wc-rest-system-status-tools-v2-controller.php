@@ -504,22 +504,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				break;
 
 			case 'recount_terms':
-				$product_cats = get_terms(
-					'product_cat',
-					array(
-						'hide_empty' => false,
-						'fields'     => 'id=>parent',
-					)
-				);
-				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
-				$product_tags = get_terms(
-					'product_tag',
-					array(
-						'hide_empty' => false,
-						'fields'     => 'id=>parent',
-					)
-				);
-				_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
+				wc_recount_all_terms();
 				$message = __( 'Terms successfully recounted', 'woocommerce' );
 				break;
 
