@@ -636,3 +636,28 @@ function wc_get_product_visibility_term_ids() {
 		)
 	);
 }
+
+/**
+ * Recounts all terms.
+ *
+ * @since 5.2
+ * @return void
+ */
+function wc_recount_all_terms() {
+	$product_cats = get_terms(
+		'product_cat',
+		array(
+			'hide_empty' => false,
+			'fields'     => 'id=>parent',
+		)
+	);
+	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
+	$product_tags = get_terms(
+		'product_tag',
+		array(
+			'hide_empty' => false,
+			'fields'     => 'id=>parent',
+		)
+	);
+	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
+}
