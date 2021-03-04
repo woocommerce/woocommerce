@@ -2996,7 +2996,10 @@ class WC_AJAX {
 
 				/**
 				 * Fires after on/off payment gateway
-				 * Here, $enabled is old status and $is_enabled is new status for the gateway
+				 *
+				 * @param string $gateway_id Gateway ID
+				 * @param bool $enabled Old status
+				 * @param bool $is_enabled Updated status
 				 */
 				do_action( 'woocommerce_after_toggle_gateway_enabled', $gateway_id, $enabled, $is_enabled );
 
