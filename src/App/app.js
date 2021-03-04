@@ -11,6 +11,7 @@ import { applyFilters, addFilter } from '@wordpress/hooks';
 // import { Options } from '../Options';
 const Options = () => <h2>Options</h2>;
 import { AdminNotes } from '../admin-notes';
+import { Tools } from '../tools';
 
 const tabs = applyFilters(
 	'woocommerce_admin_test_helper_tabs',
@@ -24,6 +25,11 @@ const tabs = applyFilters(
 			name: 'admin-notes',
 			title: 'Admin notes',
 			content: <AdminNotes/>,
+		},
+		{
+			name: 'tools',
+			title: 'Tools',
+			content: <Tools/>,
 		},
 	]
 );
