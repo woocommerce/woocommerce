@@ -10,7 +10,9 @@ import { Connect } from '../index.js';
 
 describe( 'Rendering', () => {
 	it( 'should render an abort button when the abort handler is provided', async () => {
-		const { container } = render( <Connect onAbort={ () => {} } /> );
+		const { container } = render(
+			<Connect createNotice={ () => {} } onAbort={ () => {} } />
+		);
 
 		const buttons = container.querySelectorAll( 'button' );
 

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -55,7 +55,7 @@ describe( 'StockPanel', () => {
 		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
 		// Number input gets "spinbutton", apparently.
 		userEvent.type( getByRole( 'spinbutton' ), '3' );
-		userEvent.click( getByRole( 'button', { name: 'Save' } ) );
+		fireEvent.submit( getByRole( 'button', { name: 'Save' } ) );
 
 		await waitFor( () => {
 			expect( invalidateResolution ).toHaveBeenCalled();

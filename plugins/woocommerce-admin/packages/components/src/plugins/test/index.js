@@ -57,7 +57,11 @@ describe( 'Rendering', () => {
 
 	it( 'should render an abort button when the abort handler is provided', async () => {
 		const { getByRole, getAllByRole } = render(
-			<Plugins pluginSlugs={ [ 'jetpack' ] } onAbort={ () => {} } />
+			<Plugins
+				pluginSlugs={ [ 'jetpack' ] }
+				onComplete={ () => {} }
+				onAbort={ () => {} }
+			/>
 		);
 
 		expect( getAllByRole( 'button' ) ).toHaveLength( 3 );
