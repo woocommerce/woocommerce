@@ -185,6 +185,44 @@ const createSimpleProduct = async () => {
 } ;
 
 /**
+ * Create simple product with categories
+ *
+ * @param productName Product's name which can be changed when writing a test
+ * @param productPrice Product's price which can be changed when writing a test
+ * @param categoryName Product's category which can be changed when writing a test
+ */
+const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
+	// Go to "add product" page
+	await merchant.openNewProduct();
+
+	// Add title and regular price
+	await expect(page).toFill('#title', productName);
+	await expect(page).toClick('#_virtual');
+	await clickTab('General');
+	await expect(page).toFill('#_regular_price', productPrice);
+
+	// Try to select the existing category if present already, otherwise add a new and select it
+	try {
+		const [checkbox] = await page.$x('//label[contains(text(), "'+categoryName+'")]');
+		await checkbox.click();
+	} catch (error) {
+		await expect(page).toClick('#product_cat-add-toggle');
+		await expect(page).toFill('#newproduct_cat', categoryName);
+		await expect(page).toClick('#product_cat-add-submit');
+	}
+
+	// Publish the product
+	await expect(page).toClick('#publish');
+	await uiUnblocked();
+	await page.waitForSelector('.updated.notice', {text:'Product published.'});
+
+	// Get the product ID
+	const variablePostId = await page.$('#post_ID');
+	let variablePostIdValue = (await(await variablePostId.getProperty('value')).jsonValue());
+	return variablePostIdValue;
+};
+
+/**
  * Create variable product.
  */
 const createVariableProduct = async () => {
@@ -480,6 +518,7 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
-	clickUpdateOrder,
+	createSimpleProductWithCategory,
+  clickUpdateOrder,
 	deleteAllEmailLogs,
 };

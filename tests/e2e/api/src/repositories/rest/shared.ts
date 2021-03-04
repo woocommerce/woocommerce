@@ -13,6 +13,7 @@ import {
 	UpdateChildFn,
 	DeleteChildFn,
 	CreateFn,
+	CreateChildFn,
 	ModelTransformer,
 	IgnorePropertyTransformation,
 	// @ts-ignore
@@ -131,6 +132,31 @@ export function restCreate< T extends ModelRepositoryParams >(
 	return async ( properties ) => {
 		const response = await httpClient.post(
 			buildURL( properties ),
+			transformer.fromModel( properties ),
+		);
+
+		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+	};
+}
+
+/**
+ * Creates a callback for creating child models using the REST API.
+ *
+ * @param {Function} buildURL A callback to build the URL. (This is passed the properties for the new model.)
+ * @param {Function} modelClass The model we're listing.
+ * @param {HTTPClient} httpClient The HTTP client to use for the request.
+ * @param {ModelTransformer} transformer The transformer to use for the response data.
+ * @return {CreateChildFn} The callback for the repository.
+ */
+export function restCreateChild< T extends ModelRepositoryParams >(
+	buildURL: ( parent: ParentID< T >, properties: Partial< ModelClass< T > > ) => string,
+	modelClass: ModelConstructor< ModelClass< T > >,
+	httpClient: HTTPClient,
+	transformer: ModelTransformer< ModelClass< T > >,
+): CreateChildFn< T > {
+	return async ( parent, properties ) => {
+		const response = await httpClient.post(
+			buildURL( parent, properties ),
 			transformer.fromModel( properties ),
 		);
 

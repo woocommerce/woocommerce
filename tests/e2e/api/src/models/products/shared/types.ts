@@ -7,13 +7,21 @@
 export type StockStatus = 'instock' | 'outofstock' | 'onbackorder' | string
 
 /**
+ * Base product properties.
+ */
+export type ProductDataUpdateParams = 'created' | 'postStatus'
+	| 'id' | 'permalink' | 'price' | 'priceHtml'
+	| 'description' | 'sku' | 'attributes' | 'images'
+	| 'regularPrice' | 'salePrice' | 'saleStart' | 'saleEnd'
+	| 'metaData' | 'menuOrder' | 'parentId' | 'links';
+
+/**
  * Properties common to all product types.
  */
-export type ProductCommonUpdateParams = 'name' | 'slug' | 'created' | 'postStatus' | 'shortDescription'
-	| 'id' | 'permalink' | 'type' | 'description' | 'sku' | 'categories' | 'tags' | 'isFeatured'
-	| 'attributes' | 'images' | 'catalogVisibility' | 'allowReviews'
-	| 'metaData' | 'menuOrder' | 'parentId' | 'relatedIds' | 'upsellIds'
-	| 'links' | 'relatedIds' | 'menuOrder' | 'parentId';
+export type ProductCommonUpdateParams = 'name' | 'slug' | 'shortDescription'
+	| 'categories' | 'tags' | 'isFeatured' | 'averageRating' | 'numRatings'
+	| 'catalogVisibility' | 'allowReviews' | 'upsellIds' | 'type'
+	& ProductDataUpdateParams;
 
 /**
  * Cross sells property.
@@ -67,4 +75,4 @@ export type ProductDeliveryUpdateParams = 'daysToDownload' | 'downloadLimit' | '
 /**
  * Properties exclusive to the Variable product type.
  */
-export type ProductVariableTypeUpdateParams = 'defaultAttributes' | 'variations';
+export type ProductVariableUpdateParams = 'defaultAttributes' | 'variations';
