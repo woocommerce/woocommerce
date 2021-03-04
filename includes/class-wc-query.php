@@ -617,7 +617,7 @@ class WC_Query {
 		}
 
 		$lookup_table_name = "{$wpdb->prefix}wc_product_attributes_lookup";
-		$clause_root       = ' wp_posts.ID IN (';
+		$clause_root       = " {$wpdb->prefix}posts.ID IN (";
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
@@ -626,7 +626,7 @@ class WC_Query {
 
 		$attributes_to_filter_by = $this->get_layered_nav_chosen_attributes();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-			$all_terms                  = get_terms( $taxonomy );
+			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
@@ -919,6 +919,14 @@ class WC_Query {
 		}
 
 		return implode( ' AND ', $sql );
+	}
+
+	/**
+	 * Resets the caached chosen attributes, so the next time
+	 * get_layered_nav_chosen_attributes is called it will get them from the query again.
+	 */
+	public static function reset_chosen_attributes() {
+		self::$chosen_attributes = null;
 	}
 
 	/**

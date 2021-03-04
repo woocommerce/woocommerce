@@ -19,6 +19,11 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	/**
+	 * @var WP_REST_Server REST server instance.
+	 */
+	protected static $rest_server;
+
+	/**
 	 * Holds the WC_Unit_Test_Factory instance.
 	 *
 	 * @var WC_Unit_Test_Factory
@@ -88,6 +93,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
 		WC_Install::create_terms();
+	}
+
+	/**
+	 * Runs after all tests in the class.
+	 */
+	public static function tearDownAfterClass() {
+		parent::tearDownAfterClass();
+
+		if ( self::$rest_server ) {
+			remove_all_filters( 'wp_rest_server_class' );
+			remove_all_filters( 'woocommerce_rest_check_permissions' );
+			self::$rest_server = null;
+		}
 	}
 
 	/**
@@ -245,5 +263,45 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function register_legacy_proxy_class_mocks( array $mocks ) {
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
+	}
+
+	/**
+	 * Programmatically perform a REST request, bypassing authentication.
+	 *
+	 * @param string     $url The endpopint url, if it doesn't start with '/' it'll be prepended with '/wc/v3/'.
+	 * @param array|null $params Parameters for the request, null if none are required.
+	 * @param string     $verb HTTP verb for the request, default is GET.
+	 * @return array Result from the request.
+	 */
+	public function do_rest_request( $url, $params = null, $verb = 'GET' ) {
+		if ( ! self::$rest_server ) {
+			add_filter(
+				'wp_rest_server_class',
+				function() {
+					return 'WP_Test_Spy_REST_Server';
+				},
+				999
+			);
+			add_filter(
+				'woocommerce_rest_check_permissions',
+				function() {
+					return true;
+				},
+				999
+			);
+			self::$rest_server = rest_get_server();
+		}
+
+		if ( '/' !== $url[0] ) {
+			$url = '/wc/v3/' . $url;
+		}
+
+		$request = new WP_REST_Request( $verb, $url );
+		if ( ! is_null( $params ) ) {
+			$request->set_query_params( $params );
+		}
+		$response = rest_do_request( $request );
+
+		return self::$rest_server->response_to_data( $response, false );
 	}
 }
