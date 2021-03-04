@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 import { useCheckoutContext } from '@woocommerce/base-context';
@@ -38,6 +38,14 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
 	const [ quantity, changeQuantity ] = useState( cartItemQuantity );
+	// Quantity can be updated from somewhere else, this is to keep it in sync.
+	useEffect( () => {
+		changeQuantity( ( currentQuantity ) =>
+			cartItemQuantity !== currentQuantity
+				? cartItemQuantity
+				: currentQuantity
+		);
+	}, [ cartItemQuantity ] );
 	const [ debouncedQuantity ] = useDebounce( quantity, 400 );
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
 	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
@@ -70,13 +78,13 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 	);
 	const previousIsPendingDelete = usePrevious( isPendingDelete );
 
-	const removeItem = () => {
+	const removeItem = useCallback( () => {
 		return cartItemKey
 			? removeItemFromCart( cartItemKey ).then( () => {
 					triggerFragmentRefresh();
 			  } )
 			: false;
-	};
+	}, [ cartItemKey, removeItemFromCart ] );
 
 	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
