@@ -71,10 +71,15 @@ const runGroupedProductAPITest = () => {
 			expect( response.data ).toEqual( expect.objectContaining( rawProperties ) );
 		});
 
-		it('can retrieve a transformed external product', async () => {
+		it('can retrieve a transformed grouped product', async () => {
 			// Read product via the repository.
 			const transformed = await repository.read( product.id );
 			expect( transformed ).toEqual( expect.objectContaining( baseGroupedProduct ) );
+		});
+
+		it('can delete a grouped product', async () => {
+			const status = repository.delete( product.id );
+			expect( status ).toBeTruthy();
 		});
 	});
 };
