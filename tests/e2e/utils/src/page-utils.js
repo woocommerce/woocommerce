@@ -223,6 +223,39 @@ const searchForOrder = async (value, orderId, customerName = 'John Doe') => {
 	await expect(page).toMatchElement('.order_number > a.order-view', {text: '#'+orderId+' '+customerName});
 };
 
+/**
+ * Apply a coupon code within cart or checkout.
+ * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
+ *
+ * @param couponCode string
+ * @returns {Promise<void>}
+ */
+const applyCoupon = async ( couponCode ) => {
+	try {
+		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await uiUnblocked();
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	} catch (error) {
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	};
+};
+
+/**
+ * Remove one coupon within cart or checkout.
+ *
+ * @param couponCode Coupon name.
+ * @returns {Promise<void>}
+ */
+const removeCoupon = async ( couponCode ) => {
+	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await uiUnblocked();
+	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
+};
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -240,4 +273,6 @@ export {
 	evalAndClick,
 	selectOptionInSelect2,
 	searchForOrder,
+	applyCoupon,
+	removeCoupon,
 };
