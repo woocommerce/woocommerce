@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "author": "Automattic",
   "description": "A simple interface for interacting with a WooCommerce installation.",
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/api/README.md",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/api/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/woocommerce/woocommerce.git"

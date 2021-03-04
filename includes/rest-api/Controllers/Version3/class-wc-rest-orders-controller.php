@@ -45,16 +45,18 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		foreach ( $request['coupon_lines'] as $item ) {
 			if ( is_array( $item ) ) {
-				if ( empty( $item['id'] ) ) {
-					if ( empty( $item['code'] ) ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
-					}
+				if ( ! empty( $item['id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_coupon_item_id_readonly', __( 'Coupon item ID is readonly.', 'woocommerce' ), 400 );
+				}
 
-					$results = $order->apply_coupon( wc_clean( $item['code'] ) );
+				if ( empty( $item['code'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+				}
 
-					if ( is_wp_error( $results ) ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
-					}
+				$results = $order->apply_coupon( wc_clean( $item['code'] ) );
+
+				if ( is_wp_error( $results ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
 				}
 			}
 		}

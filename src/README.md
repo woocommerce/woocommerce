@@ -26,7 +26,7 @@
 
 This directory is home to new WooCommerce class files under the `Automattic\WooCommerce` namespace using [PSR-4](https://www.php-fig.org/psr/psr-4/) file naming. This is to take full advantage of autoloading.
 
-Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/master/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
+Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
 
 A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src`directory in general) in a way that makes it easy to write unit tests. 
 
@@ -281,7 +281,7 @@ What this implies for you as developer depends on what type of contribution are 
 
 Here by "legacy code" we refer mainly to the old WooCommerce code in the `includes` directory, but the mechanisms described in this section are useful for dealing with any code outside the `src` directory.
 
-The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/master/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
+The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
 
 But we want the WooCommerce code base (and especially the code in `src`) to be well covered by unit tests, and so there are mechanisms in place to interact with legacy code while keeping the code testable.
 
@@ -355,7 +355,7 @@ $this->register_legacy_proxy_function_mocks(
 
 Of course, for the cases where no mocks are defined `MockableLegacyProxy` works the same way as `LegacyProxy`.
 
-Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/master/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/master/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
+Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
 
 ### But how does `get_instance_of` work?
 
@@ -363,7 +363,7 @@ We use a container to resolve instances of classes in the `src` directory, but h
 
 This is a mostly ad-hoc process. When a class has a special way to be instantiated or retrieved (e.g. a static `instance` method), then that is used; otherwise the method fallbacks to simply creating a new instance of the class using `new`.
 
-This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/master/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
+This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/trunk/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
 
 ### Creating specialized proxies
 

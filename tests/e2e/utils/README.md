@@ -40,9 +40,11 @@ describe( 'Cart page', () => {
 | Function | Parameters | Description |
 |----------|-------------|------------|
 | `goToOrder` | `orderId` | Go to view a single order |
+| `goToProduct` | `productId` | Go to view a single product |
 | `login` | | Log in as merchant |
 | `logout` | | Log out of merchant account |
 | `openAllOrdersView` | | Go to the orders listing |
+| `openAllProductsView` | | Go to the products listing |
 | `openDashboard` | | Go to the WordPress dashboard  |
 | `openNewCoupon` | | Go to the new coupon editor |
 | `openNewOrder` | | Go to the new order editor |
@@ -98,8 +100,11 @@ describe( 'Cart page', () => {
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
+| `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
 | `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout
 
 ### Test Utilities
 

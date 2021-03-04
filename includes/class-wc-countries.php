@@ -602,7 +602,12 @@ class WC_Countries {
 				array(
 					'{first_name}'       => $args['first_name'],
 					'{last_name}'        => $args['last_name'],
-					'{name}'             => $args['first_name'] . ' ' . $args['last_name'],
+					'{name}'             => sprintf(
+						/* translators: 1: first name 2: last name */
+						_x( '%1$s %2$s', 'full name', 'woocommerce' ),
+						$args['first_name'],
+						$args['last_name']
+					),
 					'{company}'          => $args['company'],
 					'{address_1}'        => $args['address_1'],
 					'{address_2}'        => $args['address_2'],
@@ -612,7 +617,14 @@ class WC_Countries {
 					'{country}'          => $full_country,
 					'{first_name_upper}' => wc_strtoupper( $args['first_name'] ),
 					'{last_name_upper}'  => wc_strtoupper( $args['last_name'] ),
-					'{name_upper}'       => wc_strtoupper( $args['first_name'] . ' ' . $args['last_name'] ),
+					'{name_upper}'       => wc_strtoupper(
+						sprintf(
+							/* translators: 1: first name 2: last name */
+							_x( '%1$s %2$s', 'full name', 'woocommerce' ),
+							$args['first_name'],
+							$args['last_name']
+						)
+					),
 					'{company_upper}'    => wc_strtoupper( $args['company'] ),
 					'{address_1_upper}'  => wc_strtoupper( $args['address_1'] ),
 					'{address_2_upper}'  => wc_strtoupper( $args['address_2'] ),
@@ -658,10 +670,14 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_default_address_fields() {
+		$address_2_label = __( 'Apartment, suite, unit, etc.', 'woocommerce' );
+
+		// If necessary, append '(optional)' to the placeholder: we don't need to worry about the
+		// label, though, as woocommerce_form_field() takes care of that.
 		if ( 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
 			$address_2_placeholder = __( 'Apartment, suite, unit, etc. (optional)', 'woocommerce' );
 		} else {
-			$address_2_placeholder = __( 'Apartment, suite, unit, etc.', 'woocommerce' );
+			$address_2_placeholder = $address_2_label;
 		}
 
 		$fields = array(
@@ -704,6 +720,8 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
+				'label'        => $address_2_label,
+				'label_class'  => array( 'screen-reader-text' ),
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
