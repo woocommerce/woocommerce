@@ -46,7 +46,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		);
 		$notices = WC()->session->get( 'wc_notices', array() );
 
-		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		// Check for cart contents.
 		$this->assertCount( 0, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
@@ -59,6 +59,41 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox should throw a notice to the cart if using variation_id
+	 * that doesn't belong to specified variable product.
+	 */
+	public function test_add_variation_to_the_cart_invalid_variation_id() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$single_product   = WC_Helper_Product::create_simple_product();
+
+		// Add variation using parent id.
+		WC()->cart->add_to_cart(
+			$variable_product->get_id(),
+			1,
+			$single_product->get_id()
+		);
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Check for cart contents.
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Check that the notices contain an error message about invalid colour and number.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$expected = sprintf( sprintf( 'The selected product isn\'t a variation of %2$s, please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', esc_url( $variable_product->get_permalink() ), esc_html( $variable_product->get_name() ) ) );
+		$this->assertEquals( $expected, $notices['error'][0]['notice'] );
+
+		// Reset cart.
+		WC()->cart->empty_cart();
+		WC()->customer->set_is_vat_exempt( false );
+		$variable_product->delete( true );
 	}
 
 	/**

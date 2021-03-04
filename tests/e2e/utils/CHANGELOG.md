@@ -5,6 +5,7 @@
 ## Fixed
 
 - Missing `config` package dependency
+- Added `page.removeAllListeners('dialog')` to `createVariableProduct()` to fix dialog already handled errors
 
 ## Added
 
@@ -17,12 +18,15 @@
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 - `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
 - `createSimpleProductWithCategory` component which creates a simple product with categories, containing three parameters for title, price and category name.
+- `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
+- `removeCoupon()` util helper method that removes a single coupon within cart or checkout
 
 ## Changes
 
 - Deprecated `StoreOwnerFlow`, `CustomerFlow` in favour of `merchant`,`shopper`
 - `createSimpleOrder( status )` returns the ID of the order that was created
 - Updated `createCoupon( couponAmount )` component by adding a new parameter `discountType` which allows you to use any coupon discount type in tests
+- Updated `verifyAndPublish( noticeText )` component by add a new parameter, `noticeText`, that allows passing in the accepted update notice text. For example, with variations on creation or update.
 
 # 0.1.1
 

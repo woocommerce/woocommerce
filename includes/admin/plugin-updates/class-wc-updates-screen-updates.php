@@ -6,6 +6,8 @@
  * @version     3.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -37,8 +39,13 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 			return;
 		}
 
+		$version_type = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
+		if ( ! is_string( $version_type ) ) {
+			$version_type = 'none';
+		}
+
 		$this->new_version            = wc_clean( $updateable_plugins['woocommerce/woocommerce.php']->update->new_version );
-		$this->major_untested_plugins = $this->get_untested_plugins( $this->new_version, 'major' );
+		$this->major_untested_plugins = $this->get_untested_plugins( $this->new_version, $version_type );
 
 		if ( ! empty( $this->major_untested_plugins ) ) {
 			echo $this->get_extensions_modal_warning(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
