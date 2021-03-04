@@ -6374,7 +6374,7 @@ S2.define('select2/selection/stopPropagation',[
 
     $.fn.extend({
         mousewheel: function(fn) {
-            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
+            return fn ? this.on('mousewheel', fn) : this.trigger('mousewheel');
         },
 
         unmousewheel: function(fn) {
