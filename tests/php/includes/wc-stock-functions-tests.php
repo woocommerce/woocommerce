@@ -85,7 +85,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which reduces stock to another status which also reduces stock.
+	 * Test inventory count after order status transitions which reduces stock to another status which also reduces stock.
 	 * Stock should have reduced once already, and should not reduce again.
 	 */
 	public function test_status_transition_stock_reduce_to_stock_reduce() {
@@ -97,7 +97,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which reduces stock to another status which restores stock.
+	 * Test inventory count after order status transitions which reduces stock to another status which restores stock.
 	 * Should should have already reduced once, and will increase again after transitioning.
 	 */
 	public function test_status_transition_stock_reduce_to_stock_restore() {
@@ -109,7 +109,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which reduces stock to another status which don't affect inventory.
+	 * Test inventory count after order status transitions which reduces stock to another status which don't affect inventory.
 	 * Stock should have already reduced, and will not change on transitioning.
 	 */
 	public function test_status_transition_stock_reduce_to_stock_no_effect() {
@@ -133,7 +133,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which restores stock to another status which also restores stock.
+	 * Test inventory count after order status transitions which restores stock to another status which also restores stock.
 	 * Stock should not have reduced, and will remain the same even after transition (i.e. should not be restocked again).
 	 */
 	public function test_status_transition_stock_restore_to_stock_restore() {
@@ -145,7 +145,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which restores stock to another status which don't affect inventory.
+	 * Test inventory count after order status transitions which restores stock to another status which don't affect inventory.
 	 * Stock should not have reduced, and will remain the same even after transition.
 	 */
 	public function test_status_transition_stock_restore_to_stock_no_effect() {
@@ -157,7 +157,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which don't affect inventory stock to another status which reduces stock.
+	 * Test inventory count after order status transitions which don't affect inventory stock to another status which reduces stock.
 	 * Stock would not have been affected, but will reduce after transition.
 	 */
 	public function test_status_transition_stock_no_effect_to_stock_reduce() {
@@ -169,7 +169,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which don't affect inventory stock to another status which restores stock.
+	 * Test inventory count after order status transitions which don't affect inventory stock to another status which restores stock.
 	 * Stock would not have been affected, and will not be restored after transition (since it was not reduced to begin with).
 	 */
 	public function test_status_transition_stock_no_effect_to_stock_restore() {
@@ -181,7 +181,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which don't affect inventory stock to another status which also don't affect inventory.
+	 * Test inventory count after order status transitions which don't affect inventory stock to another status which also don't affect inventory.
 	 * Stock levels will not change before or after the transition.
 	 */
 	public function test_status_transition_stock_no_effect_to_stock_no_effect() {
