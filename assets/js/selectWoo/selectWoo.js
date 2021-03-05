@@ -1486,7 +1486,7 @@ S2.define('select2/selection/base',[
         // Remove any focus when dropdown is closed by clicking outside the select area.
         // Timeout of 1 required for close to finish wrapping up.
         setTimeout(function(){
-         $this.find('*:focus').blur();
+         $this.find('*:focus').trigger( 'blur' );
          $target.trigger( 'focus' );
         }, 1);
       });
