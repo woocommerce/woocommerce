@@ -112,7 +112,7 @@
 		"@wordpress/url": "2.21.0",
 		"@wordpress/viewport": "2.25.1",
 		"classnames": "2.2.6",
-		"core-js": "3.8.3",
+		"core-js": "3.9.1",
 		"debug": "4.3.1",
 		"dompurify": "2.2.6",
 		"github-label-sync": "2.0.0",
