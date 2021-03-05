@@ -8,7 +8,12 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import CrossIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';
-import { Icon, help as helpIcon, inbox as inboxIcon } from '@wordpress/icons';
+import {
+	Icon,
+	help as helpIcon,
+	inbox as inboxIcon,
+	external,
+} from '@wordpress/icons';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, useUser } from '@woocommerce/data';
@@ -176,7 +181,18 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 				! isEmbedded && isHomescreen() && ! isPerformingSetupTask(),
 		};
 
-		return [ inbox, setup, displayOptions, help ].filter(
+		const previewSite = {
+			name: 'previewSite',
+			title: __( 'Preview site', 'woocommerce-admin' ),
+			icon: <Icon icon={ external } />,
+			visible: query.page === 'wc-admin' && query.task === 'appearance',
+			onClick: () => {
+				window.open( window.wcSettings.siteUrl );
+				return null;
+			},
+		};
+
+		return [ inbox, setup, previewSite, displayOptions, help ].filter(
 			( tab ) => tab.visible
 		);
 	};

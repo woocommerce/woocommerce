@@ -9,6 +9,14 @@
 3. Note that all the reports exist and navigating to those reports works as expected.
 4. Check that report menu items are marked active when navigating to that page.
 
+### Add preview site button on the appearance task #6457
+
+1. Navigate to Home and click "Personalzie your store" task.
+2. Click on the "Preview Site" button on the header.
+3. A new tab should open and the URL should be the site URL.
+4. Navigate to other tasks such as "Store Details" or "Add products" .
+5. The "Preview Site" should not be shown on the other tasks.
+
 ### Fix double prefixing of navigation URLs #6460
 
 1. Register a navigation menu item with a full URL or admin link.
