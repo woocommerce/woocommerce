@@ -26,7 +26,9 @@ jest.mock( '@wordpress/data', () => {
 	return {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {} ),
+		useSelect: jest.fn().mockReturnValue( {
+			menuItems: [],
+		} ),
 	};
 } );
 

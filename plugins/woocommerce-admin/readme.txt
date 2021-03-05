@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add legacy report items to new navigation #6507
 - Dev: Add initial tests for navigation Menu class #6492
 - Dev: Remove active item from navigation store #6486
+- Dev: Add navigation container tests #6464
 - Add: Add preview site button on the appearance task #6457
 - Fix: Add check for navigating being enabled. #6462
 - Dev: Add nav favorite button tests #6446

@@ -3,11 +3,10 @@
  */
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import classnames from 'classnames';
-import { compose } from '@wordpress/compose';
 import { Navigation } from '@woocommerce/experimental';
 import { NAVIGATION_STORE_NAME, useUser } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { withSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -21,7 +20,13 @@ import Header from '../header';
 import { PrimaryMenu } from './primary-menu';
 import { SecondaryMenu } from './secondary-menu';
 
-const Container = ( { menuItems } ) => {
+const Container = () => {
+	const { menuItems } = useSelect( ( select ) => {
+		return {
+			menuItems: select( NAVIGATION_STORE_NAME ).getMenuItems(),
+		};
+	} );
+
 	useEffect( () => {
 		// Collapse the original WP Menu.
 		document.documentElement.classList.remove( 'wp-toolbar' );
@@ -50,6 +55,7 @@ const Container = ( { menuItems } ) => {
 				const matchedItem = getMatchingItem( menuItems );
 				if ( matchedItem ) {
 					setActiveItem( matchedItem );
+					setActiveLevel( matchedItem.parent );
 				}
 			}, 0 );
 		} );
@@ -123,12 +129,4 @@ const Container = ( { menuItems } ) => {
 	);
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const { getMenuItems } = select( NAVIGATION_STORE_NAME );
-
-		return {
-			menuItems: getMenuItems(),
-		};
-	} )
-)( Container );
+export default Container;
