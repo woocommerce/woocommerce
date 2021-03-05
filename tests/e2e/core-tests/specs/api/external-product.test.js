@@ -69,6 +69,11 @@ const runExternalProductAPITest = () => {
 			const transformed = await repository.read( product.id );
 			expect( transformed ).toEqual( expect.objectContaining( transformedProperties ) );
 		});
+
+		it('can delete an external product', async () => {
+			const status = repository.delete( product.id );
+			expect( status ).toBeTruthy();
+		});
 	});
 };
 
