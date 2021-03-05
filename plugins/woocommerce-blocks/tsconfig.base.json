@@ -46,6 +46,7 @@
 	  "@woocommerce/icons": [ "assets/js/icons" ],
 	  "@woocommerce/resource-previews": [ "assets/js/previews" ],
 	  "@woocommerce/knobs": [ "storybook/knobs" ],
+	  "@woocommerce/price-format": [ "packages/prices" ],
 	  "@woocommerce/settings": [ "assets/js/settings/shared" ],
 	  "@woocommerce/shared-context": [ "assets/js/shared/context" ],
 	  "@woocommerce/type-defs/*": [ "assets/js/type-defs/*" ],

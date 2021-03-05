@@ -5,12 +5,8 @@ import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Checks if value passed is a string, throws an error if not.
- *
- * @param {string} value Value to be validated.
- *
- * @return {Error|true} Error if value is not string, true otherwise.
  */
-export const mustBeString = ( value ) => {
+export const mustBeString = ( value: unknown ): true | Error => {
 	if ( typeof value !== 'string' ) {
 		throw Error(
 			sprintf(
@@ -27,14 +23,9 @@ export const mustBeString = ( value ) => {
 };
 
 /**
- * Checks if value passed contain passed label
- *
- * @param {string} value Value to be validated.
- * @param {string} label Label to be searched for.
- *
- * @return {Error|true} Error if value contains label, true otherwise.
+ * Checks if value passed contain passed label.
  */
-export const mustContain = ( value, label ) => {
+export const mustContain = ( value: string, label: string ): true | Error => {
 	if ( ! value.includes( label ) ) {
 		throw Error(
 			sprintf(
@@ -55,8 +46,5 @@ export const mustContain = ( value, label ) => {
  * A function that always return true.
  * We need to have a single instance of this function so it doesn't
  * invalidate our memo comparison.
- *
- *
- * @return {true} Returns true.
  */
-export const returnTrue = () => true;
+export const returnTrue = (): true => true;

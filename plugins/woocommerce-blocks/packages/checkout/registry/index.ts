@@ -9,16 +9,30 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
  */
 import { returnTrue } from '../';
 
-let checkoutFilters = {};
+type CheckoutFilterFunction = < T >(
+	label: T,
+	extensions: Record< string, unknown >,
+	args?: CheckoutFilterArguments
+) => T;
+
+type CheckoutFilterArguments =
+	| ( Record< string, unknown > & {
+			context?: string;
+	  } )
+	| null;
+
+let checkoutFilters: Record<
+	string,
+	Record< string, CheckoutFilterFunction >
+> = {};
 
 /**
  * Register filters for a specific extension.
- *
- * @param {string} namespace Name of the extension namespace.
- * @param {Object} filters   Object of filters for that namespace. Each key of
- *                           the object is the name of a filter.
  */
-export const __experimentalRegisterCheckoutFilters = ( namespace, filters ) => {
+export const __experimentalRegisterCheckoutFilters = (
+	namespace: string,
+	filters: Record< string, CheckoutFilterFunction >
+): void => {
 	checkoutFilters = {
 		...checkoutFilters,
 		[ namespace ]: filters,
@@ -32,7 +46,7 @@ export const __experimentalRegisterCheckoutFilters = ( namespace, filters ) => {
  * @return {Function[]} Array of functions that are registered for that filter
  *                      name.
  */
-const getCheckoutFilters = ( filterName ) => {
+const getCheckoutFilters = ( filterName: string ): CheckoutFilterFunction[] => {
 	const namespaces = Object.keys( checkoutFilters );
 	const filters = namespaces
 		.map( ( namespace ) => checkoutFilters[ namespace ][ filterName ] )
@@ -42,18 +56,6 @@ const getCheckoutFilters = ( filterName ) => {
 
 /**
  * Apply a filter.
- *
- * @param {Object} o                Object of arguments.
- * @param {string} o.filterName     Name of the filter to apply.
- * @param {any}    o.defaultValue   Default value to filter.
- * @param {Object} [o.extensions]   Values extend to REST API response.
- * @param {any}    [o.arg]          Argument to pass to registered functions.
- *                                  If several arguments need to be passed, use
- *                                  an object.
- * @param {Function} [o.validation] Function that needs to return true when
- *                                  the filtered value is passed in order for
- *                                  the filter to be applied.
- * @return {any} Filtered value.
  */
 export const __experimentalApplyCheckoutFilter = ( {
 	filterName,
@@ -61,7 +63,18 @@ export const __experimentalApplyCheckoutFilter = ( {
 	extensions,
 	arg = null,
 	validation = returnTrue,
-} ) => {
+}: {
+	/** Name of the filter to apply. */
+	filterName: string;
+	/** Default value to filter. */
+	defaultValue: unknown;
+	/** Values extend to REST API response. */
+	extensions: Record< string, unknown >;
+	/** Object containing arguments for the filter function. */
+	arg: CheckoutFilterArguments;
+	/** Function that needs to return true when the filtered value is passed in order for the filter to be applied. */
+	validation: ( value: unknown ) => boolean;
+} ): unknown => {
 	return useMemo( () => {
 		const filters = getCheckoutFilters( filterName );
 

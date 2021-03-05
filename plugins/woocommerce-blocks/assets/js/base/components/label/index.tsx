@@ -3,7 +3,7 @@
  */
 import { Fragment } from '@wordpress/element';
 import classNames from 'classnames';
-import type { HTMLAttributes } from 'react';
+import type { ReactElement, HTMLAttributes } from 'react';
 
 interface LabelProps {
 	label?: string;
@@ -23,7 +23,7 @@ const Label = ( {
 	screenReaderLabel,
 	wrapperElement,
 	wrapperProps = {},
-}: LabelProps ): JSX.Element => {
+}: LabelProps ): ReactElement => {
 	let Wrapper;
 
 	const hasLabel = typeof label !== 'undefined' && label !== null;
