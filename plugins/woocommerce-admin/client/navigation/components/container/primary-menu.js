@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { NavigationMenu, NavigationGroup } from '@woocommerce/experimental';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -20,7 +21,16 @@ export const PrimaryMenu = ( {
 		return null;
 	}
 
-	const { rootBackLabel, rootBackUrl } = window.wcNavigation;
+	const rootBackLabel = applyFilters(
+		'woocommerce_navigation_root_back_label',
+		__( 'WordPress Dashboard', 'woocommerce-admin' )
+	);
+
+	const rootBackUrl = applyFilters(
+		'woocommerce_navigation_root_back_url',
+		window.wcNavigation.rootBackUrl
+	);
+
 	const isRootBackVisible = category.id === 'woocommerce' && rootBackUrl;
 
 	return (
