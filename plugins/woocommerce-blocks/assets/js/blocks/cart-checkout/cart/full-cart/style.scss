@@ -64,7 +64,7 @@ table.wc-block-cart-items {
 		.wc-block-cart-item__total {
 			@include font-size(regular);
 			text-align: right;
-			line-height: 1.25;
+			line-height: inherit;
 		}
 		.wc-block-components-product-metadata {
 			margin-bottom: 0.75em;
