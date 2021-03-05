@@ -425,3 +425,17 @@ This passes when the option value matches the value using the operation.
 ```
 
 `option_name`, `value`, and `operation` are all required. `default` is not required and allows a default value to be used if the option does not exist.
+
+### WCA updated
+This passes when WooCommerce Admin has just been updated. The specs will be run
+on update. Note that this doesn't provide a way to check the version number as
+the `plugin_version` rule can be used to check for a specific version of the
+WooCommerce Admin plugin.
+
+```
+{
+	type: "wca_updated"
+}
+```
+
+No other values are needed.

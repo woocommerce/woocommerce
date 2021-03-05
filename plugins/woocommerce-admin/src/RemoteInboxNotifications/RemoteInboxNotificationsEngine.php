@@ -19,6 +19,7 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
 class RemoteInboxNotificationsEngine {
 	const SPECS_OPTION_NAME        = 'wc_remote_inbox_notifications_specs';
 	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
+	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
 
 	/**
 	 * Initialize the engine.
@@ -34,6 +35,10 @@ class RemoteInboxNotificationsEngine {
 			10,
 			2
 		);
+
+		// Hook into WCA updated. This is hooked up here rather than in
+		// on_admin_init because that runs too late to hook into the action.
+		add_action( 'woocommerce_admin_updated', array( __CLASS__, 'run_on_woocommerce_admin_updated' ) );
 	}
 
 	/**
@@ -94,6 +99,19 @@ class RemoteInboxNotificationsEngine {
 		foreach ( $specs as $spec ) {
 			SpecRunner::run_spec( $spec, $stored_state );
 		}
+	}
+
+	/**
+	 * Set an option indicating that WooCommerce Admin has just been updated,
+	 * run the specs, then clear that option. This lets the
+	 * WooCommerceAdminUpdatedRuleProcessor trigger on WCA update.
+	 */
+	public static function run_on_woocommerce_admin_updated() {
+		update_option( self::WCA_UPDATED_OPTION_NAME, true );
+
+		self::run();
+
+		update_option( self::WCA_UPDATED_OPTION_NAME, false );
 	}
 
 	/**

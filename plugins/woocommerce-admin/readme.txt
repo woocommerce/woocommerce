@@ -97,6 +97,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add a "rather not say" option to revenue in the profile wizard. #6475
 - Dev: Added warning when WC-Admin is active but not being used #6453
 - Add: Remove Mollie promo note on install #6510
+- Add: Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
 
 == 2.1.0 ==
 
@@ -171,8 +172,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Allow highlight tooltip to use body tag as parent. #6309
 - Add: Allow users to install the PayU plugin in the payments setup task. #6332
 - Fix: Persist the enabling of plugins in the payments setup task. #6332
-
-== Changelog ==
 
 == 1.9.0 1/15/2021 ==
 

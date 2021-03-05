@@ -56,6 +56,8 @@ class GetRuleProcessor {
 				return new NoteStatusRuleProcessor();
 			case 'option':
 				return new OptionRuleProcessor();
+			case 'wca_updated':
+				return new WooCommerceAdminUpdatedRuleProcessor();
 		}
 
 		return new FailRuleProcessor();
