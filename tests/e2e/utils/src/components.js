@@ -491,10 +491,13 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	// Select shipping zone location
 	// (.toSelect is not best option here because a lot of &nbsp are present in country/state names)
 	await expect(page).toFill('#zone_locations', zoneLocation);
+	await page.waitFor(1000); // avoiding flakiness
 	await page.keyboard.press('Tab');
+	await page.waitFor(1000); // avoiding flakiness
 	await page.keyboard.press('Enter');
 
 	// Fill shipping zone postcode if needed otherwise just put empty space
+	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toFill('#zone_postcodes', zipCode);
 	await expect(page).toMatchElement('#zone_postcodes', zipCode);
@@ -504,9 +507,12 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await page.waitFor(2000); // avoiding flakiness
 	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
 	await page.waitFor(2000); // avoiding flakiness
+	await page.waitForSelector('.wc-shipping-zone-method-description');
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
+	await page.waitFor(1000); // avoiding flakiness
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
+	await page.waitFor(1000); // avoiding flakiness
 };
 
 export {
