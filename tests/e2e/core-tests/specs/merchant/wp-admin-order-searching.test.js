@@ -36,8 +36,7 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
 			await clearAndFillInput('#_shipping_postcode', '14201');
 			await page.waitFor(1000); // to avoid flakiness
-			await page.click('#select2-_shipping_state-container');
-			await selectOptionInSelect2('New York');
+			await page.select('#_shipping_state', 'NY');
 
 			// Save new order
 			await page.click('button.save_order');
