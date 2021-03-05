@@ -41,8 +41,11 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_postcode', '14201');
 			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Tab');
+			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Tab');
+			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Enter');
+			await page.waitFor(1000); // to avoid flakiness
 			await selectOptionInSelect2('New York', 'input.select2-search__field');
 
 			// Save new order
