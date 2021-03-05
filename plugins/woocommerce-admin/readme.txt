@@ -96,6 +96,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Restore visual styles back to Analytics tabs. #5913
 - Add: Add a "rather not say" option to revenue in the profile wizard. #6475
 - Dev: Added warning when WC-Admin is active but not being used #6453
+- Add: Remove Mollie promo note on install #6510
 
 == 2.1.0 ==
 
