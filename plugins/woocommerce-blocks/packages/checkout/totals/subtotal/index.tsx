@@ -3,14 +3,32 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
-import PropTypes from 'prop-types';
+import type { Currency } from '@woocommerce/price-format';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
  */
 import TotalsItem from '../item';
 
-const Subtotal = ( { currency, values, className } ) => {
+interface Values {
+	// eslint-disable-next-line camelcase
+	total_items: string;
+	// eslint-disable-next-line camelcase
+	total_items_tax: string;
+}
+
+interface SubtotalProps {
+	className?: string;
+	currency: Currency;
+	values: Values | Record< string, never >;
+}
+
+const Subtotal = ( {
+	currency,
+	values,
+	className,
+}: SubtotalProps ): ReactElement => {
 	const { total_items: totalItems, total_items_tax: totalItemsTax } = values;
 	const itemsValue = parseInt( totalItems, 10 );
 	const itemsTaxValue = parseInt( totalItemsTax, 10 );
@@ -27,15 +45,6 @@ const Subtotal = ( { currency, values, className } ) => {
 			}
 		/>
 	);
-};
-
-Subtotal.propTypes = {
-	currency: PropTypes.object.isRequired,
-	values: PropTypes.shape( {
-		total_items: PropTypes.string,
-		total_items_tax: PropTypes.string,
-	} ).isRequired,
-	className: PropTypes.string,
 };
 
 export default Subtotal;

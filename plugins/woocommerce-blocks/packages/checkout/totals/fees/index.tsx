@@ -4,14 +4,26 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
-import PropTypes from 'prop-types';
+import type { Currency } from '@woocommerce/price-format';
+import type { CartFeeItem } from '@woocommerce/type-defs/cart';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
  */
 import TotalsItem from '../item';
 
-const TotalsFees = ( { currency, cartFees, className } ) => {
+interface TotalsFeesProps {
+	currency: Currency;
+	cartFees: CartFeeItem[];
+	className?: string;
+}
+
+const TotalsFees = ( {
+	currency,
+	cartFees,
+	className,
+}: TotalsFeesProps ): ReactElement | null => {
 	return (
 		<>
 			{ cartFees.map( ( { id, name, totals } ) => {
@@ -44,12 +56,6 @@ const TotalsFees = ( { currency, cartFees, className } ) => {
 			} ) }
 		</>
 	);
-};
-
-TotalsFees.propTypes = {
-	currency: PropTypes.object.isRequired,
-	cartFees: PropTypes.array.isRequired,
-	className: PropTypes.string,
 };
 
 export default TotalsFees;

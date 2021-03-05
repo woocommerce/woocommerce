@@ -2,14 +2,23 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
+import type { ReactChildren, ReactNode, ReactElement } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import { Icon, chevronUp, chevronDown } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+
+interface PanelProps {
+	children?: ReactChildren;
+	className?: string;
+	initialOpen?: boolean;
+	hasBorder?: boolean;
+	title?: ReactNode;
+	titleTag?: keyof JSX.IntrinsicElements;
+}
 
 const Panel = ( {
 	children,
@@ -18,8 +27,8 @@ const Panel = ( {
 	hasBorder = false,
 	title,
 	titleTag: TitleTag = 'div',
-} ) => {
-	const [ isOpen, setIsOpen ] = useState( initialOpen );
+}: PanelProps ): ReactElement => {
+	const [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
 
 	return (
 		<div
@@ -49,14 +58,6 @@ const Panel = ( {
 			</div>
 		</div>
 	);
-};
-
-Panel.propTypes = {
-	className: PropTypes.string,
-	hasBorder: PropTypes.bool,
-	initialOpen: PropTypes.bool,
-	title: PropTypes.node,
-	titleTag: PropTypes.string,
 };
 
 export default Panel;
