@@ -23,8 +23,11 @@ const runOrderSearchingTest = () => {
 
 			// Create new order for testing
 			await merchant.openNewOrder();
+			await page.waitForSelector('#order_status');
 			await page.select('#order_status', 'Pending payment');
+			await page.waitForSelector('#customer_user');
 			await page.click('#customer_user');
+			await page.waitForSelector('input.select2-search__field');
 			await selectOptionInSelect2('Customer', 'input.select2-search__field');
 
 			// Change the shipping data
