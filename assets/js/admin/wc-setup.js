@@ -96,7 +96,7 @@ jQuery( function( $ ) {
 		if ( $.isEmptyObject( country_postcode_obj ) || country_postcode_obj.required  ) {
 			$store_postcode_input.attr( 'required', 'true' );
 		} else {
-			$store_postcode_input.removeAttr( 'required' );
+			$store_postcode_input.prop( 'required', false );
 		}
 	} );
 
