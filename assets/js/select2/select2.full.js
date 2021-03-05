@@ -3707,7 +3707,7 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype.createTag = function (decorated, params) {
-    var term = $.trim(params.term);
+    var term = params.term.trim();
 
     if (term === '') {
       return null;
@@ -4941,7 +4941,7 @@ S2.define('select2/defaults',[
 
     function matcher (params, data) {
       // Always return the object if there is nothing to compare
-      if ($.trim(params.term) === '') {
+      if ( params.term.trim() === '' ) {
         return data;
       }
 
@@ -5801,7 +5801,7 @@ S2.define('select2/compat/utils',[
   function syncCssClasses ($dest, $src, adapter) {
     var classes, replacements = [], adapted;
 
-    classes = $.trim($dest.attr('class'));
+    classes = $dest.attr('class').trim();
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -5814,7 +5814,7 @@ S2.define('select2/compat/utils',[
       });
     }
 
-    classes = $.trim($src.attr('class'));
+    classes = $src.attr('class').trim();
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -6131,7 +6131,7 @@ S2.define('select2/compat/matcher',[
     function wrappedMatcher (params, data) {
       var match = $.extend(true, {}, data);
 
-      if (params.term == null || $.trim(params.term) === '') {
+      if (params.term == null || params.term.trim() === '') {
         return match;
       }
 
