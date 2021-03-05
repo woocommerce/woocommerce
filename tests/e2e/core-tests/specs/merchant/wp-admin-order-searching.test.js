@@ -10,6 +10,7 @@ const {
 	searchForOrder,
 	createSimpleProduct,
 	addProductToOrder,
+	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
 let orderId;
@@ -39,8 +40,9 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
 			await clearAndFillInput('#_shipping_postcode', '14201');
 			await page.waitFor(1000); // to avoid flakiness
-			await page.click('#select2-_shipping_state-container');
-			await page.waitForSelector('input.select2-search__field');
+			await page.keyboard.press('Tab');
+			await page.keyboard.press('Tab');
+			await page.keyboard.press('Enter');
 			await selectOptionInSelect2('New York', 'input.select2-search__field');
 
 			// Save new order
