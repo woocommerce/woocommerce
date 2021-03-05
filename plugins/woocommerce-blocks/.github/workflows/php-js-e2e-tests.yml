@@ -363,6 +363,7 @@ jobs:
       - name: Npm install and build
         run: |
           npm ci
+          npm install @wordpress/e2e-test-utils@4.5.0
           FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
       - name: blocks.ini setup
