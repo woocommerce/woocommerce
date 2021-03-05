@@ -907,7 +907,7 @@ class WC_Order extends WC_Abstract_Order {
 		$address     = WC()->countries->get_formatted_address( $raw_address );
 
 		/**
-		 * Filter orders formatterd billing address.
+		 * Filter orders formatted billing address.
 		 *
 		 * @since 3.8.0
 		 * @param string   $address     Formatted billing address string.
@@ -933,7 +933,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		/**
-		 * Filter orders formatterd shipping address.
+		 * Filter orders formatted shipping address.
 		 *
 		 * @since 3.8.0
 		 * @param string   $address     Formatted billing address string.
