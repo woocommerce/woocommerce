@@ -28,7 +28,6 @@ const runOrderSearchingTest = () => {
 			await page.select('#order_status', 'Pending payment');
 			await page.waitForSelector('#customer_user');
 			await page.click('#customer_user');
-			await page.waitForSelector('input.select2-search__field');
 			await selectOptionInSelect2('Customer', 'input.select2-search__field');
 
 			// Change the shipping data
@@ -39,17 +38,15 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
 			await clearAndFillInput('#_shipping_postcode', '14201');
-			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Tab');
-			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Tab');
-			await page.waitFor(1000); // to avoid flakiness
 			await page.keyboard.press('Enter');
-			await page.waitFor(1000); // to avoid flakiness
 			await selectOptionInSelect2('New York', 'input.select2-search__field');
 
 			// Save new order
+			await page.waitFor(1000); // to avoid flakiness
 			await page.click('button.save_order');
+			await page.waitFor(2000); // to avoid flakiness
 			await page.waitForSelector('#message');
 
 			// Get the post id
