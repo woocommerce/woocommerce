@@ -21,6 +21,10 @@
 - `createSimpleProductWithCategory` component which creates a simple product with categories, containing three parameters for title, price and category name.
 - `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
 - `removeCoupon()` util helper method that removes a single coupon within cart or checkout
+- `selectOrderAction( action )` util helper method to select and initiate an order action in the Order Action postbox
+- `merchant.openEmailLog()` go to the WP Mail Log page
+- `deleteAllEmailLogs` delete all email logs in the WP Mail Log plugin
+- `clickUpdateOrder( noticeText, waitForSave )` util helper that clicks the `Update` button on an order
 
 ## Changes
 

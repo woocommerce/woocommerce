@@ -258,6 +258,20 @@ const removeCoupon = async ( couponCode ) => {
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
 };
 
+/**
+ *
+ * Select and perform an order action in the `Order actions` postbox.
+ *
+ * @param {string} action The action to take on the order.
+ */
+const selectOrderAction = async ( action ) => {
+	await page.select( 'select[name=wc_order_action]', action );
+	await Promise.all( [
+		page.click( '.wc-reload' ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+}
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -277,4 +291,5 @@ export {
 	searchForOrder,
 	applyCoupon,
 	removeCoupon,
+	selectOrderAction,
 };

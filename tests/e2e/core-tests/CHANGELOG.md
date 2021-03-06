@@ -25,6 +25,7 @@
 - Shopper Cart Apply Coupon
 - Merchant Order Searching
 - Shopper Variable product info updates on different variations
+- Merchant order emails flow
 
 ## Fixed
 

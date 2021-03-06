@@ -59,6 +59,7 @@ The functions to access the core tests are:
   - `runProductSearchTest` - Merchant can search for a product and view it
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
   - `runOrderSearchingTest` - Merchant can search for order via different terms
+  - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
 
 ### Shopper
 
