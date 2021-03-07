@@ -10,16 +10,14 @@ const {
 	searchForOrder,
 	createSimpleProduct,
 	addProductToOrder,
-	evalAndClick,
+	clickUpdateOrder,
 } = require( '@woocommerce/e2e-utils' );
-
-let orderId;
 
 const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
+		let orderId;
 		beforeAll(async () => {
 			await merchant.login();
-
 			await createSimpleProduct('Wanted Product');
 
 			// Create new order for testing
@@ -43,97 +41,90 @@ const runOrderSearchingTest = () => {
 			await page.keyboard.press('Enter');
 			await selectOptionInSelect2('New York', 'input.select2-search__field');
 
-			// Save new order
-			await page.waitFor(1000); // to avoid flakiness
-			await page.click('button.save_order');
-			await page.waitFor(2000); // to avoid flakiness
-			await page.waitForSelector('#message');
-
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
 			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
 
-			await merchant.openAllOrdersView();
-
+			// Save new order
+			await clickUpdateOrder('Order updated.', true);
 			await addProductToOrder(orderId, 'Wanted Product');
-
 			await merchant.openAllOrdersView();
 		});
 
 		it('can search for order by order id', async () => {
-			await searchForOrder(orderId, orderId);
+			await searchForOrder(orderId, orderId, 'John Doe');
 		});
 
 		it('can search for order by billing first name', async () => {
-			await searchForOrder('John', orderId);
+			await searchForOrder('John', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing last name', async () => {
-			await searchForOrder('Doe', orderId);
+			await searchForOrder('Doe', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing company name', async () => {
-			await searchForOrder('Automattic', orderId);
+			await searchForOrder('Automattic', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing first address', async () => {
-			await searchForOrder('addr 1', orderId);
+			await searchForOrder('addr 1', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing second address', async () => {
-			await searchForOrder('addr 2', orderId);
+			await searchForOrder('addr 2', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing city name', async () => {
-			await searchForOrder('San Francisco', orderId);
+			await searchForOrder('San Francisco', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing post code', async () => {
-			await searchForOrder('94107', orderId);
+			await searchForOrder('94107', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing email', async () => {
-			await searchForOrder('john.doe@example.com', orderId);
+			await searchForOrder('john.doe@example.com', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing phone', async () => {
-			await searchForOrder('123456789', orderId);
+			await searchForOrder('123456789', orderId, 'John Doe');
 		})
 
 		it('can search for order by billing state', async () => {
-			await searchForOrder('CA', orderId);
+			await searchForOrder('CA', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping first name', async () => {
-			await searchForOrder('Tim', orderId);
+			await searchForOrder('Tim', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping last name', async () => {
-			await searchForOrder('Clark', orderId);
+			await searchForOrder('Clark', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping first address', async () => {
-			await searchForOrder('Oxford Ave', orderId);
+			await searchForOrder('Oxford Ave', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping second address', async () => {
-			await searchForOrder('Linwood Ave', orderId);
+			await searchForOrder('Linwood Ave', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping city name', async () => {
-			await searchForOrder('Buffalo', orderId);
+			await searchForOrder('Buffalo', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping postcode name', async () => {
-			await searchForOrder('14201', orderId);
+			await searchForOrder('14201', orderId, 'John Doe');
 		})
 
 		it('can search for order by shipping state name', async () => {
-			await searchForOrder('NY', orderId);
+			await searchForOrder('NY', orderId, 'John Doe');
 		})
 
 		it('can search for order by item name', async () => {
-			await searchForOrder('Wanted Product', orderId);
+			await searchForOrder('Wanted Product', orderId, 'John Doe');
 		})
 	});
 };
