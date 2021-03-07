@@ -215,14 +215,15 @@ const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__f
  *
  * @param {string} value Value to be entered into the search field
  * @param {string} orderId Order ID
- * @param {string} customerName Customer's full name attached to order ID. Defaults to John Doe.
+ * @param {string} customerName Customer's full name attached to order ID.
  */
-const searchForOrder = async (value, orderId, customerName = 'John Doe') => {
+const searchForOrder = async (value, orderId, customerName) => {
 	await clearAndFillInput('#post-search-input', value);
 	await expect(page).toMatchElement('#post-search-input', value);
 	await expect(page).toClick('#search-submit');
 	await page.waitForSelector('#the-list');
-	await expect(page).toMatchElement('.order_number > a.order-view', {text: '#'+orderId+' '+customerName});
+	await page.waitFor(1000);
+	await expect(page).toMatchElement('.order_number > a.order-view', {text: `#${orderId} ${customerName}`});
 };
 
 /**
