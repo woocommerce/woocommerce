@@ -6,9 +6,9 @@
 
 # 0.2.0
 
-## Fixed
+- Support for screenshots on test errors
 
-- Return jest exit code from `npx wc-e2e test:e2e*`
+# 0.2.0
 
 ## Added
 
@@ -19,6 +19,7 @@
 
 ## Fixed
 
+- Return jest exit code from `npx wc-e2e test:e2e*`
 - Remove redundant `puppeteer` dependency
 - Support for admin user configuration from `default.json`
 
