@@ -335,7 +335,7 @@ export class OrderFeeLine extends OrderItemMeta {
 	 *
 	 * @type {TaxStatus}
 	 */
-	public readonly taxStatus: TaxStatus = '';
+	public readonly taxStatus: TaxStatus = 'taxable';
 
 	/**
 	 * The total amount for this fee.
