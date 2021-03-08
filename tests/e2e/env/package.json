@@ -27,6 +27,7 @@
     "@wordpress/jest-preset-default": "^6.4.0",
     "app-root-path": "^3.0.0",
     "jest": "^25.1.0",
+    "jest-each": "^26.6.2",
     "jest-puppeteer": "^4.4.0"
   },
   "devDependencies": {

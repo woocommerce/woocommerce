@@ -12,6 +12,7 @@ const { getAppRoot } = require( '../utils' );
 
 let setupFilesAfterEnv = [
 	path.resolve( __dirname, '../build/setup/jest.setup.js' ),
+	path.resolve( __dirname, '../build/setup/jest.failure.js' ),
 	'expect-puppeteer',
 ];
 
