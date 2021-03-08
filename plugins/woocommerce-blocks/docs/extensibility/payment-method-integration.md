@@ -63,12 +63,41 @@ const options = {
 
 Here's some more details on the configuration options:
 
--   `name` (required): This should be a unique string (wise to try to pick something unique for your gateway that wouldn't be used by another implementation) that is used as the identifier for the gateway client side. If `paymentMethodId` is not provided, `name` is used for `paymentMethodId` as well.
--   `content` (required): This should be a React node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this React node will receive props passed in from the checkout payment method interface that will allow your component to interact with checkout data (more on [these props later](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/payment-method-integration.md#props-fed-to-payment-method-nodes)).
--   `edit` (required): This should be a React node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this React node will receive props from the payment method interface to checkout (but they will contain preview data).
--   `canMakePayment` (required): A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order. Return a boolean value - true if payment method is available for use. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions. **Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.**
--   `paymentMethodId`: This is the only optional configuration object. The value of this property is what will accompany the checkout processing request to the server and is used to identify what payment method gateway class to load for processing the payment (if the shopper selected the gateway). So for instance if this is `stripe`, then `WC_Gateway_Stripe::process_payment` will be invoked for processing the payment.
--   `supports:features`: This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature. If no value is provided then this assumes that `['products']` are supported.
+#### `name` (required)
+This should be a unique string (wise to try to pick something unique for your gateway that wouldn't be used by another implementation) that is used as the identifier for the gateway client side. If `paymentMethodId` is not provided, `name` is used for `paymentMethodId` as well.
+
+#### `content` (required)
+This should be a React node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this React node will receive props passed in from the checkout payment method interface that will allow your component to interact with checkout data (more on [these props later](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/payment-method-integration.md#props-fed-to-payment-method-nodes)).
+
+#### `edit` (required)
+This should be a React node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this React node will receive props from the payment method interface to checkout (but they will contain preview data).
+
+#### `canMakePayment` (required): 
+    
+A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order.
+
+```
+canMakePayment( { 
+		cartTotals: CartTotals,
+		cartNeedsShipping: boolean,
+		shippingAddress: CartShippingAddress,
+    billingData: BillingData,
+		selectedShippingMethods: string[],
+		paymentRequirements: string[],
+} )
+```
+
+Returns a boolean value - true if payment method is available for use. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions. 
+
+**Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.**
+
+#### `paymentMethodId`
+This is the only optional configuration object. The value of this property is what will accompany the checkout processing request to the server and is used to identify what payment method gateway class to load for processing the payment (if the shopper selected the gateway). So for instance if this is `stripe`, then `WC_Gateway_Stripe::process_payment` will be invoked for processing the payment.
+
+#### `supports:features`
+This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature. If no value is provided then this assumes that `['products']` are supported.
+
+---
 
 ### Payment Methods - `registerPaymentMethod( options )`
 
