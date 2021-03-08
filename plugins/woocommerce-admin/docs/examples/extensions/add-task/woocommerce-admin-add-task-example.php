@@ -54,12 +54,4 @@ function pluginprefix_register_extended_task( $registered_tasks_list_items ) {
 	return $registered_tasks_list_items;
 }
 
-/**
- * Unregister task.
- */
-function pluginprefix_deactivate() {
-	remove_filter( 'woocommerce_get_registered_extended_tasks', 'pluginprefix_register_extended_task', 10, 1 );
-}
-
 add_action( 'admin_enqueue_scripts', 'add_task_register_script' );
-register_deactivation_hook( __FILE__, 'pluginprefix_deactivate' );
