@@ -15,6 +15,15 @@ program
 
 const appPath = getAppRoot();
 
+// clear the screenshots folder before running tests.
+const screenshotPath = path.resolve( appPath, 'tests/e2e/screenshots' );
+if ( fs.existsSync( screenshotPath ) ) {
+	fs.readdirSync( screenshotPath ).forEach( ( file, index ) => {
+		const filename = path.join( screenshotPath, file );
+		fs.unlinkSync( filename );
+	});
+}
+
 const nodeConfigDirs = [
 	path.resolve( __dirname, '../config' ),
 ];
