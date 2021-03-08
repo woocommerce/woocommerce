@@ -8,7 +8,7 @@ import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { BundleBusinessDetailsStep } from './flows/bundle';
+import { BusinessDetailsStepWithExtensionList } from './flows/bundle';
 import { SelectiveFeaturesBusinessStep } from './flows/selective-bundle';
 import './style.scss';
 import { isSelectiveBundleInstallSegmentation } from './data/segmentation';
@@ -33,13 +33,8 @@ export const BusinessDetailsStep = ( props ) => {
 		? settings.general.woocommerce_default_country
 		: null;
 
-	const industrySlugs = ( profileItems.industry || [] ).map(
-		( industry ) => industry.slug
-	);
-
 	const selectiveBundleInstallSegmentation = isSelectiveBundleInstallSegmentation(
-		country,
-		industrySlugs
+		country
 	);
 
 	if ( isLoading ) {
@@ -67,5 +62,5 @@ export const BusinessDetailsStep = ( props ) => {
 		);
 	}
 
-	return <BundleBusinessDetailsStep { ...props } />;
+	return <BusinessDetailsStepWithExtensionList { ...props } />;
 };

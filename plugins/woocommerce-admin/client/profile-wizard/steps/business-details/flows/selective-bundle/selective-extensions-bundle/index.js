@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -21,6 +21,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import { AppIllustration } from '../app-illustration';
 import './style.scss';
 import { setAllPropsToValue } from '../../../../../../lib/collections';
+import { getCountryCode } from '../../../../../../dashboard/utils';
+import { isWCPaySupported } from '../../../../../../task-list/tasks/payments/wcpay';
 
 const generatePluginDescriptionWithLink = ( description, productName ) => {
 	return interpolateComponents( {
@@ -51,6 +53,14 @@ const installableExtensions = [
 					),
 					'woocommerce-payments'
 				),
+				isVisible: ( countryCode, industry ) => {
+					const hasCbdIndustry = ( industry || [] ).some(
+						( { slug } ) => {
+							return slug === 'cbd-other-hemp-derived-products';
+						}
+					);
+					return isWCPaySupported( countryCode ) && ! hasCbdIndustry;
+				},
 			},
 			{
 				slug: 'woocommerce-services',
@@ -120,20 +130,6 @@ const installableExtensions = [
 		],
 	},
 ];
-
-const initialValues = installableExtensions.reduce(
-	( acc, curr ) => {
-		const plugins = curr.plugins.reduce( ( pluginAcc, { slug } ) => {
-			return { ...pluginAcc, [ slug ]: true };
-		}, {} );
-
-		return {
-			...acc,
-			...plugins,
-		};
-	},
-	{ install_extensions: true }
-);
 
 const FreeBadge = () => {
 	return (
@@ -239,12 +235,52 @@ const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
 	);
 };
 
+/**
+ * Returns plugins that either don't have the acceptedCountryCodes param or one defined
+ * that includes the passed in country.
+ *
+ * @param {Array}  plugins  list of plugins
+ * @param {string} country  Woo store country
+ * @param {Array}  industry List of selected industries
+ */
+const getVisiblePlugins = ( plugins, country, industry ) => {
+	const countryCode = getCountryCode( country );
+
+	return plugins.filter(
+		( plugin ) =>
+			! plugin.isVisible || plugin.isVisible( countryCode, industry )
+	);
+};
+
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
+	country,
+	industry,
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const [ values, setValues ] = useState( initialValues );
+	const [ values, setValues ] = useState( {} );
+
+	useEffect( () => {
+		const initialValues = installableExtensions.reduce(
+			( acc, curr ) => {
+				const plugins = getVisiblePlugins(
+					curr.plugins,
+					country,
+					industry
+				).reduce( ( pluginAcc, { slug } ) => {
+					return { ...pluginAcc, [ slug ]: true };
+				}, {} );
+
+				return {
+					...acc,
+					...plugins,
+				};
+			},
+			{ install_extensions: true }
+		);
+		setValues( initialValues );
+	}, [ country ] );
 
 	const getCheckboxChangeHandler = ( slug ) => {
 		return ( checked ) => {
@@ -315,7 +351,11 @@ export const SelectiveExtensionsBundle = ( {
 								<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
 									{ title }
 								</div>
-								{ plugins.map( ( { description, slug } ) => (
+								{ getVisiblePlugins(
+									plugins,
+									country,
+									industry
+								).map( ( { description, slug } ) => (
 									<BundleExtensionCheckbox
 										key={ slug }
 										description={ description }

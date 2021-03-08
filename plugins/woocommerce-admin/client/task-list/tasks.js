@@ -21,7 +21,10 @@ import { Products } from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
-import { installActivateAndConnectWcpay } from './tasks/payments/methods';
+import {
+	installActivateAndConnectWcpay,
+	isWCPaySupported,
+} from './tasks/payments/wcpay';
 import { groupListOfObjectsBy } from '../lib/collections';
 
 export function recordTaskViewEvent(
@@ -83,7 +86,12 @@ export function getAllTasks( {
 	const {
 		completed: profilerCompleted,
 		product_types: productTypes,
+		business_extensions: businessExtensions,
 	} = profileItems;
+
+	const woocommercePaymentsSelectedInProfiler = (
+		businessExtensions || []
+	).includes( 'woocommerce-payments' );
 
 	let purchaseAndInstallText = __(
 		'Add paid extensions to your store',
@@ -163,7 +171,6 @@ export function getAllTasks( {
 					);
 					onTaskSelect( 'woocommerce-payments' );
 					return installActivateAndConnectWcpay(
-						resolve,
 						reject,
 						createNotice,
 						installAndActivatePlugins
@@ -172,8 +179,9 @@ export function getAllTasks( {
 			},
 			visible:
 				window.wcAdminFeatures.wcpay &&
+				woocommercePaymentsSelectedInProfiler &&
 				woocommercePaymentsInstalled &&
-				countryCode === 'US',
+				isWCPaySupported( countryCode ),
 			additionalInfo: __(
 				'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
 				'woocommerce-admin'
@@ -190,7 +198,10 @@ export function getAllTasks( {
 				onTaskSelect( 'payments' );
 				updateQueryString( { task: 'payments' } );
 			},
-			visible: ! woocommercePaymentsInstalled || countryCode !== 'US',
+			visible:
+				! woocommercePaymentsInstalled ||
+				! woocommercePaymentsSelectedInProfiler ||
+				! isWCPaySupported( countryCode ),
 			time: __( '2 minutes', 'woocommerce-admin' ),
 			type: 'setup',
 		},

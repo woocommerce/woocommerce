@@ -101,6 +101,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Added warning when WC-Admin is active but not being used #6453
 - Add: Remove Mollie promo note on install #6510
 - Add: Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
+- Feature: Increase target audience for business feature step. #6508
 
 == 2.1.0 ==
 

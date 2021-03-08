@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _n, _x, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
@@ -9,21 +9,11 @@ import {
 	Card,
 	CardBody,
 	CardFooter,
-	CheckboxControl,
 	FormToggle,
-	Popover,
 } from '@wordpress/components';
-import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { keys, get, pickBy } from 'lodash';
-import {
-	H,
-	Link,
-	SelectControl,
-	Form,
-	TextControl,
-} from '@woocommerce/components';
-import { formatValue } from '@woocommerce/number';
+import { H, SelectControl, Form, TextControl } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
@@ -34,15 +24,10 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { Icon, info, check } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import {
-	getCountryCode,
-	getCurrencyRegion,
-} from '../../../../../dashboard/utils';
 import { CurrencyContext } from '../../../../../lib/currency-context';
 import { createNoticesFromResponse } from '../../../../../lib/notices';
 import { extensionBenefits } from '../../data/extension-benefits';
@@ -56,11 +41,7 @@ const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 class BusinessDetails extends Component {
 	constructor( props ) {
 		super();
-		const settings = get( props, 'settings', {} );
 		const profileItems = get( props, 'profileItems', {} );
-		const industrySlugs = get( profileItems, 'industry', [] ).map(
-			( industry ) => industry.slug
-		);
 		const businessExtensions = get(
 			profileItems,
 			'business_extensions',
@@ -101,15 +82,8 @@ class BusinessDetails extends Component {
 			'creative-mail-by-constant-contact',
 		];
 
-		this.bundleInstall =
-			getCountryCode( settings.woocommerce_default_country ) === 'US' &&
-			( industrySlugs.includes( 'fashion-apparel-accessories' ) ||
-				industrySlugs.includes( 'health-beauty' ) ) &&
-			! industrySlugs.includes( 'cbd-other-hemp-derived-products' );
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
-		this.getNumberRangeString = this.getNumberRangeString.bind( this );
-		this.numberFormat = this.numberFormat.bind( this );
 	}
 
 	onCreativeMailInstallAndActivated() {
@@ -173,7 +147,6 @@ class BusinessDetails extends Component {
 				'kliken-marketing-for-google'
 			),
 			install_extensions: installExtensions,
-			bundle_install: this.bundleInstall,
 		} );
 
 		const _updates = {
@@ -286,84 +259,12 @@ class BusinessDetails extends Component {
 	}
 
 	getBusinessExtensions( values ) {
-		if ( this.bundleInstall ) {
-			return values.install_extensions
-				? [
-						'jetpack',
-						'woocommerce-services',
-						'woocommerce-payments',
-						...this.extensions,
-				  ]
-				: [];
-		}
-
 		if ( values.selling_venues === '' ) {
 			return [];
 		}
 
 		return keys( pickBy( values ) ).filter( ( name ) =>
 			this.extensions.includes( name )
-		);
-	}
-
-	convertCurrency( value ) {
-		const region = getCurrencyRegion(
-			this.props.settings.woocommerce_default_country
-		);
-		if ( region === 'US' ) {
-			return value;
-		}
-
-		// These are rough exchange rates from USD.  Precision is not paramount.
-		// The keys here should match the keys in `getCurrencyData`.
-		const exchangeRates = {
-			US: 1,
-			EU: 0.9,
-			IN: 71.24,
-			GB: 0.76,
-			BR: 4.19,
-			VN: 23172.5,
-			ID: 14031.0,
-			BD: 84.87,
-			PK: 154.8,
-			RU: 63.74,
-			TR: 5.75,
-			MX: 19.37,
-			CA: 1.32,
-		};
-
-		const exchangeRate = exchangeRates[ region ] || exchangeRates.US;
-		const digits = exchangeRate.toString().split( '.' )[ 0 ].length;
-		const multiplier = Math.pow( 10, 2 + digits );
-
-		return Math.round( ( value * exchangeRate ) / multiplier ) * multiplier;
-	}
-
-	numberFormat( value ) {
-		const { getCurrencyConfig } = this.context;
-		return formatValue( getCurrencyConfig(), 'number', value );
-	}
-
-	getNumberRangeString( min, max = false, format = this.numberFormat ) {
-		if ( ! max ) {
-			return sprintf(
-				_x(
-					'%s+',
-					'store product count or revenue',
-					'woocommerce-admin'
-				),
-				format( min )
-			);
-		}
-
-		return sprintf(
-			_x(
-				'%1$s - %2$s',
-				'store product count or revenue range',
-				'woocommerce-admin'
-			),
-			format( min ),
-			format( max )
 		);
 	}
 
@@ -396,45 +297,19 @@ class BusinessDetails extends Component {
 				</Text>
 			);
 		}
-		const accountRequiredText = this.bundleInstall
-			? __(
-					'User accounts are required to use these features.',
-					'woocommerce-admin'
-			  )
-			: '';
 		return (
 			<div className="woocommerce-profile-wizard__footnote">
 				<Text variant="caption" as="p">
 					{ sprintf(
 						_n(
-							'The following plugin will be installed for free: %s. %s',
-							'The following plugins will be installed for free: %s. %s',
+							'The following plugin will be installed for free: %s.',
+							'The following plugins will be installed for free: %s.',
 							extensions.length,
 							'woocommerce-admin'
 						),
-						extensionsList,
-						accountRequiredText
+						extensionsList
 					) }
 				</Text>
-				{ this.bundleInstall && (
-					<Text variant="caption" as="p">
-						{ interpolateComponents( {
-							mixedString: __(
-								'By installing Jetpack and WooCommerce Shipping plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
-								'woocommerce-admin'
-							),
-							components: {
-								link: (
-									<Link
-										href="https://wordpress.com/tos/"
-										target="_blank"
-										type="external"
-									/>
-								),
-							},
-						} ) }
-					</Text>
-				) }
 			</div>
 		);
 	}
@@ -476,129 +351,6 @@ class BusinessDetails extends Component {
 		);
 	}
 
-	renderBusinessExtensionsBundle( values, getInputProps ) {
-		const { isPopoverVisible } = this.state;
-
-		const checkMarkIcon = (
-			<Icon
-				className="woocommerce-business-extensions__benefit__check-icon"
-				icon={ check }
-			/>
-		);
-
-		return (
-			<div className="woocommerce-business-extensions">
-				<label htmlFor="woocommerce-business-extensions__checkbox">
-					<CheckboxControl
-						id="woocommerce-business-extensions__checkbox"
-						{ ...getInputProps( 'install_extensions' ) }
-					/>
-					<span className="woocommerce-business-extensions__label-text">
-						{ interpolateComponents( {
-							mixedString: __(
-								'Install recommended {{strong}}free{{/strong}} business features',
-								'woocommerce-admin'
-							),
-							components: {
-								strong: <strong />,
-							},
-						} ) }
-						<span className="woocommerce-business-extensions__label-subtext">
-							{ __( 'Requires an account', 'woocommerce-admin' ) }
-						</span>
-					</span>
-				</label>
-
-				<div className="woocommerce-business-extensions__popover-wrapper">
-					<Button
-						isTertiary
-						label={ __(
-							'Learn more about recommended free business features',
-							'woocommerce-admin'
-						) }
-						onClick={ () => {
-							recordEvent(
-								'storeprofiler_store_business_details_popover'
-							);
-							this.setState( { isPopoverVisible: true } );
-						} }
-					>
-						<Icon icon={ info } />
-					</Button>
-					{ isPopoverVisible && (
-						<Popover
-							className="woocommerce-business-extensions__popover"
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( { isPopoverVisible: false } )
-							}
-						>
-							<div className="woocommerce-business-extensions__benefits">
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Manage your store on the go with the WooCommerce mobile app',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Accept credit cards with WooCommerce Payments',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Speed & security enhancements',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Automatic sales taxes',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Market on Facebook',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Contact customers with Mailchimp',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Drive sales with Google Ads',
-										'woocommerce-admin'
-									) }
-								</div>
-								<div className="woocommerce-business-extensions__benefit">
-									{ checkMarkIcon }
-									{ __(
-										'Print shipping labels at home',
-										'woocommerce-admin'
-									) }
-								</div>
-							</div>
-						</Popover>
-					) }
-				</div>
-			</div>
-		);
-	}
-
 	render() {
 		const {
 			goToNextStep,
@@ -624,15 +376,10 @@ class BusinessDetails extends Component {
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {
-					const businessExtensions = this.bundleInstall
-						? this.renderBusinessExtensionsBundle(
-								values,
-								getInputProps
-						  )
-						: this.renderBusinessExtensions(
-								values,
-								getInputProps
-						  );
+					const businessExtensions = this.renderBusinessExtensions(
+						values,
+						getInputProps
+					);
 
 					return (
 						<Fragment>
@@ -773,7 +520,7 @@ class BusinessDetails extends Component {
 
 BusinessDetails.contextType = CurrencyContext;
 
-export const BundleBusinessDetailsStep = compose(
+export const BusinessDetailsStepWithExtensionList = compose(
 	withSelect( ( select ) => {
 		const {
 			getSettings,
