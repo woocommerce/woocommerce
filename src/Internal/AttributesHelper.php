@@ -44,7 +44,9 @@ class AttributesHelper {
 		);
 
 		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
+			if ( $taxonomy->attribute_name === $attribute_name ) {
+				$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
+			}
 		}
 	}
 

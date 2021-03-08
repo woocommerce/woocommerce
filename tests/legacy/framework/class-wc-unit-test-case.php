@@ -274,6 +274,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return array Result from the request.
 	 */
 	public function do_rest_request( $url, $params = null, $verb = 'GET' ) {
+		global $wp_rest_server;
+
+		// This is needed to invalidate any caching used by the REST API.
+		$wp_rest_server = null;
+
 		if ( ! self::$rest_server ) {
 			add_filter(
 				'wp_rest_server_class',
@@ -303,5 +308,41 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$response = rest_do_request( $request );
 
 		return self::$rest_server->response_to_data( $response, false );
+	}
+
+
+	/**
+	 * Pause the unit test execution for peeking into the database.
+	 *
+	 * This is a helper tool to be used temporarily while developing tests.
+	 * Tests must NOT be committed to the repository with calls to this method in place.
+	 */
+	public function pause_test_for_db_inspection() {
+		global $wpdb;
+
+		// phpcs:disable WordPress.WP.AlternativeFunctions
+
+		$handle = fopen( 'php://stdin', 'rw' );
+		fputs(
+			$handle,
+			'
+!!! Test execution paused !!!
+
+You can now peek into the database. Use these connection parameters:
+
+Host: ' . DB_HOST . '
+User: ' . DB_USER . '
+Password: ' . DB_PASSWORD . "
+Prefix: {$wpdb->prefix}
+
+You'll need to run the following before querying the database (once per connection):
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+Press ENTER when you are done. "
+		);
+		fgets( $handle );
+		fclose( $handle );
+
+		// phpcs:enable WordPress.WP.AlternativeFunctions
 	}
 }
