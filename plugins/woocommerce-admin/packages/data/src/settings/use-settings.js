@@ -30,7 +30,7 @@ export const useSettings = ( group, settingsKeys = [] ) => {
 				isDirty: getIsDirty( group, settingsKeys ),
 			};
 		},
-		[ group, settingsKeys ]
+		[ group, ...settingsKeys.sort() ]
 	);
 	const {
 		persistSettingsForGroup,
