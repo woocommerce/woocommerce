@@ -1,10 +1,9 @@
 /** @format */
-/*
 import {
 	sendFailedTestScreenshotToSlack,
-	sendFailedTestMessageToSlack
-} from "./lib/reporter/slack-reporter";
-*/
+	sendFailedTestMessageToSlack,
+} from '../slack';
+
 const path = require( 'path' );
 const mkdirp = require( 'mkdirp' );
 import { bind } from 'jest-each';
@@ -23,6 +22,10 @@ let currentBlock;
 const originalDescribe = global.describe;
 const originalIt = global.it;
 
+/**
+ * A custom describe function that stores the name of the describe block.
+ * @type {describe}
+ */
 global.describe = (() => {
 	const describe = ( blockName, callback ) => {
 		currentBlock = blockName;
@@ -50,6 +53,12 @@ global.describe = (() => {
 	return describe;
 })();
 
+/**
+ * A custom it function that wraps the test function in a callback
+ * which takes a screenshot on test failure.
+ *
+ * @type {function(*=, *=): *}
+ */
 global.it = (() => {
 	const test = async ( testName, callback ) => {
 		const testCallback = async () => screenshotTest( testName, callback );
@@ -71,6 +80,12 @@ global.it = (() => {
 	return test;
 })();
 
+/**
+ * Save a screenshot during a test if the test fails.
+ * @param testName
+ * @param callback
+ * @returns {Promise<void>}
+ */
 const screenshotTest = async ( testName, callback ) => {
 	try {
 		await callback();
@@ -89,10 +104,8 @@ const screenshotTest = async ( testName, callback ) => {
 			fullPage: true,
 		} );
 
-/*
 		await sendFailedTestMessageToSlack( testTitle );
 		await sendFailedTestScreenshotToSlack( filePath );
-*/
 
 		throw ( e );
 	}
