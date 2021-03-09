@@ -27,7 +27,7 @@ import { reducer } from './reducer';
 import { DEFAULT_STATE, STATUS } from './constants';
 import {
 	EMIT_TYPES,
-	emitterSubscribers,
+	emitterObservers,
 	emitEvent,
 	emitEventWithAbort,
 	reducer as emitReducer,
@@ -99,7 +99,7 @@ export const AddToCartFormStateContextProvider = ( {
 		reducer,
 		DEFAULT_STATE
 	);
-	const [ observers, subscriber ] = useReducer( emitReducer, {} );
+	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const currentObservers = useShallowEqual( observers );
 	const { addErrorNotice, removeNotices } = useStoreNotices();
 	const { setValidationErrors } = useValidationContext();
@@ -114,16 +114,16 @@ export const AddToCartFormStateContextProvider = ( {
 	 */
 	const eventRegistration = useMemo(
 		() => ( {
-			onAddToCartAfterProcessingWithSuccess: emitterSubscribers(
-				subscriber
+			onAddToCartAfterProcessingWithSuccess: emitterObservers(
+				observerDispatch
 			).onAddToCartAfterProcessingWithSuccess,
-			onAddToCartAfterProcessingWithError: emitterSubscribers(
-				subscriber
+			onAddToCartAfterProcessingWithError: emitterObservers(
+				observerDispatch
 			).onAddToCartAfterProcessingWithError,
-			onAddToCartBeforeProcessing: emitterSubscribers( subscriber )
+			onAddToCartBeforeProcessing: emitterObservers( observerDispatch )
 				.onAddToCartBeforeProcessing,
 		} ),
-		[ subscriber ]
+		[ observerDispatch ]
 	);
 
 	/**

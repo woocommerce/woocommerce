@@ -21,7 +21,7 @@ const EMIT_TYPES = {
  * @param {Function} dispatcher A reducer dispatcher
  * @return {Object} An object with `onSuccess` and `onFail` emitter registration.
  */
-const emitterSubscribers = ( dispatcher ) => ( {
+const emitterObservers = ( dispatcher ) => ( {
 	onSuccess: emitterCallback( EMIT_TYPES.SHIPPING_RATES_SUCCESS, dispatcher ),
 	onFail: emitterCallback( EMIT_TYPES.SHIPPING_RATES_FAIL, dispatcher ),
 	onSelectSuccess: emitterCallback(
@@ -34,4 +34,4 @@ const emitterSubscribers = ( dispatcher ) => ( {
 	),
 } );
 
-export { EMIT_TYPES, emitterSubscribers, reducer, emitEvent };
+export { EMIT_TYPES, emitterObservers, reducer, emitEvent };

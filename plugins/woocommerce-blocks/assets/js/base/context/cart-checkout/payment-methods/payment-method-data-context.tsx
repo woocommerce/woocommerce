@@ -11,7 +11,6 @@ import {
 	useRef,
 	useMemo,
 } from '@wordpress/element';
-import { getSetting } from '@woocommerce/settings';
 import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
 
 /**
@@ -19,7 +18,7 @@ import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
  */
 import {
 	STATUS,
-	DEFAULT_PAYMENT_DATA,
+	DEFAULT_PAYMENT_DATA_CONTEXT_STATE,
 	DEFAULT_PAYMENT_METHOD_DATA,
 } from './constants';
 import reducer from './reducer';
@@ -42,20 +41,20 @@ import { useShippingDataContext } from '../shipping';
 import { useEditorContext } from '../../editor';
 import {
 	EMIT_TYPES,
-	emitterSubscribers,
+	useEventEmitters,
 	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
 import { useValidationContext } from '../../shared/validation';
 
-/**
- * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
- * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
- * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatchers} PaymentStatusDispatchers
- * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
- * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
- * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataResponse} ShippingDataResponse
- */
+import type {
+	PaymentStatusDispatchers,
+	PaymentMethods,
+	CustomerPaymentMethods,
+	PaymentMethodsDispatcherType,
+	PaymentMethodDataContextType,
+} from './types';
+import { getCustomerPaymentMethods } from './utils';
 
 const {
 	STARTED,
@@ -69,41 +68,8 @@ const {
 
 const PaymentMethodDataContext = createContext( DEFAULT_PAYMENT_METHOD_DATA );
 
-/**
- * @return {PaymentMethodDataContext} The data and functions exposed by the
- *                                    payment method context provider.
- */
-export const usePaymentMethodDataContext = () => {
+export const usePaymentMethodDataContext = (): PaymentMethodDataContextType => {
 	return useContext( PaymentMethodDataContext );
-};
-
-/**
- * Gets the payment methods saved for the current user after filtering out
- * disabled ones.
- *
- * @param {Object} availablePaymentMethods List of available payment methods.
- * @return {Object} Object containing the payment methods saved for a specific
- *                  user which are available.
- */
-const getCustomerPaymentMethods = ( availablePaymentMethods = {} ) => {
-	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
-	const paymentMethodKeys = Object.keys( customerPaymentMethods );
-	const enabledCustomerPaymentMethods = {};
-	paymentMethodKeys.forEach( ( type ) => {
-		const methods = customerPaymentMethods[ type ].filter(
-			( { method: { gateway } } ) => {
-				const isAvailable = gateway in availablePaymentMethods;
-				return (
-					isAvailable &&
-					availablePaymentMethods[ gateway ].supports?.showSavedCards
-				);
-			}
-		);
-		if ( methods.length ) {
-			enabledCustomerPaymentMethods[ type ] = methods;
-		}
-	} );
-	return enabledCustomerPaymentMethods;
 };
 
 /**
@@ -113,11 +79,14 @@ const getCustomerPaymentMethods = ( availablePaymentMethods = {} ) => {
  * This provides the api interface (via the context hook) for payment method
  * status and data.
  *
- * @param {Object} props                     Incoming props for provider
- * @param {Object} props.children            The wrapped components in this
- *                                           provider.
+ * @param {Object} props          Incoming props for provider
+ * @param {Object} props.children The wrapped components in this provider.
  */
-export const PaymentMethodDataProvider = ( { children } ) => {
+export const PaymentMethodDataProvider = ( {
+	children,
+}: {
+	children: React.ReactChildren;
+} ): JSX.Element => {
 	const { setBillingData } = useCustomerDataContext();
 	const {
 		isProcessing: checkoutIsProcessing,
@@ -125,25 +94,29 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		isCalculating: checkoutIsCalculating,
 		hasError: checkoutHasError,
 	} = useCheckoutContext();
+	const { isEditor, getPreviewData } = useEditorContext();
 	const {
 		isSuccessResponse,
 		isErrorResponse,
 		isFailResponse,
 		noticeContexts,
 	} = useEmitResponse();
-	// The active payment method - e.g. Stripe CC or BACS.
-	const [ activePaymentMethod, setActive ] = useState( '' );
-	// If a previously saved payment method is active, the token for that method.
-	// For example, a for a Stripe CC card saved to user account.
-	const [ activeSavedToken, setActiveSavedToken ] = useState( '' );
-	const [ observers, subscriber ] = useReducer( emitReducer, {} );
-	const currentObservers = useRef( observers );
 
-	const { isEditor, previewData } = useEditorContext();
+	const [ activePaymentMethod, setActive ] = useState( '' ); // The active payment method - e.g. Stripe CC or BACS.
+	const [ activeSavedToken, setActiveSavedToken ] = useState( '' ); // If a previously saved payment method is active, the token for that method. For example, a for a Stripe CC card saved to user account.
+	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const [ paymentData, dispatch ] = useReducer(
 		reducer,
-		DEFAULT_PAYMENT_DATA
+		DEFAULT_PAYMENT_DATA_CONTEXT_STATE
 	);
+	const currentObservers = useRef( observers );
+	const { onPaymentProcessing } = useEventEmitters( observerDispatch );
+
+	useEffect( () => {
+		// ensure observers are always current.
+		currentObservers.current = observers;
+	}, [ observers ] );
+
 	const setActivePaymentMethod = useCallback(
 		( paymentMethodSlug ) => {
 			setActive( paymentMethodSlug );
@@ -151,24 +124,39 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		},
 		[ setActive, dispatch ]
 	);
-	const paymentMethodsDispatcher = useCallback(
+
+	const paymentMethodsDispatcher = useCallback<
+		PaymentMethodsDispatcherType
+	>(
 		( paymentMethods ) => {
-			dispatch( setRegisteredPaymentMethods( paymentMethods ) );
+			dispatch(
+				setRegisteredPaymentMethods( paymentMethods as PaymentMethods )
+			);
 		},
 		[ dispatch ]
 	);
-	const expressPaymentMethodsDispatcher = useCallback(
+
+	const expressPaymentMethodsDispatcher = useCallback<
+		PaymentMethodsDispatcherType
+	>(
 		( paymentMethods ) => {
-			dispatch( setRegisteredExpressPaymentMethods( paymentMethods ) );
+			dispatch(
+				setRegisteredExpressPaymentMethods(
+					paymentMethods as PaymentMethods
+				)
+			);
 		},
 		[ dispatch ]
 	);
+
 	const paymentMethodsInitialized = usePaymentMethods(
 		paymentMethodsDispatcher
 	);
+
 	const expressPaymentMethodsInitialized = useExpressPaymentMethods(
 		expressPaymentMethodsDispatcher
 	);
+
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const { setShippingAddress } = useShippingDataContext();
@@ -179,9 +167,11 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		[ dispatch ]
 	);
 
-	const customerPaymentMethods = useMemo( () => {
-		if ( isEditor && previewData.previewSavedPaymentMethods ) {
-			return previewData.previewSavedPaymentMethods;
+	const customerPaymentMethods = useMemo( (): CustomerPaymentMethods => {
+		if ( isEditor ) {
+			return getPreviewData(
+				'previewSavedPaymentMethods'
+			) as CustomerPaymentMethods;
 		}
 		if (
 			! paymentMethodsInitialized ||
@@ -192,7 +182,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		return getCustomerPaymentMethods( paymentData.paymentMethods );
 	}, [
 		isEditor,
-		previewData.previewSavedPaymentMethods,
+		getPreviewData,
 		paymentMethodsInitialized,
 		paymentData.paymentMethods,
 	] );
@@ -213,14 +203,6 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		},
 		[ addErrorNotice, noticeContexts.EXPRESS_PAYMENTS, removeNotice ]
 	);
-	// ensure observers are always current.
-	useEffect( () => {
-		currentObservers.current = observers;
-	}, [ observers ] );
-	const onPaymentProcessing = useMemo(
-		() => emitterSubscribers( subscriber ).onPaymentProcessing,
-		[ subscriber ]
-	);
 
 	const currentStatus = useMemo(
 		() => ( {
@@ -237,53 +219,39 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		[ paymentData.currentStatus ]
 	);
 
-	/**
-	 * @type {PaymentStatusDispatch}
-	 */
 	const setPaymentStatus = useCallback(
-		() => ( {
+		(): PaymentStatusDispatchers => ( {
 			started: () => dispatch( statusOnly( STARTED ) ),
 			processing: () => dispatch( statusOnly( PROCESSING ) ),
 			completed: () => dispatch( statusOnly( COMPLETE ) ),
-			/**
-			 * @param {string} errorMessage An error message
-			 */
 			error: ( errorMessage ) => dispatch( error( errorMessage ) ),
-			/**
-			 * @param {string}           errorMessage      An error message
-			 * @param {Object}           paymentMethodData Arbitrary payment method data to
-			 *                                             accompany the checkout submission.
-			 * @param {BillingData|null} [billingData]     The billing data accompanying the
-			 *                                             payment method.
-			 */
-			failed: ( errorMessage, paymentMethodData, billingData = null ) => {
+			failed: (
+				errorMessage,
+				paymentMethodData,
+				billingData = undefined
+			) => {
 				if ( billingData ) {
 					setBillingData( billingData );
 				}
 				dispatch(
 					failed( {
-						errorMessage,
-						paymentMethodData,
+						errorMessage: errorMessage || '',
+						paymentMethodData: paymentMethodData || {},
 					} )
 				);
 			},
-			/**
-			 * @param {Object} [paymentMethodData] Arbitrary payment method data to
-			 * accompany the checkout.
-			 * @param {BillingData|null} [billingData] The billing data accompanying the
-			 * payment method.
-			 * @param {ShippingDataResponse|null} [shippingData] The shipping data accompanying the
-			 * payment method.
-			 */
 			success: (
 				paymentMethodData = {},
-				billingData = null,
-				shippingData = null
+				billingData = undefined,
+				shippingData = undefined
 			) => {
 				if ( billingData ) {
 					setBillingData( billingData );
 				}
-				if ( shippingData !== null && shippingData?.address ) {
+				if (
+					typeof shippingData !== undefined &&
+					shippingData?.address
+				) {
 					setShippingAddress( shippingData.address );
 				}
 				dispatch(
@@ -296,8 +264,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		[ dispatch, setBillingData, setShippingAddress ]
 	);
 
-	// flip payment to processing if checkout processing is complete, there are
-	// no errors, and payment status is started.
+	// flip payment to processing if checkout processing is complete, there are no errors, and payment status is started.
 	useEffect( () => {
 		if (
 			checkoutIsProcessing &&
@@ -315,17 +282,14 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		setPaymentStatus,
 	] );
 
-	// When checkout is returned to idle, set payment status to pristine
-	// but only if payment status is already not finished.
+	// When checkout is returned to idle, set payment status to pristine but only if payment status is already not finished.
 	useEffect( () => {
 		if ( checkoutIsIdle && ! currentStatus.isSuccessful ) {
 			dispatch( statusOnly( PRISTINE ) );
 		}
 	}, [ checkoutIsIdle, currentStatus.isSuccessful ] );
 
-	// if checkout has an error and payment is not being made with a saved token
-	// and payment status is success, then let's sync payment status back to
-	// pristine.
+	// if checkout has an error and payment is not being made with a saved token and payment status is success, then let's sync payment status back to pristine.
 	useEffect( () => {
 		if (
 			checkoutHasError &&
@@ -438,10 +402,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		addErrorNotice,
 	] );
 
-	/**
-	 * @type {PaymentMethodDataContext}
-	 */
-	const paymentContextData = {
+	const paymentContextData: PaymentMethodDataContextType = {
 		setPaymentStatus,
 		currentStatus,
 		paymentStatuses: STATUS,
@@ -461,6 +422,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		shouldSavePayment: paymentData.shouldSavePaymentMethod,
 		setShouldSavePayment,
 	};
+
 	return (
 		<PaymentMethodDataContext.Provider value={ paymentContextData }>
 			{ children }
