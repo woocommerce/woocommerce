@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Dev: Use wc filter to get status tabs for tools category #6525
 - Tweak: Remove mobile activity panel toggle #6539
 - Dev: Add nav header component tests #6509
 - Add: Add legacy report items to new navigation #6507

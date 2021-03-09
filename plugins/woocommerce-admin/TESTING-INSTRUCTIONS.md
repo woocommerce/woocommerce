@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Use wc filter to get status tabs for tools category #6525
+
+1. Register a new tab via the filter.
+```
+add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
+	$tabs['my-tools-page'] = __( 'My Tools Page', 'your-text-domain' );
+	return $tabs;
+} );
+```
+2. Enable the new navigation.
+3. Make sure the menu item for the registered tab is shown under `Tools`.
+
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532
 
 #### Test incompatible WooCommerce version
