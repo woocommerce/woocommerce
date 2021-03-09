@@ -122,7 +122,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 
 		const setup = {
 			name: 'setup',
-			title: __( 'Store Setup', 'woocommerce-admin' ),
+			title: __( 'Finish setup', 'woocommerce-admin' ),
 			icon: <SetupProgress />,
 			onClick: () => {
 				const currentLocation = window.location.href;

@@ -144,7 +144,7 @@ describe( 'Activity Panel', () => {
 		expect( screen.getByText( '[DisplayOptions]' ) ).toBeDefined();
 	} );
 
-	it( 'should only render the store setup link when TaskList is not complete', () => {
+	it( 'should only render the finish setup link when TaskList is not complete', () => {
 		const { queryByText, rerender } = render(
 			<ActivityPanel
 				query={ {
@@ -153,7 +153,7 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Store Setup' ) ).toBeDefined();
+		expect( queryByText( 'Finish setup' ) ).toBeDefined();
 
 		useSelect.mockImplementation( () => ( {
 			requestingTaskListOptions: false,
@@ -169,10 +169,10 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Store Setup' ) ).toBeNull();
+		expect( queryByText( 'Finish setup' ) ).toBeNull();
 	} );
 
-	it( 'should not render the store setup link when on the home screen and TaskList is not complete', () => {
+	it( 'should not render the finish setup link when on the home screen and TaskList is not complete', () => {
 		const { queryByText } = render(
 			<ActivityPanel
 				query={ {
@@ -182,18 +182,18 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Store Setup' ) ).toBeNull();
+		expect( queryByText( 'Finish setup' ) ).toBeNull();
 	} );
 
-	it( 'should render the store setup link when on embedded pages and TaskList is not complete', () => {
+	it( 'should render the finish setup link when on embedded pages and TaskList is not complete', () => {
 		const { getByText } = render(
 			<ActivityPanel isEmbedded query={ {} } />
 		);
 
-		expect( getByText( 'Store Setup' ) ).toBeInTheDocument();
+		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should not render the store setup link when a user does not have capabilties', () => {
+	it( 'should not render the finish setup link when a user does not have capabilties', () => {
 		useUser.mockImplementation( () => ( {
 			currentUserCan: () => false,
 		} ) );
@@ -206,7 +206,7 @@ describe( 'Activity Panel', () => {
 			/>
 		);
 
-		expect( queryByText( 'Store Setup' ) ).toBeDefined();
+		expect( queryByText( 'Finish setup' ) ).toBeDefined();
 	} );
 
 	describe( 'help panel tooltip', () => {
