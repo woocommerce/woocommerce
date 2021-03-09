@@ -10,6 +10,7 @@ import {
 	UpdatesVariableProducts,
 	baseProductURL,
 	buildProductURL,
+	deleteProductURL,
 } from '../../../models';
 import {
 	createProductTransformer,
@@ -67,6 +68,6 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 		restCreate< VariableProductRepositoryParams >( baseProductURL, VariableProduct, httpClient, transformer ),
 		restRead< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
 		restUpdate< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
-		restDelete< VariableProductRepositoryParams >( buildProductURL, httpClient ),
+		restDelete< VariableProductRepositoryParams >( deleteProductURL, httpClient ),
 	);
 }

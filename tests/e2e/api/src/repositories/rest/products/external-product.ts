@@ -3,6 +3,7 @@ import { ModelRepository } from '../../../framework';
 import {
 	baseProductURL,
 	buildProductURL,
+	deleteProductURL,
 	ExternalProduct,
 	CreatesExternalProducts,
 	DeletesExternalProducts,
@@ -61,6 +62,6 @@ export function externalProductRESTRepository( httpClient: HTTPClient ): ListsEx
 		restCreate< ExternalProductRepositoryParams >( baseProductURL, ExternalProduct, httpClient, transformer ),
 		restRead< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
 		restUpdate< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
-		restDelete< ExternalProductRepositoryParams >( buildProductURL, httpClient ),
+		restDelete< ExternalProductRepositoryParams >( deleteProductURL, httpClient ),
 	);
 }
