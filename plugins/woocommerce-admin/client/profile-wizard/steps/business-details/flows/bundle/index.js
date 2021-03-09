@@ -68,14 +68,18 @@ class BusinessDetails extends Component {
 				? businessExtensions.includes(
 						'creative-mail-by-constant-contact'
 				  )
-				: true,
+				: false,
 			'kliken-marketing-for-google': businessExtensions
 				? businessExtensions.includes( 'kliken-marketing-for-google' )
+				: true,
+			mailpoet: businessExtensions
+				? businessExtensions.includes( 'mailpoet' )
 				: true,
 			install_extensions: true,
 		};
 
 		this.extensions = [
+			'mailpoet',
 			'facebook-for-woocommerce',
 			'mailchimp-for-woocommerce',
 			'kliken-marketing-for-google',
@@ -137,6 +141,7 @@ class BusinessDetails extends Component {
 			install_facebook: businessExtensions.includes(
 				'facebook-for-woocommerce'
 			),
+			install_mailpoet: businessExtensions.includes( 'mailpoet' ),
 			install_mailchimp: businessExtensions.includes(
 				'mailchimp-for-woocommerce'
 			),

@@ -8,6 +8,7 @@
 2. Navigate to Analytics->Reports.
 3. Note that all the reports exist and navigating to those reports works as expected.
 4. Check that report menu items are marked active when navigating to that page.
+
 ### Add navigation container tests #6464
 
 1. On a new site, finish the store setup wizard, but don't hide the task list.
@@ -23,6 +24,23 @@
 3. A new tab should open and the URL should be the site URL.
 4. Navigate to other tasks such as "Store Details" or "Add products" .
 5. The "Preview Site" should not be shown on the other tasks.
+
+### Store profiler - Added MailPoet to Business Details step  #6503
+
+- Create a brand new site and go to the OBW.
+- In the first OBW step (`Store Details`) set a Country / Region other than `US | BR | FR | ID | GB | DE | VN | CA | PL | MY | AU | NG | GR | BE | PT | DK | SE | JP` (e.g.: Uruguay).
+- Continue with the profiler.
+- In the 4th step (`Business Details`) choose any of the options in both selectors.
+- Verify that the displayed extensions are:
+```
+Mailpoet
+Facebook
+Google Ads
+Mailchimp
+Creative Mail
+```
+(In that order)
+- Verify that the Creative Mail option is toggled off by default.
 
 ### Fix double prefixing of navigation URLs #6460
 

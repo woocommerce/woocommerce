@@ -765,6 +765,7 @@ class Onboarding {
 				'woo-razorpay'                        => 'woo-razorpay/woo-razorpay.php',
 				'mollie-payments-for-woocommerce'     => 'mollie-payments-for-woocommerce/mollie-payments-for-woocommerce.php',
 				'payu-india'                          => 'payu-india/index.php',
+				'mailpoet'                            => 'mailpoet/mailpoet.php',
 			)
 		);
 		return array_merge( $plugins, $onboarding_plugins );
