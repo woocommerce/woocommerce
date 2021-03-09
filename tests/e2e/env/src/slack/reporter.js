@@ -9,8 +9,8 @@ const {
 	TRAVIS_PULL_REQUEST_BRANCH,
 	TRAVIS_COMMIT,
 	TRAVIS_BUILD_WEB_URL,
-	SLACK_TOKEN,
-	SLACK_CHANNEL,
+	E2E_SLACK_TOKEN,
+	E2E_SLACK_CHANNEL,
 	WC_E2E_SCREENSHOTS,
 } = process.env;
 
@@ -23,7 +23,7 @@ let web;
  */
 const initializeWeb = () => {
 	if ( ! web ) {
-		web = new WebClient( SLACK_TOKEN );
+		web = new WebClient( E2E_SLACK_TOKEN );
 	}
 	return web;
 };
@@ -33,7 +33,7 @@ const initializeWeb = () => {
  * @returns {Object|boolean}
  */
 const initializeSlack = () => {
-	if ( ! WC_E2E_SCREENSHOTS || ! SLACK_TOKEN ) {
+	if ( ! WC_E2E_SCREENSHOTS || ! E2E_SLACK_TOKEN ) {
 		return false;
 	}
 	if ( ! GITHUB_ACTIONS && ! TRAVIS_PULL_REQUEST_BRANCH ) {
@@ -77,7 +77,7 @@ export async function sendFailedTestMessageToSlack( testName ) {
             The commit this build is testing is *${ pr.commit }*. \n
             The name of the test that failed: *${ testName }*. \n
             See screenshot of the failed test below. *Build log* could be found here: ${ pr.webUrl }`,
-			channel: SLACK_CHANNEL,
+			channel: E2E_SLACK_CHANNEL,
 		});
 	} catch ( error ) {
 		// Check the code property and log the response
@@ -109,7 +109,7 @@ export async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) 
 		await web.files.upload({
 			filename,
 			file: createReadStream( screenshotOfFailedTest ),
-			channels: SLACK_CHANNEL,
+			channels: E2E_SLACK_CHANNEL,
 		});
 	} catch ( error ) {
 		// Check the code property and log the response
