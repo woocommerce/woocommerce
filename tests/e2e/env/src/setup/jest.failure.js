@@ -14,7 +14,6 @@ const { getAppRoot } = require( '../../utils' );
  *
  * See: https://github.com/smooth-code/jest-puppeteer/issues/131#issuecomment-469439666
  */
-let currentBlock;
 
 /**
  * We need to reference the original version of Jest.
@@ -28,7 +27,6 @@ const originalIt = global.it;
  */
 global.describe = (() => {
 	const describe = ( blockName, callback ) => {
-		currentBlock = blockName;
 
 		try {
 			originalDescribe( blockName, callback );
@@ -61,7 +59,7 @@ global.describe = (() => {
  */
 global.it = (() => {
 	const test = async ( testName, callback ) => {
-		const testCallback = async () => screenshotTest( currentBlock, testName, callback );
+		const testCallback = async () => screenshotTest( testName, callback );
 		return originalIt( testName, testCallback );
 	};
 	const only = ( testName, callback ) => {
@@ -86,11 +84,11 @@ global.it = (() => {
  * @param callback
  * @returns {Promise<void>}
  */
-const screenshotTest = async ( blockName, testName, callback ) => {
+const screenshotTest = async ( testName, callback ) => {
 	try {
 		await callback();
 	} catch ( e ) {
-		const testTitle = `${ blockName } - ${ testName }`.replace( /\.$/, '' );
+		const testTitle = testName.replace( /\.$/, '' );
 		const appPath = getAppRoot();
 		const savePath = path.resolve( appPath, 'tests/e2e/screenshots' );
 		const filePath = path.join(
