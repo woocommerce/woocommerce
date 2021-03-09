@@ -189,7 +189,7 @@ if ( wc_tax_enabled() ) {
 					<td class="label"><?php echo esc_html( $tax_total->label ); ?>:</td>
 					<td width="1%"></td>
 					<td class="total">
-						<?php echo wc_price( $tax_total->amount, array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo wc_price( wc_round_tax_total( $tax_total->amount ), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>
