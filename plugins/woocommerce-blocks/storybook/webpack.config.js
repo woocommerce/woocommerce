@@ -12,7 +12,7 @@ const {
 	getMainConfig,
 	getStylingConfig,
 } = require( '../bin/webpack-configs.js' );
-const tsConfig = require( '../tsconfig.json' );
+const tsConfig = require( '../tsconfig.base.json' );
 
 const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
 	( acc, key ) => {
