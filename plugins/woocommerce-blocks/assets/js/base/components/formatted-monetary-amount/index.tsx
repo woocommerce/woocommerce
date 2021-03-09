@@ -1,21 +1,33 @@
 /**
  * External dependencies
  */
-import NumberFormat from 'react-number-format';
+import NumberFormat, {
+	NumberFormatValues,
+	NumberFormatProps,
+} from 'react-number-format';
 import classNames from 'classnames';
+import type { Currency } from '@woocommerce/price-format';
+import type { ReactElement } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+interface FormattedMonetaryAmountProps {
+	className?: string;
+	displayType?: NumberFormatProps[ 'displayType' ];
+	value: number; // Value of money amount.
+	currency: Currency | Record< string, never >; // Currency configuration object.
+	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
+}
+
 /**
  * Formats currency data into the expected format for NumberFormat.
- *
- * @param {Object} currency Currency data.
- * @return {Object} Formatted props for NumberFormat.
  */
-const currencyToNumberFormat = ( currency ) => {
+const currencyToNumberFormat = (
+	currency: FormattedMonetaryAmountProps[ 'currency' ]
+) => {
 	return {
 		thousandSeparator: currency.thousandSeparator,
 		decimalSeparator: currency.decimalSeparator,
@@ -28,26 +40,18 @@ const currencyToNumberFormat = ( currency ) => {
 };
 
 /**
- * Formatted price component.
+ * FormattedMonetaryAmount component.
  *
  * Takes a price and returns a formatted price using the NumberFormat component.
- *
- * @param {Object} props Component props.
- * @param {string=} props.className CSS class used.
- * @param {number} props.value Value of money amount.
- * @param {Object} props.currency Currency configuration object.
- * @param {function():any=} props.onValueChange Function to call when value changes.
- * @param {string=} props.displayType Display type.
- * @param {Object=} props.props Rest of props passed into component.
  */
 const FormattedMonetaryAmount = ( {
-	className = '',
+	className,
 	value,
 	currency,
-	onValueChange = () => {},
+	onValueChange,
 	displayType = 'text',
 	...props
-} ) => {
+}: FormattedMonetaryAmountProps ): ReactElement | null => {
 	if ( ! Number.isFinite( value ) ) {
 		return null;
 	}
@@ -64,7 +68,6 @@ const FormattedMonetaryAmount = ( {
 		className
 	);
 	const numberFormatProps = {
-		displayType,
 		...props,
 		...currencyToNumberFormat( currency ),
 		value: undefined,
@@ -74,15 +77,20 @@ const FormattedMonetaryAmount = ( {
 
 	// Wrapper for NumberFormat onValueChange which handles subunit conversion.
 	const onValueChangeWrapper = onValueChange
-		? ( values ) => {
-				const minorUnitValue = values.value * 10 ** currency.minorUnit;
+		? ( values: NumberFormatValues ) => {
+				const minorUnitValue =
+					( ( values.value as unknown ) as number ) *
+					10 ** currency.minorUnit;
 				onValueChange( minorUnitValue );
 		  }
-		: () => {};
+		: () => {
+				/* not used */
+		  };
 
 	return (
 		<NumberFormat
 			className={ classes }
+			displayType={ displayType }
 			{ ...numberFormatProps }
 			value={ priceValue }
 			onValueChange={ onValueChangeWrapper }
