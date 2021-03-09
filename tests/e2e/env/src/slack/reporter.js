@@ -73,11 +73,12 @@ export async function sendFailedTestMessageToSlack( testName ) {
 	try {
 		// For details, see: https://api.slack.com/methods/chat.postMessage
 		await web.chat.postMessage({
+			channel: E2E_SLACK_CHANNEL,
+			token: E2E_SLACK_TOKEN,
 			text: `Test failed on *${ pr.branch }* branch. \n
             The commit this build is testing is *${ pr.commit }*. \n
             The name of the test that failed: *${ testName }*. \n
             See screenshot of the failed test below. *Build log* could be found here: ${ pr.webUrl }`,
-			channel: E2E_SLACK_CHANNEL,
 		});
 	} catch ( error ) {
 		// Check the code property and log the response
@@ -107,9 +108,10 @@ export async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) 
 	try {
 		// For details, see: https://api.slack.com/methods/files.upload
 		await web.files.upload({
+			channels: E2E_SLACK_CHANNEL,
+			token: E2E_SLACK_TOKEN,
 			filename,
 			file: createReadStream( screenshotOfFailedTest ),
-			channels: E2E_SLACK_CHANNEL,
 		});
 	} catch ( error ) {
 		// Check the code property and log the response
