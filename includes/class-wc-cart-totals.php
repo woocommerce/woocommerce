@@ -862,7 +862,10 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_totals() {
 		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
-		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
+		$items_tax = array_sum( $this->get_merged_taxes( false, array( 'items' ) ) );
+		// Shipping and fee taxes are rounded because they were entered excluding taxes.
+		$shipping_and_fee_taxes = NumberUtil::round( array_sum( $this->get_merged_taxes( false, array( 'fees', 'shipping' ) ) ), wc_get_price_decimals() );
+		$this->cart->set_total_tax( $items_tax + $shipping_and_fee_taxes );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
 		if ( has_action( 'woocommerce_calculate_totals' ) ) {
