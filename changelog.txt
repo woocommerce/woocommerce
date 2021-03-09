@@ -4,7 +4,7 @@
 
 **WooCommerce**
 
-* Update - WooCommerce Admin package 2.0.2. #29111
+* Update - WooCommerce Admin package 2.0.2. #29229
 * Update - WooCommerce Blocks package 4.4.3. #29016
 * Fix - Error in notice message of reports when WC Admin is disabled via a filter. #29095
 * Fix - Error when calculating orders with tax option rounding at subtotal level in PHP 8. #29089
@@ -30,6 +30,7 @@
 * Dev - Added orders count by payment method to Tracker data and replaced direct DB calls with CRUD. #28584
 * Dev - WC_Tax::get_tax_rate_classes() is now public. #27671
 * Dev - "Store management insights" option now is turned off by default. #29105
+* Dev - Update the woo widget stock links to the new analytics page. #29093
 * Tweak - Updated WooCommerce logo color. #29054
 * Tweak - Correctly aligns content in the checkout with Twenty Twenty-One. #28951
 * Tweak - Use assigned variable for $post_thumbnail_id instead of calling function more than once. #28919
