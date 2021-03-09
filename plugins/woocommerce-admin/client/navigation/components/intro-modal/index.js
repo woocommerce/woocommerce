@@ -18,42 +18,38 @@ import NavInto2 from './images/nav-intro-2.png';
 import NavInto3 from './images/nav-intro-3.png';
 import { WELCOME_MODAL_DISMISSED_OPTION_NAME } from '../../../homescreen/constants';
 
-const INTRO_MODAL_DISMISSED_OPTION_NAME =
+export const INTRO_MODAL_DISMISSED_OPTION_NAME =
 	'woocommerce_navigation_intro_modal_dismissed';
-const TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 export const IntroModal = () => {
 	const [ isOpen, setOpen ] = useState( true );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const {
-		allowTracking,
-		isDismissed,
-		isResolving,
-		isWelcomeModalShown,
-	} = useSelect( ( select ) => {
-		const { getOption, isResolving: isOptionResolving } = select(
-			OPTIONS_STORE_NAME
-		);
-		const dismissedOption = getOption( INTRO_MODAL_DISMISSED_OPTION_NAME );
+	const { isDismissed, isResolving, isWelcomeModalShown } = useSelect(
+		( select ) => {
+			const { getOption, isResolving: isOptionResolving } = select(
+				OPTIONS_STORE_NAME
+			);
+			const dismissedOption = getOption(
+				INTRO_MODAL_DISMISSED_OPTION_NAME
+			);
 
-		return {
-			allowTracking: getOption( TRACKING_OPTION_NAME ) === 'yes',
-			isDismissed: dismissedOption === 'yes',
-			isWelcomeModalShown:
-				getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'yes',
-			isResolving:
-				typeof dismissedOption === 'undefined' ||
-				isOptionResolving( 'getOption', [
-					INTRO_MODAL_DISMISSED_OPTION_NAME,
-				] ) ||
-				isOptionResolving( 'getOption', [
-					WELCOME_MODAL_DISMISSED_OPTION_NAME,
-				] ) ||
-				isOptionResolving( 'getOption', [ TRACKING_OPTION_NAME ] ),
-		};
-	} );
+			return {
+				isDismissed: dismissedOption === 'yes',
+				isWelcomeModalShown:
+					getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'yes',
+				isResolving:
+					typeof dismissedOption === 'undefined' ||
+					isOptionResolving( 'getOption', [
+						INTRO_MODAL_DISMISSED_OPTION_NAME,
+					] ) ||
+					isOptionResolving( 'getOption', [
+						WELCOME_MODAL_DISMISSED_OPTION_NAME,
+					] ),
+			};
+		}
+	);
 
 	const dismissModal = () => {
 		updateOptions( {
@@ -66,18 +62,12 @@ export const IntroModal = () => {
 	// Dismiss the modal when the welcome modal is shown.
 	// It is likely in this case that the navigation is on by default.
 	useEffect( () => {
-		if ( ! isResolving && isWelcomeModalShown ) {
+		if ( ! isResolving && isWelcomeModalShown && ! isDismissed ) {
 			dismissModal();
 		}
-	}, [ isResolving, isWelcomeModalShown ] );
+	}, [ isDismissed, isResolving, isWelcomeModalShown ] );
 
-	if (
-		! isOpen ||
-		isDismissed ||
-		isResolving ||
-		! allowTracking ||
-		isWelcomeModalShown
-	) {
+	if ( ! isOpen || isDismissed || isResolving || isWelcomeModalShown ) {
 		return null;
 	}
 
