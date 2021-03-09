@@ -15,7 +15,7 @@ import './style.scss';
  * Component that renders a block title.
  *
  * @param {Object} props Incoming props for the component.
- * @param {React.ReactChildren} [props.children] Children elements this component wraps.
+ * @param {React.ReactNode} [props.children] Children elements this component wraps.
  * @param {string} [props.className] CSS class used.
  * @param {string} props.headingLevel Heading level for title.
  * @param {Object} [props.props] Rest of props passed through to component.

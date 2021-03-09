@@ -37,7 +37,6 @@ const TotalsItemValue = ( {
 		<FormattedMonetaryAmount
 			className="wc-block-components-totals-item__value"
 			currency={ currency || {} }
-			displayType="text"
 			value={ value as number }
 		/>
 	) : null;

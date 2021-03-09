@@ -1,16 +1,22 @@
+/**
+ * External dependencies
+ */
+import type { ReactElement } from 'react';
+import type { PackageRateOption } from '@woocommerce/type-defs/shipping';
+
 const OptionLayout = ( {
 	label,
 	secondaryLabel,
 	description,
 	secondaryDescription,
 	id,
-} ) => {
+}: Partial< PackageRateOption > ): ReactElement => {
 	return (
 		<div className="wc-block-components-radio-control__option-layout">
 			<div className="wc-block-components-radio-control__label-group">
 				{ label && (
 					<span
-						id={ id ? `${ id }__label` : null }
+						id={ id && `${ id }__label` }
 						className="wc-block-components-radio-control__label"
 					>
 						{ label }
@@ -18,7 +24,7 @@ const OptionLayout = ( {
 				) }
 				{ secondaryLabel && (
 					<span
-						id={ id ? `${ id }__secondary-label` : null }
+						id={ id && `${ id }__secondary-label` }
 						className="wc-block-components-radio-control__secondary-label"
 					>
 						{ secondaryLabel }
@@ -28,7 +34,7 @@ const OptionLayout = ( {
 			<div className="wc-block-components-radio-control__description-group">
 				{ description && (
 					<span
-						id={ id ? `${ id }__description` : null }
+						id={ id && `${ id }__description` }
 						className="wc-block-components-radio-control__description"
 					>
 						{ description }
@@ -36,7 +42,7 @@ const OptionLayout = ( {
 				) }
 				{ secondaryDescription && (
 					<span
-						id={ id ? `${ id }__secondary-description` : null }
+						id={ id && `${ id }__secondary-description` }
 						className="wc-block-components-radio-control__secondary-description"
 					>
 						{ secondaryDescription }

@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import Label from '@woocommerce/base-components/label';
 import Title from '@woocommerce/base-components/title';
 import { useSelectShippingRate } from '@woocommerce/base-hooks';
+import type { ReactElement } from 'react';
+import type { Rate, PackageRateOption } from '@woocommerce/type-defs/shipping';
 
 /**
  * Internal dependencies
@@ -15,6 +16,40 @@ import { useSelectShippingRate } from '@woocommerce/base-hooks';
 import Panel from '../../panel';
 import PackageRates from './package-rates';
 import './style.scss';
+
+interface PackageItem {
+	name: string;
+	key: string;
+	quantity: number;
+}
+
+interface Destination {
+	// eslint-disable-next-line camelcase
+	address_1: string;
+	// eslint-disable-next-line camelcase
+	address_2: string;
+	city: string;
+	state: string;
+	postcode: string;
+	country: string;
+}
+
+interface PackageProps {
+	packageId: string;
+	renderOption: ( option: Rate ) => PackageRateOption;
+	collapse: boolean;
+	packageData: {
+		destination: Destination;
+		name: string;
+		// eslint-disable-next-line camelcase
+		shipping_rates: Rate[];
+		items: PackageItem[];
+	};
+	className?: string;
+	collapsible?: boolean;
+	noResultsMessage: ReactElement;
+	showItems: boolean;
+}
 
 const Package = ( {
 	packageId,
@@ -25,7 +60,7 @@ const Package = ( {
 	collapsible = false,
 	collapse = false,
 	showItems = false,
-} ) => {
+}: PackageProps ): ReactElement => {
 	const { selectShippingRate, selectedShippingRate } = useSelectShippingRate(
 		packageId,
 		packageData.shipping_rates
@@ -108,24 +143,6 @@ const Package = ( {
 			{ body }
 		</div>
 	);
-};
-
-Package.propTypes = {
-	renderOption: PropTypes.func,
-	packageData: PropTypes.shape( {
-		shipping_rates: PropTypes.arrayOf( PropTypes.object ).isRequired,
-		items: PropTypes.arrayOf(
-			PropTypes.shape( {
-				name: PropTypes.string.isRequired,
-				key: PropTypes.string.isRequired,
-				quantity: PropTypes.number.isRequired,
-			} ).isRequired
-		).isRequired,
-	} ).isRequired,
-	className: PropTypes.string,
-	collapsible: PropTypes.bool,
-	noResultsMessage: PropTypes.node,
-	showItems: PropTypes.bool,
 };
 
 export default Package;

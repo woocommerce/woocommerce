@@ -3,6 +3,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { Rate } from '@woocommerce/type-defs/shipping';
 
 /**
  * Internal dependencies
@@ -16,7 +17,7 @@ import { useSelectShippingRates } from './use-select-shipping-rates';
  * @return {string} Selected rate id.
  */
 // This will find the selected rate ID in an array of shipping rates.
-const deriveSelectedRateId = ( shippingRates ) =>
+const deriveSelectedRateId = ( shippingRates: Rate[] ) =>
 	shippingRates.find( ( rate ) => rate.selected )?.rate_id;
 
 /**
@@ -30,7 +31,14 @@ const deriveSelectedRateId = ( shippingRates ) =>
  * 		- selectedShippingRate: The selected rate id.
  *		- isSelectingRate: True when rates are being resolved to the API.
  */
-export const useSelectShippingRate = ( packageId, shippingRates ) => {
+export const useSelectShippingRate = (
+	packageId: string,
+	shippingRates: Rate[]
+): {
+	selectShippingRate: ( newShippingRateId: string ) => unknown;
+	selectedShippingRate: string | undefined;
+	isSelectingRate: boolean;
+} => {
 	// Rates are selected via the shipping data context provider.
 	const { selectShippingRate, isSelectingRate } = useSelectShippingRates();
 
@@ -51,9 +59,9 @@ export const useSelectShippingRate = ( packageId, shippingRates ) => {
 
 	// Sets a rate for a package in state (so changes are shown right away to consumers of the hook) and in the stores.
 	const setPackageRateId = useCallback(
-		( newShippingRate ) => {
-			setSelectedShippingRate( newShippingRate );
-			selectShippingRate( newShippingRate, packageId );
+		( newShippingRateId ) => {
+			setSelectedShippingRate( newShippingRateId );
+			selectShippingRate( newShippingRateId, packageId );
 		},
 		[ packageId, selectShippingRate ]
 	);
