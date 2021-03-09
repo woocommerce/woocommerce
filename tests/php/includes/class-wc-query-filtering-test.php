@@ -33,7 +33,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		$wp_post_types['product']->has_archive = true;
 	}
 
-
 	/**
 	 * Runs after all the tests in the class.
 	 */
@@ -44,7 +43,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
-
 
 	/**
 	 * Runs after each test.
@@ -78,7 +76,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 
 		WC_Query::reset_chosen_attributes();
 	}
-
 
 	/**
 	 * Creates a simple product.
@@ -122,14 +119,13 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		}
 
 		foreach ( $attributes as $name => $terms ) {
-			$this->compose_lookup_table_insert( $product['id'], $product['id'], $name, $terms, $lookup_insert_clauses, $lookup_insert_values, $in_stock );
+			$this->compose_lookup_table_insert( $product['id'], $product['id'], $name, $terms, $lookup_insert_clauses, $lookup_insert_values, $in_stock, false );
 		}
 
 		$this->run_lookup_table_insert( $lookup_insert_clauses, $lookup_insert_values );
 
 		return $product;
 	}
-
 
 	/**
 	 * Creates a variable product.
@@ -262,7 +258,7 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 			);
 
 			foreach ( $data['non_variation_attributes'] as $name => $terms ) {
-				$this->compose_lookup_table_insert( $product['id'], $product['id'], $name, $terms, $lookup_insert_clauses, $lookup_insert_values, $main_product_in_stock );
+				$this->compose_lookup_table_insert( $product['id'], $product['id'], $name, $terms, $lookup_insert_clauses, $lookup_insert_values, $main_product_in_stock, false );
 			}
 		}
 
@@ -276,7 +272,7 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 				} else {
 					$attribute_values = array( $attribute_value );
 				}
-				$this->compose_lookup_table_insert( $product['id'], $variation_id, $attribute_name, $attribute_values, $lookup_insert_clauses, $lookup_insert_values, $variation_data['in_stock'] );
+				$this->compose_lookup_table_insert( $variation_id, $product['id'], $attribute_name, $attribute_values, $lookup_insert_clauses, $lookup_insert_values, $variation_data['in_stock'], true );
 			}
 
 			next( $variation_ids );
@@ -290,7 +286,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		);
 	}
 
-
 	/**
 	 * Compose the values part of a query to insert data in the lookup table.
 	 *
@@ -301,8 +296,9 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	 * @param array  $insert_query_parts Array of strings to add the new query parts to.
 	 * @param array  $insert_query_values Array of values to add the new query values to.
 	 * @param bool   $in_stock True if the product/variation is in stock, false otherwise.
+	 * @param bool   $is_variation True if it's an attribute that defines a variation, false otherwise.
 	 */
-	private function compose_lookup_table_insert( $product_id, $product_or_parent_id, $attribute_name, $terms, &$insert_query_parts, &$insert_query_values, $in_stock ) {
+	private function compose_lookup_table_insert( $product_id, $product_or_parent_id, $attribute_name, $terms, &$insert_query_parts, &$insert_query_values, $in_stock, $is_variation ) {
 		$taxonomy_name     = wc_attribute_taxonomy_name( $attribute_name );
 		$term_objects      = get_terms( $taxonomy_name );
 		$term_ids_by_names = wp_list_pluck( $term_objects, 'term_id', 'name' );
@@ -313,11 +309,10 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 			$insert_query_values[] = $product_or_parent_id;
 			$insert_query_values[] = wc_attribute_taxonomy_name( $attribute_name );
 			$insert_query_values[] = $term_ids_by_names[ $term ];
-			$insert_query_values[] = 0;
+			$insert_query_values[] = $is_variation ? 1 : 0;
 			$insert_query_values[] = $in_stock ? 1 : 0;
 		}
 	}
-
 
 	/**
 	 * Runs an insert clause in the lookup table.
@@ -342,7 +337,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
-
 	/**
 	 * Create a product attribute.
 	 *
@@ -361,7 +355,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		}
 	}
 
-
 	/**
 	 * Set the "hide out of stock products" option.
 	 *
@@ -370,7 +363,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	private function set_hide_out_of_stock_items( $hide ) {
 		update_option( 'woocommerce_hide_out_of_stock_items', $hide ? 'yes' : 'no' );
 	}
-
 
 	/**
 	 * Simulate a product query.
@@ -438,7 +430,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		}
 	}
 
-
 	/**
 	 * @testdox The product query shows a simple product only if it's in stock OR we don't have "hide out of stock items" set.
 	 *
@@ -467,7 +458,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 	}
-
 
 	/**
 	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for non-variation-defining attributes).
@@ -525,7 +515,6 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		}
 	}
 
-
 	/**
 	 * @testdox The product query shows a variable product only if at least one of the variations is in stock OR we don't have "hide out of stock items" set.
 	 *
@@ -576,5 +565,228 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+	}
+
+	/**
+	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes).
+	 *
+	 * Note that the difference with the simple product or the non-variation attributes case is that "and" is equivalent to "or".
+	 *
+	 * @testWith [[], "and", true]
+	 *           [[], "or", true]
+	 *           [["Blue"], "and", true]
+	 *           [["Blue"], "or", true]
+	 *           [["Blue", "Red"], "and", true]
+	 *           [["Blue", "Red"], "or", true]
+	 *           [["Green"], "and", false]
+	 *           [["Green"], "or", false]
+	 *           [["Blue", "Green"], "and", true]
+	 *
+	 * @param array  $attributes The color attribute names that will be included in the query.
+	 * @param string $filter_type The filtering type, "or" or "and".
+	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible ) {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red', 'Green' ) );
+
+		$product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+						),
+					),
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$filtered_product_ids = $this->do_product_request( array( 'Color' => $attributes ), array( 'Color' => $filter_type ) );
+
+		if ( $expected_to_be_visible ) {
+			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+		} else {
+			$this->assertEmpty( $filtered_product_ids );
+		}
+	}
+
+	/**
+	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (for variation-defining attributes, with "Any" values).
+	 *
+	 * @testWith [[], "and", true]
+	 *           [[], "or", true]
+	 *           [["Blue"], "and", true]
+	 *           [["Blue"], "or", true]
+	 *           [["Red"], "and", true]
+	 *           [["Red"], "or", true]
+	 *           [["Green"], "and", true]
+	 *           [["Green"], "or", true]
+	 *           [["White"], "and", false]
+	 *           [["White"], "or", false]
+	 *           [["Blue", "Red", "Green", "White"], "and", true]
+	 *           [["Blue", "Red", "Green", "White"], "or", true]
+	 *
+	 * @param array  $attributes The color attribute names that will be included in the query.
+	 * @param string $filter_type The filtering type, "or" or "and".
+	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible ) {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red', 'Green', 'White' ) );
+
+		$product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red', 'Green' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => null,
+						),
+					),
+				),
+			)
+		);
+
+		$filtered_product_ids = $this->do_product_request( array( 'Color' => $attributes ), array( 'Color' => $filter_type ) );
+
+		if ( $expected_to_be_visible ) {
+			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+		} else {
+			$this->assertEmpty( $filtered_product_ids );
+		}
+	}
+
+	/**
+	 * @testdox Products not in "publish" state aren't shown.
+	 */
+	public function test_filtering_excludes_non_published_products() {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+
+		$product_simple_1 = $this->create_simple_product(
+			array(),
+			true
+		);
+
+		$product_simple_2 = $this->create_simple_product(
+			array(),
+			true
+		);
+
+		$product_variable_1 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+						),
+					),
+				),
+			)
+		);
+
+		$product_variable_2 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$post_data       = array( 'post_status' => 'draft' );
+		$post_data['ID'] = $product_simple_1['id'];
+		wp_update_post( $post_data );
+		$post_data['ID'] = $product_variable_1['id'];
+		wp_update_post( $post_data );
+
+		$filtered_product_ids = $this->do_product_request( array() );
+
+		$this->assertEquals( array( $product_simple_2['id'], $product_variable_2['id'] ), $filtered_product_ids );
+	}
+
+	/**
+	 * @testdox Hidden products aren't shown.
+	 */
+	public function test_filtering_excludes_hidden_products() {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+
+		$product_simple_1 = $this->create_simple_product(
+			array(),
+			true
+		);
+
+		$product_simple_2 = $this->create_simple_product(
+			array(),
+			true
+		);
+
+		$product_variable_1 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+						),
+					),
+				),
+			)
+		);
+
+		$product_variable_2 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$terms = array( 'exclude-from-catalog' );
+		wp_set_object_terms( $product_simple_1['id'], $terms, 'product_visibility' );
+		wp_set_object_terms( $product_variable_1['id'], $terms, 'product_visibility' );
+
+		$filtered_product_ids = $this->do_product_request( array() );
+
+		$this->assertEquals( array( $product_simple_2['id'], $product_variable_2['id'] ), $filtered_product_ids );
 	}
 }
