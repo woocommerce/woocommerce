@@ -336,7 +336,7 @@ Password: ' . DB_PASSWORD . "
 Prefix: {$wpdb->prefix}
 
 You'll need to run the following before querying the database (once per connection):
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 
 Press ENTER when you are done. "
 		);

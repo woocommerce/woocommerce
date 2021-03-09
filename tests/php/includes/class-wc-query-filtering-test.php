@@ -789,4 +789,107 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( array( $product_simple_2['id'], $product_variable_2['id'] ), $filtered_product_ids );
 	}
+
+	/**
+	 * @testdox The product query shows a simple product only if it's not filtered out by the specified attribute filters (when filtering by multiple attributes).
+	 *
+	 * Worth noting that multiple attributes are always combined in an AND fashion for filtering.
+	 *
+	 * @testWith [[], [], true]
+	 *           [["Blue"], [], true]
+	 *           [[], ["Ironable"], true]
+	 *           [["Blue"], ["Ironable"], true]
+	 *           [["Red"], [], false]
+	 *           [[], ["Washable"], false]
+	 *           [["Blue"], ["Washable"], false]
+	 *           [["Red"], ["Ironable"], false]
+	 *
+	 * @param array $attributes_1 The color attribute names that will be included in the query.
+	 * @param array $attributes_2 The features attribute names that will be included in the query.
+	 * @param bool  $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_simple_product_by_multiple_attributes( $attributes_1, $attributes_2, $expected_to_be_visible ) {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Ironable', 'Washable' ) );
+
+		$product = $this->create_simple_product(
+			array(
+				'Color'    => array(
+					'Blue',
+				),
+				'Features' => array(
+					'Ironable',
+				),
+			),
+			true
+		);
+
+		$filtered_product_ids = $this->do_product_request(
+			array(
+				'Color'    => $attributes_1,
+				'Features' => $attributes_2,
+			)
+		);
+
+		if ( $expected_to_be_visible ) {
+			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+		} else {
+			$this->assertEmpty( $filtered_product_ids );
+		}
+	}
+
+	/**
+	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (when filtering by multiple attributes).
+	 *
+	 * Worth noting that multiple attributes are always combined in an AND fashion for filtering.
+	 *
+	 * @testWith [[], [], true]
+	 *           [["Blue"], [], true]
+	 *           [[], ["Medium"], true]
+	 *           [["Blue"], ["Medium"], true]
+	 *           [["Red"], [], false]
+	 *           [[], ["Large"], false]
+	 *           [["Blue"], ["Large"], false]
+	 *           [["Red"], ["Medium"], false]
+	 *
+	 * @param array $attributes_1 The color attribute names that will be included in the query.
+	 * @param array $attributes_2 The size attribute names that will be included in the query.
+	 * @param bool  $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes( $attributes_1, $attributes_2, $expected_to_be_visible ) {
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Size', array( 'Large', 'Medium' ) );
+
+		$product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue' ),
+					'Size'  => array( 'Medium' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+							'Size'  => 'Medium',
+						),
+					),
+				),
+			)
+		);
+
+		$filtered_product_ids = $this->do_product_request(
+			array(
+				'Color' => $attributes_1,
+				'Size'  => $attributes_2,
+			)
+		);
+
+		if ( $expected_to_be_visible ) {
+			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+		} else {
+			$this->assertEmpty( $filtered_product_ids );
+		}
+	}
 }
