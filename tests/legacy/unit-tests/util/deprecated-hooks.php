@@ -105,6 +105,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$args     = array( false );
 		$return   = -1;
 
+		$this->setExpectedDeprecated( 'wc_old_hook' );
 		add_filter( $old_hook, array( $this, 'toggle_value' ) );
 
 		$result = $this->handlers['filters']->handle_deprecated_hook( $new_hook, $old_hook, $args, $return );
@@ -123,6 +124,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$args       = array( &$test_value );
 		$return     = -1;
 
+		$this->setExpectedDeprecated( 'wc_old_hook' );
 		add_filter( $old_hook, array( $this, 'toggle_value_by_ref' ) );
 
 		$this->handlers['actions']->handle_deprecated_hook( $new_hook, $old_hook, $args, $return );
@@ -137,6 +139,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	public function test_filter_handler() {
 		$test_width = 1;
 
+		$this->setExpectedDeprecated( 'woocommerce_product_width' );
 		add_filter( 'woocommerce_product_width', array( $this, 'toggle_value' ) );
 
 		$new_width = apply_filters( 'woocommerce_product_get_width', $test_width );
@@ -175,6 +178,9 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	public function test_created_actions_deprecation() {
 		add_filter( 'woocommerce_payment_token_created', '__return_true' );
 		add_filter( 'woocommerce_create_product_variation', '__return_true' );
+
+		$this->setExpectedDeprecated( 'woocommerce_payment_token_created' );
+		$this->setExpectedDeprecated( 'woocommerce_create_product_variation' );
 
 		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token->save();
