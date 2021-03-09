@@ -6,6 +6,7 @@
 		{ "path": "./assets/js/data" },
 		{ "path": "./assets/js/icons" },
 		{ "path": "./assets/js/base/components" },
-		{ "path": "./packages" }
+		{ "path": "./packages" },
+		{ "path": "./assets/js/base/context" }
 	]
 }

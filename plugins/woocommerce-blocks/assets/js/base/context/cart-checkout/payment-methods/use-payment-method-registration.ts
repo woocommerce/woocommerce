@@ -23,35 +23,37 @@ import {
  */
 import { useEditorContext } from '../../editor';
 import { useShippingDataContext } from '../shipping';
+import { useCustomerDataContext } from '../customer';
+import type {
+	PaymentMethodsDispatcherType,
+	PaymentMethods,
+	ExpressPaymentMethods,
+	PaymentMethodConfig,
+	ExpressPaymentMethodConfig,
+} from './types';
 
 /**
  * This hook handles initializing registered payment methods and exposing all
  * registered payment methods that can be used in the current environment (via
  * the payment method's `canMakePayment` property).
  *
- * @param  {function(Object):undefined} dispatcher               A dispatcher for setting registered
- *                                                               payment methods to an external
- *                                                               state.
- * @param  {Object}                     registeredPaymentMethods Registered payment methods to
- *                                                               process.
- * @param  {Array}                      paymentMethodsSortOrder  Array of payment method names to
- *                                                               sort by. This should match keys of
- *                                                               registeredPaymentMethods.
- * @param  {string}                     noticeContext            Id of the context to append
- *                                                               notices to.
+ * @param  {function(Object):undefined} dispatcher               A dispatcher for setting registered payment methods to an external state.
+ * @param  {Object}                     registeredPaymentMethods Registered payment methods to process.
+ * @param  {Array}                      paymentMethodsSortOrder  Array of payment method names to sort by. This should match keys of registeredPaymentMethods.
+ * @param  {string}                     noticeContext            Id of the context to append notices to.
  *
- * @return {boolean} Whether the payment methods have been initialized or not. True when all payment
- *                   methods have been initialized.
+ * @return {boolean} Whether the payment methods have been initialized or not. True when all payment methods have been initialized.
  */
 const usePaymentMethodRegistration = (
-	dispatcher,
-	registeredPaymentMethods,
-	paymentMethodsSortOrder,
-	noticeContext
+	dispatcher: PaymentMethodsDispatcherType,
+	registeredPaymentMethods: PaymentMethods | ExpressPaymentMethods,
+	paymentMethodsSortOrder: string[],
+	noticeContext: string
 ) => {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { isEditor } = useEditorContext();
-	const { selectedRates, shippingAddress } = useShippingDataContext();
+	const { selectedRates } = useShippingDataContext();
+	const { billingData, shippingAddress } = useCustomerDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
 	const {
@@ -62,6 +64,7 @@ const usePaymentMethodRegistration = (
 	const canPayArgument = useRef( {
 		cartTotals,
 		cartNeedsShipping,
+		billingData,
 		shippingAddress,
 		selectedShippingMethods,
 		paymentRequirements,
@@ -72,6 +75,7 @@ const usePaymentMethodRegistration = (
 		canPayArgument.current = {
 			cartTotals,
 			cartNeedsShipping,
+			billingData,
 			shippingAddress,
 			selectedShippingMethods,
 			paymentRequirements,
@@ -79,6 +83,7 @@ const usePaymentMethodRegistration = (
 	}, [
 		cartTotals,
 		cartNeedsShipping,
+		billingData,
 		shippingAddress,
 		selectedShippingMethods,
 		paymentRequirements,
@@ -87,7 +92,9 @@ const usePaymentMethodRegistration = (
 	const refreshCanMakePayments = useCallback( async () => {
 		let availablePaymentMethods = {};
 
-		const addAvailablePaymentMethod = ( paymentMethod ) => {
+		const addAvailablePaymentMethod = (
+			paymentMethod: PaymentMethodConfig | ExpressPaymentMethodConfig
+		) => {
 			availablePaymentMethods = {
 				...availablePaymentMethods,
 				[ paymentMethod.name ]: paymentMethod,
@@ -106,10 +113,16 @@ const usePaymentMethodRegistration = (
 				const canPay = await Promise.resolve(
 					paymentMethod.canMakePayment( canPayArgument.current )
 				);
-				if ( canPay ) {
-					if ( canPay.error ) {
+
+				if ( !! canPay ) {
+					if (
+						typeof canPay === 'object' &&
+						canPay !== null &&
+						canPay.error
+					) {
 						throw new Error( canPay.error.message );
 					}
+
 					addAvailablePaymentMethod( paymentMethod );
 				}
 			} catch ( e ) {
@@ -135,7 +148,7 @@ const usePaymentMethodRegistration = (
 
 		// Note: some payment methods use the `canMakePayment` callback to initialize / setup.
 		// Example: Stripe CC, Stripe Payment Request.
-		// That's why we track "is initialised" state here.
+		// That's why we track "is initialized" state here.
 		setIsInitialized( true );
 	}, [
 		addErrorNotice,
@@ -168,8 +181,10 @@ const usePaymentMethodRegistration = (
  *
  * @return {boolean} True when standard payment methods have been initialized.
  */
-export const usePaymentMethods = ( dispatcher ) => {
-	const standardMethods = getPaymentMethods();
+export const usePaymentMethods = (
+	dispatcher: PaymentMethodsDispatcherType
+): boolean => {
+	const standardMethods: PaymentMethods = getPaymentMethods() as PaymentMethods;
 	const { noticeContexts } = useEmitResponse();
 	// Ensure all methods are present in order.
 	// Some payment methods may not be present in PAYMENT_GATEWAY_SORT_ORDER if they
@@ -193,8 +208,10 @@ export const usePaymentMethods = ( dispatcher ) => {
  *
  * @return {boolean} True when express payment methods have been initialized.
  */
-export const useExpressPaymentMethods = ( dispatcher ) => {
-	const expressMethods = getExpressPaymentMethods();
+export const useExpressPaymentMethods = (
+	dispatcher: PaymentMethodsDispatcherType
+): boolean => {
+	const expressMethods: ExpressPaymentMethods = getExpressPaymentMethods() as ExpressPaymentMethods;
 	const { noticeContexts } = useEmitResponse();
 	return usePaymentMethodRegistration(
 		dispatcher,

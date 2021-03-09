@@ -1,10 +1,8 @@
-const getObserversByPriority = ( observers, eventType ) => {
-	return observers[ eventType ]
-		? Array.from( observers[ eventType ].values() ).sort( ( a, b ) => {
-				return a.priority - b.priority;
-		  } )
-		: [];
-};
+/**
+ * Internal dependencies
+ */
+import { getObserversByPriority } from './utils';
+import type { EventObserversType } from './types';
 
 /**
  * Emits events on registered observers for the provided type and passes along
@@ -16,13 +14,15 @@ const getObserversByPriority = ( observers, eventType ) => {
  *
  * @param {Object} observers The registered observers to omit to.
  * @param {string} eventType The event type being emitted.
- * @param {*}      data      Data passed along to the observer when it is
- *                           invoked.
+ * @param {*}      data      Data passed along to the observer when it is invoked.
  *
- * @return {Promise} A promise that resolves to true after all observers have
- *                   executed.
+ * @return {Promise} A promise that resolves to true after all observers have executed.
  */
-export const emitEvent = async ( observers, eventType, data ) => {
+export const emitEvent = async (
+	observers: EventObserversType,
+	eventType: string,
+	data: unknown
+): Promise< unknown > => {
 	const observersByType = getObserversByPriority( observers, eventType );
 	const observerResponses = [];
 	for ( const observer of observersByType ) {
@@ -34,8 +34,7 @@ export const emitEvent = async ( observers, eventType, data ) => {
 				observerResponses.push( observerResponse );
 			}
 		} catch ( e ) {
-			// we don't care about errors blocking execution, but will
-			// console.error for troubleshooting.
+			// we don't care about errors blocking execution, but will console.error for troubleshooting.
 			// eslint-disable-next-line no-console
 			console.error( e );
 		}
@@ -50,21 +49,23 @@ export const emitEvent = async ( observers, eventType, data ) => {
  *
  * @param {Object} observers The registered observers to omit to.
  * @param {string} eventType The event type being emitted.
- * @param {*}      data      Data passed along to the observer when it is
- *                           invoked.
+ * @param {*}      data      Data passed along to the observer when it is invoked.
  *
- * @return {Promise} Returns a promise that resolves to either boolean or the
- *                   return value of the aborted observer.
+ * @return {Promise} Returns a promise that resolves to either boolean or the return value of the aborted observer.
  */
-export const emitEventWithAbort = async ( observers, eventType, data ) => {
+export const emitEventWithAbort = async (
+	observers: EventObserversType,
+	eventType: string,
+	data: unknown
+): Promise< unknown > => {
 	const observersByType = getObserversByPriority( observers, eventType );
 	for ( const observer of observersByType ) {
 		try {
 			const response = await Promise.resolve( observer.callback( data ) );
-			if ( typeof response !== 'object' ) {
+			if ( typeof response !== 'object' || response === null ) {
 				continue;
 			}
-			if ( typeof response.type === 'undefined' ) {
+			if ( ! response.hasOwnProperty( 'type' ) ) {
 				throw new Error(
 					'If you want to abort event emitter processing, your observer must return an object with a type property'
 				);
