@@ -190,7 +190,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_order_number( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order ) {
+		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
 			return null;
 		}
 

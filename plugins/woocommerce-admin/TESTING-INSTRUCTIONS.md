@@ -212,6 +212,13 @@ wp db query 'SELECT status FROM wp_wc_admin_notes WHERE name = "wc-admin-add-fir
 7. Create a user with permissions to see some but not all registered WooCommerce pages.
 8. Check that a user without permission to access a menu item cannot see said menu item.
 
+### Fixed associated Order Number for refunds #6428
+
+1. In a store with refunded orders.
+2. Go to `Analytics` > `Orders`
+3. Set the `Date Range` filter in order to cover the refunded order date.
+4. Verify that now the associated order number and the related products are visible.
+
 ### Remove CES actions for adding and editing a product and editing an order #6355
 
 1. Add a product. The customer effort score survey should not appear.

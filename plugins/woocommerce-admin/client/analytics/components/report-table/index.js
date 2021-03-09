@@ -323,7 +323,7 @@ const ReportTable = ( props ) => {
 	const isLoading =
 		isRequesting || tableData.isRequesting || primaryData.isRequesting;
 	const totals = get( primaryData, [ 'data', 'totals' ], {} );
-	const totalResults = items.totalResults;
+	const totalResults = items.totalResults || 0;
 	const downloadable = totalResults > 0;
 	// Search words are in the query string, not the table query.
 	const searchWords = getSearchWords( query );

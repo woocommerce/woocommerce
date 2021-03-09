@@ -115,4 +115,63 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $data );
 	}
+
+	/**
+	 * Test that refunded orders in list have products.
+	 */
+	public function test_products_in_orders() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product 2' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $simple_product );
+
+		$order->set_total( 25 );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new OrdersDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+		$args       = array(
+			'after'         => $start_time,
+			'before'        => $end_time,
+			'extended_info' => 1,
+		);
+		// Retrieving orders with products through the data store.
+		$data     = $data_store->get_data( $args );
+		$expected = array(
+			array(
+				'id'       => $simple_product->get_id(),
+				'name'     => $simple_product->get_name(),
+				'quantity' => '4',
+			),
+		);
+		$this->assertEquals( $expected, $data->data[0]['extended_info']['products'] );
+
+		$args = array(
+			'after'         => $start_time,
+			'before'        => $end_time,
+			'extended_info' => 1,
+			'status_is'     => array(
+				'refunded',
+			),
+		);
+		// Retrieving an order with products (when receiving a single refunded order).
+		$data_2 = $data_store->get_data( $args );
+		$this->assertEquals( $expected, $data_2->data[0]['extended_info']['products'] );
+	}
 }

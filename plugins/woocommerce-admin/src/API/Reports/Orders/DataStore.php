@@ -72,7 +72,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_total'        => "{$table_name}.net_total",
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
-			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 1 THEN 'returning' WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE '' END) as customer_type",
+			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE 'returning' END) as customer_type",
 		);
 	}
 
@@ -325,7 +325,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function include_extended_info( &$orders_data, $query_args ) {
 		$mapped_orders    = $this->map_array_by_key( $orders_data, 'order_id' );
-		$products         = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
+		$related_orders   = $this->get_orders_with_parent_id( $mapped_orders );
+		$order_ids        = array_merge( array_keys( $mapped_orders ), array_keys( $related_orders ) );
+		$products         = $this->get_products_by_order_ids( $order_ids );
 		$coupons          = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
 		$customers        = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers = $this->map_array_by_key( $customers, 'customer_id' );
@@ -354,6 +356,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			$mapped_data[ $product['order_id'] ]['products'][] = $product_data;
+
+			// If this product's order has another related order, it will be added to our mapped_data.
+			if ( isset( $related_orders [ $product['order_id'] ] ) ) {
+				$mapped_data[ $related_orders[ $product['order_id'] ]['order_id'] ] ['products'] [] = $product_data;
+			}
 		}
 
 		foreach ( $coupons as $coupon ) {
@@ -378,6 +385,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
 			}
 		}
+	}
+
+	/**
+	 * Returns oreders that have a parent id
+	 *
+	 * @param array $orders Orders array.
+	 * @return array
+	 */
+	protected function get_orders_with_parent_id( $orders ) {
+		$related_orders = array();
+		foreach ( $orders as $order ) {
+			if ( '0' !== $order['parent_id'] ) {
+				$related_orders[ $order['parent_id'] ] = $order;
+			}
+		}
+		return $related_orders;
 	}
 
 	/**

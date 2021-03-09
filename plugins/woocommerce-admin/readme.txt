@@ -100,6 +100,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Restore visual styles back to Analytics tabs. #5913
 - Add: Add a "rather not say" option to revenue in the profile wizard. #6475
 - Dev: Added warning when WC-Admin is active but not being used #6453
+- Fix: Associated Order Number for refunds was hidden #6428
 - Add: Remove Mollie promo note on install #6510
 - Add: Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
 - Feature: Increase target audience for business feature step. #6508
