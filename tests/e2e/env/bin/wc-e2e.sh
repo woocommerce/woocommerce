@@ -30,8 +30,8 @@ TESTRESULT=0
 
 # Use the script symlink to find and change directory to the root of the package
 SCRIPTPATH=$(dirname "$0")
-REALPATH=$(readlink $0)
-cd $SCRIPTPATH/$(dirname "$REALPATH")/..
+REALPATH=$(readlink "$0")
+cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 
 # Run scripts
 case $1 in
@@ -65,6 +65,6 @@ case $1 in
 esac
 
 # Restore working path
-cd $OLDPATH
+cd "$OLDPATH"
 
 exit $TESTRESULT

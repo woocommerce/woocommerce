@@ -1,5 +1,9 @@
 # Unreleased
 
+## Fixed
+
+- Update `wc-e2e` script to fix an issue with directories with a space in their name
+
 # 0.2.0
 
 ## Fixed
