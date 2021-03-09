@@ -61,14 +61,14 @@ global.describe = (() => {
  */
 global.it = (() => {
 	const test = async ( testName, callback ) => {
-		const testCallback = async () => screenshotTest( testName, callback );
+		const testCallback = async () => screenshotTest( currentBlock, testName, callback );
 		return originalIt( testName, testCallback );
 	};
-	const only = ( blockName, callback ) => {
-		return originalIt.only( blockName, callback );
+	const only = ( testName, callback ) => {
+		return originalIt.only( testName, callback );
 	};
-	const skip = ( blockName, callback ) => {
-		return originalIt.skip( blockName, callback );
+	const skip = ( testName, callback ) => {
+		return originalIt.skip( testName, callback );
 	};
 
 	test.each = bind( test, false );
@@ -86,11 +86,11 @@ global.it = (() => {
  * @param callback
  * @returns {Promise<void>}
  */
-const screenshotTest = async ( testName, callback ) => {
+const screenshotTest = async ( blockName, testName, callback ) => {
 	try {
 		await callback();
 	} catch ( e ) {
-		const testTitle = `${ currentBlock } - ${ testName }`.replace( /\.$/, '' );
+		const testTitle = `${ blockName } - ${ testName }`.replace( /\.$/, '' );
 		const appPath = getAppRoot();
 		const savePath = path.resolve( appPath, 'tests/e2e/screenshots' );
 		const filePath = path.join(
