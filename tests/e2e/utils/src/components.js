@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2 } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -183,6 +183,28 @@ const createSimpleProduct = async () => {
 	} );
 	return product.id;
 } ;
+
+/**
+ * Create simple product with categories
+ *
+ * @param productName Product's name which can be changed when writing a test
+ * @param productPrice Product's price which can be changed when writing a test
+ * @param categoryName Product's category which can be changed when writing a test
+ */
+const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
+	const product = await factories.products.simple.create( {
+		name: productName,
+		regularPrice: productPrice,
+		categories: [
+			{
+				name: categoryName,
+			}
+		],
+		isVirtual: true,
+	} );
+
+	return product.id;
+};
 
 /**
  * Create variable product.
@@ -435,6 +457,42 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	return couponCode;
 };
 
+/**
+ * Click the Update button on the order details page.
+ *
+ * @param noticeText The text that appears in the notice after updating the order.
+ * @param waitForSave Optionally wait for auto save.
+ */
+const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
+	if ( waitForSave ) {
+		await page.waitFor( 2000 );
+	}
+
+	// PUpdate order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+};
+
+/**
+ * Delete all email logs in the WP Mail Logging plugin page.
+ */
+const deleteAllEmailLogs = async () => {
+	await merchant.openEmailLog();
+
+	// Make sure we have emails to delete. If we don't, this selector will return null.
+	if ( await page.$( '#bulk-action-selector-top' ) !== null ) {
+		await setCheckbox( '#cb-select-all-1' );
+		await expect( page ).toSelect( '#bulk-action-selector-top', 'Delete' );
+		await Promise.all( [
+			page.click( '#doaction' ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+	}
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -444,4 +502,7 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	createSimpleProductWithCategory,
+  clickUpdateOrder,
+	deleteAllEmailLogs,
 };

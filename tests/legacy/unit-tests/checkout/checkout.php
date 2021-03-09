@@ -141,7 +141,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test usage limit for guest users uasge limit per user is set.
+	 * Test usage limit for guest users usage limit per user is set.
 	 *
 	 * @throws Exception When unable to create order.
 	 */
