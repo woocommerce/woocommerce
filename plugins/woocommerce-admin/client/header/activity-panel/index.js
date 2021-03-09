@@ -3,11 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { lazy, useState } from '@wordpress/element';
-import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
-import CrossIcon from 'gridicons/dist/cross-small';
-import classnames from 'classnames';
 import {
 	Icon,
 	help as helpIcon,
@@ -24,7 +21,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './style.scss';
-import ActivityPanelToggleBubble from './toggle-bubble';
 import { getUnreadNotes } from './unread-indicators';
 import { isWCAdmin } from '../../dashboard/utils';
 import { Tabs } from './tabs';
@@ -47,7 +43,6 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
-	const [ mobileOpen, setMobileOpen ] = useState( false );
 
 	const {
 		hasUnreadNotes,
@@ -85,7 +80,6 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			isPanelOpen;
 
 		setCurrentTab( tabName );
-		setMobileOpen( isTabOpen );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
 	};
@@ -99,14 +93,6 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			setIsPanelSwitching( false );
 			setCurrentTab( '' );
 		}
-	};
-
-	// On smaller screen, the panel buttons are hidden behind a toggle.
-	const toggleMobile = () => {
-		const tabs = getTabs();
-		setCurrentTab( mobileOpen ? '' : tabs[ 0 ].name );
-		setMobileOpen( ! mobileOpen );
-		setIsPanelOpen( ! mobileOpen );
 	};
 
 	const isHomescreen = () => {
@@ -251,18 +237,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 
 	const tabs = getTabs();
 	const headerId = uniqueId( 'activity-panel-header_' );
-	const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
-		'is-mobile-open': mobileOpen,
-	} );
-
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
-	const hasUnread = tabs.some( ( tab ) => tab.unread );
-	const viewLabel = hasUnread
-		? __(
-				'View Activity Panel, you have unread activity',
-				'woocommerce-admin'
-		  )
-		: __( 'View Activity Panel', 'woocommerce-admin' );
 
 	return (
 		<div>
@@ -272,49 +247,30 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			<Section
 				component="aside"
 				id="woocommerce-activity-panel"
+				className="woocommerce-layout__activity-panel"
 				aria-labelledby={ headerId }
 			>
-				<Button
-					onClick={ () => {
-						toggleMobile();
+				<Tabs
+					tabs={ tabs }
+					tabOpen={ isPanelOpen }
+					selectedTab={ currentTab }
+					onTabClick={ ( tab, tabOpen ) => {
+						if ( tab.onClick ) {
+							tab.onClick();
+							return;
+						}
+						togglePanel( tab, tabOpen );
 					} }
-					label={
-						mobileOpen
-							? __( 'Close Activity Panel', 'woocommerce-admin' )
-							: viewLabel
-					}
-					aria-expanded={ mobileOpen }
-					className="woocommerce-layout__activity-panel-mobile-toggle"
-				>
-					{ mobileOpen ? (
-						<CrossIcon />
-					) : (
-						<ActivityPanelToggleBubble hasUnread={ hasUnread } />
-					) }
-				</Button>
-				<div className={ panelClasses }>
-					<Tabs
-						tabs={ tabs }
-						tabOpen={ isPanelOpen }
-						selectedTab={ currentTab }
-						onTabClick={ ( tab, tabOpen ) => {
-							if ( tab.onClick ) {
-								tab.onClick();
-								return;
-							}
-							togglePanel( tab, tabOpen );
-						} }
-					/>
-					<Panel
-						currentTab
-						isPanelOpen={ isPanelOpen }
-						isPanelSwitching={ isPanelSwitching }
-						tab={ find( getTabs(), { name: currentTab } ) }
-						content={ getPanelContent( currentTab ) }
-						closePanel={ () => closePanel() }
-						clearPanel={ () => clearPanel() }
-					/>
-				</div>
+				/>
+				<Panel
+					currentTab
+					isPanelOpen={ isPanelOpen }
+					isPanelSwitching={ isPanelSwitching }
+					tab={ find( getTabs(), { name: currentTab } ) }
+					content={ getPanelContent( currentTab ) }
+					closePanel={ () => closePanel() }
+					clearPanel={ () => clearPanel() }
+				/>
 			</Section>
 			{ showHelpHighlightTooltip ? (
 				<HighlightTooltip

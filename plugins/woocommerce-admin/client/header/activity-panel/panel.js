@@ -26,7 +26,14 @@ export const Panel = ( {
 				'.woocommerce-inbox-dismiss-confirmation_modal'
 			) || event.target.closest( '.components-snackbar__action' );
 
-		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
+		const isToggling =
+			event.relatedTarget &&
+			event.relatedTarget.classList.contains(
+				'woocommerce-layout__activity-panel-tab'
+			) &&
+			event.relatedTarget.classList.contains( 'is-active' );
+
+		if ( isPanelOpen && ! isClickOnModalOrSnackbar && ! isToggling ) {
 			closePanel();
 		}
 	};
