@@ -9,8 +9,8 @@ import { triggerFragmentRefresh } from '@woocommerce/base-utils';
  *
  * @param {number} quantityInCart Quantity of the item in the cart.
  */
-export const useTriggerFragmentRefresh = ( quantityInCart ) => {
-	const firstMount = useRef( true );
+export const useTriggerFragmentRefresh = ( quantityInCart: number ): void => {
+	const firstMount = useRef< boolean >( true );
 
 	useEffect( () => {
 		if ( firstMount.current ) {

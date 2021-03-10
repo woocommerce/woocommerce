@@ -2,10 +2,18 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
+import type { CartResponseShippingRateItem } from '@woocommerce/types';
 
-export const previewShippingRates = [
+export const previewShippingRates: CartResponseShippingRateItem[] = [
 	{
-		destination: {},
+		destination: {
+			address_1: '',
+			address_2: '',
+			city: '',
+			state: '',
+			postcode: '',
+			country: '',
+		},
 		package_id: 0,
 		name: __( 'Shipping', 'woo-gutenberg-products-block' ),
 		items: [
@@ -41,7 +49,10 @@ export const previewShippingRates = [
 				description: '',
 				delivery_time: '',
 				price: '000',
+				taxes: '0',
 				rate_id: 'free_shipping:1',
+				instance_id: 0,
+				meta_data: [],
 				method_id: 'flat_rate',
 				selected: true,
 			},
@@ -57,7 +68,10 @@ export const previewShippingRates = [
 				description: '',
 				delivery_time: '',
 				price: '200',
+				taxes: '0',
 				rate_id: 'local_pickup:1',
+				instance_id: 1,
+				meta_data: [],
 				method_id: 'local_pickup',
 				selected: false,
 			},

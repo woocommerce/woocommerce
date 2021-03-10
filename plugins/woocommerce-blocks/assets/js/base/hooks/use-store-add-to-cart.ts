@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { decodeEntities } from '@wordpress/html-entities';
-
+import type { CartItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
@@ -16,6 +16,12 @@ import { useStoreCart } from './cart';
  * @typedef {import('@woocommerce/type-defs/hooks').StoreCartItemAddToCart} StoreCartItemAddToCart
  */
 
+interface StoreAddToCart {
+	cartQuantity: number;
+	addingToCart: boolean;
+	cartIsLoading: boolean;
+	addToCart: ( quantity: number ) => void;
+}
 /**
  * Get the quantity of a product in the cart.
  *
@@ -23,7 +29,10 @@ import { useStoreCart } from './cart';
  * @param {number} productId  The product id to look for.
  * @return {number} Quantity in the cart.
  */
-const getQuantityFromCartItems = ( cartItems, productId ) => {
+const getQuantityFromCartItems = (
+	cartItems: Array< CartItem >,
+	productId: number
+): number => {
 	const productItem = cartItems.find( ( { id } ) => id === productId );
 
 	return productItem ? productItem.quantity : 0;
@@ -39,7 +48,7 @@ const getQuantityFromCartItems = ( cartItems, productId ) => {
  * @return {StoreCartItemAddToCart} An object exposing data and actions relating
  *                                  to add to cart functionality.
  */
-export const useStoreAddToCart = ( productId ) => {
+export const useStoreAddToCart = ( productId: number ): StoreAddToCart => {
 	const { addItemToCart } = useDispatch( storeKey );
 	const { cartItems, cartIsLoading } = useStoreCart();
 	const { addErrorNotice, removeNotice } = useStoreNotices();

@@ -7,9 +7,20 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useEditorContext } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
-import { mapValues } from 'lodash';
+import type {
+	StoreCart,
+	CartResponseTotals,
+	CartResponseFeeItem,
+	CartResponseBillingAddress,
+	CartResponseShippingAddress,
+} from '@woocommerce/types';
+import { fromEntriesPolyfill } from '@woocommerce/base-utils';
 
-const defaultShippingAddress = {
+declare module '@wordpress/html-entities' {
+	// eslint-disable-next-line @typescript-eslint/no-shadow
+	export function decodeEntities< T >( coupon: T ): T;
+}
+const defaultShippingAddress: CartResponseShippingAddress = {
 	first_name: '',
 	last_name: '',
 	company: '',
@@ -21,20 +32,48 @@ const defaultShippingAddress = {
 	country: '',
 };
 
-const defaultBillingAddress = {
+const defaultBillingAddress: CartResponseBillingAddress = {
 	...defaultShippingAddress,
 	email: '',
 	phone: '',
 };
 
-const decodeValues = ( object ) =>
-	mapValues( object, ( value ) => decodeEntities( value ) );
+const defaultCartTotals: CartResponseTotals = {
+	total_items: '',
+	total_items_tax: '',
+	total_fees: '',
+	total_fees_tax: '',
+	total_discount: '',
+	total_discount_tax: '',
+	total_shipping: '',
+	total_shipping_tax: '',
+	total_price: '',
+	total_tax: '',
+	tax_lines: [],
+	currency_code: '',
+	currency_symbol: '',
+	currency_minor_unit: 2,
+	currency_decimal_separator: '',
+	currency_thousand_separator: '',
+	currency_prefix: '',
+	currency_suffix: '',
+};
+
+const decodeValues = (
+	object: Record< string, unknown >
+): Record< string, unknown > =>
+	fromEntriesPolyfill(
+		Object.entries( object ).map( ( [ key, value ] ) => [
+			key,
+			decodeEntities( value ),
+		] )
+	);
 
 /**
  * @constant
  * @type  {StoreCart} Object containing cart data.
  */
-export const defaultCartData = {
+export const defaultCartData: StoreCart = {
 	cartCoupons: [],
 	cartItems: [],
 	cartFees: [],
@@ -43,7 +82,7 @@ export const defaultCartData = {
 	cartNeedsPayment: true,
 	cartNeedsShipping: true,
 	cartItemErrors: [],
-	cartTotals: {},
+	cartTotals: defaultCartTotals,
 	cartIsLoading: true,
 	cartErrors: [],
 	billingAddress: defaultBillingAddress,
@@ -52,7 +91,7 @@ export const defaultCartData = {
 	shippingRatesLoading: false,
 	cartHasCalculatedShipping: false,
 	paymentRequirements: [],
-	receiveCart: () => {},
+	receiveCart: () => undefined,
 	extensions: {},
 };
 
@@ -68,12 +107,14 @@ export const defaultCartData = {
  *
  * @return {StoreCart} Object containing cart data.
  */
-export const useStoreCart = ( options = { shouldSelect: true } ) => {
+export const useStoreCart = (
+	options: { shouldSelect: boolean } = { shouldSelect: true }
+): StoreCart => {
 	const { isEditor, previewData } = useEditorContext();
 	const previewCart = previewData?.previewCart || {};
 	const { shouldSelect } = options;
 
-	const results = useSelect(
+	const results: StoreCart = useSelect(
 		( select, { dispatch } ) => {
 			if ( ! shouldSelect ) {
 				return defaultCartData;
@@ -103,7 +144,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					receiveCart:
 						typeof previewCart?.receiveCart === 'function'
 							? previewCart.receiveCart
-							: () => {},
+							: () => undefined,
 				};
 			}
 
@@ -120,7 +161,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			const shippingAddress = cartData.needsShipping
 				? decodeValues( cartData.shippingAddress )
 				: billingAddress;
-			const cartFees = cartData.fees.map( ( fee ) =>
+			const cartFees = cartData.fees.map( ( fee: CartResponseFeeItem ) =>
 				decodeValues( fee )
 			);
 			return {

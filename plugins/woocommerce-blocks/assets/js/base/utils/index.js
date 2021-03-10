@@ -7,3 +7,4 @@ export * from './get-intersection-observer';
 export * from './get-valid-block-attributes';
 export * from './product-data';
 export * from './derive-selected-shipping-rates';
+export * from './from-entries-polyfill';

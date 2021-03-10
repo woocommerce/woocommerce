@@ -7,7 +7,15 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { formatStoreApiErrorMessage } from '@woocommerce/base-utils';
+import type {
+	CartResponseBillingAddress,
+	CartResponseShippingAddress,
+} from '@woocommerce/types';
 
+declare type CustomerData = {
+	billingData: CartResponseBillingAddress;
+	shippingAddress: CartResponseShippingAddress;
+};
 /**
  * Internal dependencies
  */
@@ -18,7 +26,12 @@ import { useStoreCart } from '../cart';
 /**
  * This is a custom hook for syncing customer address data (billing and shipping) with the server.
  */
-export const useCustomerData = () => {
+export const useCustomerData = (): {
+	billingData: CartResponseBillingAddress;
+	shippingAddress: CartResponseShippingAddress;
+	setBillingData: ( data: CartResponseBillingAddress ) => void;
+	setShippingAddress: ( data: CartResponseBillingAddress ) => void;
+} => {
 	const { updateCustomerData } = useDispatch( storeKey );
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 
@@ -26,16 +39,18 @@ export const useCustomerData = () => {
 	const {
 		billingAddress: initialBillingAddress,
 		shippingAddress: initialShippingAddress,
+	}: Omit< CustomerData, 'billingData' > & {
+		billingAddress: CartResponseBillingAddress;
 	} = useStoreCart();
 
 	// State of customer data is tracked here from this point, using the initial values from the useStoreCart hook.
-	const [ customerData, setCustomerData ] = useState( {
+	const [ customerData, setCustomerData ] = useState< CustomerData >( {
 		billingData: initialBillingAddress,
 		shippingAddress: initialShippingAddress,
 	} );
 
 	// Store values last sent to the server in a ref to avoid requests unless important fields are changed.
-	const previousCustomerData = useRef( customerData );
+	const previousCustomerData = useRef< CustomerData >( customerData );
 
 	// Debounce updates to the customerData state so it's not triggered excessively.
 	const [ debouncedCustomerData ] = useDebounce( customerData, 1000, {
@@ -114,7 +129,6 @@ export const useCustomerData = () => {
 		removeNotice,
 		updateCustomerData,
 	] );
-
 	return {
 		billingData: customerData.billingData,
 		shippingAddress: customerData.shippingAddress,

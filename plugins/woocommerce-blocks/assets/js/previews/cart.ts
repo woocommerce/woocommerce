@@ -7,6 +7,7 @@ import {
 	WC_BLOCKS_ASSET_URL,
 	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
+import { CartResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -16,7 +17,7 @@ import { previewShippingRates } from './shipping-rates';
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi#cart-api
-export const previewCart = {
+export const previewCart: CartResponse = {
 	coupons: [],
 	shipping_rates: SHIPPING_METHODS_EXIST ? previewShippingRates : [],
 	items: [
@@ -162,6 +163,30 @@ export const previewCart = {
 	needs_payment: true,
 	needs_shipping: SHIPPING_ENABLED,
 	has_calculated_shipping: true,
+	shipping_address: {
+		first_name: '',
+		last_name: '',
+		company: '',
+		address_1: '',
+		address_2: '',
+		city: '',
+		state: '',
+		postcode: '',
+		country: '',
+	},
+	billing_address: {
+		first_name: '',
+		last_name: '',
+		company: '',
+		address_1: '',
+		address_2: '',
+		city: '',
+		state: '',
+		postcode: '',
+		country: '',
+		email: '',
+		phone: '',
+	},
 	totals: {
 		currency_code: 'USD',
 		currency_symbol: '$',
