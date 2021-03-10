@@ -2302,6 +2302,32 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Low Stock Amount.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 */
+	private static function variation_bulk_action_variable_low_stock_amount( $variations, $data ) {
+		if ( ! isset( $data['value'] ) ) {
+			return;
+		}
+
+		$low_stock_amount = wc_stock_amount( wc_clean( $data['value'] ) );
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( $variation->managing_stock() ) {
+				$variation->set_low_stock_amount( $low_stock_amount );
+			} else {
+				$variation->set_low_stock_amount( '' );
+			}
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Weight.
 	 *
 	 * @param array $variations List of variations.
@@ -2547,6 +2573,7 @@ class WC_AJAX {
 	 * @uses WC_AJAX::variation_bulk_action_toggle_virtual()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_downloadable()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_enabled
+	 * @uses WC_AJAX::variation_bulk_action_variable_low_stock_amount()
 	 */
 	public static function bulk_edit_variations() {
 		ob_start();
