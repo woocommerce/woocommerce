@@ -395,9 +395,6 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
  * @return int
  */
 function wc_get_low_stock_amount( WC_Product $product ) {
-	if ( $product->is_type( 'variation' ) ) {
-		$product = wc_get_product( $product->get_parent_id() );
-	}
 	$low_stock_amount = $product->get_low_stock_amount();
 	if ( '' === $low_stock_amount ) {
 		$low_stock_amount = get_option( 'woocommerce_notify_low_stock_amount', 2 );
