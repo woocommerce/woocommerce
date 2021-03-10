@@ -5,7 +5,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "psr/container": "^1.0"
+    "psr/container": "^2.0"
   },
   "require-dev": {
     "league/container": "3.3.3"
