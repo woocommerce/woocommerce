@@ -13,45 +13,6 @@ add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
 ```
 2. Enable the new navigation.
 3. Make sure the menu item for the registered tab is shown under `Tools`.
-
-### Add Guards to "Deactivate Plugin" Note Handlers #6532
-
-#### Test incompatible WooCommerce version
-
--   Install and activate Woocommerce 4.7
--   See that the Woocommerce Admin plugin is deactivated.
--   Add the Deactivate Plugin note via SQL.
-
-```
-INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
-```
-
--   See that the note is in the inbox
--   Activate the Woocommerce Admin plugin.
--   See that Woocommerce Admin immediately de-activates without a fatal error.
--   See that the note remains in inbox
-
-#### Test compatible WooCommerce version
-
--   Deactivate the Woocommerce Admin plugin.
--   Install and activate the latest Woocommerce version.
--   Add the Deactivate Plugin note via SQL.
-
-```
-INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
-```
-
--   Activate the Woocommerce Admin plugin.
--   See that note is **not** in the inbox
--   Add the Deactivate Plugin note via SQL.
-
-```
-INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
-```
-
--   De-activate the Woocommerce Admin plugin.
--   See that note is **not** in the inbox
-
 ### Remove mobile activity panel toggle #6539
 
 1. Narrow your viewport to < 782px.
@@ -200,6 +161,47 @@ Scenario #2
 7. The task list should show the **Choose payment methods** task, and the **Set up additional payment providers** inbox card should not be present.
 8. Click on the **Choose payment methods** task, it should not be displaying the **Woocommerce Payments** option.
 9. Go to **Plugins > installed Plugins**, check if the selected plugin features selected in step 4 are installed and activated.
+
+## 2.1.2
+
+### Add Guards to "Deactivate Plugin" Note Handlers #6532
+
+#### Test incompatible WooCommerce version
+
+-   Install and activate Woocommerce 4.7
+-   See that the Woocommerce Admin plugin is deactivated.
+-   Add the Deactivate Plugin note via SQL.
+
+```
+INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
+```
+
+-   See that the note is in the inbox
+-   Activate the Woocommerce Admin plugin.
+-   See that Woocommerce Admin immediately de-activates without a fatal error.
+-   See that the note remains in inbox
+
+#### Test compatible WooCommerce version
+
+-   Deactivate the Woocommerce Admin plugin.
+-   Install and activate the latest Woocommerce version.
+-   Add the Deactivate Plugin note via SQL.
+
+```
+INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
+```
+
+-   Activate the Woocommerce Admin plugin.
+-   See that note is **not** in the inbox
+-   Add the Deactivate Plugin note via SQL.
+
+```
+INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `content_data`, `status`, `source`, `date_created`, `date_reminder`, `is_snoozable`, `layout`, `image`, `is_deleted`, `icon`) VALUES ( 'wc-admin-deactivate-plugin', 'info', 'en_US', 'Deactivate old WooCommerce Admin version', 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce.  We recommend deactivating the plugin and using the stable version included with WooCommerce.', '{}', 'unactioned', 'woocommerce-admin', '2021-03-08 01:26:44', NULL, 0, 'plain', '', 0, 'info');
+```
+
+-   De-activate the Woocommerce Admin plugin.
+-   See that note is **not** in the inbox
+
 
 ## 2.1.0
 
