@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {},
+  "include": [ ".", "../../type-defs/**.ts", "../utils/index.js" ],
+  "exclude": [ "**/test/**" ]
+}

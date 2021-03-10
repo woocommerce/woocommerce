@@ -29,7 +29,7 @@ import { useResizeObserver } from 'wordpress-compose';
  * };
  * ```
  */
-export const useContainerQueries = () => {
+export const useContainerQueries = (): [ React.ReactElement, string ] => {
 	const [ resizeListener, { width } ] = useResizeObserver();
 
 	let className = '';

@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useValidationContext } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
-
+import type { StoreCartCoupon } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
@@ -23,12 +23,15 @@ import { useStoreNotices } from '../use-store-notices';
  * @return {StoreCartCoupon} An object exposing data and actions from/for the
  * store api /cart/coupons endpoint.
  */
-export const useStoreCartCoupons = () => {
+export const useStoreCartCoupons = (): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
 	const { addErrorNotice, addSnackbarNotice } = useStoreNotices();
 	const { setValidationErrors } = useValidationContext();
 
-	const results = useSelect(
+	const results: Pick<
+		StoreCartCoupon,
+		'applyCoupon' | 'removeCoupon' | 'isApplyingCoupon' | 'isRemovingCoupon'
+	> = useSelect(
 		( select, { dispatch } ) => {
 			const store = select( storeKey );
 			const isApplyingCoupon = store.isApplyingCoupon();
@@ -37,9 +40,13 @@ export const useStoreCartCoupons = () => {
 				applyCoupon,
 				removeCoupon,
 				receiveApplyingCoupon,
+			}: {
+				applyCoupon: ( coupon: string ) => Promise< boolean >;
+				removeCoupon: ( coupon: string ) => Promise< boolean >;
+				receiveApplyingCoupon: ( coupon: string ) => void;
 			} = dispatch( storeKey );
 
-			const applyCouponWithNotices = ( couponCode ) => {
+			const applyCouponWithNotices = ( couponCode: string ) => {
 				applyCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
@@ -70,7 +77,7 @@ export const useStoreCartCoupons = () => {
 					} );
 			};
 
-			const removeCouponWithNotices = ( couponCode ) => {
+			const removeCouponWithNotices = ( couponCode: string ) => {
 				removeCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
