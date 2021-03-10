@@ -763,6 +763,7 @@ jQuery( function( $ ) {
 				case 'variable_regular_price' :
 				case 'variable_sale_price' :
 				case 'variable_stock' :
+				case 'variable_low_stock_amount' :
 				case 'variable_weight' :
 				case 'variable_length' :
 				case 'variable_width' :
