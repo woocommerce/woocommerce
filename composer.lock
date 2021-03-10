@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d60ef90fa87857445878bb83ba4c592c",
+    "content-hash": "587544846d9704560f64218cfbf4af62",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -48,23 +48,26 @@
         },
         {
             "name": "automattic/jetpack-constants",
-            "version": "v1.5.1",
+            "version": "v1.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-constants.git",
-                "reference": "18f772daddc8be5df76c9f4a92e017a3c2569a5b"
+                "reference": "84c8f09c5a6467104094243912fdcfe8eaed945b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/18f772daddc8be5df76c9f4a92e017a3c2569a5b",
-                "reference": "18f772daddc8be5df76c9f4a92e017a3c2569a5b",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/84c8f09c5a6467104094243912fdcfe8eaed945b",
+                "reference": "84c8f09c5a6467104094243912fdcfe8eaed945b",
                 "shasum": ""
             },
             "require-dev": {
-                "php-mock/php-mock": "^2.1",
-                "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5"
+                "brain/monkey": "2.6.0",
+                "yoast/phpunit-polyfills": "0.2.0"
             },
             "type": "library",
+            "extra": {
+                "mirror-repo": "Automattic/jetpack-constants"
+            },
             "autoload": {
                 "classmap": [
                     "src/"
@@ -75,7 +78,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "time": "2020-10-28T19:00:31+00:00"
+            "time": "2021-02-05T19:07:24+00:00"
         },
         {
             "name": "composer/installers",
