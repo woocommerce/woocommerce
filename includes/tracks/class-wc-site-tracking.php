@@ -104,7 +104,7 @@ class WC_Site_Tracking {
 
 		?>
 		<script type="text/javascript">
-			window.wcTracks.enable = function( callback = null ) {
+			window.wcTracks.enable = function( callback ) {
 				window.wcTracks.isEnabled = true;
 
 				var scriptUrl = '<?php echo esc_url( $woo_tracks_script ); ?>';
