@@ -16,9 +16,10 @@
 		"skipLibCheck": false,
 		"module": "esnext",
 		"typeRoots": [ "**/node_modules/@types" ],
-		"baseUrl": "./client",
+		"baseUrl": "./",
 		"paths": {
-			"@woocommerce/*": [ "../packages/*/src" ]
+			"@woocommerce/*": [ "packages/*/src" ],
+			"~/*": [ "client/*" ]
 		}
 	},
 	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ]

@@ -107,6 +107,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
 - Feature: Increase target audience for business feature step. #6508
 - Dev: Store profiler - Added MailPoet to Business Details step  #6503
+- Dev: Add tilde (~) to represent client root directory for imports. #6517
 
 == 2.1.0 3/10/2021  ==
 

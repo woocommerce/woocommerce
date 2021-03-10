@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getCountryCode } from '../../../../dashboard/utils';
+import { getCountryCode } from '~/dashboard/utils';
 
 // Determine if a store should see the selective bundle install a/b experiment based on country and chosen industries
 // from the profile wizard.

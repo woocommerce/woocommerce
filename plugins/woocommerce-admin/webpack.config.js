@@ -146,6 +146,7 @@ const webpackConfig = {
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
+			'~': path.resolve( __dirname + '/client' ),
 			'gutenberg-components': path.resolve(
 				__dirname,
 				'node_modules/@wordpress/components/src'

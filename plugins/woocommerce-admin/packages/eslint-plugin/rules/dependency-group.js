@@ -33,7 +33,7 @@ module.exports = {
 		 * @return {WCPackageLocality} Package locality.
 		 */
 		function getPackageLocality( source ) {
-			if ( source.startsWith( '.' ) ) {
+			if ( source.startsWith( '.' ) || source.startsWith( '~/' ) ) {
 				return 'Internal';
 			}
 			return 'External';

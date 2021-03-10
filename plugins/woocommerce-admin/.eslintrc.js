@@ -1,5 +1,8 @@
 module.exports = {
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
+	settings: {
+		'import/resolver': 'webpack',
+	},
 	rules: {
 		// temporary conversion to warnings until the below are all handled.
 		'@wordpress/i18n-translator-comments': 'warn',

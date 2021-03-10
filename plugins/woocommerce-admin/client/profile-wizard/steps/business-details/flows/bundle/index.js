@@ -28,8 +28,8 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../../../lib/currency-context';
-import { createNoticesFromResponse } from '../../../../../lib/notices';
+import { CurrencyContext } from '~/lib/currency-context';
+import { createNoticesFromResponse } from '~/lib/notices';
 import { extensionBenefits } from '../../data/extension-benefits';
 import { sellingVenueOptions } from '../../data/selling-venue-options';
 import { platformOptions } from '../../data/platform-options';

@@ -20,9 +20,9 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { AppIllustration } from '../app-illustration';
 import './style.scss';
-import { setAllPropsToValue } from '../../../../../../lib/collections';
-import { getCountryCode } from '../../../../../../dashboard/utils';
-import { isWCPaySupported } from '../../../../../../task-list/tasks/payments/wcpay';
+import { setAllPropsToValue } from '~/lib/collections';
+import { getCountryCode } from '~/dashboard/utils';
+import { isWCPaySupported } from '~/task-list/tasks/payments/wcpay';
 
 const generatePluginDescriptionWithLink = ( description, productName ) => {
 	return interpolateComponents( {

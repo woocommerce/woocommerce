@@ -24,8 +24,8 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../../../lib/currency-context';
-import { createNoticesFromResponse } from '../../../../../lib/notices';
+import { CurrencyContext } from '~/lib/currency-context';
+import { createNoticesFromResponse } from '~/lib/notices';
 import { platformOptions } from '../../data/platform-options';
 import { sellingVenueOptions } from '../../data/selling-venue-options';
 import { getRevenueOptions } from '../../data/revenue-options';
