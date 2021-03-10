@@ -240,18 +240,6 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 					'installed',
 				),
 			),
-			'account_type'        => array(
-				'type'              => 'string',
-				'description'       => __( 'Account type used for Jetpack.', 'woocommerce-admin' ),
-				'context'           => array( 'view' ),
-				'readonly'          => true,
-				'validate_callback' => 'rest_validate_request_arg',
-				'enum'              => array(
-					'new',
-					'existing',
-					'google',
-				),
-			),
 			'industry'            => array(
 				'type'              => 'array',
 				'description'       => __( 'Industry.', 'woocommerce-admin' ),
@@ -370,13 +358,6 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'sanitize_title_with_dashes',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'items_purchased'     => array(
-				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the user opted to purchase items now or later.', 'woocommerce-admin' ),
-				'context'           => array( 'view' ),
-				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'setup_client'        => array(

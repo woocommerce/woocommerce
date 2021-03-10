@@ -101,6 +101,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Missing i18n in Welcome modal. #6456
 - Fix: Restore visual styles back to Analytics tabs. #5913
 - Add: Add a "rather not say" option to revenue in the profile wizard. #6475
+- Dev: Remove `items_purchased` and `account_type` props from onboarding profile API. #6520
 - Dev: Added warning when WC-Admin is active but not being used #6453
 - Fix: Associated Order Number for refunds was hidden #6428
 - Add: Remove Mollie promo note on install #6510
