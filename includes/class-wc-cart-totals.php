@@ -750,6 +750,7 @@ final class WC_Cart_Totals {
 
 		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
+		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
 		$this->set_total( 'items_subtotal', $items_subtotal );
 		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
 
@@ -863,7 +864,7 @@ final class WC_Cart_Totals {
 	protected function calculate_totals() {
 		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$items_tax = array_sum( $this->get_merged_taxes( false, array( 'items' ) ) );
-		// Shipping and fee taxes are rounded because they were entered excluding taxes.
+		// Shipping and fee taxes are rounded seperately because they were entered excluding taxes (as opposed to item prices, which may or may not be including taxes depending upon settings).
 		$shipping_and_fee_taxes = NumberUtil::round( array_sum( $this->get_merged_taxes( false, array( 'fees', 'shipping' ) ) ), wc_get_price_decimals() );
 		$this->cart->set_total_tax( $items_tax + $shipping_and_fee_taxes );
 
