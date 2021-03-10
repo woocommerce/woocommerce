@@ -46,6 +46,23 @@ add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
 4. Navigate to other tasks such as "Store Details" or "Add products" .
 5. The "Preview Site" should not be shown on the other tasks.
 
+### Store profiler - Added MailPoet to new Business Details step  #6515
+
+- Create a brand new site and go to the OBW.
+- In the first OBW step (`Store Details`) set `US` in the `Country / Region` selector.
+- Continue with the profiler.
+- In the 4th step (`Business Details`) choose any of the options in both selectors.
+- Under `Free features` tab, verify that the displayed extensions are:
+```
+Mailpoet
+Facebook
+Google Ads
+Mailchimp
+Creative Mail
+```
+(In that order)
+- Verify that the Creative Mail option copy is `Emails made easy with Creative Mail`.
+
 ### Store profiler - Added MailPoet to Business Details step  #6503
 
 - Create a brand new site and go to the OBW.
