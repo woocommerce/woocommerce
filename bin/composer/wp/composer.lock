@@ -67,11 +67,6 @@
                 "po",
                 "translation"
             ],
-            "support": {
-                "email": "oom@oscarotero.com",
-                "issues": "https://github.com/oscarotero/Gettext/issues",
-                "source": "https://github.com/php-gettext/Gettext/tree/v4.8.3"
-            },
             "time": "2020-11-18T22:35:49+00:00"
         },
         {
@@ -322,9 +317,6 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/finder/tree/3.3"
-            },
             "time": "2017-06-01T21:01:25+00:00"
         },
         {
@@ -434,16 +426,16 @@
         },
         {
             "name": "wp-cli/php-cli-tools",
-            "version": "v0.11.11",
+            "version": "v0.11.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/php-cli-tools.git",
-                "reference": "fe9c7c44a9e1bf2196ec51dc38da0593dbf2993f"
+                "reference": "e472e08489f7504d9e8c5c5a057e1419cd1b2b3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/fe9c7c44a9e1bf2196ec51dc38da0593dbf2993f",
-                "reference": "fe9c7c44a9e1bf2196ec51dc38da0593dbf2993f",
+                "url": "https://api.github.com/repos/wp-cli/php-cli-tools/zipball/e472e08489f7504d9e8c5c5a057e1419cd1b2b3e",
+                "reference": "e472e08489f7504d9e8c5c5a057e1419cd1b2b3e",
                 "shasum": ""
             },
             "require": {
@@ -464,14 +456,14 @@
             ],
             "authors": [
                 {
-                    "name": "James Logsdon",
-                    "email": "jlogsdon@php.net",
-                    "role": "Developer"
-                },
-                {
                     "name": "Daniel Bachhuber",
                     "email": "daniel@handbuilt.co",
                     "role": "Maintainer"
+                },
+                {
+                    "name": "James Logsdon",
+                    "email": "jlogsdon@php.net",
+                    "role": "Developer"
                 }
             ],
             "description": "Console utilities for PHP",
@@ -480,7 +472,7 @@
                 "cli",
                 "console"
             ],
-            "time": "2018-09-04T13:28:00+00:00"
+            "time": "2021-03-03T12:43:49+00:00"
         },
         {
             "name": "wp-cli/wp-cli",
