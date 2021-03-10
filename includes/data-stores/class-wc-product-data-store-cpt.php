@@ -711,40 +711,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
 
-		/**
-		 * Filter to allow/prevent recounting of terms as it could be expensive.
-		 * A likely scenario for this is when bulk importing products. We could
-		 * then prevent it from recounting per product but instead recount it once
-		 * when import is done. Of course this means the import logic has to support this.
-		 *
-		 * @since 5.2
-		 * @param bool
-		 */
-		if ( apply_filters( 'woocommerce_product_update_recount_terms', '__return_true' ) ) {
-			$product_terms = get_the_terms( $product->get_id(), 'product_cat' );
-
-			if ( $product_terms ) {
-				$product_cats = array();
-
-				foreach ( $product_terms as $term ) {
-					$product_cats[ $term->term_id ] = $term->parent;
-				}
-
-				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-			}
-
-			$product_terms = get_the_terms( $product->get_id(), 'product_tag' );
-
-			if ( $product_terms ) {
-				$product_tags = array();
-
-				foreach ( $product_terms as $term ) {
-					$product_tags[ $term->term_id ] = $term->parent;
-				}
-
-				_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
-			}
-		}
+		_wc_recount_terms_by_product( $product->get_id() );
 	}
 
 	/**
