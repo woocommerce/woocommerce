@@ -212,8 +212,8 @@ defined( 'ABSPATH' ) || exit;
 
 					woocommerce_wp_text_input(
 						array(
-							'id'                => "variable_low_stock_threshold{$loop}",
-							'name'              => "variable_low_stock_threshold[{$loop}]",
+							'id'                => "variable_low_stock_amount{$loop}",
+							'name'              => "variable_low_stock_amount[{$loop}]",
 							'value'             => $variation_object->get_low_stock_amount( 'edit' ),
 							'placeholder'       => get_option( 'woocommerce_notify_low_stock_amount' ),
 							'label'             => __( 'Low stock threshold', 'woocommerce' ),
