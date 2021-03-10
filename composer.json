@@ -16,7 +16,7 @@
     "php": ">=7.0",
     "automattic/jetpack-autoloader": "2.9.1",
     "automattic/jetpack-constants": "1.5.1",
-    "composer/installers": "~1.7",
+    "composer/installers": "1.10.0",
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "3.1.0",
     "psr/container": "1.0.0",
@@ -25,7 +25,7 @@
     "woocommerce/woocommerce-blocks": "4.4.3"
   },
   "require-dev": {
-    "bamarni/composer-bin-plugin": "^1.4"
+    "bamarni/composer-bin-plugin": "1.4.1"
   },
   "config": {
     "optimize-autoloader": true,

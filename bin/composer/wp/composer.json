@@ -2,7 +2,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require-dev": {
-    "wp-cli/i18n-command": "^2.2"
+    "wp-cli/i18n-command": "2.2.6"
   },
   "config": {
     "platform": {
