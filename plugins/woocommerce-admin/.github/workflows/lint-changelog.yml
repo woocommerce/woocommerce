@@ -30,9 +30,8 @@ jobs:
               shell: bash
             - name: Add a reminder label to the PR
               uses: ./.github/actions/pr-labeler
-              if: github.event.pull_request.user.login != 'renovate[bot]' && !steps.skip-workflow.outputs.skip && always()
+              if: github.event.pull_request.user.login != 'renovate[bot]' && always()
               with:
                   access_token: ${{ github.token }}
-                  label: ${{ env.label }}
-                  action: ${{ env.label_action }}
-
+                  label: ${{ env.label || 'needs changelog entry' }}
+                  action: ${{ env.label_action || 'remove' }}
