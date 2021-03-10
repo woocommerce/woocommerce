@@ -13,7 +13,7 @@ jobs:
                   access_token: ${{ github.token }}
             - name: Check out repository code
               uses: actions/checkout@v2
-              if: github.event.pull_request.user.login != 'renovate'
+              if: github.event.pull_request.user.login != 'renovate[bot]'
             - name: skip-workflow
               id: skip-workflow
               uses: saulmaldonado/skip-workflow@v1.1.0
@@ -23,15 +23,16 @@ jobs:
                   pr-message: 'body'
                   search: '["pull_request"]'
             - name: Check for changelog entry
-              if: github.event.pull_request.user.login != 'renovate' && !steps.skip-workflow.outputs.skip
+              if: github.event.pull_request.user.login != 'renovate[bot]' && !steps.skip-workflow.outputs.skip
               env:
                   PR_NUMBER: ${{github.event.number}}
               run: bin/ci/lint-changelog.sh
               shell: bash
             - name: Add a reminder label to the PR
               uses: ./.github/actions/pr-labeler
-              if: github.event.pull_request.user.login != 'renovate' && !steps.skip-workflow.outputs.skip && always()
+              if: github.event.pull_request.user.login != 'renovate[bot]' && !steps.skip-workflow.outputs.skip && always()
               with:
                   access_token: ${{ github.token }}
                   label: ${{ env.label }}
                   action: ${{ env.label_action }}
+
