@@ -65,6 +65,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'backorders',
 			'backorders_allowed',
 			'backordered',
+			'low_stock_amount',
 			'sold_individually',
 			'weight',
 			'dimensions',
