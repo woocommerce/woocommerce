@@ -87,6 +87,8 @@ jobs:
 
       - name: Load docker images and start containers.
         working-directory: package/woocommerce
+        env:
+          WP_VERSION: 5.6.2
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
