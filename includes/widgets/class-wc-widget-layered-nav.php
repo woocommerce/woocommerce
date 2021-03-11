@@ -385,13 +385,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				$all_terms_to_filter_by = array();
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-					$all_terms                  = get_terms( $taxonomy );
+					$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 					$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 					$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 					$all_terms_to_filter_by     = array_merge( $all_terms_to_filter_by, $term_ids_to_filter_by );
 					$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
 
-					$count = count( $all_terms_to_filter_by );
+					$count = count( $term_ids_to_filter_by );
 					if ( 0 !== $count ) {
 						$query['where'] .= ' AND product_or_parent_id IN (';
 						if ( 'and' === $attributes_to_filter_by[ $taxonomy ]['query_type'] ) {

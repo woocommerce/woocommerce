@@ -391,6 +391,36 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Assert that the filter by attribute widget lists a given set of terms for an attribute
+	 * (with a count of 1 each)
+	 *
+	 * @param string $attribute_name The attribute name the terms belong to.
+	 * @param array  $expected_terms The labelss of the terms that are expected to be listed.
+	 * @param string $filter_type The filter type in use, "and" or "or".
+	 */
+	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		$widget = new class() extends WC_Widget_Layered_Nav {
+			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
+			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
+				return parent::get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type );
+			}
+			// phpcs:enable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
+		};
+
+		$taxonomy         = wc_attribute_taxonomy_name( $attribute_name );
+		$term_ids         = wp_list_pluck( get_terms( $taxonomy ), 'term_id', 'name' );
+		$term_ids_by_name = wp_list_pluck( get_terms( $taxonomy ), 'term_id', 'name' );
+
+		$expected = array();
+		foreach ( $expected_terms as $term ) {
+			$expected[ $term_ids_by_name[ $term ] ] = 1;
+		}
+
+		$term_counts = $widget->get_filtered_term_product_counts( $term_ids, $taxonomy, $filter_type );
+		$this->assertEquals( $expected, $term_counts );
+	}
+
+	/**
 	 * @testdox The product query shows a simple product only if it's not filtered out by the specified attribute filters.
 	 *
 	 * @testWith [[], "and", true]
@@ -428,6 +458,8 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue', 'Red' ) : array(), $filter_type );
 	}
 
 	/**
@@ -443,8 +475,10 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	 * @param bool $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
 	 */
 	public function test_filtering_simple_product_out_of_stock( $hide_out_of_stock, $is_in_stock, $expected_to_be_visible ) {
+		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable', 'Elastic' ) );
+
 		$product = $this->create_simple_product(
-			array(),
+			array( 'Features' => array( 'Washable', 'Ironable' ) ),
 			$is_in_stock
 		);
 
@@ -457,6 +491,8 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Features', $expected_to_be_visible ? array( 'Washable', 'Ironable' ) : array() );
 	}
 
 	/**
@@ -513,6 +549,9 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue', 'Red' ) : array() );
+		$this->assert_counters( 'Features', $expected_to_be_visible ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
 	}
 
 	/**
@@ -520,9 +559,11 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [false, true, true, true]
 	 *           [false, true, false, true]
+	 *           [false, false, true, true]
 	 *           [false, false, false, true]
 	 *           [true, true, true, true]
 	 *           [true, true, false, true]
+	 *           [true, false, true, true]
 	 *           [true, false, false, false]
 	 *
 	 * @param bool $hide_out_of_stock The value of the "hide out of stock products" option.
@@ -565,6 +606,17 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$expected_visible_attributes = array();
+		if ( ! $hide_out_of_stock || $variation_1_is_in_stock ) {
+			$expected_visible_attributes[] = 'Blue';
+		}
+		if ( ! $hide_out_of_stock || $variation_2_is_in_stock ) {
+			$expected_visible_attributes[] = 'Red';
+		}
+
+		$this->assert_counters( 'Color', $expected_visible_attributes );
+
 	}
 
 	/**
@@ -619,6 +671,8 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue', 'Red' ) : array(), $filter_type );
 	}
 
 	/**
@@ -668,6 +722,8 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
 	}
 
 	/**
@@ -675,14 +731,15 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_excludes_non_published_products() {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable' ) );
 
 		$product_simple_1 = $this->create_simple_product(
-			array(),
+			array( 'Features' => array( 'Washable' ) ),
 			true
 		);
 
 		$product_simple_2 = $this->create_simple_product(
-			array(),
+			array( 'Features' => array( 'Ironable' ) ),
 			true
 		);
 
@@ -729,6 +786,9 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		$filtered_product_ids = $this->do_product_request( array() );
 
 		$this->assertEquals( array( $product_simple_2['id'], $product_variable_2['id'] ), $filtered_product_ids );
+
+		$this->assert_counters( 'Color', array( 'Red' ) );
+		$this->assert_counters( 'Features', array( 'Ironable' ) );
 	}
 
 	/**
@@ -736,14 +796,15 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_excludes_hidden_products() {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable' ) );
 
 		$product_simple_1 = $this->create_simple_product(
-			array(),
+			array( 'Features' => array( 'Washable' ) ),
 			true
 		);
 
 		$product_simple_2 = $this->create_simple_product(
-			array(),
+			array( 'Features' => array( 'Ironable' ) ),
 			true
 		);
 
@@ -788,6 +849,9 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		$filtered_product_ids = $this->do_product_request( array() );
 
 		$this->assertEquals( array( $product_simple_2['id'], $product_variable_2['id'] ), $filtered_product_ids );
+
+		$this->assert_counters( 'Color', array( 'Red' ) );
+		$this->assert_counters( 'Features', array( 'Ironable' ) );
 	}
 
 	/**
@@ -836,6 +900,9 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
+		$this->assert_counters( 'Features', $expected_to_be_visible ? array( 'Ironable' ) : array() );
 	}
 
 	/**
@@ -891,5 +958,8 @@ class WC_Query_Filtering_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $filtered_product_ids );
 		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
+		$this->assert_counters( 'Size', $expected_to_be_visible ? array( 'Medium' ) : array() );
 	}
 }
