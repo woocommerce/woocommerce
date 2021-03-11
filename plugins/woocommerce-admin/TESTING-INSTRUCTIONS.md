@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fix hidden menu title on smaller screens #6562
+
+1. Enable the new navigation.
+2. Shorten your viewport height so that the secondary menu overlaps the main.
+3. Make sure the menu title can still be seen.
 ### Use wc filter to get status tabs for tools category #6525
 
 1. Register a new tab via the filter.

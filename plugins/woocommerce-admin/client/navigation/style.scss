@@ -17,6 +17,10 @@
 	.components-navigation {
 		box-sizing: border-box;
 	}
+
+	.components-navigation__menu-title {
+		overflow: visible;
+	}
 }
 
 .woocommerce-navigation__wrapper {
