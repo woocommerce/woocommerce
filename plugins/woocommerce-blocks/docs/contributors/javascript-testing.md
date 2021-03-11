@@ -53,6 +53,25 @@ When you're done, you may want to shut down the test environment:
 
 **Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/master/packages/env/README.md).
 
+### Modify the local environment used by end-to-end tests
+
+To modify the environment used by tests locally, you will need to modify `.wp-env.json`. For example, you can set a specific WP version and install the latest Gutenberg version with these two lines:
+
+```diff
+{
++	"core": "WordPress/WordPress#5.6",
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
+		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
++		"https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip",
+		"."
+	],
+  ...
+}
+```
+
+You will need to stop `wp-env` and start it again. In some cases, you will also need to clean the database: `npm run wp-env clean all`.
+
 ### How to update end-to-end tests suites
 
 We follow the same WordPress support policy as WooCommerce, this means we need to support the latest version, and the two previous ones (L-2).
