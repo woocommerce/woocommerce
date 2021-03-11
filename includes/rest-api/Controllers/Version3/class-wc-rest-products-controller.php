@@ -551,11 +551,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 					$product->set_stock_quantity( wc_stock_amount( $stock_quantity ) );
 				}
+
+				// Low stock amount.
+				if ( isset( $request['low_stock_amount'] ) ) {
+					$product->set_low_stock_amount( wc_stock_amount( $request['low_stock_amount'] ) );
+				}
 			} else {
 				// Don't manage stock.
 				$product->set_manage_stock( 'no' );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
+				$product->set_low_stock_amount( '' );
 			}
 		} elseif ( ! $product->is_type( 'variable' ) ) {
 			$product->set_stock_status( $stock_status );
@@ -984,6 +990,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'low_stock_amount'       => array(
+					'description' => __( 'Low Stock amount for the product.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
 				),
 				'sold_individually'     => array(
 					'description' => __( 'Allow one item to be bought in a single order.', 'woocommerce' ),

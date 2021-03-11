@@ -65,6 +65,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'backorders'            => $object->get_backorders(),
 			'backorders_allowed'    => $object->backorders_allowed(),
 			'backordered'           => $object->is_on_backorder(),
+			'low_stock_amount'      => $object->get_low_stock_amount(),
 			'weight'                => $object->get_weight(),
 			'dimensions'            => array(
 				'length' => $object->get_length(),
@@ -185,9 +186,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 				$variation->set_stock_quantity( $stock_quantity );
 			}
+			if ( isset( $request['low_stock_amount'] ) ) {
+				$variation->set_low_stock_amount( wc_stock_amount( $request['low_stock_amount'] ) );
+			}
 		} else {
 			$variation->set_backorders( 'no' );
 			$variation->set_stock_quantity( '' );
+			$variation->set_low_stock_amount( '' );
 		}
 
 		// Regular Price.
@@ -596,6 +601,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'low_stock_amount'       => array(
+					'description' => __( 'Low Stock amount for the variation.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
