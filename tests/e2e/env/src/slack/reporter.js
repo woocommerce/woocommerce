@@ -71,6 +71,8 @@ export async function sendFailedTestMessageToSlack( testName ) {
 	const web = initializeWeb();
 
 	try {
+		// Adding the app does not add the app user to the channel
+		await web.conversations.join( E2E_SLACK_CHANNEL );
 		// For details, see: https://api.slack.com/methods/chat.postMessage
 		await web.chat.postMessage({
 			channel: E2E_SLACK_CHANNEL,
