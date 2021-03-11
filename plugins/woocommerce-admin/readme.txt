@@ -113,6 +113,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add Ireland to Square payment method #6559
 - Add: CES survey for search product, order, customer #6420
 - Add: CES survey for importing products #6419
+- Add: CES survey for adding product categories, tags, and attributes #6418
 
 == 2.1.0 3/10/2021  ==
 

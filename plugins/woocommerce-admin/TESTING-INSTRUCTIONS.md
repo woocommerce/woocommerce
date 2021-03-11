@@ -219,6 +219,26 @@ Scenario #2
 - Upload CSV file and finish the import process.
 - Observe CES prompt "How easy was it to import products?" is displayed.
 
+### Add CES survey for adding product categories and tags #6418
+- Make sure tracking is enabled in settings.
+- Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+- Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
+
+**Testing product categories:**
+- Go to Products > Categories.
+- Add a new category.
+- Observe CES prompt "How easy was it to add a product category?" is displayed.
+
+**Testing product tags:**
+- Go to Products > Tags.
+- Add a new tag.
+- Observe CES prompt "How easy was it to add a product tag?" is displayed.
+
+**Testing product attributes:**
+- Go to Products > Attributes.
+- Add a new attribute.
+- Observe CES prompt "How easy was it to add a product attribute?" is displayed.
+
 ## 2.1.2
 
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532
