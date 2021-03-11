@@ -179,6 +179,16 @@ Scenario #2
 8. Click on the **Choose payment methods** task, it should not be displaying the **Woocommerce Payments** option.
 9. Go to **Plugins > installed Plugins**, check if the selected plugin features selected in step 4 are installed and activated.
 
+### Add Ireland to Square payment method #6559
+
+1. Go to the store setup wizard `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard`
+1. Set up your store with Ireland as its country, and proceed until the `Business Details` step
+1. In "Currently selling anywhere?" dropdown, select either:
+    - Yes, in person at physical stores and/or events
+    - Yes, on another platform and in person at physical stores and/or events
+1. Finish the setup wizard, and go to payments task `/wp-admin/admin.php?page=wc-admin&task=payments`
+1. Observe Square as a payment method option
+
 ## 2.1.2
 
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532
