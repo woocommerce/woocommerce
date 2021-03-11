@@ -34,6 +34,6 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@testing-library/react": "^11.2.5"
+		"@testing-library/react": "11.2.5"
 	}
 }
