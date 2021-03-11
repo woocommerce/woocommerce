@@ -169,14 +169,14 @@ export class OrderLineItem extends OrderItemMeta {
 	public readonly subtotalTax: string = '';
 
 	/**
-	 * The total for the product including adjusments.
+	 * The total for the product including adjustments.
 	 *
 	 * @type {string}
 	 */
 	public readonly total: string = '';
 
 	/**
-	 * The total tax for the product including adjusments.
+	 * The total tax for the product including adjustments.
 	 *
 	 * @type {string}
 	 */
