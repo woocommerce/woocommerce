@@ -208,6 +208,17 @@ Scenario #2
 - Go to Customers.
 - Type in anything in search bar, and press enter.
 - Observe CES prompt "How easy was it to use search?" is displayed
+
+### Add CES survey for importing products #6419
+- Make sure tracking is enabled in settings.
+- Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+- Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
+- If you don't have a product CSV export, you can obtain a sample CSV [here](https://gist.githubusercontent.com/ilyasfoo/507f9579531cf4bf50fe4c0e9c48a23d/raw/05e47e6731471464c757e893c3f2d8a9b89453c0/product-export.csv).
+- Go to Products > All Products.
+- Click on "Import".
+- Upload CSV file and finish the import process.
+- Observe CES prompt "How easy was it to import products?" is displayed.
+
 ## 2.1.2
 
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532

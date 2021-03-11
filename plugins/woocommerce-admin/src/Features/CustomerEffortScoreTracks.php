@@ -35,7 +35,12 @@ class CustomerEffortScoreTracks {
 	const SETTINGS_CHANGE_ACTION_NAME = 'settings_change';
 
 	/**
-	 * Action name for add product tags.
+	 * Action name for import products.
+	 */
+	const IMPORT_PRODUCTS_ACTION_NAME = 'import_products';
+  
+	/**
+	 * Action name for search.
 	 */
 	const SEARCH_ACTION_NAME = 'ces_search';
 
@@ -45,7 +50,6 @@ class CustomerEffortScoreTracks {
 	 * @var string
 	 */
 	private $onsubmit_label;
-
 
 	/**
 	 * Constructor. Sets up filters to hook into WooCommerce.
@@ -92,6 +96,8 @@ class CustomerEffortScoreTracks {
 			3
 		);
 		add_action( 'load-edit.php', array( $this, 'run_on_load_edit_php' ), 10, 3 );
+
+		add_action( 'product_page_product_importer', array( $this, 'run_on_product_import' ), 10, 3 );
 
 		$this->onsubmit_label = __( 'Thank you for your feedback!', 'woocommerce-admin' );
 	}
@@ -240,6 +246,34 @@ class CustomerEffortScoreTracks {
 			array_values( $remaining_items )
 		);
 		update_option( self::CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME, false );
+	}
+
+	/**
+	 * Maybe enqueue the CES survey on product import, if step is done.
+	 */
+	public function run_on_product_import() {
+		// We're only interested in when the importer completes.
+		if ( empty( $_GET['step'] ) || 'done' !== $_GET['step'] ) { // phpcs:ignore CSRF ok.
+			return;
+		}
+
+		if ( $this->has_been_shown( self::IMPORT_PRODUCTS_ACTION_NAME ) ) {
+			return;
+		}
+
+		$this->enqueue_to_ces_tracks(
+			array(
+				'action'         => self::IMPORT_PRODUCTS_ACTION_NAME,
+				'label'          => __(
+					'How easy was it to import products?',
+					'woocommerce-admin'
+				),
+				'onsubmit_label' => $this->onsubmit_label,
+				'pagenow'        => 'product_page_product_importer',
+				'adminpage'      => 'product_page_product_importer',
+				'props'          => (object) array(),
+			)
+		);
 	}
 
 	/**
