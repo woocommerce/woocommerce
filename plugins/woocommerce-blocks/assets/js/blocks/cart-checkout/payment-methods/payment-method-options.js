@@ -58,7 +58,7 @@ const PaymentMethodOptions = () => {
 					  } ),
 			name: `wc-saved-payment-method-token-${ name }`,
 			content: (
-				<PaymentMethodCard allowsSaving={ supports.savePaymentInfo }>
+				<PaymentMethodCard showSaveOption={ supports.showSaveOption }>
 					{ cloneElement( component, {
 						activePaymentMethod,
 						...paymentMethodInterface,
