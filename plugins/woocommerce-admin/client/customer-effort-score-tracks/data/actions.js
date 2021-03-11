@@ -28,13 +28,15 @@ export function setCesSurveyQueue( queue ) {
  * @param {string} pageNow value of window.pagenow
  * @param {string} adminPage value of window.adminpage
  * @param {string} onsubmit_label label for the snackback onsubmit
+ * @param {Object} props object for optional props
  */
 export function addCesSurvey(
 	action,
 	label,
 	pageNow = window.pagenow,
 	adminPage = window.adminpage,
-	onsubmit_label = undefined
+	onsubmit_label = undefined,
+	props = {}
 ) {
 	return {
 		type: TYPES.ADD_CES_SURVEY,
@@ -43,6 +45,7 @@ export function addCesSurvey(
 		pageNow,
 		adminPage,
 		onsubmit_label,
+		props,
 	};
 }
 
@@ -58,5 +61,21 @@ export function addCesSurveyForAnalytics() {
 		),
 		'woocommerce_page_wc-admin',
 		'woocommerce_page_wc-admin'
+	);
+}
+
+/**
+ * Add a new CES survey track on searching customers.
+ */
+export function addCesSurveyForCustomerSearch() {
+	return addCesSurvey(
+		'ces_search',
+		__( 'How easy was it to use search?', 'woocommerce-admin' ),
+		'woocommerce_page_wc-admin',
+		'woocommerce_page_wc-admin',
+		undefined,
+		{
+			search_area: 'customer',
+		}
 	);
 }

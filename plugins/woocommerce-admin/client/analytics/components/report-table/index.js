@@ -38,6 +38,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
 import { extendTableData } from './utils';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -246,7 +247,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const onSearchChange = ( values ) => {
-		const { baseSearchQuery } = props;
+		const { baseSearchQuery, addCesSurveyForCustomerSearch } = props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const searchTerms = values.map( ( v ) =>
@@ -260,6 +261,9 @@ const ReportTable = ( props ) => {
 				...baseSearchQuery,
 				search: uniq( searchTerms ).join( ',' ),
 			} );
+
+			// Prompt survey if user is searching for something.
+			addCesSurveyForCustomerSearch();
 		} else {
 			updateQueryString( {
 				search: undefined,
@@ -638,10 +642,12 @@ export default compose(
 	withDispatch( ( dispatch ) => {
 		const { startExport } = dispatch( EXPORT_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
+		const { addCesSurveyForCustomerSearch } = dispatch( CES_STORE_KEY );
 
 		return {
 			createNotice,
 			startExport,
+			addCesSurveyForCustomerSearch,
 		};
 	} )
 )( ReportTable );

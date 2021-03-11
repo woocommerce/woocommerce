@@ -28,6 +28,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,
+				props: action.props,
 			};
 			return {
 				...state,
