@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+/**
+ * Product_Variations_API class.
+ */
 class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -397,7 +400,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 37, count( $properties ) );
+		$this->assertEquals( 38, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -424,6 +427,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'backorders', $properties );
 		$this->assertArrayHasKey( 'backorders_allowed', $properties );
 		$this->assertArrayHasKey( 'backordered', $properties );
+		$this->assertArrayHasKey( 'low_stock_amount', $properties );
 		$this->assertArrayHasKey( 'weight', $properties );
 		$this->assertArrayHasKey( 'dimensions', $properties );
 		$this->assertArrayHasKey( 'shipping_class', $properties );
