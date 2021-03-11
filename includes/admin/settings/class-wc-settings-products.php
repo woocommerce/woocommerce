@@ -64,6 +64,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 		$settings = $this->get_settings( $current_section );
 		WC_Admin_Settings::save_fields( $settings );
 
+		/*
+		 * Product->Inventory has a setting `Out of stock visibility`.
+		 * Because of this, we need to recount the terms to keep them in-sync.
+		 */
+		wc_recount_all_terms();
+
 		if ( $current_section ) {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
