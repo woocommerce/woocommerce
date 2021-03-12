@@ -72,7 +72,24 @@ export async function sendFailedTestMessageToSlack( testName ) {
 
 	try {
 		// Adding the app does not add the app user to the channel
-		await web.conversations.join( E2E_SLACK_CHANNEL );
+		await web.conversations.join({
+			channel: E2E_SLACK_CHANNEL,
+			token: E2E_SLACK_TOKEN,
+		});
+	} catch ( error ) {
+		// Check the code property and log the response
+		if ( error.code === ErrorCode.PlatformError || error.code === ErrorCode.RequestError ||
+			error.code === ErrorCode.RateLimitedError || error.code === ErrorCode.HTTPError ) {
+			console.log( error.data );
+		} else {
+			// Some other error, oh no!
+			console.log(
+				'Error joining channel',
+				error
+			);
+		}
+	}
+	try {
 		// For details, see: https://api.slack.com/methods/chat.postMessage
 		await web.chat.postMessage({
 			channel: E2E_SLACK_CHANNEL,
