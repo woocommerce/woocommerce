@@ -235,6 +235,10 @@
 
 .wc-block-components-radio-control-accordion-content {
 	padding: 0 $gap em($gap) $gap;
+
+	&:empty {
+		display: none;
+	}
 }
 
 .wc-block-checkout__order-notes {

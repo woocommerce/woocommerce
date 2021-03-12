@@ -55,7 +55,7 @@ const options = {
   edit: <div>A React node</div>,
   canMakePayment: () => true,
   paymentMethodId: 'new_payment_method',
-  supports = {
+  supports: {
       features: [],
   }
 };
