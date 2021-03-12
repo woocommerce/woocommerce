@@ -198,7 +198,7 @@ abstract class AbstractBlock {
 	 * Get the editor style handle for this block type.
 	 *
 	 * @see $this->register_block_type()
-	 * @return string|array
+	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
 		return 'wc-block-editor';
@@ -224,7 +224,7 @@ abstract class AbstractBlock {
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @see $this->register_block_type()
-	 * @return string|array
+	 * @return string|null
 	 */
 	protected function get_block_type_style() {
 		return 'wc-block-style';

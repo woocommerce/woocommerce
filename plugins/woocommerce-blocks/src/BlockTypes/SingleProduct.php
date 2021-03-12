@@ -28,16 +28,6 @@ class SingleProduct extends AbstractBlock {
 	}
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @return string|array
-	 */
-	protected function get_block_type_style() {
-		return [ 'wc-block-style', 'wc-block-vendors-style' ];
-	}
-
-	/**
 	 * Render the block on the frontend.
 	 *
 	 * @param array  $attributes Block attributes.

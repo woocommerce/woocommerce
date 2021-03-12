@@ -50,16 +50,6 @@ class Cart extends AbstractBlock {
 	}
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @return string|array
-	 */
-	protected function get_block_type_style() {
-		return [ 'wc-block-style', 'wc-block-vendors-style' ];
-	}
-
-	/**
 	 * Enqueue frontend assets for this block, just in time for rendering.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
