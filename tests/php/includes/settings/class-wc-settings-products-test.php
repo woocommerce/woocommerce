@@ -148,25 +148,19 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox 'save' flushes the term count cache.
 	 */
 	public function test_save_does_recount_terms() {
-		// phpcs:disable Squiz.Commenting
-		$mock_tools_controller = new class() {
-			public $tool_executed;
+		$wc_recount_all_terms_called = false;
 
-			public function execute_tool( $tool ) {
-				$this->tool_executed = $tool;
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		$this->register_legacy_proxy_class_mocks(
+		$this->register_legacy_proxy_function_mocks(
 			array(
-				'WC_REST_System_Status_Tools_Controller' => $mock_tools_controller,
+				'wc_recount_all_terms' => function() use ( &$wc_recount_all_terms_called ) {
+					$wc_recount_all_terms_called = true;
+				},
 			)
 		);
 
 		$sut = new WC_Settings_Products();
 		$sut->save();
 
-		$this->assertEquals( 'recount_terms', $mock_tools_controller->tool_executed );
+		$this->assertTrue( $wc_recount_all_terms_called );
 	}
 }
