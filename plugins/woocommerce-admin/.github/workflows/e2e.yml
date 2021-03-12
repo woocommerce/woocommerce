@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
     e2e-tests:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
         steps:
             - name: Cancel Previous Runs
               uses: styfle/cancel-workflow-action@0.7.0
@@ -34,5 +34,6 @@ jobs:
                   composer require wp-cli/i18n-command
                   npm run build
                   npm install jest --global
+                  WP_VERSION=5.6.2
                   npm run docker:up
                   npm run test:e2e
