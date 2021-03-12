@@ -71,6 +71,16 @@ module.exports = jestConfig;
 
 **NOTE:** Your project's Jest config file is expected to be: `tests/e2e/config/jest.config.js`.
 
+#### Test Screenshots
+
+The test sequencer provides a screenshot function for test failures. To enable screenshots on test failure use
+
+```shell script
+WC_E2E_SCREENSHOTS=1 npx wc-e2e test:e2e
+```
+
+Screenshots will be saved to `tests/e2e/screenshots`
+
 ### Jest Puppeteer Config
 
 The test sequencer uses the following default Puppeteer configuration:
