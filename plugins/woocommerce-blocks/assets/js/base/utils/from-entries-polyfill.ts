@@ -8,8 +8,6 @@ export const fromEntriesPolyfill = (
 	array: Array< [ string, unknown ] >
 ): Record< string, unknown > =>
 	array.reduce< Record< string, unknown > >( ( obj, [ key, val ] ) => {
-		if ( val ) {
-			obj[ key ] = val;
-		}
+		obj[ key ] = val;
 		return obj;
 	}, {} );
