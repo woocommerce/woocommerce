@@ -11,7 +11,7 @@ const runMyAccountPageTest = () => {
 	describe('My account page', () => {
 		it('allows customer to login', async () => {
 			await merchant.logout();
-//			await shopper.login();
+			await shopper.login();
 			await expect(page).toMatch('Hello');
 			await expect(page).toMatchElement('.woocommerce-MyAccount-navigation-link', {text: 'Dashboard'});
 			await expect(page).toMatchElement('.woocommerce-MyAccount-navigation-link', {text: 'Orders'});
