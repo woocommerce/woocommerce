@@ -53,15 +53,9 @@ class Benefits extends Component {
 	}
 
 	async skipPluginInstall() {
-		const {
-			createNotice,
-			goToNextStep,
-			isProfileItemsError,
-			updateProfileItems,
-		} = this.props;
+		const { createNotice, goToNextStep, isProfileItemsError } = this.props;
 
 		const plugins = this.isJetpackActive ? 'skipped-wcs' : 'skipped';
-		await updateProfileItems( { plugins } );
 
 		if ( isProfileItemsError ) {
 			createNotice(
@@ -86,7 +80,6 @@ class Benefits extends Component {
 			createNotice,
 			goToNextStep,
 			installAndActivatePlugins,
-			updateProfileItems,
 			updateOptions,
 		} = this.props;
 		const plugins = this.isJetpackActive ? 'installed-wcs' : 'installed';
@@ -98,7 +91,6 @@ class Benefits extends Component {
 
 		Promise.all( [
 			installAndActivatePlugins( this.pluginsToInstall ),
-			updateProfileItems( { plugins } ),
 			updateOptions( {
 				woocommerce_setup_jetpack_opted_in: true,
 			} ),
@@ -322,14 +314,12 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
-		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			installAndActivatePlugins,
-			updateProfileItems,
 			updateOptions,
 		};
 	} )

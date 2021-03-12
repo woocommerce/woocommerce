@@ -104,7 +104,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 14, $properties );
+		$this->assertCount( 13, $properties );
 		$this->assertArrayHasKey( 'completed', $properties );
 		$this->assertArrayHasKey( 'skipped', $properties );
 		$this->assertArrayHasKey( 'industry', $properties );
@@ -117,7 +117,6 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'business_extensions', $properties );
 		$this->assertArrayHasKey( 'theme', $properties );
 		$this->assertArrayHasKey( 'wccom_connected', $properties );
-		$this->assertArrayHasKey( 'plugins', $properties );
 		$this->assertArrayHasKey( 'setup_client', $properties );
 	}
 

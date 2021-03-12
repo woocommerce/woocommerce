@@ -226,20 +226,6 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'plugins'             => array(
-				'type'              => 'string',
-				'description'       => __( 'How the Jetpack/WooCommerce Shipping & Tax step was handled.', 'woocommerce-admin' ),
-				'context'           => array( 'view' ),
-				'readonly'          => true,
-				'validate_callback' => 'rest_validate_request_arg',
-				'enum'              => array(
-					'skipped',
-					'skipped-wcs',
-					'already-installed',
-					'installed-wcs',
-					'installed',
-				),
-			),
 			'industry'            => array(
 				'type'              => 'array',
 				'description'       => __( 'Industry.', 'woocommerce-admin' ),

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, createElement, Fragment } from '@wordpress/element';
+import { Component, createElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { identity, pick } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -74,8 +74,6 @@ class ProfileWizard extends Component {
 	}
 
 	componentDidMount() {
-		const { activePlugins, profileItems, updateProfileItems } = this.props;
-
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
@@ -85,20 +83,6 @@ class ProfileWizard extends Component {
 		recordEvent( 'storeprofiler_step_view', {
 			step: this.getCurrentStep().key,
 		} );
-
-		// Track plugins if already installed.
-		if (
-			activePlugins.includes( 'woocommerce-services' ) &&
-			activePlugins.includes( 'jetpack' ) &&
-			profileItems.plugins !== 'already-installed'
-		) {
-			recordEvent(
-				'wcadmin_storeprofiler_already_installed_plugins',
-				{}
-			);
-
-			updateProfileItems( { plugins: 'already-installed' } );
-		}
 	}
 
 	componentWillUnmount() {
@@ -221,18 +205,14 @@ class ProfileWizard extends Component {
 			activePlugins,
 			isJetpackConnected,
 			notes,
-			profileItems,
 			updateNote,
 			updateProfileItems,
 			connectToJetpack,
 		} = this.props;
 		recordEvent( 'storeprofiler_complete' );
 
-		const { plugins } = profileItems;
 		const shouldConnectJetpack =
-			( plugins === 'installed' || plugins === 'installed-wcs' ) &&
-			activePlugins.includes( 'jetpack' ) &&
-			! isJetpackConnected;
+			activePlugins.includes( 'jetpack' ) && ! isJetpackConnected;
 
 		const profilerNote = notes.find(
 			( note ) => note.name === 'wc-admin-onboarding-profiler-reminder'
@@ -282,7 +262,6 @@ class ProfileWizard extends Component {
 		const { query } = this.props;
 		const step = this.getCurrentStep();
 		const stepKey = step.key;
-
 		const container = createElement( step.container, {
 			query,
 			step,
@@ -297,10 +276,10 @@ class ProfileWizard extends Component {
 		const classNames = `woocommerce-profile-wizard__container ${ stepKey }`;
 
 		return (
-			<Fragment>
+			<>
 				<ProfileWizardHeader currentStep={ stepKey } steps={ steps } />
 				<div className={ classNames }>{ container }</div>
-			</Fragment>
+			</>
 		);
 	}
 }
@@ -317,13 +296,11 @@ export default compose(
 			getPluginsError,
 			isJetpackConnected,
 		} = select( PLUGINS_STORE_NAME );
-
 		const { general: generalSettings } = select(
 			SETTINGS_STORE_NAME
 		).getSettings( 'general' );
 
 		const profileItems = getProfileItems();
-
 		const country = generalSettings.woocommerce_default_country || null;
 		const industrySlugs = ( profileItems.industry || [] ).map(
 			( industry ) => industry.slug
@@ -351,7 +328,7 @@ export default compose(
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			isJetpackConnected: isJetpackConnected(),
 			notes,
-			profileItems: getProfileItems(),
+			profileItems,
 			activePlugins,
 			selectiveBundleInstallSegmentation,
 		};

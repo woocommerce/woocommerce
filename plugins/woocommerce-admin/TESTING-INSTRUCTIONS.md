@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Fix a bug where the JetPack connection flow would not activate
+
+1. With a fresh install of wc-admin and woocommerce, go to the home screen
+2. Going to the homescreen redirects to the profile setup wizard
+3. The first step is "Store details" choose United States (any state) for country and fill in the other details with test data.
+4. Click "continue", you should be taken to the "Industry" step.
+5. In the "Industry" step check the "Food and Drink" option only. Click "continue"
+6. In the "Product Type" step choose any value and click "continue"
+7. You should arrive at the "Business details" step which provides 2 tabs: "Business details" and "Free features". In the "Business Details" tab fill out the dropdowns with any values. Click "continue".
+8. In the "Free features" step expand the list of extensions to install by clicking the arrow to the right of "Add recommended business features to my site".
+9. Uncheck all the extensions except for "Enhance speed and security with Jetpack"
+10. Click "continue", the plugin will be installed and you should arrive at the theme step.
+11. Click "Continue with my active theme"
+12. After finishing the wizard, this should redirect you to the "Jetpack" setup connection flow. (You should not be redirected straight to the homescreen).
+
 ### Fix hidden menu title on smaller screens #6562
 
 1. Enable the new navigation.
