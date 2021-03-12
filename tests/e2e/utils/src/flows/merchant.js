@@ -176,6 +176,12 @@ const merchant = {
 			waitUntil: 'networkidle0',
 		} );
 	},
+
+	openEmailLog: async () => {
+		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
+	},
 };
 
 module.exports = merchant;

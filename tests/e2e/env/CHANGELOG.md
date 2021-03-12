@@ -1,19 +1,26 @@
 # Unreleased
 
-# 0.2.0
+## Added
+
+- Support for screenshots on test errors
+- Slackbot to report errors to Slack channel
 
 ## Fixed
 
-- Return jest exit code from `npx wc-e2e test:e2e*`
+- Update `wc-e2e` script to fix an issue with directories with a space in their name
+
+# 0.2.0
 
 ## Added
 
 - support for custom container name
 - Insert a 12 hour delay in using new docker image tags
 - Package `bin` script `wc-e2e`
+- WP Mail Log plugin as part of container initialization
 
 ## Fixed
 
+- Return jest exit code from `npx wc-e2e test:e2e*`
 - Remove redundant `puppeteer` dependency
 - Support for admin user configuration from `default.json`
 
