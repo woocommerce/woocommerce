@@ -17,6 +17,24 @@
 11. Click "Continue with my active theme"
 12. After finishing the wizard, this should redirect you to the "Jetpack" setup connection flow. (You should not be redirected straight to the homescreen).
 
+### Allow the manager role to query certain options #6577
+
+Testing `woocommerce_ces_tracks_queue`
+
+1. Checkout this branch.
+2. Open browser inspector and select the Network tab.
+2. Navigate to WooCommerce -> Settings.
+3. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user` returns 200 status.
+
+
+Testing `woocommerce_navigation_intro_modal_dismissed`
+
+1. Checkout this branch.
+2. Navigate to WooCommerce -> Settings -> Advanced -> features (/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features) and enable Navigation
+3. Open browser inspector and select the Network tab.
+4. Navigate to WooCommerce -> Home
+5. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_navigation_intro_modal_dismissed&_locale=user` returns 200 status.
+
 ### Fix hidden menu title on smaller screens #6562
 
 1. Enable the new navigation.

@@ -129,13 +129,15 @@ class Options extends \WC_REST_Data_Controller {
 	 */
 	public function get_option_permissions( $request ) {
 		$permissions = array(
-			'theme_mods_' . get_stylesheet()     => current_user_can( 'edit_theme_options' ),
-			'woocommerce_setup_jetpack_opted_in' => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_stripe_settings'        => current_user_can( 'manage_woocommerce' ),
-			'woocommerce-ppcp-settings'          => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_ppcp-gateway_setting'   => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_demo_store'             => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_demo_store_notice'      => current_user_can( 'manage_woocommerce' ),
+			'theme_mods_' . get_stylesheet()               => current_user_can( 'edit_theme_options' ),
+			'woocommerce_setup_jetpack_opted_in'           => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_stripe_settings'                  => current_user_can( 'manage_woocommerce' ),
+			'woocommerce-ppcp-settings'                    => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_ppcp-gateway_setting'             => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_demo_store'                       => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_demo_store_notice'                => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_ces_tracks_queue'                 => current_user_can( 'manage_woocommerce' ),
+			'woocommerce_navigation_intro_modal_dismissed' => current_user_can( 'manage_woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_rest_api_option_permissions', $permissions, $request );
