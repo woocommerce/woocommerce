@@ -29,7 +29,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'webhooks',
 			'legacy_api',
 			'woocommerce_com',
-			'features',
 		);
 
 		$this->assertEquals( $expected, $section_names );
@@ -171,23 +170,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox get_settings('legacy_api') should return all the settings for the legacy_api section.
 	 */
 	public function test_get_legacy_api_settings_returns_all_settings() {
-		$sut = new WC_Settings_Advanced();
-
-		$expected = array(
-			'legacy_api_options'      => array( 'title', 'sectionend' ),
-			'woocommerce_api_enabled' => 'checkbox',
-		);
-
-		$settings               = $sut->get_settings( 'legacy_api' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
-
-		$this->assertEquals( $expected, $settings_ids_and_types );
-	}
-
-	/**
-	 * @testdox get_settings('features') should return all the settings for the features section.
-	 */
-	public function test_get_features_settings_returns_all_settings() {
 		$sut = new WC_Settings_Advanced();
 
 		$expected = array(

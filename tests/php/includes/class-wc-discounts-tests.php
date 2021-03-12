@@ -28,7 +28,7 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	 * Helper method to create customer.
 	 */
 	public function create_customer() {
-		$username = 'testusername-' . microtime( true ) . wp_generate_password( 6, false, false );
+		$username = sanitize_title( 'testusername-' . microtime( true ) . wp_generate_password( 6, false, false ) );
 		$customer = new WC_Customer();
 		$customer->set_username( $username );
 		$customer->set_password( 'test123' );
