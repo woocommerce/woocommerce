@@ -13,7 +13,7 @@ const clearAndFillInput = async ( selector, value ) => {
 	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await pressKeyWithModifier( 'primary', 'a' );
-	await page.type( selector, value );
+	await expect(page).toFill( selector, value );
 };
 
 /**
@@ -200,14 +200,15 @@ const evalAndClick = async ( selector ) => {
 /**
  * Select a value from select2 input field.
  *
- * @param {string} value Value of what to be selected
- * @param {string} selector Selector of the select2
+ * @param {string} selector Selector of the select2 input field
+ * @param {string} value Value from what has to be selected
  */
-const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
-	await page.waitForSelector(selector);
-	await page.type(selector, value);
+const selectOptionInSelect2 = async ( selector = 'input.select2-search__field', value ) => {
+	await page.waitForSelector( selector );
+	await expect( page ).toFill( selector, value );
 	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
-	await page.keyboard.press('Enter');
+	await page.keyboard.press( 'Enter' );
+	await expect( page ).toMatchElement( selector, value );
 };
 
 /**
