@@ -89,7 +89,10 @@ export async function sendFailedTestMessageToSlack( testName ) {
 			console.log( error.data );
 		} else {
 			// Some other error, oh no!
-			console.log( 'The error occurred does not match an error we are checking for in this block.' );
+			console.log(
+				'The error occurred does not match an error we are checking for in this block.',
+				error.data
+			);
 		}
 	}
 }
