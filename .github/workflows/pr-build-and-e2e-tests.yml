@@ -24,7 +24,7 @@ jobs:
 
   e2e-tests-run:
     name: Runs E2E tests.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: [ build ]
     steps:
 
