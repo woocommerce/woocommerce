@@ -20,26 +20,31 @@ const runOrderSearchingTest = () => {
 			await merchant.login();
 			await createSimpleProduct('Wanted Product');
 
-			// Create new order for testing
-			await merchant.openNewOrder();
-			await page.waitForSelector('#order_status');
-			await page.select('#order_status', 'Pending payment');
-			await page.waitForSelector('#customer_user');
-			await page.click('#customer_user');
-			await selectOptionInSelect2('Customer', 'input.select2-search__field');
+			await Promise.all([
+				// Create new order for testing
+				await merchant.openNewOrder(),
+				await page.waitForSelector('#order_status'),
+				await page.select('#order_status', 'Pending payment'),
+				await page.waitForSelector('#customer_user'),
+				await page.click('#customer_user'),
+				await selectOptionInSelect2('Customer', 'input.select2-search__field'),
+			]);
 
-			// Change the shipping data
-			await page.waitFor(1000); // to avoid flakiness
-			await clearAndFillInput('#_shipping_first_name', 'Tim');
-			await clearAndFillInput('#_shipping_last_name', 'Clark');
-			await clearAndFillInput('#_shipping_address_1', 'Oxford Ave');
-			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
-			await clearAndFillInput('#_shipping_city', 'Buffalo');
-			await clearAndFillInput('#_shipping_postcode', '14201');
-			await page.keyboard.press('Tab');
-			await page.keyboard.press('Tab');
-			await page.keyboard.press('Enter');
-			await selectOptionInSelect2('New York', 'input.select2-search__field');
+			await Promise.all([
+				// Change the shipping data
+				await page.waitFor(1000), // to avoid flakiness
+				await page.waitForSelector('#_shipping_first_name'),
+				await clearAndFillInput('#_shipping_first_name', 'Tim'),
+				await clearAndFillInput('#_shipping_last_name', 'Clark'),
+				await clearAndFillInput('#_shipping_address_1', 'Oxford Ave'),
+				await clearAndFillInput('#_shipping_address_2', 'Linwood Ave'),
+				await clearAndFillInput('#_shipping_city', 'Buffalo'),
+				await clearAndFillInput('#_shipping_postcode', '14201'),
+				await page.keyboard.press('Tab'),
+				await page.keyboard.press('Tab'),
+				await page.keyboard.press('Enter'),
+				await selectOptionInSelect2('New York', 'input.select2-search__field'),
+			]);
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
