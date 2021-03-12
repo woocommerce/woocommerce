@@ -64,8 +64,8 @@ const initializeSlack = () => {
  * @returns {Promise<void>}
  */
 export async function sendFailedTestMessageToSlack( testName ) {
-	const pr = initializeSlack();
-	if ( ! pr ) {
+	const { branch, commit, webUrl } = initializeSlack();
+	if ( ! branch ) {
 		return;
 	}
 	const web = initializeWeb();
@@ -77,10 +77,10 @@ export async function sendFailedTestMessageToSlack( testName ) {
 		await web.chat.postMessage({
 			channel: E2E_SLACK_CHANNEL,
 			token: E2E_SLACK_TOKEN,
-			text: `Test failed on *${ pr.branch }* branch. \n
-            The commit this build is testing is *${ pr.commit }*. \n
+			text: `Test failed on *${ branch }* branch. \n
+            The commit this build is testing is *${ commit }*. \n
             The name of the test that failed: *${ testName }*. \n
-            See screenshot of the failed test below. *Build log* could be found here: ${ pr.webUrl }`,
+            See screenshot of the failed test below. *Build log* could be found here: ${ webUrl }`,
 		});
 	} catch ( error ) {
 		// Check the code property and log the response
@@ -89,7 +89,10 @@ export async function sendFailedTestMessageToSlack( testName ) {
 			console.log( error.data );
 		} else {
 			// Some other error, oh no!
-			console.log( 'The error occurred does not match an error we are checking for in this block.' );
+			console.log(
+				'The error occurred does not match an error we are checking for in this block.',
+				error
+			);
 		}
 	}
 }
