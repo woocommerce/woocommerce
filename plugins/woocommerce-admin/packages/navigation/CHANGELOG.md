@@ -1,3 +1,9 @@
+# Unreleased
+
+## Breaking changes
+
+-   Move Lodash to a peer dependency.
+
 # 5.3.0
 
 -   `getQueryExcludedScreens` Return a list of screens that should be excluded from persisted query logic.

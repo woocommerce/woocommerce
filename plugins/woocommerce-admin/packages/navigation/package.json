@@ -23,8 +23,10 @@
 	"dependencies": {
 		"@woocommerce/experimental": "file:../experimental",
 		"history": "4.10.1",
-		"lodash": "4.17.15",
 		"qs": "6.9.6"
+	},
+	"peerDependencies": {
+		"lodash": "^4.17.0"
 	},
 	"publishConfig": {
 		"access": "public"

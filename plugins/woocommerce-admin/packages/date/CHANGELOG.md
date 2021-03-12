@@ -1,7 +1,9 @@
 # Unreleased
 
 -   Take into account leap year in calculating `getLastPeriod`.
+## Breaking changes
 
+-   Move Lodash to a peer dependency.
 # 2.1.0
 
 -   Update to @wordpress/eslint coding standards.

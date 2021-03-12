@@ -12,6 +12,10 @@
 -   Fixing screen reader text being undefined for report `<Table>`
 -   Update `<SearchListControl />` to use checkbox and radio inputs.
 
+## Breaking changes
+
+-   Move Lodash to a peer dependency.
+
 # 5.1.2
 
 -   Update dependencies.
