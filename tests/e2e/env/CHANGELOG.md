@@ -3,6 +3,7 @@
 ## Added
 
 - Support for screenshots on test errors
+- Slackbot to report errors to Slack channel
 
 ## Fixed
 
