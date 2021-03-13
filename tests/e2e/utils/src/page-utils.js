@@ -203,7 +203,7 @@ const evalAndClick = async ( selector ) => {
  * @param {string} value Value of what to be selected
  * @param {string} selector Selector of the select2 search field
  */
-const selectOptionInSelect2 = async ( value, selector = 'span.select2-search > input.select2-search__field' ) => {
+const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
 	await page.waitForSelector(selector);
 	await page.click(selector);
 	await page.type(selector, value);
