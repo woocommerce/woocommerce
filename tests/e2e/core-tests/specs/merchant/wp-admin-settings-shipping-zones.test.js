@@ -10,6 +10,7 @@ const {
 	addShippingZoneAndMethod,
 	clearAndFillInput,
 	selectOptionInSelect2,
+	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -27,21 +28,13 @@ const runAddNewShippingZoneTest = () => {
 			await createSimpleProduct();
 			await merchant.openSettings('shipping');
 
-			// Check if you can go via blank shipping zones, otherwise remove first two zones
+			// Check if you can go via blank shipping zones, otherwise remove one existing zone
 			// This is a workaround to avoid flakyness and to give this test more confidence
 			try {
 				await page.click('.wc-shipping-zones-blank-state > a.wc-shipping-zone-add');
 
 			} catch (error) {
-				await page.evaluate(() => {
-					document.querySelector('.wc-shipping-zone-delete').click();
-				  });
-				await page.waitFor(1000);
-				await page.keyboard.press('Enter');
-				await page.evaluate(() => {
-					document.querySelector('.wc-shipping-zone-delete').click();
-				  });
-				await page.waitFor(1000);
+				await evalAndClick('.wc-shipping-zone-delete');
 				await page.keyboard.press('Enter');
 			}
 		});
