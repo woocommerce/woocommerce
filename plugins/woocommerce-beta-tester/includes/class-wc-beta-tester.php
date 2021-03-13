@@ -86,7 +86,7 @@ class WC_Beta_Tester {
 		);
 
 		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
-		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
+		add_filter( 'auto_update_plugin', array( $this, 'auto_update_woocommerce' ), 100, 2 );
 
 		if ( 'stable' !== $this->get_settings()->channel ) {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
@@ -106,7 +106,7 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Check wether or not the transients need to be overruled and API needs to be called for every single page load
+	 * Check whether or not the transients need to be overruled and API needs to be called for every single page load
 	 *
 	 * @return bool overrule or not
 	 */
@@ -343,7 +343,7 @@ class WC_Beta_Tester {
 	 * @return bool
 	 */
 	public function auto_update_woocommerce( $update, $plugin ) {
-		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $item->slug ) {
+		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $plugin->slug ) {
 			return true;
 		} else {
 			return $update;
@@ -426,6 +426,11 @@ class WC_Beta_Tester {
 		unset( $releases['trunk'] );
 
 		$releases = array_keys( $releases );
+		foreach ( $releases as $index => $version ) {
+			if ( version_compare( $version, '3.6', '<' ) ) {
+				unset( $releases[ $index ] );
+			}
+		}
 
 		if ( 'beta' === $channel ) {
 			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ) );

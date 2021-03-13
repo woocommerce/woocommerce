@@ -20,6 +20,7 @@ class WC_Beta_Tester_Admin_Menus {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 50 );
 		}
 		add_action( 'admin_footer', array( $this, 'version_information_template' ) );
+		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 	}
 
 	/**
@@ -152,16 +153,20 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	 * @return string
 	 */
 	protected function construct_ssr() {
+		if ( version_compare( WC()->version, '3.6', '<' ) ) {
+			return '';
+		}
+
 		$transient_name = 'wc-beta-tester-ssr';
 		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
 			// When running WC 3.6 or greater it is necessary to manually load the REST API classes.
-			if ( version_compare( WC()->version, '3.6', '>=' ) && ! did_action( 'rest_api_init' ) ) {
+			if ( ! did_action( 'rest_api_init' ) ) {
 				WC()->api->rest_api_includes();
 			}
 
-			if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+			if ( ! class_exists( 'WC_REST_System_Status_Controller' ) ) {
 				return '';
 			}
 
@@ -184,10 +189,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			$ssr = '';
 			foreach ( $response['environment'] as $key => $value ) {
 				$index = $key;
-				// @todo remove this hack after fix schema in WooCommerce, and Claudio never let you folks forget that need to write schema first, and review after every change, schema is the most important part of the REST API.
-				if ( 'version' === $index ) {
-					$index = 'wc_version';
-				} elseif ( 'external_object_cache' === $index ) {
+				if ( 'external_object_cache' === $index ) {
 					$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
 					continue;
 				}
@@ -287,6 +289,12 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			),
 			array(
 				'parent' => 'wc-beta-tester',
+				'id'     => 'import-export-settings',
+				'title'  => __( 'Import/Export Settings', 'woocommerce-beta-tester' ),
+				'href'   => admin_url( 'admin.php?page=wc-beta-tester-settings' ),
+			),
+			array(
+				'parent' => 'wc-beta-tester',
 				'id'     => 'show-version-info',
 				/* translators: %s: current version */
 				'title'  => sprintf( __( 'Release %s information', 'woocommerce-beta-tester' ), WC_VERSION ),
@@ -312,6 +320,22 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 		foreach ( $nodes as $node ) {
 			$wp_admin_bar->add_node( $node );
+		}
+	}
+
+	/**
+	 * Hide menu items from view so the pages exist, but the menu items do not.
+	 */
+	public function hide_from_menus() {
+		global $submenu;
+
+		$items_to_remove = array( 'wc-beta-tester-settings', 'wc-beta-tester-version-picker', 'wc-beta-tester' );
+		if ( isset( $submenu['plugins.php'] ) ) {
+			foreach ( $submenu['plugins.php'] as $key => $menu ) {
+				if (  in_array( $menu[2], $items_to_remove ) ) {
+					unset( $submenu['plugins.php'][ $key ] );
+				}
+			}
 		}
 	}
 

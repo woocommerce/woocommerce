@@ -24,7 +24,6 @@ class WC_Beta_Tester_Version_Picker {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
-		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_init', array( $this, 'handle_version_switch' ) );
 	}
 
@@ -110,21 +109,6 @@ class WC_Beta_Tester_Version_Picker {
 			'wc-beta-tester-version-picker',
 			array( $this, 'select_versions_form_html' )
 		);
-	}
-
-	/**
-	 * Hide menu items from view so the pages exist, but the menu items do not.
-	 */
-	public function hide_from_menus() {
-		global $submenu;
-
-		if ( isset( $submenu['plugins.php'] ) ) {
-			foreach ( $submenu['plugins.php'] as $key => $menu ) {
-				if ( 'wc-beta-tester-version-picker' === $menu[2] || 'wc-beta-tester' === $menu[2] ) {
-					unset( $submenu['plugins.php'][ $key ] );
-				}
-			}
-		}
 	}
 
 	/**

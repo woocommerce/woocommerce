@@ -7,7 +7,7 @@
     "url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
   },
   "title": "WooCommerce Beta Tester",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
   "devDependencies": {
     "eslint": "5.16.0",
@@ -22,7 +22,8 @@
     }
   },
   "scripts": {
-    "build": "npm run lint:js && npm run uglify",
+    "build": "./bin/build-zip.sh",
+    "build:dev": "npm run lint:js && npm run uglify",
     "preuglify": "rm -f $npm_package_assets_js_min",
     "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
     "lint:js": "eslint assets/js --ext=js"
@@ -50,5 +51,8 @@
     "ignore": [
       "*.min.js"
     ]
+  },
+  "config": {
+    "wp_org_slug": "woocommerce-beta-tester"
   }
 }

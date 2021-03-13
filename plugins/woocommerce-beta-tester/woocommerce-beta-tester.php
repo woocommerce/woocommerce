@@ -3,13 +3,13 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/
  * Requires at least: 4.4
- * Tested up to: 4.9
- * WC requires at least: 3.0.0
- * WC tested up to: 3.5.0
+ * Tested up to: 5.6
+ * WC requires at least: 3.6.0
+ * WC tested up to: 4.8.0
  * Text Domain: woocommerce-beta-tester
  *
  * @package WC_Beta_Tester
@@ -23,7 +23,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '2.0.1' );
+	define( 'WC_BETA_TESTER_VERSION', '2.0.2' );
 }
 
 /**
@@ -51,7 +51,9 @@ function _wc_beta_tester_bootstrap() {
 	} elseif ( ! class_exists( 'WC_Beta_Tester' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
 		// Settings.
-		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-settings.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-channel.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-import-export.php';
+		new WC_Beta_Tester_Import_Export();
 		// Tools.
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 
