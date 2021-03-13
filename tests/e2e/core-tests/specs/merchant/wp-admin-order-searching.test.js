@@ -25,10 +25,7 @@ const runOrderSearchingTest = () => {
 				await merchant.openNewOrder(),
 				await page.waitForSelector('#order_status'),
 				await page.click('#customer_user'),
-				await page.click('span.select2-search > input.select2-search__field'),
-				await page.type('span.select2-search > input.select2-search__field', 'Customer'),
-				await page.waitFor(2000), // to avoid flakyness
-				await page.keyboard.press('Enter'),
+				await selectOptionInSelect2('Customer'),
 			]);
 
 			await Promise.all([
@@ -44,7 +41,7 @@ const runOrderSearchingTest = () => {
 				await page.keyboard.press('Tab'),
 				await page.keyboard.press('Tab'),
 				await page.keyboard.press('Enter'),
-				await selectOptionInSelect2('New York'),
+				await page.select('select[name="_shipping_state"]', 'NY'),
 			]);
 
 			// Get the post id
