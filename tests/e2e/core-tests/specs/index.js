@@ -57,13 +57,13 @@ const runShopperTests = () => {
 };
 
 const runMerchantTests = () => {
+	runAddNewShippingZoneTest();
 	runCreateCouponTest();
 	runCreateOrderTest();
 	runEditOrderTest();
 	runAddSimpleProductTest();
 	runAddVariableProductTest();
 	runUpdateGeneralSettingsTest();
-	runAddNewShippingZoneTest();
 	runProductSettingsTest();
 	runTaxSettingsTest();
 	runOrderStatusFiltersTest();
