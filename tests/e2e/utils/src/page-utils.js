@@ -198,13 +198,14 @@ const evalAndClick = async ( selector ) => {
 };
 
 /**
- * Select a value from select2 input field.
+ * Select a value from select2 search input field.
  *
  * @param {string} value Value of what to be selected
- * @param {string} selector Selector of the select2
+ * @param {string} selector Selector of the select2 search field
  */
-const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
+const selectOptionInSelect2 = async ( value, selector = 'span.select2-search > input.select2-search__field' ) => {
 	await page.waitForSelector(selector);
+	await page.click(selector);
 	await page.type(selector, value);
 	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
 	await page.keyboard.press('Enter');

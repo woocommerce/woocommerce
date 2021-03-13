@@ -19,7 +19,6 @@ const runSingleProductPageTest = require( './shopper/front-end-single-product.te
 const runVariableProductUpdateTest = require( './shopper/front-end-variable-product-updates.test' );
 
 // Merchant tests
-const runOrderSearchingTest = require( './merchant/wp-admin-order-searching.test' );
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
 const runCreateOrderTest = require( './merchant/wp-admin-order-new.test' );
 const runEditOrderTest = require( './merchant/wp-admin-order-edit.test' );
@@ -34,6 +33,7 @@ const runProductEditDetailsTest = require( './merchant/wp-admin-product-edit-det
 const runProductSearchTest = require( './merchant/wp-admin-product-search.test' );
 const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order-customer-payment-page.test' );
 const runMerchantOrderEmailsTest = require( './merchant/wp-admin-order-emails.test' );
+const runOrderSearchingTest = require( './merchant/wp-admin-order-searching.test' );
 
 // REST API tests
 const runExternalProductAPITest = require( './api/external-product.test' );
