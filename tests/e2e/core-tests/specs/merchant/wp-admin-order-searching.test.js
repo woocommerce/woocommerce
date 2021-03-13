@@ -25,7 +25,10 @@ const runOrderSearchingTest = () => {
 				await merchant.openNewOrder(),
 				await page.waitForSelector('#order_status'),
 				await page.click('#customer_user'),
-				await selectOptionInSelect2('Customer'),
+				await page.click('span.select2-search > input.select2-search__field'),
+				await page.type('span.select2-search > input.select2-search__field', 'Customer'),
+				await page.waitFor(2000), // to avoid flakyness
+				await page.keyboard.press('Enter'),
 			]);
 
 			await Promise.all([
