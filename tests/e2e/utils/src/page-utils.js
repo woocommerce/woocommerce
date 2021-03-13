@@ -206,7 +206,7 @@ const evalAndClick = async ( selector ) => {
 const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
 	await page.waitForSelector(selector);
 	await page.type(selector, value);
-	await page.waitFor(3000); // to avoid flakyness, must wait before pressing Enter
+	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
 	await page.keyboard.press('Enter');
 };
 
