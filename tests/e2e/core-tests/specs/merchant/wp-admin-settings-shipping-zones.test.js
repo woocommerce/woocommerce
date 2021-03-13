@@ -36,10 +36,12 @@ const runAddNewShippingZoneTest = () => {
 				await page.evaluate(() => {
 					document.querySelector('.wc-shipping-zone-delete').click();
 				  });
+				await page.waitFor(1000);
 				await page.keyboard.press('Enter');
 				await page.evaluate(() => {
 					document.querySelector('.wc-shipping-zone-delete').click();
 				  });
+				await page.waitFor(1000);
 				await page.keyboard.press('Enter');
 			}
 		});
@@ -91,15 +93,10 @@ const runAddNewShippingZoneTest = () => {
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$19.99'});
-
-			await shopper.removeFromCart(simpleProductName);
-		})
+		});
 
 		it('allows customer to benefit from a Free shipping if in CA', async () => {
-			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
-			await shopper.goToCart();
-
+			await page.reload();
 			// Set shipping state to California
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_state-container');
@@ -113,14 +110,10 @@ const runAddNewShippingZoneTest = () => {
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Free shipping'});
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
-			await shopper.removeFromCart(simpleProductName);
-		})
+		});
 
 		it('allows customer to benefit from a free Local pickup if in SF', async () => {
-			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
-			await shopper.goToCart();
-
+			await page.reload();
 			// Set shipping postcode to 94107
 			await expect(page).toClick('a.shipping-calculator-button');
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
@@ -132,7 +125,7 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
 
 			await shopper.removeFromCart(simpleProductName);
-		})
+		});
 	});
 };
 
