@@ -25,6 +25,23 @@ const runAddNewShippingZoneTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
+			await merchant.openSettings('shipping');
+
+			// Check if you can go via blank shipping zones, otherwise remove first two zones
+			// This is a workaround to avoid flakyness and to give this test more confidence
+			try {
+				await page.click('.wc-shipping-zones-blank-state > a.wc-shipping-zone-add');
+
+			} catch (error) {
+				await page.evaluate(() => {
+					document.querySelector('.wc-shipping-zone-delete').click();
+				  });
+				await page.keyboard.press('Enter');
+				await page.evaluate(() => {
+					document.querySelector('.wc-shipping-zone-delete').click();
+				  });
+				await page.keyboard.press('Enter');
+			}
 		});
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
