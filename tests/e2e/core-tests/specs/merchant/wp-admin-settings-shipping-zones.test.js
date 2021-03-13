@@ -66,6 +66,10 @@ const runAddNewShippingZoneTest = () => {
 			await selectOptionInSelect2('New York');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
+			// Set shipping postcode to 10010
+			await clearAndFillInput('#calc_shipping_postcode', '10010');
+			await expect(page).toClick('button[name="calc_shipping"]');
+
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
