@@ -23,6 +23,7 @@ const runSingleProductPageTest = require( './shopper/front-end-single-product.te
 const runVariableProductUpdateTest = require( './shopper/front-end-variable-product-updates.test' );
 
 // Merchant tests
+const runAddNewShippingZoneTest = require ( './merchant/wp-admin-settings-shipping-zones.test' );
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
 const runCreateOrderTest = require( './merchant/wp-admin-order-new.test' );
 const runEditOrderTest = require( './merchant/wp-admin-order-edit.test' );
