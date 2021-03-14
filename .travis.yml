@@ -50,9 +50,6 @@ jobs:
   - name: "WP Latest - 2"
     php: "7.2"
     env: WP_VERSION=5.4 WP_MULTISITE=0
-  - name: "Code Standards"
-    php: "7.4"
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "Code Coverage"
     php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
@@ -104,7 +101,6 @@ install:
 
 script:
   - bash tests/bin/phpunit.sh
-  - bash tests/bin/phpcs.sh
 
 after_script:
   - bash tests/bin/travis.sh after
