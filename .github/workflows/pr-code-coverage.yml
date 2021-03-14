@@ -48,4 +48,5 @@ jobs:
       - name: Run unit tests with code coverage. Allow to fail.
         run: |
           RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
+          bash <(curl -s https://codecov.io/bash)
           exit 0
