@@ -2,10 +2,9 @@
 /**
  * WooCommerce Integration Settings
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce\Admin
- * @version     2.1.0
+ * @category Admin
+ * @package  WooCommerce\Admin
+ * @version  2.1.0
  */
 
 use Automattic\Jetpack\Constants;
