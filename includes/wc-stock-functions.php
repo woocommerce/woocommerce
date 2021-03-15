@@ -391,8 +391,9 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
  * Return low stock amount to determine if notification needs to be sent
  *
  * Since 5.3.0, this function no longer redirects from variation to its parent product.
- * Low stock amount can now be attached to the variation itself and if it isn't,
- * the default from store-wide setting gets used.
+ * Low stock amount can now be attached to the variation itself and if it isn't, only
+ * then we check the parent product, and if it's not there, then we take the default
+ * from the store-wide setting.
  *
  * @param  WC_Product $product Product to get data from.
  * @since  3.5.0
@@ -400,6 +401,12 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
  */
 function wc_get_low_stock_amount( WC_Product $product ) {
 	$low_stock_amount = $product->get_low_stock_amount();
+
+	if ( '' === $low_stock_amount && $product->is_type( 'variation' ) ) {
+		$product = wc_get_product( $product->get_parent_id() );
+		$low_stock_amount = $product->get_low_stock_amount();
+	}
+
 	if ( '' === $low_stock_amount ) {
 		$low_stock_amount = get_option( 'woocommerce_notify_low_stock_amount', 2 );
 	}

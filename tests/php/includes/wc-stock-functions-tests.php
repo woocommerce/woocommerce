@@ -191,4 +191,156 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a simple product which has low stock amount set.
+	 */
+	public function test_wc_get_low_stock_amount_simple_set() {
+		$product_low_stock_amount   = 5;
+		$site_wide_low_stock_amount = 3;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Simple product, set low stock amount.
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'     => true,
+				'stock_quantity'   => 10,
+				'low_stock_amount' => $product_low_stock_amount,
+			)
+		);
+
+		$this->assertEquals( $product_low_stock_amount, wc_get_low_stock_amount( $product ) );
+	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a simple product which doesn't have low stock amount set.
+	 */
+	public function test_wc_get_low_stock_amount_simple_unset() {
+		$site_wide_low_stock_amount = 3;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Simple product, don't set low stock amount.
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'     => true,
+				'stock_quantity'   => 10,
+			)
+		);
+
+		$this->assertEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $product ) );
+	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a variable product which has low stock amount set on the variation level,
+	 * but not on the parent level. Should use the value from the variation.
+	 */
+	public function test_wc_get_low_stock_amount_variation_set_parent_unset() {
+		$site_wide_low_stock_amount = 3;
+		$variation_low_stock_amount = 7;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Parent low stock amount NOT set.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_manage_stock( false );
+
+		// Set the variation low stock amount.
+		$variations = $variable_product->get_available_variations( 'objects' );
+		$var1 = $variations[0];
+		$var1->set_manage_stock( true );
+		$var1->set_low_stock_amount( $variation_low_stock_amount );
+		$var1->save();
+
+		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+
+		// Even after turning on manage stock on the parent, but with no value.
+		$variable_product->set_manage_stock( true );
+		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+
+		// Ans also after turning the manage stock off again on the parent.
+		$variable_product->set_manage_stock( true );
+		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a variable product which has low stock amount set on the variation level,
+	 * and also on the parent level. Should use the value from the variation.
+	 */
+	public function test_wc_get_low_stock_amount_variation_set_parent_set() {
+		$site_wide_low_stock_amount = 3;
+		$parent_low_stock_amount    = 5;
+		$variation_low_stock_amount = 7;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Set the parent low stock amount.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_manage_stock( true );
+		$variable_product->set_low_stock_amount( $parent_low_stock_amount );
+		$variable_product->save();
+
+		// Set the variation low stock amount.
+		$variations = $variable_product->get_available_variations( 'objects' );
+		$var1 = $variations[0];
+		$var1->set_manage_stock( true );
+		$var1->set_low_stock_amount( $variation_low_stock_amount );
+		$var1->save();
+
+		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a variable product which has low stock amount set on the parent level,
+	 * but NOT on the variation level. Should use the value from the parent.
+	 */
+	public function test_wc_get_low_stock_amount_variation_unset_parent_set() {
+		$site_wide_low_stock_amount = 3;
+		$parent_low_stock_amount    = 5;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Set the parent low stock amount.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_manage_stock( true );
+		$variable_product->set_low_stock_amount( $parent_low_stock_amount );
+		$variable_product->save();
+
+		// Set the variation low stock amount.
+		$variations = $variable_product->get_available_variations( 'objects' );
+		$var1 = $variations[0];
+
+		$this->assertEquals( $parent_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+	}
+
+	/**
+	 * Test wc_get_low_stock_amount with a variable product which *doesn't have* low stock amount set either on the parent level,
+	 * or on the variation level. Should use the value from the site-wide setting.
+	 */
+	public function test_wc_get_low_stock_amount_variation_unset_parent_unset() {
+		$site_wide_low_stock_amount = 3;
+
+		// Set the store-wide default.
+		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+
+		// Set the parent low stock amount.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_manage_stock( false );
+
+		// Set the variation low stock amount.
+		$variations = $variable_product->get_available_variations( 'objects' );
+		$var1 = $variations[0];
+		$var1->set_manage_stock( false );
+
+		$this->assertEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+	}
+
 }
