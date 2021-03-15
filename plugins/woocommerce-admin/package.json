@@ -186,7 +186,7 @@
 		"copy-webpack-plugin": "5.1.1",
 		"cross-env": "7.0.3",
 		"css-loader": "3.6.0",
-		"docsify-cli": "4.4.2",
+		"docsify-cli": "4.4.3",
 		"eslint-import-resolver-webpack": "0.13.0",
 		"eslint-plugin-import": "2.22.1",
 		"fork-ts-checker-webpack-plugin": "6.1.0",
