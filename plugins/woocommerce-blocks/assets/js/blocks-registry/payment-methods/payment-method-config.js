@@ -14,6 +14,10 @@ import {
 
 import { canMakePaymentWithFeaturesCheck } from './payment-method-config-helper';
 
+const NullComponent = () => {
+	return null;
+};
+
 export default class PaymentMethodConfig {
 	constructor( config ) {
 		// validate config
@@ -23,6 +27,7 @@ export default class PaymentMethodConfig {
 		this.placeOrderButtonLabel = config.placeOrderButtonLabel;
 		this.ariaLabel = config.ariaLabel;
 		this.content = config.content;
+		this.savedTokenComponent = config.savedTokenComponent;
 		this.icons = config.icons;
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;
@@ -41,6 +46,10 @@ export default class PaymentMethodConfig {
 	}
 
 	static assertValidConfig = ( config ) => {
+		// set default for optional
+		config.savedTokenComponent = config.savedTokenComponent || (
+			<NullComponent />
+		);
 		assertConfigHasProperties( config, [
 			'name',
 			'label',
@@ -82,6 +91,7 @@ export default class PaymentMethodConfig {
 		assertValidElementOrString( config.label, 'label' );
 		assertValidElement( config.content, 'content' );
 		assertValidElement( config.edit, 'edit' );
+		assertValidElement( config.savedTokenComponent, 'savedTokenComponent' );
 		if ( typeof config.ariaLabel !== 'string' ) {
 			throw new TypeError(
 				'The ariaLabel property for the payment method must be a string'

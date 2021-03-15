@@ -6,6 +6,12 @@ The checkout block has an API interface for payment methods to integrate that co
 
 - [Client Side integration](#client-side-integration)
   - [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
+    - [`name` (required)](#name-required)
+    - [`content` (required)](#content-required)
+    - [`edit` (required)](#edit-required)
+    - [`canMakePayment` (required):](#canmakepayment-required)
+    - [`paymentMethodId`](#paymentmethodid)
+    - [`supports:features`](#supportsfeatures)
   - [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
   - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
 - [Server Side Integration](#server-side-integration)
@@ -72,12 +78,12 @@ This should be a React node that will output in the express payment method area 
 #### `edit` (required)
 This should be a React node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this React node will receive props from the payment method interface to checkout (but they will contain preview data).
 
-#### `canMakePayment` (required): 
-    
+#### `canMakePayment` (required):
+
 A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order.
 
 ```
-canMakePayment( { 
+canMakePayment( {
     cartTotals: CartTotals,
     cartNeedsShipping: boolean,
     shippingAddress: CartShippingAddress,
@@ -87,7 +93,7 @@ canMakePayment( {
 } )
 ```
 
-Returns a boolean value - true if payment method is available for use. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions. 
+Returns a boolean value - true if payment method is available for use. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions.
 
 **Keep in mind this function could be invoked multiple times in the lifecycle of the checkout and thus any expensive logic in the callback provided on this property should be memoized.**
 
@@ -125,6 +131,7 @@ registerPaymentMethod( options );
 
 The options you feed the configuration instance are the same as those for express payment methods with the following additions:
 
+- `savedTokenComponent`: This should be a React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them. This component will be rendered whenever a customer's saved token using your payment method for processing is selected for making the purchase.
 -   `label`: This should be a React node that will be used to output the label for the option where the payment methods are. For example it might be `<strong>Credit/Debit Cart</strong>` or you might output images.
 -   `ariaLabel`: This is the label that will be read out via screen-readers when the payment method is selected.
 -   `placeOrderButtonLabel`: This is an optional label which will change the default "Place Order" button text to something else when the payment method is selected. As an example, the PayPal Standard payment method [changes the text of the button to "Proceed to PayPal"](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/paypal/index.js#L37-L40) when it is selected as the payment method for checkout because the payment method takes the shopper offsite to PayPal for completing the payment.
@@ -146,6 +153,8 @@ A big part of the payment method integration is the interface that is exposed fo
   - `ValidationInputError` — a container for holding validation errors which typically you'll include after any inputs
   - [`PaymentMethodLabel`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/paypal/index.js#L37-L40) — use this component for the payment method label, including an optional icon
 -   `setExpressPaymentError`: This function receives a string and allows express payment methods to set an error notice for the express payment area on demand. This can be necessary because some express payment method processing might happen outside of checkout events.
+
+Any registered `savedTokenComponent` node will also receive a `token` prop which includes the id for the selected saved token in case your payment method needs to use it for some internal logic. However, keep in mind, this is just the id representing this token in the database (and the value of the radio input the shopper checked), not the actual customer payment token (since processing using that usually happens on the server for security).
 
 ## Server Side Integration
 
