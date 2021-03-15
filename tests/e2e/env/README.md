@@ -71,6 +71,16 @@ module.exports = jestConfig;
 
 **NOTE:** Your project's Jest config file is expected to be: `tests/e2e/config/jest.config.js`.
 
+#### Test Screenshots
+
+The test sequencer provides a screenshot function for test failures. To enable screenshots on test failure use
+
+```shell script
+WC_E2E_SCREENSHOTS=1 npx wc-e2e test:e2e
+```
+
+Screenshots will be saved to `tests/e2e/screenshots`
+
 ### Jest Puppeteer Config
 
 The test sequencer uses the following default Puppeteer configuration:
@@ -123,6 +133,27 @@ Depending on the project and testing scenario, the built in testing environment 
 
 - [Built In Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/builtin.md)
 - [External Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/external.md)
+
+### Slackbot Setup
+
+The test runner has support for posting a message and screenshot to a Slack channel when there is an error in a test. It currently supports both Travis CI and Github actions.
+
+To implement the Slackbot in your CI:
+
+- Create a [Slackbot App](https://slack.com/help/articles/115005265703-Create-a-bot-for-your-workspace)
+- Give the app the following permissions:
+  - `channel:join`
+  - `chat:write`
+  - `files:write`
+  - `incoming-webhook`
+- Add the app to your channel
+- In your CI environment
+  - Add the environment variable `WC_E2E_SCREENSHOTS=1`
+  - Add your app Oauth token to a CI secret `E2E_SLACK_TOKEN`
+  - Add the Slack channel name (without the #) to a CI secret `E2E_SLACK_CHANNEL`
+  - Add the secrets to the test run using the same variable names
+
+To test your setup, create a pull request that triggers an error in the E2E tests.
 
 ## Additional information
 
