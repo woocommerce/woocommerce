@@ -487,13 +487,12 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single tax output for response.
 	 *
-	 * @param stdClass $tax Tax object.
+	 * @param stdClass        $tax     Tax object.
 	 * @param WP_REST_Request $request Request object.
+	 *
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $tax, $request ) {
-		global $wpdb;
-
 		$id   = (int) $tax->tax_rate_id;
 		$data = array(
 			'id'       => $id,
@@ -510,18 +509,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			'class'    => $tax->tax_rate_class ? $tax->tax_rate_class : 'standard',
 		);
 
-		// Get locales from a tax rate.
-		$locales = $wpdb->get_results( $wpdb->prepare( "
-			SELECT location_code, location_type
-			FROM {$wpdb->prefix}woocommerce_tax_rate_locations
-			WHERE tax_rate_id = %d
-		", $id ) );
-
-		if ( ! is_wp_error( $tax ) && ! is_null( $tax ) ) {
-			foreach ( $locales as $locale ) {
-				$data[ $locale->location_type ] = $locale->location_code;
-			}
-		}
+		$data = $this->add_tax_rate_locales( $data, $tax );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -559,6 +547,38 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		);
 
 		return $links;
+	}
+
+	/**
+	 * Add tax rate locales to the response array.
+	 *
+	 * @param array    $data Response data.
+	 * @param stdClass $tax  Tax object.
+	 *
+	 * @return array
+	 */
+	protected function add_tax_rate_locales( $data, $tax ) {
+		global $wpdb;
+
+		// Get locales from a tax rate.
+		$locales = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT location_code, location_type
+				FROM {$wpdb->prefix}woocommerce_tax_rate_locations
+				WHERE tax_rate_id = %d
+				",
+				$tax->tax_rate_id
+			)
+		);
+
+		if ( ! is_wp_error( $tax ) && ! is_null( $tax ) ) {
+			foreach ( $locales as $locale ) {
+				$data[ $locale->location_type ] = $locale->location_code;
+			}
+		}
+
+		return $data;
 	}
 
 	/**
