@@ -17,7 +17,7 @@ import './style.scss';
 interface FormattedMonetaryAmountProps {
 	className?: string;
 	displayType?: NumberFormatProps[ 'displayType' ];
-	value: number; // Value of money amount.
+	value: number | string; // Value of money amount.
 	currency: Currency | Record< string, never >; // Currency configuration object.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
 }
@@ -46,12 +46,15 @@ const currencyToNumberFormat = (
  */
 const FormattedMonetaryAmount = ( {
 	className,
-	value,
+	value: rawValue,
 	currency,
 	onValueChange,
 	displayType = 'text',
 	...props
 }: FormattedMonetaryAmountProps ): ReactElement | null => {
+	const value =
+		typeof rawValue === 'string' ? parseInt( rawValue, 10 ) : rawValue;
+
 	if ( ! Number.isFinite( value ) ) {
 		return null;
 	}
