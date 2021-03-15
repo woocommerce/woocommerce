@@ -24,6 +24,13 @@
 5. Click the download link in the email
 6. See gross sales column
 
+### Add customer name column to CSV export #6556
+
+- Create more than 25 orders
+- Go to Analytics -> Orders -> Click "Download"
+- Click download link in the email
+- See customer column with customer full name
+
 ### Allow the manager role to query certain options #6577
 
 Testing `woocommerce_ces_tracks_queue`

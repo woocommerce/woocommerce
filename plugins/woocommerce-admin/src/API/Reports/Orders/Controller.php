@@ -476,6 +476,16 @@ class Controller extends ReportsController implements ExportableInterface {
 	}
 
 	/**
+	 * Get customer name column export value.
+	 *
+	 * @param array $customer Customer from report row.
+	 * @return string
+	 */
+	protected function get_customer_name( $customer ) {
+		return $customer['first_name'] . ' ' . $customer['last_name'];
+	}
+
+	/**
 	 * Get products column export value.
 	 *
 	 * @param array $products Products from report row.
@@ -516,7 +526,8 @@ class Controller extends ReportsController implements ExportableInterface {
 			'date_created'   => __( 'Date', 'woocommerce-admin' ),
 			'order_number'   => __( 'Order #', 'woocommerce-admin' ),
 			'status'         => __( 'Status', 'woocommerce-admin' ),
-			'customer_type'  => __( 'Customer', 'woocommerce-admin' ),
+			'customer_name'  => __( 'Customer', 'woocommerce-admin' ),
+			'customer_type'  => __( 'Customer Type', 'woocommerce-admin' ),
 			'products'       => __( 'Product(s)', 'woocommerce-admin' ),
 			'num_items_sold' => __( 'Items Sold', 'woocommerce-admin' ),
 			'coupons'        => __( 'Coupon(s)', 'woocommerce-admin' ),
@@ -546,6 +557,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'date_created'   => $item['date_created'],
 			'order_number'   => $item['order_number'],
 			'status'         => $item['status'],
+			'customer_name'  => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'  => $item['customer_type'],
 			'products'       => isset( $item['extended_info']['products'] ) ? $this->_get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold' => $item['num_items_sold'],
