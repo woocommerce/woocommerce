@@ -666,6 +666,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$coupon->set_amount( 5 );
 		$coupon->save();
 
+		// Let's try a well-formed request first of all.
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -682,6 +683,25 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $data['coupon_lines'] );
 		$this->assertEquals( '45.00', $data['total'] );
+
+		// Let's repeat, but this time we'll specify the item ID for the coupon: this is
+		// a readonly property and we expect the request to fail as a result.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'id' => 123,
+						'code' => 'fake-coupon',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_coupon_item_id_readonly', $data['code'] );
 	}
 
 	/**
@@ -704,16 +724,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '45.00', $order->get_total() );
 
 		$request     = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$coupon_data = current( $order->get_items( 'coupon' ) );
 
 		$request->set_body_params(
 			array(
-				'coupon_lines' => array(
-					array(
-						'id'   => $coupon_data->get_id(),
-						'code' => null,
-					),
-				),
+				'coupon_lines' => array(),
 				'line_items'   => array(
 					array(
 						'id'         => $order_item->get_id(),

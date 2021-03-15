@@ -1,17 +1,33 @@
 import { HTTPClient } from '../../../http';
-import { ModelRepository } from '../../../framework/model-repository';
-import { SimpleProduct } from '../../../models';
+import { ModelRepository } from '../../../framework';
 import {
+	SimpleProduct,
+	baseProductURL,
+	buildProductURL,
 	CreatesSimpleProducts,
 	DeletesSimpleProducts,
 	ListsSimpleProducts,
 	ReadsSimpleProducts,
 	SimpleProductRepositoryParams,
 	UpdatesSimpleProducts,
-} from '../../../models/products/simple-product';
-import { createProductTransformer } from './shared';
-import { restCreate, restDelete, restList, restRead, restUpdate } from '../shared';
-import { ModelID } from '../../../models/model';
+} from '../../../models';
+import {
+	createProductTransformer,
+	createProductCrossSellsTransformation,
+	createProductDeliveryTransformation,
+	createProductInventoryTransformation,
+	createProductPriceTransformation,
+	createProductSalesTaxTransformation,
+	createProductShippingTransformation,
+	createProductUpSellsTransformation,
+} from './shared';
+import {
+	restCreate,
+	restDelete,
+	restList,
+	restRead,
+	restUpdate,
+} from '../shared';
 
 /**
  * Creates a new ModelRepository instance for interacting with models via the REST API.
@@ -30,14 +46,30 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 	& ReadsSimpleProducts
 	& UpdatesSimpleProducts
 	& DeletesSimpleProducts {
-	const buildURL = ( id: ModelID ) => '/wc/v3/products/' + id;
-	const transformer = createProductTransformer( 'simple' );
+	const crossSells = createProductCrossSellsTransformation();
+	const delivery = createProductDeliveryTransformation();
+	const inventory = createProductInventoryTransformation();
+	const price = createProductPriceTransformation();
+	const salesTax = createProductSalesTaxTransformation();
+	const shipping = createProductShippingTransformation();
+	const upsells = createProductUpSellsTransformation();
+	const transformations = [
+		...crossSells,
+		...delivery,
+		...inventory,
+		...price,
+		...salesTax,
+		...shipping,
+		...upsells,
+	];
+
+	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );
 
 	return new ModelRepository(
-		restList< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
-		restCreate< SimpleProductRepositoryParams >( () => '/wc/v3/products', SimpleProduct, httpClient, transformer ),
-		restRead< SimpleProductRepositoryParams >( buildURL, SimpleProduct, httpClient, transformer ),
-		restUpdate< SimpleProductRepositoryParams >( buildURL, SimpleProduct, httpClient, transformer ),
-		restDelete< SimpleProductRepositoryParams >( buildURL, httpClient ),
+		restList< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
+		restCreate< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
+		restRead< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
+		restUpdate< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
+		restDelete< SimpleProductRepositoryParams >( buildProductURL, httpClient ),
 	);
 }

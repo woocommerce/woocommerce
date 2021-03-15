@@ -44,8 +44,9 @@ jQuery(
 				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
 				$( 'input[name="_height"]', '.inline-edit-row' ).val( height );
 
-				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).change();
-				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' ).change();
+				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).trigger( 'change' );
+				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' )
+					.trigger( 'change' );
 
 				$( 'input[name="_stock"]', '.inline-edit-row' ).val( stock );
 				$( 'input[name="menu_order"]', '.inline-edit-row' ).val( menu_order );

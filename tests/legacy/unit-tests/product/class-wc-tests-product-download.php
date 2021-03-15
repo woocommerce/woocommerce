@@ -50,6 +50,8 @@ class WC_Tests_Product_Download extends WC_Unit_Test_Case {
 		$this->assertEquals( 'absolute', $download->get_type_of_file_path( 'http://example.com/file.jpg' ) );
 		$this->assertEquals( 'absolute', $download->get_type_of_file_path( site_url( '/wp-content/uploads/test.jpg' ) ) );
 		$this->assertEquals( 'relative', $download->get_type_of_file_path( trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
+		$this->assertEquals( 'relative', $download->get_type_of_file_path( '//' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
+		$this->assertEquals( 'relative', $download->get_type_of_file_path( '/////' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/assets/images/help.png' ) );
 		$this->assertEquals( 'shortcode', $download->get_type_of_file_path( '[s3 bucket ="" file=""]' ) );
 	}
 
@@ -138,5 +140,22 @@ class WC_Tests_Product_Download extends WC_Unit_Test_Case {
 
 		$download->set_file( trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/woocommerce.php' );
 		$this->assertEquals( false, $download->is_allowed_filetype() );
+
+		// For triple-slash overwriting of "local" to "absolute" - see https://github.com/woocommerce/woocommerce/pull/28699.
+		$download->set_file( '//' . trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/woocommerce.php' );
+		$this->assertEquals( false, $download->is_allowed_filetype() );
+	}
+
+	/**
+	 * Tests if we are trimming prepending slashes which can confuse system and change the file type to a filesystem path.
+	 * @see https://github.com/woocommerce/woocommerce/pull/28699
+	 *
+	 * @since 5.0.1
+	 */
+	public function test_trim_extra_prepending_slashes() {
+		$download = new WC_Product_Download();
+
+		$download->set_file( '////////test/path' );
+		$this->assertEquals( '/test/path', $download->get_file() );
 	}
 }

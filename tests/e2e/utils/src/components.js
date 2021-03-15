@@ -6,14 +6,19 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
-const verifyAndPublish = async () => {
+/**
+ * Verify and publish
+ *
+ * @param noticeText The text that appears in the notice after publishing.
+ */
+const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -22,7 +27,7 @@ const verifyAndPublish = async () => {
 	await page.waitForSelector( '.updated.notice' );
 
 	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
 };
 
 /**
@@ -180,9 +185,35 @@ const createSimpleProduct = async () => {
 } ;
 
 /**
+ * Create simple product with categories
+ *
+ * @param productName Product's name which can be changed when writing a test
+ * @param productPrice Product's price which can be changed when writing a test
+ * @param categoryName Product's category which can be changed when writing a test
+ */
+const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
+	const product = await factories.products.simple.create( {
+		name: productName,
+		regularPrice: productPrice,
+		categories: [
+			{
+				name: categoryName,
+			}
+		],
+		isVirtual: true,
+	} );
+
+	return product.id;
+};
+
+/**
  * Create variable product.
  */
 const createVariableProduct = async () => {
+
+	// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialogs below
+	page.removeAllListeners('dialog');
+
 	// Go to "add product" page
 	await merchant.openNewProduct();
 
@@ -303,12 +334,46 @@ const createVariableProduct = async () => {
 	await page.focus( 'button.save-variation-changes' );
 	await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-	await verifyAndPublish();
+	await verifyAndPublish( 'Product published.' );
 
 	const variablePostId = await page.$( '#post_ID' );
 	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
 	return variablePostIdValue;
 };
+
+/**
+ * Create grouped product.
+ */
+const createGroupedProduct = async () => {
+	// Create two products to be linked in a grouped product after
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 1',
+		regularPrice: simpleProductPrice
+	} );
+	await factories.products.simple.create( {
+		name: simpleProductName + ' 2',
+		regularPrice: simpleProductPrice
+	} );
+
+	// Go to "add product" page
+	await merchant.openNewProduct();
+
+	// Make sure we're on the add product page
+	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+
+	// Set product data and save the product
+	await expect( page ).toFill( '#title', 'Grouped Product' );
+	await expect( page ).toSelect( '#product-type', 'Grouped product' );
+	await clickTab( 'Linked Products' );
+	await selectOptionInSelect2( simpleProductName + ' 1' );
+	await selectOptionInSelect2( simpleProductName + ' 2' );
+	await verifyAndPublish();
+
+	// Get product ID
+	const groupedPostId = await page.$( '#post_ID' );
+	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
+	return groupedPostIdValue;
+}
 
 /**
  * Create a basic order with the provided order status.
@@ -392,12 +457,52 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	return couponCode;
 };
 
+/**
+ * Click the Update button on the order details page.
+ *
+ * @param noticeText The text that appears in the notice after updating the order.
+ * @param waitForSave Optionally wait for auto save.
+ */
+const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
+	if ( waitForSave ) {
+		await page.waitFor( 2000 );
+	}
+
+	// PUpdate order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+};
+
+/**
+ * Delete all email logs in the WP Mail Logging plugin page.
+ */
+const deleteAllEmailLogs = async () => {
+	await merchant.openEmailLog();
+
+	// Make sure we have emails to delete. If we don't, this selector will return null.
+	if ( await page.$( '#bulk-action-selector-top' ) !== null ) {
+		await setCheckbox( '#cb-select-all-1' );
+		await expect( page ).toSelect( '#bulk-action-selector-top', 'Delete' );
+		await Promise.all( [
+			page.click( '#doaction' ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+	}
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
+	createGroupedProduct,
 	createSimpleOrder,
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	createSimpleProductWithCategory,
+  clickUpdateOrder,
+	deleteAllEmailLogs,
 };

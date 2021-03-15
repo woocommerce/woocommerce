@@ -16,7 +16,7 @@ wp post create --post_type=page --post_status=publish --post_title='Ready' --pos
 
 ### Project Initialization
 
-Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/master/sample-data) have already been imported. Below is the WP CLI equivalent of the built in initialization script for WooCommerce Core E2E testing:
+Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/trunk/sample-data) have already been imported. Below is the WP CLI equivalent of the built in initialization script for WooCommerce Core E2E testing:
 
 
 ```
@@ -79,8 +79,8 @@ You can override these in `/tests/e2e/config/default.json`.
 
 The built in container defaults to mapping the root folder of the repository to a folder in the `plugins` folder. For example `woocommerce` is mapped to `/var/www/html/wp-content/plugins/woocommerce`. Use the `WC_E2E_FOLDER_MAPPING` environment variable to override this mapping.
 
-- Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npm explore @woocommerce/e2e-environment -- npm run docker:up```
-- Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/plugins npm explore @woocommerce/e2e-environment -- npm run docker:up```
+- Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npx wc-e2e docker:up```
+- Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content npx wc-e2e docker:up```
 
 ### Travis CI Supported Versions
 
@@ -106,11 +106,11 @@ version: ~> 1.0
 
 script:
   - npm install jest --global
-  - npm explore @woocommerce/e2e-environment -- npm run docker:up
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
+  - npx wc-e2e docker:up
+  - npx wc-e2e test:e2e
 
 ....
 
 after_script:
-  - npm explore @woocommerce/e2e-environment -- npm run docker:down
+  - npx wc-e2e docker:down
 ```

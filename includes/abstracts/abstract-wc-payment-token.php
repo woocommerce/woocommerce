@@ -2,7 +2,7 @@
 /**
  * Abstract payment tokens
  *
- * Generic payment tokens functionality which can be extended by idividual types of payment tokens.
+ * Generic payment tokens functionality which can be extended by individual types of payment tokens.
  *
  * @class WC_Payment_Token
  * @package WooCommerce\Abstracts

@@ -71,7 +71,7 @@ jQuery( function ( $ ) {
 
 				$state.replaceWith( $newstate );
 
-				$newstate.show().selectWoo().hide().change();
+				$newstate.show().selectWoo().hide().trigger( 'change' );
 			} else {
 				$newstate = $( '<input type="text" />' )
 					.prop( 'id', input_id )

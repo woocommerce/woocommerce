@@ -7,7 +7,9 @@ const {
 	merchant,
 	createCoupon,
 	createSimpleProduct,
-	uiUnblocked
+	uiUnblocked,
+	applyCoupon,
+	removeCoupon,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -21,9 +23,10 @@ const {
 
 const runCartApplyCouponsTest = () => {
 	describe('Cart applying coupons', () => {
-			let couponFixedCart;
-			let couponPercentage;
-			let couponFixedProduct;
+		let couponFixedCart;
+		let couponPercentage;
+		let couponFixedProduct;
+
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
@@ -31,76 +34,68 @@ const runCartApplyCouponsTest = () => {
 			couponPercentage = await createCoupon('50', 'Percentage discount');
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await merchant.logout();
-		});
-
-		it('allows customer to apply coupons in the cart', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
-			await shopper.goToCart();
-			await shopper.productIsInCart('Simple product');
-
-			// Apply Fixed cart discount coupon
-			await expect(page).toFill('#coupon_code', couponFixedCart);
-			await expect(page).toClick('button', {text: 'Apply coupon'});
 			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+			await shopper.goToCart();
+		});
 
-			// Wait for page to expand total calculations to avoid flakyness
-			await page.waitForSelector('.order-total');
+		it('allows customer to apply fixed cart coupon', async () => {
+			await applyCoupon(couponFixedCart);
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
 			// Verify discount applied and order total
-			await page.waitForSelector('.cart-discount .amount', {text: '$5.00'});
-			await page.waitForSelector('.order-total .amount', {text: '$4.99'});
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
+			await removeCoupon(couponFixedCart);
+		});
 
-			// Remove coupon
-			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
+		it('allows customer to apply percentage coupon', async () => {
+			await applyCoupon(couponPercentage);
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
-			// Apply Percentage discount coupon
-			await expect(page).toFill('#coupon_code', couponPercentage);
-			await expect(page).toClick('button', {text: 'Apply coupon'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-			await page.waitForSelector('.cart-discount .amount', {text: '$4.99'});
-			await page.waitForSelector('.order-total .amount', {text: '$5.00'});
+			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.cart-discount .amount', {text: '$4.99'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$5.00'});
+			await removeCoupon(couponPercentage);
+		});
 
-			// Remove coupon
-			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
+		it('allows customer to apply fixed product coupon', async () => {
+			await applyCoupon(couponFixedProduct);
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
-			// Apply Fixed product discount coupon
-			await expect(page).toFill('#coupon_code', couponFixedProduct);
-			await expect(page).toClick('button', {text: 'Apply coupon'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-			await page.waitForSelector('.cart-discount .amount', {text: '$5.00'});
-			await page.waitForSelector('.order-total .amount', {text: '$4.99'});
+			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
+			await removeCoupon(couponFixedProduct);
+		});
 
-			// Try to apply the same coupon
-			await expect(page).toFill('#coupon_code', couponFixedProduct);
-			await expect(page).toClick('button', {text: 'Apply coupon'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-error', { text: 'Coupon code already applied!' });
+		it('prevents customer applying same coupon twice', async () => {
+			await applyCoupon(couponFixedCart);
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+			await applyCoupon(couponFixedCart);
+			// Verify only one discount applied
+			// This is a work around for Puppeteer inconsistently finding 'Coupon code already applied'
+			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
+			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
+		});
 
-			// Try to apply multiple coupons
-			await expect(page).toFill('#coupon_code', couponFixedCart);
-			await expect(page).toClick('button', {text: 'Apply coupon'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-			await page.waitForSelector('.order-total .amount', {text: '$0.00'});
+		it('allows customer to apply multiple coupons', async () => {
+			await applyCoupon(couponFixedProduct);
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
-			// Remove coupon
-			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
-			await expect(page).toClick('.woocommerce-remove-coupon', {text: '[Remove]'});
-			await uiUnblocked();
-			await page.waitForSelector('.woocommerce-message', {text: 'Coupon has been removed.'});
+			// Verify discount applied and order total
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.order-total .amount', {text: '$0.00'});
+		});
 
-			// Verify the total amount after all coupons removal
-			await page.waitForSelector('.order-total .amount', {text: '$9.99'});
+		it('restores cart total when coupons are removed', async () => {
+			await removeCoupon(couponFixedCart);
+			await removeCoupon(couponFixedProduct);
+			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
 		});
 	});
 };

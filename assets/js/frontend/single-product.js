@@ -16,13 +16,13 @@ jQuery( function( $ ) {
 			var $tabs = $( this ).find( '.wc-tabs, ul.tabs' ).first();
 
 			if ( hash.toLowerCase().indexOf( 'comment-' ) >= 0 || hash === '#reviews' || hash === '#tab-reviews' ) {
-				$tabs.find( 'li.reviews_tab a' ).click();
+				$tabs.find( 'li.reviews_tab a' ).trigger( 'click' );
 			} else if ( url.indexOf( 'comment-page-' ) > 0 || url.indexOf( 'cpage=' ) > 0 ) {
-				$tabs.find( 'li.reviews_tab a' ).click();
+				$tabs.find( 'li.reviews_tab a' ).trigger( 'click' );
 			} else if ( hash === '#tab-additional_information' ) {
-				$tabs.find( 'li.additional_information_tab a' ).click();
+				$tabs.find( 'li.additional_information_tab a' ).trigger( 'click' );
 			} else {
-				$tabs.find( 'li:first a' ).click();
+				$tabs.find( 'li:first a' ).trigger( 'click' );
 			}
 		} )
 		.on( 'click', '.wc-tabs li a, ul.tabs li a', function( e ) {
@@ -39,7 +39,7 @@ jQuery( function( $ ) {
 		} )
 		// Review link
 		.on( 'click', 'a.woocommerce-review-link', function() {
-			$( '.reviews_tab a' ).click();
+			$( '.reviews_tab a' ).trigger( 'click' );
 			return true;
 		} )
 		// Star ratings for comments
@@ -101,8 +101,8 @@ jQuery( function( $ ) {
 		$target.data( 'product_gallery', this );
 
 		// Pick functionality to initialize...
-		this.flexslider_enabled = $.isFunction( $.fn.flexslider ) && wc_single_product_params.flexslider_enabled;
-		this.zoom_enabled       = $.isFunction( $.fn.zoom ) && wc_single_product_params.zoom_enabled;
+		this.flexslider_enabled = 'function' === typeof $.fn.flexslider && wc_single_product_params.flexslider_enabled;
+		this.zoom_enabled       = 'function' === typeof $.fn.zoom && wc_single_product_params.zoom_enabled;
 		this.photoswipe_enabled = typeof PhotoSwipe !== 'undefined' && wc_single_product_params.photoswipe_enabled;
 
 		// ...also taking args into account.

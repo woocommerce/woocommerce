@@ -1,5 +1,6 @@
-import { Model } from '../../models/model';
+import { Model } from '../../models';
 import {
+	CreatesChildModels,
 	CreatesModels,
 	DeletesChildModels,
 	DeletesModels,
@@ -90,7 +91,7 @@ describe( 'ModelRepository', () => {
 	it( 'should create child', async () => {
 		const model = new DummyChildModel();
 		const callback = jest.fn().mockResolvedValue( model );
-		const repository: CreatesModels< DummyChildParams > = new ModelRepository< DummyChildParams >(
+		const repository: CreatesChildModels< DummyChildParams > = new ModelRepository< DummyChildParams >(
 			null,
 			callback,
 			null,
@@ -98,7 +99,7 @@ describe( 'ModelRepository', () => {
 			null,
 		);
 
-		const created = await repository.create( { childName: 'test' } );
+		const created = await repository.create( { parent: 'yes' }, { childName: 'test' } );
 		expect( created ).toBe( model );
 		expect( callback ).toHaveBeenCalledWith( { childName: 'test' } );
 	} );

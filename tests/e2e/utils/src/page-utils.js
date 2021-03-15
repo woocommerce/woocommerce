@@ -196,6 +196,66 @@ const evalAndClick = async ( selector ) => {
 	page.$eval( selector, elem => elem.click() );
 };
 
+/**
+ * Select a value from select2 input field.
+ *
+ * @param {string} value Value of what to be selected
+ * @param {string} selector Selector of the select2
+ */
+const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
+	await page.waitForSelector(selector);
+	await page.type(selector, value);
+	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
+	await page.keyboard.press('Enter');
+};
+
+/**
+ * Apply a coupon code within cart or checkout.
+ * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
+ *
+ * @param couponCode string
+ * @returns {Promise<void>}
+ */
+const applyCoupon = async ( couponCode ) => {
+	try {
+		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await uiUnblocked();
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	} catch (error) {
+		await clearAndFillInput('#coupon_code', couponCode);
+		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await uiUnblocked();
+	};
+};
+
+/**
+ * Remove one coupon within cart or checkout.
+ *
+ * @param couponCode Coupon name.
+ * @returns {Promise<void>}
+ */
+const removeCoupon = async ( couponCode ) => {
+	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await uiUnblocked();
+	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
+};
+
+/**
+ *
+ * Select and perform an order action in the `Order actions` postbox.
+ *
+ * @param {string} action The action to take on the order.
+ */
+const selectOrderAction = async ( action ) => {
+	await page.select( 'select[name=wc_order_action]', action );
+	await Promise.all( [
+		page.click( '.wc-reload' ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+}
+
 export {
 	clearAndFillInput,
 	clickTab,
@@ -211,4 +271,8 @@ export {
 	clickFilter,
 	moveAllItemsToTrash,
 	evalAndClick,
+	selectOptionInSelect2,
+  applyCoupon,
+	removeCoupon,
+	selectOrderAction,
 };

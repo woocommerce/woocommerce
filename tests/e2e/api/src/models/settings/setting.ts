@@ -1,12 +1,12 @@
 import { Model, ModelID } from '../model';
 import { HTTPClient } from '../../http';
-import { settingRESTRepository } from '../../repositories/rest/settings/setting';
+import { settingRESTRepository } from '../../repositories';
 import {
 	ModelRepositoryParams,
 	ListsChildModels,
 	ReadsChildModels,
 	UpdatesChildModels,
-} from '../../framework/model-repository';
+} from '../../framework';
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give

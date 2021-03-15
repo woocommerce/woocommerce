@@ -1,5 +1,4 @@
-import { Model } from '../models/model';
-import { ModelConstructor } from '../models/shared-types';
+import { Model, ModelConstructor } from '../models';
 
 /**
  * An interface for an object that can perform transformations both to and from a representation

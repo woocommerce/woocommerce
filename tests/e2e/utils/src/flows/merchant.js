@@ -9,6 +9,7 @@ const config = require( 'config' );
 const { clearAndFillInput } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
+	WP_ADMIN_ALL_PRODUCTS_VIEW,
 	WP_ADMIN_DASHBOARD,
 	WP_ADMIN_LOGIN,
 	WP_ADMIN_NEW_COUPON,
@@ -56,6 +57,12 @@ const merchant = {
 
 	openAllOrdersView: async () => {
 		await page.goto( WP_ADMIN_ALL_ORDERS_VIEW, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAllProductsView: async () => {
+		await page.goto( WP_ADMIN_ALL_PRODUCTS_VIEW, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -121,6 +128,12 @@ const merchant = {
 		} );
 	},
 
+	goToProduct: async ( productId ) => {
+		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( productId ), {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	updateOrderStatus: async ( orderId, status ) => {
 		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
 			waitUntil: 'networkidle0',
@@ -156,6 +169,12 @@ const merchant = {
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
 	},
+
+	openEmailLog: async () => {
+		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
+	}
 };
 
 module.exports = merchant;

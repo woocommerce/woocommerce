@@ -40,9 +40,11 @@ describe( 'Cart page', () => {
 | Function | Parameters | Description |
 |----------|-------------|------------|
 | `goToOrder` | `orderId` | Go to view a single order |
+| `goToProduct` | `productId` | Go to view a single product |
 | `login` | | Log in as merchant |
 | `logout` | | Log out of merchant account |
 | `openAllOrdersView` | | Go to the orders listing |
+| `openAllProductsView` | | Go to the products listing |
 | `openDashboard` | | Go to the WordPress dashboard  |
 | `openNewCoupon` | | Go to the new coupon editor |
 | `openNewOrder` | | Go to the new order editor |
@@ -52,6 +54,7 @@ describe( 'Cart page', () => {
 | `openSettings` | | Go to WooCommerce -> Settings |
 | `runSetupWizard` | | Open the onboarding profiler |
 | `updateOrderStatus` | `orderId, status` | Update the status of an order |
+| `openEmailLog` | | Open the WP Mail Log page |
 
 ### Shopper `shopper`
 
@@ -75,6 +78,7 @@ describe( 'Cart page', () => {
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
 | `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
+| `searchForProduct` | Searching for a product name and landing on its detail page |
 
 ### Page Utilities
 
@@ -98,6 +102,12 @@ describe( 'Cart page', () => {
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
+| `verifyAndPublish` | `noticeText` | Verify that an item can be published |
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout |
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
+| `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
+| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 
 ### Test Utilities
 

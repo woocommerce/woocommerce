@@ -1,9 +1,14 @@
 import { HTTPClient } from '../../../http';
-import { ModelRepository } from '../../../framework/model-repository';
-import { SettingGroup } from '../../../models';
-import { ListsSettingGroups, SettingGroupRepositoryParams } from '../../../models/settings/setting-group';
-import { ModelTransformer } from '../../../framework/model-transformer';
-import { KeyChangeTransformation } from '../../../framework/transformations/key-change-transformation';
+import {
+	ModelRepository,
+	ModelTransformer,
+	KeyChangeTransformation,
+} from '../../../framework';
+import {
+	SettingGroup,
+	ListsSettingGroups,
+	SettingGroupRepositoryParams,
+} from '../../../models';
 import { restList } from '../shared';
 
 function createTransformer(): ModelTransformer< SettingGroup > {
@@ -20,7 +25,7 @@ function createTransformer(): ModelTransformer< SettingGroup > {
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
  * @return {ListsSettingGroups} The created repository.
  */
-export function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSettingGroups {
+export default function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSettingGroups {
 	const transformer = createTransformer();
 
 	return new ModelRepository(

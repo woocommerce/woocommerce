@@ -2255,7 +2255,11 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 
 	$new_version      = wc_clean( $plugin->new_version );
 	$plugin_updates   = new WC_Plugin_Updates();
-	$untested_plugins = $plugin_updates->get_untested_plugins( $new_version, 'major' );
+	$version_type = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
+	if ( ! is_string( $version_type ) ) {
+		$version_type = 'none';
+	}
+	$untested_plugins = $plugin_updates->get_untested_plugins( $new_version, $version_type );
 	if ( ! empty( $untested_plugins ) ) {
 		return false;
 	}
