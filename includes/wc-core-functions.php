@@ -1801,10 +1801,25 @@ function wc_ascii_uasort_comparison( $a, $b ) {
 function wc_asort_by_locale( &$data, $locale = '' ) {
 	// Use Collator if PHP Internationalization Functions (php-intl) is available.
 	if ( class_exists( 'Collator' ) ) {
-		$locale   = $locale ? $locale : get_locale();
-		$collator = new Collator( $locale );
-		$collator->asort( $data, Collator::SORT_STRING );
-		return $data;
+		try {
+			$locale   = $locale ? $locale : get_locale();
+			$collator = new Collator( $locale );
+			$collator->asort( $data, Collator::SORT_STRING );
+			return $data;
+		} catch ( IntlException $e ) {
+			// Just skip if some error got caused.
+			// It may be caused in installations that doesn't include ICU TZData.
+			if ( Constants::is_true( 'WP_DEBUG' ) ) {
+				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					sprintf(
+						/* translators: 1: PHP docs link 2: error message */
+						esc_html__( 'An unexpected error occurred while trying to use PHP Intl Collator class, it may be caused by an incorrect installation of PHP Intl and ICU, and could be fixed by reinstallaing PHP Intl, see more details about PHP Intl installation: %1$s. Error message: %2$s', 'woocommerce' ),
+						'https://www.php.net/manual/en/intl.installation.php',
+						$e->getMessage()
+					)
+				);
+			}
+		}
 	}
 
 	$raw_data = $data;
