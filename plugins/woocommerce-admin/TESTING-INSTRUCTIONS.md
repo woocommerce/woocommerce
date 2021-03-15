@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Update undefined task name properties for help panel tracks #6565
+
+1. Enter `localStorage.setItem( 'debug', 'wc-admin:*' );` into your console. Leave your console open.
+2. Navigate to the homescreen.
+3. Open the "Help" tab in the top right.
+4. Note the tracks information in the console includes `homescreen` for the `taskName` property.
+5. Click on a help item.
+6. Note `homescreen` is used for the `taskName` in the help panel click tracks event.
+6. Navigate to any task in the task list.
+7. Click on the "Help" tab.
+8. Note the `taskName` for the event is the current task.
+9. Click on a help item.
+10. Note the `taskName` for the event is the current task.
+
 ### Add gross sales column to CSV export #6567
 
 1. Navigate to Analytics -> Revenue
@@ -33,6 +47,7 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 1. Enable the new navigation.
 2. Shorten your viewport height so that the secondary menu overlaps the main.
 3. Make sure the menu title can still be seen.
+
 ### Use wc filter to get status tabs for tools category #6525
 
 1. Register a new tab via the filter.

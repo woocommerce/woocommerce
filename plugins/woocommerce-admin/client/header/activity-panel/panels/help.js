@@ -316,7 +316,7 @@ function handleOnItemClick( props, event ) {
 	}
 
 	props.recordEvent( 'help_panel_click', {
-		task_name: taskName,
+		task_name: taskName || 'homescreen',
 		link: event.currentTarget.href,
 	} );
 }
@@ -369,7 +369,7 @@ export const HelpPanel = ( props ) => {
 	const { taskName } = props;
 	useEffect( () => {
 		props.recordEvent( 'help_panel_open', {
-			task_name: taskName,
+			task_name: taskName || 'homescreen',
 		} );
 	}, [ taskName ] );
 
