@@ -553,8 +553,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				// Low stock amount.
-				if ( isset( $request['low_stock_amount'] ) ) {
-					$product->set_low_stock_amount( wc_stock_amount( $request['low_stock_amount'] ) );
+				// isset() returns false for value null, thus we need to check whether the value has been sent by the request.
+				if ( array_key_exists( 'low_stock_amount', $request->get_params() ) ) {
+					if ( null === $request['low_stock_amount'] ) {
+						$product->set_low_stock_amount( '' );
+					} else {
+						$product->set_low_stock_amount( wc_stock_amount( $request['low_stock_amount'] ) );
+					}
 				}
 			} else {
 				// Don't manage stock.
@@ -993,7 +998,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'low_stock_amount'       => array(
 					'description' => __( 'Low Stock amount for the product.', 'woocommerce' ),
-					'type'        => 'integer',
+					'type'        => array( 'integer', 'null' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sold_individually'     => array(
