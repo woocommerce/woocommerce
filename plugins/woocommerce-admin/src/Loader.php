@@ -755,7 +755,8 @@ class Loader {
 	 * Returns true if we are on a JS powered admin page.
 	 */
 	public static function is_admin_page() {
-		return wc_admin_is_registered_page();
+		// Check the function exists before calling in case WC Admin is disabled. See PR #6563.
+		return function_exists( 'wc_admin_is_registered_page' ) && wc_admin_is_registered_page();
 	}
 
 	/**
