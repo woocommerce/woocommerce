@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				array(
 					'id'                => '_low_stock_amount',
 					'value'             => $product_object->get_low_stock_amount( 'edit' ),
-					'placeholder'       => printf(
+					'placeholder'       => sprintf(
 						/* translators: %d: Amount of stock left */
 						esc_attr__( 'Store-wide threshold (%d)', 'woocommerce' ),
 						esc_attr( get_option( 'woocommerce_notify_low_stock_amount' ) )

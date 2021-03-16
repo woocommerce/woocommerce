@@ -210,22 +210,24 @@ defined( 'ABSPATH' ) || exit;
 						)
 					);
 
+					$low_stock_placeholder = ( $product_object->get_manage_stock() && '' !== $product_object->get_low_stock_amount() )
+						? sprintf(
+							/* translators: %d: Amount of stock left */
+							esc_attr__( 'Parent product\'s threshold (%d)', 'woocommerce' ),
+							esc_attr( $product_object->get_low_stock_amount() )
+						)
+						: sprintf(
+							/* translators: %d: Amount of stock left */
+							esc_attr__( 'Store-wide threshold (%d)', 'woocommerce' ),
+							esc_attr( get_option( 'woocommerce_notify_low_stock_amount' ) )
+						);
+
 					woocommerce_wp_text_input(
 						array(
 							'id'                => "variable_low_stock_amount{$loop}",
 							'name'              => "variable_low_stock_amount[{$loop}]",
 							'value'             => $variation_object->get_low_stock_amount( 'edit' ),
-							'placeholder'       => $product_object->get_manage_stock() && '' !== $product_object->get_low_stock_amount()
-								? printf(
-									/* translators: %d: Amount of stock left */
-									esc_attr__( 'Parent product\'s threshold (%d)', 'woocommerce' ),
-									esc_attr( $product_object->get_low_stock_amount() )
-								)
-								: printf(
-									/* translators: %d: Amount of stock left */
-									esc_attr__( 'Store-wide threshold (%d)', 'woocommerce' ),
-									esc_attr( get_option( 'woocommerce_notify_low_stock_amount' ) )
-								),
+							'placeholder'       => $low_stock_placeholder,
 							'label'             => __( 'Low stock threshold', 'woocommerce' ),
 							'desc_tip'          => true,
 							'description'       => __( 'When variation stock reaches this amount you will be notified by email. The default value for all variations can be set in the product Inventory tab. The shop default value can be set in Settings > Products > Inventory.', 'woocommerce' ),
