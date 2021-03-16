@@ -69,24 +69,14 @@
 		background: transparent;
 		border: 0;
 		appearance: none;
-		height: 0;
-		padding: 16px 0 0 0;
+		height: 16px;
 		width: 16px;
-		overflow: hidden;
+		padding: 0;
 		position: absolute;
 		right: 0;
 		top: 50%;
 		margin: -8px 0 0 0;
-
-		&::before {
-			width: 16px;
-			height: 16px;
-			background: transparent url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='9' fill='%2324292d'/%3E%3Crect x='4.5' y='6.8866' width='3.375' height='9.9466' transform='rotate(-45 4.5 6.8866)' fill='white'/%3E%3Crect x='11.5334' y='4.5' width='3.375' height='9.9466' transform='rotate(45 11.5334 4.5)' fill='white'/%3E%3C/svg%3E%0A") center center no-repeat; /* stylelint-disable-line */
-			display: block;
-			content: "";
-			position: absolute;
-			top: 0;
-		}
+		color: currentColor;
 	}
 
 	.wc-block-active-filters__list--chips {
