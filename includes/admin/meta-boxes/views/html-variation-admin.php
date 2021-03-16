@@ -218,7 +218,7 @@ defined( 'ABSPATH' ) || exit;
 							'placeholder'       => $product_object->get_manage_stock() && '' !== $product_object->get_low_stock_amount() ? $product_object->get_low_stock_amount() : get_option( 'woocommerce_notify_low_stock_amount' ),
 							'label'             => __( 'Low stock threshold', 'woocommerce' ),
 							'desc_tip'          => true,
-							'description'       => __( 'When variation stock reaches this amount you will be notified by email. The default value can be set in Settings > Products > Inventory.', 'woocommerce' ),
+							'description'       => __( 'When variation stock reaches this amount you will be notified by email. The fallback is parent product\'s value and the default value can be set in Settings > Products > Inventory.', 'woocommerce' ),
 							'type'              => 'number',
 							'custom_attributes' => array(
 								'step' => 'any',
