@@ -95,14 +95,14 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
-			const { changeQuantity, quantity } = renderer.root.findByType(
+			const { setItemQuantity, quantity } = renderer.root.findByType(
 				'div'
 			).props;
 
 			expect( quantity ).toBe( 1 );
 
 			act( () => {
-				changeQuantity( 2 );
+				setItemQuantity( 2 );
 			} );
 
 			const { quantity: newQuantity } = renderer.root.findByType(
@@ -133,7 +133,7 @@ describe( 'useStoreCartItemQuantity', () => {
 			expect( mockRemoveItemFromCart ).toHaveBeenCalledWith( '123' );
 		} );
 
-		it( 'changeQuantity should call the dispatch action', () => {
+		it( 'setItemQuantity should call the dispatch action', () => {
 			const TestComponent = getTestComponent( {
 				key: '123',
 				quantity: 1,
@@ -145,10 +145,10 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
-			const { changeQuantity } = renderer.root.findByType( 'div' ).props;
+			const { setItemQuantity } = renderer.root.findByType( 'div' ).props;
 
 			act( () => {
-				changeQuantity( 2 );
+				setItemQuantity( 2 );
 			} );
 
 			expect( mockChangeCartItemQuantity.mock.calls ).toEqual( [
