@@ -427,6 +427,92 @@ const getPaymentsConfig = ( options = {} ) => {
 	};
 };
 
+const getExtensionsConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: getEntryConfig( 'extensions', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			filename: `[name].js`,
+			jsonpFunction: 'webpackWcBlocksExtensionsMethodExtensionJsonp',
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'babel-loader?cacheDirectory',
+						options: {
+							presets: [
+								[
+									'@babel/preset-env',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								require.resolve(
+									'@babel/plugin-proposal-object-rest-spread'
+								),
+								require.resolve(
+									'@babel/plugin-transform-react-jsx'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-async-generator-functions'
+								),
+								require.resolve(
+									'@babel/plugin-transform-runtime'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-class-properties'
+								),
+								NODE_ENV === 'production'
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+							].filter( Boolean ),
+						},
+					},
+				},
+			],
+		},
+		plugins: [
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig(
+					'Experimental Extensions',
+					options.fileSuffix
+				)
+			),
+			new DependencyExtractionWebpackPlugin( {
+				injectPolyfill: true,
+				requestToExternal,
+				requestToHandle,
+			} ),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.ts' ],
+		},
+	};
+};
+
 const getStylingConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -594,5 +680,6 @@ module.exports = {
 	getFrontConfig,
 	getMainConfig,
 	getPaymentsConfig,
+	getExtensionsConfig,
 	getStylingConfig,
 };

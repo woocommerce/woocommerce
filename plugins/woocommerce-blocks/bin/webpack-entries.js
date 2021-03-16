@@ -133,6 +133,10 @@ const entries = {
 		'wc-payment-method-cod':
 			'./assets/js/payment-method-extensions/payment-methods/cod/index.js',
 	},
+	extensions: {
+		'wc-blocks-google-analytics':
+			'./assets/js/extensions/google-analytics/index.ts',
+	},
 };
 
 const getEntryConfig = ( type = 'main', exclude = [] ) => {

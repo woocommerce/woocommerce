@@ -8,21 +8,20 @@ import { useDebounce } from 'use-debounce';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import { triggerFragmentRefresh } from '@woocommerce/base-utils';
 import type { CartItem, StoreCartItemQuantity } from '@woocommerce/types';
+
 /**
  * Internal dependencies
  */
 import { useStoreCart } from './use-store-cart';
 import { usePrevious } from '../use-previous';
+
 /**
- * This is a custom hook for loading the Store API /cart/ endpoint and
- * actions for removing or changing item quantity.
+ * This is a custom hook for loading the Store API /cart/ endpoint and actions for removing or changing item quantity.
  *
  * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  *
- * @param {CartItem} cartItem      The cartItem to get quantity info from and
- *                                 will have quantity updated on.
- * @return {StoreCartItemQuantity} An object exposing data and actions relating
- *                                 to cart items.
+ * @param {CartItem} cartItem      The cartItem to get quantity info from and will have quantity updated on.
+ * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
  */
 export const useStoreCartItemQuantity = (
 	cartItem: CartItem
@@ -31,56 +30,45 @@ export const useStoreCartItemQuantity = (
 	const { cartErrors } = useStoreCart();
 	const { dispatchActions } = useCheckoutContext();
 
-	// Store quantity in hook state. This is used to keep the UI
-	// updated while server request is updated.
-	const [ quantity, changeQuantity ] = useState< number >( cartItemQuantity );
+	// Store quantity in hook state. This is used to keep the UI updated while server request is updated.
+	const [ quantity, setQuantity ] = useState< number >( cartItemQuantity );
 	const [ debouncedQuantity ] = useDebounce< number >( quantity, 400 );
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
 	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
 		storeKey
 	);
 
-	const isPendingQuantity = useSelect(
+	// Track when things are already pending updates.
+	const isPending = useSelect(
 		( select ) => {
 			if ( ! cartItemKey ) {
-				return false;
+				return {
+					quantity: false,
+					delete: false,
+				};
 			}
-
 			const store = select( storeKey );
-			return store.isItemPendingQuantity( cartItemKey );
+			return {
+				quantity: store.isItemPendingQuantity( cartItemKey ),
+				delete: store.isItemPendingDelete( cartItemKey ),
+			};
 		},
 		[ cartItemKey ]
 	);
-	const previousIsPendingQuantity = usePrevious( isPendingQuantity );
-
-	const isPendingDelete = useSelect(
-		( select ) => {
-			if ( ! cartItemKey ) {
-				return false;
-			}
-
-			const store = select( storeKey );
-			return store.isItemPendingDelete( cartItemKey );
-		},
-		[ cartItemKey ]
-	);
-	const previousIsPendingDelete = usePrevious( isPendingDelete );
+	const previousIsPending = usePrevious( isPending );
 
 	const removeItem = () => {
 		return cartItemKey
 			? removeItemFromCart( cartItemKey ).then( () => {
 					triggerFragmentRefresh();
+					return true;
 			  } )
-			: false;
+			: Promise.resolve( false );
 	};
 
 	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
-		if (
-			cartItemKey &&
-			Number.isFinite( previousDebouncedQuantity ) &&
-			previousDebouncedQuantity !== debouncedQuantity
-		) {
+		if ( cartItemKey && previousDebouncedQuantity !== debouncedQuantity ) {
 			changeCartItemQuantity( cartItemKey, debouncedQuantity ).then(
 				triggerFragmentRefresh
 			);
@@ -93,34 +81,37 @@ export const useStoreCartItemQuantity = (
 	] );
 
 	useEffect( () => {
-		if ( previousIsPendingQuantity !== isPendingQuantity ) {
-			if ( isPendingQuantity ) {
+		if ( typeof previousIsPending === 'undefined' ) {
+			return;
+		}
+		if ( previousIsPending.quantity !== isPending.quantity ) {
+			if ( isPending.quantity ) {
 				dispatchActions.incrementCalculating();
 			} else {
 				dispatchActions.decrementCalculating();
 			}
 		}
-	}, [ dispatchActions, isPendingQuantity, previousIsPendingQuantity ] );
-
-	useEffect( () => {
-		if ( previousIsPendingDelete !== isPendingDelete ) {
-			if ( isPendingDelete ) {
+		if ( previousIsPending.delete !== isPending.delete ) {
+			if ( isPending.delete ) {
 				dispatchActions.incrementCalculating();
 			} else {
 				dispatchActions.decrementCalculating();
 			}
 		}
 		return () => {
-			if ( isPendingDelete ) {
+			if ( isPending.quantity ) {
+				dispatchActions.decrementCalculating();
+			}
+			if ( isPending.delete ) {
 				dispatchActions.decrementCalculating();
 			}
 		};
-	}, [ dispatchActions, isPendingDelete, previousIsPendingDelete ] );
+	}, [ dispatchActions, isPending, previousIsPending ] );
 
 	return {
-		isPendingDelete,
+		isPendingDelete: isPending.delete,
 		quantity,
-		changeQuantity,
+		setItemQuantity: setQuantity,
 		removeItem,
 		cartItemQuantityErrors: cartErrors,
 	};

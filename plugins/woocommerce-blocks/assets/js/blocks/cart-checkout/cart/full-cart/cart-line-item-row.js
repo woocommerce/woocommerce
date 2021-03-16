@@ -7,7 +7,10 @@ import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
-import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
+import {
+	useStoreCartItemQuantity,
+	useStoreEvents,
+} from '@woocommerce/base-hooks';
 import {
 	ProductBackorderBadge,
 	ProductImage,
@@ -94,10 +97,11 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 
 	const {
 		quantity,
-		changeQuantity,
+		setItemQuantity,
 		removeItem,
 		isPendingDelete,
 	} = useStoreCartItemQuantity( lineItem );
+	const { dispatchStoreEvent } = useStoreEvents();
 
 	const productPriceValidation = useCallback(
 		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
@@ -243,12 +247,24 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 						disabled={ isPendingDelete }
 						quantity={ quantity }
 						maximum={ quantityLimit }
-						onChange={ changeQuantity }
+						onChange={ ( newQuantity ) => {
+							setItemQuantity( newQuantity );
+							dispatchStoreEvent( 'set-cart-item-quantity', {
+								product: lineItem,
+								quantity: newQuantity,
+							} );
+						} }
 						itemName={ name }
 					/>
 					<button
 						className="wc-block-cart-item__remove-link"
-						onClick={ removeItem }
+						onClick={ () => {
+							removeItem();
+							dispatchStoreEvent( 'remove-cart-item', {
+								product: lineItem,
+								quantity,
+							} );
+						} }
 						disabled={ isPendingDelete }
 					>
 						{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
