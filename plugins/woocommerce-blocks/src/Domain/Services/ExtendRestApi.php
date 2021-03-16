@@ -78,6 +78,7 @@ final class ExtendRestApi {
 	 *     @type string   $namespace Plugin namespace.
 	 *     @type callable $schema_callback Callback executed to add schema data.
 	 *     @type callable $data_callback Callback executed to add endpoint data.
+	 *     @type string   $data_type The type of data, object or array.
 	 * }
 	 *
 	 * @throws Exception On failure to register.
@@ -102,9 +103,16 @@ final class ExtendRestApi {
 			$this->throw_exception( '$data_callback must be a callable function.' );
 		}
 
+		if ( isset( $args['data_type'] ) && ! in_array( $args['data_type'], [ ARRAY_N, ARRAY_A ], true ) ) {
+			$this->throw_exception(
+				sprintf( 'Data type must be either ARRAY_N for a numeric array or ARRAY_A for an object like array. You provided %1$s.', $args['data_type'] )
+			);
+		}
+
 		$this->extend_data[ $args['endpoint'] ][ $args['namespace'] ] = [
 			'schema_callback' => $args['schema_callback'],
 			'data_callback'   => $args['data_callback'],
+			'data_type'       => isset( $args['data_type'] ) ? $args['data_type'] : ARRAY_A,
 		];
 
 		return true;
@@ -140,6 +148,41 @@ final class ExtendRestApi {
 			$registered_data[ $namespace ] = $data;
 		}
 		return (object) $registered_data;
+	}
+
+	/**
+	 * Returns the registered endpoint schema
+	 *
+	 * @param string $endpoint    A valid identifier.
+	 * @param array  $passed_args Passed arguments from the Schema class.
+	 * @return array Returns an array with registered schema data.
+	 * @throws Exception If a registered callback throws an error, or silently logs it.
+	 */
+	public function get_endpoint_schema( $endpoint, array $passed_args = [] ) {
+		$registered_schema = [];
+		if ( ! isset( $this->extend_data[ $endpoint ] ) ) {
+			return (object) $registered_schema;
+		}
+
+		foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {
+			$schema = [];
+
+			try {
+				$schema = $callbacks['schema_callback']( ...$passed_args );
+
+				if ( ! is_array( $schema ) ) {
+					throw new Exception( '$schema_callback must return an array.' );
+				}
+			} catch ( Throwable $e ) {
+				$this->throw_exception( $e );
+				continue;
+			}
+
+			$schema = $this->format_extensions_properties( $namespace, $schema, $callbacks['data_type'] );
+
+			$registered_schema[ $namespace ] = $schema;
+		}
+		return (object) $registered_schema;
 	}
 
 	/**
@@ -197,41 +240,6 @@ final class ExtendRestApi {
 	}
 
 	/**
-	 * Returns the registered endpoint schema
-	 *
-	 * @param string $endpoint    A valid identifier.
-	 * @param array  $passed_args Passed arguments from the Schema class.
-	 * @return array Returns an array with registered schema data.
-	 * @throws Exception If a registered callback throws an error, or silently logs it.
-	 */
-	public function get_endpoint_schema( $endpoint, array $passed_args = [] ) {
-		$registered_schema = [];
-		if ( ! isset( $this->extend_data[ $endpoint ] ) ) {
-			return (object) $registered_schema;
-		}
-
-		foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {
-			$schema = [];
-
-			try {
-				$schema = $callbacks['schema_callback']( ...$passed_args );
-
-				if ( ! is_array( $schema ) ) {
-					throw new Exception( '$schema_callback must return an array.' );
-				}
-			} catch ( Throwable $e ) {
-				$this->throw_exception( $e );
-				continue;
-			}
-
-			$schema = $this->format_extensions_properties( $namespace, $schema );
-
-			$registered_schema[ $namespace ] = $schema;
-		}
-		return (object) $registered_schema;
-	}
-
-	/**
 	 * Throws error and/or silently logs it.
 	 *
 	 * @param string|Throwable $exception_or_error Error message or Exception.
@@ -255,10 +263,21 @@ final class ExtendRestApi {
 	 *
 	 * @param string $namespace Error message or Exception.
 	 * @param array  $schema An error to throw if we have debug enabled and user is admin.
+	 * @param string $data_type How should data be shaped.
 	 *
 	 * @return array Formatted schema.
 	 */
-	private function format_extensions_properties( $namespace, $schema ) {
+	private function format_extensions_properties( $namespace, $schema, $data_type ) {
+		if ( ARRAY_N === $data_type ) {
+			return [
+				/* translators: %s: extension namespace */
+				'description' => sprintf( __( 'Extension data registered by %s', 'woo-gutenberg-products-block' ), $namespace ),
+				'type'        => [ 'array', 'null' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => $schema,
+			];
+		}
 		return [
 			/* translators: %s: extension namespace */
 			'description' => sprintf( __( 'Extension data registered by %s', 'woo-gutenberg-products-block' ), $namespace ),

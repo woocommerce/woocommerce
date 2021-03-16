@@ -90,6 +90,7 @@ export const previewCart: CartResponse = {
 				line_total: '1600',
 				line_total_tax: '0',
 			},
+			extensions: {},
 		},
 		{
 			key: '2',
@@ -155,6 +156,7 @@ export const previewCart: CartResponse = {
 				line_total: '1400',
 				line_total_tax: '0',
 			},
+			extensions: {},
 		},
 	],
 	fees: [],
@@ -163,6 +165,7 @@ export const previewCart: CartResponse = {
 	needs_payment: true,
 	needs_shipping: SHIPPING_ENABLED,
 	has_calculated_shipping: true,
+	extensions: {},
 	shipping_address: {
 		first_name: '',
 		last_name: '',
