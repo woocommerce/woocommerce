@@ -62,16 +62,11 @@
 .wc-block-product-categories__button {
 	display: flex;
 	align-items: center;
-	text-decoration: none;
 	margin: 0;
-	border: none;
-	cursor: pointer;
-	background: none;
 	padding: 0 0.5em;
-	color: $gray-700;
 	position: relative;
 	overflow: hidden;
-	border-radius: 0.25em;
+
 	svg {
 		fill: currentColor;
 		outline: none;
@@ -86,24 +81,6 @@
 	&[aria-disabled="true"] {
 		cursor: default;
 		opacity: 0.3;
-	}
-	&:focus:enabled {
-		background-color: #fff;
-		color: $gray-900;
-		box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px #fff;
-		outline: 2px solid transparent;
-		outline-offset: -2px;
-	}
-	&:not(:disabled):not([aria-disabled="true"]):hover {
-		background-color: #fff;
-		color: $gray-900;
-		box-shadow: inset 0 0 0 1px $gray-200, inset 0 0 0 2px #fff, 0 1px 1px rgba(25, 30, 35, 0.2);
-	}
-	&:not(:disabled):not([aria-disabled="true"]):active {
-		outline: none;
-		background-color: #fff;
-		color: $gray-900;
-		box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px #fff;
 	}
 	&[aria-disabled="true"]:focus,
 	&:disabled:focus {
