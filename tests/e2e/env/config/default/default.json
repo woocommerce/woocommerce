@@ -1,5 +1,6 @@
 {
   "url": "http://localhost:8084/",
+  "appName": "woocommerce_e2e",
   "users": {
     "admin": {
       "username": "admin",
@@ -12,8 +13,7 @@
   },
   "products": {
     "simple": {
-      "name": "Simple product",
-      "price": "9.99"
+      "name": "Simple product"
     },
     "variable": {
       "name": "Variable Product with Three Variations"
