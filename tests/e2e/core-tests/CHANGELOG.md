@@ -19,6 +19,7 @@
 - Merchant Product Edit tests
 - Merchant Product Search tests
 - Shopper Single Product tests
+- Shopper My Account Pay Order
 - Shopper Checkout Apply Coupon
 - Shopper Shop Browse Search Sort
 - Merchant Orders Customer Checkout Page
