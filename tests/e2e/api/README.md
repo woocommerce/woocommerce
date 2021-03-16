@@ -49,11 +49,19 @@ httpClient.get( '/wc/v3/products' ).then( ( response ) => {
 
 ### Repositories
 
-As a convenience utility we've created repositories for core data types that can simplify interacting with the API.
+As a convenience utility we've created repositories for core data types that can simplify interacting with the API:
+
+- `SimpleProduct`
+- `ExternalProduct`
+- `GroupedProduct`
+- `VariableProduct`
+- `ProductVariation`
+- `Coupon`
+
 These repositories provide CRUD methods for ease-of-use:
 
 ```javascript
-import { SimpleProduct } from '@woocommerce/api';
+import { HTTPClientFactory, SimpleProduct } from '@woocommerce/api';
 
 // Prepare the HTTP client that will be consumed by the repository.
 // This is necessary so that it can make requests to the REST API.
@@ -68,5 +76,86 @@ const product = repository.create( { name: 'Simple Product', regularPrice: '9.99
 
 // The response will be one of the models with structured properties and TypeScript support.
 product.id;
+```
 
+#### Repository Methods
+
+The following methods are available on all repositories:
+
+- `create( {...properties} )` - Create a single object of the model type
+- `delete( objectId )` - Delete a single object of the model type
+- `list` - Retrieve a list of the existing objects of that model type
+- `read( objectId )` - Read a single object of the model type
+- `update( objectId, {...properties} )` - Update a single object of the model type
+
+#### Child Repositories
+
+`ProductVariation` is a child model repository. In child model repositories, each method requires the `parentId` as the first parameter:
+
+```javascript
+import { HTTPClientFactory, VariableProduct, ProductVariation } from '@woocommerce/api';
+
+const httpClient = HTTPClientFactory.build( 'https://example.com' )
+    .withBasicAuth( 'username', 'password' )
+	.withIndexPermalinks()
+    .create();
+
+const productRepository = VariableProduct.restRepository( httpClient );
+const variationRepository = ProductVariation.restRepository( httpClient );
+
+const product = await productRepository.create({
+    "name": "Variable Product with Three Attributes",
+    "defaultAttributes": [
+    {
+     "id": 0,
+     "name": "Size",
+     "option": "Medium"
+    },
+    {
+     "id": 0,
+     "name": "Colour",
+     "option": "Blue"
+    }
+    ],
+    "attributes": [
+    {
+     "id": 0,
+     "name": "Colour",
+     "isVisibleOnProductPage": true,
+     "isForVariations": true,
+     "options": [
+       "Red",
+       "Green",
+       "Blue"
+     ],
+     "sortOrder": 0
+    },
+    {
+     "id": 0,
+     "name": "Size",
+     "isVisibleOnProductPage": true,
+     "isForVariations": true,
+     "options": [
+       "Small",
+       "Medium",
+       "Large"
+     ],
+     "sortOrder": 0
+   }
+  ]
+});
+
+const variation = await variationRepository.create( product.id, {
+    "regularPrice": "19.99",
+    "attributes": [
+      {
+        "name": "Size",
+        "option": "Large"
+      },
+      {
+        "name": "Colour",
+        "option": "Red"
+      }
+    ]
+});
 ```
