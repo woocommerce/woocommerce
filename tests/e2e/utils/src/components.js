@@ -503,6 +503,6 @@ export {
 	addProductToOrder,
 	createCoupon,
 	createSimpleProductWithCategory,
-  clickUpdateOrder,
+	clickUpdateOrder,
 	deleteAllEmailLogs,
 };

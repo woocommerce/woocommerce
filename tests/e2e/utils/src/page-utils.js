@@ -272,7 +272,7 @@ export {
 	moveAllItemsToTrash,
 	evalAndClick,
 	selectOptionInSelect2,
-  applyCoupon,
+	applyCoupon,
 	removeCoupon,
 	selectOrderAction,
 };
