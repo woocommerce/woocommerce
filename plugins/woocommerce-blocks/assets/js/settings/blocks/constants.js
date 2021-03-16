@@ -49,6 +49,11 @@ export const IS_SHIPPING_CALCULATOR_ENABLED = getSetting(
 	'isShippingCalculatorEnabled',
 	true
 );
+// used for the editor logic as an extra check
+export const SHIPPING_COST_REQUIRES_ADDRESS = getSetting(
+	'shippingCostRequiresAddress',
+	false
+);
 export const IS_SHIPPING_COST_HIDDEN = getSetting(
 	'isShippingCostHidden',
 	false
