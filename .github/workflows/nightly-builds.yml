@@ -4,6 +4,7 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
 jobs:
   build:
+    if: github.repository_owner == 'woocommerce'
     name: Nightly builds
     strategy:
       fail-fast: false
