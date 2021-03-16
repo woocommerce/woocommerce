@@ -14,6 +14,7 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
+const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 const simpleProductName = config.get( 'products.simple.name' );
 const california = 'California, United States (US)';
 const sanFranciscoZIP = '94107';
@@ -85,7 +86,7 @@ const runAddNewShippingZoneTest = () => {
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$19.99'});
+			await expect(page).toMatchElement('.order-total .amount', {text: `$1${simpleProductPrice}`});
 		});
 
 		it('allows customer to benefit from a Free shipping if in CA', async () => {
@@ -102,7 +103,7 @@ const runAddNewShippingZoneTest = () => {
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Free shipping'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
+			await expect(page).toMatchElement('.order-total .amount', {text: `$${simpleProductPrice}`});
 		});
 
 		it('allows customer to benefit from a free Local pickup if in SF', async () => {
@@ -115,7 +116,7 @@ const runAddNewShippingZoneTest = () => {
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Local pickup'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
+			await expect(page).toMatchElement('.order-total .amount', {text: `$${simpleProductPrice}`});
 
 			await shopper.removeFromCart(simpleProductName);
 		});
