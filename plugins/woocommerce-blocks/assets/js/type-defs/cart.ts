@@ -3,7 +3,11 @@
 /**
  * Internal dependencies
  */
-import { MetaKeyValue, ShippingRateItemItem } from './cart-response';
+import {
+	MetaKeyValue,
+	ShippingRateItemItem,
+	ExtensionsData,
+} from './cart-response';
 export interface CurrencyInfo {
 	currency_code: string;
 	currency_symbol: string;
@@ -123,6 +127,7 @@ export interface CartItem {
 	variation: Array< CartVariationItem >;
 	prices: CartItemPrices;
 	totals: CartItemTotals;
+	extensions: ExtensionsData;
 }
 
 export interface CartTotalsTaxLineItem {
@@ -160,9 +165,6 @@ export interface CartErrorItem {
 	message: string;
 }
 
-export interface CartExtensionItem {
-	[ key: string ]: unknown;
-}
 export interface Cart {
 	coupons: Array< CartCouponItem >;
 	shippingRates: Array< CartShippingRateItem >;
@@ -178,7 +180,7 @@ export interface Cart {
 	totals: CartTotals;
 	errors: Array< CartErrorItem >;
 	paymentRequirements: Array< unknown >;
-	extensions: Array< CartExtensionItem >;
+	extensions: ExtensionsData;
 }
 export interface CartMeta {
 	updatingCustomerData: boolean;

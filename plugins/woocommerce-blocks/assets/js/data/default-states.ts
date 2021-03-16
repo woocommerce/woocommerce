@@ -75,7 +75,7 @@ export const defaultCartState: CartState = {
 		},
 		errors: [],
 		paymentRequirements: [],
-		extensions: [],
+		extensions: {},
 	},
 	metaData: {
 		updatingCustomerData: false,
