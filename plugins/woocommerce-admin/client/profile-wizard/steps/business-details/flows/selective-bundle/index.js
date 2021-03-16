@@ -91,6 +91,7 @@ class BusinessDetails extends Component {
 				extensionInstallationOptions[ 'woocommerce-services' ],
 			install_mailchimp:
 				extensionInstallationOptions[ 'mailchimp-for-woocommerce' ],
+			install_mailpoet: extensionInstallationOptions.mailpoet,
 			install_jetpack: extensionInstallationOptions.jetpack,
 			install_google_ads:
 				extensionInstallationOptions[ 'kliken-marketing-for-google' ],

@@ -119,6 +119,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: CES survey for search product, order, customer #6420
 - Add: CES survey for importing products #6419
 - Add: CES survey for adding product categories, tags, and attributes #6418
+- Add: Include tracking for mail poet installs in the selective bundle install #6603
 
 == 2.1.3 3/14/2021  ==
 
