@@ -149,7 +149,7 @@
 		"@testing-library/jest-dom": "5.11.9",
 		"@testing-library/react": "11.2.5",
 		"@testing-library/react-hooks": "3.7.0",
-		"@testing-library/user-event": "12.7.3",
+		"@testing-library/user-event": "12.8.3",
 		"@typescript-eslint/eslint-plugin": "4.15.2",
 		"@woocommerce/components": "file:packages/components",
 		"@woocommerce/csv-export": "file:packages/csv-export",
