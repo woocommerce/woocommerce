@@ -11,7 +11,7 @@ npm install jest --global
 
 ## Configuration
 
-The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it includes a hosting container for running tests and includes instructions for creating your Travis CI setup.
+The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it includes a basic hosting container for running tests and includes instructions for creating your Travis CI setup.
 
 ### Babel Config
 
@@ -56,7 +56,7 @@ module.exports = useE2EEsLintConfig( {
 
 ### Jest Config
 
-The E2E environment uses Jest as a test runner. Extending the base config is needed in order for Jest to run your project's test files.
+The E2E environment uses Jest as a test runner. Extending the base config is necessary in order for Jest to run your project's test files.
 
 ```js
 const path = require( 'path' );
@@ -69,7 +69,7 @@ const jestConfig = useE2EJestConfig( {
 module.exports = jestConfig;
 ```
 
-**NOTE:** Your project's Jest config file is expected to be: `tests/e2e/config/jest.config.js`.
+**NOTE:** Your project's Jest config file is: `tests/e2e/config/jest.config.js`.
 
 #### Test Screenshots
 
@@ -79,7 +79,7 @@ The test sequencer provides a screenshot function for test failures. To enable s
 WC_E2E_SCREENSHOTS=1 npx wc-e2e test:e2e
 ```
 
-Screenshots will be saved to `tests/e2e/screenshots`
+Screenshots will be saved to `tests/e2e/screenshots`. This folder is cleared at the beginning of each test run.
 
 ### Jest Puppeteer Config
 
@@ -125,11 +125,11 @@ module.exports = puppeteerConfig;
 
 ### Jest Setup
 
-Jest provides setup and teardown functions similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
+Jest provides [setup and teardown functions](https://jestjs.io/docs/setup-teardown) similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
 
 ### Container Setup
 
-Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` container supports using either the built in container or an external container. See the the appropriate readme for  details:
+Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` test runner supports using either the built in container or an external container. See the appropriate readme for  details:
 
 - [Built In Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/builtin.md)
 - [External Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/external.md)

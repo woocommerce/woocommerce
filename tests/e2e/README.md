@@ -55,7 +55,7 @@ This section explains how e2e tests are working behind the scenes. These are not
 
 ### Test Environment
 
-We recommend using Docker for running tests locally in order for the test environment to match the setup on Travis CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
+We recommend using Docker for running tests locally in order for the test environment to match the setup on Github CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
 
 ### Test Variables
 
@@ -77,13 +77,13 @@ The jest test sequencer uses the following test variables:
 }
 ```
 
-If you need to modify the port for your local test environment (eg. port is already in use), copy `tests/e2e/env/config/default.json` to `tests/e2e/config/default.json` and edit that copy. Only edit this file while your test container is `down`.
+If you need to modify the port for your local test environment (eg. port is already in use), edit `tests/e2e/config/default.json`. Only edit this file while your test container is `down`.
 
 ### Jest test sequencer
 
-[Jest](https://jestjs.io/) is being used to run e2e tests. Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the new directory `activate-and-setup` will run first. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last).
+[Jest](https://jestjs.io/) is being used to run e2e tests. Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the directory `activate-and-setup` will run first. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last).
 
-The Setup Wizard e2e test (located in `activate-and-setup` directory) will run first. This ensures that WooCommerce is active and the setup wizard has been completed. This is necessary because `docker:up` creates a brand new install of WordPress and WooCommerce.
+The Setup Wizard e2e test runs first to ensure that WooCommerce is active and that the setup wizard has been completed. This is necessary because `docker:up` creates a brand new install of WordPress and WooCommerce.
 
 ### Chromium Download
 
@@ -99,23 +99,25 @@ Puppeteer will still automatically download Chromium when needed.
 
 ### Prep work for running tests
 
+Run the following in a terminal/command line window
+
 - `cd` to the WooCommerce plugin folder
 
-- `git checkout trunk` or checkout the branch where you need to run tests 
+- `git checkout trunk` (or the branch where you need to run tests) 
 
-- Run `nvm use`
+- `nvm use`
 
-- Run `npm install`
+- `npm install`
 
-- Run `composer install --no-dev`
+- `composer install --no-dev`
 
-- Run `npm run build:assets`
+- `npm run build:assets`
 
-- Run `npm install jest --global` (this only needs to be done once)
+- `npm install jest --global` (this only needs to be done once)
 
-- Run `npx wc-e2e docker:up` - it will build the test site using Docker.  
+- `npx wc-e2e docker:up` (this will build the test site using Docker)
 
-- Run `docker ps` - to confirm that the Docker containers are running. You should see the log that looks similar to below indicating that everything had been built as expected:
+- Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
 ```
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
@@ -305,7 +307,7 @@ describe( 'Merchant can create virtual product', () => {
 } );
 ```
 
-Next, you can start filling up each section with relevant functions (test building blocks). Note, that we have the `@woocommerce/e2e-utils` package where many reusable helper functions can be found for writing tests. For example, `flows.js` of `@woocommerce/e2e-utils` package contains `merchant` object that has `login` method. As a result, in the test it can be used as `await merchant.login();` so the first `it()` section of the test will become:
+Next, you can start filling up each section with relevant functions (test building blocks). Note, that we have the `@woocommerce/e2e-utils` package where many reusable helper functions can be found for writing tests. For example, `merchant.js` of `@woocommerce/e2e-utils` package contains `merchant` object that has `login` method. As a result, in the test it can be used as `await merchant.login();` so the first `it()` section of the test will become:
 
 ```
 it( 'merchant can log in', async () => {
@@ -327,7 +329,7 @@ it( 'merchant can create virtual product', async () => {
 
 You would then continue writing the test using utilities where possible. 
 
-Make sure to utilize the functions of the `@automattic/puppeteer-utils` package where possible. For example, if you need to wait for certain element to be ready to be clicked on and then click on it, you can use `waitAndClick()` function:
+Make sure to utilize the functions of the `@automattic/puppeteer-utils` package where possible. For example, if you need to wait for a certain element to be ready to be clicked on and then click on it, you can use `waitAndClick()` function:
 
 ```
 await waitAndClick( page, '#selector' ); 
@@ -350,5 +352,7 @@ FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
 In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
 
 ## Debugging tests 
+
+The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   
