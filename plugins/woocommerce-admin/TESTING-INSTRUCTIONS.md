@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Close activity panel tabs by default and track #6566
+
+1. Open your browser console and enter `localStorage.setItem( 'debug', 'wc-admin:tracks' );`.  Make sure the "Verbose" is selected under the levels shown.
+2. With the task list enabled, navigate to the homescreen.
+3. Check that the `wcadmin_activity_panel_visible_panels` event is shown with `taskList: true` in its data.
+4. Hide the task list.
+5. Note that `wcadmin_activity_panel_visible_panels` event is shown with visible activity panels.
+6. After refreshing, make sure that the "Orders" activity panel is closed by default.
+
 ### Update undefined task name properties for help panel tracks #6565
 
 1. Enter `localStorage.setItem( 'debug', 'wc-admin:*' );` into your console. Leave your console open.

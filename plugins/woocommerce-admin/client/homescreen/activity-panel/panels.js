@@ -31,7 +31,7 @@ export function getAllPanels( {
 			count: countUnreadOrders,
 			collapsible: true,
 			id: 'orders-panel',
-			initialOpen: true,
+			initialOpen: false,
 			panel: (
 				<OrdersPanel
 					countUnreadOrders={ countUnreadOrders }

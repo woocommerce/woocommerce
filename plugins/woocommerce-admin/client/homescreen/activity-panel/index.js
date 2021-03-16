@@ -12,6 +12,8 @@ import {
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -52,6 +54,17 @@ export const ActivityPanel = () => {
 
 	const panels = getAllPanels( panelsData );
 
+	useEffect( () => {
+		const visiblePanels = panels.reduce(
+			( acc, panel ) => {
+				acc[ panel.id ] = true;
+				return acc;
+			},
+			{ taskList: panelsData.isTaskListHidden !== 'yes' }
+		);
+		recordEvent( 'activity_panel_visible_panels', visiblePanels );
+	}, [ panelsData.isTaskListHidden ] );
+
 	if ( panels.length === 0 ) {
 		return null;
 	}
@@ -86,6 +99,15 @@ export const ActivityPanel = () => {
 						initialOpen={ initialOpen }
 						collapsible={ collapsible }
 						disabled={ ! collapsible }
+						onToggle={ ( isOpen ) => {
+							if ( ! isOpen ) {
+								return;
+							}
+
+							recordEvent( 'activity_panel_open', {
+								tab: id,
+							} );
+						} }
 					>
 						<PanelRow>{ panel }</PanelRow>
 					</PanelBody>
