@@ -8,6 +8,7 @@ const {
 	getMainConfig,
 	getFrontConfig,
 	getPaymentsConfig,
+	getExtensionsConfig,
 	getStylingConfig,
 } = require( './bin/webpack-configs.js' );
 
@@ -50,6 +51,14 @@ const MainConfig = {
 const FrontendConfig = {
 	...sharedConfig,
 	...getFrontConfig( { alias: getAlias() } ),
+};
+
+/**
+ * Config for building experimental extension scripts.
+ */
+const ExtensionsConfig = {
+	...sharedConfig,
+	...getExtensionsConfig( { alias: getAlias() } ),
 };
 
 /**
@@ -154,6 +163,7 @@ module.exports = [
 	CoreConfig,
 	MainConfig,
 	FrontendConfig,
+	ExtensionsConfig,
 	PaymentsConfig,
 	StylingConfig,
 ];

@@ -20,7 +20,7 @@ interface StoreAddToCart {
 	cartQuantity: number;
 	addingToCart: boolean;
 	cartIsLoading: boolean;
-	addToCart: ( quantity: number ) => void;
+	addToCart: ( quantity?: number ) => Promise< boolean >;
 }
 /**
  * Get the quantity of a product in the cart.
@@ -60,11 +60,9 @@ export const useStoreAddToCart = ( productId: number ): StoreAddToCart => {
 
 	const addToCart = ( quantity = 1 ) => {
 		setAddingToCart( true );
-		addItemToCart( productId, quantity )
-			.then( ( result ) => {
-				if ( result === true ) {
-					removeNotice( 'add-to-cart' );
-				}
+		return addItemToCart( productId, quantity )
+			.then( () => {
+				removeNotice( 'add-to-cart' );
 			} )
 			.catch( ( error ) => {
 				addErrorNotice( decodeEntities( error.message ), {

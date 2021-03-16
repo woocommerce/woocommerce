@@ -12,6 +12,7 @@ import {
 	useStoreProducts,
 	useSynchronizedQueryState,
 	useQueryStateByKey,
+	useStoreEvents,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
@@ -126,8 +127,9 @@ const ProductList = ( {
 	const { products, totalProducts, productsLoading } = useStoreProducts(
 		queryState
 	);
-	const { parentClassName } = useInnerBlockLayoutContext();
+	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
+	const { dispatchStoreEvent } = useStoreEvents();
 
 	// These are possible filters.
 	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
@@ -137,15 +139,23 @@ const ProductList = ( {
 	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
 	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
-	// Only update previous query totals if the query is different and
-	// the total number of products is a finite number.
+	// Only update previous query totals if the query is different and the total number of products is a finite number.
 	const previousQueryTotals = usePrevious(
 		{ totalQuery, totalProducts },
 		areQueryTotalsDifferent
 	);
 
-	// If query state (excluding pagination/sorting attributes) changed,
-	// reset pagination to the first page.
+	// If the product list changes, trigger an event.
+	useEffect( () => {
+		if ( products.length > 0 ) {
+			dispatchStoreEvent( 'list-products', {
+				products,
+				listName: parentName,
+			} );
+		}
+	}, [ products, parentName, dispatchStoreEvent ] );
+
+	// If query state (excluding pagination/sorting attributes) changed, reset pagination to the first page.
 	useEffect( () => {
 		if ( isEqual( totalQuery, previousQueryTotals?.totalQuery ) ) {
 			return;

@@ -12,6 +12,7 @@ export * from './use-previous';
 export * from './use-shallow-equal';
 export * from './use-store-products';
 export * from './use-store-add-to-cart';
+export * from './use-store-events';
 export * from './use-store-notices';
 export * from './use-query-state';
 export * from './use-throw-error';
