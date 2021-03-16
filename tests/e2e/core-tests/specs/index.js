@@ -15,6 +15,7 @@ const runCartPageTest = require( './shopper/front-end-cart.test' );
 const runCheckoutApplyCouponsTest = require( './shopper/front-end-checkout-coupons.test');
 const runCheckoutPageTest = require( './shopper/front-end-checkout.test' );
 const runMyAccountPageTest = require( './shopper/front-end-my-account.test' );
+const runMyAccountPayOrderTest = require( './shopper/front-end-my-account-pay-order.test' );
 const runSingleProductPageTest = require( './shopper/front-end-single-product.test' );
 const runVariableProductUpdateTest = require( './shopper/front-end-variable-product-updates.test' );
 
@@ -54,6 +55,7 @@ const runShopperTests = () => {
 	runCheckoutApplyCouponsTest();
 	runCheckoutPageTest();
 	runMyAccountPageTest();
+	runMyAccountPayOrderTest();
 	runSingleProductPageTest();
 	runVariableProductUpdateTest();
 };
@@ -97,6 +99,7 @@ module.exports = {
 	runCheckoutApplyCouponsTest,
 	runCheckoutPageTest,
 	runMyAccountPageTest,
+	runMyAccountPayOrderTest,
 	runSingleProductPageTest,
 	runVariableProductUpdateTest,
 	runShopperTests,
