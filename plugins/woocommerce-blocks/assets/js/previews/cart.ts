@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	SHIPPING_COST_REQUIRES_ADDRESS,
 	SHIPPING_METHODS_EXIST,
 	WC_BLOCKS_ASSET_URL,
 	SHIPPING_ENABLED,
@@ -164,7 +165,7 @@ export const previewCart: CartResponse = {
 	items_weight: 0,
 	needs_payment: true,
 	needs_shipping: SHIPPING_ENABLED,
-	has_calculated_shipping: true,
+	has_calculated_shipping: ! SHIPPING_COST_REQUIRES_ADDRESS,
 	extensions: {},
 	shipping_address: {
 		first_name: '',
