@@ -68,7 +68,11 @@ export const useStoreCartItemQuantity = (
 
 	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
-		if ( cartItemKey && previousDebouncedQuantity !== debouncedQuantity ) {
+		if (
+			cartItemKey &&
+			Number.isFinite( previousDebouncedQuantity ) &&
+			previousDebouncedQuantity !== debouncedQuantity
+		) {
 			changeCartItemQuantity( cartItemKey, debouncedQuantity ).then(
 				triggerFragmentRefresh
 			);
