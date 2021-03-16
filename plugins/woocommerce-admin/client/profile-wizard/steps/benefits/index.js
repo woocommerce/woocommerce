@@ -3,12 +3,10 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, Card, CardBody, CardFooter } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { filter } from 'lodash';
+import { useEffect, useState } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 import interpolateComponents from 'interpolate-components';
-import { H, Link } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import {
 	pluginNames,
 	ONBOARDING_STORE_NAME,
@@ -21,41 +19,72 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
+import { Benefits } from './benefits';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import Logo from './logo';
-import ManagementIcon from './images/management';
-import SalesTaxIcon from './images/sales_tax';
-import ShippingLabels from './images/shipping_labels';
-import SpeedIcon from './images/speed';
 
-class Benefits extends Component {
-	constructor( props ) {
-		super( props );
-
-		this.isJetpackActive = props.activePlugins.includes( 'jetpack' );
-		this.isWcsActive = props.activePlugins.includes(
-			'woocommerce-services'
+export const BenefitsLayout = ( { goToNextStep } ) => {
+	const {
+		activePlugins,
+		isJetpackConnected,
+		isProfileItemsError,
+		isUpdatingProfileItems,
+	} = useSelect( ( select ) => {
+		const { getOnboardingError, isOnboardingRequesting } = select(
+			ONBOARDING_STORE_NAME
 		);
-		this.pluginsToInstall = [];
-		if ( ! this.isJetpackActive ) {
-			this.pluginsToInstall.push( 'jetpack' );
-		}
-		if ( ! this.isWcsActive ) {
-			this.pluginsToInstall.push( 'woocommerce-services' );
+		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+
+		return {
+			activePlugins: getActivePlugins(),
+			isJetpackConnected: select(
+				PLUGINS_STORE_NAME
+			).isJetpackConnected(),
+			isProfileItemsError: Boolean(
+				getOnboardingError( 'updateProfileItems' )
+			),
+			isUpdatingProfileItems: isOnboardingRequesting(
+				'updateProfileItems'
+			),
+		};
+	} );
+
+	const { createNotice } = useDispatch( 'core/notices' );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateProfileItems } = useDispatch( ONBOARDING_STORE_NAME );
+	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+
+	const pluginsRemaining = [ 'jetpack', 'woocommerce-services' ].filter(
+		( plugin ) => ! activePlugins.includes( plugin )
+	);
+
+	// Cache the initial plugin list so we don't change benefits midway through activation.
+	const [ pluginsToInstall ] = useState( pluginsRemaining );
+	const [ isInstalling, setIsInstalling ] = useState( false );
+
+	const isJetpackActive = ! pluginsToInstall.includes( 'jetpack' );
+	const isWcsActive = ! pluginsToInstall.includes( 'woocommerce-services' );
+	const isComplete = isWcsActive && isJetpackActive && isJetpackConnected;
+
+	useEffect( () => {
+		// Skip this step if already complete.
+		if ( isComplete ) {
+			goToNextStep();
+			return;
 		}
 
 		recordEvent( 'storeprofiler_plugins_to_install', {
-			plugins: this.pluginsToInstall,
+			plugins: pluginsToInstall,
 		} );
+	}, [] );
 
-		this.startPluginInstall = this.startPluginInstall.bind( this );
-		this.skipPluginInstall = this.skipPluginInstall.bind( this );
+	if ( isComplete ) {
+		return null;
 	}
 
-	async skipPluginInstall() {
-		const { createNotice, goToNextStep, isProfileItemsError } = this.props;
-
-		const plugins = this.isJetpackActive ? 'skipped-wcs' : 'skipped';
+	const skipPluginInstall = async () => {
+		const plugins = isJetpackActive ? 'skipped-wcs' : 'skipped';
+		await updateProfileItems( { plugins } );
 
 		if ( isProfileItemsError ) {
 			createNotice(
@@ -73,16 +102,12 @@ class Benefits extends Component {
 		}
 
 		goToNextStep();
-	}
+	};
 
-	startPluginInstall() {
-		const {
-			createNotice,
-			goToNextStep,
-			installAndActivatePlugins,
-			updateOptions,
-		} = this.props;
-		const plugins = this.isJetpackActive ? 'installed-wcs' : 'installed';
+	const startPluginInstall = () => {
+		const plugins = isJetpackActive ? 'installed-wcs' : 'installed';
+
+		setIsInstalling( true );
 
 		recordEvent( 'storeprofiler_install_plugins', {
 			install: true,
@@ -90,12 +115,18 @@ class Benefits extends Component {
 		} );
 
 		Promise.all( [
-			installAndActivatePlugins( this.pluginsToInstall ),
+			pluginsToInstall.length
+				? installAndActivatePlugins( pluginsToInstall )
+				: null,
+			updateProfileItems( { plugins } ),
 			updateOptions( {
 				woocommerce_setup_jetpack_opted_in: true,
 			} ),
 		] )
-			.then( goToNextStep )
+			.then( () => {
+				setIsInstalling( false );
+				goToNextStep();
+			} )
 			.catch( ( pluginError, profileError ) => {
 				if ( pluginError ) {
 					createNoticesFromResponse( pluginError );
@@ -109,152 +140,72 @@ class Benefits extends Component {
 						)
 					);
 				}
+				setIsInstalling( false );
 				goToNextStep();
 			} );
-	}
+	};
 
-	renderBenefit( benefit ) {
-		const { description, icon, title } = benefit;
+	const pluginNamesString = pluginsToInstall
+		.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
+		.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
+	const isAcceptingTos = ! isWcsActive;
+	const pluralizedPlugins = _n(
+		'plugin',
+		'plugins',
+		pluginsToInstall.length,
+		'woocommerce-admin'
+	);
 
-		return (
-			<div
-				className="woocommerce-profile-wizard__benefit-card"
-				key={ title }
-			>
-				{ icon }
-				<div className="woocommerce-profile-wizard__benefit-card-content">
-					<H className="woocommerce-profile-wizard__benefit-card-title">
-						{ title }
-					</H>
-					<p>{ description }</p>
+	return (
+		<Card className="woocommerce-profile-wizard__benefits-card">
+			<CardBody justify="center">
+				<Logo />
+				<div className="woocommerce-profile-wizard__step-header">
+					<Text variant="title.small" as="h2">
+						{ sprintf(
+							/* translators: %s = names of plugins to install, e.g. Jetpack and Woocommerce Services */
+							__(
+								'Enhance your store with %s',
+								'woocommerce-admin'
+							),
+							pluginNamesString
+						) }
+					</Text>
 				</div>
-			</div>
-		);
-	}
+				<Benefits
+					isJetpackSetup={ isJetpackActive && isJetpackConnected }
+					isWcsSetup={ isWcsActive }
+				/>
+			</CardBody>
+			<CardFooter isBorderless justify="center">
+				<Button
+					isPrimary
+					isBusy={ isInstalling }
+					disabled={ isUpdatingProfileItems || isInstalling }
+					onClick={ startPluginInstall }
+				>
+					{ __( 'Yes please!', 'woocommerce-admin' ) }
+				</Button>
+				<Button
+					isSecondary
+					isBusy={ isUpdatingProfileItems && ! isInstalling }
+					disabled={ isUpdatingProfileItems || isInstalling }
+					className="woocommerce-profile-wizard__skip"
+					onClick={ skipPluginInstall }
+				>
+					{ __( 'No thanks', 'woocommerce-admin' ) }
+				</Button>
+			</CardFooter>
 
-	getBenefits() {
-		return [
-			{
-				title: __( 'Store management on the go', 'woocommerce-admin' ),
-				icon: <ManagementIcon />,
-				description: __(
-					'Your store in your pocket. Manage orders, receive sales notifications, and more. Only with a Jetpack connection.',
-					'woocommerce-admin'
-				),
-				visible: ! this.isJetpackActive,
-			},
-			{
-				title: __( 'Automated sales taxes', 'woocommerce-admin' ),
-				icon: <SalesTaxIcon />,
-				description: __(
-					'Ensure that the correct rate of tax is charged on all of your orders automatically, and print shipping labels at home.',
-					'woocommerce-admin'
-				),
-				visible: ! this.isWcsActive || ! this.isJetpackActive,
-			},
-			{
-				title: __( 'Improved speed & security', 'woocommerce-admin' ),
-				icon: <SpeedIcon />,
-				description: __(
-					'Automatically block brute force attacks and speed up your store using our powerful, global server network to cache images.',
-					'woocommerce-admin'
-				),
-				visible: ! this.isJetpackActive,
-			},
-			{
-				title: __(
-					'Print shipping labels at home',
-					'woocommerce-admin'
-				),
-				icon: <ShippingLabels />,
-				description: __(
-					'Save time at the post office by printing shipping labels for your orders at home.',
-					'woocommerce-admin'
-				),
-				visible: this.isJetpackActive && ! this.isWcsActive,
-			},
-		];
-	}
-
-	renderBenefits() {
-		return (
-			<div className="woocommerce-profile-wizard__benefits">
-				{ filter(
-					this.getBenefits(),
-					( benefit ) => benefit.visible
-				).map( ( benefit ) => this.renderBenefit( benefit ) ) }
-			</div>
-		);
-	}
-
-	render() {
-		const {
-			activePlugins,
-			isInstallingActivating,
-			isUpdatingProfileItems,
-		} = this.props;
-
-		const pluginNamesString = this.pluginsToInstall
-			.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
-			.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
-		const pluginsRemaining = this.pluginsToInstall.filter(
-			( plugin ) => ! activePlugins.includes( plugin )
-		);
-		const isInstallAction =
-			isInstallingActivating || ! pluginsRemaining.length;
-		const isAcceptingTos = ! this.isWcsActive;
-		const pluralizedPlugins = _n(
-			'plugin',
-			'plugins',
-			this.pluginsToInstall.length,
-			'woocommerce-admin'
-		);
-
-		return (
-			<Card className="woocommerce-profile-wizard__benefits-card">
-				<CardBody justify="center">
-					<Logo />
-					<div className="woocommerce-profile-wizard__step-header">
-						<Text variant="title.small" as="h2">
-							{ sprintf(
-								__(
-									'Enhance your store with %s',
-									'woocommerce-admin'
-								),
-								pluginNamesString
-							) }
-						</Text>
-					</div>
-
-					{ this.renderBenefits() }
-				</CardBody>
-				<CardFooter isBorderless justify="center">
-					<Button
-						isPrimary
-						isBusy={ isInstallAction }
-						disabled={ isUpdatingProfileItems || isInstallAction }
-						onClick={ this.startPluginInstall }
-					>
-						{ __( 'Yes please!', 'woocommerce-admin' ) }
-					</Button>
-					<Button
-						isSecondary
-						isBusy={ isUpdatingProfileItems && ! isInstallAction }
-						disabled={ isUpdatingProfileItems || isInstallAction }
-						className="woocommerce-profile-wizard__skip"
-						onClick={ this.skipPluginInstall }
-					>
-						{ __( 'No thanks', 'woocommerce-admin' ) }
-					</Button>
-				</CardFooter>
-
+			{ !! pluginsToInstall.length && (
 				<CardFooter isBorderless justify="center">
 					<p className="woocommerce-profile-wizard__benefits-install-notice">
 						{ isAcceptingTos
 							? interpolateComponents( {
 									mixedString: sprintf(
+										/* translators: %1$s: names of plugins to install, e.g. Jetpack and Woocommerce Services, %2$s: singular or plural form of 'plugins'   */
 										__(
-											'%s %s will be installed & activated for free, and you agree to our {{link}}Terms of Service{{/link}}.',
+											'%1$s %2$s will be installed & activated for free, and you agree to our {{link}}Terms of Service{{/link}}.',
 											'woocommerce-admin'
 										),
 										pluginNamesString,
@@ -271,8 +222,9 @@ class Benefits extends Component {
 									},
 							  } )
 							: sprintf(
+									/* translators: %1$s: names of plugins to install, e.g. Jetpack and Woocommerce Services, %2$s: singular or plural form of 'plugins'   */
 									__(
-										'%s %s will be installed & activated for free.',
+										'%1$s %2$s will be installed & activated for free.',
 										'woocommerce-admin'
 									),
 									pluginNamesString,
@@ -280,47 +232,7 @@ class Benefits extends Component {
 							  ) }
 					</p>
 				</CardFooter>
-			</Card>
-		);
-	}
-}
-
-export default compose(
-	withSelect( ( select ) => {
-		const {
-			getOnboardingError,
-			getProfileItems,
-			isOnboardingRequesting,
-		} = select( ONBOARDING_STORE_NAME );
-
-		const { getActivePlugins, isPluginsRequesting } = select(
-			PLUGINS_STORE_NAME
-		);
-
-		return {
-			activePlugins: getActivePlugins(),
-			isProfileItemsError: Boolean(
-				getOnboardingError( 'updateProfileItems' )
-			),
-			profileItems: getProfileItems(),
-			isUpdatingProfileItems: isOnboardingRequesting(
-				'updateProfileItems'
-			),
-			isInstallingActivating:
-				isPluginsRequesting( 'installPlugins' ) ||
-				isPluginsRequesting( 'activatePlugins' ) ||
-				isPluginsRequesting( 'getJetpackConnectUrl' ),
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			createNotice,
-			installAndActivatePlugins,
-			updateOptions,
-		};
-	} )
-)( Benefits );
+			) }
+		</Card>
+	);
+};

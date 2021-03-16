@@ -27,7 +27,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import Benefits from './steps/benefits';
+import { BenefitsLayout } from './steps/benefits';
 import { BusinessDetailsStep } from './steps/business-details';
 import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
@@ -155,7 +155,7 @@ class ProfileWizard extends Component {
 		) {
 			steps.push( {
 				key: 'benefits',
-				container: Benefits,
+				container: BenefitsLayout,
 			} );
 		}
 

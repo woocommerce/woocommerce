@@ -57,6 +57,17 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 3. Open browser inspector and select the Network tab.
 4. Navigate to WooCommerce -> Home
 5. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_navigation_intro_modal_dismissed&_locale=user` returns 200 status.
+### Refactor profile wizard benefits step and add tests #6583
+
+1. Deactivate Jetpack and/or WooCommerce Services.
+2. Visit the profiler benefits page. `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=benefits`
+3. Click "Yes please!" to continue.
+4. Without connecting to Jetpack, navigate backwards using your browser's back button.
+5. Make sure the page continues to display (benefits may have changed) and that action buttons are functional.
+6. Make sure skipping the install works as expected.
+7. Connect Jetpack.
+8. Attempt to directly visit the benefits page. `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=benefits`
+9. Note that you are redirected to the homescreen.
 
 ### Fix hidden menu title on smaller screens #6562
 
