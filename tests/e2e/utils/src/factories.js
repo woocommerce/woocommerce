@@ -1,15 +1,25 @@
 import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
-
-const httpClient = HTTPClientFactory.build( config.get( 'url' ) )
-	.withBasicAuth( config.get( 'users.admin.username' ), config.get( 'users.admin.password' ) )
-	.create();
-
 import { simpleProductFactory } from './factories/simple-product';
 
+const apiUrl = config.get( 'url' );
+const adminUsername = config.get( 'users.admin.username' );
+const adminPassword = config.get( 'users.admin.password' );
+const withDefaultPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.create();
+const withIndexPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.withIndexPermalinks()
+	.create();
+
 const factories = {
+	api: {
+		withDefaultPermalinks,
+		withIndexPermalinks,
+	},
 	products: {
-		simple: simpleProductFactory( httpClient ),
+		simple: simpleProductFactory( withDefaultPermalinks ),
 	},
 };
 
