@@ -63,6 +63,16 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 1. Enable the new navigation.
 2. Shorten your viewport height so that the secondary menu overlaps the main.
 3. Make sure the menu title can still be seen.
+### Add filter to profile wizard steps #6564
+
+1. Add the following JS to your admin head.  You can use a plugin like "Add Admin Javascript" to do this:
+```
+wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin', ( steps ) => {
+	return steps.filter( ( step ) => step.key !== 'product-types' );
+} );
+```
+2. Navigate to the profile wizard. `wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard`.
+3. Make sure the filtered step (product types) is not shown.
 
 ### Use wc filter to get status tabs for tools category #6525
 

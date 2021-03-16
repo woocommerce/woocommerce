@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { Component, createElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { identity, pick } from 'lodash';
@@ -35,6 +36,8 @@ import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
 import './style.scss';
 import { isSelectiveBundleInstallSegmentation } from './steps/business-details/data/segmentation';
+
+const STEPS_FILTER = 'woocommerce_admin_profile_wizard_steps';
 
 class ProfileWizard extends Component {
 	constructor( props ) {
@@ -155,7 +158,8 @@ class ProfileWizard extends Component {
 				container: Benefits,
 			} );
 		}
-		return steps;
+
+		return applyFilters( STEPS_FILTER, steps );
 	}
 
 	getCurrentStep() {
