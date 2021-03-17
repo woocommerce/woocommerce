@@ -29,8 +29,7 @@ class AddFirstProduct {
 	 * @return Note
 	 */
 	public static function get_note() {
-		// We want to show the note after 3 days and before 30.
-		if ( ! self::wc_admin_active_for( 3 * DAY_IN_SECONDS ) || self::wc_admin_active_for( 30 * DAY_IN_SECONDS ) ) {
+		if ( ! self::wc_admin_active_for( 2 * DAY_IN_SECONDS ) || self::wc_admin_active_for( 5 * DAY_IN_SECONDS ) ) {
 			return;
 		}
 

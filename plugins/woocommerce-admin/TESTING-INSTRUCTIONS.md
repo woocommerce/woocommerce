@@ -85,6 +85,38 @@ wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin
 2. Navigate to the profile wizard. `wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard`.
 3. Make sure the filtered step (product types) is not shown.
 
+### Adjust targeting store age: 2 - 5 days for the Add First Product note #6554
+
+- Checkout this branch.
+- Create a zip for testing with `npm run zip:test`.
+- Create a `jurassic.ninja` instance.
+- Upload the plugin and activate it.
+- Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
+
+```
+UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
+```
+
+- Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+- You should have received an email like the image above.
+- Verify the note's status is `sent`. You can use an SQL statement like this:
+```
+SELECT `status` FROM `wp_wc_admin_notes` WHERE `name` = 'wc-admin-add-first-product-note'
+```
+- Now delete the note with an SQL statement like:
+```
+DELETE FROM `wp_wc_admin_notes` WHERE `name` = 'wc-admin-add-first-product-note';
+```
+- Add a new order and run the cron.
+- No note should have been added.
+- Remove the order, add a product and run the cron.
+- No note should have been added.
+- Delete the product and modify the store creation date to 7 days with an SQL statement like:
+```
+UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
+```
+- No note should have been added.
+
 ### Use wc filter to get status tabs for tools category #6525
 
 1. Register a new tab via the filter.
