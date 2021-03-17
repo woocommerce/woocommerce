@@ -74,6 +74,7 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 1. Enable the new navigation.
 2. Shorten your viewport height so that the secondary menu overlaps the main.
 3. Make sure the menu title can still be seen.
+
 ### Add filter to profile wizard steps #6564
 
 1. Add the following JS to your admin head.  You can use a plugin like "Add Admin Javascript" to do this:
@@ -92,6 +93,11 @@ wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin
 - Create a `jurassic.ninja` instance.
 - Upload the plugin and activate it.
 - Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
+
+### Update Insight inbox message #6555
+
+1. Checkout this branch.
+2. Update the installation date of your store if it hasn't been at least a day. You can use the following SQL uqery.
 
 ```
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
@@ -144,7 +150,10 @@ UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7
 2. Continue to the Business Details step.
 3. Expand "Add recommended business features to my site" by clicking the down arrow.
 4. Confirm that "WooCommerce Tax" is listed.
->>>>>>> bbeebaf91 (Add changelog)
+3. Install & activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
+4. Navigate to Tools -> Cron Events
+5. Run `wc_admin_daily` job
+6. Navigate to WooCommerce -> Home and confirm the Insight note.
 
 ### Use wc filter to get status tabs for tools category #6525
 
