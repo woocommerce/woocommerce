@@ -1,23 +1,17 @@
 /**
  * @format
  */
+import {
+	clearAndFillInput,
+	verifyValueOfInputField,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import {
-	permalinkSettingsPageSaveChanges,
-	setCheckbox,
-	settingsPageSaveChanges,
-	verifyCheckboxIsSet,
-	verifyValueOfInputField,
-} from '../../utils/actions';
-
-const config = require( 'config' );
-const baseUrl = config.get( 'url' );
-
-const WC_ADMIN_HOME = baseUrl + 'wp-admin/admin.php?page=wc-admin';
+import { WcSettings } from '../../models/WcSettings';
+import { WpSettings } from '../../models/WpSettings';
 
 describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 	it( 'can login', async () => {
@@ -41,47 +35,36 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 
 describe( 'Store owner can finish initial store setup', () => {
 	it( 'can enable tax rates and calculations', async () => {
+		const wcSettings = new WcSettings( page );
+
 		// Go to general settings page
-		await StoreOwnerFlow.openSettings( 'general' );
+		await wcSettings.open();
 
-		// Make sure the general tab is active
-		await expect( page ).toMatchElement( 'a.nav-tab-active', {
-			text: 'General',
-		} );
+		await wcSettings.enableTaxRates();
 
-		// Enable tax rates and calculations
-		await setCheckbox( '#woocommerce_calc_taxes' );
-
-		await settingsPageSaveChanges();
+		await wcSettings.saveSettings();
 
 		// Verify that settings have been saved
-		await Promise.all( [
-			expect( page ).toMatchElement( '#message', {
-				text: 'Your settings have been saved.',
-			} ),
-			verifyCheckboxIsSet( '#woocommerce_calc_taxes' ),
-		] );
+		const taxRate = await wcSettings.getTaxRateValue();
+		expect( taxRate ).toEqual( true );
 	} );
 
 	it( 'can configure permalink settings', async () => {
+		const wpSettings = new WpSettings( page );
 		// Go to Permalink Settings page
-		await StoreOwnerFlow.openPermalinkSettings();
+		await wpSettings.openPermalinkSettings();
 
 		// Select "Post name" option in common settings section
-		await page.click( 'input[value="/%postname%/"]', {
-			text: ' Post name',
-		} );
+		await page.click( 'input[value="/%postname%/"]' );
 
 		// Select "Custom base" in product permalinks section
 		await page.click( '#woocommerce_custom_selection' );
 
 		// Fill custom base slug to use
-		await expect( page ).toFill(
-			'#woocommerce_permalink_structure',
-			'/product/'
-		);
+		await clearAndFillInput( '#woocommerce_permalink_structure', '' );
+		await page.type( '#woocommerce_permalink_structure', '/product/' );
 
-		await permalinkSettingsPageSaveChanges();
+		await wpSettings.saveSettings();
 
 		// Verify that settings have been saved
 		await Promise.all( [

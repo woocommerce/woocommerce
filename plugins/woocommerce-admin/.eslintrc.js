@@ -18,6 +18,12 @@ module.exports = {
 		'jest/valid-title': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
 	},
+	settings: {
+		jest: {
+			// only needed as we use jest-24.9.0 in our package.json, can be removed once we update and set it to 'jest'.
+			version: '24.9.0',
+		},
+	},
 	overrides: [
 		{
 			files: [ '*.ts', '*.tsx' ],
