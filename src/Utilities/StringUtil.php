@@ -57,4 +57,15 @@ final class StringUtil {
 
 		return strcasecmp( $string, $ends_with ) === 0;
 	}
+
+	/**
+	 * Get a class name without namespace from a full class name.
+	 *
+	 * @param string $full_class_name Full (namespaced) class name.
+	 * @return string Class name without the namespace.
+	 */
+	public static function class_name_without_namespace( string $full_class_name ) {
+		$class_name_parts = explode( '\\', $full_class_name );
+		return array_pop( $class_name_parts );
+	}
 }

@@ -41,6 +41,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
+			'graphql_api'     => __( 'GraphQL API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
 
@@ -385,11 +386,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'legacy_api_options',
 					),
 					array(
-						'title'   => __( 'Legacy API', 'woocommerce' ),
-						'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
-						'id'      => 'woocommerce_api_enabled',
-						'type'    => 'checkbox',
-						'default' => 'no',
+						'title'    => __( 'Legacy API', 'woocommerce' ),
+						'desc'     => __( 'Enable the legacy REST API', 'woocommerce' ),
+						'desc_tip' => __( 'Enable the legacy REST API', 'woocommerce' ),
+						'id'       => 'woocommerce_api_enabled',
+						'type'     => 'checkbox',
+						'default'  => 'no',
 					),
 					array(
 						'type' => 'sectionend',
@@ -397,6 +399,34 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					),
 				)
 			);
+		} elseif ( 'graphql_api' === $current_section ) {
+			$graphql_entrypoint = get_rest_url( null, 'wc/graphql/api' );
+
+			// phpcs:disable WordPress.WP.I18n.InterpolatedVariableText
+			$settings = apply_filters(
+				'woocommerce_settings_graphql_api',
+				array(
+					array(
+						'title' => '',
+						'type'  => 'title',
+						'desc'  => '',
+						'id'    => 'graphql_api_options',
+					),
+					array(
+						'title'    => __( 'GraphQL API', 'woocommerce' ),
+						'desc'     => __( 'Enable the GraphQL API', 'woocommerce' ),
+						'desc_tip' => __( "<b>The GraphQL API is experimental and not intended for production use.</b><br/>GraphQL API entry point: <code>$graphql_entrypoint</code><br/>Accepts <code>POST</code> requests with a JSON object containing a <code>query</code> field and optionally a <code>variables</code> field.", 'woocommerce' ),
+						'id'       => 'woocommerce_graphql_api_enabled',
+						'type'     => 'checkbox',
+						'default'  => 'no',
+					),
+					array(
+						'type' => 'sectionend',
+						'id'   => 'graphql_api_options',
+					),
+				)
+			);
+			// phpcs:enable WordPress.WP.I18n.InterpolatedVariableText
 		}
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );

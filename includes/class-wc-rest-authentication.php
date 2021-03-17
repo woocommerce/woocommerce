@@ -6,6 +6,8 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\StringUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,6 +35,16 @@ class WC_REST_Authentication {
 	 * @var string
 	 */
 	protected $auth_method = '';
+
+	private static $_instance;
+
+	public static function instance() {
+		if(is_null(self::$_instance)) {
+			self::$_instance = new self();
+		}
+
+		return self::$_instance;
+	}
 
 	/**
 	 * Initialize authentication actions.
@@ -556,6 +568,10 @@ class WC_REST_Authentication {
 	private function check_permissions( $method ) {
 		$permissions = $this->user->permissions;
 
+		if($this->is_graphql_request()) {
+			return 'POST' === $method;
+		}
+
 		switch ( $method ) {
 			case 'HEAD':
 			case 'GET':
@@ -635,6 +651,28 @@ class WC_REST_Authentication {
 
 		return $result;
 	}
+
+	private function is_graphql_request()
+	{
+		return StringUtil::ends_with($_SERVER['PHP_SELF'], '/wc/v4/api');
+	}
+
+	public function current_user_has_permission(string $permission) {
+		if(!$this->user) {
+			return false;
+		}
+
+		$actual_permission = $this->user->permissions;
+
+		switch($permission) {
+			case 'read':
+				return 'read' === $actual_permission || 'read_write' === $actual_permission;
+			case 'write':
+				return 'write' === $actual_permission || 'read_write' === $actual_permission;
+		}
+
+		throw new Exception("Unknown permission: " . $permission);
+	}
 }
 
-new WC_REST_Authentication();
+WC_REST_Authentication::instance();

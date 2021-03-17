@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\GraphqlInfrastructureServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\GraphqlTypesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 
 /**
@@ -33,8 +35,10 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 * @var string[]
 	 */
 	private $service_providers = array(
-		ProxiesServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
+		GraphqlInfrastructureServiceProvider::class,
+		GraphqlTypesServiceProvider::class,
+		ProxiesServiceProvider::class
 	);
 
 	/**

@@ -167,6 +167,7 @@ final class WooCommerce {
 		$this->define_tables();
 		$this->includes();
 		$this->init_hooks();
+		Automattic\WooCommerce\Internal\GraphQL\Main::initialize();
 	}
 
 	/**
