@@ -106,11 +106,21 @@ describe( 'Cart page', () => {
 | `settingsPageSaveChanges` |  | Save the current WooCommerce settings page |
 | `uiUnblocked` |  | Wait until the page is unblocked |
 | `unsetCheckbox` | `selector` | Uncheck a checkbox |
-trashVerification` | Verify that an item can be published and trashed |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `verifyCheckboxIsSet` | `selector` | Verify that a checkbox is checked |
 | `verifyCheckboxIsUnset` | `selector` | Verify that a checkbox is unchecked |
-| `verifyPublishAndTrash` | `button, publishNotice, publishVerification, | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
+| `verifyPublishAndTrash` | `button, publishNotice, publishVerification, trashVerification` | Verify that an item can be published and trashed |
+| `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
+| `clickFilter` | `selector` | Click on a list page filter |
+| `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
+| `verifyAndPublish` | `noticeText` | Verify that an item can be published |
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
+| `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms |
+| `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods |
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout |
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
+| `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
+| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 
 ### Test Utilities
 

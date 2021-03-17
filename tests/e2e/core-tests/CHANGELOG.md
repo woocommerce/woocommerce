@@ -24,6 +24,8 @@
 - Shopper Shop Browse Search Sort
 - Merchant Orders Customer Checkout Page
 - Shopper Cart Apply Coupon
+- Merchant Order Searching
+- Merchant Settings Shipping Zones
 - Shopper Variable product info updates on different variations
 - Merchant order emails flow
 

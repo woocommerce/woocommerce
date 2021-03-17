@@ -45,6 +45,7 @@ The functions to access the core tests are:
 ### Merchant
 
 - `runMerchantTests` - Run all merchant tests
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runAddSimpleProductTest` - Merchant can create a simple product
   - `runAddVariableProductTest` - Merchant can create a variable product
   - `runCreateCouponTest` - Merchant can create coupon
@@ -54,11 +55,13 @@ The functions to access the core tests are:
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
+  - `runOrderSearchingTest` - Merchant can search for order via different terms
   - `runProductEditDetailsTest` - Merchant can edit an existing product
   - `runProductSearchTest` - Merchant can search for a product and view it
   - `runProductSettingsTest` - Merchant can update product settings
   - `runTaxSettingsTest` - Merchant can update tax settings
   - `runUpdateGeneralSettingsTest` - Merchant can update general settings
+  - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
 
 ### Shopper
 

@@ -10,6 +10,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
  * @param {string} value
  */
 const clearAndFillInput = async ( selector, value ) => {
+	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await pressKeyWithModifier( 'primary', 'a' );
 	await page.type( selector, value );
@@ -197,16 +198,33 @@ const evalAndClick = async ( selector ) => {
 };
 
 /**
- * Select a value from select2 input field.
+ * Select a value from select2 search input field.
  *
  * @param {string} value Value of what to be selected
- * @param {string} selector Selector of the select2
+ * @param {string} selector Selector of the select2 search field
  */
 const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
 	await page.waitForSelector(selector);
+	await page.click(selector);
 	await page.type(selector, value);
 	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
 	await page.keyboard.press('Enter');
+};
+
+/**
+ * Search by any term for an order
+ *
+ * @param {string} value Value to be entered into the search field
+ * @param {string} orderId Order ID
+ * @param {string} customerName Customer's full name attached to order ID.
+ */
+const searchForOrder = async (value, orderId, customerName) => {
+	await clearAndFillInput('#post-search-input', value);
+	await expect(page).toMatchElement('#post-search-input', value);
+	await expect(page).toClick('#search-submit');
+	await page.waitForSelector('#the-list');
+	await page.waitFor(1000);
+	await expect(page).toMatchElement('.order_number > a.order-view', {text: `#${orderId} ${customerName}`});
 };
 
 /**
@@ -272,6 +290,7 @@ export {
 	moveAllItemsToTrash,
 	evalAndClick,
 	selectOptionInSelect2,
+	searchForOrder,
 	applyCoupon,
 	removeCoupon,
 	selectOrderAction,
