@@ -11,6 +11,7 @@ const {
 	clearAndFillInput,
 	selectOptionInSelect2,
 	evalAndClick,
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -29,14 +30,24 @@ const runAddNewShippingZoneTest = () => {
 			await createSimpleProduct();
 			await merchant.openSettings('shipping');
 
-			// Check if you can go via blank shipping zones, otherwise remove one existing zone
-			// This is a workaround to avoid flakyness and to give this test more confidence
+			// Delete existing shipping zones.
 			try {
-				await page.click('.wc-shipping-zones-blank-state > a.wc-shipping-zone-add');
-
+				let zone = await page.$( '.wc-shipping-zone-delete' );
+				if ( zone ) {
+					// WP action links aren't clickable because they are hidden with a left=-9999 style.
+					await page.evaluate(() => {
+						document.querySelector('.wc-shipping-zone-name .row-actions')
+							.style
+							.left = '0';
+					});
+					while ( zone ) {
+						await evalAndClick( '.wc-shipping-zone-delete' );
+						await uiUnblocked();
+						zone = await page.$( '.wc-shipping-zone-delete' );
+					}
+				}
 			} catch (error) {
-				await evalAndClick('.wc-shipping-zone-delete');
-				await page.keyboard.press('Enter');
+				// Prevent an error here causing the test to fail.
 			}
 		});
 
@@ -55,9 +66,9 @@ const runAddNewShippingZoneTest = () => {
 			await addShippingZoneAndMethod(shippingZoneNameUS);
 
 			// Set Flat rate cost
-			await expect(page).toClick('a.wc-shipping-zone-method-settings', {text: 'Edit'});
+			await expect(page).toClick('a.wc-shipping-zone-method-settings', {text: 'Flat rate'});
 			await clearAndFillInput('#woocommerce_flat_rate_cost', '10');
-			await expect(page).toClick('button#btn-ok');
+			await expect(page).toClick('.wc-backbone-modal-main button#btn-ok');
 			await merchant.logout();
 		});
 
