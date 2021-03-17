@@ -58,6 +58,7 @@ The functions to access the core tests are:
   - `runProductEditDetailsTest` - Merchant can edit an existing product
   - `runProductSearchTest` - Merchant can search for a product and view it
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
 
 ### Shopper

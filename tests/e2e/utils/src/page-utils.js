@@ -10,6 +10,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
  * @param {string} value
  */
 const clearAndFillInput = async ( selector, value ) => {
+	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await pressKeyWithModifier( 'primary', 'a' );
 	await page.type( selector, value );
