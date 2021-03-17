@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2 } from './page-utils';
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -192,34 +192,18 @@ const createSimpleProduct = async () => {
  * @param categoryName Product's category which can be changed when writing a test
  */
 const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
-	// Go to "add product" page
-	await merchant.openNewProduct();
+	const product = await factories.products.simple.create( {
+		name: productName,
+		regularPrice: productPrice,
+		categories: [
+			{
+				name: categoryName,
+			}
+		],
+		isVirtual: true,
+	} );
 
-	// Add title and regular price
-	await expect(page).toFill('#title', productName);
-	await expect(page).toClick('#_virtual');
-	await clickTab('General');
-	await expect(page).toFill('#_regular_price', productPrice);
-
-	// Try to select the existing category if present already, otherwise add a new and select it
-	try {
-		const [checkbox] = await page.$x('//label[contains(text(), "'+categoryName+'")]');
-		await checkbox.click();
-	} catch (error) {
-		await expect(page).toClick('#product_cat-add-toggle');
-		await expect(page).toFill('#newproduct_cat', categoryName);
-		await expect(page).toClick('#product_cat-add-submit');
-	}
-
-	// Publish the product
-	await expect(page).toClick('#publish');
-	await uiUnblocked();
-	await page.waitForSelector('.updated.notice', {text:'Product published.'});
-
-	// Get the product ID
-	const variablePostId = await page.$('#post_ID');
-	let variablePostIdValue = (await(await variablePostId.getProperty('value')).jsonValue());
-	return variablePostIdValue;
+	return product.id;
 };
 
 /**
@@ -473,6 +457,84 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	return couponCode;
 };
 
+/**
+ * Adds a shipping zone along with a shipping method.
+ *
+ * @param zoneName Shipping zone name.
+ * @param zoneLocation Shiping zone location. Defaults to United States (US).
+ * @param zipCode Shipping zone zip code. Defaults to empty one space.
+ * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
+ */
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+	await merchant.openNewShipping();
+	
+	// Fill shipping zone name
+	await page.waitForSelector('input#zone_name');
+	await expect(page).toFill('input#zone_name', zoneName);
+
+	// Select shipping zone location
+	// (.toSelect is not best option here because a lot of &nbsp are present in country/state names)
+	await expect(page).toFill('#zone_locations', zoneLocation);
+	await page.waitFor(1000); // avoiding flakiness
+	await page.keyboard.press('Tab');
+	await page.waitFor(1000); // avoiding flakiness
+	await page.keyboard.press('Enter');
+
+	// Fill shipping zone postcode if needed otherwise just put empty space
+	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toFill('#zone_postcodes', zipCode);
+	await expect(page).toMatchElement('#zone_postcodes', zipCode);
+	await expect(page).toClick('button#submit');
+
+	// Add shipping zone method
+	await page.waitFor(2000); // avoiding flakiness
+	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await page.waitFor(2000); // avoiding flakiness
+	await page.waitForSelector('.wc-shipping-zone-method-description');
+	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
+	await page.waitFor(1000); // avoiding flakiness
+	await expect(page).toClick('button#btn-ok');
+	await page.waitForSelector('#zone_locations');
+	await page.waitFor(1000); // avoiding flakiness
+};
+
+/**
+ * Click the Update button on the order details page.
+ *
+ * @param noticeText The text that appears in the notice after updating the order.
+ * @param waitForSave Optionally wait for auto save.
+ */
+const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
+	if ( waitForSave ) {
+		await page.waitFor( 2000 );
+	}
+
+	// Update order
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '.updated.notice' );
+
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+};
+
+/**
+ * Delete all email logs in the WP Mail Logging plugin page.
+ */
+const deleteAllEmailLogs = async () => {
+	await merchant.openEmailLog();
+
+	// Make sure we have emails to delete. If we don't, this selector will return null.
+	if ( await page.$( '#bulk-action-selector-top' ) !== null ) {
+		await setCheckbox( '#cb-select-all-1' );
+		await expect( page ).toSelect( '#bulk-action-selector-top', 'Delete' );
+		await Promise.all( [
+			page.click( '#doaction' ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+	}
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -482,5 +544,8 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	addShippingZoneAndMethod,
 	createSimpleProductWithCategory,
+  clickUpdateOrder,
+	deleteAllEmailLogs,
 };

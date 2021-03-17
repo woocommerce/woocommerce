@@ -18,7 +18,8 @@ const {
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
-	WP_ADMIN_WC_SETTINGS
+	WP_ADMIN_WC_SETTINGS,
+	WP_ADMIN_NEW_SHIPPING_ZONE
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );
@@ -168,6 +169,18 @@ const merchant = {
 			// Verify customer profile link is present to verify order was placed by a registered customer, not a guest
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
+	},
+
+	openNewShipping: async () => {
+		await page.goto( WP_ADMIN_NEW_SHIPPING_ZONE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openEmailLog: async () => {
+		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
 	},
 };
 

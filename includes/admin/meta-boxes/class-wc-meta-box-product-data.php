@@ -509,6 +509,7 @@ class WC_Meta_Box_Product_Data {
 						),
 						'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
 						'stock_quantity'    => $stock,
+						'low_stock_amount'  => isset( $_POST['variable_low_stock_amount'][ $i ] ) && '' !== $_POST['variable_low_stock_amount'][ $i ] ? wc_stock_amount( wp_unslash( $_POST['variable_low_stock_amount'][ $i ] ) ) : '',
 						'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_backorders'][ $i ] ) ) : null,
 						'stock_status'      => isset( $_POST['variable_stock_status'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_stock_status'][ $i ] ) ) : null,
 						'image_id'          => isset( $_POST['upload_image_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['upload_image_id'][ $i ] ) ) : null,

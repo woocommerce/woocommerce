@@ -75,6 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="variable_stock_status_instock"><?php esc_html_e( 'Set Status - In stock', 'woocommerce' ); ?></option>
 						<option value="variable_stock_status_outofstock"><?php esc_html_e( 'Set Status - Out of stock', 'woocommerce' ); ?></option>
 						<option value="variable_stock_status_onbackorder"><?php esc_html_e( 'Set Status - On backorder', 'woocommerce' ); ?></option>
+						<option value="variable_low_stock_amount"><?php esc_html_e( 'Low stock threshold', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
 						<option value="variable_length"><?php esc_html_e( 'Length', 'woocommerce' ); ?></option>
