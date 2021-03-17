@@ -766,6 +766,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'backordered':
 					$base_data['backordered'] = $product->is_on_backorder();
 					break;
+				case 'low_stock_amount':
+					$base_data['low_stock_amount'] = '' === $product->get_low_stock_amount() ? null : $product->get_low_stock_amount();
+					break;
 				case 'sold_individually':
 					$base_data['sold_individually'] = $product->is_sold_individually();
 					break;

@@ -59,6 +59,7 @@ The functions to access the core tests are:
   - `runProductSearchTest` - Merchant can search for a product and view it
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
   - `runOrderSearchingTest` - Merchant can search for order via different terms
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
 
 ### Shopper
@@ -70,6 +71,9 @@ The functions to access the core tests are:
   - `runCheckoutPageTest` - Shopper can complete checkout
   - `runMyAccountPageTest` - Shopper can access my account page
   - `runSingleProductPageTest` - Shopper can view single product page in many variations (simple, variable, grouped)
+  - `runMyAccountPayOrderTest` - Shopper can pay for his order in My Account
+  - `runCartApplyCouponsTest` - Shopper can apply coupons in the cart
+  - `runCheckoutApplyCouponsTest` - Shopper can apply coupons in the checkout
   - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
   - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
 

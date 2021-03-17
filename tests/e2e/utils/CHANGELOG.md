@@ -18,6 +18,7 @@
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
 - `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
 - `searchForOrder( value, orderId, customerName )` util helper method that search order with different terms
+- `addShippingZoneAndMethod( zoneName, zoneLocation, zipCode, zoneMethod )` util helper method for adding shipping zones with shipping methods
 - `createSimpleProductWithCategory` component which creates a simple product with categories, containing three parameters for title, price and category name.
 - `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
 - `removeCoupon()` util helper method that removes a single coupon within cart or checkout
