@@ -77,7 +77,8 @@
 		"build-storybook": "build-storybook  -c ./storybook",
 		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"bump-version": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
-		"wp-env-mysql-port": "node ./docker/wc-admin-wp-env/mysql-port.js"
+		"wp-env-mysql-port": "node ./docker/wc-admin-wp-env/mysql-port.js",
+		"create-hook-reference": "node ./bin/hook-reference/index.js"
 	},
 	"changelog": {
 		"labelPrefix": "[Type]",
@@ -176,11 +177,13 @@
 		"@wordpress/scripts": "12.6.1",
 		"ast-types": "0.14.2",
 		"autoprefixer": "10.2.4",
+		"await-exec": "^0.1.2",
 		"babel-jest": "26.6.3",
 		"babel-loader": "8.2.2",
 		"babel-plugin-transform-class-properties": "6.24.1",
 		"babel-plugin-transform-es2015-template-literals": "6.22.0",
 		"chalk": "4.1.0",
+		"comment-parser": "^1.1.2",
 		"concurrently": "5.3.0",
 		"config": "3.3.6",
 		"copy-webpack-plugin": "5.1.1",
