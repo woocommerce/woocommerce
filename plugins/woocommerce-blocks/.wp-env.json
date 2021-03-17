@@ -1,4 +1,5 @@
 {
+	"core": "WordPress/WordPress#5.7-branch",
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
