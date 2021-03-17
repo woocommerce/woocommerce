@@ -117,6 +117,35 @@ UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7
 ```
 - No note should have been added.
 
+### Improve WC Shipping & Tax logic #6547
+
+**Scenario 1** - Exclude the WooCommerce Shipping mention if the user is not in the US
+
+1. Start OBW and enter an address that is not in the US
+2. Choose "food and drink" from the Industry (this forces Business Details to display "Free features" tab)
+3. When you get to the "Business Details", click "Free features"
+4. Expand "Add recommended business features to my site" by clicking the down arrow.
+5. Confirm that "WooCommerce Shipping" is not listed
+
+**Scenario 2**- Exclude the WooCommerce Shipping mention if the user is in the US but only selected digital products in the Product Types step
+
+1. Start OBW and enter an address that is in the US.
+2. Choose "food and drink" from the Industry (this forces Business Details to display the "Free features" tab)
+3. Choose "Downloads" from the Product Types step.
+4. When you get to the Business Details step, expand "Add recommended business features to my site" by clicking the down arrow.
+5. Confirm that "WooCommerce Shipping" is not listed
+
+**Scenario 3** -  Include WooCommerce Tax if the user is in one of the following countries: US | FR | GB | DE | CA | PL | AU | GR | BE | PT | DK | SE
+
+1. Start OBW and enter an address that is in one of the following countries 
+
+    US | FR | GB | DE | CA | PL | AU | GR | BE | PT | DK | SE
+
+2. Continue to the Business Details step.
+3. Expand "Add recommended business features to my site" by clicking the down arrow.
+4. Confirm that "WooCommerce Tax" is listed.
+>>>>>>> bbeebaf91 (Add changelog)
+
 ### Use wc filter to get status tabs for tools category #6525
 
 1. Register a new tab via the filter.

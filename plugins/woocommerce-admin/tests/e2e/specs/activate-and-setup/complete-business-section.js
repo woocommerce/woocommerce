@@ -75,7 +75,7 @@ export async function unselectAllFeaturesAndContinue(
 	await waitForElementCount(
 		page,
 		'.components-checkbox-control__input',
-		shouldWCPayBeListed ? 9 : 8
+		shouldWCPayBeListed ? 10 : 7
 	);
 	const wcPayLabel = await getElementByText( 'a', 'WooCommerce Payments' );
 	if ( shouldWCPayBeListed ) {

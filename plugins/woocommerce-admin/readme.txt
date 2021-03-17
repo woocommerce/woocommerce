@@ -83,6 +83,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Add gross sales column to CSV export #6567
 - Dev: Add filter to profile wizard steps #6564
 - Tweak: Adjust targeting store age for the Add First Product note #6554
+- Tweak: Improve WC Shipping & Tax logic #6547
 - Dev: Add nav intro modal tests #6518
 - Dev: Use wc filter to get status tabs for tools category #6525
 - Tweak: Remove mobile activity panel toggle #6539
