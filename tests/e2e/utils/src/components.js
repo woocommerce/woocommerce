@@ -175,11 +175,14 @@ const completeOnboardingWizard = async () => {
 
 /**
  * Create simple product.
+ *
+ * @param productTitle - Defaults to Simple Product. Customizable title.
+ * @param productPrice - Defaults to $9.99. Customizable pricing.
  */
-const createSimpleProduct = async () => {
+const createSimpleProduct = async ( productTitle = simpleProductName, productPrice = simpleProductPrice ) => {
 	const product = await factories.products.simple.create( {
-		name: simpleProductName,
-		regularPrice: simpleProductPrice
+		name: productTitle,
+		regularPrice: productPrice
 	} );
 	return product.id;
 } ;
@@ -467,7 +470,7 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  */
 const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
 	await merchant.openNewShipping();
-	
+
 	// Fill shipping zone name
 	await page.waitForSelector('input#zone_name');
 	await expect(page).toFill('input#zone_name', zoneName);
@@ -475,9 +478,9 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	// Select shipping zone location
 	// (.toSelect is not best option here because a lot of &nbsp are present in country/state names)
 	await expect(page).toFill('#zone_locations', zoneLocation);
-	await page.waitFor(1000); // avoiding flakiness
+	await uiUnblocked();
 	await page.keyboard.press('Tab');
-	await page.waitFor(1000); // avoiding flakiness
+	await uiUnblocked();
 	await page.keyboard.press('Enter');
 
 	// Fill shipping zone postcode if needed otherwise just put empty space
@@ -488,15 +491,14 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await expect(page).toClick('button#submit');
 
 	// Add shipping zone method
-	await page.waitFor(2000); // avoiding flakiness
+	await uiUnblocked();
 	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
-	await page.waitFor(2000); // avoiding flakiness
-	await page.waitForSelector('.wc-shipping-zone-method-description');
+	await page.waitForSelector('.wc-shipping-zone-method-selector');
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
-	await page.waitFor(1000); // avoiding flakiness
+	await uiUnblocked();
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
-	await page.waitFor(1000); // avoiding flakiness
+	await uiUnblocked();
 };
 
 /**
