@@ -546,6 +546,6 @@ export {
 	createCoupon,
 	addShippingZoneAndMethod,
 	createSimpleProductWithCategory,
-  clickUpdateOrder,
+	clickUpdateOrder,
 	deleteAllEmailLogs,
 };
