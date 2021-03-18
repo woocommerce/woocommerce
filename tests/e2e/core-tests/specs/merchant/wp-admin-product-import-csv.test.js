@@ -22,12 +22,12 @@ const productNames = ["V-Neck T-Shirt", "Hoodie", "Hoodie with Logo", "T-Shirt",
 	"Polo", "Album", "Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"].sort();
 const productNamesOverride = ["V-Neck T-Shirt Override", "Hoodie Override", "Hoodie with Logo Override",
 	"T-Shirt Override", "Beanie Override", "Belt Override", "Cap Override", "Sunglasses Override",
-    "Hoodie with Pocket Override", "Hoodie with Zipper Override", "Long Sleeve Tee Override",
+	"Hoodie with Pocket Override", "Hoodie with Zipper Override", "Long Sleeve Tee Override",
 	"Polo Override", "Album Override", "Single Override", "T-Shirt with Logo Override", "Beanie with Logo Override",
-    "Logo Collection Override", "WordPress Pennant Override"].sort();
+	"Logo Collection Override", "WordPress Pennant Override"].sort();
 const productPrices = ["145", "118", "120", "118", "165", "155", "118", "116", "190", "145", "135", "145", "125",
-    "120", "115", "13", "12", "120", "120", "115", "145", "142", "145", "145",
-    "118","120", "118", "111.05", "145"].sort();
+	"120", "115", "13", "12", "120", "120", "115", "145", "142", "145", "145",
+	"118","120", "118", "111.05", "145"].sort();
 const errorMessage = 'Invalid file type. The importer supports CSV and TXT file formats.';
 
 const runImportProductsTest = () => {
@@ -64,7 +64,7 @@ const runImportProductsTest = () => {
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
 			let productTitles = await page.$$eval('a.row-title',
-             elements => elements.map(item => item.innerHTML));
+			 elements => elements.map(item => item.innerHTML));
 
 			// Compare imported product names
 			await expect(productNames).toEqual(productTitles.sort());
@@ -95,18 +95,18 @@ const runImportProductsTest = () => {
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
 			let productTitles = await page.$$eval('a.row-title',
-             elements => elements.map(item => item.innerHTML));
+			 elements => elements.map(item => item.innerHTML));
 
 			// Compare overriden product names
 			await expect(productNamesOverride).toEqual(productTitles.sort());
 
-            // Gathering product prices
-            await page.waitForSelector('td.price.column-price');
-            let productPrices = await page.$$eval('td.price.column-price > .amount',
-             elements => elements.map(item => item.text));
+			// Gathering product prices
+			await page.waitForSelector('td.price.column-price');
+			let productPrices = await page.$$eval('td.price.column-price > .amount',
+			 elements => elements.map(item => item.text));
 
-            // Compare overriden product prices
-            await expect(productPrices).toEqual(productPrices.sort());
+			// Compare overriden product prices
+			await expect(productPrices).toEqual(productPrices.sort());
 		});
 	});
 };
