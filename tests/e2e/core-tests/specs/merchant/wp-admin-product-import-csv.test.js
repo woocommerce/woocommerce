@@ -19,15 +19,15 @@ const filePath = '../../../sample-data/sample_products.csv';
 const filePathOverride = '../../../sample-data/sample_products_override.csv';
 const productNames = ["V-Neck T-Shirt", "Hoodie", "Hoodie with Logo", "T-Shirt", "Beanie",
 	"Belt", "Cap", "Sunglasses", "Hoodie with Pocket", "Hoodie with Zipper", "Long Sleeve Tee", "Polo", "Album",
-	"Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"].sort();
+	"Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"];
 const productNamesOverride = ["V-Neck T-Shirt Override", "Hoodie Override", "Hoodie with Logo Override",
 	"T-Shirt Override", "Beanie Override", "Belt Override", "Cap Override", "Sunglasses Override",
 	"Hoodie with Pocket Override", "Hoodie with Zipper Override", "Long Sleeve Tee Override",
 	"Polo Override", "Album Override", "Single Override", "T-Shirt with Logo Override", "Beanie with Logo Override",
-	"Logo Collection Override", "WordPress Pennant Override"].sort();
-const productPricesOverride = ["145", "118", "120", "118", "165", "155", "118", "116", "190", "145",
-	"135", "145", "125", "120", "115", "13", "12", "120", "120", "115", "145", "142",
-	"145", "145", "118","120", "118", "111.05", "145"].sort();
+	"Logo Collection Override", "WordPress Pennant Override"];
+const productPricesOverride = ["$111.05", "$118.00", "$145.00", "$120.00", "$118.00", "$118.00", "$13.00", "$12.00",
+	"$115.00", "$120.00", "$125.00", "$145.00", "$145.00", "$135.00", "$190.00", "$118.00", "$116.00",
+	"$165.00", "$155.00", "$120.00", "$118.00", "$118.00", "$145.00", "$142.00", "$145.00", "$115.00", "$120.00"];
 const errorMessage = 'Invalid file type. The importer supports CSV and TXT file formats.';
 
 const runImportProductsTest = () => {
@@ -63,11 +63,11 @@ const runImportProductsTest = () => {
 
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
-			let productTitles = await page.$$eval('a.row-title',
+			const productTitles = await page.$$eval('a.row-title',
 			 elements => elements.map(item => item.innerHTML));
 
 			// Compare imported product names
-			expect(productNames).toContain(productTitles.sort());
+			expect(productTitles.sort()).toEqual(productNames.sort());
 		});
 
 		it('can override the existing products via CSV import', async () => {
@@ -94,19 +94,19 @@ const runImportProductsTest = () => {
 
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
-			let productTitles = await page.$$eval('a.row-title',
+			const productTitles = await page.$$eval('a.row-title',
 			 elements => elements.map(item => item.innerHTML));
 
 			// Compare overriden product names
-			expect(productNamesOverride).toContain(productTitles.sort());
+			expect(productTitles.sort()).toEqual(productNamesOverride.sort());
 
 			// Gathering product prices
 			await page.waitForSelector('td.price.column-price');
-			let productPrices = await page.$$eval('td.price.column-price > .amount',
-			 elements => elements.map(item => item.text));
+			const productPrices = await page.$$eval('.amount',
+			 elements => elements.map(item => item.innerText));
 
 			// Compare overriden product prices
-			expect(productPricesOverride).toContain(productPrices.sort());
+			expect(productPrices.sort()).toEqual(productPricesOverride.sort());
 		});
 	});
 };
