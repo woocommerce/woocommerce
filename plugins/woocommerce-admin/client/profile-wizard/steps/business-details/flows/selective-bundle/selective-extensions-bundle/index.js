@@ -39,6 +39,14 @@ const generatePluginDescriptionWithLink = (
 					target="_blank"
 					className="woocommerce-admin__business-details__selective-extensions-bundle__link"
 					href={ url }
+					onClick={ () => {
+						recordEvent(
+							'storeprofiler_store_business_features_link_click',
+							{
+								extension_name: productName,
+							}
+						);
+					} }
 				/>
 			),
 		},

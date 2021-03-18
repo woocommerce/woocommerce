@@ -87,19 +87,11 @@ class BusinessDetails extends Component {
 			selling_venues: sellingVenues,
 		} = this.state.savedValues;
 
-		const { getCurrencyConfig } = this.context;
-
 		const businessExtensions = filterBusinessExtensions(
 			extensionInstallationOptions
 		);
 
 		recordEvent( 'storeprofiler_store_business_features_continue', {
-			product_number: productCount,
-			already_selling: sellingVenues,
-			currency: getCurrencyConfig().code,
-			revenue,
-			used_platform: otherPlatform,
-			used_platform_name: otherPlatformName,
 			all_extensions_installed: Object.values(
 				extensionInstallationOptions
 			).every( ( val ) => val ),
@@ -232,6 +224,25 @@ class BusinessDetails extends Component {
 		return errors;
 	}
 
+	trackBusinessDetailsStep( {
+		other_platform: otherPlatform,
+		other_platform_name: otherPlatformName,
+		product_count: productCount,
+		selling_venues: sellingVenues,
+		revenue,
+	} ) {
+		const { getCurrencyConfig } = this.context;
+
+		recordEvent( 'storeprofiler_store_business_details_continue_variant', {
+			already_selling: sellingVenues,
+			currency: getCurrencyConfig().code,
+			product_number: productCount,
+			revenue,
+			used_platform: otherPlatform,
+			used_platform_name: otherPlatformName,
+		} );
+	}
+
 	renderBusinessDetailsStep() {
 		const {
 			goToNextStep,
@@ -255,6 +266,8 @@ class BusinessDetails extends Component {
 						savedValues: values,
 						currentTab: 'free-features',
 					} );
+
+					this.trackBusinessDetailsStep( values );
 				} }
 				onChangeCallback={ ( _, values, isValid ) => {
 					this.setState( { savedValues: values, isValid } );
