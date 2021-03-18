@@ -11,6 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { PayPal, PAYPAL_PLUGIN } from '../tasks/payments/paypal';
 import { getPaymentMethods } from '../tasks/payments/methods';
 import { setMethodEnabledOption } from '../../task-list/tasks/payments';
+import { GenericPaymentStep } from '../tasks/payments/generic-payment-step';
 
 jest.mock( '@wordpress/api-fetch' );
 
@@ -220,6 +221,153 @@ describe( 'TaskList > Payments', () => {
 			expect( oauthButton.href ).toEqual( mockConnectUrl );
 			expect( oauthButton.dataset.paypalButton ).toEqual( 'true' );
 			expect( oauthButton.dataset.paypalOnboardButton ).toEqual( 'true' );
+		} );
+	} );
+
+	describe( 'Payfast', () => {
+		const params = {
+			activePlugins: [],
+			countryCode: 'ZA',
+			onboardingStatus: {},
+			options: [],
+			profileItems: { industry: [] },
+		};
+		const mockInstallStep = {
+			isComplete: true,
+			key: 'install',
+			label: 'Install',
+		};
+		it( 'Detects the plugin is enabled based on the options passed', () => {
+			const payfastParams = {
+				...params,
+				options: {
+					woocommerce_payfast_settings: {
+						enabled: 'yes',
+					},
+				},
+			};
+
+			const payfastMethod = getPaymentMethods( payfastParams ).find(
+				( method ) => method.key === 'payfast'
+			);
+
+			expect( payfastMethod.isEnabled ).toBe( true );
+		} );
+
+		it( 'is enabled for supported countries', () => {
+			[ 'ZA' ].forEach( ( countryCode ) => {
+				const methods = getPaymentMethods( {
+					...params,
+					countryCode,
+				} );
+
+				expect(
+					methods.filter( ( method ) => method.key === 'payfast' )
+						.length
+				).toBe( 1 );
+			} );
+		} );
+
+		it( 'shows API credential inputs', async () => {
+			const payfastMethod = getPaymentMethods( params ).find(
+				( method ) => method.key === 'payfast'
+			);
+
+			render(
+				<GenericPaymentStep
+					isRequestingOptions={ false }
+					options={ {} }
+					installStep={ mockInstallStep }
+					methodConfig={ payfastMethod }
+				/>
+			);
+
+			// Since the oauth response failed, we should have the API credentials form.
+			expect(
+				await screen.findByText( 'Proceed', { selector: 'button' } )
+			).toBeDefined();
+			expect(
+				screen.getByLabelText( 'Merchant ID', { selector: 'input' } )
+			).toBeDefined();
+			expect(
+				screen.getByLabelText( 'Merchant Key', { selector: 'input' } )
+			).toBeDefined();
+			expect(
+				screen.getByLabelText( 'Passphrase', { selector: 'input' } )
+			).toBeDefined();
+		} );
+	} );
+
+	describe( 'Paystack', () => {
+		const params = {
+			activePlugins: [],
+			countryCode: 'ZA',
+			onboardingStatus: {},
+			options: [],
+			profileItems: { industry: [] },
+		};
+		const mockInstallStep = {
+			isComplete: true,
+			key: 'install',
+			label: 'Install',
+		};
+		it( 'Detects the plugin is enabled based on the enabled gateways', () => {
+			const paystackParams = {
+				...params,
+				onboardingStatus: {
+					enabledPaymentGateways: [ 'paystack' ],
+				},
+			};
+
+			const paystackMethod = getPaymentMethods( paystackParams ).find(
+				( method ) => method.key === 'paystack'
+			);
+
+			expect( paystackMethod.isEnabled ).toBe( true );
+		} );
+
+		it( 'is enabled for supported countries', () => {
+			[ 'ZA', 'GH', 'NG' ].forEach( ( countryCode ) => {
+				const methods = getPaymentMethods( {
+					...params,
+					countryCode,
+				} );
+
+				expect(
+					methods.filter( ( method ) => method.key === 'paystack' )
+						.length
+				).toBe( 1 );
+			} );
+		} );
+
+		it( 'shows API credential inputs', async () => {
+			const payfastMethod = getPaymentMethods( params ).find(
+				( method ) => method.key === 'paystack'
+			);
+
+			render(
+				<GenericPaymentStep
+					isRequestingOptions={ false }
+					options={ {} }
+					installStep={ mockInstallStep }
+					methodConfig={ payfastMethod }
+				/>
+			);
+
+			// Since the oauth response failed, we should have the API credentials form.
+			expect(
+				await screen.findByText( 'Proceed', { selector: 'button' } )
+			).toBeDefined();
+			expect(
+				screen.getByLabelText( 'Live Public Key', {
+					selector: 'input',
+				} )
+			).toBeDefined();
+			expect(
+				screen.getByLabelText( 'Live Secret Key', {
+					selector: 'input',
+				} )
+			).toBeDefined();
 		} );
 	} );
 } );

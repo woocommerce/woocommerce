@@ -709,6 +709,7 @@ class Onboarding {
 		$options[] = 'wc_square_refresh_tokens';
 		$options[] = 'woocommerce_square_credit_card_settings';
 		$options[] = 'woocommerce_payfast_settings';
+		$options[] = 'woocommerce_paystack_settings';
 		$options[] = 'woocommerce_kco_settings';
 		$options[] = 'woocommerce_klarna_payments_settings';
 		$options[] = 'woocommerce_cod_settings';
@@ -760,6 +761,7 @@ class Onboarding {
 				'woocommerce-square'                  => 'woocommerce-square/woocommerce-square.php',
 				'woocommerce-shipstation-integration' => 'woocommerce-shipstation-integration/woocommerce-shipstation.php',
 				'woocommerce-payfast-gateway'         => 'woocommerce-payfast-gateway/gateway-payfast.php',
+				'woo-paystack'                        => 'woo-paystack/woo-paystack.php',
 				'woocommerce-payments'                => 'woocommerce-payments/woocommerce-payments.php',
 				'woocommerce-gateway-eway'            => 'woocommerce-gateway-eway/woocommerce-gateway-eway.php',
 				'woo-razorpay'                        => 'woo-razorpay/woo-razorpay.php',

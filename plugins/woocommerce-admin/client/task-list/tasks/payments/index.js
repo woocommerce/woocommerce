@@ -267,6 +267,7 @@ class Payments extends Component {
 				<Card className="woocommerce-task-payment-method woocommerce-task-card">
 					<CardBody>
 						{ cloneElement( currentMethod.container, {
+							methodConfig: currentMethod,
 							query,
 							installStep: this.getInstallStep(),
 							markConfigured: this.markConfigured,
@@ -412,6 +413,7 @@ export default compose(
 			'woocommerce_razorpay_settings',
 			'woocommerce_mollie_payments_settings',
 			'woocommerce_payubiz_settings',
+			'woocommerce_paystack_settings',
 		];
 
 		const options = optionNames.reduce( ( result, name ) => {

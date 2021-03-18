@@ -374,6 +374,22 @@ For each task in that list apart from "Store details":
 - Add a new attribute.
 - Observe CES prompt "How easy was it to add a product attribute?" is displayed.
 
+### Add paystack as payment option for African countries #6579
+
+1. Go to the store setup wizard `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard`
+2. Set up your store with **South Africa - Eastern Cape** as its country, and proceed
+3. Select **Fashion, apparel, and accessories** as the industry, and finish the rest of the onboarding flow.
+4. Once finished it will redirect to the home screen, click on the **Choose payment methods** task
+5. Both **Paystack** and **Payfast** should be listed above **Paypal**
+6. Click **Set up** on the Paystack payment option
+7. It should successfully finish the **Install** step, and ask for a public and secret key.
+8. Check if the **Paystack account** link, directs you to the **dashboard.paystack.com/#/settings/developer**
+9. Set `public_key` for public key, and `secret_key` for secret key and click **Proceed**
+10. It should redirect you to the payment list and the **Set up** button should be gone, and replaced by an enabled toggle button.
+11. You should be able to successfully toggle paystack from on to off and back. Leave it selected for now.
+12. Go to **WooCommerce > Settings > Payments**, **Paystack** should be selected.
+13. Click **Manage**, the secret and public key's should match what you entered in step 9.
+
 # 2.1.3
 ### Fix a bug where the JetPack connection flow would not activate #6521
 
@@ -420,6 +436,7 @@ Scenario #2
 7. The task list should show the **Choose payment methods** task, and the **Set up additional payment providers** inbox card should not be present.
 8. Click on the **Choose payment methods** task, it should not be displaying the **Woocommerce Payments** option.
 9. Go to **Plugins > installed Plugins**, check if the selected plugin features selected in step 4 are installed and activated.
+
 
 ## 2.1.2
 
