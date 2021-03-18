@@ -30,6 +30,7 @@ class CustomersScheduler extends ImportScheduler {
 		add_action( 'woocommerce_update_customer', array( __CLASS__, 'schedule_import' ) );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'schedule_anonymize' ) );
 		add_action( 'delete_user', array( __CLASS__, 'schedule_user_delete' ) );
+		add_action( 'remove_user_from_blog', array( __CLASS__, 'schedule_user_delete' ) );
 
 		CustomersDataStore::init();
 		parent::init();
