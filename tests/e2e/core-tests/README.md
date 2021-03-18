@@ -60,6 +60,7 @@ The functions to access the core tests are:
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
   - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runImportProductsTest` - Merchant can import products via CSV file
 
 ### Shopper
 
