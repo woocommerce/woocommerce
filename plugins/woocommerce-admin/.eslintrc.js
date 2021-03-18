@@ -1,7 +1,7 @@
 module.exports = {
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	settings: {
-		'import/resolver': 'webpack',
+		'import/resolver': 'typescript',
 	},
 	rules: {
 		// temporary conversion to warnings until the below are all handled.
@@ -18,12 +18,6 @@ module.exports = {
 		'jest/valid-title': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
 	},
-	settings: {
-		jest: {
-			// only needed as we use jest-24.9.0 in our package.json, can be removed once we update and set it to 'jest'.
-			version: '24.9.0',
-		},
-	},
 	overrides: [
 		{
 			files: [ '*.ts', '*.tsx' ],
@@ -33,6 +27,9 @@ module.exports = {
 				'plugin:@typescript-eslint/recommended',
 			],
 			rules: {
+				camelcase: 'off',
+				'import/no-unresolved': 'warn',
+				'import/no-extraneous-dependencies': 'warn',
 				'@typescript-eslint/no-explicit-any': 'error',
 				'no-use-before-define': 'off',
 				'@typescript-eslint/no-use-before-define': [ 'error' ],

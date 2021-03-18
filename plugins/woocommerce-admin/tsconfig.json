@@ -15,11 +15,18 @@
 		"esModuleInterop": true,
 		"skipLibCheck": false,
 		"module": "esnext",
-		"typeRoots": [ "./typings", "./node_modules/@types", "packages/**/node_modules/@types" ],
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types",
+			"packages/**/node_modules/@types"
+		],
 		"baseUrl": "./",
 		"paths": {
 			"@woocommerce/*": [ "packages/*/src" ],
-			"~/*": [ "client/*" ]
+			"~/*": [ "client/*" ],
+			"@woocommerce/wc-admin-settings": [
+				"client/wc-admin-settings/index"
+			]
 		}
 	},
 	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ]
