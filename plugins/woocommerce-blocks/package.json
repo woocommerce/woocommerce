@@ -86,7 +86,7 @@
 		"@storybook/react": "6.1.18",
 		"@testing-library/jest-dom": "5.11.9",
 		"@testing-library/react": "11.2.5",
-		"@testing-library/react-hooks": "5.0.3",
+		"@testing-library/react-hooks": "5.1.0",
 		"@testing-library/user-event": "12.6.3",
 		"@types/classnames": "2.2.11",
 		"@types/gtag.js": "0.0.4",
