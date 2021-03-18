@@ -18,27 +18,25 @@ const {
 const merchant = require('../../../utils/src/flows/merchant');
 const filePath = '../../../sample-data/sample_products.csv';
 const productNames = ["V-Neck T-Shirt", "Hoodie", "Hoodie with Logo", "T-Shirt", "Beanie",
-			"Belt", "Cap", "Sunglasses", "Hoodie with Pocket", "Hoodie with Zipper", "Long Sleeve Tee",
-			"Polo", "Album", "Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"].sort();
+	"Belt", "Cap", "Sunglasses", "Hoodie with Pocket", "Hoodie with Zipper", "Long Sleeve Tee",
+	"Polo", "Album", "Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"].sort();
 const errorMessage = 'Invalid file type. The importer supports CSV and TXT file formats.';
 
 const runImportProductsTest = () => {
 	describe('Import Products from a CSV file', () => {
 		beforeAll(async () => {
-            await merchant.login();
-            await merchant.openImportProducts();
-        });
+			await merchant.login();
+			await merchant.openImportProducts();
+		});
 		it('can upload the CSV file and import products', async () => {
-            // Verify error message if you go withot provided CSV file
-            await expect(page).toClick('button[value="Continue"]');
-            await page.waitForSelector('div.error inline');
-            await expect(page).toMatchElement('div.error inline > p', errorMessage);
+			// Verify error message if you go withot provided CSV file
+			await expect(page).toClick('button[value="Continue"]');
+			await page.waitForSelector('div.error');
+			await expect(page).toMatchElement('div.error > p', errorMessage);
 
 			// Put the CSV products file and proceed further
 			const uploader = await page.$("input[type=file]");
 			await uploader.uploadFile(filePath);
-			await setCheckbox('#woocommerce-importer-update-existing');
-            await page.waitFor(2000);
 			await expect(page).toClick('button[value="Continue"]');
 
 			// Click on Run the importer
@@ -47,10 +45,12 @@ const runImportProductsTest = () => {
 
 			// Waiting for importer to finish
 			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 60000});
+			await page.waitForSelector('.woocommerce-importer-done');
+			await expect(page).toMatchElement('.woocommerce-importer-done', {text: 'Import complete!'});
 
 			// Click on view products
-			await page.waitForSelector('div.wc-actions a.button.button-primary');
-			await expect(page).toClick('div.wc-actions a.button.button-primary');
+			await page.waitForSelector('div.wc-actions > a.button.button-primary');
+			await expect(page).toClick('div.wc-actions > a.button.button-primary');
 
 			// Getting product names
 			await page.waitForSelector('a.row-title');
