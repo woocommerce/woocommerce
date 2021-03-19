@@ -3,7 +3,6 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -27,7 +26,9 @@ import {
 	useEditorContext,
 	StoreNoticesProvider,
 } from '@woocommerce/base-context';
+import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import PageSelector from '@woocommerce/editor-components/page-selector';
+import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import {
 	previewCart,
 	previewSavedPaymentMethods,
@@ -323,45 +324,48 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 const CheckoutEditor = ( { attributes, setAttributes } ) => {
 	const { className, isPreview } = attributes;
 	return (
-		<EditorProvider
-			previewData={ { previewCart, previewSavedPaymentMethods } }
-		>
-			<div
-				className={ classnames(
-					className,
-					'wp-block-woocommerce-checkout',
-					{
-						'is-editor-preview': isPreview,
-					}
-				) }
+		<>
+			<EditorProvider
+				previewData={ { previewCart, previewSavedPaymentMethods } }
 			>
-				<BlockSettings
-					attributes={ attributes }
-					setAttributes={ setAttributes }
-				/>
-				<BlockErrorBoundary
-					header={ __(
-						'Checkout Block Error',
-						'woo-gutenberg-products-block'
-					) }
-					text={ __(
-						'There was an error whilst rendering the checkout block. If this problem continues, try re-creating the block.',
-						'woo-gutenberg-products-block'
-					) }
-					showErrorMessage={ true }
-					errorMessagePrefix={ __(
-						'Error message:',
-						'woo-gutenberg-products-block'
+				<div
+					className={ classnames(
+						className,
+						'wp-block-woocommerce-checkout',
+						{
+							'is-editor-preview': isPreview,
+						}
 					) }
 				>
-					<StoreNoticesProvider context="wc/checkout">
-						<Disabled>
-							<Block attributes={ attributes } />
-						</Disabled>
-					</StoreNoticesProvider>
-				</BlockErrorBoundary>
-			</div>
-		</EditorProvider>
+					<BlockSettings
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+					<BlockErrorBoundary
+						header={ __(
+							'Checkout Block Error',
+							'woo-gutenberg-products-block'
+						) }
+						text={ __(
+							'There was an error whilst rendering the checkout block. If this problem continues, try re-creating the block.',
+							'woo-gutenberg-products-block'
+						) }
+						showErrorMessage={ true }
+						errorMessagePrefix={ __(
+							'Error message:',
+							'woo-gutenberg-products-block'
+						) }
+					>
+						<StoreNoticesProvider context="wc/checkout">
+							<Disabled>
+								<Block attributes={ attributes } />
+							</Disabled>
+						</StoreNoticesProvider>
+					</BlockErrorBoundary>
+				</div>
+			</EditorProvider>
+			<CartCheckoutCompatibilityNotice blockName="checkout" />
+		</>
 	);
 };
 
