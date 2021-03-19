@@ -4,7 +4,8 @@
  */
  const {
 	merchant,
-	setCheckbox
+	setCheckbox,
+	moveAllItemsToTrash
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -107,6 +108,17 @@ const runImportProductsTest = () => {
 
 			// Compare overriden product prices
 			expect(productPrices.sort()).toEqual(productPricesOverride.sort());
+		});
+
+		afterAll(async () => {
+			// Remove all the imported products
+			await page.waitForSelector('#cb-select-all-1', {visible:true});
+			await moveAllItemsToTrash();
+			await page.waitForSelector('ul.subsubsub li.trash a', {visible:true});
+			await page.click('ul.subsubsub li.trash a');
+			await page.waitForSelector('#delete_all', {visible:true});
+			await page.click('#delete_all');
+			await page.waitForSelector('a.woocommerce-BlankState-cta.button-primary.button ~ a', {visible:true});
 		});
 	});
 };

@@ -64,6 +64,7 @@ const runShopperTests = () => {
 };
 
 const runMerchantTests = () => {
+	runImportProductsTest();
 	runOrderSearchingTest();
 	runAddNewShippingZoneTest();
 	runCreateCouponTest();
@@ -80,7 +81,6 @@ const runMerchantTests = () => {
 	runProductEditDetailsTest();
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
-	runImportProductsTest();
 }
 
 const runApiTests = () => {
