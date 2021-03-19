@@ -36,7 +36,6 @@ const runImportProductsTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await merchant.openAllProductsView();
-			await moveAllItemsToTrash();
 		});
 		it('can upload the CSV file and import products', async () => {
 			await merchant.openImportProducts();
