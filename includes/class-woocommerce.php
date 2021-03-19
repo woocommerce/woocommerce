@@ -602,6 +602,8 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			wc_load_cart();
+		} else if( $this->is_rest_api_request() ) {
+			WC()->initialize_session();
 		}
 
 		$this->load_webhooks();
