@@ -65,23 +65,22 @@ const runShopperTests = () => {
 
 const runMerchantTests = () => {
 	runAddShippingClassesTest()
-	// todo re-enable
-	// runOrderSearchingTest();
-	// runAddNewShippingZoneTest();
-	// runCreateCouponTest();
-	// runCreateOrderTest();
-	// runEditOrderTest();
-	// runAddSimpleProductTest();
-	// runAddVariableProductTest();
-	// runUpdateGeneralSettingsTest();
-	// runProductSettingsTest();
-	// runTaxSettingsTest();
-	// runOrderStatusFiltersTest();
-	// runOrderRefundTest();
-	// runOrderApplyCouponTest();
-	// runProductEditDetailsTest();
-	// runProductSearchTest();
-	// runMerchantOrdersCustomerPaymentPage();
+	runOrderSearchingTest();
+	runAddNewShippingZoneTest();
+	runCreateCouponTest();
+	runCreateOrderTest();
+	runEditOrderTest();
+	runAddSimpleProductTest();
+	runAddVariableProductTest();
+	runUpdateGeneralSettingsTest();
+	runProductSettingsTest();
+	runTaxSettingsTest();
+	runOrderStatusFiltersTest();
+	runOrderRefundTest();
+	runOrderApplyCouponTest();
+	runProductEditDetailsTest();
+	runProductSearchTest();
+	runMerchantOrdersCustomerPaymentPage();
 }
 
 const runApiTests = () => {
