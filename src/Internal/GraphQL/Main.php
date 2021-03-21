@@ -41,19 +41,6 @@ class Main {
 	private static $subnamespaces = array( 'EnumTypes', 'QueryTypes', 'MutationTypes', 'InputTypes' );
 
 	/**
-	 * Array mapping "ApiException" categories to HTTP response status codes.
-	 * Thrown "ApiException"s should always have a category matching one of the keys of this array.
-	 *
-	 * @var array Array of "ApiException" category => HTTP response status code.
-	 */
-	private static $status_codes_by_error_category = array(
-		'request'       => 400,
-		'graphql'       => 400,
-		'authorization' => 401,
-		'internal'      => 500,
-	);
-
-	/**
 	 * Initialize the GraphQL API entry point.
 	 */
 	public static function initialize() {
@@ -106,15 +93,14 @@ class Main {
 	 * @throws ApiException Does not actually throw any exception, but phpcs needs this comment.
 	 */
 	private static function handle_request( \WP_REST_Request $request ) {
-		$error_category = null;
-
 		try {
 			$input = json_decode( $request->get_body(), true );
 			if ( is_null( $input ) ) {
-				throw new ApiException( 'Invalid input JSON: ' . json_last_error_msg() );
+				// Should never happen since WP REST engine already catches invalid JSON errors, but it doesn't hurt to check it anyway.
+				return self::error_response( 'Invalid input JSON: ' . json_last_error_msg(), 'rest_invalid_json', 400 );
 			}
 			if ( ! isset( $input['query'] ) ) {
-				throw new ApiException( "Invalid input JSON: no 'query' element" );
+				return self::error_response( "Invalid input JSON: no 'query' element", 'rest_invalid_json', 400 );
 			}
 
 			$query           = $input['query'];
@@ -131,40 +117,34 @@ class Main {
 			);
 
 			$result = GraphQL::executeQuery( $schema, $query, null, null, $variable_values );
-			if ( ! empty( $result->errors ) ) {
-				$error_category = current( $result->errors )->getCategory();
-			}
-
-			$output = $result->toArray( self::get_debug_config() );
+			return $result->toArray( self::get_debug_config() );
 		} catch ( \Exception $e ) {
-			$error_category = $e instanceof ClientAware ? $e->getCategory() : 'internal';
-
-			if ( self::get_debug_config() ) {
-				$output = array(
-					'errors' => array(
-						array(
-							'message'  => $e->getMessage(),
-							'category' => $error_category,
-							'trace'    => $e->getTrace(),
-						),
-					),
-				);
-			} else {
-				$output = array(
-					'errors' => array(
-						array(
-							'message'  => 'Internal server error',
-							'category' => $error_category,
-						),
-					),
-				);
-			}
+			return self::error_response( $e, 'internal_server_error', 500 );
 		}
+	}
 
-		if ( $error_category ) {
-			return new \WP_REST_Response( $output, self::$status_codes_by_error_category[ $error_category ] );
+	/**
+	 * Generate an instance of WP_Error to return as the response.
+	 *
+	 * @param mixed  $error An error message string or an exception.
+	 * @param string $code Error code for WP_Error.
+	 * @param int    $status_code HTTP status code for the response.
+	 * @return \WP_Error The generated error.
+	 */
+	private static function error_response( $error, $code, $status_code ) {
+		if ( is_string( $error ) ) {
+			return new \WP_Error( $code, $error, array( 'status' => $status_code ) );
+		} elseif ( self::get_debug_config() ) {
+			return new \WP_Error(
+				$code,
+				$error->getMessage(),
+				array(
+					'status' => $status_code,
+					'trace'  => $error->getTrace(),
+				)
+			);
 		} else {
-			return $output;
+			return new \WP_Error( $code, 'Internal server error', array( 'status' => $status_code ) );
 		}
 	}
 
