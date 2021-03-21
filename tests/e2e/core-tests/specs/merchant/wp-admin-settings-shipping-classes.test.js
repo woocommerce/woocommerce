@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
 
-import faker from 'faker'
+const faker = require("faker");
 
 /**
  * Internal dependencies
@@ -10,12 +10,12 @@ const { merchant } = require('@woocommerce/e2e-utils');
 /**
  * Add shipping class(es) by filling up and submitting the 'Add shipping class' form
  */
-const addShippingClasses = async (...shippingClasses) => {
+const addShippingClasses = async (shippingClasses) => {
 	for (const { name, slug, description } of shippingClasses) {
 		await expect(page).toClick('.wc-shipping-class-add')
-		await expect(page).toFill('.editing [data-attribute="name"]', name)
-		await expect(page).toFill('.editing [data-attribute="slug"]', slug)
-		await expect(page).toFill('.editing [data-attribute="description"]', description)
+		await expect(page).toFill('.editing:last-child [data-attribute="name"]', name)
+		await expect(page).toFill('.editing:last-child [data-attribute="slug"]', slug)
+		await expect(page).toFill('.editing:last-child [data-attribute="description"]', description)
 	}
 
 	await expect(page).toClick('.wc-shipping-class-save')
@@ -24,14 +24,31 @@ const addShippingClasses = async (...shippingClasses) => {
 /**
  * Verify that the specified shipping classes were saved
  */
-const verifyThatShippingClassWasSaved = async (...savedShippingClasses) => {
+const verifySavedShippingClasses = async (savedShippingClasses) => {
 	for (const { name, slug, description } of savedShippingClasses) {
-		const savedClass = await expect(page).toMatchElement('.wc-shipping-class-rows tr', { text: slug })
+		const row = await expect(page).toMatchElement('.wc-shipping-class-rows tr', { text: slug })
 
-		await expect(savedClass).toMatchElement('.wc-shipping-class-name', name)
-		await expect(savedClass).toMatchElement('.wc-shipping-class-slug', slug)
-		await expect(savedClass).toMatchElement('.wc-shipping-class-description', description)
+		await expect(row).toMatchElement('.wc-shipping-class-name', name)
+		await expect(row).toMatchElement('.wc-shipping-class-slug', slug)
+		await expect(row).toMatchElement('.wc-shipping-class-description', description)
 	}
+}
+
+/**
+ * Generate an array of shipping class objects to be used as test data.
+ */
+const generateShippingClassesTestData = (count = 1) => {
+	const shippingClasses = []
+
+	while (count--) {
+		shippingClasses.push({
+			name: faker.lorem.words(),
+			slug: faker.lorem.slug(),
+			description: faker.lorem.sentence()
+		})
+	}
+
+	return shippingClasses
 }
 
 const runAddShippingClassesTest = () => {
@@ -43,25 +60,35 @@ const runAddShippingClassesTest = () => {
 			await merchant.openSettings('shipping', 'classes');
 		});
 
-		// wip
 		it('can add a new shipping class', async () => {
-			const expectedShippingClasses = {
-				name: faker.lorem.words(),
-				slug: faker.lorem.slug(),
-				description: faker.lorem.sentence()
-			}
+			const shippingClass = generateShippingClassesTestData()
 
-			await addShippingClasses(expectedShippingClasses)
-			await verifyThatShippingClassWasSaved(expectedShippingClasses)
+			await addShippingClasses(shippingClass)
+			await verifySavedShippingClasses(shippingClass)
 		});
 
-		// it('can add multiple shipping classes at once', async () => {
-		// 	// todo
-		// });
+		it('can add multiple shipping classes at once', async () => {
+			const shippingClasses = generateShippingClassesTestData(2)
 
-		// it('can automatically generate slug', async () => {
-		// 	// todo
-		// });
+			await addShippingClasses(shippingClasses)
+			await verifySavedShippingClasses(shippingClasses)
+		});
+
+		it('can automatically generate slug', async () => {
+			const input = [{
+				name: faker.lorem.words(3),
+				slug: '',
+				description: ''
+			}]
+			const expectedShippingClass = [{
+				name: input.name,
+				slug: faker.helpers.slugify(input.name),
+				description: ''
+			}]
+
+			await addShippingClasses(input)
+			await verifySavedShippingClasses(expectedShippingClass)
+		});
 	});
 };
 
