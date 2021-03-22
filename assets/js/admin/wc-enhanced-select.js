@@ -72,7 +72,7 @@ jQuery( function( $ ) {
 					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 
-				function display_result( self, select2_args) {
+				function display_result( self, select2_args ) {
 					select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 					$( self ).selectWoo( select2_args ).addClass( 'enhanced' );
@@ -155,7 +155,7 @@ jQuery( function( $ ) {
 						}
 					};
 
-					display_result(this, select2_args);
+					display_result( this, select2_args );
 				});
 
 				// Ajax Page Search.
