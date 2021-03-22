@@ -977,7 +977,8 @@ class WC_Checkout {
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 			if ( ! is_ajax() ) {
-				wp_safe_redirect( $result['redirect'] );
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+				wp_redirect( $result['redirect'] );
 				exit;
 			}
 
