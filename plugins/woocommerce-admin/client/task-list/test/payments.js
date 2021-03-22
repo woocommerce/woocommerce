@@ -148,6 +148,47 @@ describe( 'TaskList > Payments', () => {
 				} ).find( ( method ) => method.key === 'mollie' ).isConfigured
 			).toBe( true );
 		} );
+
+		describe( 'MercadoPago', () => {
+			it( 'Is enabled for supported countries', () => {
+				[ 'AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY' ].forEach(
+					( countryCode ) => {
+						params.countryCode = countryCode;
+						const methods = getPaymentMethods( params );
+						expect(
+							methods.some(
+								( method ) => method.key === 'mercadopago'
+							)
+						).toBe( true );
+					}
+				);
+			} );
+
+			it( 'Detects whether the plugin is enabled based on the received options', () => {
+				const mercadoPagoParams = {
+					...params,
+					onboardingStatus: {
+						enabledPaymentGateways: [ 'mercadopago' ],
+					},
+				};
+
+				const mercadoPagoMethod = getPaymentMethods(
+					mercadoPagoParams
+				).find( ( method ) => method.key === 'mercadopago' );
+
+				expect( mercadoPagoMethod.isEnabled ).toBe( true );
+			} );
+		} );
+
+		it( 'If the plugin is active `mercadopago` is marked as `isConfigured`', () => {
+			expect(
+				getPaymentMethods( {
+					...params,
+					activePlugins: [ 'woocommerce-mercadopago' ],
+				} ).find( ( method ) => method.key === 'mercadopago' )
+					.isConfigured
+			).toBe( true );
+		} );
 	} );
 
 	describe( 'PayPal', () => {

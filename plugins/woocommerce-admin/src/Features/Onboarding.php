@@ -703,6 +703,7 @@ class Onboarding {
 		$options[] = 'woocommerce_task_list_tracked_completed_tasks';
 		$options[] = 'woocommerce_task_list_dismissed_tasks';
 		$options[] = 'woocommerce_allow_tracking';
+		$options[] = 'woocommerce_mercadopago_settings';
 		$options[] = 'woocommerce_stripe_settings';
 		$options[] = 'woocommerce-ppcp-settings';
 		$options[] = 'woocommerce_ppcp-gateway_settings';
@@ -768,6 +769,7 @@ class Onboarding {
 				'mollie-payments-for-woocommerce'     => 'mollie-payments-for-woocommerce/mollie-payments-for-woocommerce.php',
 				'payu-india'                          => 'payu-india/index.php',
 				'mailpoet'                            => 'mailpoet/mailpoet.php',
+				'woocommerce-mercadopago'             => 'woocommerce-mercadopago/woocommerce-mercadopago.php',
 			)
 		);
 		return array_merge( $plugins, $onboarding_plugins );

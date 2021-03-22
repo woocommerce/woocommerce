@@ -135,6 +135,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add TypeScript and page objects to the E2E test suite. #6582
 - Dev: Introduce Typescript to Navigation utils #6477
 - Add: Paystack payment provider to several african countries. #6579
+- Dev: Payments task: include Mercado Pago #6572
 
 == 2.1.3 3/14/2021  ==
 

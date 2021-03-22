@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### Payments task: include Mercado Pago #6572
+
+- Create a brand new store.
+- Set one of the following countries in the first OBW step:
+```
+Mexico
+Brazil
+Argentina
+Chile
+Colombia
+Peru
+Uruguay
+```
+- Continue with the OBW and finish it up. 
+- Select `Choose payment methods` in the setup task list (`Get ready to start selling`).
+- Press the `Setup` button in the `Mercado Pago Payments` box.
+- Try the links presented after the plugin's installation and verify they are working.
+- Confirm that the `Mercado Pago payments for WooCommerce` plugin was installed.
+- Press `Continue`.
+- Now the `Mercado Pago Payments` option should appear as active.
+
 ### Update contrast and hover / active colors for analytics dropdown buttons #6504
 
 1. Go to analytics.

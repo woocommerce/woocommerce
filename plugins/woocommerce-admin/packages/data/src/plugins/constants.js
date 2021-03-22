@@ -60,6 +60,10 @@ export const pluginNames = {
 		'WooCommerce ShipStation Gateway',
 		'woocommerce-admin'
 	),
+	'woocommerce-mercadopago': __(
+		'Mercado Pago payments for WooCommerce',
+		'woocommerce-admin'
+	),
 	'kliken-marketing-for-google': __( 'Google Ads', 'woocommerce-admin' ),
 	'woo-razorpay': __( 'Razorpay', 'woocommerce-admin' ),
 	mailpoet: __( 'MailPoet', 'woocommerce-admin' ),

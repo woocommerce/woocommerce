@@ -29,6 +29,7 @@ import {
 	isWCPaySupported,
 } from './wcpay';
 import PayPal, { PAYPAL_PLUGIN } from './paypal';
+import { MercadoPago, MERCADOPAGO_PLUGIN } from './mercadopago';
 import Klarna from './klarna';
 import EWay from './eway';
 import Razorpay from './razorpay';
@@ -208,6 +209,35 @@ export function getPaymentMethods( {
 					},
 				};
 			},
+		},
+		{
+			key: 'mercadopago',
+			title: __(
+				'Mercado Pago Checkout Pro & Custom',
+				'woocommerce-admin'
+			),
+			content: (
+				<>
+					{ __(
+						'Accept credit and debit cards, offline (cash or bank transfer) and logged-in payments with money in Mercado Pago. Safe and secure payments with the leading payment processor in LATAM.',
+						'woocommerce-admin'
+					) }
+				</>
+			),
+			before: (
+				<img
+					src={ wcAdminAssetUrl + 'onboarding/mercadopago.png' }
+					alt=""
+				/>
+			),
+			visible: [ 'AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY' ].includes(
+				countryCode
+			),
+			plugins: [ MERCADOPAGO_PLUGIN ],
+			container: <MercadoPago />,
+			isConfigured: activePlugins.includes( MERCADOPAGO_PLUGIN ),
+			isEnabled: enabledPaymentGateways.includes( 'mercadopago' ),
+			optionName: 'woocommerce_mercadopago_settings',
 		},
 		{
 			key: 'paypal',
