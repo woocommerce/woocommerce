@@ -10,7 +10,7 @@ import type { PaymentMethodDataContextState } from './types';
 import type { ActionType } from './actions';
 
 const hasSavedPaymentToken = (
-	paymentMethodData: Record< string, unknown >
+	paymentMethodData: Record< string, unknown > | undefined
 ): boolean => {
 	return !! (
 		typeof paymentMethodData === 'object' && paymentMethodData.isSavedToken
@@ -24,7 +24,7 @@ const reducer = (
 	state = DEFAULT_PAYMENT_DATA_CONTEXT_STATE,
 	{
 		type,
-		paymentMethodData = {},
+		paymentMethodData,
 		shouldSavePaymentMethod = false,
 		errorMessage = '',
 		paymentMethods = {},
@@ -36,6 +36,11 @@ const reducer = (
 				? {
 						...state,
 						currentStatus: STATUS.STARTED,
+						paymentMethodData:
+							paymentMethodData || state.paymentMethodData,
+						hasSavedToken: hasSavedPaymentToken(
+							paymentMethodData || state.paymentMethodData
+						),
 				  }
 				: state;
 		case STATUS.ERROR:
@@ -64,7 +69,7 @@ const reducer = (
 						paymentMethodData:
 							paymentMethodData || state.paymentMethodData,
 						hasSavedToken: hasSavedPaymentToken(
-							paymentMethodData
+							paymentMethodData || state.paymentMethodData
 						),
 				  }
 				: state;

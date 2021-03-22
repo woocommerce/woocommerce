@@ -49,9 +49,21 @@ export const failed = ( {
 export const success = ( {
 	paymentMethodData,
 }: {
-	paymentMethodData: Record< string, unknown >;
+	paymentMethodData?: Record< string, unknown >;
 } ): ActionType => ( {
 	type: STATUS.SUCCESS,
+	paymentMethodData,
+} );
+
+/**
+ * Used to dispatch a payment started status update.
+ */
+export const started = ( {
+	paymentMethodData,
+}: {
+	paymentMethodData?: Record< string, unknown >;
+} ): ActionType => ( {
+	type: STATUS.STARTED,
 	paymentMethodData,
 } );
 
