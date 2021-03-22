@@ -218,6 +218,9 @@
  *                                                                 when the express payment method
  *                                                                 modal closes and control is
  *                                                                 returned to checkout.
+ * @property {boolean}                    shouldSavePayment        A boolean which indicates whether
+ *                                                                 the shopper has checked the save
+ *                                                                 payment method checkbox.
  */
 
 export {};
