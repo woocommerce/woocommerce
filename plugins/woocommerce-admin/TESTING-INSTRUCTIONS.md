@@ -8,6 +8,16 @@
 2. Verifty the dropdown buttons (date range or filters) are now higher contrast.
 3. Verifty the text and chevron in the dropdown button turn blue on hover, and while active.
 
+### Set default value to array when op is `contains` #6622
+
+1. Clone and start https://github.com/Automattic/woocommerce.com
+2. Open `notifications.json.php` from woocommerce.com repository and find a rule that uses the `contains` operator and remove the `default` key. Please make a note of the option name.
+3. Open `src/RemoteInboxNotifications/DataSourcepoller.php` from your WooCommerce Admin repository and change the datasource to your local woocommerce.com (woocommerce.test)
+4. Make sure your local WooCommerce Admin database does not have the option from step #2
+5. Install and activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)
+6. Navigate to Tools -> Cron Events and run `wc_admin_daily` job
+7. Check your debug log in `wp-content/debug.log`. You should see PHP error.
+
 ### Close activity panel tabs by default and track #6566
 
 1. Open your browser console and enter `localStorage.setItem( 'debug', 'wc-admin:tracks' );`.  Make sure the "Verbose" is selected under the levels shown.
