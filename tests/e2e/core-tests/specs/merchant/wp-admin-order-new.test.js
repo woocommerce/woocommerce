@@ -6,37 +6,41 @@ const {
 	merchant,
 	verifyPublishAndTrash,
 	createSimpleProduct,
-	createSimpleProductWithCategory,
+	createVariableProduct,
+	createGroupedProduct,
 	uiUnblocked
 } = require('@woocommerce/e2e-utils');
 const faker = require('faker');
+const config = require('config');
 
 /**
  * Create different product types
  */
 const setupProducts = async () => {
-	const generateProductName = () => faker.commerce.productName();
-	const generatePrice = () => faker.commerce.price(1, 999);
 	const simpleProduct = {
-		name: generateProductName(),
-		price: generatePrice(),
+		name: faker.commerce.productName(),
+		price: faker.commerce.price(1, 999),
 		id: null
 	}
-	const simpleProductWithCategory = {
-		name: generateProductName(),
-		price: generatePrice(),
-		category: faker.commerce.productMaterial(),
+	const variableProduct = {
+		name: 'Variable Product with Three Variations',
+		prices: [9.99, 11.99, 20.00],
+		id: null
+	}
+	const groupedProduct = {
+		name: config.get('products.simple.name'),
+		simpleProductPrice: config.has('products.simple.price') ? config.get('products.simple.price') : '9.99',
 		id: null
 	}
 
 	simpleProduct.id = await createSimpleProduct(simpleProduct.name, simpleProduct.price)
-	simpleProductWithCategory.id = await createSimpleProductWithCategory(simpleProductWithCategory.name, simpleProductWithCategory.price);
-	// todo variable and grouped products
+	variableProduct.id = await createVariableProduct();
+	groupedProduct.id = await createGroupedProduct()
 
 	return [
 		simpleProduct,
-		simpleProductWithCategory
-		// todo variable and grouped products
+		variableProduct,
+		groupedProduct
 	]
 }
 
@@ -69,7 +73,6 @@ const runCreateOrderTest = () => {
 		});
 
 		// todo remove .only
-		// todo complete this
 		it('can create new complex order with multiple product types & tax classes', async () => {
 			// todo setup products and tax classes
 			const products = await setupProducts();
@@ -77,7 +80,7 @@ const runCreateOrderTest = () => {
 			// Go to "add order" page
 			await merchant.openNewOrder();
 
-			// Add products to the order
+			// Add products (line items) to the order
 			await expect(page).toClick('button.add-line-item');
 			await expect(page).toClick('button.add-order-item');
 			await page.waitForSelector('.wc-backbone-modal-header');
@@ -95,11 +98,10 @@ const runCreateOrderTest = () => {
 
 			await uiUnblocked();
 
-			// Verify the product we added shows as a line item now
+			// Verify the products we added show as line items now
 			for (const { name } of products) {
 				await expect(page).toMatchElement('.wc-order-item-name', { text: name });
 			}
-
 		})
 	});
 }
