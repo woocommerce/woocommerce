@@ -97,6 +97,15 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 8. Navigate to WooCommerce -> Customers.
 9. Make sure that customer data has been deleted.
 
+### Fix "Themes" step visibility in IE 11 #6578
+
+1. Get an IE 11 test environment. I downloaded a trial version of Parallels Desktop on [here](https://www.parallels.com/) and IE 11 virtual machine from [developer.microsoft.com](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/)
+2. Make a zip version of this branch by running `npm run test:zip`
+3. Make a JN site -> install and activate the zip file.
+4. Open IE 11 and start OBW
+5. Confirm that the themes are displayed correctly.
+
+
 ### Fix hidden menu title on smaller screens #6562
 
 1. Enable the new navigation.

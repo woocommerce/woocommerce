@@ -103,12 +103,13 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 	}
 
 	.components-form-file-upload {
-		flex: 1;
+		flex: 1 1 auto;
 		width: 100%;
+		display: flex;
 	}
 
 	.components-form-file-upload > .components-button {
-		flex: 1;
+		flex: 1 1 auto;
 		flex-direction: column;
 		justify-content: center;
 		margin: 0;
