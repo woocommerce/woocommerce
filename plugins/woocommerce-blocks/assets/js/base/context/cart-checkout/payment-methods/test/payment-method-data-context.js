@@ -185,6 +185,8 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );
+		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
+		expect( console ).toHaveWarned();
 	} );
 
 	it( 'resets saved payment method data after starting and closing an express payment method', async () => {
