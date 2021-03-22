@@ -4,8 +4,41 @@
  */
 const {
 	merchant,
-	verifyPublishAndTrash
-} = require( '@woocommerce/e2e-utils' );
+	verifyPublishAndTrash,
+	createSimpleProduct,
+	createSimpleProductWithCategory,
+	uiUnblocked
+} = require('@woocommerce/e2e-utils');
+const faker = require('faker');
+
+/**
+ * Create different product types
+ */
+const setupProducts = async () => {
+	const generateProductName = () => faker.commerce.productName();
+	const generatePrice = () => faker.commerce.price(1, 999);
+	const simpleProduct = {
+		name: generateProductName(),
+		price: generatePrice(),
+		id: null
+	}
+	const simpleProductWithCategory = {
+		name: generateProductName(),
+		price: generatePrice(),
+		category: faker.commerce.productMaterial(),
+		id: null
+	}
+
+	simpleProduct.id = await createSimpleProduct(simpleProduct.name, simpleProduct.price)
+	simpleProductWithCategory.id = await createSimpleProductWithCategory(simpleProductWithCategory.name, simpleProductWithCategory.price);
+	// todo variable and grouped products
+
+	return [
+		simpleProduct,
+		simpleProductWithCategory
+		// todo variable and grouped products
+	]
+}
 
 const runCreateOrderTest = () => {
 	describe('WooCommerce Orders > Add new order', () => {
@@ -34,6 +67,40 @@ const runCreateOrderTest = () => {
 				'1 order moved to the Trash.'
 			);
 		});
+
+		// todo remove .only
+		// todo complete this
+		it('can create new complex order with multiple product types & tax classes', async () => {
+			// todo setup products and tax classes
+			const products = await setupProducts();
+
+			// Go to "add order" page
+			await merchant.openNewOrder();
+
+			// Add products to the order
+			await expect(page).toClick('button.add-line-item');
+			await expect(page).toClick('button.add-order-item');
+			await page.waitForSelector('.wc-backbone-modal-header');
+			for (const { name, id } of products) {
+				await expect(page).toClick('.wc-backbone-modal-content tr:last-child .wc-product-search');
+				await expect(page).toFill('#wc-backbone-modal-dialog + .select2-container .select2-search__field', name);
+				await expect(page).toClick('li[aria-selected="true"]');
+				await expect(page).toMatchElement(
+					'.wc-backbone-modal-content tr:nth-last-child(2) .wc-product-search option',
+					`${name} (#${id})`
+				);
+			}
+
+			await page.click('.wc-backbone-modal-content #btn-ok');
+
+			await uiUnblocked();
+
+			// Verify the product we added shows as a line item now
+			for (const { name } of products) {
+				await expect(page).toMatchElement('.wc-order-item-name', { text: name });
+			}
+
+		})
 	});
 }
 
