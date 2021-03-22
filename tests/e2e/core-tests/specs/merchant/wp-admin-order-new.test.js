@@ -5,44 +5,17 @@
 const {
 	merchant,
 	verifyPublishAndTrash,
-	createSimpleProduct,
-	createVariableProduct,
-	createGroupedProduct,
 	uiUnblocked
 } = require('@woocommerce/e2e-utils');
 const faker = require('faker');
 const config = require('config');
-
-/**
- * Create different product types
- */
-const setupProducts = async () => {
-	const simpleProduct = {
-		name: faker.commerce.productName(),
-		price: faker.commerce.price(1, 999),
-		id: null
-	}
-	const variableProduct = {
-		name: 'Variable Product with Three Variations',
-		prices: [9.99, 11.99, 20.00],
-		id: null
-	}
-	const groupedProduct = {
-		name: config.get('products.simple.name'),
-		simpleProductPrice: config.has('products.simple.price') ? config.get('products.simple.price') : '9.99',
-		id: null
-	}
-
-	simpleProduct.id = await createSimpleProduct(simpleProduct.name, simpleProduct.price)
-	variableProduct.id = await createVariableProduct();
-	groupedProduct.id = await createGroupedProduct()
-
-	return [
-		simpleProduct,
-		variableProduct,
-		groupedProduct
-	]
-}
+const { HTTPClientFactory,
+	VariableProduct,
+	GroupedProduct,
+	SimpleProduct,
+	ProductAttribute,
+	ProductVariation
+} = require('@woocommerce/api');
 
 const runCreateOrderTest = () => {
 	describe('WooCommerce Orders > Add new order', () => {
@@ -74,8 +47,40 @@ const runCreateOrderTest = () => {
 
 		// todo remove .only
 		it('can create new complex order with multiple product types & tax classes', async () => {
-			// todo setup products and tax classes
-			const products = await setupProducts();
+			// Initialize different product types
+			const initProducts = async () => {
+				const apiUrl = config.get('url');
+				const adminUsername = config.get('users.admin.username');
+				const adminPassword = config.get('users.admin.password');
+				const httpClient = HTTPClientFactory.build(apiUrl)
+					.withBasicAuth(adminUsername, adminPassword)
+					.create();
+				const productName = () => faker.commerce.productName();
+				const price = () => faker.commerce.price(1, 999);
+
+				// Initialize repositories
+				const simpleRepo = SimpleProduct.restRepository(httpClient);
+				const variableRepo = VariableProduct.restRepository(httpClient);
+				const groupedRepo = GroupedProduct.restRepository(httpClient);
+
+
+				// Initialize products
+				const simpleProduct = await simpleRepo.create({ name: productName(), price: price() });
+				const variableProduct = await variableRepo.create({ name: productName() });
+				const groupMemberProduct1 = await simpleRepo.create({ name: productName(), price: price() });
+				const groupMemberProduct2 = await simpleRepo.create({ name: productName(), price: price() });
+				const groupedProduct = await groupedRepo.create({
+					name: productName(),
+					groupedProducts: [groupMemberProduct1.id, groupMemberProduct2.id]
+				});
+
+				return [
+					simpleProduct,
+					variableProduct,
+					groupedProduct
+				];
+			}
+			const products = await initProducts();
 
 			// Go to "add order" page
 			await merchant.openNewOrder();
@@ -102,6 +107,9 @@ const runCreateOrderTest = () => {
 			for (const { name } of products) {
 				await expect(page).toMatchElement('.wc-order-item-name', { text: name });
 			}
+
+			// Verify variation details in variable product line item
+			await expect(page).toMatchElement('.wc-order-item-variation', { text: products.filter(p => p.variations).id })
 		})
 	});
 }
