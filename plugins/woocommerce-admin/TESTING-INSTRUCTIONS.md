@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Update contrast and hover / active colors for analytics dropdown buttons #6504
+
+1. Go to analytics.
+2. Verifty the dropdown buttons (date range or filters) are now higher contrast.
+3. Verifty the text and chevron in the dropdown button turn blue on hover, and while active.
+
 ### Close activity panel tabs by default and track #6566
 
 1. Open your browser console and enter `localStorage.setItem( 'debug', 'wc-admin:tracks' );`.  Make sure the "Verbose" is selected under the levels shown.
@@ -244,7 +250,7 @@ Mailchimp
 Creative Mail
 ```
 (In that order)
-- Verify that the Creative Mail option is toggled off by default.
+- Verify that the Creative Mail option is toggled off by default
 
 ### Fix double prefixing of navigation URLs #6460
 

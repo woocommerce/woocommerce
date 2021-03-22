@@ -1,8 +1,8 @@
 .woocommerce-page .woocommerce-dropdown-button {
 	background-color: $studio-white;
 	position: relative;
-	border: 1px solid $gray-100;
-	color: $gray-700;
+	border: 1px solid $gray-700;
+	color: $gray-900;
 	border-radius: 4px;
 	padding: 0 40px 0 0;
 	width: 100%;
@@ -10,8 +10,8 @@
 
 	&::after {
 		content: '';
-		background: transparent
-			url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E)
+		background: $gray-900;
+		mask: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20%2F%3E%3C%2Fsvg%3E)
 			no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
@@ -28,8 +28,10 @@
 	&:hover,
 	&:active,
 	&.is-open {
-		background-color: $gray-100;
-		border-color: $gray-700;
+		color: var(--wp-admin-theme-color);
+		&::after {
+			background: var(--wp-admin-theme-color);
+		}
 	}
 
 	&.is-multi-line .woocommerce-dropdown-button__labels {
