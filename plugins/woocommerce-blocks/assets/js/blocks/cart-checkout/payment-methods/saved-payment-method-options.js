@@ -50,7 +50,7 @@ const getCcOrEcheckPaymentMethodOption = (
 		onChange: ( token ) => {
 			const savedTokenKey = `wc-${ method.gateway }-payment-token`;
 			setActivePaymentMethod( method.gateway );
-			setPaymentStatus().success( {
+			setPaymentStatus().started( {
 				payment_method: method.gateway,
 				[ savedTokenKey ]: token + '',
 				isSavedToken: true,
@@ -84,7 +84,7 @@ const getDefaultPaymentMethodOptions = (
 		onChange: ( token ) => {
 			const savedTokenKey = `wc-${ method.gateway }-payment-token`;
 			setActivePaymentMethod( method.gateway );
-			setPaymentStatus().success( {
+			setPaymentStatus().started( {
 				payment_method: method.gateway,
 				[ savedTokenKey ]: token + '',
 				isSavedToken: true,
@@ -114,12 +114,9 @@ const SavedPaymentMethodOptions = () => {
 
 	const updateToken = useCallback(
 		( token ) => {
-			if ( token === '0' ) {
-				setPaymentStatus().started();
-			}
 			setActiveSavedToken( token );
 		},
-		[ setActiveSavedToken, setPaymentStatus ]
+		[ setActiveSavedToken ]
 	);
 
 	useEffect( () => {

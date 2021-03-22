@@ -38,7 +38,7 @@ const ExpressPaymentMethods = () => {
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			setPaymentStatus().started();
+			setPaymentStatus().started( {} );
 			setActivePaymentMethod( paymentMethodId );
 		},
 		[
@@ -51,7 +51,7 @@ const ExpressPaymentMethods = () => {
 	const onExpressPaymentClose = useCallback( () => {
 		setActivePaymentMethod( previousActivePaymentMethod.current );
 		if ( previousPaymentMethodData.current.isSavedToken ) {
-			setPaymentStatus().success( previousPaymentMethodData.current );
+			setPaymentStatus().started( previousPaymentMethodData.current );
 		}
 	}, [ setActivePaymentMethod, setPaymentStatus ] );
 	const paymentMethodIds = Object.keys( paymentMethods );

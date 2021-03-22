@@ -27,6 +27,7 @@ import {
 	error,
 	failed,
 	success,
+	started,
 	setRegisteredPaymentMethods,
 	setRegisteredExpressPaymentMethods,
 	setShouldSavePaymentMethod,
@@ -112,8 +113,8 @@ export const PaymentMethodDataProvider = ( {
 	const currentObservers = useRef( observers );
 	const { onPaymentProcessing } = useEventEmitters( observerDispatch );
 
+	// ensure observers are always current.
 	useEffect( () => {
-		// ensure observers are always current.
 		currentObservers.current = observers;
 	}, [ observers ] );
 
@@ -221,7 +222,13 @@ export const PaymentMethodDataProvider = ( {
 
 	const setPaymentStatus = useCallback(
 		(): PaymentStatusDispatchers => ( {
-			started: () => dispatch( statusOnly( STARTED ) ),
+			started: ( paymentMethodData ) => {
+				dispatch(
+					started( {
+						paymentMethodData,
+					} )
+				);
+			},
 			processing: () => dispatch( statusOnly( PROCESSING ) ),
 			completed: () => dispatch( statusOnly( COMPLETE ) ),
 			error: ( errorMessage ) => dispatch( error( errorMessage ) ),
@@ -241,7 +248,7 @@ export const PaymentMethodDataProvider = ( {
 				);
 			},
 			success: (
-				paymentMethodData = {},
+				paymentMethodData,
 				billingData = undefined,
 				shippingData = undefined
 			) => {

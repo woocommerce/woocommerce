@@ -81,7 +81,7 @@
 /**
  * @typedef {Object} PaymentStatusDispatchers
  *
- * @property {function()}                        started    Sets started status.
+ * @property {function(Object=)}                 started    Sets started status.
  * @property {function()}                        processing Sets processing status.
  * @property {function()}                        completed  Sets complete status.
  * @property {function(string)}                  error      Sets error status.
