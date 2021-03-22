@@ -153,6 +153,7 @@ A big part of the payment method integration is the interface that is exposed fo
   - `ValidationInputError` — a container for holding validation errors which typically you'll include after any inputs
   - [`PaymentMethodLabel`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/paypal/index.js#L37-L40) — use this component for the payment method label, including an optional icon
 -   `setExpressPaymentError`: This function receives a string and allows express payment methods to set an error notice for the express payment area on demand. This can be necessary because some express payment method processing might happen outside of checkout events.
+-   `shouldSavePayment`: This is a boolean type value that indicates whether or not the shopper has selected to save their payment method details (for payment methods that support saved payments). True if selected, false otherwise. Defaults to false.
 
 Any registered `savedTokenComponent` node will also receive a `token` prop which includes the id for the selected saved token in case your payment method needs to use it for some internal logic. However, keep in mind, this is just the id representing this token in the database (and the value of the radio input the shopper checked), not the actual customer payment token (since processing using that usually happens on the server for security).
 
