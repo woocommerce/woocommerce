@@ -45,6 +45,8 @@ describe( 'Testing cart', () => {
 		).toBeInTheDocument();
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
+		expect( console ).toHaveWarned();
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
