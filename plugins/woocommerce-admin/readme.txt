@@ -136,6 +136,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Introduce Typescript to Navigation utils #6477
 - Add: Paystack payment provider to several african countries. #6579
 - Dev: Payments task: include Mercado Pago #6572
+- Dev: Ensure script asset.php files are included in builds #6635
 
 == 2.1.3 3/14/2021  ==
 

@@ -22,7 +22,7 @@ output 2 "Creating archive... 🎁"
 ZIP_FILE=$1
 
 build_files=$(find dist \( -name '*.js' -o -name '*.css' \))
-asset_files=$(find dist \( -name 'index.min.asset.php' \))
+asset_files=$(find dist \( -name '*.min.asset.php' \))
 
 zip -r "${ZIP_FILE}" \
 	woocommerce-admin.php \
