@@ -153,7 +153,6 @@ const runCreateOrderTest = () => {
 			);
 		});
 
-		// todo remove .only
 		it('can create new complex order with multiple product types & tax classes', async () => {
 			// Go to "add order" page
 			await merchant.openNewOrder();
