@@ -13,7 +13,6 @@ const { HTTPClientFactory,
 	VariableProduct,
 	GroupedProduct,
 	SimpleProduct,
-	ProductAttribute,
 	ProductVariation
 } = require('@woocommerce/api');
 
@@ -60,18 +59,28 @@ const runCreateOrderTest = () => {
 
 				// Initialize repositories
 				const simpleRepo = SimpleProduct.restRepository(httpClient);
+				const variationsRepo = ProductVariation.restRepository(httpClient);
 				const variableRepo = VariableProduct.restRepository(httpClient);
 				const groupedRepo = GroupedProduct.restRepository(httpClient);
 
-
-				// Initialize products
+				// Initialize Simple Product
 				const simpleProduct = await simpleRepo.create({ name: productName(), price: price() });
+
+				// Initialize Variable Product
+				const variations = config.get('products.variations');
 				const variableProduct = await variableRepo.create({ name: productName() });
-				const groupMemberProduct1 = await simpleRepo.create({ name: productName(), price: price() });
-				const groupMemberProduct2 = await simpleRepo.create({ name: productName(), price: price() });
+				await variationsRepo.create(variableProduct.id, variations)
+
+				// Initialize Grouped Products
+				const groupSize = 3;
+				const groupedProducts = [];
+				for (let i = 0; i < groupSize; i++) {
+					const prod = await simpleRepo.create({ name: productName(), price: price() });
+					groupedProducts.push(prod)
+				}
 				const groupedProduct = await groupedRepo.create({
 					name: productName(),
-					groupedProducts: [groupMemberProduct1.id, groupMemberProduct2.id]
+					groupedProducts: groupedProducts
 				});
 
 				return [
@@ -110,6 +119,11 @@ const runCreateOrderTest = () => {
 
 			// Verify variation details in variable product line item
 			await expect(page).toMatchElement('.wc-order-item-variation', { text: products.filter(p => p.variations).id })
+
+			// todo specify quantities
+			// todo setup tax classes
+
+
 		})
 	});
 }
