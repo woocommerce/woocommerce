@@ -59,7 +59,8 @@ To modify the environment used by tests locally, you will need to modify `.wp-en
 
 ```diff
 {
-+	"core": "WordPress/WordPress#5.6",
+-	"core": "WordPress/WordPress#5.7-branch",
++	"core": "WordPress/WordPress#5.6-branch",
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
