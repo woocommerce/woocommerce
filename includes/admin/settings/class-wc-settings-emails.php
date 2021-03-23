@@ -206,7 +206,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'default'       => 'no',
 					'autoload'      => false,
 				),
-				
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_merchant_notes',
