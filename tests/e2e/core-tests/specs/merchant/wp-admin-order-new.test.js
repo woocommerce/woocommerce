@@ -18,20 +18,37 @@ const { HTTPClientFactory,
 
 let variations;
 let products;
+const taxRates = [
+	{
+		name: 'My Standard Tax 1',
+		rate: '10',
+		class: 'standard'
+	},
+	{
+		name: 'My Reduced Rate Tax 2',
+		rate: '20',
+		class: 'reduced-rate'
+	},
+	{
+		name: 'My Zero Rate Tax 3',
+		rate: '30',
+		class: 'zero-rate'
+	}
+];
 
 const runCreateOrderTest = () => {
 	describe('WooCommerce Orders > Add new order', () => {
 		beforeAll(async () => {
+			// Initialize HTTP client
+			const apiUrl = config.get('url');
+			const adminUsername = config.get('users.admin.username');
+			const adminPassword = config.get('users.admin.password');
+			const httpClient = HTTPClientFactory.build(apiUrl)
+				.withBasicAuth(adminUsername, adminPassword)
+				.create();
+
 			// Initialize products for each product type
 			const initProducts = async () => {
-				// Initialize HTTP client
-				const apiUrl = config.get('url');
-				const adminUsername = config.get('users.admin.username');
-				const adminPassword = config.get('users.admin.password');
-				const httpClient = HTTPClientFactory.build(apiUrl)
-					.withBasicAuth(adminUsername, adminPassword)
-					.create();
-
 				// Initialization functions per product type
 				const initSimpleProduct = async () => {
 					const repo = SimpleProduct.restRepository(httpClient);
@@ -76,6 +93,42 @@ const runCreateOrderTest = () => {
 			};
 			products = await initProducts();
 
+			// Initialize tax rates & classes
+			const initTaxes = async () => {
+				// Enable taxes in settings
+				const enableTaxes = async () => {
+					const path = '/wc/v3/settings/general/woocommerce_calc_taxes';
+					const data = {
+						value: 'yes'
+					}
+					await httpClient.put(path, data);
+				}
+				await enableTaxes();
+
+				// Delete existing tax rates
+				const deleteTaxRates = async () => {
+					const path = '/wc/v3/taxes';
+					await httpClient.get(path).then(async (response) => {
+						for (const { id } of response.data) {
+							await httpClient.delete(`${path}/${id}?force=true`);
+						}
+					});
+				};
+				await deleteTaxRates();
+
+				// Set up tax rates
+				const createTaxRates = async () => {
+					const path = '/wc/v3/taxes';
+					for (const t of taxRates) {
+						await httpClient.post(path, t);
+					}
+				};
+				await createTaxRates();
+
+				return taxRates;
+			};
+			await initTaxes();
+
 			// Login
 			await merchant.login();
 		});
@@ -104,8 +157,6 @@ const runCreateOrderTest = () => {
 
 		// todo remove .only
 		it('can create new complex order with multiple product types & tax classes', async () => {
-
-
 			// Go to "add order" page
 			await merchant.openNewOrder();
 
