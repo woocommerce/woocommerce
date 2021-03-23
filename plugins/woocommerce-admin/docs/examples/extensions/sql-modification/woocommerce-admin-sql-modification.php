@@ -75,18 +75,12 @@ function add_report_register_script() {
 
 	add_currency_settings();
 
+	$asset_file = require __DIR__ . '/dist/index.asset.php';
 	wp_register_script(
 		'sql-modification',
 		plugins_url( '/dist/index.js', __FILE__ ),
-		array(
-			'wp-hooks',
-			'wp-element',
-			'wp-i18n',
-			'wp-plugins',
-			'wc-components',
-			'wc-settings',
-		),
-		filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
+		$asset_file['dependencies'],
+		$asset_file['version'],
 		true
 	);
 
@@ -104,9 +98,11 @@ add_action( 'admin_enqueue_scripts', 'add_report_register_script' );
 function apply_currency_arg( $args ) {
 	$currency = 'USD';
 
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['currency'] ) ) {
 		$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
 	}
+	// phpcs:enable
 
 	$args['currency'] = $currency;
 
@@ -170,9 +166,11 @@ add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_interval', 'add_join
 function add_where_subquery( $clauses ) {
 	$currency = 'USD';
 
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['currency'] ) ) {
 		$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
 	}
+	// phpcs:enable
 
 	$clauses[] = "AND currency_postmeta.meta_key = '_order_currency' AND currency_postmeta.meta_value = '{$currency}'";
 

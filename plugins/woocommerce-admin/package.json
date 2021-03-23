@@ -166,6 +166,7 @@
 		"@woocommerce/customer-effort-score": "file:packages/customer-effort-score",
 		"@woocommerce/data": "file:packages/data",
 		"@woocommerce/date": "file:packages/date",
+		"@woocommerce/dependency-extraction-webpack-plugin": "file:packages/dependency-extraction-webpack-plugin",
 		"@woocommerce/eslint-plugin": "file:packages/eslint-plugin",
 		"@woocommerce/experimental": "file:packages/experimental",
 		"@woocommerce/navigation": "file:packages/navigation",

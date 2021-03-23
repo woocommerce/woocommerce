@@ -20,16 +20,12 @@ function add_task_register_script() {
 		return;
 	}
 
+	$asset_file = require __DIR__ . '/dist/index.asset.php';
 	wp_register_script(
 		'add-task',
 		plugins_url( '/dist/index.js', __FILE__ ),
-		array(
-			'wp-hooks',
-			'wp-element',
-			'wp-i18n',
-			'wc-components',
-		),
-		filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
+		$asset_file['dependencies'],
+		$asset_file['version'],
 		true
 	);
 

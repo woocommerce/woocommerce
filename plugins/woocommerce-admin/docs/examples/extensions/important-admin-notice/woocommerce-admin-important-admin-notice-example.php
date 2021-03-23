@@ -20,13 +20,12 @@ function wc_admin_important_notice_register_script() {
 		return;
 	}
 
+	$asset_file = require __DIR__ . '/dist/index.asset.php';
 	wp_register_script(
 		'wc-admin-important-notice',
 		plugins_url( '/dist/index.js', __FILE__ ),
-		array(
-			'wp-hooks',
-		),
-		filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
+		$asset_file['dependencies'],
+		$asset_file['version'],
 		true
 	);
 
@@ -43,7 +42,7 @@ function wc_admin_add_important_notice() {
 		<p class="notice-text">Important notice targeted by inspecting DOM.</p>
 	</div>
 	<div class="updated woocommerce-admin woocommerce-message">
-		<p>Impotant notice targeted by class.</p>
+		<p>Important notice targeted by class.</p>
 	</div>
 	<div class="updated woocommerce-admin woocommerce-message ok-to-hide">
 		<p>Notice excluded from importance clause targeted by class.</p>

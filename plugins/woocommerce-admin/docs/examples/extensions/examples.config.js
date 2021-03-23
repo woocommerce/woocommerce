@@ -23,6 +23,8 @@ if ( ! fs.existsSync( extensionPath ) ) {
 	throw new Error( 'Extension example does not exist.' );
 }
 
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
+
 const webpackConfig = {
 	mode: 'development',
 	entry: {
@@ -100,6 +102,7 @@ const webpackConfig = {
 		new MiniCssExtractPlugin( {
 			filename: '[name]/dist/style.css',
 		} ),
+		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
 };
 
