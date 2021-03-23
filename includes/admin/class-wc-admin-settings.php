@@ -579,6 +579,47 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'single_select_page_with_search':
+						$option_value = $value['value'];
+						$page         = get_post( $option_value );
+
+						if ( ! is_null( $page ) ) {
+							$page                = get_post( $option_value );
+							$option_display_name = sprintf(
+								/* translators: 1: page name 2: page ID */
+								__( '%1$s (ID: %2$s)', 'woocommerce' ),
+								$page->post_title,
+								$option_value
+							);
+						}
+						?>
+						<tr valign="top" class="single_select_page">
+							<th scope="row" class="titledesc">
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+							</th>
+							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
+								<select
+									name="<?php echo esc_attr( $value['id'] ); ?>"
+									id="<?php echo esc_attr( $value['id'] ); ?>"
+									style="<?php echo esc_attr( $value['css'] ); ?>"
+									class="<?php echo esc_attr( $value['class'] ); ?>"
+									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									data-placeholder="<?php esc_attr_e( 'Search for a page&hellip;', 'woocommerce' ); ?>"
+									data-allow_clear="true"
+									data-exclude="<?php echo wc_esc_json( wp_json_encode( $value['args']['exclude'] ) ); ?>"
+									>
+									<option value=""></option>
+									<?php if ( ! is_null( $page ) ) { ?>
+										<option value="<?php echo esc_attr( $option_value ); ?>" selected="selected">
+										<?php echo wp_strip_all_tags( $option_display_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</option>
+									<?php } ?>
+								</select> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</td>
+						</tr>
+						<?php
+						break;
+
 					// Single country selects.
 					case 'single_select_country':
 						$country_setting = (string) $value['value'];
