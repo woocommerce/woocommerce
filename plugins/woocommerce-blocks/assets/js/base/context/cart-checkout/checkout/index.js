@@ -47,7 +47,7 @@ export const CheckoutProvider = ( {
 									CURRENT_USER_IS_ADMIN ? null : () => null
 								}
 							>
-								<PluginArea />
+								<PluginArea scope="woocommerce-checkout" />
 							</BlockErrorBoundary>
 						</SlotFillProvider>
 						<CheckoutProcessor />
