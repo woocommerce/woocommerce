@@ -124,8 +124,6 @@ const runCreateOrderTest = () => {
 					}
 				};
 				await createTaxRates();
-
-				return taxRates;
 			};
 			await initTaxes();
 
@@ -167,7 +165,7 @@ const runCreateOrderTest = () => {
 
 			// Search for each product to add, then verify that they are saved
 			for (const { name } of products) {
-				await expect(page).toClick('.wc-backbone-modal-content tr:last-child .wc-product-search');
+				await expect(page).toClick('.wc-backbone-modal-content tr:last-child .select2-selection__arrow');
 				await expect(page).toFill('#wc-backbone-modal-dialog + .select2-container .select2-search__field',
 					name
 				);
@@ -179,9 +177,17 @@ const runCreateOrderTest = () => {
 				);
 			}
 
-			// Save the line items, then verify
+			// Save the line items
 			await expect(page).toClick('.wc-backbone-modal-content #btn-ok');
 			await uiUnblocked();
+
+			// Recalculate taxes
+			await expect(page).toDisplayDialog(async () => {
+				await expect(page).toClick('.calculate-action');
+			});
+			await page.waitForSelector('th.line_tax');
+
+			// Save the order and verify line items
 			await expect(page).toClick('button.save_order');
 			await page.waitForNavigation();
 			for (const { name } of products) {
@@ -189,17 +195,27 @@ const runCreateOrderTest = () => {
 			}
 
 			// Verify variation details
-			const lastVariation = variations[0];
-			const attributes = lastVariation.attributes;
+			const firstVariation = variations[0];
+			const attributes = firstVariation.attributes;
 			const actualAttributes = await page.$('.display_meta');
-			await expect(page).toMatchElement('.wc-order-item-variation', { text: lastVariation.id });
+			await expect(page).toMatchElement('.wc-order-item-variation', { text: firstVariation.id });
 			for (const { name, option } of attributes) {
 				await expect(actualAttributes).toMatch(name);
 				await expect(actualAttributes).toMatch(option);
 			}
 
-			// todo specify quantities
-			// todo setup tax classes
+			// Verify that the names of each tax class were shown
+			for (const { name } of taxRates) {
+				await expect(page).toMatchElement('th.line_tax', { text: name });
+				await expect(page).toMatchElement('.wc-order-totals td.label', { text: name });
+			}
+
+			// Verify tax amounts
+			const taxTotals = ['£10.00', '£4.00', '£7.50'];
+			for (const amount of taxTotals) {
+				await expect(page).toMatchElement('td.line_tax', { text: amount });
+				await expect(page).toMatchElement('.wc-order-totals td.total', { text: amount });
+			}
 		})
 	});
 }
