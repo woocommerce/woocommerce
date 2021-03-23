@@ -132,7 +132,7 @@
 		"typescript": "4.2.2"
 	},
 	"devDependencies": {
-		"@automattic/color-studio": "2.4.0",
+		"@automattic/color-studio": "2.5.0",
 		"@automattic/mini-css-extract-plugin-with-rtl": "0.8.0",
 		"@babel/cli": "7.13.10",
 		"@babel/core": "7.13.10",
