@@ -17,7 +17,7 @@ const {
 } = require( '@jest/globals' );
 
 const filePath = '../../../sample-data/sample_products.csv';
-const filePathOverride = '../../../sample-data/sample_products_override.csv';
+const filePathOverride = '../../../tests/e2e/core-tests/test-data/sample_products_override.csv';
 const productNames = ["V-Neck T-Shirt", "Hoodie", "Hoodie with Logo", "T-Shirt", "Beanie",
 	"Belt", "Cap", "Sunglasses", "Hoodie with Pocket", "Hoodie with Zipper", "Long Sleeve Tee", "Polo", "Album",
 	"Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"];
