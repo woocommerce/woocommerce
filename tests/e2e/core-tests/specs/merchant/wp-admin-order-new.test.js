@@ -16,38 +16,13 @@ const { HTTPClientFactory,
 	ExternalProduct
 } = require('@woocommerce/api');
 
+let variations;
+let products;
+
 const runCreateOrderTest = () => {
 	describe('WooCommerce Orders > Add new order', () => {
 		beforeAll(async () => {
-			await merchant.login();
-		});
-
-		it('can create new order', async () => {
-			// Go to "add order" page
-			await merchant.openNewOrder();
-
-			// Make sure we're on the add order page
-			await expect(page.title()).resolves.toMatch('Add new order');
-
-			// Set order data
-			await expect(page).toSelect('#order_status', 'Processing');
-			await expect(page).toFill('input[name=order_date]', '2018-12-13');
-			await expect(page).toFill('input[name=order_date_hour]', '18');
-			await expect(page).toFill('input[name=order_date_minute]', '55');
-
-			// Create order, verify that it was created. Trash order, verify that it was trashed.
-			await verifyPublishAndTrash(
-				'.order_actions li .save_order',
-				'#message',
-				'Order updated.',
-				'1 order moved to the Trash.'
-			);
-		});
-
-		// todo remove .only
-		it('can create new complex order with multiple product types & tax classes', async () => {
 			// Initialize products for each product type
-			const variations = config.get('products.variations');;
 			const initProducts = async () => {
 				// Initialize HTTP client
 				const apiUrl = config.get('url');
@@ -65,6 +40,7 @@ const runCreateOrderTest = () => {
 				};
 				const initVariableProduct = async () => {
 					const prodProps = config.get('products.variable');
+					variations = config.get('products.variations');;
 					const productRepo = VariableProduct.restRepository(httpClient);
 					const variationRepo = ProductVariation.restRepository(httpClient);
 					const variableProduct = await productRepo.create(prodProps);
@@ -98,7 +74,37 @@ const runCreateOrderTest = () => {
 					externalProduct
 				];
 			};
-			const products = await initProducts();
+			products = await initProducts();
+
+			// Login
+			await merchant.login();
+		});
+
+		it('can create new order', async () => {
+			// Go to "add order" page
+			await merchant.openNewOrder();
+
+			// Make sure we're on the add order page
+			await expect(page.title()).resolves.toMatch('Add new order');
+
+			// Set order data
+			await expect(page).toSelect('#order_status', 'Processing');
+			await expect(page).toFill('input[name=order_date]', '2018-12-13');
+			await expect(page).toFill('input[name=order_date_hour]', '18');
+			await expect(page).toFill('input[name=order_date_minute]', '55');
+
+			// Create order, verify that it was created. Trash order, verify that it was trashed.
+			await verifyPublishAndTrash(
+				'.order_actions li .save_order',
+				'#message',
+				'Order updated.',
+				'1 order moved to the Trash.'
+			);
+		});
+
+		// todo remove .only
+		it('can create new complex order with multiple product types & tax classes', async () => {
+
 
 			// Go to "add order" page
 			await merchant.openNewOrder();
