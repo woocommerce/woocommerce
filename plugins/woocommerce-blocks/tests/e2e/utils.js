@@ -20,7 +20,3 @@ export async function insertBlockDontWaitForInsertClose( searchTerm ) {
 export const closeInserter = async () => {
 	await page.click( '.edit-post-header [aria-label="Add block"]' );
 };
-
-export const conditionalDescribe = ( condition ) => {
-	return condition ? describe : describe.skip;
-};
