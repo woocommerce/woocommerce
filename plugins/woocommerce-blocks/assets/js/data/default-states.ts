@@ -82,6 +82,7 @@ export const defaultCartState: CartState = {
 		updatingSelectedRate: false,
 		applyingCoupon: '',
 		removingCoupon: '',
+		isCartDataStale: false,
 	},
 	errors: [],
 };
