@@ -52,6 +52,54 @@ After you've made your updates, you're ready to commit:
 3. Create your commit. Write a descriptive, but short first line (e.g. "Reports: Reticulate the splines"), and add more details below. If your commit addresses a github issue, reference it by number here (e.g. "This commit fixes issue #123 by reticulating all the splines.")
 4. Push the branch up to your local fork, then create a PR via the GitHub web interface.
 
+## Creating a Pull Request
+
+The pull request template will remind you of some of the details you need to fill out in your pull request, but there are 2 critical pieces of information that may be needed, the changelog and the testing instructions.
+
+### Changelog Entry
+
+For many pull requests a changelog entry is required. You'll need to add an entry under the `== Unreleased ==` heading in `readme.txt` with the format:
+
+`- <Type of change>: <Description of change>. #<PR Number>`
+
+For example:
+
+`- Add: a cool new feature. #1234`
+
+The types we use currently are: "Dev", "Tweak", "Add", "Fix" and "Enhancement"
+
+-   `Dev` is for a code change that doesn't have an obvious user facing benefit. e.g. "Refactor a class to be single responsibility."
+-   `Tweak`. For minor changes to user facing functionality. e.g. "Styling updates to the site footer."
+-   `Add`. This is reserved for new features and functionality. e.g. "A new page for payment settings."
+-   `Fix`. For bugfixes minor and major. e.g. "Fix a crash when the user selected 0 for revenue."
+-   `Enhancement`. This is used interchangeably with `Tweak` at the moment. Use your best discretion to choose.
+
+### Testing Instructions
+
+Every release we do some manual testing of new features, workflows and major bugfixes. For these kind of changes we need to include
+testing instructions. If your pull request requires testing instructions you'll need to add them under the `## Unreleased` heading in
+`TESTING-INSTRUCTIONS.md`. Add a detailed set of testing instructions to test your change.
+
+### When to Add Testing Instructions
+
+**DO** Add testing instructions for:
+
+-   Significant new features and workflows being added.
+-   Major bugs and regressions. (This does not include fatal crashes on main screens though, these are covered by general testing).
+
+**DON'T** Add testing instructions for:
+
+-   Visual issues and changes.
+-   Minor bugs.
+-   Tweaks
+-   Analytics tracking
+
+Please make testing instructions as comprehensive as possible as testers may not have context of how to test some aspects
+of the system.
+
+For example an instruction like: `Enable new navigation` should be `Toggle on the new navigation under WooCommerce->Settings->Advanced->Features`.
+Assume the tester does not have context on how to test the feature except for a basic understanding of Wordpress.
+
 ## PHP Unit tests
 
 ### Setting up PHP unit tests using [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV)
