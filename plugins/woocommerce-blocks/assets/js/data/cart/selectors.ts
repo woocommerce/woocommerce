@@ -60,6 +60,16 @@ export const isApplyingCoupon = ( state: CartState ): boolean => {
 };
 
 /**
+ * Returns true if cart is stale, false if it is not.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} True if the cart data is stale.
+ */
+export const isCartDataStale = ( state: CartState ): boolean => {
+	return state.metaData.isCartDataStale;
+};
+
+/**
  * Retrieves the coupon code currently being applied.
  *
  * @param {CartState} state The current state.

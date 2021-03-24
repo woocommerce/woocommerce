@@ -82,4 +82,35 @@ export async function visitBlockPage( title ) {
 	}
 }
 
+/**
+ * This function will attempt to navigate to a page in the WordPress dashboard
+ *
+ * @param {string} title 	The title of the page/post you want to visit.
+ * @param {string} postType The post type of the entity you want to visit.
+ * @return {Promise<void>}
+ */
+export async function visitPostOfType( title, postType ) {
+	let link = '';
+	// Visit Import Products page.
+	await visitAdminPage( 'edit.php', `post_type=${ postType }` );
+	// If the website has no pages, `#post-search-input` will not render.
+	if ( await page.$( '#post-search-input' ) ) {
+		// search for the page.
+		await page.type( '#post-search-input', title );
+		await page.click( '#search-submit' );
+		await page.waitForNavigation( { waitUntil: 'domcontentloaded' } );
+		const pageLink = await page.$x( `//a[contains(text(), '${ title }')]` );
+		if ( pageLink.length > 0 ) {
+			// clicking the link directly caused racing issues, so I used goto.
+			link = await page.evaluate(
+				( a ) => a.getAttribute( 'href' ),
+				pageLink[ 0 ]
+			);
+		}
+	}
+	if ( link ) {
+		await page.goto( link );
+	} else throw new Error( `Unable to find page with name ${ title }` );
+}
+
 export default visitBlockPage;

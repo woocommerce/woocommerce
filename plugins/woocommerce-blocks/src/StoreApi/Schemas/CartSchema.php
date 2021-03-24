@@ -309,6 +309,12 @@ class CartSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'generated_timestamp'     => [
+				'description' => __( 'The time at which this cart data was prepared', 'woo-gutenberg-products-block' ),
+				'type'        => 'number',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			self::EXTENDING_KEY       => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
@@ -364,6 +370,7 @@ class CartSchema extends AbstractSchema {
 			),
 			'errors'                  => $cart_errors,
 			'payment_requirements'    => $this->extend->get_payment_requirements(),
+			'generated_timestamp'     => time(),
 			self::EXTENDING_KEY       => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}

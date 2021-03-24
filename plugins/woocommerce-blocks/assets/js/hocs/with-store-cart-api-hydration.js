@@ -4,7 +4,12 @@
 import { useRef } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { LAST_CART_UPDATE_TIMESTAMP_KEY } from '../data/cart/constants';
 
 /**
  * Hydrate Cart API data.
@@ -13,13 +18,47 @@ import { useSelect } from '@wordpress/data';
  */
 const useStoreCartApiHydration = () => {
 	const cartData = useRef( getSetting( 'cartData' ) );
+	const { setIsCartDataStale } = useDispatch( CART_STORE_KEY );
 
 	useSelect( ( select, registry ) => {
 		if ( ! cartData.current ) {
 			return;
 		}
+		const { isResolving, hasFinishedResolution, isCartDataStale } = select(
+			CART_STORE_KEY
+		);
 
-		const { isResolving, hasFinishedResolution } = select( CART_STORE_KEY );
+		/**
+		 * This should only execute once. When the code further down the file executes
+		 * then the condition directly below this comment should never evaluate to true
+		 * on subsequent executions. Because of this localStorage.getItem won't be
+		 * called multiple times.
+		 */
+		if (
+			! isCartDataStale() &&
+			! isResolving( 'getCartData' ) &&
+			! hasFinishedResolution( 'getCartData', [] )
+		) {
+			const lastCartUpdateRaw = window.localStorage.getItem(
+				LAST_CART_UPDATE_TIMESTAMP_KEY
+			);
+
+			if ( lastCartUpdateRaw ) {
+				const lastCartUpdate = parseFloat( lastCartUpdateRaw );
+				const cartGeneratedTimestamp = parseFloat(
+					cartData.current.generated_timestamp
+				);
+
+				const needsUpdateFromAPI =
+					! isNaN( cartGeneratedTimestamp ) &&
+					! isNaN( lastCartUpdate ) &&
+					lastCartUpdate > cartGeneratedTimestamp;
+
+				if ( needsUpdateFromAPI ) {
+					setIsCartDataStale();
+				}
+			}
+		}
 		const {
 			receiveCart,
 			receiveError,
@@ -28,6 +67,7 @@ const useStoreCartApiHydration = () => {
 		} = registry.dispatch( CART_STORE_KEY );
 
 		if (
+			! isCartDataStale() &&
 			! isResolving( 'getCartData', [] ) &&
 			! hasFinishedResolution( 'getCartData', [] )
 		) {

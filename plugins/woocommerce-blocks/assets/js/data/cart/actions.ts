@@ -122,6 +122,18 @@ export const itemIsPendingDelete = (
 		cartItemKey,
 		isPendingDelete,
 	} as const );
+/**
+ * Returns an action object to mark the cart data in the store as stale.
+ *
+ * @param   {boolean} [isCartDataStale=true] Flag to mark cart data as stale; true if
+ * 											 lastCartUpdate timestamp is newer than the
+ * 											 one in wcSettings.
+ */
+export const setIsCartDataStale = ( isCartDataStale = true ) =>
+	( {
+		type: types.SET_IS_CART_DATA_STALE,
+		isCartDataStale,
+	} as const );
 
 /**
  * Returns an action object used to track when customer data is being updated
@@ -435,6 +447,7 @@ export type CartAction = ReturnOrGeneratorYieldUnion<
 	| typeof itemIsPendingDelete
 	| typeof updatingCustomerData
 	| typeof shippingRatesBeingSelected
+	| typeof cartDataIsStale
 	| typeof updateCustomerData
 	| typeof removeItemFromCart
 	| typeof changeCartItemQuantity

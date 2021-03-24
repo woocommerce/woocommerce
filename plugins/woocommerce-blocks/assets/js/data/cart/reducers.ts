@@ -149,6 +149,16 @@ const reducer: Reducer< CartState > = (
 					updatingSelectedRate: !! action.isResolving,
 				},
 			};
+			break;
+		case types.SET_IS_CART_DATA_STALE:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					isCartDataStale: action.isCartDataStale,
+				},
+			};
+			break;
 	}
 	return state;
 };
