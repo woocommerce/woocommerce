@@ -80,6 +80,10 @@ const runGroupedProductAPITest = () => {
 		it('can delete a grouped product', async () => {
 			const status = repository.delete( product.id );
 			expect( status ).toBeTruthy();
+			// Delete the simple "child" products.
+			groupedProducts.forEach( ( productId ) => {
+				repository.delete( productId );
+			});
 		});
 	});
 };

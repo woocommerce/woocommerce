@@ -4,6 +4,7 @@ import {
 	SimpleProduct,
 	baseProductURL,
 	buildProductURL,
+	deleteProductURL,
 	CreatesSimpleProducts,
 	DeletesSimpleProducts,
 	ListsSimpleProducts,
@@ -70,6 +71,6 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 		restCreate< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
 		restRead< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
 		restUpdate< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
-		restDelete< SimpleProductRepositoryParams >( buildProductURL, httpClient ),
+		restDelete< SimpleProductRepositoryParams >( deleteProductURL, httpClient ),
 	);
 }
