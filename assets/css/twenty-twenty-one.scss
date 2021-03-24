@@ -1433,6 +1433,11 @@ a.reset_variations {
 }
 
 .woocommerce-cart {
+	table.woocommerce-cart-form__contents {
+		thead, tfoot {
+			text-align: left;
+		}
+	}
 
 	.post-inner {
 		padding-top: 0;
@@ -2123,6 +2128,10 @@ a.reset_variations {
 
 .woocommerce-table--order-details {
 	margin-bottom: 2rem;
+
+	thead, tfoot {
+		text-align: left;
+	}
 }
 
 /**
