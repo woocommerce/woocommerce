@@ -28,6 +28,14 @@ export const baseProductURL = () => '/wc/v3/products/';
 export const buildProductURL = ( id: ModelID ) => baseProductURL() + id;
 
 /**
+ * A common delete product URL builder.
+ *
+ * @param {ModelID} id the id of the product.
+ * @return {string} RESTful Url.
+ */
+export const deleteProductURL = ( id: ModelID ) => buildProductURL( id ) + '?force=true';
+
+/**
  * The base for all product types.
  */
 export abstract class AbstractProduct extends AbstractProductData {
