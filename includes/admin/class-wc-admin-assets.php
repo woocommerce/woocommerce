@@ -145,6 +145,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 					'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
 					'search_categories_nonce'   => wp_create_nonce( 'search-categories' ),
+					'search_pages_nonce'        => wp_create_nonce( 'search-pages' ),
 				)
 			);
 

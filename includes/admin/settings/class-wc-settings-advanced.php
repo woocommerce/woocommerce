@@ -74,9 +74,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						/* Translators: %s Page contents. */
 						'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
 						'id'       => 'woocommerce_cart_page_id',
-						'type'     => 'single_select_page',
+						'type'     => 'single_select_page_with_search',
 						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
+						'class'    => 'wc-page-search',
 						'css'      => 'min-width:300px;',
 						'args'     => array(
 							'exclude' =>
@@ -94,9 +94,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						/* Translators: %s Page contents. */
 						'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
 						'id'       => 'woocommerce_checkout_page_id',
-						'type'     => 'single_select_page',
-						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
+						'type'     => 'single_select_page_with_search',
+						'default'  => wc_get_page_id( 'checkout' ),
+						'class'    => 'wc-page-search',
 						'css'      => 'min-width:300px;',
 						'args'     => array(
 							'exclude' =>
@@ -114,9 +114,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						/* Translators: %s Page contents. */
 						'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) ),
 						'id'       => 'woocommerce_myaccount_page_id',
-						'type'     => 'single_select_page',
+						'type'     => 'single_select_page_with_search',
 						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
+						'class'    => 'wc-page-search',
 						'css'      => 'min-width:300px;',
 						'args'     => array(
 							'exclude' =>
@@ -134,9 +134,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'desc'     => __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
 						'id'       => 'woocommerce_terms_page_id',
 						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
+						'class'    => 'wc-page-search',
 						'css'      => 'min-width:300px;',
-						'type'     => 'single_select_page',
+						'type'     => 'single_select_page_with_search',
 						'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
 						'desc_tip' => true,
 						'autoload' => false,

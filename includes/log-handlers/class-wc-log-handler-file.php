@@ -146,10 +146,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		if ( $file ) {
 			if ( ! file_exists( $file ) ) {
 				$temphandle = @fopen( $file, 'w+' ); // @codingStandardsIgnoreLine.
-				@fclose( $temphandle ); // @codingStandardsIgnoreLine.
+				if ( is_resource( $temphandle ) ) {
+					@fclose( $temphandle ); // @codingStandardsIgnoreLine.
 
-				if ( Constants::is_defined( 'FS_CHMOD_FILE' ) ) {
-					@chmod( $file, FS_CHMOD_FILE ); // @codingStandardsIgnoreLine.
+					if ( Constants::is_defined( 'FS_CHMOD_FILE' ) ) {
+						@chmod( $file, FS_CHMOD_FILE ); // @codingStandardsIgnoreLine.
+					}
 				}
 			}
 

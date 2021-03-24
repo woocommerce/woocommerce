@@ -66,7 +66,7 @@ version: ~> 1.0
 script:
   - npm install jest --global
 # add your initialization script here
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
+  - npx wc-e2e test:e2e
 
 ....
 
