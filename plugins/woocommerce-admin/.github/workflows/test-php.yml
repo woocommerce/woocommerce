@@ -27,11 +27,6 @@ jobs:
                       woocommerce: '4.9.1'
                       phpunit: '6.5.9'
                       composer: '2.0.6'
-                    - php: '7.3'
-                      wordpress: '5.6'
-                      woocommerce: '4.7.0'
-                      phpunit: '6.5.9'
-                      composer: '1.10.19'
         steps:
             - name: Cancel Previous Runs
               uses: styfle/cancel-workflow-action@0.7.0
