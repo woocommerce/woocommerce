@@ -76,7 +76,7 @@ jQuery( function( $ ) {
 			}
 		} );
 
-		return notices;
+		return new_notices;
 	};
 
 	/**
