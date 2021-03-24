@@ -24,6 +24,8 @@ const SUPPORTED_COUNTRIES = [
 	'DK',
 	'SE',
 	'JP',
+	'IE',
+	'NZ',
 ];
 export const isSelectiveBundleInstallSegmentation = ( country ) => {
 	return SUPPORTED_COUNTRIES.includes( getCountryCode( country ) );
