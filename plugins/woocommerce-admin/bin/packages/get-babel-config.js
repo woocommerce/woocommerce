@@ -22,13 +22,16 @@ const overrideOptions = ( target, targetName, options ) => {
 const babelConfigs = {
 	main: Object.assign( {}, babelDefaultConfig, {
 		plugins,
-		presets: map( babelDefaultConfig.presets, ( preset ) =>
-			overrideOptions( preset, '@babel/preset-env', {
-				modules: 'commonjs',
-				corejs: '3',
-				useBuiltIns: 'usage',
-			} )
-		),
+		presets: [
+			[ '@babel/preset-typescript' ],
+			...map( babelDefaultConfig.presets, ( preset ) =>
+				overrideOptions( preset, '@babel/preset-env', {
+					modules: 'commonjs',
+					corejs: '3',
+					useBuiltIns: 'usage',
+				} )
+			),
+		],
 	} ),
 	module: Object.assign( {}, babelDefaultConfig, {
 		plugins: map( plugins, ( plugin ) =>
@@ -36,13 +39,16 @@ const babelConfigs = {
 				useESModules: true,
 			} )
 		),
-		presets: map( babelDefaultConfig.presets, ( preset ) =>
-			overrideOptions( preset, '@babel/preset-env', {
-				modules: false,
-				corejs: '3',
-				useBuiltIns: 'usage',
-			} )
-		),
+		presets: [
+			[ '@babel/preset-typescript' ],
+			...map( babelDefaultConfig.presets, ( preset ) =>
+				overrideOptions( preset, '@babel/preset-env', {
+					modules: false,
+					corejs: '3',
+					useBuiltIns: 'usage',
+				} )
+			),
+		],
 	} ),
 };
 

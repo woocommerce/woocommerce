@@ -27,5 +27,8 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"peerDependencies": {
+		"@wordpress/core-data": "^2.24.2"
 	}
 }

@@ -88,7 +88,11 @@ const webpackConfig = {
 			},
 			{
 				test: /\.(t|j)sx?$/,
-				exclude: /node_modules(\/|\\)(?!(debug))/,
+				exclude: [
+					/node_modules(\/|\\)(?!(debug))/,
+					/build/,
+					/build-module/,
+				],
 				use: {
 					loader: 'babel-loader',
 					options: {

@@ -5,21 +5,13 @@
 /**
  * Internal dependencies
  */
-import reducer from '../reducer';
+import reducer, { defaultState } from '../reducer';
 import TYPES from '../action-types';
-
-const defaultState = {
-	errors: {},
-	profileItems: {},
-	requesting: {},
-	tasksStatus: {},
-};
 
 describe( 'plugins reducer', () => {
 	it( 'should return a default state', () => {
 		const state = reducer( undefined, {} );
 		expect( state ).toEqual( defaultState );
-		expect( state ).not.toBe( defaultState );
 	} );
 
 	it( 'should handle SET_PROFILE_ITEMS', () => {

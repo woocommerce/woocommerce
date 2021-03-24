@@ -2,14 +2,6 @@
  * External dependencies
  */
 import { Component, Suspense, lazy } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { identity } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
-import {
-	ONBOARDING_STORE_NAME,
-	withOnboardingHydration,
-} from '@woocommerce/data';
 import { Spinner } from '@woocommerce/components';
 
 /**
@@ -37,16 +29,4 @@ class Dashboard extends Component {
 	}
 }
 
-const onboardingData = getSetting( 'onboarding', {} );
-
-export default compose(
-	!! onboardingData.tasksStatus
-		? withOnboardingHydration( { tasksStatus: onboardingData.tasksStatus } )
-		: identity,
-	withSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
-		const profileItems = getProfileItems();
-
-		return { profileItems };
-	} )
-)( Dashboard );
+export default Dashboard;

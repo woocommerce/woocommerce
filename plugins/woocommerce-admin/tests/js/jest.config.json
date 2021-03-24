@@ -27,7 +27,7 @@
 		"**/?(*.)test.[jt]s"
 	],
 	"transform": {
-		"^.+\\.[t|j]s?$": "babel-jest"
+		"^.+\\.[jt]sx?$": "babel-jest"
 	},
 	"testPathIgnorePatterns": [
 		"/node_modules/",
