@@ -93,4 +93,43 @@ class WC_REST_Taxes_Controller extends WC_REST_Taxes_V2_Controller {
 
 		return $schema;
 	}
+
+	/**
+	 * Create a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response The response, or an error.
+	 */
+	public function create_item( $request ) {
+		$this->adjust_cities_and_postcodes( $request );
+
+		return parent::create_item( $request );
+	}
+
+	/**
+	 * Update a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response The response, or an error.
+	 */
+	public function update_item( $request ) {
+		$this->adjust_cities_and_postcodes( $request );
+
+		return parent::update_item( $request );
+	}
+
+	/**
+	 * Convert array "cities" and "postcodes" parameters
+	 * into semicolon-separated strings "city" and "postcode".
+	 *
+	 * @param WP_REST_Request $request The request to adjust.
+	 */
+	private function adjust_cities_and_postcodes( &$request ) {
+		if ( isset( $request['cities'] ) ) {
+			$request['city'] = join( ';', $request['cities'] );
+		}
+		if ( isset( $request['postcodes'] ) ) {
+			$request['postcode'] = join( ';', $request['postcodes'] );
+		}
+	}
 }
