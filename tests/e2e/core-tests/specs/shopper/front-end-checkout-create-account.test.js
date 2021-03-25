@@ -6,8 +6,8 @@
 	shopper,
 	merchant,
 	createSimpleProduct,
-    uiUnblocked,
-    setCheckbox,
+	uiUnblocked,
+	setCheckbox,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -28,7 +28,7 @@ const runCheckoutCreateAccountTest = () => {
 			await merchant.login();
 			await createSimpleProduct();
 			await merchant.logout();
-            await shopper.goToShop();
+			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await uiUnblocked();
 			await shopper.goToCheckout();
@@ -44,14 +44,14 @@ const runCheckoutCreateAccountTest = () => {
 
 			// Place an order
 			await shopper.placeOrder();
-            await expect(page).toMatchElement('h1.entry-title', {text: 'Order received'});
+			await expect(page).toMatchElement('h1.entry-title', {text: 'Order received'});
 		});
 
-        it('can verify that the customer has been created', async () => {
-            await merchant.login();
-            await merchant.openAllUsersView();
-            await expect(page).toMatchElement('td.email.column-email > a', {text: 'john.doe@example.com'});
-        });
+		it('can verify that the customer has been created', async () => {
+			await merchant.login();
+			await merchant.openAllUsersView();
+			await expect(page).toMatchElement('td.email.column-email > a', {text: 'john.doe@example.com'});
+		});
 	});
 };
 
