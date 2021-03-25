@@ -236,8 +236,11 @@ export function getPaymentMethods( {
 			plugins: [ MERCADOPAGO_PLUGIN ],
 			container: <MercadoPago />,
 			isConfigured: activePlugins.includes( MERCADOPAGO_PLUGIN ),
-			isEnabled: enabledPaymentGateways.includes( 'mercadopago' ),
-			optionName: 'woocommerce_mercadopago_settings',
+			isEnabled:
+				options[ 'woocommerce_woo-mercado-pago-basic_settings' ] &&
+				options[ 'woocommerce_woo-mercado-pago-basic_settings' ]
+					.enabled === 'yes',
+			optionName: 'woocommerce_woo-mercado-pago-basic_settings',
 		},
 		{
 			key: 'paypal',

@@ -703,7 +703,7 @@ class Onboarding {
 		$options[] = 'woocommerce_task_list_tracked_completed_tasks';
 		$options[] = 'woocommerce_task_list_dismissed_tasks';
 		$options[] = 'woocommerce_allow_tracking';
-		$options[] = 'woocommerce_mercadopago_settings';
+		$options[] = 'woocommerce_woo-mercado-pago-basic_settings';
 		$options[] = 'woocommerce_stripe_settings';
 		$options[] = 'woocommerce-ppcp-settings';
 		$options[] = 'woocommerce_ppcp-gateway_settings';

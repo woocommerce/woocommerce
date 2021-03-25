@@ -167,8 +167,11 @@ describe( 'TaskList > Payments', () => {
 			it( 'Detects whether the plugin is enabled based on the received options', () => {
 				const mercadoPagoParams = {
 					...params,
-					onboardingStatus: {
-						enabledPaymentGateways: [ 'mercadopago' ],
+					options: {
+						...params.options,
+						'woocommerce_woo-mercado-pago-basic_settings': {
+							enabled: 'yes',
+						},
 					},
 				};
 

@@ -139,6 +139,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Payments task: include Mercado Pago #6572
 - Dev: Ensure script asset.php files are included in builds #6635
 - Fix: Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
+- Fix: Update the Mercado option used for enabling/disabling. #6677
 
 == 2.1.3 3/14/2021  ==
 
