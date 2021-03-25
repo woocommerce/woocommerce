@@ -221,6 +221,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$orderby_possibles        = array(
 			'id'       => 'tax_rate_id',
 			'order'    => 'tax_rate_order',
+			'priority' => 'tax_rate_priority',
 		);
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['class']   = $request['class'];
@@ -740,6 +741,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			'enum'              => array(
 				'id',
 				'order',
+				'priority',
 			),
 			'sanitize_callback' => 'sanitize_key',
 			'type'              => 'string',
