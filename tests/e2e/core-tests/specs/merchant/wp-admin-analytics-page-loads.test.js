@@ -41,61 +41,61 @@ const runAnalyticsPageLoadsTest = () => {
 		});
 
 		it('can see Products page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "products" page and verify it
 			await merchant.openAnalyticsPage('products');
 			await checkHeadingAndElement('Products');
 		});
 
 		it('can see Revenue page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "revenue" page and verify it
 			await merchant.openAnalyticsPage('revenue');
 			await checkHeadingAndElement('Revenue');
 		});
 
 		it('can see Orders page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "orders" page and verify it
 			await merchant.openAnalyticsPage('orders');
 			await checkHeadingAndElement('Orders');
 		});
 
 		it('can see Variations page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "variations" page and verify it
 			await merchant.openAnalyticsPage('variations');
 			await checkHeadingAndElement('Variations');
 		});
 
 		it('can see Categories page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "categories" page and verify it
 			await merchant.openAnalyticsPage('categories');
 			await checkHeadingAndElement('Categories');
 		});
 
 		it('can see Coupons page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "coupons" page and verify it
 			await merchant.openAnalyticsPage('coupons');
 			await checkHeadingAndElement('Coupons');
 		});
 
 		it('can see Taxes page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "taxes" page and verify it
 			await merchant.openAnalyticsPage('taxes');
 			await checkHeadingAndElement('Taxes');
 		});
 
 		it('can see Downloads page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "downloads" page and verify it
 			await merchant.openAnalyticsPage('downloads');
 			await checkHeadingAndElement('Downloads');
 		});
 
 		it('can see Stock page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "stock" page and verify it
 			await merchant.openAnalyticsPage('stock');
-			await checkHeadingAndElement('Stock', '.woocommerce-table__empty-item', 'No data to display');
+			await checkHeadingAndElement('Stock', '.components-button > span', 'Product / Variation');
 		});
 
 		it('can see Settings page properly', async () => {
-			// Go to "overview" page and verify it
+			// Go to "settings" page and verify it
 			await merchant.openAnalyticsPage('settings');
 			await checkHeadingAndElement('Settings', 'h2', 'Analytics Settings');
 		});
