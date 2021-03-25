@@ -366,10 +366,10 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			}
 		}
 
-		if ( $id ) {
-			WC_Tax::_update_tax_rate( $id, $data );
-		} else {
+		if ( ! $id ) {
 			$id = WC_Tax::_insert_tax_rate( $data );
+		} elseif ( $data ) {
+			WC_Tax::_update_tax_rate( $id, $data );
 		}
 
 		// Add locales.
