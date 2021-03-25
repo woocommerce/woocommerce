@@ -7,6 +7,7 @@
 	setCheckbox,
 	moveAllItemsToTrash
 } = require( '@woocommerce/e2e-utils' );
+const getCoreTestsRoot = require( '../../core-tests-root' );
 
 /**
  * External dependencies
@@ -16,8 +17,10 @@ const {
 	describe
 } = require( '@jest/globals' );
 
-const filePath = '../../../sample-data/sample_products.csv';
-const filePathOverride = '../../../tests/e2e/core-tests/test-data/sample_products_override.csv';
+const path = require( 'path' );
+const coreTestsPath = getCoreTestsRoot();
+const filePath = path.resolve( coreTestsPath, 'sample-data/sample_products.csv' );
+const filePathOverride = path.resolve( coreTestsPath, 'tests/e2e/core-tests/test-data/sample_products_override.csv' );
 const productNames = ["V-Neck T-Shirt", "Hoodie", "Hoodie with Logo", "T-Shirt", "Beanie",
 	"Belt", "Cap", "Sunglasses", "Hoodie with Pocket", "Hoodie with Zipper", "Long Sleeve Tee", "Polo", "Album",
 	"Single", "T-Shirt with Logo", "Beanie with Logo", "Logo Collection", "WordPress Pennant"];
