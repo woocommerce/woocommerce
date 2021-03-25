@@ -348,6 +348,12 @@ a.button {
 .woocommerce,
 .woocommerce-page {
 
+	&.is-dark-theme {
+		.select2-dropdown {
+			color: var(--global--color-dark-gray);
+		}
+	}
+
 	table.shop_table {
 
 		td,
