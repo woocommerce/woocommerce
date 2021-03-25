@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
-import {createSimpleProduct} from "@woocommerce/e2e-utils";
+const { createSimpleProduct } = require( '@woocommerce/e2e-utils' );
 
 /**
  * Internal dependencies
