@@ -1,5 +1,10 @@
 # Unreleased
 
+# 0.1.3
+
+## Fixed
+
+- removed use of ES6 `import`
 
 # 0.1.2
 
