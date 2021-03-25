@@ -49,10 +49,11 @@ export const Layout = ( {
 	isBatchUpdating,
 	query,
 	requestingTaskList,
-	isTaskListHidden,
+	taskListComplete,
 	bothTaskListsHidden,
 	shouldShowWelcomeModal,
 	shouldShowWelcomeFromCalypsoModal,
+	isTaskListHidden,
 	updateOptions,
 } ) => {
 	const userPrefs = useUserPreferences();
@@ -83,6 +84,7 @@ export const Layout = ( {
 	}, [ maybeToggleColumns ] );
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
+	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 
 	const renderColumns = () => {
 		return (
@@ -102,7 +104,7 @@ export const Layout = ( {
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					<StatsOverview />
-					{ isTaskListHidden && <StoreManagementLinks /> }
+					{ shouldShowStoreLinks && <StoreManagementLinks /> }
 				</Column>
 			</>
 		);
@@ -244,6 +246,10 @@ export default compose(
 				isResolving( 'getOption', [
 					'woocommerce_extended_task_list_hidden',
 				] ),
+			taskListComplete:
+				! isResolving( 'getOption', [
+					'woocommerce_task_list_complete',
+				] ) && getOption( 'woocommerce_task_list_complete' ) === 'yes',
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

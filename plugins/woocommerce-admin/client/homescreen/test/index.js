@@ -9,19 +9,22 @@ import { useUserPreferences } from '@woocommerce/data';
  */
 import { Layout } from '../layout';
 
-// Rendering <StatsOverview /> breaks tests.
 jest.mock( 'homescreen/stats-overview', () =>
-	jest.fn().mockReturnValue( '[StatsOverview]' )
+	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
 );
 
-// We aren't testing the <TaskList /> component here.
-jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
-
-// We aren't testing the <InboxPanel /> component here.
-jest.mock( 'inbox-panel', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
+jest.mock( '../../inbox-panel', () =>
+	jest.fn().mockReturnValue( <div>[InboxPanel]</div> )
+);
 
 jest.mock( '../../store-management-links', () => ( {
-	StoreManagementLinks: jest.fn().mockReturnValue( '[StoreManagementLinks]' ),
+	StoreManagementLinks: jest
+		.fn()
+		.mockReturnValue( <div>[StoreManagementLinks]</div> ),
+} ) );
+
+jest.mock( '../activity-panel', () => ( {
+	ActivityPanel: jest.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
 } ) );
 
 jest.mock( '@woocommerce/data', () => ( {
@@ -29,10 +32,14 @@ jest.mock( '@woocommerce/data', () => ( {
 	useUserPreferences: jest.fn().mockReturnValue( {} ),
 } ) );
 
-// We aren't testing the <ActivityPanel /> component here.
-jest.mock( '../activity-panel', () => ( {
-	ActivityPanel: jest.fn().mockReturnValue( '[ActivityPanel]' ),
-} ) );
+jest.mock( '@wordpress/element', () => {
+	return {
+		...jest.requireActual( '@wordpress/element' ),
+		Suspense: ( { children } ) => <div>{ children }</div>,
+		// It's not easy to mock a React.lazy component, since we only use one in this component, this mocks lazy to return a mocked <TaskList>
+		lazy: () => () => <div>[TaskList]</div>,
+	};
+} );
 
 describe( 'Homescreen Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
@@ -48,13 +55,14 @@ describe( 'Homescreen Layout', () => {
 		const placeholder = container.querySelector(
 			'.woocommerce-task-card.is-loading'
 		);
-		expect( placeholder ).not.toBeNull();
+		expect( placeholder ).toBeInTheDocument();
 	} );
 
 	it( 'should show TaskList inline', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
+				taskListComplete
 				bothTaskListsHidden={ false }
 				query={ {} }
 				updateOptions={ () => {} }
@@ -65,11 +73,11 @@ describe( 'Homescreen Layout', () => {
 		const columns = container.querySelector(
 			'.woocommerce-homescreen-column'
 		);
-		expect( columns ).not.toBeNull();
+		expect( columns ).toBeInTheDocument();
 
 		// Expect that the <TaskList /> is there too.
-		const taskList = screen.queryByText( /\[TaskList\]/ );
-		expect( taskList ).toBeDefined();
+		const taskList = screen.getByText( '[TaskList]' );
+		expect( taskList ).toBeInTheDocument();
 	} );
 
 	it( 'should render TaskList alone when on task', () => {
@@ -88,11 +96,11 @@ describe( 'Homescreen Layout', () => {
 		const columns = container.querySelector(
 			'.woocommerce-homescreen-column'
 		);
-		expect( columns ).toBeNull();
+		expect( columns ).not.toBeInTheDocument();
 
 		// Expect that the <TaskList /> is there though.
 		const taskList = screen.queryByText( '[TaskList]' );
-		expect( taskList ).toBeDefined();
+		expect( taskList ).toBeInTheDocument();
 	} );
 
 	it( 'should not show TaskList when user has hidden', () => {
@@ -106,35 +114,24 @@ describe( 'Homescreen Layout', () => {
 		);
 
 		const taskList = screen.queryByText( '[TaskList]' );
-		expect( taskList ).toBeNull();
+		expect( taskList ).not.toBeInTheDocument();
 	} );
 
-	it( 'should show QuickLinks when user has hidden TaskList', () => {
-		render(
-			<Layout
-				requestingTaskList={ false }
-				bothTaskListsHidden
-				query={ {} }
-				updateOptions={ () => {} }
-			/>
-		);
-
-		const quickLinks = screen.queryByText( '[QuickLinks]' );
-		expect( quickLinks ).toBeDefined();
-	} );
-
-	it( 'should show QuickLinks when TaskList is complete', () => {
+	it( 'should show StoreManagementLinks when TaskList is complete, even if the task list is not hidden', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
 				bothTaskListsHidden={ false }
+				taskListComplete
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
 		);
 
-		const quickLinks = screen.queryByText( '[QuickLinks]' );
-		expect( quickLinks ).toBeDefined();
+		const storeManagementLinks = screen.queryByText(
+			'[StoreManagementLinks]'
+		);
+		expect( storeManagementLinks ).toBeInTheDocument();
 	} );
 
 	it( 'should default to layout option value', () => {
@@ -212,6 +209,7 @@ describe( 'Homescreen Layout', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
+				taskListComplete
 				bothTaskListsHidden={ false }
 				query={ {} }
 				updateOptions={ () => {} }
@@ -226,24 +224,24 @@ describe( 'Homescreen Layout', () => {
 		const secondColumn = columns[ 1 ];
 
 		expect(
-			within( firstColumn ).getByText( /\[TaskList\]/ )
+			within( firstColumn ).getByText( '[TaskList]' )
 		).toBeInTheDocument();
 		expect(
-			within( firstColumn ).getByText( /\[InboxPanel\]/ )
+			within( firstColumn ).getByText( '[InboxPanel]' )
 		).toBeInTheDocument();
 		expect(
-			within( secondColumn ).queryByText( /\[TaskList\]/ )
-		).toBeNull();
+			within( secondColumn ).queryByText( '[TaskList]' )
+		).not.toBeInTheDocument();
 		expect(
-			within( secondColumn ).queryByText( /\[InboxPanel\]/ )
-		).toBeNull();
+			within( secondColumn ).queryByText( '[InboxPanel]' )
+		).not.toBeInTheDocument();
 
 		expect(
-			within( secondColumn ).getByText( /\[StatsOverview\]/ )
+			within( secondColumn ).getByText( '[StatsOverview]' )
 		).toBeInTheDocument();
 		expect(
-			within( firstColumn ).queryByText( /\[StatsOverview\]/ )
-		).toBeNull();
+			within( firstColumn ).queryByText( '[StatsOverview]' )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'should display the correct blocks in each column when task list is hidden', () => {
@@ -253,6 +251,7 @@ describe( 'Homescreen Layout', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
+				taskListComplete
 				bothTaskListsHidden={ false }
 				isTaskListHidden={ true }
 				query={ {} }
@@ -268,26 +267,26 @@ describe( 'Homescreen Layout', () => {
 		const secondColumn = columns[ 1 ];
 
 		expect(
-			within( firstColumn ).getByText( /\[TaskList\]/ )
+			within( firstColumn ).getByText( '[TaskList]' )
 		).toBeInTheDocument();
 		expect(
-			within( firstColumn ).getByText( /\[InboxPanel\]/ )
+			within( firstColumn ).getByText( '[InboxPanel]' )
 		).toBeInTheDocument();
 		expect(
-			within( secondColumn ).queryByText( /\[TaskList\]/ )
-		).toBeNull();
+			within( secondColumn ).queryByText( '[TaskList]' )
+		).not.toBeInTheDocument();
 		expect(
-			within( secondColumn ).queryByText( /\[InboxPanel\]/ )
-		).toBeNull();
+			within( secondColumn ).queryByText( '[InboxPanel]' )
+		).not.toBeInTheDocument();
 
 		expect(
-			within( secondColumn ).getByText( /\[StatsOverview\]/ )
+			within( secondColumn ).getByText( '[StatsOverview]' )
 		).toBeInTheDocument();
 		expect(
-			within( secondColumn ).getByText( /\[StoreManagementLinks\]/ )
+			within( secondColumn ).getByText( '[StoreManagementLinks]' )
 		).toBeInTheDocument();
 		expect(
-			within( firstColumn ).queryByText( /\[StatsOverview\]/ )
-		).toBeNull();
+			within( firstColumn ).queryByText( '[StatsOverview]' )
+		).not.toBeInTheDocument();
 	} );
 } );

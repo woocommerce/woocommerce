@@ -138,6 +138,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Paystack payment provider to several african countries. #6579
 - Dev: Payments task: include Mercado Pago #6572
 - Dev: Ensure script asset.php files are included in builds #6635
+- Fix: Show management links when the task list is complete (even if its not hidden). #6657
 - Fix: Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
 - Fix: Update the Mercado option used for enabling/disabling. #6677
 
