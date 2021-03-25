@@ -53,6 +53,7 @@ describe( 'Cart page', () => {
 | `runSetupWizard` | | Open the onboarding profiler |
 | `updateOrderStatus` | `orderId, status` | Update the status of an order |
 | `openEmailLog` | | Open the WP Mail Log page |
+| `openAllUsersView` | | Open the All Users page |
 
 ### Shopper `shopper`
 

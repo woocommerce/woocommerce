@@ -23,6 +23,7 @@
 - Shopper Cart Apply Coupon
 - Shopper Variable product info updates on different variations
 - Merchant order emails flow
+- Shopper Checkout Create Account
 
 - Shopper My Account Pay Order
 
