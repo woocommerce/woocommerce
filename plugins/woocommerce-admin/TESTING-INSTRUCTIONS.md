@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.2.0
+
 ### Payments task: include Mercado Pago #6572
 
 - Create a brand new store.
