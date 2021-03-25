@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == 2.2.0 3/26/2021 ==
 
+- Fix: Fix the activity panel toggle not closing on click #6679
 - Tweak: Add default value for contains op #6622
 - Dev: Close activity panel tabs by default and track #6566
 - Dev: Update undefined task name properties for help panel tracks #6565

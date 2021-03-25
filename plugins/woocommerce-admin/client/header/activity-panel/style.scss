@@ -192,7 +192,7 @@
 }
 
 .woocommerce-layout__activity-panel-wrapper {
-	height: calc(100vh - #{$header-height + $header-height + $adminbar-height-mobile});
+	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
 	background: $gray-100;
 	width: 510px;
 	@include breakpoint( '<782px' ) {

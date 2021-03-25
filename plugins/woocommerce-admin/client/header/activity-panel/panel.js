@@ -20,20 +20,17 @@ export const Panel = ( {
 	closePanel,
 	clearPanel,
 } ) => {
+	const panelClass = 'woocommerce-layout__activity-panel-wrapper';
+
 	const handleFocusOutside = ( event ) => {
 		const isClickOnModalOrSnackbar =
-			event.target.closest(
-				'.woocommerce-inbox-dismiss-confirmation_modal'
-			) || event.target.closest( '.components-snackbar__action' );
-
-		const isToggling =
 			event.relatedTarget &&
-			event.relatedTarget.classList.contains(
-				'woocommerce-layout__activity-panel-tab'
-			) &&
-			event.relatedTarget.classList.contains( 'is-active' );
+			( event.relatedTarget.closest(
+				'.woocommerce-inbox-dismiss-confirmation_modal'
+			) ||
+				event.relatedTarget.closest( '.components-snackbar__action' ) );
 
-		if ( isPanelOpen && ! isClickOnModalOrSnackbar && ! isToggling ) {
+		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
 			closePanel();
 		}
 	};
@@ -63,20 +60,17 @@ export const Panel = ( {
 	}, [] );
 
 	if ( ! tab ) {
-		return <div className="woocommerce-layout__activity-panel-wrapper" />;
+		return <div className={ panelClass } />;
 	}
 
 	if ( ! content ) {
 		return null;
 	}
 
-	const classNames = classnames(
-		'woocommerce-layout__activity-panel-wrapper',
-		{
-			'is-open': isPanelOpen,
-			'is-switching': isPanelSwitching,
-		}
-	);
+	const classNames = classnames( panelClass, {
+		'is-open': isPanelOpen,
+		'is-switching': isPanelSwitching,
+	} );
 
 	return (
 		<div
