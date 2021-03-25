@@ -57,4 +57,71 @@ class WC_Tests_RemoteInboxNotifications_OptionRuleProcessor extends WC_Unit_Test
 
 		$this->assertEquals( true, $result );
 	}
+
+	/**
+	 * Test contains of array
+	 *
+	 * @group fast
+	 */
+	public function test_rule_passes_for_contains() {
+		add_option( 'contain_item', array( 'test' ) );
+		$processor = new OptionRuleProcessor();
+		$rule      = json_decode(
+			'
+			{
+				"type": "option",
+				"option_name": "contain_item",
+				"value": "test",
+				"default": [],
+				"operation": "contains"
+			}
+			'
+		);
+
+		$result = $processor->process( $rule, null );
+		$this->assertEquals( true, $result );
+
+		$rule->value = 'not_included';
+		$result      = $processor->process( $rule, null );
+		$this->assertEquals( false, $result );
+		delete_option( 'contain_item' );
+	}
+
+	/**
+	 * Test not contains of value that is not an array
+	 *
+	 * @group fast
+	 */
+	public function test_rule_contains_with_no_array_value() {
+		add_option( 'contain_item', false );
+		$processor = new OptionRuleProcessor();
+		$rule      = json_decode(
+			'
+			{
+				"type": "option",
+				"option_name": "contain_item",
+				"value": "test",
+				"default": [],
+				"operation": "contains"
+			}
+			'
+		);
+
+		$result = $processor->process( $rule, null );
+		$this->assertEquals( false, $result );
+
+		$rule->operation = '!contains';
+		$result          = $processor->process( $rule, null );
+		$this->assertEquals( true, $result );
+
+		update_option( 'contain_item', 'random_string' );
+		$rule->operation = 'contains';
+		$result          = $processor->process( $rule, null );
+		$this->assertEquals( false, $result );
+
+		$rule->operation = '!contains';
+		$result          = $processor->process( $rule, null );
+		$this->assertEquals( true, $result );
+		delete_option( 'contain_item' );
+	}
 }

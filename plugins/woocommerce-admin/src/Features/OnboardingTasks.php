@@ -281,7 +281,7 @@ class OnboardingTasks {
 	 */
 	public static function add_onboarding_homepage_notice_admin_script( $hook ) {
 		global $post;
-		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.		
+		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.
 			$script_assets = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/onboarding-homepage-notice.min.asset.php';
 
 			wp_enqueue_script(
@@ -439,6 +439,7 @@ class OnboardingTasks {
 	 */
 	public static function track_task_completion( $old_value, $new_value ) {
 		$old_value       = is_array( $old_value ) ? $old_value : array();
+		$new_value       = is_array( $new_value ) ? $new_value : array();
 		$untracked_tasks = array_diff( $new_value, $old_value );
 
 		foreach ( $untracked_tasks as $task ) {

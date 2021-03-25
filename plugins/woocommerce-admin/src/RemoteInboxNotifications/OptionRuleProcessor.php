@@ -20,9 +20,26 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$default_value = 'contains' === $rule->operation ? array() : false;
+		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
+		$default_value = $is_contains ? array() : false;
 		$default       = isset( $rule->default ) ? $rule->default : $default_value;
 		$option_value  = get_option( $rule->option_name, $default );
+
+		if ( $is_contains && ! is_array( $option_value ) ) {
+			$logger = wc_get_logger();
+			$logger->warning(
+				sprintf(
+					'ComparisonOperation "%s" option value "%s" is not an array, defaulting to empty array.',
+					$rule->operation,
+					$rule->option_name
+				),
+				array(
+					'option_value' => $option_value,
+					'rule'         => $rule,
+				)
+			);
+			$option_value = array();
+		}
 
 		return ComparisonOperation::compare(
 			$option_value,
