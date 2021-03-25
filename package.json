@@ -96,7 +96,7 @@
     "wp-textdomain": "1.0.1"
   },
   "engines": {
-    "node": "^10.22.0",
+    "node": "^14.0.0",
     "npm": "^6.14.6"
   },
   "husky": {
