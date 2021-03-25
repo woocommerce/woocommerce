@@ -8,6 +8,7 @@
 	createSimpleProduct,
 	uiUnblocked,
 	setCheckbox,
+    settingsPageSaveChanges,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -27,6 +28,9 @@ const runCheckoutCreateAccountTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
+            await merchant.openSettings('account');
+            await setCheckbox('#woocommerce_enable_signup_and_login_from_checkout');
+            await settingsPageSaveChanges();
 			await merchant.logout();
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
