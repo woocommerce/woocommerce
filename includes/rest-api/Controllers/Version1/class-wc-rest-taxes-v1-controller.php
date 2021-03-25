@@ -233,26 +233,35 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_tax_query', $prepared_args, $request );
 
-		$query = "
+		$orderby = sanitize_key( $prepared_args['orderby'] ) . ' ' . sanitize_key( $prepared_args['order'] );
+		$query   = "
 			SELECT *
 			FROM {$wpdb->prefix}woocommerce_tax_rates
-			WHERE 1 = 1
+			%s
+			ORDER BY {$orderby}
+			LIMIT %%d, %%d
 		";
 
 		// Filter by tax class.
-		if ( ! empty( $prepared_args['class'] ) ) {
+		if ( empty( $prepared_args['class'] ) ) {
+			$class = null;
+			$query = sprintf( $query, '' );
+		} else {
 			$class = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
-			$query .= " AND tax_rate_class = '$class'";
+			$query = sprintf( $query, 'WHERE tax_rate_class = %s' );
 		}
 
-		// Order tax rates.
-		$order_by = sprintf( ' ORDER BY %s', sanitize_key( $prepared_args['orderby'] ) );
-
-		// Pagination.
-		$pagination = sprintf( ' LIMIT %d, %d', $prepared_args['offset'], $prepared_args['number'] );
-
 		// Query taxes.
-		$results = $wpdb->get_results( $query . $order_by . $pagination );
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				$query,
+				$prepared_args['offset'],
+				$prepared_args['number'],
+				$class
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$taxes = array();
 		foreach ( $results as $tax ) {
@@ -267,7 +276,17 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
 		// Query only for ids.
-		$wpdb->get_results( str_replace( 'SELECT *', 'SELECT tax_rate_id', $query ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$query = str_replace( 'SELECT *', 'SELECT tax_rate_id', $query );
+		$wpdb->get_results(
+			$wpdb->prepare(
+				$query,
+				$prepared_args['offset'],
+				$prepared_args['number'],
+				$class
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		// Calculate totals.
 		$total_taxes = (int) $wpdb->num_rows;
