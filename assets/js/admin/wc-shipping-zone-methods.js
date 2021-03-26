@@ -62,6 +62,7 @@
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
 							shippingMethod.trigger( 'saved:methods' );
+							window.onbeforeunload = null;
 						} else {
 							window.alert( data.strings.save_failed );
 						}
