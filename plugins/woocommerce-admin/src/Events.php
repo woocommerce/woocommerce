@@ -49,6 +49,7 @@ use \Automattic\WooCommerce\Admin\Notes\FilterByProductVariationsInReports;
 use \Automattic\WooCommerce\Admin\Notes\AddFirstProduct;
 use \Automattic\WooCommerce\Admin\Notes\DrawAttention;
 use \Automattic\WooCommerce\Admin\Notes\GettingStartedInEcommerceWebinar;
+use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
 
 /**
  * Events Class.
@@ -146,6 +147,7 @@ class Events {
 		CustomizingProductCatalog::possibly_add_note();
 		GettingStartedInEcommerceWebinar::possibly_add_note();
 		FirstDownlaodableProduct::possibly_add_note();
+		NavigationNudge::possibly_add_note();
 	}
 
 	/**

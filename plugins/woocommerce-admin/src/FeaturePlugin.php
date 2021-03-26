@@ -22,6 +22,7 @@ use \Automattic\WooCommerce\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
+use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
 
 /**
  * Feature plugin main class.
@@ -195,6 +196,7 @@ class FeaturePlugin {
 		new LearnMoreAboutVariableProducts();
 		new WelcomeToWooCommerceForStoreUsers();
 		new ManageStoreActivityFromHomeScreen();
+		new NavigationNudge();
 
 		// Initialize RemoteInboxNotificationsEngine.
 		RemoteInboxNotificationsEngine::init();

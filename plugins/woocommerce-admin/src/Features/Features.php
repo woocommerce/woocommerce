@@ -137,6 +137,23 @@ class Features {
 	}
 
 	/**
+	 * Enable a toggleable beta feature.
+	 *
+	 * @param string $feature Feature name.
+	 * @return bool
+	 */
+	public static function enable( $feature ) {
+		$features = self::get_beta_feature_options();
+
+		if ( isset( $features[ $feature ] ) ) {
+			update_option( $features[ $feature ], 'yes' );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Disable a toggleable beta feature.
 	 *
 	 * @param string $feature Feature name.

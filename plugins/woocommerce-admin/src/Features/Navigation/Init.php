@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\Survey;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
@@ -28,11 +29,10 @@ class Init {
 	public function __construct() {
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
-		add_filter( 'woocommerce_admin_features', array( $this, 'maybe_remove_nav_feature' ), 0 );
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
 
-		if ( Loader::is_feature_enabled( 'navigation' ) ) {
+		if ( Features::is_enabled( 'navigation' ) ) {
 			Menu::instance()->init();
 			CoreMenu::instance()->init();
 			Screen::instance()->init();
@@ -99,27 +99,6 @@ class Init {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Overwrites the allowed features array using a local `feature-config.php` file.
-	 *
-	 * @param array $features Array of feature slugs.
-	 */
-	public function maybe_remove_nav_feature( $features ) {
-		$has_feature_enabled = in_array( 'navigation', $features, true );
-		$has_option_disabled = 'yes' !== get_option( self::TOGGLE_OPTION_NAME, 'no' );
-		$is_not_compatible   = ! self::is_nav_compatible();
-
-		/* phpcs:disable WordPress.Security.NonceVerification */
-		if ( $has_option_disabled && isset( $_POST['woocommerce_navigation_enabled'] ) && '1' === $_POST['woocommerce_navigation_enabled'] ) {
-			$has_option_disabled = false;
-		}
-
-		if ( ( $has_feature_enabled && $has_option_disabled ) || $is_not_compatible ) {
-			$features = array_diff( $features, array( 'navigation' ) );
-		}
-		return $features;
 	}
 
 	/**
