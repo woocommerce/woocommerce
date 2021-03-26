@@ -35,3 +35,9 @@ Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information how you can do this.
+
+<p align="center">
+    <br/><br/>
+    Made with 💜 by <a href="https://woocommerce.com/">WooCommerce</a>.<br/>
+    <a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!
+</p>
