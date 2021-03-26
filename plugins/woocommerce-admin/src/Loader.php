@@ -244,6 +244,18 @@ class Loader {
 	}
 
 	/**
+	 * Gets a script asset filename
+	 *
+	 * @param  string $file File name (without extension).
+	 * @return string complete asset filename.
+	 */
+	public static function get_script_asset_filename( $file ) {
+		$minification_suffix = Features::exists( 'minified-js' ) ? '.min' : '';
+
+		return $file . $minification_suffix . '.asset.php';
+	}
+
+	/**
 	 * Gets the file modified time as a cache buster if we're in dev mode, or the plugin version otherwise.
 	 *
 	 * @param string $ext File extension.
@@ -355,8 +367,9 @@ class Loader {
 		);
 
 		foreach ( $scripts as $script ) {
-			$script_path_name = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
-			$script_assets    = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/index.min.asset.php';
+			$script_path_name       = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
+			$script_assets_filename = self::get_script_asset_filename( 'index' );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
 			wp_register_script(
 				$script,
