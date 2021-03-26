@@ -83,6 +83,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Next new novel navigation nudge note #6610
 - Fix: Fix the activity panel toggle not closing on click #6679
 - Tweak: Add default value for contains op #6622
+- Fix: Fix use of feature checks and remove deprecated method calls #6687
 - Dev: Close activity panel tabs by default and track #6566
 - Dev: Update undefined task name properties for help panel tracks #6565
 - Fix: Allow the manager role to query certain options #6577

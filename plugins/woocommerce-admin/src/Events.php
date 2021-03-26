@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\Features\Features;
 use \Automattic\WooCommerce\Admin\Notes\AddingAndManangingProducts;
 use \Automattic\WooCommerce\Admin\Notes\ChooseNiche;
 use \Automattic\WooCommerce\Admin\Notes\ChoosingTheme;
@@ -32,7 +33,6 @@ use \Automattic\WooCommerce\Admin\Notes\RealTimeOrderAlerts;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmailNotifications;
-use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\InsightFirstSale;
 use \Automattic\WooCommerce\Admin\Notes\NeedSomeInspiration;
 use \Automattic\WooCommerce\Admin\Notes\OnlineClothingStore;
@@ -157,7 +157,7 @@ class Events {
 	 */
 	protected function is_remote_inbox_notifications_enabled() {
 		// Check if the feature flag is disabled.
-		if ( ! Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
+		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
 			return false;
 		}
 

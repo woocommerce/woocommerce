@@ -202,10 +202,10 @@ class Loader {
 	 * @param  string $feature Feature slug.
 	 * @return bool Returns true if the feature is enabled.
 	 *
-	 * @deprecated since 1.9.0, use Features::exists( $feature )
+	 * @deprecated since 1.9.0, use Features::is_enabled( $feature )
 	 */
 	public static function is_feature_enabled( $feature ) {
-		return Features::exists( $feature );
+		return Features::is_enabled( $feature );
 	}
 
 	/**

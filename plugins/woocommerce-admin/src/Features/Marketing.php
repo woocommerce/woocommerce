@@ -6,6 +6,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
@@ -69,7 +70,7 @@ class Marketing {
 	 * Uses priority of 9 so other items can easily be added at the default priority (10).
 	 */
 	public function add_parent_menu_item() {
-		if ( ! Loader::is_feature_enabled( 'navigation' ) ) {
+		if ( ! Features::is_enabled( 'navigation' ) ) {
 			add_menu_page(
 				__( 'Marketing', 'woocommerce-admin' ),
 				__( 'Marketing', 'woocommerce-admin' ),

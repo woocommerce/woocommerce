@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Notes;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Survey;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,7 +30,7 @@ class NavigationFeedback {
 	 * @return Note
 	 */
 	public static function get_note() {
-		if ( ! Loader::is_feature_enabled( 'navigation' ) ) {
+		if ( ! Features::is_enabled( 'navigation' ) ) {
 			return;
 		}
 

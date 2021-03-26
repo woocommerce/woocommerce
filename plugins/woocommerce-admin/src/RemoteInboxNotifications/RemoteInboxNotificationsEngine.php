@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Admin\Features\Features;
 use \Automattic\WooCommerce\Admin\Features\Onboarding;
 
 /**
@@ -67,7 +67,7 @@ class RemoteInboxNotificationsEngine {
 	 * condition and thus doesn't return any results.
 	 */
 	public static function on_admin_init() {
-		if ( ! Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
+		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
 			return;
 		}
 
