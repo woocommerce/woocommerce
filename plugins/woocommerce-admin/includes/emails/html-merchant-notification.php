@@ -15,7 +15,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 
 <?php if ( isset( $email_image ) ) { ?>
 <div>
-	<img src="<?php echo esc_url( $email_image ); ?>" style="display: block; margin-bottom: 24px; width: 90px;"/>
+	<img src="<?php echo esc_url( $email_image ); ?>" style="display: block; margin-bottom: 24px; width: 180px;"/>
 </div>
 <?php } ?>
 
@@ -48,7 +48,7 @@ $buttons_styles   = "
 	background: {$base_color};
 	border: 1px solid {$base_color};
 	border-radius: 3px;
-	padding: 5px;";
+	padding: 6px 15px;";
 ?>
 <div style="<?php echo esc_attr( $container_styles ); ?>">
 <?php foreach ( $email_actions as $an_action ) : ?>

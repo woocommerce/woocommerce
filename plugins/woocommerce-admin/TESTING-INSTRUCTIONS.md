@@ -485,7 +485,23 @@ Scenario #2
 8. Click on the **Choose payment methods** task, it should not be displaying the **Woocommerce Payments** option.
 9. Go to **Plugins > installed Plugins**, check if the selected plugin features selected in step 4 are installed and activated.
 
+### Improve AddFirstProduct email note contents #6617
 
+- Install the plugin in a fresh site.
+- Make sure the store has 0 products and 0 orders.
+- Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
+
+```
+UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
+```
+
+- Make sure the `woocommerce_merchant_email_notifications` option is set to `yes`:
+```
+UPDATE `wp_options` SET `option_value` = 'yes' WHERE `wp_options`.`option_name` = 'woocommerce_merchant_email_notifications';
+```
+
+- Run the `wc_admin_daily ` cron job (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+- You should have received an email like the image above.
 ## 2.1.2
 
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532

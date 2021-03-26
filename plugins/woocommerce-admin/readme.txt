@@ -146,6 +146,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Show management links when the task list is complete (even if its not hidden). #6657
 - Fix: Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
 - Fix: Update the Mercado option used for enabling/disabling. #6677
+- Fix: Improve AddFirstProduct email note contents. #6617
 
 == 2.1.3 3/14/2021  ==
 
