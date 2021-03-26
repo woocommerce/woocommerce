@@ -1221,7 +1221,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					$stock_quantity         = $product_data->get_stock_quantity();
 					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
 
-					$message = printf(
+					$message = sprintf(
 						'<a href="%s" class="button wc-forward">%s</a> %s',
 						wc_get_cart_url(),
 						__( 'View cart', 'woocommerce' ),
