@@ -1,5 +1,5 @@
 import { SimpleProduct } from '@woocommerce/api';
-import faker from 'faker/locale/en';
+const faker = require( 'faker/locale/en' );
 import { Factory } from 'fishery';
 
 /**
