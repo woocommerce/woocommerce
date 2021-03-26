@@ -130,7 +130,14 @@ class Features {
 		$features = self::get_beta_feature_options();
 
 		if ( isset( $features[ $feature ] ) ) {
-			return 'yes' === get_option( $features[ $feature ], 'no' );
+			$feature_option = $features[ $feature ];
+			// Check if the feature is currently being enabled.
+			/* phpcs:disable WordPress.Security.NonceVerification */
+			if ( isset( $_POST[ $feature_option ] ) && '1' === $_POST[ $feature_option ] ) {
+				return true;
+			}
+
+			return 'yes' === get_option( $feature_option, 'no' );
 		}
 
 		return true;

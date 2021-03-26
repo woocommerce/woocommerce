@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == 2.2.0 3/26/2021 ==
 
+- Fix: Check if features are currently being enabled #6688
 - Add: Next new novel navigation nudge note #6610
 - Fix: Fix the activity panel toggle not closing on click #6679
 - Tweak: Add default value for contains op #6622
