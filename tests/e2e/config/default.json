@@ -12,13 +12,10 @@
   },
   "products": {
     "simple": {
-      "name": "Simple product",
-      "regularPrice": "100.00",
-      "taxClass": "Standard"
+      "name": "Simple product"
     },
     "variable": {
       "name": "Variable Product with Three Attributes",
-      "taxClass": "Reduced rate",
       "defaultAttributes": [
         {
           "id": 0,
@@ -37,7 +34,11 @@
           "name": "Colour",
           "isVisibleOnProductPage": true,
           "isForVariations": true,
-          "options": ["Red", "Green", "Blue"],
+          "options": [
+            "Red",
+            "Green",
+            "Blue"
+          ],
           "sortOrder": 0
         },
         {
@@ -45,7 +46,11 @@
           "name": "Size",
           "isVisibleOnProductPage": true,
           "isForVariations": true,
-          "options": ["Small", "Medium", "Large"],
+          "options": [
+            "Small",
+            "Medium",
+            "Large"
+          ],
           "sortOrder": 0
         },
         {
@@ -53,7 +58,10 @@
           "name": "Logo",
           "isVisibleOnProductPage": true,
           "isForVariations": true,
-          "options": ["Woo", "WordPress"],
+          "options": [
+            "Woo",
+            "WordPress"
+          ],
           "sortOrder": 0
         }
       ]
@@ -104,25 +112,21 @@
       "groupedProducts": [
         {
           "name": "Base Unit",
-          "regularPrice": "29.99",
-          "taxClass": "Standard"
+          "regularPrice": "29.99"
         },
         {
           "name": "Add-on A",
-          "regularPrice": "11.95",
-          "taxClass": "Reduced rate"
+          "regularPrice": "11.95"
         },
         {
           "name": "Add-on B",
-          "regularPrice": "18.97",
-          "taxClass": "Zero rate"
+          "regularPrice": "18.97"
         }
       ]
     },
     "external": {
       "name": "External product",
       "regularPrice": "24.99",
-      "taxClass": "Zero rate",
       "buttonText": "Buy now",
       "externalUrl": "https://wordpress.org/plugins/woocommerce"
     }
