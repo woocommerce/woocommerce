@@ -243,6 +243,25 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
+	 * Indicates if the customer has a non-empty shipping address.
+	 *
+	 * Note that this does not indicate if the customer's shipping address
+	 * is complete, only that one or more fields are populated.
+	 *
+	 * @return bool
+	 */
+	public function has_shipping_address() {
+		foreach ( $this->get_shipping() as $address_field ) {
+			// Trim guards against a case where a subset of saved shipping address fields contain whitespace.
+			if ( strlen( trim( $address_field ) ) > 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get if customer is VAT exempt?
 	 *
 	 * @since 3.0.0
