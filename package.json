@@ -22,7 +22,8 @@
 	"devDependencies": {
 		"@woocommerce/dependency-extraction-webpack-plugin": "1.4.0",
 		"@woocommerce/eslint-plugin": "1.1.0",
-		"@wordpress/scripts": "^13.0.3"
+		"@wordpress/scripts": "^13.0.3",
+		"prop-types": "^15.7.2"
 	},
 	"dependencies": {
 		"@woocommerce/data": "^1.1.1",

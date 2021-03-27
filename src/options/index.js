@@ -3,11 +3,14 @@
  */
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { Modal, Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORE_KEY } from './data/constants';
+import { default as OptionEditor } from './OptionEditor';
 import './data';
 
 function Options( {
@@ -16,29 +19,50 @@ function Options( {
 	deleteOptionById,
 	isLoading,
 	invalidateResolution,
+	getOptionForEditing,
+	editingOption,
+	saveOption,
+	notice,
+	setNotice,
 } ) {
-	const deleteOption = function ( optionId ) {
+	const [ isEditModalOpen, setEditModalOpen ] = useState( false );
+
+	const deleteOption = ( optionId ) => {
 		// eslint-disable-next-line no-alert
 		if ( confirm( 'Are you sure you want to delete?' ) ) {
 			deleteOptionById( optionId );
 		}
 	};
 
-	const renderLoading = function () {
+	const openEditModal = ( optionName ) => {
+		invalidateResolution( STORE_KEY, 'getOptionForEditing', [
+			optionName,
+		] );
+
+		getOptionForEditing( optionName );
+		setEditModalOpen( true );
+	};
+
+	const handleSaveOption = ( optionName, newValue ) => {
+		saveOption( optionName, newValue );
+		setEditModalOpen( false );
+	};
+
+	const renderLoading = () => {
 		return (
 			<tr>
-				<td colSpan="4" align="center">
+				<td colSpan="5" align="center">
 					Loading...
 				</td>
 			</tr>
 		);
 	};
 
-	const renderTableData = function () {
+	const renderTableData = () => {
 		if ( options.length === 0 ) {
 			return (
 				<tr>
-					<td colSpan="4" align="center">
+					<td colSpan="5" align="center">
 						No Options Found
 					</td>
 				</tr>
@@ -58,8 +82,10 @@ function Options( {
 				<tr key={ optionId }>
 					<td key={ 0 }>{ optionId }</td>
 					<td key={ 1 }>{ optionName }</td>
-					<td key={ 2 }>{ autoload }</td>
-					<td key={ 3 }>
+					<td className="align-center" key={ 2 }>
+						{ autoload }
+					</td>
+					<td className="align-center" key={ 3 }>
 						<button
 							className="button btn-danger"
 							onClick={ () => deleteOption( optionId ) }
@@ -67,12 +93,20 @@ function Options( {
 							Delete
 						</button>
 					</td>
+					<td className="align-center" key={ 4 }>
+						<button
+							className="button btn-primary"
+							onClick={ () => openEditModal( optionName ) }
+						>
+							Edit
+						</button>
+					</td>
 				</tr>
 			);
 		} );
 	};
 
-	const searchOption = function ( event ) {
+	const searchOption = ( event ) => {
 		event.preventDefault();
 		const keyword = event.target.search.value;
 
@@ -84,61 +118,125 @@ function Options( {
 	};
 
 	return (
-		<div id="wc-admin-test-helper-options">
-			<form onSubmit={ searchOption }>
-				<div className="search-box">
-					<label
-						className="screen-reader-text"
-						htmlFor="post-search-input"
+		<>
+			{ isEditModalOpen && (
+				<Modal
+					title={ editingOption.name }
+					onRequestClose={ () => {
+						setEditModalOpen( false );
+					} }
+				>
+					<OptionEditor
+						option={ editingOption }
+						onSave={ handleSaveOption }
+					></OptionEditor>
+				</Modal>
+			) }
+			<div id="wc-admin-test-helper-options">
+				{ notice.message.length > 0 && (
+					<Notice
+						status={ notice.status }
+						onRemove={ () => {
+							setNotice( { message: '' } );
+						} }
 					>
-						Search products:
-					</label>
-					<input type="search" name="search" />
-					<input
-						type="submit"
-						id="search-submit"
-						className="button"
-						value="Search Option"
-					/>
-				</div>
-			</form>
-			<div className="clear"></div>
-			<table className="wp-list-table striped table-view-list widefat">
-				<thead>
-					<tr>
-						<td className="manage-column column-thumb" key={ 0 }>
-							I.D
-						</td>
-						<td className="manage-column column-thumb" key={ 1 }>
-							Name
-						</td>
-						<td className="manage-column column-thumb" key={ 2 }>
-							Autoload
-						</td>
-						<td className="manage-column column-thumb" key={ 3 }>
-							Delete
-						</td>
-					</tr>
-				</thead>
-				<tbody>
-					{ isLoading ? renderLoading() : renderTableData() }
-				</tbody>
-			</table>
-		</div>
+						{ notice.message }
+					</Notice>
+				) }
+				<form onSubmit={ searchOption }>
+					<div className="search-box">
+						<label
+							className="screen-reader-text"
+							htmlFor="post-search-input"
+						>
+							Search products:
+						</label>
+						<input type="search" name="search" />
+						<input
+							type="submit"
+							id="search-submit"
+							className="button"
+							value="Search Option"
+						/>
+					</div>
+				</form>
+				<div className="clear"></div>
+				<table className="wp-list-table striped table-view-list widefat">
+					<thead>
+						<tr>
+							<td
+								className="manage-column column-thumb"
+								key={ 0 }
+							>
+								I.D
+							</td>
+							<td
+								className="manage-column column-thumb"
+								key={ 1 }
+							>
+								Name
+							</td>
+							<td
+								className="manage-column column-thumb align-center"
+								key={ 2 }
+							>
+								Autoload
+							</td>
+							<td
+								className="manage-column column-thumb align-center"
+								key={ 3 }
+							>
+								Delete
+							</td>
+							<td
+								className="manage-column column-thumb align-center"
+								key={ 4 }
+							>
+								Edit
+							</td>
+						</tr>
+					</thead>
+					<tbody>
+						{ isLoading ? renderLoading() : renderTableData() }
+					</tbody>
+				</table>
+			</div>
+		</>
 	);
 }
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions, isLoading } = select( STORE_KEY );
+		const {
+			getOptions,
+			getOptionForEditing,
+			getNotice,
+			isLoading,
+		} = select( STORE_KEY );
 		const options = getOptions();
+		const editingOption = getOptionForEditing();
+		const notice = getNotice();
 
-		return { options, getOptions, isLoading: isLoading() };
+		return {
+			options,
+			getOptions,
+			isLoading: isLoading(),
+			editingOption,
+			getOptionForEditing,
+			notice,
+		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { deleteOptionById } = dispatch( STORE_KEY );
+		const { deleteOptionById, saveOption, setNotice } = dispatch(
+			STORE_KEY
+		);
 		const { invalidateResolution } = dispatch( 'core/data' );
 
-		return { deleteOptionById, invalidateResolution };
+		return {
+			deleteOptionById,
+			invalidateResolution,
+			saveOption,
+			setNotice,
+		};
 	} )
 )( Options );
