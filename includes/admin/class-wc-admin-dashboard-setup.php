@@ -178,7 +178,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 			}
 
 			// payments can't be used when woocommerce-payments exists and country is US.
-			if ( $is_woo_payment_installed || 'US' === $country ) {
+			if ( $is_woo_payment_installed && 'US' === $country ) {
 				unset( $this->tasks['payments'] );
 			}
 
