@@ -34,7 +34,7 @@ class NoticeHandler {
 		wc_clear_notices();
 
 		foreach ( $error_notices as $error_notice ) {
-			throw new RouteException( $error_code, $error_notice['notice'], 400 );
+			throw new RouteException( $error_code, wp_strip_all_tags( $error_notice['notice'] ), 400 );
 		}
 	}
 }
