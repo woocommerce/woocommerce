@@ -15,9 +15,7 @@
  * @version     3.7.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 foreach ( $items as $item_id => $item ) :
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
@@ -25,21 +23,24 @@ foreach ( $items as $item_id => $item ) :
 		$sku           = '';
 		$purchase_note = '';
 
+		$item->set_item_invoke_template( __FILE__ );
+
 		if ( is_object( $product ) ) {
 			$sku           = $product->get_sku();
 			$purchase_note = $product->get_purchase_note();
 		}
 
-		echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+		echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
 		if ( $show_sku && $sku ) {
-			echo ' (#' . $sku . ')';
+			echo wp_kses_post( ' (#' . $sku . ')' );
 		}
-		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
-		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
+		echo ' X ' . wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ) );
+		echo ' = ' . wp_kses_post( $order->get_formatted_line_subtotal( $item ) ) . "\n";
 
-		// allow other plugins to add additional product information here
+		// Allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
-		echo strip_tags(
+
+		echo wp_strip_all_tags( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			wc_display_item_meta(
 				$item,
 				array(
@@ -52,10 +53,10 @@ foreach ( $items as $item_id => $item ) :
 			)
 		);
 
-		// allow other plugins to add additional product information here
+		// Allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}
-	// Note
+	// Note.
 	if ( $show_purchase_note && $purchase_note ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}

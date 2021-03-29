@@ -26,6 +26,8 @@ foreach ( $items as $item_id => $item ) :
 	$purchase_note = '';
 	$image         = '';
 
+	$item->set_item_invoke_template( __FILE__ );
+
 	if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		continue;
 	}
@@ -54,7 +56,7 @@ foreach ( $items as $item_id => $item ) :
 			echo wp_kses_post( ' (#' . $sku . ')' );
 		}
 
-		// allow other plugins to add additional product information here.
+		// Allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
 		wc_display_item_meta(
@@ -64,7 +66,7 @@ foreach ( $items as $item_id => $item ) :
 			)
 		);
 
-		// allow other plugins to add additional product information here.
+		// Allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 		?>
