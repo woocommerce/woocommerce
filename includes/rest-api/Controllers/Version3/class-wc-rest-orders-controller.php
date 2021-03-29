@@ -43,6 +43,14 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$coupons   = array();
 		$discounts = new WC_Discounts( $order );
 
+		$current_order_coupons      = array_values( $order->get_coupons() );
+		$current_order_coupon_codes = array_map(
+			function( $coupon ) {
+				return $coupon->get_code();
+			},
+			$current_order_coupons
+		);
+
 		foreach ( $request['coupon_lines'] as $item ) {
 			if ( ! empty( $item['id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_coupon_item_id_readonly', __( 'Coupon item ID is readonly.', 'woocommerce' ), 400 );
@@ -52,11 +60,15 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$coupon_code  = wc_format_coupon_code( wc_clean( $item['code'] ) );
-			$coupon       = new WC_Coupon( $coupon_code );
-			$check_result = $discounts->is_coupon_valid( $coupon );
-			if ( is_wp_error( $check_result ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
+			$coupon_code = wc_format_coupon_code( wc_clean( $item['code'] ) );
+			$coupon      = new WC_Coupon( $coupon_code );
+
+			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
+			if ( ! in_array( $coupon_code, $current_order_coupon_codes, true ) ) {
+				$check_result = $discounts->is_coupon_valid( $coupon );
+				if ( is_wp_error( $check_result ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
+				}
 			}
 
 			$coupons[] = $coupon;
