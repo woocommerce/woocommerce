@@ -1,5 +1,8 @@
 # Unreleased
 
+
+# 0.1.2
+
 ## Added
 
 - Support for the external product type.
