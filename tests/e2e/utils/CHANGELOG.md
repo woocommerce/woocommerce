@@ -1,5 +1,10 @@
 # Unreleased
 
+# 0.1.4
+
+## Fixed
+
+- build issue with faker import
 
 # 0.1.3
 
