@@ -30,6 +30,7 @@ class MerchantEmailNotifications {
 		if (
 			! isset( $_GET['external_redirect'] ) ||
 			1 !== intval( $_GET['external_redirect'] ) ||
+			! isset( $_GET['user'] ) ||
 			! isset( $_GET['note'] ) ||
 			! isset( $_GET['action'] )
 		) {
@@ -37,6 +38,7 @@ class MerchantEmailNotifications {
 		}
 		$note_id   = intval( $_GET['note'] );
 		$action_id = intval( $_GET['action'] );
+		$user_id   = intval( $_GET['user'] );
 		/* phpcs:enable */
 
 		$note = Notes::get_note( $note_id );
@@ -51,7 +53,10 @@ class MerchantEmailNotifications {
 			return;
 		}
 
+		// We need to set the current user for tracking reasons. And unset user after tracking.
+		wp_set_current_user( $user_id );
 		Notes::trigger_note_action( $note, $triggered_action );
+		wp_set_current_user( 0 );
 
 		$url = $triggered_action->query;
 
@@ -82,7 +87,6 @@ class MerchantEmailNotifications {
 				self::send_merchant_notification( $note );
 				$note->set_status( 'sent' );
 				$note->save();
-				wc_admin_record_tracks_event( 'wcadmin_email_note_sent', array( 'note_name' => $note->get_name() ) );
 			}
 		}
 	}
@@ -99,7 +103,7 @@ class MerchantEmailNotifications {
 		foreach ( $users as $user ) {
 			if ( is_email( $user->user_email ) ) {
 				$name = self::get_merchant_preferred_name( $user );
-				$email->trigger( $user->user_email, $name );
+				$email->trigger( $user->user_email, $user->ID, $name );
 			}
 		}
 	}
@@ -126,7 +130,7 @@ class MerchantEmailNotifications {
 	 * Get users by role to notify.
 	 *
 	 * @param object $note The note to send.
-	 * @return array Emails to notify
+	 * @return array Users to notify
 	 */
 	public static function get_notification_recipients( $note ) {
 		$content_data = $note->get_content_data();

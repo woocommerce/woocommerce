@@ -4,6 +4,19 @@
 
 ## 2.2.0
 
+### Fixed event tracking for merchant email notes #6616
+
+- Create a brand new site.
+- Install a plugin to log every sent email (you can use [WP mail logging](https://wordpress.org/plugins/wp-mail-logging/)).
+- Install and active [this gist](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) to create an email note. Just download the file and install it as a plugin.
+- After activating the plugin, press `Add Email Notes` to create a note.
+- Now go to WooCommerce > Settings > Email (`/wp-admin/admin.php?page=wc-settings&tab=email`) and check the checkbox `Enable email insights` and save changes.
+- You will need to run the cron so you can install a plugin like [WP Crontol](https://wordpress.org/plugins/wp-crontrol/)
+- Go to Tools > Cron events (`/wp-admin/tools.php?page=crontrol_admin_manage_page`).
+- Call the hook `wc_admin_daily` by pressing its `Run Now` link. (https://user-images.githubusercontent.com/1314156/111530634-4929ce80-8742-11eb-8b53-de936ceea76e.png)
+- Go to Tools > WP Mail Logging Log (`/wp-admin/tools.php?page=wpml_plugin_log`) and verify the testing email note was sent.
+- View the message and press `Test action` (a broken image will be visible under the button, but that's expected and only visible in a test environment).
+
 ### Payments task: include Mercado Pago #6572
 
 - Create a brand new store.

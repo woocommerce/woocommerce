@@ -76,6 +76,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Tweak: Add check to see if value for contains is array, show warning if not. #6645
+- Fix: Event tracking for merchant email notes #6616
 
 == 2.2.0 3/26/2021 ==
 
