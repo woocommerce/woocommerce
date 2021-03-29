@@ -38,10 +38,10 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			return false;
 		}
 
-		// Validate input and at the same time generate the coupon objects to apply.
+		// Validate input and at the same time store the processed coupon codes to apply.
 
-		$coupons   = array();
-		$discounts = new WC_Discounts( $order );
+		$coupon_codes = array();
+		$discounts    = new WC_Discounts( $order );
 
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
@@ -71,7 +71,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				}
 			}
 
-			$coupons[] = $coupon;
+			$coupon_codes[] = $coupon_code;
 		}
 
 		// Remove all coupons first to ensure calculation is correct.
@@ -80,7 +80,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		}
 
 		// Apply the coupons.
-		foreach ( $coupons as $new_coupon ) {
+		foreach ( $coupon_codes as $new_coupon ) {
 			$results = $order->apply_coupon( $new_coupon );
 
 			if ( is_wp_error( $results ) ) {
