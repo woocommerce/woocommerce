@@ -195,9 +195,11 @@ class WC_Session_Handler extends WC_Session {
 	 * @return string
 	 */
 	public function get_customer_unique_id() {
-		$customer_id = $this->has_session() && $this->_customer_id ? $this->_customer_id : '';
+		$customer_id = '';
 
-		if ( is_user_logged_in() ) {
+		if ( $this->has_session() && $this->_customer_id ) {
+			$customer_id = $this->_customer_id;
+		} elseif ( is_user_logged_in() ) {
 			$customer_id = (string) get_current_user_id();
 		}
 
