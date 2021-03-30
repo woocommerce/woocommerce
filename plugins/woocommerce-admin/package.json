@@ -117,7 +117,7 @@
 		"classnames": "2.2.6",
 		"core-js": "3.9.1",
 		"debug": "4.3.1",
-		"dompurify": "2.2.6",
+		"dompurify": "2.2.7",
 		"github-label-sync": "2.0.0",
 		"gridicons": "3.3.1",
 		"interpolate-components": "1.1.1",
