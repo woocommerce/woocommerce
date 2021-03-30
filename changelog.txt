@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 5.2.0 RC 2021-03-30 =
+
+* Update - WooCommerce Admin package 2.1.4. #29520
+* Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
+* Fix - Wrong logic for including or excluding the payments step in the list of completed tasks in the onboarding wizard. #29518
+
+**WooCommerce Admin - 2.1.4**
+
+* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
+
 = 5.2.0 beta 2021-03-23 =
 
 **WooCommerce**
