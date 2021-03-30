@@ -212,6 +212,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - add validation of the posted country codes on checkout. #28849
 * Fix - Correctly display pagination arrows on RTL languages. #28523
 * Fix - Invalid refund amount error on $0 refund when number of decimals is equal to 0. #27277
+* Fix - "Sale" badge misaligned on products when displaying 1 item per row. #29425
 * Tweak - Added the Mercado Pago logo into the assets/images folder in order to use it in the payments setup task. #29365
 * Tweak - Update the contributor guidelines. #29150
 * Tweak - Introduced phone number input validation. #27242
