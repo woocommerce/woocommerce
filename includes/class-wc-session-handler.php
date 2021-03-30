@@ -188,6 +188,25 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
+	 * Get session unique ID for quests if session is initialized or user ID if logged in.
+	 * Introduced to help with unit tests.
+	 *
+	 * @since 5.3.0
+	 * @return string
+	 */
+	public function get_customer_unique_id() {
+		$customer_id = '';
+
+		if ( $this->has_session() && $this->_customer_id ) {
+			$customer_id = $this->_customer_id;
+		} elseif ( is_user_logged_in() ) {
+			$customer_id = (string) get_current_user_id();
+		}
+
+		return $customer_id;
+	}
+
+	/**
 	 * Get the session cookie, if set. Otherwise return false.
 	 *
 	 * Session cookies without a customer ID are invalid.
