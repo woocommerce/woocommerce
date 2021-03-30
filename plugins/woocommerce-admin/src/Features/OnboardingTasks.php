@@ -285,7 +285,7 @@ class OnboardingTasks {
 		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.
 			$script_assets_filename = Loader::get_script_asset_filename( 'onboarding-homepage-notice' );
 			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-			
+
 			wp_enqueue_script(
 				'onboarding-homepage-notice',
 				Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice', 'js' ),
