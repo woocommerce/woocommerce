@@ -62,6 +62,9 @@
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
 							shippingMethod.trigger( 'saved:methods' );
+
+							// Overrides the onbeforeunload callback added by settings.js.
+							window.onbeforeunload = null;
 						} else {
 							window.alert( data.strings.save_failed );
 						}
