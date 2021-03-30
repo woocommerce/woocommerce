@@ -13,7 +13,11 @@ import {
 } from '@wordpress/icons';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { H, Section } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, useUser } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	useUser,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -45,12 +49,29 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 
+	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
+		let trackData = {};
+		if ( query.page === 'wc-admin' && query.task === 'appearance' ) {
+			const { getTasksStatus } = select( ONBOARDING_STORE_NAME );
+			const tasksStatus = getTasksStatus();
+			const demoNotice = getOption( 'woocommerce_demo_store_notice' );
+			trackData = {
+				set_notice: demoNotice ? 'Y' : 'N',
+				create_homepage: tasksStatus.hasHomepage === true ? 'Y' : 'N',
+				upload_logo: tasksStatus.themeMods?.custom_logo ? 'Y' : 'N',
+			};
+		}
+
+		return trackData;
+	};
+
 	const {
 		hasUnreadNotes,
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
 		trackedCompletedTasks,
+		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
 		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 
@@ -68,6 +89,10 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			trackedCompletedTasks:
 				getOption( 'woocommerce_task_list_tracked_completed_tasks' ) ||
 				[],
+			previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
+				select,
+				getOption
+			),
 		};
 	} );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -181,6 +206,11 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			visible: query.page === 'wc-admin' && query.task === 'appearance',
 			onClick: () => {
 				window.open( window.wcSettings.siteUrl );
+				recordEvent(
+					'wcadmin_tasklist_previewsite',
+					previewSiteBtnTrackData
+				);
+
 				return null;
 			},
 		};

@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Tweak: Add tracking data for the preview site btn #6623
 - Tweak: Add check to see if value for contains is array, show warning if not. #6645
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Check active plugins before getting the PayPal onboarding status #6625
