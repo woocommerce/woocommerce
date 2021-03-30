@@ -160,6 +160,7 @@
 		"@types/jest": "26.0.20",
 		"@types/lodash": "4.14.168",
 		"@types/puppeteer": "5.4.3",
+		"@types/wordpress__components": "^9.8.6",
 		"@typescript-eslint/eslint-plugin": "4.19.0",
 		"@woocommerce/api": "0.1.1",
 		"@woocommerce/components": "file:packages/components",

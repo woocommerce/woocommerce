@@ -141,6 +141,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Additional analytics tracking for the business details step. #6575
 - Add: Include tracking for mail poet installs in the selective bundle install #6603
 - Dev: Add script automation for gathering hooks and filters. #6454
+- Dev: Add TypeScript to CustomerFeedbackModal component. #6498
 - Fix: Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
 - Dev: Add TypeScript and page objects to the E2E test suite. #6582
 - Dev: Introduce Typescript to Navigation utils #6477
