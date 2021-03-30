@@ -18,6 +18,7 @@ export const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settin
 export const WP_ADMIN_PERMALINK_SETTINGS = baseUrl + 'wp-admin/options-permalink.php';
 export const WP_ADMIN_NEW_SHIPPING_ZONE = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new';
 export const WP_ADMIN_ANALYTICS_PAGES = baseUrl + 'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2F';
+export const WP_ADMIN_ALL_USERS_VIEW = baseUrl + 'wp-admin/users.php';
 
 export const SHOP_PAGE = baseUrl + 'shop';
 export const SHOP_PRODUCT_PAGE = baseUrl + '?p=';
