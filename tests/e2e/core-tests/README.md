@@ -62,6 +62,7 @@ The functions to access the core tests are:
   - `runTaxSettingsTest` - Merchant can update tax settings
   - `runUpdateGeneralSettingsTest` - Merchant can update general settings
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
 
 ### Shopper
 

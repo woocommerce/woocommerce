@@ -26,6 +26,7 @@
 - Merchant Settings Shipping Zones
 - Shopper Variable product info updates on different variations
 - Merchant order emails flow
+- Merchant analytics page load tests
 - Shopper Checkout Create Account
 
 # 0.1.1
