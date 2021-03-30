@@ -5,12 +5,6 @@ if ! [ -x "$(command -v hub)" ]; then
   exit 1
 fi
 
-if [[ $1 == '' || $2 == '' ]]
-  then
-    output 1 "Please supply a tag and zip file name"
-    exit 1
-fi
-
 echo "Releasing to GitHub"
 echo "==================="
 echo "Before proceeding:"

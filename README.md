@@ -107,6 +107,11 @@ const response = await apiFetch( {
 
 ### Deploying
 
+Prerequisites:
+
+- [Hub](https://github.com/github/hub)
+- Write access to this repository
+
 You can create a test ZIP of the plugin using this command:
 
 ```
