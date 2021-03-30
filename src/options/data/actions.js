@@ -21,6 +21,13 @@ export function setOptions( options ) {
 	};
 }
 
+export function setLoadingState( isLoading ) {
+	return {
+		type: TYPES.SET_IS_LOADING,
+		isLoading,
+	};
+}
+
 export function* deleteOptionById( optionId ) {
 	try {
 		yield apiFetch( {

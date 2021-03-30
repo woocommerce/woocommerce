@@ -14,7 +14,8 @@ function Options( {
 	options,
 	getOptions,
 	deleteOptionById,
-	invalidateResolutionForStoreSelector,
+	isLoading,
+	invalidateResolution,
 } ) {
 	const deleteOption = function ( optionId ) {
 		// eslint-disable-next-line no-alert
@@ -23,7 +24,27 @@ function Options( {
 		}
 	};
 
+	const renderLoading = function () {
+		return (
+			<tr>
+				<td colSpan="4" align="center">
+					Loading...
+				</td>
+			</tr>
+		);
+	};
+
 	const renderTableData = function () {
+		if ( options.length === 0 ) {
+			return (
+				<tr>
+					<td colSpan="4" align="center">
+						No Options Found
+					</td>
+				</tr>
+			);
+		}
+
 		return options.map( ( option ) => {
 			// eslint-disable-next-line camelcase
 			const { option_id, option_name, autoload } = option;
@@ -53,14 +74,13 @@ function Options( {
 
 	const searchOption = function ( event ) {
 		event.preventDefault();
-		let keyword = event.target.search.value;
-		if ( keyword === '' ) {
-			keyword = undefined;
-		}
-		getOptions( keyword );
+		const keyword = event.target.search.value;
 
-		// force invlidation of the cached selector resolvers
-		invalidateResolutionForStoreSelector( 'getOptions' );
+		// Invalidate resolution of the same selector + arg
+		// so that entering the same keyword always works
+		invalidateResolution( STORE_KEY, 'getOptions', [ keyword ] );
+
+		getOptions( keyword );
 	};
 
 	return (
@@ -100,7 +120,9 @@ function Options( {
 						</td>
 					</tr>
 				</thead>
-				<tbody>{ renderTableData() }</tbody>
+				<tbody>
+					{ isLoading ? renderLoading() : renderTableData() }
+				</tbody>
 			</table>
 		</div>
 	);
@@ -108,15 +130,15 @@ function Options( {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions } = select( STORE_KEY );
+		const { getOptions, isLoading } = select( STORE_KEY );
 		const options = getOptions();
-		return { options, getOptions };
+
+		return { options, getOptions, isLoading: isLoading() };
 	} ),
 	withDispatch( ( dispatch ) => {
-		const {
-			deleteOptionById,
-			invalidateResolutionForStoreSelector,
-		} = dispatch( STORE_KEY );
-		return { deleteOptionById, invalidateResolutionForStoreSelector };
+		const { deleteOptionById } = dispatch( STORE_KEY );
+		const { invalidateResolution } = dispatch( 'core/data' );
+
+		return { deleteOptionById, invalidateResolution };
 	} )
 )( Options );
