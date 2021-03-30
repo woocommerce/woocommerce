@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Check active plugins before getting the PayPal onboarding status #6625
+
+-  Go to the WooCommerce home page
+-  Open your browser console
+-  Choose payment methods
+-  See no error message
+
 ## 2.2.0
 
 ### Fixed event tracking for merchant email notes #6616
