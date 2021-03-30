@@ -79,7 +79,7 @@ describe( 'Cart page', () => {
 | `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
 | `searchForProduct` | | Searching for a product name and landing on its detail page |
-|  `emptyCart` | | Removes any products and coupons that are the cart |
+|  `emptyCart` | | Removes any products and coupons that are in the cart |
 
 ### Page Utilities
 
