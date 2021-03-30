@@ -449,7 +449,19 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return array
 	 */
 	public function get_billing( $context = 'view' ) {
-		return $this->get_prop( 'billing', $context );
+		$value = null;
+		$prop  = 'billing';
+
+		if ( array_key_exists( $prop, $this->data ) ) {
+			$changes = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : array();
+			$value   = array_merge( $this->data[ $prop ], $changes );
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -580,7 +592,19 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return array
 	 */
 	public function get_shipping( $context = 'view' ) {
-		return $this->get_prop( 'shipping', $context );
+		$value = null;
+		$prop  = 'shipping';
+
+		if ( array_key_exists( $prop, $this->data ) ) {
+			$changes = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : array();
+			$value   = array_merge( $this->data[ $prop ], $changes );
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+
+		return $value;
 	}
 
 	/**
