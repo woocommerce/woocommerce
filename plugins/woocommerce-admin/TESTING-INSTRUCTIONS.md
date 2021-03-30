@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+
+### Fix varation bug with Products reports #6647
+
+
+1. Add two variable products. You want to have at least one variable for each product. 
+
+Product A - color:black
+Product A - color:white
+
+Product B - size:small
+Product B - size:medium
+
+2. Make an order for each product.
+3. Navigate to Analytics -> Products
+4. Choose 'Single product' from the 'Show' dropdown and search for the product.
+5. Confirm that the "Variations" table shows the correct variations. If you searched for the 'Product A', then you should see color:black and color:white.
+
+In case the report shows "no data", please reimport historical data by following the guide on [here](https://docs.woocommerce.com/document/woocommerce-analytics/#analytics-settings__import-historical-data)
+
 ### Check active plugins before getting the PayPal onboarding status #6625
 
 -  Go to the WooCommerce home page
@@ -23,6 +42,7 @@
 - Call the hook `wc_admin_daily` by pressing its `Run Now` link. (https://user-images.githubusercontent.com/1314156/111530634-4929ce80-8742-11eb-8b53-de936ceea76e.png)
 - Go to Tools > WP Mail Logging Log (`/wp-admin/tools.php?page=wpml_plugin_log`) and verify the testing email note was sent.
 - View the message and press `Test action` (a broken image will be visible under the button, but that's expected and only visible in a test environment).
+
 
 ### Payments task: include Mercado Pago #6572
 

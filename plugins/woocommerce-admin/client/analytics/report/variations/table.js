@@ -271,7 +271,7 @@ class VariationsReportTable extends Component {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
-					products: query.products,
+					product_includes: query.products,
 					variations: query.variations,
 				} }
 				title={ __( 'Variations', 'woocommerce-admin' ) }
