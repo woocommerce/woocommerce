@@ -75,7 +75,7 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
 		if ( ! is_user_logged_in() ) {
-			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
+			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ), 10, 2 );
 		}
 	}
 
@@ -288,11 +288,16 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID.
 	 *
-	 * @param int $uid User ID.
-	 * @return string
+	 * @param int    $uid    User ID.
+	 * @param string $action The nonce action.
+	 * @return int|string
 	 */
-	public function nonce_user_logged_out( $uid ) {
-		return $this->has_session() && $this->_customer_id ? $this->_customer_id : $uid;
+	public function nonce_user_logged_out( $uid, $action ) {
+		if ( Automattic\WooCommerce\Utilities\StringUtil::starts_with( $action, 'woocommerce' ) ) {
+			return $this->has_session() && $this->_customer_id ? $this->_customer_id : $uid;
+		}
+
+		return $uid;
 	}
 
 	/**
