@@ -187,14 +187,12 @@ const merchant = {
 
 	openAnalyticsPage: async ( pageName ) => {
 		await page.goto( WP_ADMIN_ANALYTICS_PAGES + pageName, {
-      
-      waitUntil: 'networkidle0',
-    } );
-  },
-  
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	openAllUsersView: async () => {
 		await page.goto( WP_ADMIN_ALL_USERS_VIEW, {
-
 			waitUntil: 'networkidle0',
 		} );
 	},
