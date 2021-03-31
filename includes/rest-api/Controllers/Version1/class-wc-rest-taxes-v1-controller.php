@@ -243,12 +243,17 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			LIMIT %%d, %%d
 		";
 
+		$wpdb_prepare_args = array(
+			$prepared_args['offset'],
+			$prepared_args['number'],
+		);
+
 		// Filter by tax class.
 		if ( empty( $prepared_args['class'] ) ) {
-			$class = null;
 			$query = sprintf( $query, '' );
 		} else {
 			$class = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
+			array_unshift( $wpdb_prepare_args, $class );
 			$query = sprintf( $query, 'WHERE tax_rate_class = %s' );
 		}
 
@@ -257,9 +262,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				$query,
-				$prepared_args['offset'],
-				$prepared_args['number'],
-				$class
+				$wpdb_prepare_args
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
@@ -282,9 +285,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		$wpdb->get_results(
 			$wpdb->prepare(
 				$query,
-				$prepared_args['offset'],
-				$prepared_args['number'],
-				$class
+				$wpdb_prepare_args
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared

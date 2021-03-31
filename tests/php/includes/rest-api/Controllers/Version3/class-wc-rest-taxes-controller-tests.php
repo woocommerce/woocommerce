@@ -238,4 +238,49 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 		}
 		$this->assertEquals( $expected, $ids );
 	}
+
+	/**
+	 * @testdox Tax rates can be queries filtering by tax class.
+	 *
+	 * @testWith ["standard"]
+	 *           ["reduced-rate"]
+	 *           ["zero-rate"]
+	 *
+	 * @param string $class The tax class name to try getting the taxes for.
+	 */
+	public function test_can_get_taxes_filtering_by_class( $class ) {
+		$classes = array( 'standard', 'reduced-rate', 'zero-rate' );
+
+		$tax_ids_by_class = array();
+		foreach ( $classes as $class ) {
+			$tax_id                     = WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'JP',
+					'tax_rate'          => '1',
+					'tax_rate_priority' => 1,
+					'tax_rate_name'     => 'Fake Tax',
+					'tax_rate_class'    => $class,
+				)
+			);
+			$tax_ids_by_class[ $class ] = $tax_id;
+		}
+
+		$response = $this->do_rest_get_request(
+			'taxes',
+			array(
+				'class' => $class,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = array_values( $response->get_data() );
+		$ids  = array_map(
+			function( $item ) {
+				return $item['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( array( $tax_ids_by_class[ $class ] ), $ids );
+	}
 }
