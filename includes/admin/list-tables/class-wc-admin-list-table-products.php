@@ -148,7 +148,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: thumb.
+	 * Render column: thumb.
 	 */
 	protected function render_thumb_column() {
 		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // WPCS: XSS ok.
@@ -203,21 +203,21 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: sku.
+	 * Render column: sku.
 	 */
 	protected function render_sku_column() {
 		echo $this->object->get_sku() ? esc_html( $this->object->get_sku() ) : '<span class="na">&ndash;</span>';
 	}
 
 	/**
-	 * Render columm: price.
+	 * Render column: price.
 	 */
 	protected function render_price_column() {
 		echo $this->object->get_price_html() ? wp_kses_post( $this->object->get_price_html() ) : '<span class="na">&ndash;</span>';
 	}
 
 	/**
-	 * Render columm: product_cat.
+	 * Render column: product_cat.
 	 */
 	protected function render_product_cat_column() {
 		$terms = get_the_terms( $this->object->get_id(), 'product_cat' );
@@ -234,7 +234,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: product_tag.
+	 * Render column: product_tag.
 	 */
 	protected function render_product_tag_column() {
 		$terms = get_the_terms( $this->object->get_id(), 'product_tag' );
@@ -251,7 +251,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: featured.
+	 * Render column: featured.
 	 */
 	protected function render_featured_column() {
 		$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $this->object->get_id() ), 'woocommerce-feature-product' );
@@ -265,7 +265,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: is_in_stock.
+	 * Render column: is_in_stock.
 	 */
 	protected function render_is_in_stock_column() {
 		if ( $this->object->is_on_backorder() ) {
@@ -337,7 +337,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			?>
 			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
 				<?php if ( $current_category_slug && $current_category ) : ?>
-					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( $current_category->name ) ) ); ?><option>
+					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( $current_category->name ) ) ); ?></option>
 				<?php endif; ?>
 			</select>
 			<?php
