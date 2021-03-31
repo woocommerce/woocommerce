@@ -1,5 +1,6 @@
 const { createReadStream } = require( 'fs' );
 const { WebClient, ErrorCode } = require( '@slack/web-api' );
+const { getTestConfig } = require( '../../utils' );
 const {
 	GITHUB_ACTIONS,
 	GITHUB_REF,
@@ -37,10 +38,11 @@ const initializeSlack = () => {
 		return false;
 	}
 	if ( ! GITHUB_ACTIONS && ! TRAVIS_PULL_REQUEST_BRANCH ) {
+		const testConfig = getTestConfig();
 		return {
 			branch: 'local environment',
 			commit: 'latest',
-			webUrl: 'http:://localhost',
+			webUrl: testConfig.url,
 		};
 	}
 	// Build PR info
@@ -84,7 +86,9 @@ export async function sendFailedTestMessageToSlack( testName ) {
 		// Check the code property and log the response
 		if ( error.code === ErrorCode.PlatformError || error.code === ErrorCode.RequestError ||
 			error.code === ErrorCode.RateLimitedError || error.code === ErrorCode.HTTPError ) {
-			console.log( error.data );
+			if ( error.data.error != 'channel_not_found' ) {
+				console.log(error.data);
+			}
 		} else {
 			// Some other error, oh no!
 			console.log(
