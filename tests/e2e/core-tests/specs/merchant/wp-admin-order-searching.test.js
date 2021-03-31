@@ -30,6 +30,8 @@ const runOrderSearchingTest = () => {
 
 			// Change the shipping data
 			await page.waitFor(1000); // to avoid flakiness
+			await page.click('.billing-same-as-shipping');
+			await page.keyboard.press('Enter');
 			await page.waitForSelector('#_shipping_first_name');
 			await clearAndFillInput('#_shipping_first_name', 'Tim');
 			await clearAndFillInput('#_shipping_last_name', 'Clark');
@@ -37,9 +39,6 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
 			await clearAndFillInput('#_shipping_postcode', '14201');
-			await page.waitFor(1000); // to avoid flakyness
-			await page.click('#select2-_shipping_state-container');
-			await page.select('select[name="_shipping_state"]', 'NY');
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
@@ -122,7 +121,7 @@ const runOrderSearchingTest = () => {
 		})
 
 		it('can search for order by shipping state name', async () => {
-			await searchForOrder('NY', orderId, 'John Doe');
+			await searchForOrder('CA', orderId, 'John Doe');
 		})
 
 		it('can search for order by item name', async () => {
