@@ -6,7 +6,8 @@ import Button from '@woocommerce/base-components/button';
 import { Icon, done as doneIcon } from '@woocommerce/icons';
 import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';
-import { useStoreAddToCart } from '@woocommerce/base-hooks';
+import { useStoreAddToCart, useStoreEvents } from '@woocommerce/base-hooks';
+import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 
 /**
  * Add to Cart Form Button Component.
@@ -24,6 +25,8 @@ const AddToCartButton = () => {
 		hasError,
 		dispatchActions,
 	} = useAddToCartFormContext();
+	const { parentName } = useInnerBlockLayoutContext();
+	const { dispatchStoreEvent } = useStoreEvents();
 	const { cartQuantity } = useStoreAddToCart( product.id || 0 );
 	const [ addedToCart, setAddedToCart ] = useState( false );
 	const addToCartButtonData = product.add_to_cart || {
@@ -69,7 +72,13 @@ const AddToCartButton = () => {
 			isDisabled={ isDisabled }
 			isProcessing={ isProcessing }
 			isDone={ addedToCart }
-			onClick={ () => dispatchActions.submitForm() }
+			onClick={ () => {
+				dispatchActions.submitForm();
+				dispatchStoreEvent( 'cart-add-item', {
+					product,
+					listName: parentName,
+				} );
+			} }
 		/>
 	) : (
 		<LinkComponent
@@ -79,6 +88,12 @@ const AddToCartButton = () => {
 				addToCartButtonData.text ||
 				__( 'View Product', 'woo-gutenberg-products-block' )
 			}
+			onClick={ () => {
+				dispatchStoreEvent( 'product-view-link', {
+					product,
+					listName: parentName,
+				} );
+			} }
 		/>
 	);
 };
@@ -90,10 +105,16 @@ const AddToCartButton = () => {
  * @param {string} props.className Css classnames.
  * @param {string} props.href      Link for button.
  * @param {string} props.text      Text content for button.
+ * @param {function():any} props.onClick Callback to execute when button is clicked.
  */
-const LinkComponent = ( { className, href, text } ) => {
+const LinkComponent = ( { className, href, text, onClick } ) => {
 	return (
-		<Button className={ className } href={ href } rel="nofollow">
+		<Button
+			className={ className }
+			href={ href }
+			onClick={ onClick }
+			rel="nofollow"
+		>
 			{ text }
 		</Button>
 	);

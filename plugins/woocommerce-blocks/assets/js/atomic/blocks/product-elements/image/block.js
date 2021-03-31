@@ -11,6 +11,7 @@ import {
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { useStoreEvents } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -39,6 +40,7 @@ export const Block = ( {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const [ imageLoaded, setImageLoaded ] = useState( false );
+	const { dispatchStoreEvent } = useStoreEvents();
 
 	if ( ! product.id ) {
 		return (
@@ -68,6 +70,11 @@ export const Block = ( {
 		href: product.permalink,
 		rel: 'nofollow',
 		...( ! hasProductImages && { 'aria-label': anchorLabel } ),
+		onClick: () => {
+			dispatchStoreEvent( 'product-view-link', {
+				product,
+			} );
+		},
 	};
 
 	return (

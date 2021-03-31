@@ -11,6 +11,12 @@ use Exception;
  * @since 2.5.0
  */
 class Api {
+	/**
+	 * Stores inline scripts already enqueued.
+	 *
+	 * @var array
+	 */
+	private $inline_scripts = [];
 
 	/**
 	 * Reference to the Package instance
@@ -167,5 +173,25 @@ class Api {
 			? ''
 			: '-legacy';
 		return "build/$filename$suffix.$type";
+	}
+
+	/**
+	 * Adds an inline script, once.
+	 *
+	 * @param string $handle Script handle.
+	 * @param string $script Script contents.
+	 */
+	public function add_inline_script( $handle, $script ) {
+		if ( ! empty( $this->inline_scripts[ $handle ] ) && in_array( $script, $this->inline_scripts[ $handle ], true ) ) {
+			return;
+		}
+
+		wp_add_inline_script( $handle, $script );
+
+		if ( isset( $this->inline_scripts[ $handle ] ) ) {
+			$this->inline_scripts[ $handle ][] = $script;
+		} else {
+			$this->inline_scripts[ $handle ] = array( $script );
+		}
 	}
 }

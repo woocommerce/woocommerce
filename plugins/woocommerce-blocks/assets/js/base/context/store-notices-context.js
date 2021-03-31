@@ -15,6 +15,11 @@ import {
 } from '@woocommerce/base-components/store-notices-container';
 
 /**
+ * Internal dependencies
+ */
+import { useStoreEvents } from '../hooks/use-store-events';
+
+/**
  * @typedef {import('@woocommerce/type-defs/contexts').NoticeContext} NoticeContext
  * @typedef {import('react')} React
  */
@@ -61,6 +66,7 @@ export const StoreNoticesProvider = ( {
 } ) => {
 	const { createNotice, removeNotice } = useDispatch( 'core/notices' );
 	const [ isSuppressed, setIsSuppressed ] = useState( false );
+	const { dispatchStoreEvent } = useStoreEvents();
 
 	const createNoticeWithContext = useCallback(
 		( status = 'default', content = '', options = {} ) => {
@@ -68,8 +74,13 @@ export const StoreNoticesProvider = ( {
 				...options,
 				context: options.context || context,
 			} );
+			dispatchStoreEvent( 'store-notice-create', {
+				status,
+				content,
+				options,
+			} );
 		},
-		[ createNotice, context ]
+		[ createNotice, dispatchStoreEvent, context ]
 	);
 
 	const removeNoticeWithContext = useCallback(

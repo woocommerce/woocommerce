@@ -9,6 +9,7 @@ import { Rate } from '@woocommerce/type-defs/shipping';
  * Internal dependencies
  */
 import { useSelectShippingRates } from './use-select-shipping-rates';
+import { useStoreEvents } from '../use-store-events';
 
 /**
  * Selected rates are derived by looping over the shipping rates.
@@ -39,6 +40,8 @@ export const useSelectShippingRate = (
 	selectedShippingRate: string | undefined;
 	isSelectingRate: boolean;
 } => {
+	const { dispatchCheckoutEvent } = useStoreEvents();
+
 	// Rates are selected via the shipping data context provider.
 	const { selectShippingRate, isSelectingRate } = useSelectShippingRates();
 
@@ -62,8 +65,11 @@ export const useSelectShippingRate = (
 		( newShippingRateId ) => {
 			setSelectedShippingRate( newShippingRateId );
 			selectShippingRate( newShippingRateId, packageId );
+			dispatchCheckoutEvent( 'set-selected-shipping-rate', {
+				shippingRateId: newShippingRateId,
+			} );
 		},
-		[ packageId, selectShippingRate ]
+		[ packageId, selectShippingRate, dispatchCheckoutEvent ]
 	);
 
 	return {

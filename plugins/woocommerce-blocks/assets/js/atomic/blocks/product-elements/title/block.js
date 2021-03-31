@@ -12,6 +12,7 @@ import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { gatedStyledText } from '@woocommerce/atomic-utils';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import ProductName from '@woocommerce/base-components/product-name';
+import { useStoreEvents } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -45,6 +46,7 @@ export const Block = ( {
 } ) => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
+	const { dispatchStoreEvent } = useStoreEvents();
 	const TagName = `h${ headingLevel }`;
 
 	const colorClass = getColorClassName( 'color', color );
@@ -104,6 +106,11 @@ export const Block = ( {
 					color: customColor,
 					fontSize: customFontSize,
 				} ) }
+				onClick={ () => {
+					dispatchStoreEvent( 'product-view-link', {
+						product,
+					} );
+				} }
 			/>
 		</TagName>
 	);
