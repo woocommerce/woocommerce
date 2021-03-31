@@ -10,6 +10,9 @@
  */
 class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
+	/**
+	 * Setup.
+	 */
 	public function setUp() {
 		parent::setUp();
 
@@ -17,6 +20,9 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->create_session();
 	}
 
+	/**
+	 * @testdox Test that save data should insert new row.
+	 */
 	public function test_save_data_should_insert_new_row() {
 		$current_session_data = $this->get_session_from_db( $this->session_key );
 		// delete session to make sure a new row is created in the DB.
@@ -35,6 +41,9 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->assertEquals( array( 'cart' => 'new cart' ), wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
 	}
 
+	/**
+	 * @testdox Test that save data should replace existing row.
+	 */
 	public function test_save_data_should_replace_existing_row() {
 		$current_session_data = $this->get_session_from_db( $this->session_key );
 
@@ -49,23 +58,35 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->assertTrue( is_numeric( $updated_session_data->session_expiry ) );
 	}
 
+	/**
+	 * @testdox Test that get_setting() should use cache.
+	 */
 	public function test_get_session_should_use_cache() {
 		$session = $this->handler->get_session( $this->session_key );
 		$this->assertEquals( array( 'cart' => 'fake cart' ), $session );
 	}
 
+	/**
+	 * @testdox Test that get_setting() shouldn't use cache.
+	 */
 	public function test_get_session_should_not_use_cache() {
 		wp_cache_delete( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP );
 		$session = $this->handler->get_session( $this->session_key );
 		$this->assertEquals( array( 'cart' => 'fake cart' ), $session );
 	}
 
+	/**
+	 * @testdox Test that get_setting() should return default value.
+	 */
 	public function test_get_session_should_return_default_value() {
 		$default_session = array( 'session' => 'default' );
 		$session         = $this->handler->get_session( 'non-existent key', $default_session );
 		$this->assertEquals( $default_session, $session );
 	}
 
+	/**
+	 * @testdox Test delete_session().
+	 */
 	public function test_delete_session() {
 		global $wpdb;
 
@@ -82,6 +103,9 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->assertNull( $session_id );
 	}
 
+	/**
+	 * @testdox Test update_session_timestamp().
+	 */
 	public function test_update_session_timestamp() {
 		global $wpdb;
 
@@ -99,6 +123,14 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that nonce of user logged out is only changed by WooCommerce.
+	 */
+	public function test_maybe_update_nonce_user_logged_out() {
+		$this->assertEquals( 1, $this->handler->maybe_update_nonce_user_logged_out( 1, 'wp_rest' ) );
+		$this->assertEquals( $this->handler->get_customer_unique_id(), $this->handler->maybe_update_nonce_user_logged_out( 1, 'woocommerce-something' ) );
+	}
+
+	/**
 	 * Helper function to create a WC session and save it to the DB.
 	 */
 	protected function create_session() {
@@ -113,7 +145,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	/**
 	 * Helper function to get session data from DB.
 	 *
-	 * @param string $session_key
+	 * @param string $session_key Session key.
 	 * @return stdClass
 	 */
 	protected function get_session_from_db( $session_key ) {
