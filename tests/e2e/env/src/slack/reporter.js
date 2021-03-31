@@ -37,7 +37,11 @@ const initializeSlack = () => {
 		return false;
 	}
 	if ( ! GITHUB_ACTIONS && ! TRAVIS_PULL_REQUEST_BRANCH ) {
-		return false;
+		return {
+			branch: 'local environment',
+			commit: 'latest',
+			webUrl: 'http:://localhost',
+		};
 	}
 	// Build PR info
 	if ( GITHUB_ACTIONS ) {
