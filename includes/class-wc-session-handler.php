@@ -312,6 +312,8 @@ class WC_Session_Handler extends WC_Session {
 	 * @return int|string
 	 */
 	public function nonce_user_logged_out( $uid ) {
+		wc_deprecated_function( 'WC_Session_Handler::nonce_user_logged_out', '5.3', 'WC_Session_Handler::maybe_update_nonce_user_logged_out' );
+
 		return $this->has_session() && $this->_customer_id ? $this->_customer_id : $uid;
 	}
 
