@@ -6,7 +6,6 @@
 const {
 	merchant,
 	clearAndFillInput,
-	selectOptionInSelect2,
 	searchForOrder,
 	createSimpleProduct,
 	addProductToOrder,
@@ -41,18 +40,18 @@ const runOrderSearchingTest = () => {
 			await page.keyboard.press('Tab');
 			await page.keyboard.press('Tab');
 			await page.keyboard.press('Enter');
-			await page.select('select[name="_shipping_state"]', 'NY');
-			// Select again in case it ignores above command, this is a workaround to avoid flakiness
-			await page.select('select[name="_shipping_state"]', 'NY');
+			await page.type('input.select2-search__field', 'New York');
+			await page.keyboard.press('Enter');
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
 			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
 
-			// Save new order
+			// Save new order and add desired product to order
 			await clickUpdateOrder('Order updated.', true);
 			await addProductToOrder(orderId, 'Wanted Product');
-			await page.waitFor(1000); // to avoid flakiness
+
+			// Open All Orders view
 			await merchant.openAllOrdersView();
 		});
 
