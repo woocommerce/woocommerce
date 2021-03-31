@@ -13,7 +13,7 @@ import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
-
+import { sanitize } from 'dompurify';
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
@@ -135,6 +135,7 @@ class Chart extends Component {
 
 		const updatedKeys = Object.entries( uniqueKeys ).map(
 			( [ key, label ] ) => {
+				label = sanitize( label, { ALLOWED_TAGS: [] } );
 				return {
 					focus:
 						focusedKeys.length === 0 || focusedKeys.includes( key ),
@@ -317,6 +318,7 @@ class Chart extends Component {
 			visibleKeys,
 			selectedIds
 		);
+
 		const visibleData = isRequesting
 			? null
 			: this.getVisibleData( data, orderedKeys );
