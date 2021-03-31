@@ -188,7 +188,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Get session unique ID for quests if session is initialized or user ID if logged in.
+	 * Get session unique ID for requests if session is initialized or user ID if logged in.
 	 * Introduced to help with unit tests.
 	 *
 	 * @since 5.3.0
