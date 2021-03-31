@@ -74,7 +74,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Taxes_V2_Controller {
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['postcodes'] = array(
-			'description' => __( 'List of postcodes / ZIPs.', 'woocommerce' ),
+			'description' => __( 'List of postcodes / ZIPs. Introduced in WooCommerce 5.3.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'string',
@@ -83,13 +83,19 @@ class WC_REST_Taxes_Controller extends WC_REST_Taxes_V2_Controller {
 		);
 
 		$schema['properties']['cities'] = array(
-			'description' => __( 'List of city names.', 'woocommerce' ),
+			'description' => __( 'List of city names. Introduced in WooCommerce 5.3.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'string',
 			),
 			'context'     => array( 'view', 'edit' ),
 		);
+
+		$schema['properties']['postcode']['description'] =
+			__( "Postcode/ZIP, it doesn't support multiple values. Deprecated as of WooCommerce 5.3, 'postcodes' should be used instead.", 'woocommerce' );
+
+		$schema['properties']['city']['description'] =
+			__( "City name, it doesn't support multiple values. Deprecated as of WooCommerce 5.3, 'cities' should be used instead.", 'woocommerce' );
 
 		return $schema;
 	}

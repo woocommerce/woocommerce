@@ -249,6 +249,8 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @param string $class The tax class name to try getting the taxes for.
 	 */
 	public function test_can_get_taxes_filtering_by_class( $class ) {
+		wp_set_current_user( $this->user );
+
 		$classes = array( 'standard', 'reduced-rate', 'zero-rate' );
 
 		$tax_ids_by_class = array();
