@@ -6,7 +6,14 @@
  * Internal dependencies
  */
 import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
+import {
+	clickTab,
+	uiUnblocked,
+	verifyCheckboxIsUnset,
+	selectOptionInSelect2,
+	setCheckbox,
+	unsetCheckbox
+} from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -143,7 +150,8 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary( false );
 
 	// Skip installing extensions
-	await evalAndClick( '.components-checkbox-control__input' );
+	await unsetCheckbox( '.components-checkbox-control__input' );
+	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 	await waitAndClickPrimary();
 
 	// Theme section
