@@ -1,5 +1,8 @@
 # Unreleased
 
+
+# 0.2.1
+
 ## Added
 
 - Support for screenshots on test errors
