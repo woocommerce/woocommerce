@@ -464,11 +464,11 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  * Adds a shipping zone along with a shipping method.
  *
  * @param zoneName Shipping zone name.
- * @param zoneLocation Shiping zone location. Defaults to United States (US).
+ * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
  * @param zipCode Shipping zone zip code. Defaults to empty one space.
  * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
-const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States (US)', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
 	await merchant.openNewShipping();
 
 	// Fill shipping zone name
@@ -476,12 +476,7 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await expect(page).toFill('input#zone_name', zoneName);
 
 	// Select shipping zone location
-	// (.toSelect is not best option here because a lot of &nbsp are present in country/state names)
-	await expect(page).toFill('#zone_locations', zoneLocation);
-	await uiUnblocked();
-	await page.keyboard.press('Tab');
-	await uiUnblocked();
-	await page.keyboard.press('Enter');
+	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
 
 	// Fill shipping zone postcode if needed otherwise just put empty space
 	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
@@ -491,14 +486,12 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'United States
 	await expect(page).toClick('button#submit');
 
 	// Add shipping zone method
-	await uiUnblocked();
+	await page.waitFor(1000);
 	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
 	await page.waitForSelector('.wc-shipping-zone-method-selector');
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
-	await uiUnblocked();
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
-	await uiUnblocked();
 };
 
 /**
