@@ -11,7 +11,11 @@ import {
 	useRef,
 	useMemo,
 } from '@wordpress/element';
-import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
+import {
+	useStoreNotices,
+	useEmitResponse,
+	useStoreEvents,
+} from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -102,6 +106,7 @@ export const PaymentMethodDataProvider = ( {
 		isFailResponse,
 		noticeContexts,
 	} = useEmitResponse();
+	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	const [ activePaymentMethod, setActive ] = useState( '' ); // The active payment method - e.g. Stripe CC or BACS.
 	const [ activeSavedToken, setActiveSavedToken ] = useState( '' ); // If a previously saved payment method is active, the token for that method. For example, a for a Stripe CC card saved to user account.
@@ -122,8 +127,11 @@ export const PaymentMethodDataProvider = ( {
 		( paymentMethodSlug ) => {
 			setActive( paymentMethodSlug );
 			dispatch( statusOnly( PRISTINE ) );
+			dispatchCheckoutEvent( 'set-active-payment-method', {
+				paymentMethodSlug,
+			} );
 		},
-		[ setActive, dispatch ]
+		[ setActive, dispatch, dispatchCheckoutEvent ]
 	);
 
 	const paymentMethodsDispatcher = useCallback<

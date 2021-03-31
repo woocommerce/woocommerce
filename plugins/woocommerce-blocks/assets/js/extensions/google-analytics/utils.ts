@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import type { ProductResponseItem, CartResponseItem } from '@woocommerce/types';
+import type {
+	ProductResponseItem,
+	CartResponseItem,
+	StoreCart,
+} from '@woocommerce/types';
 
 interface ImpressionItem extends Gtag.Item {
 	// eslint-disable-next-line camelcase
@@ -72,4 +76,44 @@ export const trackEvent = (
 	// eslint-disable-next-line no-console
 	console.log( `Tracking event ${ eventName }` );
 	window.gtag( 'event', eventName, eventParams );
+};
+
+let currentStep = -1;
+
+export const trackCheckoutStep = ( step: number ) => ( {
+	storeCart,
+}: {
+	storeCart: StoreCart;
+} ): void => {
+	if ( currentStep === step ) {
+		return;
+	}
+	trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
+		items: storeCart.cartItems.map( getProductFieldObject ),
+		coupon: storeCart.cartCoupons[ 0 ]?.code || '',
+		currency: storeCart.cartTotals.currency_code,
+		value: (
+			parseInt( storeCart.cartTotals.total_price, 10 ) /
+			10 ** storeCart.cartTotals.currency_minor_unit
+		).toString(),
+		checkout_step: step,
+	} );
+	currentStep = step;
+};
+
+export const trackCheckoutOption = ( {
+	step,
+	option,
+	value,
+}: {
+	step: number;
+	option: string;
+	value: string;
+} ) => (): void => {
+	trackEvent( 'set_checkout_option', {
+		checkout_step: step,
+		checkout_option: option,
+		value,
+	} );
+	currentStep = step;
 };

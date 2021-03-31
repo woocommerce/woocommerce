@@ -16,6 +16,7 @@ import {
 	useStoreNotices,
 	useEmitResponse,
 	usePrevious,
+	useStoreEvents,
 } from '@woocommerce/base-hooks';
 
 /**
@@ -101,6 +102,7 @@ export const CheckoutStateProvider = ( {
 	const currentObservers = useRef( observers );
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotices } = useStoreNotices();
+	const { dispatchCheckoutEvent } = useStoreEvents();
 	const isCalculating = checkoutState.calculatingCount > 0;
 	const {
 		isSuccessResponse,
@@ -350,8 +352,9 @@ export const CheckoutStateProvider = ( {
 	] );
 
 	const onSubmit = useCallback( () => {
+		dispatchCheckoutEvent( 'submit' );
 		dispatch( actions.setBeforeProcessing() );
-	}, [] );
+	}, [ dispatchCheckoutEvent ] );
 
 	/**
 	 * @type {CheckoutDataContext}

@@ -99,10 +99,15 @@ const AddToCartButton = ( { product } ) => {
 	if ( ! allowAddToCart ) {
 		buttonProps.href = permalink;
 		buttonProps.rel = 'nofollow';
+		buttonProps.onClick = () => {
+			dispatchStoreEvent( 'product-view-link', {
+				product,
+			} );
+		};
 	} else {
 		buttonProps.onClick = () => {
 			addToCart();
-			dispatchStoreEvent( 'add-cart-item', {
+			dispatchStoreEvent( 'cart-add-item', {
 				product,
 			} );
 		};

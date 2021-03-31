@@ -3,5 +3,5 @@
 	"compilerOptions": {
 		"types": [ "gtag.js" ]
 	},
-	"include": [ ".", "../../type-defs/**.ts", "../../mapped-types.ts" ]
+	"include": [ ".", "../../type-defs", "../../mapped-types.ts" ]
 }

@@ -3,6 +3,8 @@
 /**
  * External dependencies
  */
+import { isEqual } from 'lodash';
+import { useRef } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useEditorContext } from '@woocommerce/base-context';
@@ -113,6 +115,7 @@ export const useStoreCart = (
 	const { isEditor, previewData } = useEditorContext();
 	const previewCart = previewData?.previewCart || {};
 	const { shouldSelect } = options;
+	const currentResults = useRef();
 
 	const results: StoreCart = useSelect(
 		( select, { dispatch } ) => {
@@ -188,5 +191,13 @@ export const useStoreCart = (
 		},
 		[ shouldSelect ]
 	);
-	return results;
+
+	if (
+		! currentResults.current ||
+		! isEqual( currentResults.current, results )
+	) {
+		currentResults.current = results;
+	}
+
+	return currentResults.current;
 };

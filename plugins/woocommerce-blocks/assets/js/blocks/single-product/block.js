@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
+import { useEffect } from '@wordpress/element';
 import { withProduct } from '@woocommerce/block-hocs';
 import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
+import { useStoreEvents } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -24,8 +26,16 @@ import { BLOCK_NAME } from './constants';
  * @param {React.ReactChildren} props.children
  */
 const Block = ( { isLoading, product, children } ) => {
+	const { dispatchStoreEvent } = useStoreEvents();
 	const className = 'wc-block-single-product wc-block-layout';
 	const noticeContext = `woocommerce/single-product/${ product?.id || 0 }`;
+
+	useEffect( () => {
+		dispatchStoreEvent( 'product-render', {
+			product,
+			listName: BLOCK_NAME,
+		} );
+	}, [ product, dispatchStoreEvent ] );
 
 	return (
 		<InnerBlockLayoutContextProvider

@@ -147,12 +147,10 @@ const ProductList = ( {
 
 	// If the product list changes, trigger an event.
 	useEffect( () => {
-		if ( products.length > 0 ) {
-			dispatchStoreEvent( 'list-products', {
-				products,
-				listName: parentName,
-			} );
-		}
+		dispatchStoreEvent( 'product-list-render', {
+			products,
+			listName: parentName,
+		} );
 	}, [ products, parentName, dispatchStoreEvent ] );
 
 	// If query state (excluding pagination/sorting attributes) changed, reset pagination to the first page.
