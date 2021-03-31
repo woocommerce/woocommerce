@@ -8,7 +8,7 @@
     "psr/container": "^1.0"
   },
   "require-dev": {
-    "league/container": "3.3.3"
+    "league/container": "3.3.5"
   },
   "config": {
     "platform": {
