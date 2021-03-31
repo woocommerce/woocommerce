@@ -1,6 +1,6 @@
 .wc-block-components-totals-coupon__form {
 	display: flex;
-	margin-bottom: 0;
+	margin-bottom: 0.5em;
 	width: 100%;
 
 	.wc-block-components-totals-coupon__input {
@@ -22,10 +22,4 @@
 .wc-block-components-totals-coupon__content {
 	flex-direction: column;
 	position: relative;
-
-	.wc-block-components-validation-error {
-		margin-top: $gap-smaller;
-		position: relative;
-		width: 100%;
-	}
 }
