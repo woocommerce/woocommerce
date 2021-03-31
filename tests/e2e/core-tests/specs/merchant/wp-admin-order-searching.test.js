@@ -37,11 +37,9 @@ const runOrderSearchingTest = () => {
 			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
 			await clearAndFillInput('#_shipping_city', 'Buffalo');
 			await clearAndFillInput('#_shipping_postcode', '14201');
-			await page.keyboard.press('Tab');
-			await page.keyboard.press('Tab');
-			await page.keyboard.press('Enter');
-			await page.type('input.select2-search__field', 'New York');
-			await page.keyboard.press('Enter');
+			await page.waitFor(1000); // to avoid flakyness
+			await page.click('#select2-_shipping_state-container');
+			await page.select('select[name="_shipping_state"]', 'NY');
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
