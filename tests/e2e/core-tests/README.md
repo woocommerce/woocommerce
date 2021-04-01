@@ -77,6 +77,7 @@ The functions to access the core tests are:
   - `runSingleProductPageTest` - Shopper can view single product page in many variations (simple, variable, grouped)
   - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
   - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
+  - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
 
 ### REST API
 
