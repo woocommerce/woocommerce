@@ -15,6 +15,6 @@ jobs:
           days-before-issue-stale: 7
           days-before-issue-close: 7
           days-before-pr-close: -1
-          only-issue-label: 'needs feedback'
+          only-issue-labels: 'needs feedback'
           close-issue-label: "category: can't reproduce"
           debug-only: true
