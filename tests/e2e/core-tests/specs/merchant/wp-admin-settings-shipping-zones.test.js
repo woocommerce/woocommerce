@@ -17,7 +17,7 @@ const {
 const config = require( 'config' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 const simpleProductName = config.get( 'products.simple.name' );
-const california = 'California, United States (US)';
+const california = 'state:US:CA';
 const sanFranciscoZIP = '94107';
 const shippingZoneNameUS = 'US with Flat rate';
 const shippingZoneNameFL = 'CA with Free shipping';
@@ -90,10 +90,6 @@ const runAddNewShippingZoneTest = () => {
 			await selectOptionInSelect2('New York');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
-			// Set shipping postcode to 10010
-			await clearAndFillInput('#calc_shipping_postcode', '10010');
-			await expect(page).toClick('button[name="calc_shipping"]');
-
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
@@ -102,6 +98,7 @@ const runAddNewShippingZoneTest = () => {
 
 		it('allows customer to benefit from a Free shipping if in CA', async () => {
 			await page.reload();
+			
 			// Set shipping state to California
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_state-container');
@@ -119,6 +116,7 @@ const runAddNewShippingZoneTest = () => {
 
 		it('allows customer to benefit from a free Local pickup if in SF', async () => {
 			await page.reload();
+
 			// Set shipping postcode to 94107
 			await expect(page).toClick('a.shipping-calculator-button');
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
