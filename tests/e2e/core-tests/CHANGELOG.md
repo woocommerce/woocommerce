@@ -2,6 +2,10 @@
 
 # 0.1.3
 
+## Added
+
+- Shopper My Account Create Account
+
 ## Fixed
 
 - removed use of ES6 `import`
