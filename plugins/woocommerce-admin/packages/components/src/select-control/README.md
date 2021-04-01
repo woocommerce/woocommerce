@@ -21,7 +21,7 @@ const options = [
 
 <SelectControl
 	label="Single value"
-	onChange={ selected => setState( { singleSelected: selected } ) }
+	onChange={ ( selected ) => setState( { singleSelected: selected } ) }
 	options={ options }
 	placeholder="Start typing to filter options..."
 	selected={ singleSelected }
@@ -49,3 +49,10 @@ const options = [
 | `showClearButton`        | boolean      | `false`    | Render a 'Clear' button next to the input box to remove its contents                                                                                            |
 | `hideBeforeSearch`       | boolean      | `false`    | Only show list options after typing a search query                                                                                                              |
 | `staticList`             | boolean      | `false`    | Render results list positioned statically instead of absolutely                                                                                                 |
+
+### onChange value
+
+The onChange value defaults to an array of the selected option(s), but will also reflect what has been passed in the `selected` prop.
+If the `selected` prop has the value set as a `string`, the `onChange` method will also be called with a string value - the `key` of the selected option (if multiple is `false`).
+
+Only string or array are the supported types here.

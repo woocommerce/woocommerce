@@ -11,6 +11,7 @@
 -   Deprecate use of `<Card>` in favor of the `<Card>` component in `@wordpress/components`.
 -   Fixing screen reader text being undefined for report `<Table>`
 -   Update `<SearchListControl />` to use checkbox and radio inputs.
+-   Fix <SelectControl /> so the onChange value type always matches the selected type. #6594
 
 ## Breaking changes
 

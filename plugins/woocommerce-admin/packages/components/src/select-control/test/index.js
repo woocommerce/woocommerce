@@ -200,4 +200,104 @@ describe( 'SelectControl', () => {
 
 		expect( getAllByRole( 'option' ) ).toHaveLength( 1 );
 	} );
+
+	describe( 'selected value', () => {
+		it( 'should return an array if array', async () => {
+			const onChangeMock = jest.fn();
+			const { getByRole } = render(
+				<SelectControl
+					isSearchable
+					selected={ [ { ...options[ 0 ] } ] }
+					options={ options }
+					onSearch={ () => options }
+					onFilter={ () => options }
+					onChange={ onChangeMock }
+				/>
+			);
+
+			userEvent.clear( getByRole( 'combobox' ) );
+			userEvent.type( getByRole( 'combobox' ), 'test' );
+
+			// Wait for the search promise to resolve.
+			await waitFor( () =>
+				expect(
+					getByRole( 'option', { name: 'bar' } )
+				).toBeInTheDocument()
+			);
+			userEvent.click( getByRole( 'option', { name: 'bar' } ) );
+			expect( onChangeMock ).toHaveBeenCalledWith(
+				[ options[ 2 ] ],
+				'test'
+			);
+		} );
+
+		it( 'should return key value as string if selected is string', async () => {
+			const onChangeMock = jest.fn();
+			const { getByRole } = render(
+				<SelectControl
+					isSearchable
+					selected={ options[ 0 ].key }
+					options={ options }
+					onSearch={ () => options }
+					onFilter={ () => options }
+					onChange={ onChangeMock }
+				/>
+			);
+
+			userEvent.clear( getByRole( 'combobox' ) );
+			userEvent.type( getByRole( 'combobox' ), 'test' );
+
+			// Wait for the search promise to resolve.
+			await waitFor( () =>
+				expect(
+					getByRole( 'option', { name: 'bar' } )
+				).toBeInTheDocument()
+			);
+			userEvent.click( getByRole( 'option', { name: 'bar' } ) );
+			expect( onChangeMock ).toHaveBeenCalledWith(
+				options[ 2 ].key,
+				'test'
+			);
+		} );
+
+		describe( 'control onChange', () => {
+			it( 'should return array if selected is array and onChange triggered from control', () => {
+				const onChangeMock = jest.fn();
+				const { getByRole } = render(
+					<SelectControl
+						isSearchable
+						selected={ [ { ...options[ 0 ] } ] }
+						options={ options }
+						onSearch={ () => options }
+						onFilter={ () => options }
+						onChange={ onChangeMock }
+					/>
+				);
+
+				userEvent.clear( getByRole( 'combobox' ) );
+				userEvent.type( getByRole( 'combobox' ), '{backspace}' );
+
+				expect( onChangeMock ).toHaveBeenCalledWith( [], '' );
+			} );
+
+			it( 'should return string if selected is string and onChange triggered from control', () => {
+				const onChangeMock = jest.fn();
+				const { getByRole } = render(
+					<SelectControl
+						isSearchable
+						selected={ options[ 0 ].key }
+						options={ options }
+						onSearch={ () => options }
+						onFilter={ () => options }
+						onChange={ onChangeMock }
+					/>
+				);
+
+				userEvent.clear( getByRole( 'combobox' ) );
+				userEvent.type( getByRole( 'combobox' ), '{backspace}' );
+
+				expect( onChangeMock ).toHaveBeenCalledWith( '', '' );
+			} );
+		} );
+	} );
 } );
