@@ -149,7 +149,7 @@ const shopper = {
 		// Remove coupons if they exist
 		if ( await page.$( '.woocommerce-remove-coupon' ) !== null ) {
 			await page.click( '.woocommerce-remove-coupon' );
-			await uiUnblocked()
+			await uiUnblocked();
 		}
 
 		await page.waitForSelector('.woocommerce-info');
