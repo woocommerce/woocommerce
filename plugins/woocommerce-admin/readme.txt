@@ -82,7 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Check active plugins before getting the PayPal onboarding status #6625
 
-== 2.2.0 3/26/2021 ==
+== 2.2.0 3/30/2021 ==
 
 - Fix: Check if features are currently being enabled #6688
 - Add: Next new novel navigation nudge note #6610
