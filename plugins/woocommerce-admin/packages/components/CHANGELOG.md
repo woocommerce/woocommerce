@@ -1,4 +1,4 @@
-# Unreleased
+# 6.0.0
 
 -   Change styling of `<ProductImage />`.
 -   Remove the `showCount` prop from `<SearchListItem>`. Count will always be displayed if any of those props is not undefined/null: `countLabel` and `item.count`.
