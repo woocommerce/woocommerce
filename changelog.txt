@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 5.2.0 RC 2021-03-30 =
+
+* Update - WooCommerce Admin package 2.1.4. #29520
+* Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
+* Fix - Wrong logic for including or excluding the payments step in the list of completed tasks in the onboarding wizard. #29518
+
+**WooCommerce Admin - 2.1.4**
+
+* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
+
 = 5.2.0 beta 2021-03-23 =
 
 **WooCommerce**
@@ -42,6 +52,8 @@
 * Fix - add validation of the posted country codes on checkout. #28849
 * Fix - Correctly display pagination arrows on RTL languages. #28523
 * Fix - Invalid refund amount error on $0 refund when number of decimals is equal to 0. #27277
+* Fix - "Sale" badge misaligned on products when displaying 1 item per row. #29425
+* Fix - Revert a replacement of wp_redirect to wp_safe_redirect in WC_Checkout::process_order_payment that caused issues in the default PayPal interface. #29459
 * Tweak - Added the Mercado Pago logo into the assets/images folder in order to use it in the payments setup task. #29365
 * Tweak - Update the contributor guidelines. #29150
 * Tweak - Introduced phone number input validation. #27242
@@ -1342,6 +1354,7 @@
 * Fix - Don't show duplicated update notifications on Woo Screens. #25828
 * Fix - Escape MaxMind database URL. #25682
 * Fix - System status report should correctly identify inactive package. #25830
+* Fix - "Sale" badge misaligned on products when displaying 1 item per row. #29425
 * Dev - Added support for placeholder attribute in quantity inputs. #25418
 * Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
 * Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320

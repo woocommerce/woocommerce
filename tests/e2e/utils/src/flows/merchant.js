@@ -19,7 +19,9 @@ const {
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
 	WP_ADMIN_WC_SETTINGS,
-	WP_ADMIN_NEW_SHIPPING_ZONE
+	WP_ADMIN_NEW_SHIPPING_ZONE,
+	WP_ADMIN_ANALYTICS_PAGES,
+	WP_ADMIN_ALL_USERS_VIEW,
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );
@@ -179,6 +181,18 @@ const merchant = {
 
 	openEmailLog: async () => {
 		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAnalyticsPage: async ( pageName ) => {
+		await page.goto( WP_ADMIN_ANALYTICS_PAGES + pageName, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAllUsersView: async () => {
+		await page.goto( WP_ADMIN_ALL_USERS_VIEW, {
 			waitUntil: 'networkidle0',
 		} );
 	},

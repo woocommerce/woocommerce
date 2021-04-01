@@ -62,6 +62,7 @@ The functions to access the core tests are:
   - `runTaxSettingsTest` - Merchant can update tax settings
   - `runUpdateGeneralSettingsTest` - Merchant can update general settings
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
 
 ### Shopper
 
@@ -75,6 +76,7 @@ The functions to access the core tests are:
   - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
   - `runSingleProductPageTest` - Shopper can view single product page in many variations (simple, variable, grouped)
   - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
+  - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
 
 ### REST API
 
