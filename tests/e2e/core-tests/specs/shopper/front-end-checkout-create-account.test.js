@@ -28,10 +28,14 @@ const runCheckoutCreateAccountTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
+
+			// Set checkbox for creating an account during checkout
 			await merchant.openSettings('account');
 			await setCheckbox('#woocommerce_enable_signup_and_login_from_checkout');
 			await settingsPageSaveChanges();
 			await merchant.logout();
+
+			// Add simple product to cart and proceed to checkout
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await uiUnblocked();
