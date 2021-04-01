@@ -60,12 +60,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -92,12 +89,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </span>
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -124,12 +118,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </span>
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -156,12 +147,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </span>
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -183,12 +171,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -210,12 +195,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>
@@ -283,12 +265,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -310,12 +289,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -337,12 +313,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -364,12 +337,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -391,12 +361,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -418,12 +385,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>
@@ -491,12 +455,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -518,12 +479,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -545,12 +503,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -572,12 +527,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -599,12 +551,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -626,12 +575,9 @@ exports[`SearchListControl should render a search box and list of options with a
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>
@@ -781,12 +727,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -808,12 +751,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -835,12 +775,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -862,12 +799,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -889,12 +823,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -916,12 +847,9 @@ exports[`SearchListControl should render a search box and list of options, with 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>
@@ -1133,12 +1061,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elder<strong>berry</strong>",
-              }
-            }
-          />
+          >
+            Elder
+            <strong>
+              berry
+            </strong>
+            
+          </span>
         </span>
       </label>
     </li>
@@ -1160,12 +1089,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mul<strong>berry</strong>",
-              }
-            }
-          />
+          >
+            Mul
+            <strong>
+              berry
+            </strong>
+            
+          </span>
         </span>
       </label>
     </li>
@@ -1234,12 +1164,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elder<strong>berry</strong>",
-              }
-            }
-          />
+          >
+            Elder
+            <strong>
+              bERry
+            </strong>
+            
+          </span>
         </span>
       </label>
     </li>
@@ -1261,12 +1192,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mul<strong>berry</strong>",
-              }
-            }
-          />
+          >
+            Mul
+            <strong>
+              bERry
+            </strong>
+            
+          </span>
         </span>
       </label>
     </li>
@@ -1387,12 +1319,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -1414,12 +1343,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -1441,12 +1367,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -1468,12 +1391,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -1495,12 +1415,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -1522,12 +1439,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>
@@ -1691,12 +1605,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Apricots",
-              }
-            }
-          />
+          >
+            Apricots
+          </span>
         </span>
       </label>
     </li>
@@ -1718,12 +1629,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Clementine",
-              }
-            }
-          />
+          >
+            Clementine
+          </span>
         </span>
       </label>
     </li>
@@ -1745,12 +1653,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Elderberry",
-              }
-            }
-          />
+          >
+            Elderberry
+          </span>
         </span>
       </label>
     </li>
@@ -1772,12 +1677,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Guava",
-              }
-            }
-          />
+          >
+            Guava
+          </span>
         </span>
       </label>
     </li>
@@ -1799,12 +1701,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Lychee",
-              }
-            }
-          />
+          >
+            Lychee
+          </span>
         </span>
       </label>
     </li>
@@ -1826,12 +1725,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         >
           <span
             className="woocommerce-search-list__item-name"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Mulberry",
-              }
-            }
-          />
+          >
+            Mulberry
+          </span>
         </span>
       </label>
     </li>

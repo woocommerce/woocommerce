@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Fragment } from '@wordpress/element';
 import { escapeRegExp, first, last, isNil } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -9,7 +10,18 @@ function getHighlightedName( name, search ) {
 		return name;
 	}
 	const re = new RegExp( escapeRegExp( search ), 'ig' );
-	return name.replace( re, '<strong>$&</strong>' );
+	const nameParts = name.split( re );
+	return nameParts.map( ( part, i ) => {
+		if ( i === 0 ) {
+			return part;
+		}
+		return (
+			<Fragment key={ i }>
+				<strong>{ search }</strong>
+				{ part }
+			</Fragment>
+		);
+	} );
 }
 
 function getBreadcrumbsForDisplay( breadcrumbs ) {
@@ -77,12 +89,9 @@ const SearchListItem = ( {
 						{ getBreadcrumbsForDisplay( item.breadcrumbs ) }
 					</span>
 				) : null }
-				<span
-					className="woocommerce-search-list__item-name"
-					dangerouslySetInnerHTML={ {
-						__html: getHighlightedName( item.name, search ),
-					} }
-				/>
+				<span className="woocommerce-search-list__item-name">
+					{ getHighlightedName( item.name, search ) }
+				</span>
 			</span>
 
 			{ !! showCount && (
