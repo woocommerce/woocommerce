@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Fix: Update folded header style #6724
 - Fix: Fix unreleated variations showing up in the Products reports #6647
 - Tweak: Add tracking data for the preview site btn #6623
 - Tweak: Add check to see if value for contains is array, show warning if not. #6645
