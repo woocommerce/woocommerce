@@ -8,7 +8,9 @@ $headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-
 $body: nonbreakingspaceoverride, "Hoefler Text", garamond, "Times New Roman", serif;
 
 $body-color: #111;
-$highlights-color: #cd2653;
+:root {
+	--wc-highlight: #cd2653;
+}:
 
 /**
  * Fonts
@@ -157,7 +159,7 @@ a.button {
 	top: 0;
 	left: 0;
 	display: inline-block;
-	background: $highlights-color;
+	background: var( --wc-highlight );
 	color: #fff;
 	font-family: $headings;
 	font-size: 1.7rem;
@@ -245,7 +247,7 @@ a.button {
 .woocommerce-info {
 	background: #eee;
 	color: #000;
-	border-top: 2px solid $highlights-color;
+	border-top: 2px solid var( --wc-highlight );
 
 	a {
 		color: #444;
@@ -255,7 +257,7 @@ a.button {
 		}
 
 		&.button {
-			background: $highlights-color;
+			background: var( --wc-highlight );
 			color: #f5efe0;
 		}
 	}
@@ -264,7 +266,7 @@ a.button {
 .woocommerce-store-notice {
 	background: #eee;
 	color: #000;
-	border-top: 2px solid $highlights-color;
+	border-top: 2px solid var( --wc-highlight );
 	padding: 2rem;
 	position: absolute;
 	top: 0;
@@ -459,7 +461,7 @@ a.remove {
 	color: #000;
 
 	&:hover {
-		background: $highlights-color;
+		background: var( --wc-highlight );
 		color: #fff !important;
 	}
 }
@@ -772,8 +774,8 @@ a.reset_variations {
 			&.active {
 
 				a {
-					color: $highlights-color;
-					box-shadow: 0 2px 0 $highlights-color;
+					color: var( --wc-highlight );
+					box-shadow: 0 2px 0 var( --wc-highlight );
 				}
 			}
 		}
@@ -1170,7 +1172,7 @@ a.reset_variations {
 
 				a {
 					text-decoration: underline;
-					color: $highlights-color;
+					color: var( --wc-highlight );
 				}
 			}
 		}
@@ -1742,7 +1744,7 @@ a.reset_variations {
 		.form-row.woocommerce-invalid {
 
 			input.input-text {
-				border: 2px solid $highlights-color;
+				border: 2px solid var( --wc-highlight );
 			}
 		}
 
