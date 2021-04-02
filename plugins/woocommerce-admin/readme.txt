@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Update: Update choose niche note cta URL #6733
 - Fix: Update folded header style #6724
 - Fix: Fix unreleated variations showing up in the Products reports #6647
 - Tweak: Add tracking data for the preview site btn #6623

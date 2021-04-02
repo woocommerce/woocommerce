@@ -73,7 +73,7 @@ class ChooseNiche {
 		$note->add_action(
 			'choose-niche',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://woocommerce.com/posts/idea-to-first-ecommerce-customer-finding-an-audience/?utm_source=inbox',
+			'https://woocommerce.com/from-idea-to-first-customer/?utm_source=inbox',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);
