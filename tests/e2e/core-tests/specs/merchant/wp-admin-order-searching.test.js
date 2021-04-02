@@ -6,7 +6,6 @@
 const {
 	merchant,
 	clearAndFillInput,
-	selectOptionInSelect2,
 	searchForOrder,
 	createSimpleProduct,
 	addProductToOrder,
@@ -20,40 +19,36 @@ const runOrderSearchingTest = () => {
 			await merchant.login();
 			await createSimpleProduct('Wanted Product');
 
-			await Promise.all([
-				// Create new order for testing
-				await merchant.openNewOrder(),
-				await page.waitForSelector('#order_status'),
-				await page.click('#customer_user'),
-				await page.click('span.select2-search > input.select2-search__field'),
-				await page.type('span.select2-search > input.select2-search__field', 'Customer'),
-				await page.waitFor(2000), // to avoid flakyness
-				await page.keyboard.press('Enter'),
-			]);
+			// Create new order for testing
+			await merchant.openNewOrder();
+			await page.waitForSelector('#order_status');
+			await page.click('#customer_user');
+			await page.click('span.select2-search > input.select2-search__field');
+			await page.type('span.select2-search > input.select2-search__field', 'Customer');
+			await page.waitFor(2000); // to avoid flakyness
+			await page.keyboard.press('Enter');
 
-			await Promise.all([
-				// Change the shipping data
-				await page.waitFor(1000), // to avoid flakiness
-				await page.waitForSelector('#_shipping_first_name'),
-				await clearAndFillInput('#_shipping_first_name', 'Tim'),
-				await clearAndFillInput('#_shipping_last_name', 'Clark'),
-				await clearAndFillInput('#_shipping_address_1', 'Oxford Ave'),
-				await clearAndFillInput('#_shipping_address_2', 'Linwood Ave'),
-				await clearAndFillInput('#_shipping_city', 'Buffalo'),
-				await clearAndFillInput('#_shipping_postcode', '14201'),
-				await page.keyboard.press('Tab'),
-				await page.keyboard.press('Tab'),
-				await page.keyboard.press('Enter'),
-				await page.select('select[name="_shipping_state"]', 'NY'),
-			]);
+			// Change the shipping data
+			await page.waitFor(1000); // to avoid flakiness
+			await page.click('.billing-same-as-shipping');
+			await page.keyboard.press('Enter');
+			await page.waitForSelector('#_shipping_first_name');
+			await clearAndFillInput('#_shipping_first_name', 'Tim');
+			await clearAndFillInput('#_shipping_last_name', 'Clark');
+			await clearAndFillInput('#_shipping_address_1', 'Oxford Ave');
+			await clearAndFillInput('#_shipping_address_2', 'Linwood Ave');
+			await clearAndFillInput('#_shipping_city', 'Buffalo');
+			await clearAndFillInput('#_shipping_postcode', '14201');
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
 			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
 
-			// Save new order
+			// Save new order and add desired product to order
 			await clickUpdateOrder('Order updated.', true);
 			await addProductToOrder(orderId, 'Wanted Product');
+
+			// Open All Orders view
 			await merchant.openAllOrdersView();
 		});
 
@@ -126,7 +121,7 @@ const runOrderSearchingTest = () => {
 		})
 
 		it('can search for order by shipping state name', async () => {
-			await searchForOrder('NY', orderId, 'John Doe');
+			await searchForOrder('CA', orderId, 'John Doe');
 		})
 
 		it('can search for order by item name', async () => {
