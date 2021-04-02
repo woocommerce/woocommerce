@@ -54,7 +54,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 
 		$desc_str = sprintf(
 			'<div class="wc-block-featured-category__description">%s</div>',
-			wc_format_content( $category->description )
+			wc_format_content( wp_kses_post( $category->description ) )
 		);
 
 		$output  = sprintf( '<div class="%1$s" style="%2$s">', esc_attr( $this->get_classes( $attributes ) ), esc_attr( $this->get_styles( $attributes, $category ) ) );
