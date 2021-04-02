@@ -2,9 +2,7 @@
 
 ## Unreleased
 
-
 ### Fix varation bug with Products reports #6647
-
 
 1. Add two variable products. You want to have at least one variable for each product. 
 
@@ -20,6 +18,12 @@ Product B - size:medium
 5. Confirm that the "Variations" table shows the correct variations. If you searched for the 'Product A', then you should see color:black and color:white.
 
 In case the report shows "no data", please reimport historical data by following the guide on [here](https://docs.woocommerce.com/document/woocommerce-analytics/#analytics-settings__import-historical-data)
+
+### Update WC Payments plugin copy #6734
+
+1. Install WooCommerce with WooCommerce Payments
+2. Clone this branch and run npm start (only needed if you are using dev version)
+3. Navigate to WooCommerce -> Home and observe the copy change.
 
 ### Check active plugins before getting the PayPal onboarding status #6625
 

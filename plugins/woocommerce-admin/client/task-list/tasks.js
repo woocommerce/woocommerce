@@ -150,7 +150,10 @@ export function getAllTasks( {
 		},
 		{
 			key: 'woocommerce-payments',
-			title: __( 'Set up WooCommerce Payments', 'woocommerce-admin' ),
+			title: __(
+				'Get paid with WooCommerce Payments',
+				'woocommerce-admin'
+			),
 			container: <Fragment />,
 			completed: wcPayIsConnected,
 			onClick: async ( e ) => {
