@@ -7,15 +7,12 @@ import { Navigation } from '@woocommerce/experimental';
 import { NAVIGATION_STORE_NAME, useUser } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
+import { addHistoryListener } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import {
-	addHistoryListener,
-	getMappedItemsCategories,
-	getMatchingItem,
-} from '../../utils';
+import { getMappedItemsCategories, getMatchingItem } from '../../utils';
 import Header from '../header';
 import { PrimaryMenu } from './primary-menu';
 import { SecondaryMenu } from './secondary-menu';

@@ -9,6 +9,7 @@ const defaultState = {
 	menuItems: [],
 	favorites: [],
 	requesting: {},
+	persistedQuery: {},
 };
 
 describe( 'navigation reducer', () => {

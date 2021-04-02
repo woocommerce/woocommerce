@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+### Retain persisted queries when navigating to Homescreen #6614
+
+1. Go to Analytics Report.
+2. Change Time period.
+3. Navigate to another report.
+4. Notice that the time period stays the same.
+5. Navigate to Homescreen.
+6. Navigate back to previous Analytics Report.
+7. Ensure that the time period is _still_ what you set on step 2.
+
 ### Fix varation bug with Products reports #6647
 
-1. Add two variable products. You want to have at least one variable for each product. 
+1. Add two variable products. You want to have at least one variable for each product.
 
 Product A - color:black
 Product A - color:white
@@ -27,31 +37,31 @@ In case the report shows "no data", please reimport historical data by following
 
 ### Check active plugins before getting the PayPal onboarding status #6625
 
--  Go to the WooCommerce home page
--  Open your browser console
--  Choose payment methods
--  See no error message
+-   Go to the WooCommerce home page
+-   Open your browser console
+-   Choose payment methods
+-   See no error message
 
 ## 2.2.0
 
 ### Fixed event tracking for merchant email notes #6616
 
-- Create a brand new site.
-- Install a plugin to log every sent email (you can use [WP mail logging](https://wordpress.org/plugins/wp-mail-logging/)).
-- Install and active [this gist](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) to create an email note. Just download the file and install it as a plugin.
-- After activating the plugin, press `Add Email Notes` to create a note.
-- Now go to WooCommerce > Settings > Email (`/wp-admin/admin.php?page=wc-settings&tab=email`) and check the checkbox `Enable email insights` and save changes.
-- You will need to run the cron so you can install a plugin like [WP Crontol](https://wordpress.org/plugins/wp-crontrol/)
-- Go to Tools > Cron events (`/wp-admin/tools.php?page=crontrol_admin_manage_page`).
-- Call the hook `wc_admin_daily` by pressing its `Run Now` link. (https://user-images.githubusercontent.com/1314156/111530634-4929ce80-8742-11eb-8b53-de936ceea76e.png)
-- Go to Tools > WP Mail Logging Log (`/wp-admin/tools.php?page=wpml_plugin_log`) and verify the testing email note was sent.
-- View the message and press `Test action` (a broken image will be visible under the button, but that's expected and only visible in a test environment).
-
+-   Create a brand new site.
+-   Install a plugin to log every sent email (you can use [WP mail logging](https://wordpress.org/plugins/wp-mail-logging/)).
+-   Install and active [this gist](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) to create an email note. Just download the file and install it as a plugin.
+-   After activating the plugin, press `Add Email Notes` to create a note.
+-   Now go to WooCommerce > Settings > Email (`/wp-admin/admin.php?page=wc-settings&tab=email`) and check the checkbox `Enable email insights` and save changes.
+-   You will need to run the cron so you can install a plugin like [WP Crontol](https://wordpress.org/plugins/wp-crontrol/)
+-   Go to Tools > Cron events (`/wp-admin/tools.php?page=crontrol_admin_manage_page`).
+-   Call the hook `wc_admin_daily` by pressing its `Run Now` link. (https://user-images.githubusercontent.com/1314156/111530634-4929ce80-8742-11eb-8b53-de936ceea76e.png)
+-   Go to Tools > WP Mail Logging Log (`/wp-admin/tools.php?page=wpml_plugin_log`) and verify the testing email note was sent.
+-   View the message and press `Test action` (a broken image will be visible under the button, but that's expected and only visible in a test environment).
 
 ### Payments task: include Mercado Pago #6572
 
-- Create a brand new store.
-- Set one of the following countries in the first OBW step:
+-   Create a brand new store.
+-   Set one of the following countries in the first OBW step:
+
 ```
 Mexico
 Brazil
@@ -61,13 +71,14 @@ Colombia
 Peru
 Uruguay
 ```
-- Continue with the OBW and finish it up. 
-- Select `Choose payment methods` in the setup task list (`Get ready to start selling`).
-- Press the `Setup` button in the `Mercado Pago Payments` box.
-- Try the links presented after the plugin's installation and verify they are working.
-- Confirm that the `Mercado Pago payments for WooCommerce` plugin was installed.
-- Press `Continue`.
-- Now the `Mercado Pago Payments` option should appear as active.
+
+-   Continue with the OBW and finish it up.
+-   Select `Choose payment methods` in the setup task list (`Get ready to start selling`).
+-   Press the `Setup` button in the `Mercado Pago Payments` box.
+-   Try the links presented after the plugin's installation and verify they are working.
+-   Confirm that the `Mercado Pago payments for WooCommerce` plugin was installed.
+-   Press `Continue`.
+-   Now the `Mercado Pago Payments` option should appear as active.
 
 ### Update contrast and hover / active colors for analytics dropdown buttons #6504
 
@@ -87,7 +98,7 @@ Uruguay
 
 ### Close activity panel tabs by default and track #6566
 
-1. Open your browser console and enter `localStorage.setItem( 'debug', 'wc-admin:tracks' );`.  Make sure the "Verbose" is selected under the levels shown.
+1. Open your browser console and enter `localStorage.setItem( 'debug', 'wc-admin:tracks' );`. Make sure the "Verbose" is selected under the levels shown.
 2. With the task list enabled, navigate to the homescreen.
 3. Check that the `wcadmin_activity_panel_visible_panels` event is shown with `taskList: true` in its data.
 4. Hide the task list.
@@ -102,26 +113,26 @@ Uruguay
 4. Note the tracks information in the console includes `homescreen` for the `taskName` property.
 5. Click on a help item.
 6. Note `homescreen` is used for the `taskName` in the help panel click tracks event.
-6. Navigate to any task in the task list.
-7. Click on the "Help" tab.
-8. Note the `taskName` for the event is the current task.
-9. Click on a help item.
-10. Note the `taskName` for the event is the current task.
+7. Navigate to any task in the task list.
+8. Click on the "Help" tab.
+9. Note the `taskName` for the event is the current task.
+10. Click on a help item.
+11. Note the `taskName` for the event is the current task.
 
 ### Add gross sales column to CSV export #6567
 
 1. Navigate to Analytics -> Revenue
 2. Adjust the date filter so that more than 25 rows are visible
-4. Click "Download"
-5. Click the download link in the email
-6. See gross sales column
+3. Click "Download"
+4. Click the download link in the email
+5. See gross sales column
 
 ### Add customer name column to CSV export #6556
 
-- Create more than 25 orders
-- Go to Analytics -> Orders -> Click "Download"
-- Click download link in the email
-- See customer column with customer full name
+-   Create more than 25 orders
+-   Go to Analytics -> Orders -> Click "Download"
+-   Click download link in the email
+-   See customer column with customer full name
 
 ### Allow the manager role to query certain options #6577
 
@@ -129,9 +140,8 @@ Testing `woocommerce_ces_tracks_queue`
 
 1. Checkout this branch.
 2. Open browser inspector and select the Network tab.
-2. Navigate to WooCommerce -> Settings.
-3. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user` returns 200 status.
-
+3. Navigate to WooCommerce -> Settings.
+4. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user` returns 200 status.
 
 Testing `woocommerce_navigation_intro_modal_dismissed`
 
@@ -140,6 +150,7 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 3. Open browser inspector and select the Network tab.
 4. Navigate to WooCommerce -> Home
 5. Confirm that the request to `/wp-json/wc-admin/options?options=woocommerce_navigation_intro_modal_dismissed&_locale=user` returns 200 status.
+
 ### Refactor profile wizard benefits step and add tests #6583
 
 1. Deactivate Jetpack and/or WooCommerce Services.
@@ -172,7 +183,6 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 4. Open IE 11 and start OBW
 5. Confirm that the themes are displayed correctly.
 
-
 ### Fix hidden menu title on smaller screens #6562
 
 1. Enable the new navigation.
@@ -181,22 +191,24 @@ Testing `woocommerce_navigation_intro_modal_dismissed`
 
 ### Add filter to profile wizard steps #6564
 
-1. Add the following JS to your admin head.  You can use a plugin like "Add Admin Javascript" to do this:
+1. Add the following JS to your admin head. You can use a plugin like "Add Admin Javascript" to do this:
+
 ```
 wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin', ( steps ) => {
 	return steps.filter( ( step ) => step.key !== 'product-types' );
 } );
 ```
+
 2. Navigate to the profile wizard. `wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard`.
 3. Make sure the filtered step (product types) is not shown.
 
 ### Adjust targeting store age: 2 - 5 days for the Add First Product note #6554
 
-- Checkout this branch.
-- Create a zip for testing with `npm run zip:test`.
-- Create a `jurassic.ninja` instance.
-- Upload the plugin and activate it.
-- Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
+-   Checkout this branch.
+-   Create a zip for testing with `npm run zip:test`.
+-   Create a `jurassic.ninja` instance.
+-   Upload the plugin and activate it.
+-   Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
 
 ### Update Insight inbox message #6555
 
@@ -207,25 +219,31 @@ wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
 
-- Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
-- You should have received an email like the image above.
-- Verify the note's status is `sent`. You can use an SQL statement like this:
+-   Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   You should have received an email like the image above.
+-   Verify the note's status is `sent`. You can use an SQL statement like this:
+
 ```
 SELECT `status` FROM `wp_wc_admin_notes` WHERE `name` = 'wc-admin-add-first-product-note'
 ```
-- Now delete the note with an SQL statement like:
+
+-   Now delete the note with an SQL statement like:
+
 ```
 DELETE FROM `wp_wc_admin_notes` WHERE `name` = 'wc-admin-add-first-product-note';
 ```
-- Add a new order and run the cron.
-- No note should have been added.
-- Remove the order, add a product and run the cron.
-- No note should have been added.
-- Delete the product and modify the store creation date to 7 days with an SQL statement like:
+
+-   Add a new order and run the cron.
+-   No note should have been added.
+-   Remove the order, add a product and run the cron.
+-   No note should have been added.
+-   Delete the product and modify the store creation date to 7 days with an SQL statement like:
+
 ```
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
-- No note should have been added.
+
+-   No note should have been added.
 
 ### Improve WC Shipping & Tax logic #6547
 
@@ -245,29 +263,31 @@ UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7
 4. When you get to the Business Details step, expand "Add recommended business features to my site" by clicking the down arrow.
 5. Confirm that "WooCommerce Shipping" is not listed
 
-**Scenario 3** -  Include WooCommerce Tax if the user is in one of the following countries: US | FR | GB | DE | CA | PL | AU | GR | BE | PT | DK | SE
+**Scenario 3** - Include WooCommerce Tax if the user is in one of the following countries: US | FR | GB | DE | CA | PL | AU | GR | BE | PT | DK | SE
 
-1. Start OBW and enter an address that is in one of the following countries 
+1. Start OBW and enter an address that is in one of the following countries
 
     US | FR | GB | DE | CA | PL | AU | GR | BE | PT | DK | SE
 
 2. Continue to the Business Details step.
 3. Expand "Add recommended business features to my site" by clicking the down arrow.
 4. Confirm that "WooCommerce Tax" is listed.
-3. Install & activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
-4. Navigate to Tools -> Cron Events
-5. Run `wc_admin_daily` job
-6. Navigate to WooCommerce -> Home and confirm the Insight note.
+5. Install & activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
+6. Navigate to Tools -> Cron Events
+7. Run `wc_admin_daily` job
+8. Navigate to WooCommerce -> Home and confirm the Insight note.
 
 ### Use wc filter to get status tabs for tools category #6525
 
 1. Register a new tab via the filter.
+
 ```
 add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
 	$tabs['my-tools-page'] = __( 'My Tools Page', 'your-text-domain' );
 	return $tabs;
 } );
 ```
+
 2. Enable the new navigation.
 3. Make sure the menu item for the registered tab is shown under `Tools`.
 
@@ -304,13 +324,14 @@ add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
 4. Navigate to other tasks such as "Store Details" or "Add products" .
 5. The "Preview Site" should not be shown on the other tasks.
 
-### Store profiler - Added MailPoet to new Business Details step  #6515
+### Store profiler - Added MailPoet to new Business Details step #6515
 
-- Create a brand new site and go to the OBW.
-- In the first OBW step (`Store Details`) set `US` in the `Country / Region` selector.
-- Continue with the profiler.
-- In the 4th step (`Business Details`) choose any of the options in both selectors.
-- Under `Free features` tab, verify that the displayed extensions are:
+-   Create a brand new site and go to the OBW.
+-   In the first OBW step (`Store Details`) set `US` in the `Country / Region` selector.
+-   Continue with the profiler.
+-   In the 4th step (`Business Details`) choose any of the options in both selectors.
+-   Under `Free features` tab, verify that the displayed extensions are:
+
 ```
 Mailpoet
 Facebook
@@ -318,16 +339,19 @@ Google Ads
 Mailchimp
 Creative Mail
 ```
+
 (In that order)
-- Verify that the Creative Mail option copy is `Emails made easy with Creative Mail`.
 
-### Store profiler - Added MailPoet to Business Details step  #6503
+-   Verify that the Creative Mail option copy is `Emails made easy with Creative Mail`.
 
-- Create a brand new site and go to the OBW.
-- In the first OBW step (`Store Details`) set a Country / Region other than `US | BR | FR | ID | GB | DE | VN | CA | PL | MY | AU | NG | GR | BE | PT | DK | SE | JP` (e.g.: Uruguay).
-- Continue with the profiler.
-- In the 4th step (`Business Details`) choose any of the options in both selectors.
-- Verify that the displayed extensions are:
+### Store profiler - Added MailPoet to Business Details step #6503
+
+-   Create a brand new site and go to the OBW.
+-   In the first OBW step (`Store Details`) set a Country / Region other than `US | BR | FR | ID | GB | DE | VN | CA | PL | MY | AU | NG | GR | BE | PT | DK | SE | JP` (e.g.: Uruguay).
+-   Continue with the profiler.
+-   In the 4th step (`Business Details`) choose any of the options in both selectors.
+-   Verify that the displayed extensions are:
+
 ```
 Mailpoet
 Facebook
@@ -335,12 +359,15 @@ Google Ads
 Mailchimp
 Creative Mail
 ```
+
 (In that order)
-- Verify that the Creative Mail option is toggled off by default
+
+-   Verify that the Creative Mail option is toggled off by default
 
 ### Fix double prefixing of navigation URLs #6460
 
 1. Register a navigation menu item with a full URL or admin link.
+
 ```
 	\Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_plugin_item(
 		array(
@@ -351,20 +378,21 @@ Creative Mail
 		)
 	);
 ```
+
 2. Enable the navigation.
 3. Check that the menu item is marked active when visiting that page.
 4. Make sure old menu items are still correctly marked active.
 
 ### Fix summary number style regression on analytics reports #5913
 
-- Go to Analytics
-- See that the active (selected) tab is white, with a highlight above the tab.
-- See that inactive tabs are a lighter shade of grey.
+-   Go to Analytics
+-   See that the active (selected) tab is white, with a highlight above the tab.
+-   See that inactive tabs are a lighter shade of grey.
 
 ### Update payment card style on mobile #6413
 
-- Using a small size screen, go to your WooCommerce -> Home -> Choose payment methods.
-- See that the text descriptions for payment methods have a margin between them and the edge of the screen.
+-   Using a small size screen, go to your WooCommerce -> Home -> Choose payment methods.
+-   See that the text descriptions for payment methods have a margin between them and the edge of the screen.
 
 ### Navigation: Correct error thrown when enabling #6462
 
@@ -375,12 +403,12 @@ Creative Mail
 
 ### Remove Mollie promo note on install #6510
 
-- If you do not currently have the Mollie note on your WooCommerce Admin home screen, you can add a test note with the correct name as follows:
+-   If you do not currently have the Mollie note on your WooCommerce Admin home screen, you can add a test note with the correct name as follows:
     1. install the WooCommerce Admin Test Helper plugin [here](https://github.com/woocommerce/woocommerce-admin-test-helper)
     2. Go to the Admin notes tab
     3. Add an admin note with the name `wc-admin-effortless-payments-by-mollie`
     4. Go to the WCA home screen and verify that your test note is present
-- The note is removed on a new version install, so either install an old version of WCA and upgrade to the current one, or trigger the install process manually:
+-   The note is removed on a new version install, so either install an old version of WCA and upgrade to the current one, or trigger the install process manually:
     1. install the WCA test helper
     2. go to the Tools tab
     3. click the `Trigger WCA install` button
@@ -417,54 +445,63 @@ For each task in that list apart from "Store details":
 1. Observe Square as a payment method option
 
 ### Add CES survey for search product, order, customer #6420
-- Make sure tracking is enabled in settings.
-- Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
-- Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
+
+-   Make sure tracking is enabled in settings.
+-   Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+-   Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
 
 **Testing search on products:**
-- Go to Products > All Products.
-- Type in anything in search bar, click on "Search products".
-- Observe CES prompt "How easy was it to use search?" is displayed.
+
+-   Go to Products > All Products.
+-   Type in anything in search bar, click on "Search products".
+-   Observe CES prompt "How easy was it to use search?" is displayed.
 
 **Testing search on orders:**
-- Go to Orders > Orders.
-- Type in anything in search bar, click on "Search orders".
-- Observe CES prompt "How easy was it to use search?" is displayed.
+
+-   Go to Orders > Orders.
+-   Type in anything in search bar, click on "Search orders".
+-   Observe CES prompt "How easy was it to use search?" is displayed.
 
 **Testing search on customers:**
-- Go to Customers.
-- Type in anything in search bar, and press enter.
-- Observe CES prompt "How easy was it to use search?" is displayed
+
+-   Go to Customers.
+-   Type in anything in search bar, and press enter.
+-   Observe CES prompt "How easy was it to use search?" is displayed
 
 ### Add CES survey for importing products #6419
-- Make sure tracking is enabled in settings.
-- Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
-- Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
-- If you don't have a product CSV export, you can obtain a sample CSV [here](https://gist.githubusercontent.com/ilyasfoo/507f9579531cf4bf50fe4c0e9c48a23d/raw/05e47e6731471464c757e893c3f2d8a9b89453c0/product-export.csv).
-- Go to Products > All Products.
-- Click on "Import".
-- Upload CSV file and finish the import process.
-- Observe CES prompt "How easy was it to import products?" is displayed.
+
+-   Make sure tracking is enabled in settings.
+-   Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+-   Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
+-   If you don't have a product CSV export, you can obtain a sample CSV [here](https://gist.githubusercontent.com/ilyasfoo/507f9579531cf4bf50fe4c0e9c48a23d/raw/05e47e6731471464c757e893c3f2d8a9b89453c0/product-export.csv).
+-   Go to Products > All Products.
+-   Click on "Import".
+-   Upload CSV file and finish the import process.
+-   Observe CES prompt "How easy was it to import products?" is displayed.
 
 ### Add CES survey for adding product categories and tags #6418
-- Make sure tracking is enabled in settings.
-- Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
-- Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
+
+-   Make sure tracking is enabled in settings.
+-   Delete the option `woocommerce_ces_shown_for_actions` to make sure CES prompt triggers when updating settings.
+-   Enable the logging of Tracks events to your browser dev console `localStorage.setItem( 'debug', 'wc-admin:tracks' );`
 
 **Testing product categories:**
-- Go to Products > Categories.
-- Add a new category.
-- Observe CES prompt "How easy was it to add a product category?" is displayed.
+
+-   Go to Products > Categories.
+-   Add a new category.
+-   Observe CES prompt "How easy was it to add a product category?" is displayed.
 
 **Testing product tags:**
-- Go to Products > Tags.
-- Add a new tag.
-- Observe CES prompt "How easy was it to add a product tag?" is displayed.
+
+-   Go to Products > Tags.
+-   Add a new tag.
+-   Observe CES prompt "How easy was it to add a product tag?" is displayed.
 
 **Testing product attributes:**
-- Go to Products > Attributes.
-- Add a new attribute.
-- Observe CES prompt "How easy was it to add a product attribute?" is displayed.
+
+-   Go to Products > Attributes.
+-   Add a new attribute.
+-   Observe CES prompt "How easy was it to add a product attribute?" is displayed.
 
 ### Add paystack as payment option for African countries #6579
 
@@ -483,6 +520,7 @@ For each task in that list apart from "Store details":
 13. Click **Manage**, the secret and public key's should match what you entered in step 9.
 
 # 2.1.3
+
 ### Fix a bug where the JetPack connection flow would not activate #6521
 
 1. With a fresh install of wc-admin and woocommerce, go to the home screen
@@ -506,11 +544,11 @@ Scenario #1
 2. Fill out the store details with a canadian address (addr: 4428 Blanshard, country/region: Canada -- British Columbia, city: Victoria, postcode: V8W 2H9)
 3. Click continue and select **Fashion, apparel, and accessories**, continue, and select **Physical products**, and continue.
 4. The business details tab should show a **Business details** tab, and a **Free features** tab (disabled at first)
-     - There should only be dropdowns visible on the **Business details** step (no checkboxes)
+    - There should only be dropdowns visible on the **Business details** step (no checkboxes)
 5. Select **1-10** for the first dropdown, and **No** for the second, and click Continue.
 6. Click on the expansion icon for the **Add recommended business features to my site**
 7. It should list 7 features, including **WooCommerce Payments** (top one)
-     - Note down the selected features, for step 10
+    - Note down the selected features, for step 10
 8. Click continue, and select your theme, after it should redirect to the home screen (showing the welcome modal, you can step through this).
 9. The home screen task list should include a **Set up WooCommerce Payments** task, and there should also be a **Set up additional payment providers** inbox card displayed (below the task list).
 10. Go to **Plugins > installed Plugins**, check if the selected plugin features selected in step 7 are installed and activated.
@@ -521,8 +559,8 @@ Scenario #2
 2. Fill out the store details with a spanish address (addr: C/ Benito Guinea 52, country/region: Spain -- Barcelona, city: Canet de Mar, postcode: 08360)
 3. Click continue and select **Fashion, apparel, and accessories**, continue, and select **Physical products**, and continue.
 4. On the business details tab select **1-10** for the first dropdown, and **No** for the second.
-     - After filling the dropdowns it should show several checkboxes with plugins (Facebook, mailchimp, creative mail, google ads)
-     - Note which ones you kept selected (you can unselect one or two)
+    - After filling the dropdowns it should show several checkboxes with plugins (Facebook, mailchimp, creative mail, google ads)
+    - Note which ones you kept selected (you can unselect one or two)
 5. Click continue, and select your theme, it should show the **WooCommerce Shipping & Tax** step after, you can click **No thanks**.
 6. You will be redirected to the home screen, showing the welcome modal, you can step through this.
 7. The task list should show the **Choose payment methods** task, and the **Set up additional payment providers** inbox card should not be present.
@@ -531,21 +569,23 @@ Scenario #2
 
 ### Improve AddFirstProduct email note contents #6617
 
-- Install the plugin in a fresh site.
-- Make sure the store has 0 products and 0 orders.
-- Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
+-   Install the plugin in a fresh site.
+-   Make sure the store has 0 products and 0 orders.
+-   Update the installation date (we need a store between 2 and 5 days old). You can do it with an SQL statement like this:
 
 ```
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
 
-- Make sure the `woocommerce_merchant_email_notifications` option is set to `yes`:
+-   Make sure the `woocommerce_merchant_email_notifications` option is set to `yes`:
+
 ```
 UPDATE `wp_options` SET `option_value` = 'yes' WHERE `wp_options`.`option_name` = 'woocommerce_merchant_email_notifications';
 ```
 
-- Run the `wc_admin_daily ` cron job (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
-- You should have received an email like the image above.
+-   Run the `wc_admin_daily ` cron job (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   You should have received an email like the image above.
+
 ## 2.1.2
 
 ### Add Guards to "Deactivate Plugin" Note Handlers #6532

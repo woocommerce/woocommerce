@@ -62,6 +62,16 @@ export const getQueryExcludedScreens = () =>
 	] );
 
 /**
+ * Given a path, return whether it is an excluded screen
+ *
+ * @param {Object} path Path to check
+ *
+ * @return {boolean} Boolean representing whether path is excluded
+ */
+export const pathIsExcluded = ( path ) =>
+	getQueryExcludedScreens().includes( getScreenFromPath( path ) );
+
+/**
  * Retrieve a string 'name' representing the current screen
  *
  * @param {Object} path Path to resolve, default to current
@@ -196,6 +206,48 @@ export function updateQueryString(
 	const newPath = getNewPath( query, path, currentQuery, page );
 	getHistory().push( newPath );
 }
+
+/**
+ * Adds a listener that runs on history change.
+ *
+ * @param {Function} listener Listener to add on history change.
+ * @return {Function} Function to remove listeners.
+ */
+export const addHistoryListener = ( listener ) => {
+	// Monkey patch pushState to allow trigger the pushstate event listener.
+	if ( window.wcNavigation && ! window.wcNavigation.historyPatched ) {
+		( ( history ) => {
+			/* global CustomEvent */
+			const pushState = history.pushState;
+			const replaceState = history.replaceState;
+			history.pushState = function ( state ) {
+				const pushStateEvent = new CustomEvent( 'pushstate', {
+					state,
+				} );
+				window.dispatchEvent( pushStateEvent );
+				return pushState.apply( history, arguments );
+			};
+			history.replaceState = function ( state ) {
+				const replaceStateEvent = new CustomEvent( 'replacestate', {
+					state,
+				} );
+				window.dispatchEvent( replaceStateEvent );
+				return replaceState.apply( history, arguments );
+			};
+			window.wcNavigation.historyPatched = true;
+		} )( window.history );
+	}
+
+	window.addEventListener( 'popstate', listener );
+	window.addEventListener( 'pushstate', listener );
+	window.addEventListener( 'replacestate', listener );
+
+	return () => {
+		window.removeEventListener( 'popstate', listener );
+		window.removeEventListener( 'pushstate', listener );
+		window.removeEventListener( 'replacestate', listener );
+	};
+};
 
 /**
  * Create a Fill for extensions to add client facing custom Navigation Items.

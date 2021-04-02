@@ -12,6 +12,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer from './reducer';
 import * as resolvers from './resolvers';
+import initDispatchers from './dispatchers';
 
 registerStore( STORE_NAME, {
 	reducer,
@@ -21,4 +22,5 @@ registerStore( STORE_NAME, {
 	selectors,
 } );
 
+initDispatchers();
 export const NAVIGATION_STORE_NAME = STORE_NAME;

@@ -5,13 +5,12 @@ import { registerPlugin } from '@wordpress/plugins';
 import {
 	WooNavigationItem,
 	getNewPath,
-	getPersistedQuery,
-	getQueryExcludedScreens,
-	getScreenFromPath,
+	pathIsExcluded,
 } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -19,27 +18,13 @@ import { useEffect, useState } from '@wordpress/element';
 import getReports from '../analytics/report/get-reports';
 import { getPages } from './controller';
 import { isWCAdmin } from '../dashboard/utils';
-import { addHistoryListener } from '../navigation/utils';
 
 const NavigationPlugin = () => {
-	const [ persistedQuery, setPersistedQuery ] = useState(
-		getPersistedQuery()
-	);
-
-	const pathIsExcluded = ( path ) =>
-		getQueryExcludedScreens().includes( getScreenFromPath( path ) );
-
-	// Update the persisted queries when history is updated
-	useEffect( () => {
-		return addHistoryListener( () => {
-			setTimeout( () => {
-				if ( pathIsExcluded() ) {
-					return;
-				}
-				setPersistedQuery( getPersistedQuery() );
-			}, 0 );
-		} );
-	}, [] );
+	const { persistedQuery } = useSelect( ( select ) => {
+		return {
+			persistedQuery: select( NAVIGATION_STORE_NAME ).getPersistedQuery(),
+		};
+	} );
 
 	/**
 	 * If the current page is embedded, stay with the default urls

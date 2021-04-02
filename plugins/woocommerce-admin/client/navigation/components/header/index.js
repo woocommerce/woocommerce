@@ -10,12 +10,12 @@ import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { debounce } from 'lodash';
+import { addHistoryListener } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import useIsScrolled from '../../../hooks/useIsScrolled';
-import { addHistoryListener } from '../../utils';
 
 const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );

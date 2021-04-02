@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Moving `addHistoryListener()` to this package, which supports adding a listener that is executed for history changes.
+
 ## Breaking changes
 
 -   Move Lodash to a peer dependency.

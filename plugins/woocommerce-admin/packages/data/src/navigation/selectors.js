@@ -16,3 +16,7 @@ export const getFavorites = ( state ) => {
 export const isNavigationRequesting = ( state, selector ) => {
 	return state.requesting[ selector ] || false;
 };
+
+export const getPersistedQuery = ( state ) => {
+	return state.persistedQuery || {};
+};

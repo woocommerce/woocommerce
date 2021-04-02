@@ -6,7 +6,11 @@ import {
 	getPersistedQuery,
 	getSearchWords,
 	getNewPath,
+	addHistoryListener,
 } from '../index';
+
+global.window = Object.create( window );
+global.window.wcNavigation = {};
 
 describe( 'getPersistedQuery', () => {
 	beforeEach( () => {
@@ -143,5 +147,35 @@ describe( 'getNewPath', () => {
 		);
 
 		expect( path ).toEqual( 'admin.php?page=custom-page&path=' );
+	} );
+} );
+
+describe( 'addHistoryListener', () => {
+	it( 'should add a custom event to the browser pushState', () => {
+		const mockCallback = jest.fn();
+		const removeListener = addHistoryListener( mockCallback );
+		window.history.pushState( {}, 'Test pushState' );
+		window.history.pushState( {}, 'Test pushState 2' );
+
+		expect( mockCallback.mock.calls.length ).toBe( 2 );
+
+		// Check that events are no longer called after removing the listener.
+		removeListener();
+		window.history.pushState( {}, 'Test pushState 3' );
+		expect( mockCallback.mock.calls.length ).toBe( 2 );
+	} );
+
+	it( 'should add a custom event to the browser replaceState', () => {
+		const mockCallback = jest.fn();
+		const removeListener = addHistoryListener( mockCallback );
+		window.history.replaceState( {}, 'Test replaceState' );
+		window.history.replaceState( {}, 'Test replaceState 2' );
+
+		expect( mockCallback.mock.calls.length ).toBe( 2 );
+
+		// Check that events are no longer called after removing the listener.
+		removeListener();
+		window.history.replaceState( {}, 'Test replaceState 3' );
+		expect( mockCallback.mock.calls.length ).toBe( 2 );
 	} );
 } );

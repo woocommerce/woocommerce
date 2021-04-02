@@ -109,55 +109,6 @@ declare global {
 }
 
 /**
- * Adds a listener that runs on history change.
- *
- * @param {Function} listener Listener to add on history change.
- * @return {Function} Function to remove listeners.
- */
-export const addHistoryListener = ( listener: () => void ): ( () => void ) => {
-	// Monkey patch pushState to allow trigger the pushstate event listener.
-	if ( ! window.wcNavigation.historyPatched ) {
-		( ( history ) => {
-			/* global CustomEvent */
-			const pushState = history.pushState;
-			const replaceState = history.replaceState;
-			history.pushState = function (
-				state: Record< string, string >,
-				title: string,
-				url: string
-			) {
-				const pushStateEvent = new CustomEvent( 'pushstate', state );
-				window.dispatchEvent( pushStateEvent );
-				return pushState.apply( history, [ state, title, url ] );
-			};
-			history.replaceState = function (
-				state: Record< string, string >,
-				title: string,
-				url: string
-			) {
-				const replaceStateEvent = new CustomEvent(
-					'replacestate',
-					state
-				);
-				window.dispatchEvent( replaceStateEvent );
-				return replaceState.apply( history, [ state, title, url ] );
-			};
-			window.wcNavigation.historyPatched = true;
-		} )( window.history );
-	}
-
-	window.addEventListener( 'popstate', listener );
-	window.addEventListener( 'pushstate', listener );
-	window.addEventListener( 'replacestate', listener );
-
-	return () => {
-		window.removeEventListener( 'popstate', listener );
-		window.removeEventListener( 'pushstate', listener );
-		window.removeEventListener( 'replacestate', listener );
-	};
-};
-
-/**
  * Get the closest matching item.
  *
  * @param {Array} items An array of items to match against.

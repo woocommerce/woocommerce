@@ -2,6 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -86,6 +87,23 @@ export function removeFavoriteSuccess( favorite, error ) {
 		type: TYPES.REMOVE_FAVORITE_SUCCESS,
 		favorite,
 		error,
+	};
+}
+
+export function* onLoad() {
+	yield onHistoryChange();
+}
+
+export function* onHistoryChange() {
+	const persistedQuery = getPersistedQuery();
+
+	if ( ! Object.keys( persistedQuery ).length ) {
+		return null;
+	}
+
+	yield {
+		type: TYPES.ON_HISTORY_CHANGE,
+		persistedQuery,
 	};
 }
 
