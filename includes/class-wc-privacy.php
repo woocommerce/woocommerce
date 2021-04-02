@@ -391,22 +391,16 @@ class WC_Privacy extends WC_Abstract_Privacy {
 				if ( empty( $posts_made_prior ) ) {
 					wp_delete_user( $user_id );
 				} else {
-					$admin_users = get_users( array( 'role' => 'administrator' ) );
+					$admin_users  = get_users( array( 'role' => 'administrator' ) );
+					$deleted_user = get_user_by( 'ID', $user_id );
+					wp_delete_user( $user_id, $admin_users[0]->ID ); // Delete user and reassign content to admin.
 
 					$posts_made_prior_list = '<ul>';
 					foreach ( $posts_made_prior as $post ) {
-						wp_update_post(
-							array(
-								'ID'          => $post->ID,
-								'post_author' => $admin_users[0]->ID,
-							)
-						);
 						$posts_made_prior_list .= '<li><a href="' . esc_attr( $post->guid ) . '">' . esc_html( $post->post_title ) . '</a></li>';
 					}
 					$posts_made_prior_list .= '</ul>';
 
-					$deleted_user = get_user_by( 'ID', $user_id );
-					wp_delete_user( $user_id );
 					$subject = __( 'Contents of a deleted inactive user transferred to admin', 'woocommerce' );
 					$message = '<h1>' . esc_html( $subject ) . '</h1><p>' . sprintf(
 						/* translators: 1: deleted user username 2: deleted user email 3: list of all post types 4: admin username 5: admin email */
@@ -422,6 +416,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 						wc_mail( $admin->user_email, $subject, $message );
 					}
 				}
+
 				$count ++;
 			}
 		}
