@@ -48,15 +48,15 @@ const initProducts = async () => {
 	const taxClasses = [
 		{
 			name: 'Tax Class Simple',
-			slug: 'tax-class-simple'
+			slug: 'tax-class-simple-698962'
 		},
 		{
 			name: 'Tax Class Variable',
-			slug: 'tax-class-variable'
+			slug: 'tax-class-variable-790238'
 		},
 		{
 			name: 'Tax Class External',
-			slug: 'tax-class-external'
+			slug: 'tax-class-external-991321'
 		}
 	];
 
@@ -69,20 +69,6 @@ const initProducts = async () => {
 		await httpClient.put(path, data);
 	};
 	await enableTaxes();
-
-	// Make sure that the tax classes to be created does not exist yet
-	const deleteTaxClassesAndRates = async () => {
-		const { data } = await httpClient.get(taxClassesPath);
-
-		for (const { slug } of taxClasses) {
-			const exists = data.some((d) => d.slug === slug);
-
-			if (exists) {
-				await httpClient.delete(`${taxClassesPath}/${slug}?force=true`);
-			}
-		}
-	};
-	await deleteTaxClassesAndRates();
 
 	// Initialize tax classes
 	const initTaxClasses = async () => {
@@ -106,7 +92,7 @@ const initProducts = async () => {
 	const initSimpleProduct = async () => {
 		const repo = SimpleProduct.restRepository(httpClient);
 		const simpleProduct = {
-			name: 'Simple Product',
+			name: 'Simple Product 273722',
 			regularPrice: '100',
 			tax_class: 'Tax Class Simple'
 		};
@@ -144,7 +130,7 @@ const initProducts = async () => {
 			}
 		];
 		const variableProductData = {
-			name: 'Variable Product',
+			name: 'Variable Product 024611',
 			type: 'variable',
 			tax_class: 'Tax Class Variable'
 		};
@@ -160,17 +146,21 @@ const initProducts = async () => {
 	};
 	const initGroupedProduct = async () => {
 		const groupedRepo = GroupedProduct.restRepository(httpClient);
-		const groupedProductData = config.get('products.grouped');
+		const defaultGroupedData = config.get('products.grouped');
+		const groupedProductData = {
+			...defaultGroupedData,
+			name: 'Grouped Product 858012'
+		};
 
 		return await groupedRepo.create(groupedProductData);
 	};
 	const initExternalProduct = async () => {
 		const repo = ExternalProduct.restRepository(httpClient);
+		const defaultProps = config.get('products.external');
 		const props = {
-			name: 'External product',
+			...defaultProps,
+			name: 'External product 786794',
 			regularPrice: '800',
-			buttonText: 'Buy now',
-			externalUrl: 'https://wordpress.org/plugins/woocommerce',
 			tax_class: 'Tax Class External'
 		};
 		return await repo.create(props);
