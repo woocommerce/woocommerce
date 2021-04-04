@@ -64,7 +64,7 @@ const runShopperTests = () => {
 };
 
 const runMerchantTests = () => {
-	runAddShippingClassesTest()
+	runAddShippingClassesTest();
 	runOrderSearchingTest();
 	runAddNewShippingZoneTest();
 	runCreateCouponTest();
@@ -129,4 +129,5 @@ module.exports = {
 	runAddNewShippingZoneTest,
 	runProductBrowseSearchSortTest,
 	runApiTests,
+	runAddShippingClassesTest
 };
