@@ -1,5 +1,5 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.5
 Tested up to: 5.7
@@ -160,6 +160,16 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.2.0 RC 2021-03-30 =
+
+* Update - WooCommerce Admin package 2.1.4. #29520
+* Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
+* Fix - Wrong logic for including or excluding the payments step in the list of completed tasks in the onboarding wizard. #29518
+
+**WooCommerce Admin - 2.1.4**
+
+* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
+
 = 5.2.0 beta 2021-03-23 =
 
 **WooCommerce**
@@ -202,6 +212,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - add validation of the posted country codes on checkout. #28849
 * Fix - Correctly display pagination arrows on RTL languages. #28523
 * Fix - Invalid refund amount error on $0 refund when number of decimals is equal to 0. #27277
+* Fix - Revert a replacement of wp_redirect to wp_safe_redirect in WC_Checkout::process_order_payment that caused issues in the default PayPal interface. #29459
+* Fix - "Sale" badge misaligned on products when displaying 1 item per row. #29425
 * Tweak - Added the Mercado Pago logo into the assets/images folder in order to use it in the payments setup task. #29365
 * Tweak - Update the contributor guidelines. #29150
 * Tweak - Introduced phone number input validation. #27242
