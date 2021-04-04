@@ -35,7 +35,7 @@ const taxRates = [
 	}
 ];
 
-const taxTotals = ['£10.00', '£40.00', '£240.00'];
+const taxTotals = ['$10.00', '$40.00', '$240.00'];
 
 const initProducts = async () => {
 	const apiUrl = config.get('url');
