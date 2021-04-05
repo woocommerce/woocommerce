@@ -160,7 +160,19 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.2.0 RC 2 2021-04-06 =
+
+**WooCommerce**
+
+* Update - WooCommerce Admin package 2.1.5. #29577
+
+**WooCommerce Admin - 2.1.5**
+
+* Tweak - Set international country feature flag off
+
 = 5.2.0 RC 2021-03-30 =
+
+**WooCommerce**
 
 * Update - WooCommerce Admin package 2.1.4. #29520
 * Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
