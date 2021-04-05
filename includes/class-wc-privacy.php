@@ -375,6 +375,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			/**
 			 * Filter post types that should be assign to an admin user prior user exclusion.
 			 *
+			 * @since 5.3.0
 			 * @param array $post_types List of post types to assign to an admin. Defaults to WordPress builtin post types.
 			 */
 			$post_types_to_assign = apply_filters( 'woocommerce_delete_inactive_account_post_types_to_assign', array_values( $builtin_post_types ) );
