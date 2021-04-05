@@ -132,4 +132,5 @@ module.exports = {
 	runApiTests,
 	runCheckoutCreateAccountTest,
 	runMyAccountCreateAccountTest,
+	runCartRedirectionTest,
 };
