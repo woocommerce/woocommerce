@@ -1,4 +1,4 @@
-import { SimpleProduct } from '@woocommerce/api';
+import { SimpleProduct, Coupon } from '@woocommerce/api';
 import {
 	visitAdminPage,
 	switchUserToTest,
@@ -56,12 +56,32 @@ async function deleteAllProducts() {
 	}
 }
 
+/**
+ * Use api package to delete coupons.
+ *
+ * @return {Promise} Promise resolving once coupons have been trashed.
+ */
+async function deleteAllCoupons() {
+	const repository = Coupon.restRepository( factories.api.withDefaultPermalinks );
+	let coupons;
+
+	coupons = await repository.list();
+
+	while ( coupons.length > 0 ) {
+		for (let c = 0; c < coupons.length; c++ ) {
+			await repository.delete( coupons[ c ].id );
+		}
+		coupons = await repository.list();
+	}
+}
+
 // Before every test suite run, delete all content created by the test. This ensures
 // other posts/comments/etc. aren't dirtying tests and tests don't depend on
 // each other's side-effects.
 beforeAll( async () => {
 	await trashExistingPosts();
 	await deleteAllProducts();
+	await deleteAllCoupons();
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
 } );
