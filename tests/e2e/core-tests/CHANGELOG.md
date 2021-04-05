@@ -4,6 +4,7 @@
 
 ## Added
 
+- Shopper Checkout Login Account
 - Shopper My Account Create Account
 
 ## Fixed
