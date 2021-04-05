@@ -5,6 +5,7 @@
 ## Added
 
 - Shopper My Account Create Account
+- Shopper Cart Redirection
 
 ## Fixed
 

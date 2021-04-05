@@ -78,6 +78,7 @@ The functions to access the core tests are:
   - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
   - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
   - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
+  - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
 
 ### REST API
 
