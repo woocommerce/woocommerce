@@ -55,6 +55,13 @@ const verifyPublishAndTrash = async (
 	} );
 };
 
+const hasClass = async ( element: ElementHandle, elementClass: string ) => {
+	const classNameProp = await element.getProperty( 'className' );
+	const classNameValue = ( await classNameProp.jsonValue() ) as string;
+
+	return classNameValue.includes( elementClass );
+};
+
 const getInputValue = async ( selector: string ) => {
 	const field = await page.$( selector );
 	if ( field ) {
@@ -114,4 +121,5 @@ export {
 	getAttribute,
 	getElementByText,
 	waitForElementByText,
+	hasClass,
 };

@@ -1,5 +1,5 @@
 /**
- * @format
+ * External dependencies
  */
 import {
 	clearAndFillInput,
@@ -9,39 +9,26 @@ import {
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { WcSettings } from '../../models/WcSettings';
-import { WpSettings } from '../../models/WpSettings';
-
-describe( 'Store owner can login and make sure WooCommerce is activated', () => {
-	it( 'can login', async () => {
-		await StoreOwnerFlow.login();
-	} );
-
-	it( 'can make sure WooCommerce is activated. If not, activate it', async () => {
-		const slug = 'woocommerce';
-		await StoreOwnerFlow.openPlugins();
-		const disableLink = await page.$(
-			`tr[data-slug="${ slug }"] .deactivate a`
-		);
-		if ( disableLink ) {
-			return;
-		}
-		await page.click( `tr[data-slug="${ slug }"] .activate a` );
-
-		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
-	} );
-} );
+import { WcSettings } from '../../pages/WcSettings';
+import { WpSettings } from '../../pages/WpSettings';
+import { Login } from '../../pages/Login';
 
 describe( 'Store owner can finish initial store setup', () => {
+	const wcSettings = new WcSettings( page );
+	const wpSettings = new WpSettings( page );
+	const login = new Login( page );
+
+	beforeAll( async () => {
+		await login.login();
+	} );
+	afterAll( async () => {
+		await login.logout();
+	} );
+
 	it( 'can enable tax rates and calculations', async () => {
-		const wcSettings = new WcSettings( page );
-
 		// Go to general settings page
-		await wcSettings.open();
-
+		await wcSettings.navigate( 'general' );
 		await wcSettings.enableTaxRates();
-
 		await wcSettings.saveSettings();
 
 		// Verify that settings have been saved
@@ -50,8 +37,8 @@ describe( 'Store owner can finish initial store setup', () => {
 	} );
 
 	it( 'can configure permalink settings', async () => {
-		const wpSettings = new WpSettings( page );
 		// Go to Permalink Settings page
+		await wpSettings.navigate();
 		await wpSettings.openPermalinkSettings();
 
 		// Select "Post name" option in common settings section

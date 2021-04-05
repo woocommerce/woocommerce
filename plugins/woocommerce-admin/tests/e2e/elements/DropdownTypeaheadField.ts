@@ -1,26 +1,16 @@
-import { Page } from 'puppeteer';
-import {
-	clearAndFillInput,
-	verifyValueOfInputField,
-} from '@woocommerce/e2e-utils';
+import { clearAndFillInput } from '@woocommerce/e2e-utils';
+import { BaseElement } from './BaseElement';
 
-export class DropdownTypeaheadField {
-	page: Page;
-	id: string;
-
-	constructor( page: Page, id: string ) {
-		this.page = page;
-		this.id = id;
-	}
+export class DropdownTypeaheadField extends BaseElement {
 	async search( text: string ) {
-		await clearAndFillInput( this.id + '-0__control-input', text );
+		await clearAndFillInput( this.selector + '-0__control-input', text );
 	}
 	async select( selector: string ) {
-		await this.page.click( this.id + `__option-0-${ selector }` );
+		await this.page.click( this.selector + `__option-0-${ selector }` );
 	}
 
 	async checkSelected( value: string ) {
-		const selector = this.id + '-0__control-input';
+		const selector = this.selector + '-0__control-input';
 		await page.focus( selector );
 		const field = await this.page.$( selector );
 		const curValue = await field?.getProperty( 'value' );

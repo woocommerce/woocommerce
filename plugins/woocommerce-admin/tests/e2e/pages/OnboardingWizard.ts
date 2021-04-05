@@ -1,15 +1,15 @@
 import { Page } from 'puppeteer';
-import { getElementByText } from '../utils/actions';
-import { WP_ADMIN_START_PROFILE_WIZARD } from '../utils/constants';
-import { BenefitsSection } from './onboarding/BenefitsSection';
-import { BusinessSection } from './onboarding/BusinessSection';
-import { IndustrySection } from './onboarding/IndustrySection';
-import { ProductTypeSection } from './onboarding/ProductTypesSection';
-import { StoreDetailsSection } from './onboarding/StoreDetailsSection';
-import { ThemeSection } from './onboarding/ThemeSection';
+import { BenefitsSection } from '../sections/onboarding/BenefitsSection';
+import { BusinessSection } from '../sections/onboarding/BusinessSection';
+import { IndustrySection } from '../sections/onboarding/IndustrySection';
+import { ProductTypeSection } from '../sections/onboarding/ProductTypesSection';
+import { StoreDetailsSection } from '../sections/onboarding/StoreDetailsSection';
+import { ThemeSection } from '../sections/onboarding/ThemeSection';
+import { BasePage } from './BasePage';
 
-export class OnboardingWizard {
-	page: Page;
+export class OnboardingWizard extends BasePage {
+	url = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
+
 	storeDetails: StoreDetailsSection;
 	industry: IndustrySection;
 	productTypes: ProductTypeSection;
@@ -18,7 +18,7 @@ export class OnboardingWizard {
 	benefits: BenefitsSection;
 
 	constructor( page: Page ) {
-		this.page = page;
+		super( page );
 		this.storeDetails = new StoreDetailsSection( page );
 		this.industry = new IndustrySection( page );
 		this.productTypes = new ProductTypeSection( page );
@@ -27,22 +27,20 @@ export class OnboardingWizard {
 		this.benefits = new BenefitsSection( page );
 	}
 
-	async start() {
-		await this.page.goto( WP_ADMIN_START_PROFILE_WIZARD, {
-			waitUntil: 'networkidle0',
-		} );
+	async skipStoreSetup() {
+		await this.clickButtonWithText( 'Skip setup store details' );
+		await this.optionallySelectUsageTracking( false );
 	}
 
 	async continue() {
-		const button = await getElementByText( 'button', 'Continue' );
-		await button?.click();
+		await this.clickButtonWithText( 'Continue' );
 	}
 
 	async optionallySelectUsageTracking( select = false ) {
 		const usageTrackingHeader = await this.page.waitForSelector(
 			'.components-modal__header-heading',
 			{
-				timeout: 2000,
+				timeout: 5000,
 			}
 		);
 		if ( ! usageTrackingHeader ) {
@@ -60,15 +58,11 @@ export class OnboardingWizard {
 		expect( primaryButtons ).toHaveLength( 2 );
 
 		if ( select ) {
-			const button = await getElementByText(
-				'button',
-				'Yes, count me in'
-			);
-			await button?.click();
+			await this.clickButtonWithText( 'Yes, count me in' );
 		} else {
-			const button = await getElementByText( 'button', 'No thanks' );
-			await button?.click();
+			await this.clickButtonWithText( 'No thanks' );
 		}
+
 		this.page.waitForNavigation( {
 			waitUntil: 'networkidle0',
 			timeout: 2000,

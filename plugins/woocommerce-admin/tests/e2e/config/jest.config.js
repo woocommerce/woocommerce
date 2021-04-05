@@ -7,7 +7,16 @@ module.exports = {
 	roots: [ path.resolve( __dirname, '../specs' ) ],
 	testMatch: [ '**/*.(test|spec).(j|t)s', '*.(test|spec).(j|t)s' ],
 	testTimeout: 30000,
-	// transform: {
-	// 	'^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
-	// },
+	transform: {
+		'\\.[jt]sx?$': [
+			'babel-jest',
+			{
+				configFile: path.join(
+					__dirname,
+					'../../../',
+					'babel.config.js'
+				),
+			},
+		],
+	},
 };

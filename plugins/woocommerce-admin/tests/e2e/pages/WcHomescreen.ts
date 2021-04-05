@@ -1,12 +1,8 @@
-import { Page } from 'puppeteer';
 import { getElementByText, waitForElementByText } from '../utils/actions';
+import { BasePage } from './BasePage';
 
-export class WcHomescreen {
-	page: Page;
-
-	constructor( page: Page ) {
-		this.page = page;
-	}
+export class WcHomescreen extends BasePage {
+	url = 'wp-admin/admin.php?page=wc-admin';
 
 	async isDisplayed() {
 		// Wait for Benefits section to appear
@@ -21,16 +17,13 @@ export class WcHomescreen {
 		);
 
 		if ( modal ) {
-			let button = await getElementByText( 'button', 'Next' );
-			await button?.click();
-			button = await getElementByText( 'button', 'Next' );
-			await button?.click();
-			await this.page.click( '.components-guide__finish-button' );
+			await this.clickButtonWithText( 'Next' );
+			await this.clickButtonWithText( 'Next' );
+			await this.click( '.components-guide__finish-button' );
 		}
 	}
 
 	async getTaskList() {
-		// Log out link in admin bar is not visible so can't be clicked directly.
 		await page.waitForSelector(
 			'.woocommerce-task-card .woocommerce-list__item-title'
 		);
@@ -49,8 +42,15 @@ export class WcHomescreen {
 	}
 
 	async clickOnTaskList( taskTitle: string ) {
-		const item = await getElementByText( 'div', taskTitle );
-		await item?.click();
-		await waitForElementByText( 'h1', taskTitle );
+		const item = await waitForElementByText( 'div', taskTitle );
+
+		if ( ! item ) {
+			throw new Error(
+				`Could not find task list item with title: ${ taskTitle }`
+			);
+		} else {
+			await item.click();
+			await waitForElementByText( 'h1', taskTitle );
+		}
 	}
 }

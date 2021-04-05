@@ -23,17 +23,16 @@ jobs:
               uses: actions/setup-node@v2-beta
               with:
                   node-version: '14'
-            - name: Build
+            - name: Build and run E2E Tests
               env:
                   WP_VERSION: latest
-                  WP_MULTISITE: 0
-                  WP_CORE_DIR: /tmp/wordpress
-                  RUN_E2E: 1
+                  WC_E2E_SCREENSHOTS: 1
+                  E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
+                  E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  GITHUB_ACTIONS: 1
               run: |
                   npm i
                   composer require wp-cli/i18n-command
                   npm run build
-                  npm install jest --global
-                  WP_VERSION=5.6.2
-                  npm run docker:up
-                  npm run test:e2e
+                  npx wc-e2e docker:up
+                  npx wc-e2e test:e2e

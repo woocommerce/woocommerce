@@ -32,29 +32,32 @@ For local development setup using Docker [see here](./docker/wc-admin-wp-env/REA
 
 #### End-to-end tests
 
-Tests live in `./tests/e2e`. An existing build is required prior running, please refer to the section above for steps. E2E tests have their own Docker container to run the WordPress server. Start
-the server using:
+Tests live in `./tests/e2e`. An existing build is required prior running, please refer to the section above for steps. E2E tests use the `@woocommerce/e2e-environment` package which hosts a Docker container for testing, by default the container can be accessed at `http://localhost:8084`
+
+All the commands from `@woocommerce/e2e-environment` can be run through `npx`.
 
 ```
-npm run docker:up
+# Set up the e2e environment
+npm i
+npx wc-e2e docker:up
 ```
 
 Run tests using:
 
 ```
-npm run test:e2e-dev
+npx wc-e2e test:e2e-dev
 ```
 
 or in headless mode:
 
 ```
-npm run test:e2e
+npx wc-e2e test:e2e
 ```
 
-Run a single test by adding the file name:
+Run a single test by adding the path to the file name:
 
 ```
-npm run test:e2e-dev complete-onboarding-wizard.test.js
+npx wc-e2e test:e2e-dev tests/e2e/specs/activate-and-setup/complete-onboarding-wizard.test.ts
 ```
 
 ## Common Issues
