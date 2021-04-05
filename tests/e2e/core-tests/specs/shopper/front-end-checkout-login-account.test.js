@@ -52,9 +52,9 @@ const runCheckoutLoginAccountTest = () => {
 			await page.type( '#password', config.get('users.customer.password') );
 
 			await Promise.all([
-			page.waitForNavigation({waitUntil: 'networkidle0'}),
-			page.click('button[name="login"]'),
-		]);
+				page.waitForNavigation({waitUntil: 'networkidle0'}),
+				page.click('button[name="login"]'),
+			]);
 
 			// Place an order
 			await shopper.placeOrder();
@@ -65,7 +65,7 @@ const runCheckoutLoginAccountTest = () => {
 
 			// Verify the user is logged in on my account page
 			await shopper.gotoMyAccount();
-			expect(page.url()).toMatch('my-account/');
+			await expect(page.url()).toMatch('my-account/');
 			await expect(page).toMatchElement('h1', {text: 'My account'});
 		});
 	});
