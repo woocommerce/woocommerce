@@ -1237,7 +1237,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					 * @param int $stock_quantity Quantity remaining.
 					 * @param int $stock_quantity_in_cart
 					 *
-					 * @since 5.0.0
+					 * @since 5.3.0
 					 */
 					$message = apply_filters( 'woocommerce_cart_product_not_enough_stock_already_in_cart_message', $message, $product_data, $stock_quantity, $stock_quantity_in_cart );
 
