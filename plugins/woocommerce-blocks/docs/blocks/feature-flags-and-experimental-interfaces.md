@@ -1,13 +1,13 @@
 We have feature gating system setup in our plugin that defines what is accessible to the public and what is not, it has three phases:
 
-*   **Core flag `WOOCOMMERCE_BLOCKS_PHASE=1`:** anything that is not hidden behind a flag, falls under this category, and it contains all of the code that runs on WooCommerce Core plugin.
-*   **Feature plugin flag `WOOCOMMERCE_BLOCKS_PHASE=2`**: anything that is behind this flag is code that is shipped to our [feature plugin](https://wordpress.org/plugins/woo-gutenberg-products-block/), the files of blocks behind this flag are also present in WooCommerce Core, just not active.
-*   **Experimental flag `WOOCOMMERCE_BLOCKS_PHASE=3`**: This flag contains things that we're not shipping yet, so unfinished work mostly. These features are only available in developer builds of the plugin.
+-   **Core flag `WOOCOMMERCE_BLOCKS_PHASE=1`:** anything that is not hidden behind a flag, falls under this category, and it contains all of the code that runs on WooCommerce Core plugin.
+-   **Feature plugin flag `WOOCOMMERCE_BLOCKS_PHASE=2`**: anything that is behind this flag is code that is shipped to our [feature plugin](https://wordpress.org/plugins/woo-gutenberg-products-block/), the files of blocks behind this flag are also present in WooCommerce Core, just not active.
+-   **Experimental flag `WOOCOMMERCE_BLOCKS_PHASE=3`**: This flag contains things that we're not shipping yet, so unfinished work mostly. These features are only available in developer builds of the plugin.
 
 We also use an `__experimental` prefix for any experimental interfaces. This is a signal to those reading our code that it should not be implemented in for production use. Currently this prefix is used in the following ways:
 
-* Prefixing references that are experimental. An example would be PHP action or filter slugs.
-* Prefixing functions or methods that are experimental.
+-   Prefixing references that are experimental. An example would be PHP action or filter slugs.
+-   Prefixing functions or methods that are experimental.
 
 ## Blocks behind flags
 
@@ -15,17 +15,17 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Feature plugin flag
 
-*   Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/cart-checkout/cart/index.js#L53) | [PHP flag 1](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L74-L77) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L92-L95)).
-*   Checkout block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/cart-checkout/checkout/index.js#L52) | [PHP flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L74-L77) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L92-L95)).
+-   Cart block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/cart-checkout/cart/index.js#L53) | [PHP flag 1](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L74-L77) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L92-L95)).
+-   Checkout block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/cart-checkout/checkout/index.js#L52) | [PHP flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L74-L77) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L92-L95)).
 
 ### Experimental flag
 
-*   Single Product block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/single-product/index.js#L43) | [PHP flag 1](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L79-L81) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L88-L90) | [webpack flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/bin/webpack-entries.js#L48-L50)).
-*   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/add-to-cart/index.js#L29-L32)).
-*   ⚛️ Product category list ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/category-list/index.js#L29-L32)).
-*   ⚛️ Product SKU ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/sku/index.js#L29-L33)).
-*   ⚛️ Product stock indicator ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/stock-indicator/index.js#L29-L33)).
-*   ⚛️ Product tag list ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/tag-list/index.js#L29-L33)).
+-   Single Product block ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9b76ea7a1680e68cc20bfee01078e43ccfc996bd/assets/js/blocks/single-product/index.js#L43) | [PHP flag 1](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e167b2c99c68e8113b4e371fefdd6f9a356ed2e8/src/Library.php#L79-L81) | [PHP flag 2](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/src/Assets.php#L88-L90) | [webpack flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/bin/webpack-entries.js#L48-L50)).
+-   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/add-to-cart/index.js#L29-L32)).
+-   ⚛️ Product category list ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/category-list/index.js#L29-L32)).
+-   ⚛️ Product SKU ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/sku/index.js#L29-L33)).
+-   ⚛️ Product stock indicator ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/stock-indicator/index.js#L29-L33)).
+-   ⚛️ Product tag list ([JS flag](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/b3a9753d8b7dae18b36025d09fbff835b8365de0/assets/js/atomic/blocks/product-elements/tag-list/index.js#L29-L33)).
 
 ## Features behind flags
 
@@ -63,5 +63,30 @@ We also have individual features or code blocks behind a feature flag, this is a
 -   `__experimental_woocommerce_blocks_hidden` property in a Cart item data array that allows overwriting the `hidden` property. This is useful to make some cart item data visible/hidden depending if it needs to be displayed in Blocks or shortcode ([experimental property](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/9c4288b0ee46960bdc2bf8ef351d05ac23073b0c/src/StoreApi/Schemas/CartItemSchema.php#L439-L441)).
 
 ### Slots
+
 -   `__experimentalOrderMeta` slot that allows extensions adding content to the order meta in the Cart and Checkout blocks ([experimental slot](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4cedb65367be0d1c4c1f9dd9c016e3b1325cf92e/packages/checkout/order-meta/index.js#L12)).
 -   `__experimentalOrderShippingPackages` slot that allows extensions adding content to the shipping packages in the Cart and Checkout blocks ([experimental slot](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4cedb65367be0d1c4c1f9dd9c016e3b1325cf92e/packages/checkout/order-shipping-packages/index.js#L12)).
+
+## Usages of `experimental` prefix
+
+`useStoreEvents` makes use of an `experimental__` prefix for wp-hook actions (since `__experimental` is not a valid prefix in that context).
+
+-   `experimental__woocommerce_blocks-` is used for store events.
+-   `experimental__woocommerce_blocks-checkout-` is used for checkout events.
+
+Current list of events:
+
+-   `experimental__woocommerce_blocks-cart-add-item` - Fired when an item is added to the cart.
+-   `experimental__woocommerce_blocks-product-view-link` - Fired when a product link is clicked.
+-   `experimental__woocommerce_blocks-product-list-render` - Fired when a product list is rendered.
+-   `experimental__woocommerce_blocks-store-notice-create` - Fired when a store notice is created.
+-   `experimental__woocommerce_blocks-cart-set-item-quantity` - Fired when cart item quantity is changed by the customer.
+-   `experimental__woocommerce_blocks-cart-remove-item` - Fired when a cart item is removed from the cart.
+-   `experimental__woocommerce_blocks-product-render` - Fired when a single product block is rendered.
+-   `experimental__woocommerce_blocks-checkout-submit` - Fired when the checkout form is submitted.
+-   `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` - Fired when a shipping rate is chosen on checkout.
+-   `experimental__woocommerce_blocks-checkout-render-checkout-form` - Fired when the checkout form is rendered.
+-   `experimental__woocommerce_blocks-checkout-set-email-address` - Fired when an email address is added during checkout.
+-   `experimental__woocommerce_blocks-checkout-set-shipping-address` - Fired when a shipping address is added during checkout.
+-   `experimental__woocommerce_blocks-checkout-set-phone-number` - Fired when a phone number is added during checkout.
+-   `experimental__woocommerce_blocks-checkout-set-billing-address` - Fired when a billing address is added during checkout.

@@ -21,9 +21,6 @@ class GoogleAnalytics {
 	 * @param AssetApi $asset_api Instance of the asset API.
 	 */
 	public function __construct( AssetApi $asset_api ) {
-		if ( ! Package::feature()->is_experimental_build() ) {
-			return;
-		}
 		$this->asset_api = $asset_api;
 		$this->init();
 	}
