@@ -4,7 +4,7 @@
  *
  * Handles geolocation and updating the geolocation database.
  *
- * This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com.
+ * This product includes GeoLite data created by MaxMind, available from https://www.maxmind.com.
  *
  * @package WooCommerce\Classes
  * @version 3.9.0
@@ -45,10 +45,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'             => 'http://api.ipify.org/',
-		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://ident.me',
-		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
+		'ipify'             => 'https://api.ipify.org/',
+		'ipecho'            => 'https://ipecho.net/plain',
+		'ident'             => 'https://ident.me',
+		'whatismyipaddress' => 'https://bot.whatismyipaddress.com',
 	);
 
 	/**
