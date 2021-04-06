@@ -175,7 +175,7 @@ const Component = () => {
 		noticeContexts,
 		responseTypes,
 		shouldRetry,
-	} = useEmitResponse;
+	} = useEmitResponse();
 	return null;
 };
 ```
