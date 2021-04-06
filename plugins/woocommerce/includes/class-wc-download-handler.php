@@ -590,7 +590,7 @@ class WC_Download_Handler {
 
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 		header( 'Content-Description: File Transfer' );
-		header( 'Content-Type: text/html' );
+		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
 		header( 'Content-Disposition: inline' );
 		header( 'Content-Transfer-Encoding: binary' );
 
