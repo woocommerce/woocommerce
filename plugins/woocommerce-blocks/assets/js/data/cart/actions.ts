@@ -9,6 +9,7 @@ import type {
 	CartBillingAddress,
 	CartShippingAddress,
 } from '@woocommerce/types';
+import { ReturnOrGeneratorYieldUnion } from '@automattic/data-stores';
 import { camelCase, mapKeys } from 'lodash';
 
 /**
@@ -18,7 +19,6 @@ import { ACTION_TYPES as types } from './action-types';
 import { STORE_KEY as CART_STORE_KEY } from './constants';
 import { apiFetchWithHeaders } from '../shared-controls';
 import type { ResponseError } from '../types';
-import { ReturnOrGeneratorYieldUnion } from '../../mapped-types';
 
 /**
  * Returns an action object used in updating the store with the provided items
@@ -447,7 +447,7 @@ export type CartAction = ReturnOrGeneratorYieldUnion<
 	| typeof itemIsPendingDelete
 	| typeof updatingCustomerData
 	| typeof shippingRatesBeingSelected
-	| typeof cartDataIsStale
+	| typeof setIsCartDataStale
 	| typeof updateCustomerData
 	| typeof removeItemFromCart
 	| typeof changeCartItemQuantity
