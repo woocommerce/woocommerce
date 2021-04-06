@@ -67,7 +67,7 @@
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",
-		"@automattic/data-stores": "1.0.0-alpha.0",
+		"@automattic/data-stores": "2.0.1",
 		"@babel/cli": "7.13.10",
 		"@babel/core": "7.13.10",
 		"@babel/plugin-proposal-class-properties": "7.13.0",
