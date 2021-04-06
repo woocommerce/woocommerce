@@ -1,7 +1,7 @@
 name: Smoke test daily
 on:
   schedule:
-    - cron: '3 25 * * *'
+    - cron: '25 3 * * *'
 jobs:
   login-run:
     name: Log into smoke test site.
