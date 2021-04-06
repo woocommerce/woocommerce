@@ -94,6 +94,10 @@
 		}
 	}
 
+	.wp-block-button.aligncenter {
+		text-align: center;
+	}
+
 	&.has-background-dim::before {
 		content: "";
 		position: absolute;
