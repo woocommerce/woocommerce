@@ -259,7 +259,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product1_id );
 		$this->assertEquals( $product1_id, $product->get_id() );
-		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>10.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>7.00</bdi></span></ins>', $product->get_price_html() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>10.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>7.00</bdi></span></ins>', $product->get_price_html() );
 
 		$product = wc_get_product( $product2_id );
 		$this->assertEquals( $product2_id, $product->get_id() );
