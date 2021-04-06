@@ -94,7 +94,7 @@ const initProducts = async () => {
 		const simpleProduct = {
 			name: 'Simple Product 273722',
 			regularPrice: '100',
-			tax_class: 'Tax Class Simple'
+			taxClass: 'Tax Class Simple'
 		};
 		return await repo.create(simpleProduct);
 	};
@@ -112,7 +112,7 @@ const initProducts = async () => {
 						option: 'Yellow'
 					}
 				],
-				tax_class: 'Tax Class Variable'
+				taxClass: 'Tax Class Variable'
 			},
 			{
 				regularPrice: '300',
@@ -126,13 +126,13 @@ const initProducts = async () => {
 						option: 'Magenta'
 					}
 				],
-				tax_class: 'Tax Class Variable'
+				taxClass: 'Tax Class Variable'
 			}
 		];
 		const variableProductData = {
 			name: 'Variable Product 024611',
 			type: 'variable',
-			tax_class: 'Tax Class Variable'
+			taxClass: 'Tax Class Variable'
 		};
 
 		const variationRepo = ProductVariation.restRepository(httpClient);
@@ -161,7 +161,7 @@ const initProducts = async () => {
 			...defaultProps,
 			name: 'External product 786794',
 			regularPrice: '800',
-			tax_class: 'Tax Class External'
+			taxClass: 'Tax Class External'
 		};
 		return await repo.create(props);
 	};
