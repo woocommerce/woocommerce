@@ -162,7 +162,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return bool
 		 */
 		private function should_display_widget() {
-			return 'yes' !== get_option( 'woocommerce_task_list_complete' ) && 'yes' !== get_option( 'woocommerce_task_list_hidden' );
+			return WC()->is_wc_admin_active() &&
+				'yes' !== get_option( 'woocommerce_task_list_complete' ) &&
+				'yes' !== get_option( 'woocommerce_task_list_hidden' );
 		}
 
 		/**
