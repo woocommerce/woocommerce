@@ -217,10 +217,10 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$note_id = $note->get_id();
 
 		// Sub in a mock datastore that throws an error on read().
-		$mock_datastore = $this->createMock( \Automattic\WooCommerce\Admin\Notes\DataStore::class );
-		$mock_datastore
-			->method( 'read' )
-			->will( $this->throwException( new \Exception() ) );
+		$mock_datastore = $this->getMockBuilder( \Automattic\WooCommerce\Admin\Notes\DataStore::class )
+			->setMethods( array( 'read' ) )
+			->getMock();
+		$mock_datastore->method( 'read' )->will( $this->throwException( new \Exception() ) );
 
 		// Suppress deliberately caused errors.
 		$log_file = ini_set( 'error_log', '/dev/null' );

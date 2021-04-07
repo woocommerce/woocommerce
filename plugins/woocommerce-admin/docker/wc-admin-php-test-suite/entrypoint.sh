@@ -8,6 +8,19 @@ done
 
 >&2 echo "MySQL is up - executing tests"
 
+if [ "$(php -r "echo version_compare(PHP_VERSION,'8','>=');")" ]; then
+  # WP_VERSION="$WP_VERSION"
+  # WC_VERSION="$WC_VERSION"
+  if [ "$(php -r "echo version_compare('$WP_VERSION','5.6','<');")" ]; then
+    >&2 echo "$WP_VERSION is not supported for PHP 8 updating WP_VERSION to 5.6"
+	WP_VERSION=5.6
+  fi
+  if [ "$(php -r "echo version_compare('$WC_VERSION','5.1','<');")" ]; then
+    >&2 echo "$WC_VERSION is not supported for PHP 8 updating WC_VERSION to 5.1"
+	WC_VERSION=5.1.0
+  fi
+fi
+
 # Function to install the test suite.
 function install {
 	# Delete previous state.
@@ -47,9 +60,25 @@ else
 	fi
 fi
 
+
 # Run the install script if the WordPress directory is not found.
 if [ ! -d /tmp/wordpress-tests-lib ]; then
 	install
 fi
 
-exec phpunit "$@"
+if [ "$(php -r "echo version_compare(PHP_VERSION,'8','>=');")" ]; then
+	if [ -f "/tmp/phpunit-7.5-fork.zip" ]; then
+	    echo "phpunit 7.5 fork already exists"
+	else
+	    echo "Retrieving phpunit 7.5 fork"
+		curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+		unzip -q -d /tmp/phpunit-7.5-fork -o /tmp/phpunit-7.5-fork.zip
+    fi
+    composer bin phpunit config --unset platform
+    composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+    composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
+	exec ./vendor/bin/phpunit "$@"
+else
+	exec phpunit "$@"
+fi
+

@@ -13,9 +13,9 @@
 		"automattic/jetpack-autoloader": "^2.9.1"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "7.5.20",
 		"woocommerce/woocommerce-sniffs": "0.1.0",
-		"suin/phpcs-psr4-sniff": "^2.2"
+		"suin/phpcs-psr4-sniff": "^2.2",
+		"bamarni/composer-bin-plugin": "^1.4"
 	},
 	"config": {
 		"platform": {
@@ -23,6 +23,9 @@
 		}
 	},
 	"scripts": {
+		"bin": "echo 'bin not installed'",
+		"post-install-cmd": ["@composer bin all install --ansi"],
+		"post-update-cmd": ["@composer bin all update --ansi"],
 		"test": [
 			"phpunit"
 		],
@@ -38,6 +41,9 @@
 			"test": "Run unit tests",
 			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+		},
+		"bamarni-bin": {
+			"target-directory": "bin/composer"
 		}
 	},
 	"autoload": {
