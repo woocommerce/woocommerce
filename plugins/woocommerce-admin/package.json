@@ -158,7 +158,7 @@
 		"@types/puppeteer": "5.4.3",
 		"@types/wordpress__components": "9.8.6",
 		"@typescript-eslint/eslint-plugin": "4.21.0",
-		"@woocommerce/api": "0.1.1",
+		"@woocommerce/api": "0.1.2",
 		"@woocommerce/components": "file:packages/components",
 		"@woocommerce/csv-export": "file:packages/csv-export",
 		"@woocommerce/currency": "file:packages/currency",
