@@ -1296,7 +1296,7 @@ return array(
 	),
 	'PL' => array(),
 	'PR' => array(),
-	'PT' => array( // Portugal states.
+	'PT' => array( // Portugal states. Ref: https://github.com/unicode-org/cldr/blob/release-38-1/common/subdivisions/en.xml#L4139-L4159
 		'PT-01'  => __( 'Aveiro', 'woocommerce' ),
 		'PT-02'  => __( 'Beja', 'woocommerce' ),
 		'PT-03'  => __( 'Braga', 'woocommerce' ),
