@@ -1,5 +1,7 @@
 # Unreleased
 
+- `emptyCart()` Shopper flow helper that empties the cart
+
 # 0.1.4
 
 ## Fixed

@@ -19,10 +19,30 @@ if ( fs.existsSync( localTestConfigFile ) ) {
 	);
 }
 
+/**
+ * Get test container configuration.
+ * @returns {any}
+ */
 const getTestConfig = () => {
 	const rawTestConfig = fs.readFileSync( testConfigFile );
+	const config = require( 'config' );
+	const url = config.get( 'url' );
+	const users = config.get( 'users' );
 
+	// Support for environment variable overrides.
 	let testConfig = JSON.parse( rawTestConfig );
+	if ( url ) {
+		testConfig.url = url;
+	}
+	if ( users ) {
+		if ( users.admin ) {
+			testConfig.users.admin = users.admin;
+		}
+		if ( users.customer ) {
+			testConfig.users.customer = users.customer;
+		}
+	}
+
 	let testPort = testConfig.url.match( /[0-9]+/ );
 	testConfig.baseUrl = testConfig.url.substr( 0, testConfig.url.length - 1 );
 	if ( Array.isArray( testPort ) ) {
