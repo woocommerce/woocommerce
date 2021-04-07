@@ -1,10 +1,12 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests */
+
 /**
  * Internal dependencies
  */
 const {
 	merchant,
 	completeOnboardingWizard,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -17,6 +19,17 @@ const {
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
+		it( 'can reset onboarding to default settings', async () => {
+			await withRestApi.resetOnboarding();
+		});
+
+		it( 'can reset shipping zones to default settings', async () => {
+			await withRestApi.deleteAllShippingZones();
+		});
+
+		it( 'can reset allow tracking to default settings', async () => {
+			await withRestApi.resetAllowTracking();
+		});
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
 			await merchant.runSetupWizard();

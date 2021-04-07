@@ -12,7 +12,8 @@ import {
 	verifyCheckboxIsUnset,
 	selectOptionInSelect2,
 	setCheckbox,
-	unsetCheckbox
+	unsetCheckbox,
+	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
 
@@ -67,7 +68,7 @@ const completeOnboardingWizard = async () => {
 	await expect( page ).toFill( '.woocommerce-select-control__control-input', config.get( 'addresses.admin.store.countryandstate' ) );
 
 	// Fill the city where the store is located
-	await expect( page ).toFill( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
+	await clearAndFillInput( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
 
 	// Fill postcode of the store
 	await expect( page ).toFill( '#inspector-text-control-3', config.get( 'addresses.admin.store.postcode' ) );
