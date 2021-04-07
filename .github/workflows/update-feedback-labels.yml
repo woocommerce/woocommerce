@@ -3,7 +3,11 @@ on: 'issue_comment'
 
 jobs:
   feedback:
-    if: github.event.issue && contains(github.event.issue.labels.*.name, 'needs feedback')
+    if: |
+      github.actor != 'github-actions' &&
+      github.event.issue &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'needs feedback')
     runs-on: ubuntu-latest
     steps:
     - name: Add has feedback
