@@ -248,6 +248,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Note that this does not indicate if the customer's shipping address
 	 * is complete, only that one or more fields are populated.
 	 *
+	 * @since 5.3.0
+	 *
 	 * @return bool
 	 */
 	public function has_shipping_address() {
