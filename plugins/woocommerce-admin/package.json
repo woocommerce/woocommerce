@@ -153,7 +153,7 @@
 		"@testing-library/user-event": "12.8.3",
 		"@types/expect-puppeteer": "4.4.5",
 		"@types/history": "4.7.8",
-		"@types/jest": "26.0.20",
+		"@types/jest": "26.0.22",
 		"@types/lodash": "4.14.168",
 		"@types/puppeteer": "5.4.3",
 		"@types/wordpress__components": "9.8.6",
