@@ -12,8 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Report_Sales_By_Category
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
@@ -171,11 +169,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 					switch ( $this->chart_groupby ) {
 						case 'day':
-							$time = strtotime( date( 'Ymd', strtotime( $order_item->post_date ) ) ) * 1000;
+							$time = strtotime( gmdate( 'Ymd', strtotime( $order_item->post_date ) ) ) * 1000;
 							break;
 						case 'month':
 						default:
-							$time = strtotime( date( 'Ym', strtotime( $order_item->post_date ) ) . '01' ) * 1000;
+							$time = strtotime( gmdate( 'Ym', strtotime( $order_item->post_date ) ) . '01' ) * 1000;
 							break;
 					}
 
@@ -307,11 +305,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 					switch ( $this->chart_groupby ) {
 						case 'day':
-							$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $this->start_date ) ) ) * 1000;
+							$time = strtotime( gmdate( 'Ymd', strtotime( "+{$i} DAY", $this->start_date ) ) ) * 1000;
 							break;
 						case 'month':
 						default:
-							$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $this->start_date ) ) . '01' ) * 1000;
+							$time = strtotime( gmdate( 'Ym', strtotime( "+{$i} MONTH", $this->start_date ) ) . '01' ) * 1000;
 							break;
 					}
 
