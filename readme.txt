@@ -160,34 +160,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.2.0 RC 2 2021-04-06 =
+= 5.2.0 2021-04-13 =
 
 **WooCommerce**
 
-* Update - WooCommerce Admin package 2.1.5. #29577
-
-**WooCommerce Admin - 2.1.5**
-
-* Tweak - Set international country feature flag off
-
-= 5.2.0 RC 2021-03-30 =
-
-**WooCommerce**
-
-* Update - WooCommerce Admin package 2.1.4. #29520
-* Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
-* Fix - Wrong logic for including or excluding the payments step in the list of completed tasks in the onboarding wizard. #29518
-
-**WooCommerce Admin - 2.1.4**
-
-* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
-
-= 5.2.0 beta 2021-03-23 =
-
-**WooCommerce**
-
-* Update - WooCommerce Blocks package 4.7.0. #29406
-* Update - WooCommerce Admin package 2.1.3. #29283
 * Add - Filter woocommerce_product_recount_terms to allow/prevent recounting of product terms. #29281
 * Add - Result return array to the checkout_place_order_success callback to allow 3rd party to manipulate results. #29232
 * Dev - Fix miscellaneous typos in docblocks. #29285
@@ -224,13 +200,23 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - add validation of the posted country codes on checkout. #28849
 * Fix - Correctly display pagination arrows on RTL languages. #28523
 * Fix - Invalid refund amount error on $0 refund when number of decimals is equal to 0. #27277
-* Fix - Revert a replacement of wp_redirect to wp_safe_redirect in WC_Checkout::process_order_payment that caused issues in the default PayPal interface. #29459
 * Fix - "Sale" badge misaligned on products when displaying 1 item per row. #29425
+* Fix - Revert a replacement of wp_redirect to wp_safe_redirect in WC_Checkout::process_order_payment that caused issues in the default PayPal interface. #29459
+* Fix - Don't remove existing coupons from order when an invalid REST API request for updating coupons is submitted. #29474
+* Fix - Wrong logic for including or excluding the payments step in the list of completed tasks in the onboarding wizard. #29518
+* Fix - Error when loading the admin dashboard while the admin package was disabled. #29613
+* Fix - "'' is not a valid country code" error when no billing/shipping country specified (e.g. when using PayPal checkout). #29606
+* Fix - Sanitize tax class and display errors in admin while creating tax classes.
+* Fix - Check if a verified product owner is required before placing a review.
+* Fix - Make product name escaping consistent in the front-end.
 * Tweak - Added the Mercado Pago logo into the assets/images folder in order to use it in the payments setup task. #29365
 * Tweak - Update the contributor guidelines. #29150
 * Tweak - Introduced phone number input validation. #27242
+* Tweak - Escape short description.
+* Update - WooCommerce Admin package 2.1.5. #29577
+* Update - WooCommerce Blocks package 4.7.0. #29406
 
-**WooCommerce Admin - 2.1.0 & 2.1.1 & 2.1.2 & 2.1.3**
+**WooCommerce Admin - 2.1.0 & 2.1.1 & 2.1.2 & 2.1.3 & 2.1.4 & 2.1.5**
 
 * Add - Add navigation intro modal. #6367
 * Add - CES track settings tab on updating settings #6368
@@ -257,6 +243,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Add check for navigating being enabled. #6462
 * Fix - Add customer name column to CSV export #6556
 * Fix - Add guard to "Deactivate Plugin" note handlers to prevent fatal error. #6532
+* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
 * Fix - Broken link anchors to online documentation. #6455
 * Fix - Check if tax was successfully added before displaying notice #6229
 * Fix - Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
@@ -280,11 +267,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - New Settings: Turn off in dev mode #6348
 * Tweak - Order and styles updates to nav footer #6373
 * Tweak - Remove categories without menu items #6329
+* Tweak - Set international country feature flag off
 * Tweak - Set `is_deleted` from the database when instantiating a `Note` #6322
 * Tweak - Update inline documentation for navigation Screen class #6173
 * Tweak - Updates to copy and punctuation to be more conversational and consistent. #6298
 
-**WooCommerce Blocks - 4.5.0 & 4.6.0 & 4.7.0**
+**WooCommerce Blocks - 4.5.0 & 4.6.0 & 4.7.0 & 4.7.1**
 
 * Enhancement - Login links on the checkout should use the account page. ([3844](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3844))
 * Enhancement - Prevent checkout linking to trashed terms and policy pages. ([3843](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3843))
