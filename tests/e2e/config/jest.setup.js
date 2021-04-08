@@ -4,10 +4,27 @@ import {
 	switchUserToTest,
 	clearLocalStorage,
 	setBrowserViewport,
-	factories,
+	withRestApi,
 } from '@woocommerce/e2e-utils';
 
 const { merchant } = require( '@woocommerce/e2e-utils' );
+
+/**
+ * Add an expect range matcher
+ * @see https://jestjs.io/docs/expect#expectextendmatchers
+ */
+expect.extend({
+	toBeInRange: function (received, floor, ceiling) {
+		const pass = received >= floor && received <= ceiling;
+		const condition = pass ? 'not to be' : 'to be';
+
+		return {
+			message: () =>
+				`expected ${received} ${condition} within range ${floor} - ${ceiling}`,
+			pass,
+		};
+	},
+});
 
 /**
  * Navigates to the post listing screen and bulk-trashes any posts which exist.
@@ -38,50 +55,13 @@ async function trashExistingPosts() {
 	await switchUserToTest();
 }
 
-/**
- * Use api package to delete products.
- *
- * @return {Promise} Promise resolving once products have been trashed.
- */
-async function deleteAllProducts() {
-	const repository = SimpleProduct.restRepository( factories.api.withDefaultPermalinks );
-	let products;
-
-	products = await repository.list();
-	while ( products.length > 0 ) {
-		for( let p = 0; p < products.length; p++ ) {
-			await repository.delete( products[ p ].id );
-		}
-		products = await repository.list();
-	}
-}
-
-/**
- * Use api package to delete coupons.
- *
- * @return {Promise} Promise resolving once coupons have been trashed.
- */
-async function deleteAllCoupons() {
-	const repository = Coupon.restRepository( factories.api.withDefaultPermalinks );
-	let coupons;
-
-	coupons = await repository.list();
-
-	while ( coupons.length > 0 ) {
-		for (let c = 0; c < coupons.length; c++ ) {
-			await repository.delete( coupons[ c ].id );
-		}
-		coupons = await repository.list();
-	}
-}
-
 // Before every test suite run, delete all content created by the test. This ensures
 // other posts/comments/etc. aren't dirtying tests and tests don't depend on
 // each other's side-effects.
 beforeAll( async () => {
 	await trashExistingPosts();
-	await deleteAllProducts();
-	await deleteAllCoupons();
+	await withRestApi.deleteAllProducts();
+	await withRestApi.deleteAllCoupons();
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
 } );

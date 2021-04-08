@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import {WP_ADMIN_WC_HOME} from "./constants";
+
 const config = require( 'config' );
 
 /**
@@ -119,7 +121,8 @@ const merchant = {
 	},
 
 	runSetupWizard: async () => {
-		await page.goto( WP_ADMIN_SETUP_WIZARD, {
+			const setupWizard = process.env.E2E_RETEST == '1' ? WP_ADMIN_SETUP_WIZARD : WP_ADMIN_WC_HOME;
+			await page.goto( setupWizard, {
 			waitUntil: 'networkidle0',
 		} );
 	},
