@@ -14,7 +14,8 @@ const getCoreTestsRoot = require( '../../core-tests-root' );
  */
 const {
 	it,
-	describe
+	describe,
+	beforeAll,
 } = require( '@jest/globals' );
 
 const path = require( 'path' );
