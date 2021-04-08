@@ -17,7 +17,6 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) 
 	const minimum = defaultObjectId == null ? 0 : 1;
 
 	objects = await repository.list();
-
 	while ( objects.length > minimum ) {
 		for (let o = 0; o < objects.length; o++ ) {
 			// Skip default data store object
