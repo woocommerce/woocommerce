@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import {WP_ADMIN_WC_HOME} from "./constants";
-
 const config = require( 'config' );
 
 /**
@@ -20,6 +18,7 @@ const {
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
+	WP_ADMIN_WC_HOME,
 	WP_ADMIN_WC_SETTINGS,
 	WP_ADMIN_NEW_SHIPPING_ZONE,
 	WP_ADMIN_ANALYTICS_PAGES,

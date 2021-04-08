@@ -56,7 +56,7 @@ const runTaskListTest = () => {
 				const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
 				await setupTaskListItem.click();
 			} else {
-				await merchant.openSettings( 'shipping' );
+				await merchant.openNewShipping();
 			}
 			await page.waitForNavigation({waitUntil: 'networkidle0'});
 
