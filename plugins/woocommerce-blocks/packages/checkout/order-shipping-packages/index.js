@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useStoreCart } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -15,10 +14,15 @@ const {
 	Slot: OrderShippingPackagesSlot,
 } = createSlotFill( slotName );
 
-const Slot = ( { className, collapsible, noResultsMessage, renderOption } ) => {
-	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
-	const { extensions, receiveCart, ...cart } = useStoreCart();
+const Slot = ( {
+	className,
+	collapsible,
+	noResultsMessage,
+	renderOption,
+	extensions,
+	cart,
+	components,
+} ) => {
 	const { fills } = useSlot( slotName );
 	const hasMultiplePackages = fills.length > 1;
 	return (
@@ -35,6 +39,7 @@ const Slot = ( { className, collapsible, noResultsMessage, renderOption } ) => {
 				renderOption,
 				extensions,
 				cart,
+				components,
 			} }
 		/>
 	);

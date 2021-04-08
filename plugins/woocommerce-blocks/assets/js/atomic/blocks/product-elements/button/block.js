@@ -5,7 +5,10 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-import { useStoreAddToCart, useStoreEvents } from '@woocommerce/base-hooks';
+import {
+	useStoreEvents,
+	useStoreAddToCart,
+} from '@woocommerce/base-context/hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import { triggerFragmentRefresh } from '@woocommerce/base-utils';
 import {

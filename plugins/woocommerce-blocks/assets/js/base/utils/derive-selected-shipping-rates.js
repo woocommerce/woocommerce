@@ -1,7 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { fromEntriesPolyfill } from '@woocommerce/base-utils';
+import { fromEntriesPolyfill } from './from-entries-polyfill';
 
 /**
  * Get an array of selected shipping rates keyed by Package ID.

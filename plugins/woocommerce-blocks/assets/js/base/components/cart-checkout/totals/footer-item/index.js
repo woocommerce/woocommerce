@@ -14,7 +14,7 @@ import {
 	mustBeString,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
-import { useStoreCart } from '@woocommerce/base-hooks';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies

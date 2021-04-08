@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { usePaymentMethods } from '@woocommerce/base-hooks';
+import { usePaymentMethods } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import Label from '@woocommerce/base-components/label';
 import { usePaymentMethodDataContext } from '@woocommerce/base-context';

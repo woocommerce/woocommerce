@@ -16,11 +16,11 @@ import { useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import { useShallowEqual } from '@woocommerce/base-hooks';
+import { defaultAddressFields } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import defaultAddressFields from './default-address-fields';
 import prepareAddressFields from './prepare-address-fields';
 
 // If it's the shipping address form and the user starts entering address

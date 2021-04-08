@@ -30,7 +30,7 @@ There are several aliases for internal imports which make importing files across
 
 ```diff
 -import { useStoreCartCoupons } from '../../../../base/hooks';
-+import { useStoreCartCoupons } from '@woocommerce/base-hooks';
++import { useStoreCartCoupons } from '@woocommerce/base-context/hooks';
 ```
 
 Aliases also ease refactors because imports no longer depend on the exact location of the file.

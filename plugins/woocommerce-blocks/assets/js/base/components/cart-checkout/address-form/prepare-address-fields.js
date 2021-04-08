@@ -1,10 +1,78 @@
 /** @typedef { import('@woocommerce/type-defs/address-fields').CountryAddressFields } CountryAddressFields */
 
 /**
- * Internal dependencies
+ * External dependencies
  */
-import defaultAddressFields from './default-address-fields';
-import countryAddressFields from './country-address-fields';
+import { defaultAddressFields, getSetting } from '@woocommerce/settings';
+import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * This is locale data from WooCommerce countries class. This doesn't match the shape of the new field data blocks uses,
+ * but we can import part of it to set which fields are required.
+ *
+ * This supports new properties such as optionalLabel which are not used by core (yet).
+ */
+const coreLocale = getSetting( 'countryLocale', {} );
+
+/**
+ * Gets props from the core locale, then maps them to the shape we require in the client.
+ *
+ * Ignores "class", "type", "placeholder", and "autocomplete" props from core.
+ *
+ * @param {Object} localeField Locale fields from WooCommerce.
+ * @return {Object} Supported locale fields.
+ */
+const getSupportedCoreLocaleProps = ( localeField ) => {
+	const fields = {};
+
+	if ( localeField.label !== undefined ) {
+		fields.label = localeField.label;
+	}
+
+	if ( localeField.required !== undefined ) {
+		fields.required = localeField.required;
+	}
+
+	if ( localeField.hidden !== undefined ) {
+		fields.hidden = localeField.hidden;
+	}
+
+	if ( localeField.label !== undefined && ! localeField.optionalLabel ) {
+		fields.optionalLabel = sprintf(
+			/* translators: %s Field label. */
+			__( '%s (optional)', 'woo-gutenberg-products-block' ),
+			localeField.label
+		);
+	}
+
+	if ( localeField.priority ) {
+		fields.index = parseInt( localeField.priority, 10 );
+	}
+
+	if ( localeField.hidden === true ) {
+		fields.required = false;
+	}
+
+	return fields;
+};
+
+const countryAddressFields = Object.entries( coreLocale )
+	.map( ( [ country, countryLocale ] ) => [
+		country,
+		Object.entries( countryLocale )
+			.map( ( [ localeFieldKey, localeField ] ) => [
+				localeFieldKey,
+				getSupportedCoreLocaleProps( localeField ),
+			] )
+			.reduce( ( obj, [ key, val ] ) => {
+				obj[ key ] = val;
+				return obj;
+			}, {} ),
+	] )
+	.reduce( ( obj, [ key, val ] ) => {
+		obj[ key ] = val;
+		return obj;
+	}, {} );
 
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.

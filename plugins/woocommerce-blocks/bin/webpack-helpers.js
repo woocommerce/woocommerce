@@ -5,6 +5,7 @@ const path = require( 'path' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FORCE_MAP = process.env.FORCE_MAP || false;
+const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 
 // If a package is not available, or missing functionality, in an old but __supported__ version of WordPress, it should be listed here.
 // Some packages are not available in legacy versions of WordPress, so we don't want to extract them.
@@ -124,6 +125,7 @@ const requestToHandle = ( request ) => {
 module.exports = {
 	NODE_ENV,
 	FORCE_MAP,
+	CHECK_CIRCULAR_DEPS,
 	getAlias,
 	findModuleMatch,
 	requestToHandle,

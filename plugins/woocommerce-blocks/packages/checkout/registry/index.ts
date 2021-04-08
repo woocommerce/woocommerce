@@ -7,7 +7,7 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { returnTrue } from '../';
+import { returnTrue } from '../utils';
 
 type CheckoutFilterFunction = < T >(
 	label: T,

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
+import { usePrevious } from '@woocommerce/base-hooks';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
 	useCollectionData,
-	usePrevious,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 import { useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { useDebouncedCallback } from 'use-debounce';

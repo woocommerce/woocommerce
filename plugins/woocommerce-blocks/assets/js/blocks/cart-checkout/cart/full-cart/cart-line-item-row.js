@@ -10,7 +10,7 @@ import ProductName from '@woocommerce/base-components/product-name';
 import {
 	useStoreCartItemQuantity,
 	useStoreEvents,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 import {
 	ProductBackorderBadge,
 	ProductImage,

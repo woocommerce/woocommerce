@@ -7,13 +7,13 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Pagination from '@woocommerce/base-components/pagination';
 import { useEffect } from '@wordpress/element';
+import { usePrevious } from '@woocommerce/base-hooks';
 import {
-	usePrevious,
+	useStoreEvents,
 	useStoreProducts,
 	useSynchronizedQueryState,
 	useQueryStateByKey,
-	useStoreEvents,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { speak } from '@wordpress/a11y';

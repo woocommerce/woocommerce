@@ -7,10 +7,8 @@ import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
-import {
-	usePaymentMethods,
-	usePositionRelativeToViewport,
-} from '@woocommerce/base-hooks';
+import { usePaymentMethods } from '@woocommerce/base-context/hooks';
+import { usePositionRelativeToViewport } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies

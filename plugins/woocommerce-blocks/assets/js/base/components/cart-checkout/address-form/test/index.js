@@ -3,8 +3,8 @@
  */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useCheckoutAddress } from '@woocommerce/base-hooks';
 import { CheckoutProvider } from '@woocommerce/base-context';
+import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
