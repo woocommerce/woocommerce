@@ -19,17 +19,19 @@ const {
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
-		it( 'can reset onboarding to default settings', async () => {
-			await withRestApi.resetOnboarding();
-		});
+		if ( process.env.E2E_RETEST == '1' ) {
+			it('can reset onboarding to default settings', async () => {
+				await withRestApi.resetOnboarding();
+			});
 
-		it( 'can reset shipping zones to default settings', async () => {
-			await withRestApi.deleteAllShippingZones();
-		});
+			it('can reset shipping zones to default settings', async () => {
+				await withRestApi.deleteAllShippingZones();
+			});
 
-		it( 'can reset allow tracking to default settings', async () => {
-			await withRestApi.resetAllowTracking();
-		});
+			it('can reset allow tracking to default settings', async () => {
+				await withRestApi.resetAllowTracking();
+			});
+		}
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
 			await merchant.runSetupWizard();
@@ -46,16 +48,17 @@ const runTaskListTest = () => {
 			});
 			// Query for all tasks on the list
 			const taskListItems = await page.$$('.woocommerce-list__item-title');
-			expect(taskListItems).toHaveLength(6);
+			expect(taskListItems.length).toBeInRange( 5, 6 );
 
-			const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
-			await Promise.all([
+			// Work around for https://github.com/woocommerce/woocommerce-admin/issues/6761
+			if ( taskListItems.length == 6 ) {
 				// Click on "Set up shipping" task to move to the next step
-				setupTaskListItem.click(),
-
-				// Wait for shipping setup section to load
-				page.waitForNavigation({waitUntil: 'networkidle0'}),
-			]);
+				const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
+				await setupTaskListItem.click();
+			} else {
+				await merchant.openSettings( 'shipping' );
+			}
+			await page.waitForNavigation({waitUntil: 'networkidle0'});
 
 			// Wait for "Proceed" button to become active
 			await page.waitForSelector('button.is-primary:not(:disabled)');

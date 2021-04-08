@@ -2,9 +2,12 @@
  * External dependencies
  */
 const config = require( 'config' );
-
 const baseUrl = config.get( 'url' );
 
+/**
+ * WordPress core dashboard pages.
+ * @type {string}
+ */
 export const WP_ADMIN_LOGIN = baseUrl + 'wp-login.php';
 export const WP_ADMIN_DASHBOARD = baseUrl + 'wp-admin';
 export const WP_ADMIN_PLUGINS = baseUrl + 'wp-admin/plugins.php';
@@ -24,8 +27,11 @@ export const SHOP_PRODUCT_PAGE = baseUrl + '?p=';
 export const SHOP_CART_PAGE = baseUrl + 'cart';
 export const SHOP_CHECKOUT_PAGE = baseUrl + 'checkout/';
 export const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
-
-export const MY_ACCOUNT_ORDERS = baseUrl + 'my-account/orders';
-export const MY_ACCOUNT_DOWNLOADS = baseUrl + 'my-account/downloads';
-export const MY_ACCOUNT_ADDRESSES = baseUrl + 'my-account/edit-address';
-export const MY_ACCOUNT_ACCOUNT_DETAILS = baseUrl + 'my-account/edit-account';
+/**
+ * Customer account pages.
+ * @type {string}
+ */
+export const MY_ACCOUNT_ORDERS = SHOP_MY_ACCOUNT_PAGE + 'orders';
+export const MY_ACCOUNT_DOWNLOADS = SHOP_MY_ACCOUNT_PAGE + 'downloads';
+export const MY_ACCOUNT_ADDRESSES = SHOP_MY_ACCOUNT_PAGE + 'edit-address';
+export const MY_ACCOUNT_ACCOUNT_DETAILS = SHOP_MY_ACCOUNT_PAGE + 'edit-account';

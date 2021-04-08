@@ -3,10 +3,27 @@ const {
 	switchUserToTest,
 	clearLocalStorage,
 	setBrowserViewport,
-	factories,
+	withRestApi,
 } from '@woocommerce/e2e-utils';
 
 const { merchant } = require( '@woocommerce/e2e-utils' );
+
+/**
+ * Add an expect range matcher
+ * @see https://jestjs.io/docs/expect#expectextendmatchers
+ */
+expect.extend({
+	toBeInRange: function (received, floor, ceiling) {
+		const pass = received >= floor && received <= ceiling;
+		const condition = pass ? 'not to be' : 'to be';
+
+		return {
+			message: () =>
+				`expected ${received} ${condition} within range ${floor} - ${ceiling}`,
+			pass,
+		};
+	},
+});
 
 /**
  * Navigates to the post listing screen and bulk-trashes any posts which exist.
@@ -80,8 +97,8 @@ async function deleteAllCoupons() {
 // each other's side-effects.
 beforeAll( async () => {
 	await trashExistingPosts();
-	await deleteAllProducts();
-	await deleteAllCoupons();
+	await withRestApi.deleteAllProducts();
+	await withRestApi.deleteAllCoupons();
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
 } );
