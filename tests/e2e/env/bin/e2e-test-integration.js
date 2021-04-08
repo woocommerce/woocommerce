@@ -40,7 +40,7 @@ let testEnvVars = {
 	NODE_ENV: 'test-e2e',
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 	node_config_dev: program.dev ? 'yes' : 'no',
-	jest_test_timeout: program.dev ? 120000 : 45000,
+	jest_test_timeout: program.dev ? 120000 : 30000,
 };
 
 if ( ! JEST_PUPPETEER_CONFIG ) {
