@@ -55,7 +55,9 @@ const runCartCalculateShippingTest = () => {
 			} catch (error) {
 				// Prevent an error here causing the test to fail.
 			}
+		});
 
+		it('can prepare the shipping zones for the test', async () => {
 			// Add a new shipping zone Germany with Free shipping
 			await addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
 
@@ -72,8 +74,6 @@ const runCartCalculateShippingTest = () => {
 			await page.select('select[name="add_method_id"]', 'local_pickup');
 			await page.click('button#btn-ok');
 			await page.waitForSelector('#zone_locations');
-
-			await merchant.logout();
 		});
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
@@ -113,6 +113,33 @@ const runCartCalculateShippingTest = () => {
 			await expect(page).toClick('button', {text: 'Update cart'});
 			await uiUnblocked();
 			await expect(page).toMatchElement('.order-total .amount', {text: `$${fourProductPriceWithFlatRate}`});
+		});
+
+		it('should show correct total cart price with 2 products and flat rate', async () => {
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(secondProductName);
+			await shopper.goToCart();
+
+			await shopper.setCartQuantity(firstProductName, 1);
+			await expect(page).toClick('button', {text: 'Update cart'});
+			await uiUnblocked();
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.shipping .amount', {text: '$5.00'});
+			await expect(page).toMatchElement('.order-total .amount', {text: `$${twoProductsPriceWithFlatRate}`});
+		});
+
+		it('should show correct total cart price with 2 products without flat rate', async () => {
+			await page.reload();
+
+			// Set shipping country to Spain
+			await expect(page).toClick('a.shipping-calculator-button');
+			await expect(page).toClick('#select2-calc_shipping_country-container');
+			await selectOptionInSelect2('Spain');
+			await expect(page).toClick('button[name="calc_shipping"]');
+
+			// Verify shipping costs
+			await page.waitForSelector('.order-total');
+			await expect(page).toMatchElement('.order-total .amount', {text: `$${twoProductsPrice}`});
 		});
 	});
 };
