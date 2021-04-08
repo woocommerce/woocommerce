@@ -4,9 +4,9 @@
 import {
 	usePaymentMethods,
 	usePaymentMethodInterface,
-	useStoreNotices,
 	useEmitResponse,
-} from '@woocommerce/base-hooks';
+	useStoreNotices,
+} from '@woocommerce/base-context/hooks';
 import { cloneElement } from '@wordpress/element';
 import {
 	useEditorContext,

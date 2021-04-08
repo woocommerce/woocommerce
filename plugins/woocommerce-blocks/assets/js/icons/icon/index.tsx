@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { cloneElement, isValidElement } from 'wordpress-element';
+import { cloneElement, isValidElement } from '@wordpress/element';
 import type { ReactElement } from 'react';
 
 interface IconProps {

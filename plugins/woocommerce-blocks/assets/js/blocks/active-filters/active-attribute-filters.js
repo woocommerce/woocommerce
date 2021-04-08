@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { useCollection, useQueryStateByKey } from '@woocommerce/base-hooks';
+import {
+	useCollection,
+	useQueryStateByKey,
+} from '@woocommerce/base-context/hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 

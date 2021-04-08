@@ -8,7 +8,7 @@ import {
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
-import { useStoreEvents } from '@woocommerce/base-hooks';
+import { useStoreEvents } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies

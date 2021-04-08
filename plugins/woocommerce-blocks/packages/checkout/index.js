@@ -1,5 +1,4 @@
 export * from './totals';
-export * from './shipping';
 export * from './utils';
 export * from './slot';
 export * from './registry';

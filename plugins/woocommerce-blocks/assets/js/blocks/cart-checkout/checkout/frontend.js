@@ -6,7 +6,7 @@ import {
 	withRestApiHydration,
 	withStoreCartApiHydration,
 } from '@woocommerce/block-hocs';
-import { useStoreCart } from '@woocommerce/base-hooks';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
 	StoreNoticesProvider,
 	ValidationContextProvider,

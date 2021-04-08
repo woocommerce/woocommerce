@@ -13,7 +13,7 @@ import RadioControl from '@woocommerce/base-components/radio-control';
 import {
 	usePaymentMethodInterface,
 	usePaymentMethods,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 
 /**

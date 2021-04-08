@@ -8,10 +8,10 @@ import {
 	StoreNoticesProvider,
 } from '@woocommerce/base-context';
 import {
+	useStoreCart,
 	useEmitResponse,
 	usePaymentMethods,
-	useStoreCart,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies

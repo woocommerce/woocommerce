@@ -3,7 +3,7 @@
  */
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { dispatch } from '@wordpress/data';
-import { useStoreCart } from '@woocommerce/base-hooks';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect, RawHTML } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { ValidationContextProvider } from '@woocommerce/base-context';

@@ -15,7 +15,7 @@ import {
 	useEditorContext,
 	useValidationContext,
 } from '@woocommerce/base-context';
-import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
+import { useStoreCart, useStoreNotices } from '@woocommerce/base-context/hooks';
 import {
 	Sidebar,
 	SidebarLayout,

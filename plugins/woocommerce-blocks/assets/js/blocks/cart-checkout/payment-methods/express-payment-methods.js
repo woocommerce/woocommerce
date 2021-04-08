@@ -4,7 +4,7 @@
 import {
 	useExpressPaymentMethods,
 	usePaymentMethodInterface,
-} from '@woocommerce/base-hooks';
+} from '@woocommerce/base-context/hooks';
 import {
 	cloneElement,
 	isValidElement,

@@ -6,7 +6,10 @@ import Button from '@woocommerce/base-components/button';
 import { Icon, done as doneIcon } from '@woocommerce/icons';
 import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';
-import { useStoreAddToCart, useStoreEvents } from '@woocommerce/base-hooks';
+import {
+	useStoreEvents,
+	useStoreAddToCart,
+} from '@woocommerce/base-context/hooks';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 
 /**

@@ -20,7 +20,10 @@ import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
-import { useStoreCartCoupons } from '@woocommerce/base-hooks';
+import {
+	useStoreCartCoupons,
+	useStoreCart,
+} from '@woocommerce/base-context/hooks';
 
 const CheckoutSidebar = ( {
 	cartCoupons = [],
@@ -37,6 +40,15 @@ const CheckoutSidebar = ( {
 
 	const { needsShipping } = useShippingDataContext();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+
+	// Prepare props to pass to the ExperimentalOrderMeta slot fill.
+	// We need to pluck out receiveCart.
+	// eslint-disable-next-line no-unused-vars
+	const { extensions, receiveCart, ...cart } = useStoreCart();
+	const slotFillProps = {
+		extensions,
+		cart,
+	};
 
 	return (
 		<>
@@ -75,7 +87,7 @@ const CheckoutSidebar = ( {
 				currency={ totalsCurrency }
 				values={ cartTotals }
 			/>
-			<ExperimentalOrderMeta.Slot />
+			<ExperimentalOrderMeta.Slot { ...slotFillProps } />
 		</>
 	);
 };
