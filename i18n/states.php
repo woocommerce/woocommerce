@@ -1793,9 +1793,8 @@ return array(
 		'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 	),
 	'VE' => array( // Venezuela States. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:VE
-		'W' => __( 'Dependencias Federales', 'woocommerce' ),
-		'A' => __( 'Distrito Capital', 'woocommerce' ),
-		'Z' => __( 'Amazonas', 'woocommerce' ),
+
+		'A' => __( 'Capital', 'woocommerce' ),
 		'B' => __( 'Anzoátegui', 'woocommerce' ),
 		'C' => __( 'Apure', 'woocommerce' ),
 		'D' => __( 'Aragua', 'woocommerce' ),
@@ -1803,7 +1802,6 @@ return array(
 		'F' => __( 'Bolívar', 'woocommerce' ),
 		'G' => __( 'Carabobo', 'woocommerce' ),
 		'H' => __( 'Cojedes', 'woocommerce' ),
-		'Y' => __( 'Delta Amacuro', 'woocommerce' ),
 		'I' => __( 'Falcón', 'woocommerce' ),
 		'J' => __( 'Guárico', 'woocommerce' ),
 		'K' => __( 'Lara', 'woocommerce' ),
@@ -1815,9 +1813,12 @@ return array(
 		'R' => __( 'Sucre', 'woocommerce' ),
 		'S' => __( 'Táchira', 'woocommerce' ),
 		'T' => __( 'Trujillo', 'woocommerce' ),
-		'X' => __( 'La Guaira', 'woocommerce' ),
 		'U' => __( 'Yaracuy', 'woocommerce' ),
 		'V' => __( 'Zulia', 'woocommerce' ),
+		'W' => __( 'Federal Dependencies', 'woocommerce' ),
+		'X' => __( 'Vargas', 'woocommerce' ),
+		'Y' => __( 'Delta Amacuro', 'woocommerce' ),
+		'Z' => __( 'Amazonas', 'woocommerce' )
 	),
 	'VN' => array(),
 	'YT' => array(),
