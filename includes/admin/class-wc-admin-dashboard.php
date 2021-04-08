@@ -63,6 +63,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * @return bool
 		 */
 		private function should_display_widget() {
+			if ( ! WC()->is_wc_admin_active() ) {
+				return false;
+			}
+
 			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
 			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
 			return $task_completed_or_hidden && $has_permission;
@@ -127,11 +131,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$reports = new WC_Admin_Report();
 
-			$net_sales_link = 'admin.php?page=wc-reports&tab=orders&range=month';
+			$net_sales_link  = 'admin.php?page=wc-reports&tab=orders&range=month';
 			$top_seller_link = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
-			$report_data = $is_wc_admin_disabled ? $this->get_sales_report_data() : $this->get_wc_admin_performance_data();
+			$report_data     = $is_wc_admin_disabled ? $this->get_sales_report_data() : $this->get_wc_admin_performance_data();
 			if ( ! $is_wc_admin_disabled ) {
-				$net_sales_link = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
+				$net_sales_link  = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
 				$top_seller_link = 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=';
 			}
 
