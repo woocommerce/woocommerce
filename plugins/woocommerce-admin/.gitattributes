@@ -22,3 +22,5 @@
 /docs* export-ignore
 /config* export-ignore
 /client* export-ignore
+/docker* export-ignore
+/storybook* export-ignore
