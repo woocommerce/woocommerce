@@ -544,6 +544,7 @@ const deleteAllEmailLogs = async () => {
  */
 const deleteAllShippingZones = async () => {
 	await merchant.openSettings('shipping');
+
 	// Delete existing shipping zones.
 	try {
 		let zone = await page.$( '.wc-shipping-zone-delete' );

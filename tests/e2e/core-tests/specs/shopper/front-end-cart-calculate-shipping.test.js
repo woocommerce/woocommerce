@@ -13,6 +13,15 @@ const {
 	selectOptionInSelect2,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+ const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
+
 const config = require( 'config' );
 const firstProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 const secondProductPrice = '4.99';
