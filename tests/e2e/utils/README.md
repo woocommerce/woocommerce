@@ -124,6 +124,7 @@ describe( 'Cart page', () => {
 | `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
+| `deleteAllShippingZones` | | Delete all the existing shipping zones |
 
 ### Test Utilities
 

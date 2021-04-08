@@ -1,6 +1,7 @@
 # Unreleased
 
 - `emptyCart()` Shopper flow helper that empties the cart
+- `deleteAllShippingZones` Delete all the existing shipping zones
 
 # 0.1.4
 
