@@ -8,7 +8,7 @@ const {
 	createSimpleProduct,
 	addShippingZoneAndMethod,
 	clearAndFillInput,
-	evalAndClick,
+	deleteAllShippingZones,
 	uiUnblocked,
 	selectOptionInSelect2,
 } = require( '@woocommerce/e2e-utils' );
@@ -33,33 +33,9 @@ const runCartCalculateShippingTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct(firstProductName);
-			await merchant.openSettings('general');
 			await createSimpleProduct(secondProductName, secondProductPrice);
-			await merchant.openSettings('shipping');
+			await deleteAllShippingZones();
 		});
-
-		it('can remove the existing shippings if they are present', async () => {
-			// Delete existing shipping zones.
-			try {
-				let zone = await page.$( '.wc-shipping-zone-delete' );
-				if ( zone ) {
-					// WP action links aren't clickable because they are hidden with a left=-9999 style.
-					await page.evaluate(() => {
-						document.querySelector('.wc-shipping-zone-name .row-actions')
-							.style
-							.left = '0';
-					});
-					while ( zone ) {
-						await evalAndClick( '.wc-shipping-zone-delete' );
-						await uiUnblocked();
-						zone = await page.$( '.wc-shipping-zone-delete' );
-					}
-				}
-			} catch (error) {
-				// Prevent an error here causing the test to fail.
-			}
-		});
-
 		it('can prepare the shipping zones for the test', async () => {
 			// Add a new shipping zone Germany with Free shipping
 			await addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
