@@ -13,6 +13,15 @@ const {
 	deleteAllShippingZones,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
+
 const config = require( 'config' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 const simpleProductName = config.get( 'products.simple.name' );

@@ -1,4 +1,5 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
+
 /**
  * Internal dependencies
  */
@@ -16,7 +17,7 @@ const {
 /**
  * External dependencies
  */
- const {
+const {
 	it,
 	describe,
 	beforeAll,
