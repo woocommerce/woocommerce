@@ -33,9 +33,12 @@ const runCartCalculateShippingTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct(firstProductName);
+			await merchant.openSettings('general');
 			await createSimpleProduct(secondProductName, secondProductPrice);
 			await merchant.openSettings('shipping');
+		});
 
+		it('can remove the existing shippings if they are present', async () => {
 			// Delete existing shipping zones.
 			try {
 				let zone = await page.$( '.wc-shipping-zone-delete' );
