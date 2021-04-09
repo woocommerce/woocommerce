@@ -55,6 +55,7 @@ describe( 'Cart page', () => {
 | `openEmailLog` | | Open the WP Mail Log page |
 | `openAnalyticsPage` | | Open any Analytics page |
 | `openAllUsersView` | | Open the All Users page |
+| `openImportProducts` | | Open the Import Products page |
 
 ### Shopper `shopper`
 
