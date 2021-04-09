@@ -2,6 +2,7 @@
 .wc-block-components-title.wc-block-components-title {
 	@include reset-box();
 	@include font-size(large);
+	word-break: break-word;
 }
 
 // For Twenty Twenty we need to increase specificity a bit more.
@@ -9,5 +10,6 @@
 	.wc-block-components-title.wc-block-components-title {
 		@include reset-box();
 		@include font-size(large);
+		word-break: break-word;
 	}
 }
