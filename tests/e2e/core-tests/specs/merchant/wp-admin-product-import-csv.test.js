@@ -43,8 +43,11 @@ const runImportProductsTest = () => {
 			await merchant.openImportProducts();
 		});
 		it('should show error message if you go without providing CSV file', async () => {
-			// Verify error message if you go without providing CSV file
-			await expect(page).toClick('button[value="Continue"]');
+			// Verify the error message if you go without providing CSV file
+			await Promise.all( [
+				page.click( 'button[value="Continue"]' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
 			await page.waitForSelector('div.error');
 			await expect(page).toMatchElement('div.error > p', errorMessage);
 		});
