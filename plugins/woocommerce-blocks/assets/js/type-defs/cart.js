@@ -152,6 +152,8 @@
  *                                                     provided using the
  *                                                     smallest unit of the
  *                                                     currency.
+ * @property {Object}              extensions          Extra data registered
+ *                                                     by plugins.
  */
 
 /**

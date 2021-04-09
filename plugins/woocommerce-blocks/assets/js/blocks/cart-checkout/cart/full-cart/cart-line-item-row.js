@@ -88,7 +88,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			line_subtotal: '0',
 			line_subtotal_tax: '0',
 		},
-		extensions,
+		extensions = {},
 	} = lineItem;
 
 	const {
