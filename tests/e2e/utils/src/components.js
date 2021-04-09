@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { merchant } from './flows';
+import { merchant, IS_RETEST_MODE } from './flows';
 import {
 	clickTab,
 	uiUnblocked,
@@ -68,7 +68,7 @@ const completeOnboardingWizard = async () => {
 	await expect( page ).toFill( '.woocommerce-select-control__control-input', config.get( 'addresses.admin.store.countryandstate' ) );
 
 	// Fill the city where the store is located
-	await clearAndFillInput( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
+	await expect( page ).toFill( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
 
 	// Fill postcode of the store
 	await expect( page ).toFill( '#inspector-text-control-3', config.get( 'addresses.admin.store.postcode' ) );
@@ -82,23 +82,20 @@ const completeOnboardingWizard = async () => {
 	// Click on "Continue" button to move to the next step
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
-	// Wait for usage tracking pop-up window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
-	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a better WooCommerce' }
-	);
+	// Wait for usage tracking pop-up window to appear on a new site
+	if ( IS_RETEST_MODE ) {
+		await page.waitForSelector('.components-modal__header-heading');
+		await expect(page).toMatchElement(
+			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
+		);
 
-	// Query for "Continue" buttons
-	const continueButtons = await page.$$( 'button.is-primary' );
-	expect( continueButtons ).toHaveLength( 2 );
+		// Query for "Continue" buttons
+		const continueButtons = await page.$$( 'button.is-primary' );
+		expect( continueButtons ).toHaveLength( 2 );
 
-	await Promise.all( [
-		// Click on "Continue" button of the usage pop-up window to move to the next step
-		continueButtons[1].click(),
-
-		// Wait for "In which industry does the store operate?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+		await continueButtons[1].click();
+	}
+	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
 
@@ -159,6 +156,10 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary();
 
 	// End of onboarding wizard
+	if ( process.env.E2E_RETEST == '1' ) {
+		// Home screen modal can't be reset via the rest api.
+		return;
+	}
 
 	// Wait for homescreen welcome modal to appear
 	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );

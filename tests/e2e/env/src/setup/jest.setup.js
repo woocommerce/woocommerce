@@ -102,6 +102,23 @@ function removePageEvents() {
 }
 
 /**
+ * Add an expect range matcher.
+ * @see https://jestjs.io/docs/expect#expectextendmatchers
+ */
+expect.extend({
+	toBeInRange: function (received, floor, ceiling) {
+		const pass = received >= floor && received <= ceiling;
+		const condition = pass ? 'not to be' : 'to be';
+
+		return {
+			message: () =>
+				`expected ${received} ${condition} within range ${floor} - ${ceiling}`,
+			pass,
+		};
+	},
+});
+
+/**
  * Adds a page event handler to emit uncaught exception to process if one of
  * the observed console logging types is encountered.
  */

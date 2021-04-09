@@ -6,7 +6,6 @@ const { HTTPClientFactory } = require( '@woocommerce/api' );
 const {
 	it,
 	describe,
-	beforeAll,
 } = require( '@jest/globals' );
 
 /**
