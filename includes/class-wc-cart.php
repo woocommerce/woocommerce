@@ -1123,8 +1123,13 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Load cart item data - may be added by other plugins.
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
-			// Generate a ID based on product ID, variation ID, variation data, and other cart item data.
-			$cart_id = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
+			// If cart item key is set use it.
+			if( isset( $cart_item_data['cart_item_key'] ) && !empty( $cart_item_data['cart_item_key'] ) ){
+				$cart_id = $cart_item_data['cart_item_key'];
+			}else{
+				// Generate a ID based on product ID, variation ID, variation data, and other cart item data.
+				$cart_id = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
+			}
 
 			// Find the cart item key in the existing cart.
 			$cart_item_key = $this->find_product_in_cart( $cart_id );
