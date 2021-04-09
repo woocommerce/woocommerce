@@ -14,7 +14,8 @@ const getCoreTestsRoot = require( '../../core-tests-root' );
  */
 const {
 	it,
-	describe
+	describe,
+	beforeAll,
 } = require( '@jest/globals' );
 
 const path = require( 'path' );
@@ -39,15 +40,19 @@ const runImportProductsTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await merchant.openAllProductsView();
-		});
-		it('can upload the CSV file and import products', async () => {
 			await merchant.openImportProducts();
-
-			// Verify error message if you go withot provided CSV file
-			await expect(page).toClick('button[value="Continue"]');
+		});
+		it('should show error message if you go without providing CSV file', async () => {
+			// Verify the error message if you go without providing CSV file
+			await Promise.all( [
+				page.click( 'button[value="Continue"]' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
 			await page.waitForSelector('div.error');
 			await expect(page).toMatchElement('div.error > p', errorMessage);
+		});
 
+		it('can upload the CSV file and import products', async () => {
 			// Put the CSV products file and proceed further
 			const uploader = await page.$("input[type=file]");
 			await uploader.uploadFile(filePath);
@@ -61,7 +66,9 @@ const runImportProductsTest = () => {
 			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 60000});
 			await page.waitForSelector('.woocommerce-importer-done');
 			await expect(page).toMatchElement('.woocommerce-importer-done', {text: 'Import complete!'});
+		});
 
+		it('can see and verify the uploaded products', async () => {
 			// Click on view products
 			await page.waitForSelector('div.wc-actions > a.button.button-primary');
 			await expect(page).toClick('div.wc-actions > a.button.button-primary');
@@ -69,7 +76,7 @@ const runImportProductsTest = () => {
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
 			const productTitles = await page.$$eval('a.row-title',
-			 elements => elements.map(item => item.innerHTML));
+			elements => elements.map(item => item.innerHTML));
 
 			// Compare imported product names
 			expect(productTitles.sort()).toEqual(productNames.sort());
@@ -92,7 +99,9 @@ const runImportProductsTest = () => {
 			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 60000});
 			await page.waitForSelector('.woocommerce-importer-done');
 			await expect(page).toMatchElement('.woocommerce-importer-done', {text: 'Import complete!'});
+		});
 
+		it('can see and verify the uploaded overrode products', async () => {
 			// Click on view products
 			await page.waitForSelector('div.wc-actions > a.button.button-primary');
 			await expect(page).toClick('div.wc-actions > a.button.button-primary');
@@ -115,6 +124,7 @@ const runImportProductsTest = () => {
 
 			// Move all imported products to trash
 			await moveAllItemsToTrash();
+
 		});
 	});
 };
