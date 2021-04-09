@@ -83,7 +83,7 @@ const completeOnboardingWizard = async () => {
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
 	// Wait for usage tracking pop-up window to appear on a new site
-	if ( IS_RETEST_MODE ) {
+	if ( ! IS_RETEST_MODE ) {
 		await page.waitForSelector('.components-modal__header-heading');
 		await expect(page).toMatchElement(
 			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
@@ -156,7 +156,7 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary();
 
 	// End of onboarding wizard
-	if ( process.env.E2E_RETEST == '1' ) {
+	if ( IS_RETEST_MODE ) {
 		// Home screen modal can't be reset via the rest api.
 		return;
 	}
