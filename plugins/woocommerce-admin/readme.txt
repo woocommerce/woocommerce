@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Tweak: Add settings_section event prop for CES #6762
 - Fix: Retain persisted queries when navigating to Homescreen #6614
 - Update: Update choose niche note cta URL #6733
 - Fix: Update folded header style #6724

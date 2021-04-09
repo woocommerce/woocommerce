@@ -358,9 +358,18 @@ class CustomerEffortScoreTracks {
 	public function run_on_update_options() {
 		// $current_tab is set when WC_Admin_Settings::save_settings is called.
 		global $current_tab;
+		global $current_section;
 
 		if ( $this->has_been_shown( self::SETTINGS_CHANGE_ACTION_NAME ) ) {
 			return;
+		}
+
+		$props = array(
+			'settings_area' => $current_tab,
+		);
+
+		if ( $current_section ) {
+			$props['settings_section'] = $current_section;
 		}
 
 		$this->enqueue_to_ces_tracks(
@@ -373,9 +382,7 @@ class CustomerEffortScoreTracks {
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'woocommerce_page_wc-settings',
 				'adminpage'      => 'woocommerce_page_wc-settings',
-				'props'          => (object) array(
-					'settings_area' => $current_tab,
-				),
+				'props'          => (object) $props,
 			)
 		);
 	}
