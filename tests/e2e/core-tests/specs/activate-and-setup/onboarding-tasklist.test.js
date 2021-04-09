@@ -7,19 +7,25 @@ const {
 	merchant,
 	completeOnboardingWizard,
 	withRestApi,
+	addShippingZoneAndMethod,
+	IS_RETEST_MODE,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
  * External dependencies
  */
+const config = require( 'config' );
 const {
 	it,
 	describe,
+	beforeAll
 } = require( '@jest/globals' );
+
+const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
-		if ( process.env.E2E_RETEST == '1' ) {
+		if ( IS_RETEST_MODE ) {
 			it('can reset onboarding to default settings', async () => {
 				await withRestApi.resetOnboarding();
 			});
@@ -28,8 +34,10 @@ const runOnboardingFlowTest = () => {
 				await withRestApi.deleteAllShippingZones();
 			});
 
-			it('can reset allow tracking to default settings', async () => {
-				await withRestApi.resetAllowTracking();
+			it('can reset to default settings', async () => {
+				await withRestApi.resetSettingsGroupToDefault('general');
+				await withRestApi.resetSettingsGroupToDefault('products');
+				await withRestApi.resetSettingsGroupToDefault('tax');
 			});
 		}
 
@@ -55,18 +63,19 @@ const runTaskListTest = () => {
 				// Click on "Set up shipping" task to move to the next step
 				const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
 				await setupTaskListItem.click();
+				await page.waitForNavigation({waitUntil: 'networkidle0'});
+
+				// Wait for "Proceed" button to become active
+				await page.waitForSelector('button.is-primary:not(:disabled)');
+				await page.waitFor(3000);
+
+				// Click on "Proceed" button to save shipping settings
+				await page.click('button.is-primary');
+				await page.waitFor(3000);
 			} else {
 				await merchant.openNewShipping();
+				await addShippingZoneAndMethod(shippingZoneNameUS);
 			}
-			await page.waitForNavigation({waitUntil: 'networkidle0'});
-
-			// Wait for "Proceed" button to become active
-			await page.waitForSelector('button.is-primary:not(:disabled)');
-			await page.waitFor(3000);
-
-			// Click on "Proceed" button to save shipping settings
-			await page.click('button.is-primary');
-			await page.waitFor(3000);
 		});
 	});
 };

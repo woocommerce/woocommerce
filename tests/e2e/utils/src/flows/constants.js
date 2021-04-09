@@ -52,3 +52,9 @@ export const MY_ACCOUNT_ORDERS = SHOP_MY_ACCOUNT_PAGE + 'orders';
 export const MY_ACCOUNT_DOWNLOADS = SHOP_MY_ACCOUNT_PAGE + 'downloads';
 export const MY_ACCOUNT_ADDRESSES = SHOP_MY_ACCOUNT_PAGE + 'edit-address';
 export const MY_ACCOUNT_ACCOUNT_DETAILS = SHOP_MY_ACCOUNT_PAGE + 'edit-account';
+
+/**
+ * Test control flags.
+ * @type {boolean}
+ */
+export const IS_RETEST_MODE = process.env.E2E_RETEST == '1';
