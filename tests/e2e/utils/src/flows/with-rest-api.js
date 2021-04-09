@@ -4,6 +4,7 @@ import {Coupon, Setting, SimpleProduct} from '@woocommerce/api';
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
+const userEndpoint = '/wp/v2/users';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -91,14 +92,52 @@ export const withRestApi = {
 			}
 		}
 	},
-	resetAllowTracking: async () => {
-		const settingsClient = Setting.restRepository( client );
-
-		const allowTracking = {
-			id: 'woocommerce_allow_tracking',
-			value: 'no'
+	deleteCustomerByEmail: async ( emailAddress ) => {
+		const query = {
+			search: emailAddress,
+			context: 'edit',
 		};
-		const response = await settingsClient.update( 'advanced', allowTracking.id, allowTracking );
-		expect( response.value ).toBe( 'no' );
+		const customers = await client.get( userEndpoint, query );
+
+		if ( customers.data && customers.data.length ) {
+			for ( let c = 0; c < customers.data.length; c++ ) {
+				const deleteUser = {
+					id: customers.data[c].id,
+					force: true,
+					reassign: 1,
+				}
+				await client.delete( userEndpoint + `/${ deleteUser.id }`, deleteUser );
+			}
+		}
+	},
+	/**
+	 * Reset a settings group to default values except selects.
+	 * @param settingsGroup
+	 * @returns {Promise<void>}
+	 */
+	resetSettingsGroupToDefault: async ( settingsGroup ) => {
+		const settingsClient = Setting.restRepository( client );
+		const settings = await settingsClient.list( settingsGroup );
+		if ( ! settings.length  ) {
+			return;
+		}
+
+		for ( let s = 0; s < settings.length; s++ ) {
+			// The rest api doesn't allow selects to be set to ''.
+			if ( settings[s].type == 'select' && settings[s].default == '' ) {
+				continue;
+			}
+			const defaultSetting = {
+				group_id: settingsGroup,
+				id: settings[s].id,
+				value: settings[s].default,
+			};
+
+			const response = await settingsClient.update( settingsGroup, defaultSetting.id, defaultSetting );
+			// Multi-selects have a default '' but return an empty [].
+			if ( settings[s].type != 'multiselect' ) {
+				expect( response.value ).toBe( defaultSetting.value );
+			}
+		}
 	}
 };
