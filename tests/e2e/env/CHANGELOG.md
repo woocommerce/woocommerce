@@ -3,11 +3,6 @@
 ## Added
 
 - `toBeInRange` expect numeric range matcher
-- constants
-  - `WP_ADMIN_POST_TYPE`
-  - `WP_ADMIN_NEW_POST_TYPE`
-  - `WP_ADMIN_ALL_COUPONS_VIEW`
-  - `WP_ADMIN_WC_HOME`
 
 # 0.2.1
 

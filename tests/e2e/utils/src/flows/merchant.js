@@ -23,6 +23,7 @@ const {
 	WP_ADMIN_NEW_SHIPPING_ZONE,
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
+	IS_RETEST_MODE,
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );
@@ -120,7 +121,7 @@ const merchant = {
 	},
 
 	runSetupWizard: async () => {
-			const setupWizard = process.env.E2E_RETEST == '1' ? WP_ADMIN_SETUP_WIZARD : WP_ADMIN_WC_HOME;
+			const setupWizard = IS_RETEST_MODE ? WP_ADMIN_SETUP_WIZARD : WP_ADMIN_WC_HOME;
 			await page.goto( setupWizard, {
 			waitUntil: 'networkidle0',
 		} );
