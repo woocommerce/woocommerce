@@ -92,6 +92,12 @@ export const withRestApi = {
 			}
 		}
 	},
+	/**
+	 * Delete a customer account by their email address if the user exists.
+	 *
+	 * @param emailAddress Customer user account email address.
+	 * @returns {Promise<void>}
+	 */
 	deleteCustomerByEmail: async ( emailAddress ) => {
 		const query = {
 			search: emailAddress,

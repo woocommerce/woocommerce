@@ -18,7 +18,6 @@ const config = require( 'config' );
 const {
 	it,
 	describe,
-	beforeAll
 } = require( '@jest/globals' );
 
 const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );
