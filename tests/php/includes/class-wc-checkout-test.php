@@ -94,6 +94,30 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' doesn't add errors for empty billing/shipping countries.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $ship_to_different_address True to simulate shipping to a different address than the billing address.
+	 */
+	public function test_validate_posted_data_does_not_add_error_for_empty_country( $ship_to_different_address ) {
+		$_POST = array(
+			'billing_country'           => '',
+			'shipping_country'          => '',
+			'ship_to_different_address' => $ship_to_different_address,
+		);
+		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEmpty( $errors->get_error_message( 'billing_country_validation' ) );
+		$this->assertEmpty( $errors->get_error_message( 'shipping_country_validation' ) );
+	}
+
+	/**
 	 * @testdox 'validate_checkout' adds a "We don't ship to country X" error but only if the country exists.
 	 *
 	 * @testWith [ "XX", false ]

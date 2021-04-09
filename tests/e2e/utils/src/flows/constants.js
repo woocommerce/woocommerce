@@ -25,6 +25,7 @@ export const WP_ADMIN_ALL_ORDERS_VIEW = WP_ADMIN_POST_TYPE + 'shop_order';
 export const WP_ADMIN_NEW_ORDER = WP_ADMIN_NEW_POST_TYPE + 'shop_order';
 export const WP_ADMIN_ALL_PRODUCTS_VIEW = WP_ADMIN_POST_TYPE + 'product';
 export const WP_ADMIN_NEW_PRODUCT = WP_ADMIN_NEW_POST_TYPE + 'product';
+export const WP_ADMIN_IMPORT_PRODUCTS = WP_ADMIN_ALL_PRODUCTS_VIEW + '&page=product_importer';
 /**
  * WooCommerce settings pages.
  * @type {string}

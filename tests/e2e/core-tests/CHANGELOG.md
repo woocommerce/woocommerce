@@ -41,6 +41,7 @@
 - Merchant order emails flow
 - Merchant analytics page load tests
 - Shopper Checkout Create Account
+- Merchant import products via CSV
 
 # 0.1.1
 
