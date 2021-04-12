@@ -84,10 +84,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		$expected = array(
 			'advanced_page_options'                        => array( 'title', 'sectionend' ),
-			'woocommerce_cart_page_id'                     => 'single_select_page',
-			'woocommerce_checkout_page_id'                 => 'single_select_page',
-			'woocommerce_myaccount_page_id'                => 'single_select_page',
-			'woocommerce_terms_page_id'                    => 'single_select_page',
+			'woocommerce_cart_page_id'                     => 'single_select_page_with_search',
+			'woocommerce_checkout_page_id'                 => 'single_select_page_with_search',
+			'woocommerce_myaccount_page_id'                => 'single_select_page_with_search',
+			'woocommerce_terms_page_id'                    => 'single_select_page_with_search',
 			'checkout_process_options'                     => array( 'title', 'sectionend' ),
 			'woocommerce_force_ssl_checkout'               => 'checkbox',
 			'woocommerce_unforce_ssl_checkout'             => 'checkbox',
