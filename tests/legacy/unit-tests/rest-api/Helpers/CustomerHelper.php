@@ -26,15 +26,15 @@ class CustomerHelper {
 			'id'                  => 0,
 			'date_modified'       => null,
 			'country'             => 'US',
-			'state'               => 'PA',
-			'postcode'            => '19123',
-			'city'                => 'Philadelphia',
+			'state'               => 'CA',
+			'postcode'            => '94110',
+			'city'                => 'San Francisco',
 			'address'             => '123 South Street',
 			'address_2'           => 'Apt 1',
 			'shipping_country'    => 'US',
-			'shipping_state'      => 'PA',
-			'shipping_postcode'   => '19123',
-			'shipping_city'       => 'Philadelphia',
+			'shipping_state'      => 'CA',
+			'shipping_postcode'   => '94110',
+			'shipping_city'       => 'San Francisco',
 			'shipping_address'    => '123 South Street',
 			'shipping_address_2'  => 'Apt 1',
 			'is_vat_exempt'       => false,
@@ -55,15 +55,15 @@ class CustomerHelper {
 		$customer = new WC_Customer();
 		$customer->set_billing_country( 'US' );
 		$customer->set_first_name( 'Justin' );
-		$customer->set_billing_state( 'PA' );
-		$customer->set_billing_postcode( '19123' );
-		$customer->set_billing_city( 'Philadelphia' );
+		$customer->set_billing_state( 'CA' );
+		$customer->set_billing_postcode( '94110' );
+		$customer->set_billing_city( 'San Francisco' );
 		$customer->set_billing_address( '123 South Street' );
 		$customer->set_billing_address_2( 'Apt 1' );
 		$customer->set_shipping_country( 'US' );
-		$customer->set_shipping_state( 'PA' );
-		$customer->set_shipping_postcode( '19123' );
-		$customer->set_shipping_city( 'Philadelphia' );
+		$customer->set_shipping_state( 'CA' );
+		$customer->set_shipping_postcode( '94110' );
+		$customer->set_shipping_city( 'San Francisco' );
 		$customer->set_shipping_address( '123 South Street' );
 		$customer->set_shipping_address_2( 'Apt 1' );
 		$customer->set_username( $username );
@@ -79,7 +79,7 @@ class CustomerHelper {
 	 * @return array
 	 */
 	public static function get_expected_store_location() {
-		return array( 'GB', '', '', '' );
+		return array( 'US', 'CA', '', '' );
 	}
 
 	/**

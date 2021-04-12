@@ -117,8 +117,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 */
 	public function test_get_base_tax_rates() {
 		$tax_rate = array(
-			'tax_rate_country'  => 'GB',
-			'tax_rate_state'    => '',
+			'tax_rate_country'  => 'US',
+			'tax_rate_state'    => 'CA',
 			'tax_rate'          => '20.0000',
 			'tax_rate_name'     => 'VAT',
 			'tax_rate_priority' => '1',

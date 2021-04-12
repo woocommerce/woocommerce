@@ -324,16 +324,16 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_based_on', 'shipping' );
 		$taxable = $customer->get_taxable_address();
 		$this->assertEquals( 'US', $taxable[0] );
-		$this->assertEquals( 'PA', $taxable[1] );
+		$this->assertEquals( 'CA', $taxable[1] );
 		$this->assertEquals( '11111', $taxable[2] );
 		$this->assertEquals( 'Test', $taxable[3] );
 
 		update_option( 'woocommerce_tax_based_on', 'billing' );
 		$taxable = $customer->get_taxable_address();
 		$this->assertEquals( 'US', $taxable[0] );
-		$this->assertEquals( 'PA', $taxable[1] );
-		$this->assertEquals( '19123', $taxable[2] );
-		$this->assertEquals( 'Philadelphia', $taxable[3] );
+		$this->assertEquals( 'CA', $taxable[1] );
+		$this->assertEquals( '94110', $taxable[2] );
+		$this->assertEquals( 'San Francisco', $taxable[3] );
 
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		$taxable = $customer->get_taxable_address();
@@ -431,7 +431,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_is_customer_outside_base() {
 		$customer = WC_Helper_Customer::create_customer();
-		$this->assertTrue( $customer->is_customer_outside_base() );
+		$this->assertFalse( $customer->is_customer_outside_base() );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		$customer->set_billing_address_to_base();
 		$this->assertFalse( $customer->is_customer_outside_base() );
@@ -444,9 +444,9 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	public function test_customer_sessions() {
 		$session = WC_Helper_Customer::create_mock_customer(); // set into session....
 
-		$this->assertEquals( '19123', $session->get_billing_postcode() );
+		$this->assertEquals( '94110', $session->get_billing_postcode() );
 		$this->assertEquals( '123 South Street', $session->get_billing_address() );
-		$this->assertEquals( 'Philadelphia', $session->get_billing_city() );
+		$this->assertEquals( 'San Francisco', $session->get_billing_city() );
 
 		$session->set_billing_address( '124 South Street' );
 		$session->save();

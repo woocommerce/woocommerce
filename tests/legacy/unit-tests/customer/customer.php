@@ -83,7 +83,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the customer's billing address.
 		WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
 		WC_Helper_Customer::set_tax_based_on( 'billing' );
-		$this->assertEquals( $customer->is_customer_outside_base(), true );
+		$this->assertEquals( $customer->is_customer_outside_base(), false );
 
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the store base location.
 		WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
