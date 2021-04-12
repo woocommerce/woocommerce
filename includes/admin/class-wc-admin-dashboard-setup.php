@@ -172,7 +172,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 */
 		private function populate_payment_tasks() {
 			$is_woo_payment_installed = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
-			$country                  = explode( ':', get_option( 'woocommerce_default_country', '' ) )[0];
+			$country                  = explode( ':', get_option( 'woocommerce_default_country', 'US:CA' ) )[0];
 
 			// woocommerce-payments requires its plugin activated and country must be US.
 			if ( ! $is_woo_payment_installed || 'US' !== $country ) {

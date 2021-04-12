@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Countries
  */
 
+// phpcs:disable WordPress.Files.FileName
+
 /**
  * WC_Countries tests.
  */
@@ -178,7 +180,7 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'NO' );
 		$this->assertEquals( 'VAT', $countries->tax_or_vat() );
 
-		update_option( 'woocommerce_default_country', 'US' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
 		$this->assertEquals( 'Tax', $countries->tax_or_vat() );
 	}
 

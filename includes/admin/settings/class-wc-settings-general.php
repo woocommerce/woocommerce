@@ -81,7 +81,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Country / State', 'woocommerce' ),
 					'desc'     => __( 'The country and state or province, if any, in which your business is located.', 'woocommerce' ),
 					'id'       => 'woocommerce_default_country',
-					'default'  => 'GB',
+					'default'  => 'US:CA',
 					'type'     => 'single_select_country',
 					'desc_tip' => true,
 				),
