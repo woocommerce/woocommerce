@@ -3,13 +3,13 @@
  * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce blocks for the Gutenberg editor.
- * Version: 4.9.0-dev
+ * Version: 4.9.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
  * Requires at least: 5.5
  * Requires PHP: 7.0
- * WC requires at least: 4.3
+ * WC requires at least: 4.9
  * WC tested up to: 5.2
  *
  * @package WooCommerce\Blocks
