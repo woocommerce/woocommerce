@@ -46,16 +46,16 @@ class Assets {
 
 		// Shared libraries and components across multiple blocks.
 		$asset_api->register_script( 'wc-blocks-middleware', 'build/wc-blocks-middleware.js', [], false );
-		$asset_api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ], false );
+		$asset_api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ] );
 		$asset_api->register_script( 'wc-blocks', $asset_api->get_block_asset_build_path( 'blocks' ), [], false );
 		$asset_api->register_script( 'wc-vendors', $asset_api->get_block_asset_build_path( 'vendors' ), [], false );
 		$asset_api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
-		$asset_api->register_script( 'wc-shared-context', 'build/wc-shared-context.js', [], false );
+		$asset_api->register_script( 'wc-shared-context', 'build/wc-shared-context.js', [] );
 		$asset_api->register_script( 'wc-shared-hocs', 'build/wc-shared-hocs.js', [], false );
 		$asset_api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
-			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [], false );
+			$asset_api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [] );
 		}
 
 		wp_add_inline_script(
