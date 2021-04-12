@@ -179,7 +179,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_formatted_address() {
 		$customer = WC_Helper_Customer::create_customer();
 
-		$this->assertEquals( '123 South Street<br/>Apt 1<br/>Philadelphia, PA 19123<br/>United States (US)', wc_get_account_formatted_address( 'billing', $customer->get_id() ) );
+		$this->assertEquals( '123 South Street<br/>Apt 1<br/>San Francisco, CA 94110', wc_get_account_formatted_address( 'billing', $customer->get_id() ) );
 
 		$customer->delete( true );
 	}
