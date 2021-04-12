@@ -303,7 +303,7 @@ return array(
 		'CN31' => __( 'Tibet / 西藏', 'woocommerce' ),
 		'CN32' => __( 'Xinjiang / 新疆', 'woocommerce' ),
 	),
-	'CO' => array( // Colombian Republic
+	'CO' => array( // Colombian Republic.
 		'AM' => __( 'Amazonas', 'woocommerce' ),
 		'AN' => __( 'Antioquia', 'woocommerce' ),
 		'AR' => __( 'Arauca', 'woocommerce' ),
