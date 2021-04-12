@@ -147,6 +147,7 @@ To implement the Slackbot in your CI:
   - `files:write`
   - `incoming-webhook`
 - Add the app to your channel
+- Invite the Slack app user to your channel `/invite @your-slackbot-user`
 - In your CI environment
   - Add the environment variable `WC_E2E_SCREENSHOTS=1`
   - Add your app Oauth token to a CI secret `E2E_SLACK_TOKEN`
