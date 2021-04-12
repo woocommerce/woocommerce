@@ -50,7 +50,7 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings_for_default_section() {
 		$sut = new WC_Settings_Tax();
 
-		$settings               = $sut->get_settings();
+		$settings               = $sut->get_settings_for_section( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(

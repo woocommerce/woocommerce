@@ -59,7 +59,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 
 		$sut = new WC_Settings_Products();
 
-		$actual_settings_returned = $sut->get_settings( $section_name );
+		$actual_settings_returned = $sut->get_settings_for_section( $section_name );
 
 		foreach ( $filter_names as $filter_name ) {
 			remove_all_filters( $filter_name );
@@ -76,7 +76,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings( '' );
+		$settings               = $sut->get_settings_for_section( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
@@ -105,7 +105,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_inventory_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings( 'inventory' );
+		$settings               = $sut->get_settings_for_section( 'inventory' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
@@ -130,7 +130,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_downloadable_settings_returns_all_settings() {
 		$sut = new WC_Settings_Products();
 
-		$settings               = $sut->get_settings( 'downloadable' );
+		$settings               = $sut->get_settings_for_section( 'downloadable' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
