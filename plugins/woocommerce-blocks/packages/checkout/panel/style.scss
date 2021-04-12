@@ -56,6 +56,11 @@
 
 .theme-twentytwenty .wc-block-components-panel__button,
 .theme-twentyseventeen .wc-block-components-panel__button {
-	background: transparent;
+	background: none transparent;
 	color: inherit;
+
+	&.wc-block-components-panel__button:hover,
+	&.wc-block-components-panel__button:focus {
+		background: none transparent;
+	}
 }

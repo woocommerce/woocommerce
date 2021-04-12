@@ -1,3 +1,4 @@
+.wc-block-components-form .wc-block-components-text-input,
 .wc-block-components-text-input {
 	position: relative;
 	margin-top: em($gap-large);
@@ -56,11 +57,18 @@
 
 		&:focus {
 			background-color: #fff;
+			color: $input-text-active;
 		}
+
 		.has-dark-controls & {
 			background-color: $input-background-dark;
 			border-color: $input-border-dark;
 			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+			}
 		}
 	}
 

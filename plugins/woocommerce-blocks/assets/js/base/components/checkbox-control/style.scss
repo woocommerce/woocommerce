@@ -6,6 +6,7 @@
 	position: relative;
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
+		font-size: 1em;
 		appearance: none;
 		border: 2px solid $input-border-gray;
 		border-radius: 2px;
@@ -22,6 +23,11 @@
 		&:checked {
 			background: #fff;
 			border-color: $input-border-gray;
+		}
+
+		&::before,
+		&::after {
+			content: "";
 		}
 
 		&:not(:checked) + .wc-block-components-checkbox__mark {
@@ -75,7 +81,8 @@
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"]:checked,
-	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
+	.has-dark-controls
+	.wc-block-components-checkbox__input[type="checkbox"]:checked {
 		background-color: #fff;
 		border-color: var(--form--border-color);
 	}
