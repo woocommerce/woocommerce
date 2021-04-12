@@ -1,8 +1,9 @@
+.wc-block-components-form .wc-block-components-select,
 .wc-block-components-select {
 	height: 3em;
 	position: relative;
 
-	label {
+	label.components-custom-select-control__label {
 		@include reset-typography();
 		@include font-size(regular);
 		line-height: 1.375; // =22px when font-size is 16px.
@@ -70,6 +71,8 @@
 			text-transform: none;
 			white-space: nowrap;
 			width: 100%;
+			opacity: initial;
+			border-radius: 4px;
 			.has-dark-controls & {
 				background: $input-background-dark;
 				border-color: $input-border-dark;
@@ -138,6 +141,22 @@
 		// If the theme is in dark mode, but the block isn't, then this selector will match.
 		.components-custom-select-control__item {
 			color: $input-text-active;
+		}
+	}
+}
+
+.theme-twentyseventeen {
+	// Extra classes for specificity.
+	&.theme-twentyseventeen.theme-twentyseventeen {
+		.components-custom-select-control__button {
+			background-color: $select-dropdown-light;
+			color: $input-text-active;
+		}
+		.has-dark-controls {
+			.components-custom-select-control__button {
+				background-color: $select-dropdown-dark;
+				color: $input-text-dark;
+			}
 		}
 	}
 }

@@ -67,6 +67,7 @@
 		-webkit-appearance: none;
 		margin: 0;
 	}
+
 	.wc-block-components-quantity-selector__button {
 		@include reset-button;
 		@include font-size(regular);
@@ -75,6 +76,7 @@
 		color: $gray-900;
 		font-style: normal;
 		text-align: center;
+		text-decoration: none;
 
 		&:hover,
 		&:focus {
@@ -99,10 +101,21 @@
 			}
 		}
 	}
-	.wc-block-components-quantity-selector__button--minus {
+
+	> .wc-block-components-quantity-selector__button--minus {
 		order: 1;
 	}
-	.wc-block-components-quantity-selector__button--plus {
+
+	> .wc-block-components-quantity-selector__button--plus {
 		order: 3;
+	}
+}
+
+.theme-twentyseventeen {
+	.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+		&:hover,
+		&:focus {
+			background: none transparent;
+		}
 	}
 }
