@@ -1,6 +1,9 @@
-# Unreleased
+# 6.0.0
 
 -   Moving `addHistoryListener()` to this package, which supports adding a listener that is executed for history changes.
+-   Update dependencies.
+-   Add management of persisted queries to navigation.
+-   Add page parameter to getNewPath to override default page wc-admin #5821
 
 ## Breaking changes
 

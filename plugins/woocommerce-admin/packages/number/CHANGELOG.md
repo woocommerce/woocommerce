@@ -1,3 +1,8 @@
+# 2.1.1
+
+-   Update dependencies.
+-   Add TypeScript support.
+
 # 2.1.0
 
 -   Update to @wordpress/eslint coding standards.

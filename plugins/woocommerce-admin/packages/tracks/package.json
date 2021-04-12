@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/tracks",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "WooCommerce user event tracking utilities for Automattic based projects.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",

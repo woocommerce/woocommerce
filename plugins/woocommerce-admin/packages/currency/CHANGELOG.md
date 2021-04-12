@@ -1,3 +1,9 @@
+# 3.1.0
+
+-   Return countryInfo as an empty object if not in locale info #6188
+-   Localize regional currency information for use during onboarding setup #5969
+-   Update dependencies
+
 # 3.0.0
 
 ## Breaking changes

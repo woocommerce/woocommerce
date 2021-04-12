@@ -1,5 +1,4 @@
-Notices
-=======
+# Notices
 
 State management for notices.
 
@@ -7,6 +6,8 @@ NOTE: This has been copied from Gutenberg so that we can iterate on it faster
 than if we were relying on Gutenberg releasing a new version with our
 requirements. Once Gutenberg supports our requirements this package should be
 removed.
+
+**Update:** Changes required have been shipped in the Gutenberg package released with WP 5.7, so this package will be removed when WP 5.9 becomes available. Please use the Gutenberg version instead.
 
 ## Installation
 
@@ -17,7 +18,6 @@ npm install @wordpress/notices
 ```
 
 _This package assumes that your code will run in an **ES2015+** environment. If you're using an environment that has limited or no support for ES2015+ such as lower versions of IE then using [core-js](https://github.com/zloirock/core-js) or [@babel/polyfill](https://babeljs.io/docs/en/next/babel-polyfill) will add support for these methods. Learn more about it in [Babel docs](https://babeljs.io/docs/en/next/caveats)._
-
 
 ## Usage
 

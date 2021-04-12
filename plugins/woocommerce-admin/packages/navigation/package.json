@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/navigation",
-	"version": "5.2.0",
+	"version": "6.0.0",
 	"description": "WooCommerce navigation utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
