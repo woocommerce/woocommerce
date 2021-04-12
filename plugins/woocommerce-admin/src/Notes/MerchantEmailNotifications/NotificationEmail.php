@@ -91,6 +91,16 @@ class NotificationEmail extends \WC_Email {
 	}
 
 	/**
+	 * Get email headers.
+	 *
+	 * @return string
+	 */
+	public function get_headers() {
+		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
+		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object, $this );
+	}
+
+	/**
 	 * Get email subject.
 	 *
 	 * @return string
