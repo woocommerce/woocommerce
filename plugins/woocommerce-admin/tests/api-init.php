@@ -6,6 +6,7 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Admin\Schedulers\CustomersScheduler;
 use Automattic\WooCommerce\Admin\Schedulers\OrdersScheduler;
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 
@@ -19,6 +20,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->queue = new WC_Admin_Test_Action_Queue();
+		CustomersScheduler::set_queue( $this->queue );
 		OrdersScheduler::set_queue( $this->queue );
 	}
 
@@ -27,6 +29,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
+		CustomersScheduler::set_queue( null );
 		OrdersScheduler::set_queue( null );
 		$this->queue->actions = array();
 	}
@@ -83,6 +86,39 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 			array(
 				'hook' => OrdersScheduler::get_action( 'import' ),
 				'args' => array( $order->get_id() ),
+			),
+			$this->queue->actions[0]
+		);
+	}
+
+	/**
+	 * Test that updating user meta other than wc_last_active doesn't trigger a customer sync.
+	 *
+	 * @return void
+	 */
+	public function test_other_user_meta_update_no_customer_sync() {
+		update_user_meta( 1, 'nickname', 'test' );
+
+		$this->assertEmpty( $this->queue->actions );
+	}
+
+	/**
+	 * Test that updating  wc_last_active triggers a customer sync.
+	 *
+	 * @return void
+	 */
+	public function test_other_last_active_update_customer_sync() {
+		// First call creates the meta key.
+		// These don't use wc_update_user_last_active() because the timestamps will be the same.
+		update_user_meta( 1, 'wc_last_active', time() - 10 );
+		// Second call updates it which triggers the sync.
+		update_user_meta( 1, 'wc_last_active', time() );
+
+		$this->assertCount( 1, $this->queue->actions );
+		$this->assertArraySubset(
+			array(
+				'hook' => CustomersScheduler::get_action( 'import' ),
+				'args' => array( 1 ),
 			),
 			$this->queue->actions[0]
 		);

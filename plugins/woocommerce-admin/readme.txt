@@ -87,6 +87,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Check active plugins before getting the PayPal onboarding status #6625
 - Dev: Add support for running php unit tests in PHP 8. #6678
 - Fix: Remove no-reply from inbox notification emails #6644
+- Performance: Avoid updating customer info synchronously from the front end. #6765
 
 == 2.2.0 3/30/2021 ==
 
