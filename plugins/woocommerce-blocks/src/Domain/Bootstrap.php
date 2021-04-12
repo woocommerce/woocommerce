@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\Domain;
 use Automattic\WooCommerce\Blocks\Assets as BlockAssets;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Assets\BackCompatAssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Library;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Registry\Container;
@@ -155,12 +154,7 @@ class Bootstrap {
 		$this->container->register(
 			AssetDataRegistry::class,
 			function( Container $container ) {
-				$asset_api        = $container->get( AssetApi::class );
-				$load_back_compat = defined( 'WC_ADMIN_VERSION_NUMBER' )
-					&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' );
-				return $load_back_compat
-					? new BackCompatAssetDataRegistry( $asset_api )
-					: new AssetDataRegistry( $asset_api );
+				return new AssetDataRegistry( $container->get( AssetApi::class ) );
 			}
 		);
 		$this->container->register(
