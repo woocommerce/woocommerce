@@ -390,7 +390,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	// Look within passed path within the theme - this is priority.
 	if ( false !== strpos( $template_name, 'product_cat' ) || false !== strpos( $template_name, 'product_tag' ) ) {
 		$cs_template = str_replace( '_', '-', $template_name );
-		$template = locate_template(
+		$template    = locate_template(
 			array(
 				trailingslashit( $template_path ) . $cs_template,
 				$cs_template,
@@ -1270,7 +1270,7 @@ function wc_format_country_state_string( $country_string ) {
  * @return array
  */
 function wc_get_base_location() {
-	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country' ) );
+	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country', 'US:CA' ) );
 
 	return wc_format_country_state_string( $default );
 }
@@ -1286,7 +1286,7 @@ function wc_get_base_location() {
  */
 function wc_get_customer_default_location() {
 	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
-	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
+	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', 'US:CA' );
 	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
 	// Geolocation takes priority if used and if geolocation is possible.
@@ -2269,9 +2269,9 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
-	$new_version      = wc_clean( $plugin->new_version );
-	$plugin_updates   = new WC_Plugin_Updates();
-	$version_type = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
+	$new_version    = wc_clean( $plugin->new_version );
+	$plugin_updates = new WC_Plugin_Updates();
+	$version_type   = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
 	if ( ! is_string( $version_type ) ) {
 		$version_type = 'none';
 	}
