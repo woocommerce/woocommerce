@@ -75,6 +75,17 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Get settings array for the default section.
+		 *
+		 * @deprecated 5.4.0 'get_settings_for_section' (passing an empty string for default section) should be used instead.
+		 *
+		 * @return array Settings array, each item being an associative array representing a setting.
+		 */
+		public function get_settings() {
+			return $this->get_settings_for_section( '' );
+		}
+
+		/**
 		 * Get settings array.
 		 *
 		 * The strategy for getting the settings is as follows:
@@ -83,38 +94,39 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *   it will be invoked (for the default '' section, the method name is 'get_settings_for_default_section').
 		 *   Derived classes can implement these methods as required.
 		 *
-		 * - Otherwise, 'get_settings_for_section' will be invoked. Derived classes can override it
+		 * - Otherwise, 'get_settings_for_section_core' will be invoked. Derived classes can override it
 		 *   as an alternative to implementing 'get_settings_for_{section_id}_section' methods.
 		 *
-		 * @param string $current_section The id of the section to return settings for.
+		 * @param string $section_id The id of the section to return settings for, an empty string for the default section.
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
-		public function get_settings( $current_section = '' ) {
-			if ( '' === $current_section ) {
+		public function get_settings_for_section( $section_id ) {
+			if ( '' === $section_id ) {
 				$method_name = 'get_settings_for_default_section';
 			} else {
-				$method_name = "get_settings_for_{$current_section}_section";
+				$method_name = "get_settings_for_{$section_id}_section";
 			}
 
 			if ( method_exists( $this, $method_name ) ) {
 				$settings = $this->$method_name();
 			} else {
-				$settings = $this->get_settings_for_section( $current_section );
+				$settings = $this->get_settings_for_section_core( $section_id );
 			}
 
-			return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+			return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $section_id );
 		}
 
 		/**
 		 * Get the settings for a given section.
-		 * This method is invoked when no 'get_settings_for_{current_section}_section' exists in the class.
+		 * This method is invoked from 'get_settings_for_section' when no 'get_settings_for_{current_section}_section'
+		 * method exists in the class.
 		 *
-		 * @param string $current_section The section name to get the settings for.
+		 * @param string $section_id The section name to get the settings for.
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
-		protected function get_settings_for_section( $current_section ) {
+		protected function get_settings_for_section_core( $section_id ) {
 			return array();
 		}
 
@@ -178,7 +190,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$settings = $this->get_settings( $current_section );
+			$settings = $this->get_settings_for_section( $current_section );
 
 			WC_Admin_Settings::output_fields( $settings );
 		}
@@ -197,7 +209,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		protected function save_settings_for_current_section() {
 			global $current_section;
 
-			$settings = $this->get_settings( $current_section );
+			$settings = $this->get_settings_for_section( $current_section );
 			WC_Admin_Settings::save_fields( $settings );
 		}
 

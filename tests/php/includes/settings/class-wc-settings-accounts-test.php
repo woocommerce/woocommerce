@@ -32,7 +32,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 
 		$sut = new WC_Settings_Accounts();
 
-		$actual_settings_returned = $sut->get_settings();
+		$actual_settings_returned = $sut->get_settings_for_section( '' );
 		remove_all_filters( 'woocommerce_account_settings' );
 
 		$this->assertSame( $actual_settings_returned, $actual_settings_via_filter );
@@ -44,7 +44,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings__all_settings_are_present() {
 		$sut = new WC_Settings_Accounts();
 
-		$settings               = $sut->get_settings();
+		$settings               = $sut->get_settings_for_section( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
@@ -128,7 +128,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 
 		$sut = new WC_Settings_Accounts();
 
-		$settings = $sut->get_settings();
+		$settings = $sut->get_settings_for_section( '' );
 
 		$order_data_removal_setting = $this->setting_by_id( $settings, 'woocommerce_erasure_request_removes_order_data' );
 		$actual_desc                = $order_data_removal_setting['desc_tip'];

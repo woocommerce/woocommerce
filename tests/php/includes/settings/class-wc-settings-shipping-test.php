@@ -92,7 +92,7 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_and_options_settings_returns_all_settings( $section_name ) {
 		$sut = new WC_Settings_Shipping();
 
-		$settings               = $sut->get_settings( $section_name );
+		$settings               = $sut->get_settings_for_section( $section_name );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(

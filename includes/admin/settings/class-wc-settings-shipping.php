@@ -90,17 +90,17 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	/**
 	 * Get settings for the current section.
 	 *
-	 * @param string $current_section The id of the section to return settings for.
+	 * @param string $section_id The id of the section to return settings for.
 	 *
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
+	public function get_settings_for_section( $section_id = '' ) {
 		/*
 		The original implementation of this function was returning the settings for the "Options" section
 		when the supplied value for $current_section was '', which is the id for the "Zones" section.
 		We need this workaround to keep compatibility.
 		*/
-		return parent::get_settings( '' === $current_section ? 'options' : $current_section );
+		return parent::get_settings_for_section( '' === $section_id ? 'options' : $section_id );
 	}
 
 	/**

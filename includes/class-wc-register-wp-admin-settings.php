@@ -118,7 +118,7 @@ class WC_Register_WP_Admin_Settings {
 		}
 
 		foreach ( $sections as $section => $section_label ) {
-			$settings_from_section = $this->object->get_settings( $section );
+			$settings_from_section = $this->object->get_settings_for_section( $section );
 			foreach ( $settings_from_section as $setting ) {
 				if ( ! isset( $setting['id'] ) ) {
 					continue;
