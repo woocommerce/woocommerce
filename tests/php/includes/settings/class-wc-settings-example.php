@@ -25,8 +25,8 @@ class WC_Settings_Example extends WC_Settings_Page {
 		return array( 'foo' => 'bar' );
 	}
 
-	protected function get_settings_for_section( $current_section ) {
-		return array( "${current_section}_key" => "${current_section}_value" );
+	protected function get_settings_for_section_core( $section_id ) {
+		return array( "${section_id}_key" => "${section_id}_value" );
 	}
 
 	protected function get_own_sections() {

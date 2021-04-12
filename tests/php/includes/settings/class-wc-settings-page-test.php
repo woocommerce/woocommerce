@@ -53,7 +53,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	public function test_get_settings__default_section() {
 		$sut = new WC_Settings_Example();
 
-		$actual = $sut->get_settings( '' );
+		$actual = $sut->get_settings_for_section( '' );
 
 		$expected = array( 'key' => 'value' );
 		$this->assertEquals( $expected, $actual );
@@ -65,7 +65,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	public function test_get_settings__named_section_with_own_method() {
 		$sut = new WC_Settings_Example();
 
-		$actual = $sut->get_settings( 'foobar' );
+		$actual = $sut->get_settings_for_section( 'foobar' );
 
 		$expected = array( 'foo' => 'bar' );
 		$this->assertEquals( $expected, $actual );
@@ -77,7 +77,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	public function test_get_settings__named_section_without_own_method() {
 		$sut = new WC_Settings_Example();
 
-		$actual = $sut->get_settings( 'fizzbuzz' );
+		$actual = $sut->get_settings_for_section( 'fizzbuzz' );
 
 		$expected = array( 'fizzbuzz_key' => 'fizzbuzz_value' );
 		$this->assertEquals( $expected, $actual );
@@ -101,7 +101,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WC_Settings_Example();
-		$sut->get_settings( 'foobar' );
+		$sut->get_settings_for_section( 'foobar' );
 		remove_all_filters( 'woocommerce_get_settings_example' );
 
 		$expected_section  = 'foobar';

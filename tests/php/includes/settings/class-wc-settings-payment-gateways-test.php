@@ -55,7 +55,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		$sut = new WC_Settings_Payment_Gateways();
 
-		$actual_settings_returned = $sut->get_settings( $section_name );
+		$actual_settings_returned = $sut->get_settings_for_section( $section_name );
 		remove_all_filters( $filter_name );
 
 		$this->assertSame( $actual_settings_returned, $actual_settings_via_filter );
@@ -67,7 +67,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings() {
 		$sut = new WC_Settings_Payment_Gateways();
 
-		$settings               = $sut->get_settings( '' );
+		$settings               = $sut->get_settings_for_section( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
