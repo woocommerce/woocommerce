@@ -6,6 +6,7 @@
 
 - Shopper Checkout Login Account
 - Shopper My Account Create Account
+- Shopper Cart Redirection
 
 ## Fixed
 
