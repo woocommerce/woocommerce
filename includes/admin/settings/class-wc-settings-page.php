@@ -77,7 +77,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get settings array for the default section.
 		 *
-		 * @deprecated 5.4.0 'get_settings_for_section' (passing an empty string for default section) should be used instead.
+		 * @deprecated 5.4.0 Use 'get_settings_for_section' (passing an empty string for default section)
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
@@ -101,7 +101,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
-		public function get_settings_for_section( $section_id ) {
+		final public function get_settings_for_section( $section_id ) {
 			if ( '' === $section_id ) {
 				$method_name = 'get_settings_for_default_section';
 			} else {
@@ -121,6 +121,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * Get the settings for a given section.
 		 * This method is invoked from 'get_settings_for_section' when no 'get_settings_for_{current_section}_section'
 		 * method exists in the class.
+		 *
+		 * When overriding, note that the 'woocommerce_get_settings_' filter must NOT be triggered,
+		 * as this is already done by 'get_settings_for_section'.
 		 *
 		 * @param string $section_id The section name to get the settings for.
 		 *
