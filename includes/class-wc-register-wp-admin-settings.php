@@ -114,11 +114,16 @@ class WC_Register_WP_Admin_Settings {
 		$sections = $this->object->get_sections();
 		if ( empty( $sections ) ) {
 			// Default section is just an empty string, per admin page classes.
-			$sections = array( '' );
+			$sections = array( ''  => '' );
 		}
 
+		/**
+		 * We are using 'WC_Settings_Page::get_settings' on purpose even thought it's deprecated.
+		 * See the method documentation for an explanation.
+		 */
+
 		foreach ( $sections as $section => $section_label ) {
-			$settings_from_section = $this->object->get_settings_for_section( $section );
+			$settings_from_section = $this->object->get_settings( $section );
 			foreach ( $settings_from_section as $setting ) {
 				if ( ! isset( $setting['id'] ) ) {
 					continue;
