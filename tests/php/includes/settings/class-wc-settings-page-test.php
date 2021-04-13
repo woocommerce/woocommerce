@@ -60,9 +60,33 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test for get_settings_for_section (default section).
+	 */
+	public function test_get_settings_for_section__default_section() {
+		$sut = new WC_Settings_Example();
+
+		$actual = $sut->get_settings_for_section( '' );
+
+		$expected = array( 'key' => 'value' );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
 	 * Test for get_settings (named section with its own get_settings_for_X_section method).
 	 */
 	public function test_get_settings__named_section_with_own_method() {
+		$sut = new WC_Settings_Example();
+
+		$actual = $sut->get_settings( 'foobar' );
+
+		$expected = array( 'foo' => 'bar' );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Test for get_settings_for_section (named section with its own get_settings_for_X_section method).
+	 */
+	public function test_get_settings_for_section__named_section_with_own_method() {
 		$sut = new WC_Settings_Example();
 
 		$actual = $sut->get_settings_for_section( 'foobar' );

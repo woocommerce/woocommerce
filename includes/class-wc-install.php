@@ -603,8 +603,13 @@ class WC_Install {
 			}
 			$subsections = array_unique( array_merge( array( '' ), array_keys( $section->get_sections() ) ) );
 
+			/**
+			 * We are using 'WC_Settings_Page::get_settings' on purpose even thought it's deprecated.
+			 * See the method documentation for an explanation.
+			 */
+
 			foreach ( $subsections as $subsection ) {
-				foreach ( $section->get_settings_for_section( $subsection ) as $value ) {
+				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
 						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );

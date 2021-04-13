@@ -186,7 +186,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
-	public function test_register_settings_one_section() {
+	public function test_register_settings_default_section_no_settings() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )
@@ -194,8 +194,8 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 		$this->page
 			->expects( $this->once() )
-			->method( 'get_settings_for_section' )
-			->with( $this->equalTo( 0 ) )
+			->method( 'get_settings' )
+			->with( $this->equalTo( '' ) )
 			->will( $this->returnValue( array() ) );
 
 		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
@@ -210,7 +210,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
-	public function test_register_settings() {
+	public function test_register_settings_default_section_with_settings() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )
@@ -235,7 +235,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 		$this->page
 			->expects( $this->any() )
-			->method( 'get_settings_for_section' )
+			->method( 'get_settings' )
 			->will( $this->returnValue( $settings ) );
 
 		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );

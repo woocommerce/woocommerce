@@ -77,12 +77,25 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get settings array for the default section.
 		 *
+		 * External settings classes (registered via 'woocommerce_get_settings_pages' filter)
+		 * might have redefined this method as "get_settings($section_id='')", thus we need
+		 * to use this method internally instead of 'get_settings_for_section' to register settings
+		 * and render settings pages.
+		 *
+		 * *But* we can't just redefine the method as "get_settings($section_id='')" here, since this
+		 * will break on PHP 8 if any external setting class have it as 'get_settings()'.
+		 *
+		 * Thus we leave the method signature as is and use 'func_get_arg' to get the setting id
+		 * if it's supplied, and we use this method internally; but it's deprecated and should
+		 * otherwise never be used.
+		 *
 		 * @deprecated 5.4.0 Use 'get_settings_for_section' (passing an empty string for default section)
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
 		public function get_settings() {
-			return $this->get_settings_for_section( '' );
+			$section_id = 0 === func_num_args() ? '' : func_get_arg( 0 );
+			return $this->get_settings_for_section( $section_id );
 		}
 
 		/**
