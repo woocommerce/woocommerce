@@ -143,13 +143,13 @@ class WC_Logger implements WC_Logger_Interface {
 
 			foreach ( $this->handlers as $handler ) {
 				/**
-				 * Filter the logging message. Returning null will prevent logging from occuring since 5.2.
+				 * Filter the logging message. Returning null will prevent logging from occuring since 5.3.
 				 *
 				 * @since 3.1
 				 * @param string $message Log message.
 				 * @param string $level   One of: emergency, alert, critical, error, warning, notice, info, or debug.
 				 * @param array  $context Additional information for log handlers.
-				 * @param object $handler The handler object, such as WC_Log_Handler_File. Available since 5.2.
+				 * @param object $handler The handler object, such as WC_Log_Handler_File. Available since 5.3.
 				 */
 				$message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context, $handler );
 
