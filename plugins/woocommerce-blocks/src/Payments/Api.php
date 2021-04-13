@@ -216,6 +216,12 @@ class Api {
 
 					$cart_checkout_scripts = [ 'wc-cart-block', 'wc-cart-block-frontend', 'wc-checkout-block', 'wc-checkout-block-frontend' ];
 					foreach ( $cart_checkout_scripts as $script_handle ) {
+						if (
+							! array_key_exists( $script_handle, $wp_scripts->registered ) ||
+							! property_exists( $wp_scripts->registered[ $script_handle ], 'deps' )
+						) {
+							continue;
+						}
 						// Remove payment method script from dependencies.
 						$wp_scripts->registered[ $script_handle ]->deps = array_diff(
 							$wp_scripts->registered[ $script_handle ]->deps,
