@@ -42,6 +42,18 @@ In case the report shows "no data", please reimport historical data by following
 -   Choose payment methods
 -   See no error message
 
+### Set up shipping costs task, redirect to shipping settings after completion. #6791
+
+-   Create a new store, and finish the Onboarding flow
+-   Go to **WooCommerce > Home** and select the **Set up shipping costs** task, it should show the standard stepper
+-   Type some number in the 'Shipping cost' input
+-   Click the 'Rest of the world' toggle to toggle it on.
+-   Type some number in the 'Shipping cost' input box under the 'Rest of the world' label
+-   Finish the set up, but don't need to install the shipping label plugin
+-   Once on home screen the **Set up shipping costs** task should show as finished
+-   Click on the task again
+-   It should now redirect to the shipping settings page.
+
 ## 2.2.0
 
 ### Fixed event tracking for merchant email notes #6616

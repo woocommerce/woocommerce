@@ -26,6 +26,7 @@ import {
 	isWCPaySupported,
 } from './tasks/payments/wcpay';
 import { groupListOfObjectsBy } from '../lib/collections';
+import { getLinkTypeAndHref } from '~/store-management-links';
 
 export function recordTaskViewEvent(
 	taskName,
@@ -226,8 +227,15 @@ export function getAllTasks( {
 			title: __( 'Set up shipping costs', 'woocommerce-admin' ),
 			container: <Shipping />,
 			onClick: () => {
-				onTaskSelect( 'shipping' );
-				updateQueryString( { task: 'shipping' } );
+				if ( shippingZonesCount > 0 ) {
+					window.location = getLinkTypeAndHref( {
+						type: 'wc-settings',
+						tab: 'shipping',
+					} ).href;
+				} else {
+					onTaskSelect( 'shipping' );
+					updateQueryString( { task: 'shipping' } );
+				}
 			},
 			completed: shippingZonesCount > 0,
 			visible:
