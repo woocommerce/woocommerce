@@ -63,6 +63,7 @@ The functions to access the core tests are:
   - `runUpdateGeneralSettingsTest` - Merchant can update general settings
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
   - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
+  - `runImportProductsTest` - Merchant can import products via CSV file
 
 ### Shopper
 

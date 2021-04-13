@@ -55,6 +55,7 @@ describe( 'Cart page', () => {
 | `openEmailLog` | | Open the WP Mail Log page |
 | `openAnalyticsPage` | | Open any Analytics page |
 | `openAllUsersView` | | Open the All Users page |
+| `openImportProducts` | | Open the Import Products page |
 
 ### Shopper `shopper`
 
@@ -78,7 +79,8 @@ describe( 'Cart page', () => {
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
 | `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
-| `searchForProduct` | Searching for a product name and landing on its detail page |
+| `searchForProduct` | | Searching for a product name and landing on its detail page |
+|  `emptyCart` | | Removes any products and coupons that are in the cart |
 
 ### Page Utilities
 

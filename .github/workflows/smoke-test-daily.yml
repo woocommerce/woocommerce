@@ -1,0 +1,38 @@
+name: Smoke test daily
+on:
+  schedule:
+    - cron: '25 3 * * *'
+jobs:
+  login-run:
+    name: Log into smoke test site.
+    runs-on: ubuntu-18.04
+    steps:
+
+      - name: Create dirs.
+        run: |
+              mkdir -p code/woocommerce
+              mkdir -p package/woocommerce
+              mkdir -p tmp/woocommerce
+              mkdir -p node_modules
+
+      - name: Checkout code.
+        uses: actions/checkout@v2
+        with:
+          path: package/woocommerce
+
+      - name: Run npm install.
+        working-directory: package/woocommerce
+        run: npm install
+
+      - name: Move current directory to code. We will install zip file in this dir later.
+        run: mv ./package/woocommerce/* ./code/woocommerce
+
+      - name: Run login test.
+        working-directory: code/woocommerce
+        env:
+          SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
+          SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+          SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+          SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+          SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+        run: npx wc-e2e test:e2e ./tests/e2e/specs/activate-and-setup/test-activation.js
