@@ -26,7 +26,7 @@
 	border-radius: 4px;
 	background: $button;
 
-	.components-button:not(:disabled):not([aria-disabled='true']) {
+	.components-button {
 		color: $wp-admin-sidebar;
 		height: 30px;
 		width: 32px;
