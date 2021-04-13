@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 5.2.1 2021-04-14 =
+
+**WooCommerce**
+
+* Update - WooCommerce Blocks package 4.7.2. #29660
+
+**WooCommerce Blocks - 4.7.2**
+
+* Fix - Check if Cart and Checkout are registered before removing payment methods. ([4056](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4056))
+
 = 5.2.0 2021-04-13 =
 
 **WooCommerce**
