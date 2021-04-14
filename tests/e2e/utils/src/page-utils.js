@@ -9,7 +9,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
  * @param {string} selector
  * @param {string} value
  */
-const clearAndFillInput = async ( selector, value ) => {
+export const clearAndFillInput = async ( selector, value ) => {
 	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await page.waitFor(2000); // avoiding flakiness
@@ -23,14 +23,14 @@ const clearAndFillInput = async ( selector, value ) => {
  *
  * @param {string} tabName Tab label
  */
-const clickTab = async ( tabName ) => {
+export const clickTab = async ( tabName ) => {
 	await expect( page ).toClick( '.wc-tabs > li > a', { text: tabName } );
 };
 
 /**
  * Save changes on a WooCommerce settings page.
  */
-const settingsPageSaveChanges = async () => {
+export const settingsPageSaveChanges = async () => {
 	await page.focus( 'button.woocommerce-save-button' );
 	await Promise.all( [
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -41,7 +41,7 @@ const settingsPageSaveChanges = async () => {
 /**
  * Save changes on Permalink settings page.
  */
-const permalinkSettingsPageSaveChanges = async () => {
+export const permalinkSettingsPageSaveChanges = async () => {
 	await page.focus( '.wp-core-ui .button-primary' );
 	await Promise.all( [
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -54,7 +54,7 @@ const permalinkSettingsPageSaveChanges = async () => {
  *
  * @param {string} selector
  */
-const setCheckbox = async( selector ) => {
+export const setCheckbox = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
@@ -68,7 +68,7 @@ const setCheckbox = async( selector ) => {
  *
  * @param {string} selector
  */
-const unsetCheckbox = async( selector ) => {
+export const unsetCheckbox = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
@@ -80,7 +80,7 @@ const unsetCheckbox = async( selector ) => {
 /**
  * Wait for UI blocking to end.
  */
-const uiUnblocked = async () => {
+export const uiUnblocked = async () => {
 	await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
 };
 
@@ -92,7 +92,7 @@ const uiUnblocked = async () => {
  * @param {string} publishVerification
  * @param {string} trashVerification
  */
-const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
+export const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -126,7 +126,7 @@ const verifyPublishAndTrash = async ( button, publishNotice, publishVerification
  *
  * @param {string} selector Selector of the checkbox that needs to be verified.
  */
-const verifyCheckboxIsSet = async( selector ) => {
+export const verifyCheckboxIsSet = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
@@ -138,7 +138,7 @@ const verifyCheckboxIsSet = async( selector ) => {
  *
  * @param {string} selector Selector of the checkbox that needs to be verified.
  */
-const verifyCheckboxIsUnset = async( selector ) => {
+export const verifyCheckboxIsUnset = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
@@ -151,7 +151,7 @@ const verifyCheckboxIsUnset = async( selector ) => {
  * @param {string} selector Selector of the input field that needs to be verified.
  * @param {string} value Value of the input field that needs to be verified.
  */
-const verifyValueOfInputField = async( selector, value ) => {
+export const verifyValueOfInputField = async( selector, value ) => {
 	await page.focus( selector );
 	const field = await page.$( selector );
 	const fieldValue = ( await ( await field.getProperty( 'value' ) ).jsonValue() );
@@ -163,7 +163,7 @@ const verifyValueOfInputField = async( selector, value ) => {
  *
  * @param {string} selector Selector of the filter link to be clicked.
  */
-const clickFilter = async ( selector ) => {
+export const clickFilter = async ( selector ) => {
 	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await Promise.all( [
@@ -177,7 +177,7 @@ const clickFilter = async ( selector ) => {
  *
  * If there's more than 20 items, it moves all 20 items on the current page.
  */
-const moveAllItemsToTrash = async () => {
+export const moveAllItemsToTrash = async () => {
 	await setCheckbox( '#cb-select-all-1' );
 	await expect( page ).toSelect( '#bulk-action-selector-top', 'Move to Trash' );
 	await Promise.all( [
@@ -193,7 +193,7 @@ const moveAllItemsToTrash = async () => {
  *
  * @param {string} selector Selector of the filter link to be clicked.
  */
-const evalAndClick = async ( selector ) => {
+export const evalAndClick = async ( selector ) => {
 	// We use this when `expect(page).toClick()` is unable to find the element
 	// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
 	page.$eval( selector, elem => elem.click() );
@@ -205,7 +205,7 @@ const evalAndClick = async ( selector ) => {
  * @param {string} value Value of what to be selected
  * @param {string} selector Selector of the select2 search field
  */
-const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
+export const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
 	await page.waitForSelector(selector);
 	await page.click(selector);
 	await page.type(selector, value);
@@ -220,7 +220,7 @@ const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__f
  * @param couponCode string
  * @returns {Promise<void>}
  */
-const applyCoupon = async ( couponCode ) => {
+export const applyCoupon = async ( couponCode ) => {
 	try {
 		await expect(page).toClick('a', {text: 'Click here to enter your code'});
 		await uiUnblocked();
@@ -240,7 +240,7 @@ const applyCoupon = async ( couponCode ) => {
  * @param couponCode Coupon name.
  * @returns {Promise<void>}
  */
-const removeCoupon = async ( couponCode ) => {
+export const removeCoupon = async ( couponCode ) => {
 	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
 	await uiUnblocked();
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
