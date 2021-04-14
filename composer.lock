@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aaad3b20adf49ba997d4be94865087c6",
+    "content-hash": "11158f53934e897bd84be190a184ec87",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -51,9 +51,6 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/2.10.1"
-            },
             "time": "2021-03-30T15:15:59+00:00"
         },
         {
@@ -545,11 +542,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.1.5"
-            },
-            "time": "2021-04-02T16:48:38+00:00"
+            "time": "2021-04-02T19:30:03+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -596,10 +589,6 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.7.2"
-            },
             "time": "2021-04-13T16:06:16+00:00"
         }
     ],
