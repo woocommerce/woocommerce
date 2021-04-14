@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { createNoticesFromResponse } from '../../../../lib/notices';
+import { createNoticesFromResponse } from '~/lib/notices';
 
 export function installActivateAndConnectWcpay(
 	reject,

@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { PayPal, PAYPAL_PLUGIN } from '../tasks/payments/paypal';
+import { PayPal, PAYPAL_PLUGIN } from '../tasks/payments/methods/paypal';
 import { getPaymentMethods } from '../tasks/payments/methods';
 import { setMethodEnabledOption } from '../../task-list/tasks/payments';
 import { GenericPaymentStep } from '../tasks/payments/generic-payment-step';

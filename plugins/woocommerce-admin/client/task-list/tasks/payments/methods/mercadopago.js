@@ -12,7 +12,7 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { getCountryCode } from '../../../dashboard/utils';
+import { getCountryCode } from '~/dashboard/utils';
 
 export const MERCADOPAGO_PLUGIN = 'woocommerce-mercadopago';
 

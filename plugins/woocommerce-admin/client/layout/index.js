@@ -36,7 +36,7 @@ const StoreAlerts = lazy( () =>
 
 const WCPayUsageModal = lazy( () =>
 	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../task-list/tasks/payments/wcpay/wcpay-usage-modal'
+		/* webpackChunkName: "wcpay-usage-modal" */ '../task-list/tasks/payments/methods/wcpay/wcpay-usage-modal'
 	)
 );
 

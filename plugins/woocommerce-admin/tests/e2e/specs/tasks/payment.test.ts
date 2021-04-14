@@ -53,7 +53,7 @@ describe( 'Payment setup task', () => {
 		await paymentsSetup.methodHasBeenSetup( 'bacs' );
 	} );
 
-	it( 'Toggling cash on delivery enables the payment method', async () => {
+	it( 'Enabling cash on delivery enables the payment method', async () => {
 		await paymentsSetup.enableCashOnDelivery();
 		await paymentsSetup.methodHasBeenSetup( 'cod' );
 	} );

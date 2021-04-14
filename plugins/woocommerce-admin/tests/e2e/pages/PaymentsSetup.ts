@@ -3,6 +3,7 @@
  */
 import { waitForElementByText } from '../utils/actions';
 import { BasePage } from './BasePage';
+import { getElementByText } from '../utils/actions';
 
 type PaymentMethodWithSetupButton =
 	| 'wcpay'
@@ -39,15 +40,10 @@ export class PaymentsSetup extends BasePage {
 	}
 
 	async methodHasBeenSetup( method: PaymentMethod ) {
-		const toggle = this.getFormToggle(
-			`.woocommerce-task-payment-${ method }`
-		);
-
-		await toggle.isEnabled();
+		await getElementByText( 'button', 'Manage', `.woocommerce-task-payment-${ method }` )
 	}
 
 	async enableCashOnDelivery() {
-		const toggle = this.getFormToggle( '.woocommerce-task-payment-cod' );
-		await toggle.switchOn();
+		await this.clickButtonWithText( 'Enable' );
 	}
 }

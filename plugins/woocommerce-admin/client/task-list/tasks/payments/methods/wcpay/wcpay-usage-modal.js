@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import UsageModal from '../../../../profile-wizard/steps/usage-modal';
+import UsageModal from '~/profile-wizard/steps/usage-modal';
 
 const WCPayUsageModal = () => {
 	const query = getQuery();

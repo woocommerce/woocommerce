@@ -11,6 +11,15 @@
 5. Navigate to Homescreen.
 6. Navigate back to previous Analytics Report.
 7. Ensure that the time period is _still_ what you set on step 2.
+### Refactor payments to allow management of methods #6786
+
+1. Do not select "CBD industry" as a store industry during onboarding.
+2. Make various payment methods visible by switching to different countries.
+3. Attempt to set up various payment methods.
+4. Make sure that after setup, a `Manage` link is shown that links to the payment method settings page.
+5. Check that simple methods like, cash delivery or bank transfer initially have an `Enable` option.
+
+### Fix varation bug with Products reports #6647
 
 ### Fix varation bug with Products reports #6647
 

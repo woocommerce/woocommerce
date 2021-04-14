@@ -80,6 +80,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Retain persisted queries when navigating to Homescreen #6614
 - Update: Update choose niche note cta URL #6733
 - Fix: Update folded header style #6724
+- Tweak: Refactor payments to allow management of methods #6786
 - Fix: Fix unreleated variations showing up in the Products reports #6647
 - Tweak: Add tracking data for the preview site btn #6623
 - Tweak: Update WC Payments copy on the task list #6734
