@@ -63,7 +63,7 @@ export class OnboardingWizard extends BasePage {
 			await this.clickButtonWithText( 'No thanks' );
 		}
 
-		this.page.waitForNavigation( {
+		await this.page.waitForNavigation( {
 			waitUntil: 'networkidle0',
 			timeout: 2000,
 		} );

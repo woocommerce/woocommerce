@@ -90,7 +90,7 @@ export class StoreDetailsSection extends BasePage {
 	}
 
 	async selectSetupForClient() {
-		setCheckbox( '.components-checkbox-control__input' );
+		await setCheckbox( '.components-checkbox-control__input' );
 	}
 
 	async checkClientSetupCheckbox( selected: boolean ) {
