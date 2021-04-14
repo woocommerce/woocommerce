@@ -486,7 +486,8 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$term_query['join'] .= " INNER JOIN ( SELECT object_id FROM {$wpdb->term_relationships} INNER JOIN {$wpdb->term_taxonomy} using( term_taxonomy_id ) WHERE term_id IN ( " . implode( ',', array_map( 'absint', $terms_to_count ) ) . ' ) ) AS include_join ON include_join.object_id = p.ID';
 
 		// Get the count.
-		$count = $wpdb->get_var( implode( ' ', $term_query ) ); // WPCS: unprepared SQL ok.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$count = $wpdb->get_var( implode( ' ', $term_query ) );
 
 		// Update the count.
 		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
@@ -694,7 +695,7 @@ function _wc_recount_terms_by_product( $product_id = '' ) {
  * Assigns default product category for products
  * that have no categories.
  *
- * @since 5.3
+ * @since 5.4
  * @return void
  */
 function _wc_maybe_assign_default_product_cat() {
@@ -724,3 +725,5 @@ function _wc_maybe_assign_default_product_cat() {
 		wp_update_term_count_now( array( $default_category ), 'product_cat' );
 	}
 }
+
+add_action( 'wc_schedule_update_product_default_cat', '_wc_maybe_assign_default_product_cat' );
