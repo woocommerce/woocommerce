@@ -65,6 +65,19 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Parses query to create nonces when available.
+	 *
+	 * @deprecated 5.4.0
+	 * @param object $response The WP_REST_Response we're working with.
+	 * @return object $response The prepared WP_REST_Response object.
+	 */
+	public static function prepare_note_with_nonce( $response ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '5.4.0' );
+
+		return $response;
+	}
+
+	/**
 	 * Store notices to DB
 	 */
 	public static function store_notices() {
