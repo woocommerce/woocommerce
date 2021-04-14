@@ -11,6 +11,8 @@ import {
  */
 import { visitBlockPage } from './visit-block-page';
 
+const blockPagePermalinks = {};
+
 /**
  * Gets the permalink of a page where the block editor is in use.
  *
@@ -18,6 +20,9 @@ import { visitBlockPage } from './visit-block-page';
  * @return {Promise<string>} Returns the permalink of the page.
  */
 export async function getBlockPagePermalink( blockPage ) {
+	if ( blockPagePermalinks[ blockPage ] ) {
+		return blockPagePermalinks[ blockPage ];
+	}
 	await visitBlockPage( blockPage );
 	await ensureSidebarOpened();
 	const panelButton = await findSidebarPanelToggleButtonWithTitle(
@@ -38,6 +43,7 @@ export async function getBlockPagePermalink( blockPage ) {
 	const link = await page.$eval( '.edit-post-post-link__link', ( el ) => {
 		return el.getAttribute( 'href' );
 	} );
+	blockPagePermalinks[ blockPage ] = link;
 	return link;
 }
 

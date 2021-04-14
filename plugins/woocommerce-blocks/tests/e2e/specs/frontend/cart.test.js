@@ -13,8 +13,11 @@ import { shopper } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { visitPostOfType } from '../../../utils/visit-block-page';
-import { getBlockPagePermalink, getNormalPagePermalink } from '../../../utils';
+import {
+	getBlockPagePermalink,
+	getNormalPagePermalink,
+	visitPostOfType,
+} from '../../../utils';
 
 const block = {
 	name: 'Cart',
@@ -26,7 +29,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
 	// eslint-disable-next-line jest/no-focused-tests
 	test.only( `skipping ${ block.name } tests`, () => {} );
 
-describe( `${ block.name } Block`, () => {
+describe( `${ block.name } Block (frontend)`, () => {
 	let cartBlockPermalink;
 	let productPermalink;
 
@@ -40,6 +43,10 @@ describe( `${ block.name } Block`, () => {
 		productPermalink = await getNormalPagePermalink();
 		await page.goto( productPermalink );
 		await shopper.addToCart();
+	} );
+
+	afterAll( async () => {
+		await shopper.removeFromCart( 'Woo Single #1' );
 	} );
 
 	it( 'Adds a timestamp to localstorage when the cart is updated', async () => {
