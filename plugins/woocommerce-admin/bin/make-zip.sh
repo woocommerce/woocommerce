@@ -22,7 +22,12 @@ output 2 "Creating archive... 🎁"
 ZIP_FILE=$1
 
 build_files=$(find dist \( -name '*.js' -o -name '*.css' \))
-asset_files=$(find dist \( -name '*.min.asset.php' \))
+asset_files=$(find dist \( -name '*.asset.php' \))
+if [[ $(find dist/app \( -name '*.asset.php' \) | wc -l) -gt 1 ]]; then
+	output 3 "$asset_files"
+	output 1 "Multiple asset.php files exists per directory, have you removed the old build?"
+	exit;
+fi
 
 zip -r "${ZIP_FILE}" \
 	woocommerce-admin.php \
