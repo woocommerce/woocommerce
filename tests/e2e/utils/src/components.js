@@ -430,11 +430,13 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'button.add-order-item' );
 	await page.waitForSelector( '.wc-backbone-modal-header' );
 	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
-	await expect( page ).toFill( '#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName );
+	await expect( page ).toFill(
+		'#wc-backbone-modal-dialog + .select2-container .select2-search__field',
+		productName,
+		{ waitUntil: 'networkidle0' }
+	);
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
-	await page.click( '.wc-backbone-modal-content #btn-ok' );
-
-	await uiUnblocked();
+	await page.click( '.wc-backbone-modal-content #btn-ok', { waitUntil: 'networkidle0' } );
 
 	// Verify the product we added shows as a line item now
 	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
