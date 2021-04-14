@@ -106,7 +106,7 @@ describe( `${ block.name } Block`, () => {
 			);
 			// Simulate user scrolling up so the block toolbar doesn't cover
 			// the `Full Cart` button.
-			page.evaluate( () => {
+			await page.evaluate( () => {
 				document
 					.querySelector( '.wc-block-view-switch-control' )
 					.scrollIntoView( { block: 'center', inline: 'center' } );
