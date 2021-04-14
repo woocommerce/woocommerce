@@ -7,6 +7,7 @@
 - Shopper Checkout Login Account
 - Shopper My Account Create Account
 - Shopper Cart Calculate Shipping
+- Shopper Cart Redirection
 
 ## Fixed
 

@@ -22,6 +22,7 @@ const runVariableProductUpdateTest = require( './shopper/front-end-variable-prod
 const runCheckoutCreateAccountTest = require( './shopper/front-end-checkout-create-account.test' );
 const runCheckoutLoginAccountTest = require( './shopper/front-end-checkout-login-account.test' );
 const runCartCalculateShippingTest = require( './shopper/front-end-cart-calculate-shipping.test' );
+const runCartRedirectionTest = require( './shopper/front-end-cart-redirection.test' );
 
 // Merchant tests
 const runAddNewShippingZoneTest = require ( './merchant/wp-admin-settings-shipping-zones.test' );
@@ -71,6 +72,7 @@ const runShopperTests = () => {
 	runCheckoutCreateAccountTest();
 	runCheckoutLoginAccountTest();
 	runCartCalculateShippingTest();
+  runCartRedirectionTest();
 };
 
 const runMerchantTests = () => {
@@ -147,5 +149,6 @@ module.exports = {
   runImportProductsTest,
 	runCheckoutLoginAccountTest,
 	runCartCalculateShippingTest,
+	runCartRedirectionTest,
 	runMyAccountCreateAccountTest,
 };

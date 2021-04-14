@@ -81,6 +81,7 @@ The functions to access the core tests are:
   - `runCheckoutLoginAccountTest` - Shopper can login to an account during checkout
   - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
   - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
+  - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
 
 ### REST API
 
