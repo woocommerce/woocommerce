@@ -563,6 +563,13 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
+		/*
+		 * When a product category is deleted, we need to check
+		 * if the product has no categories assigned. Then assign
+		 * it a default category.
+		 */
+		_wc_maybe_assign_default_product_cat();
+
 		/**
 		 * Fires after a single term is deleted via the REST API.
 		 *
