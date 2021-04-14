@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Dev: Add data source filter to remote inbox notification system #6794
 - Fix: Make pagination buttons height and width consistent #6725
 - Tweak: Add settings_section event prop for CES #6762
 - Fix: Retain persisted queries when navigating to Homescreen #6614
