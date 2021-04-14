@@ -49,6 +49,7 @@ class WC_Admin_Taxonomies {
 
 		// Category/term ordering.
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
+		add_action( 'delete_product_cat', array( $this, 'maybe_assign_default_product_cat' ) );
 
 		// Add form.
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
@@ -108,6 +109,22 @@ class WC_Admin_Taxonomies {
 	 */
 	public function delete_term( $term_id ) {
 		wc_deprecated_function( 'delete_term', '3.6' );
+	}
+
+	/**
+	 * Assigns default product category. This is done when the product
+	 * has no assgined product category.
+	 *
+	 * @since 5.3
+	 * @return void
+	 */
+	public function maybe_assign_default_product_cat() {
+		/*
+		 * When a product category is deleted, we need to check
+		 * if the product has no categories assigned. Then assign
+		 * it a default category.
+		 */
+		_wc_maybe_assign_default_product_cat();
 	}
 
 	/**
