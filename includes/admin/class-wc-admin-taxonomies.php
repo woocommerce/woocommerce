@@ -92,7 +92,7 @@ class WC_Admin_Taxonomies {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( 'product_cat' != $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
+		if ( 'product_cat' !== $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
 			return;
 		}
 
@@ -115,16 +115,22 @@ class WC_Admin_Taxonomies {
 	 * Assigns default product category. This is done when the product
 	 * has no assgined product category.
 	 *
-	 * @since 5.3
+	 * @since 5.4
 	 * @return void
 	 */
 	public function maybe_assign_default_product_cat() {
 		/*
 		 * When a product category is deleted, we need to check
 		 * if the product has no categories assigned. Then assign
-		 * it a default category.
+		 * it a default category. We delay this with a scheduled
+		 * action job to not block the response.
 		 */
-		_wc_maybe_assign_default_product_cat();
+		WC()->queue()->schedule_single(
+			time(),
+			'wc_schedule_update_product_default_cat',
+			array(),
+			'wc_update_product_default_cat'
+		);
 	}
 
 	/**
