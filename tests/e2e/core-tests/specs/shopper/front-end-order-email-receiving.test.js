@@ -7,7 +7,7 @@
 	merchant,
 	createSimpleProduct,
 	uiUnblocked,
-    deleteAllEmailLogs,
+	deleteAllEmailLogs,
 } = require( '@woocommerce/e2e-utils' );
 
 let simplePostIdValue;
@@ -30,7 +30,7 @@ const runOrderEmailReceivingTest = () => {
 	describe('Shopper Order Email Receiving', () => {
 		beforeAll(async () => {
 			await merchant.login();
-            await deleteAllEmailLogs();
+			await deleteAllEmailLogs();
 			simplePostIdValue = await createSimpleProduct();
 			await merchant.logout();
 		});
