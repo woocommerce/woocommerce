@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 5.2.2 2021-04-15 =
+
+**WooCommerce**
+
+* Fix - Can't grant permission for download from order details page. #29691
+
 = 5.2.1 2021-04-14 =
 
 **WooCommerce**
