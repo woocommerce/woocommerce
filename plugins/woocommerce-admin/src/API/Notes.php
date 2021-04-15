@@ -476,10 +476,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			return;
 		}
 
-		// We need to set the current user for tracking reasons. And unset user after tracking.
-		wp_set_current_user( $request->get_param( 'user_id' ) );
-		wc_admin_record_tracks_event( 'wcadmin_email_note_opened', array( 'note_name' => $note->get_name() ) );
-		wp_set_current_user( 0 );
+		NotesRepository::record_tracks_event_with_user( $request->get_param( 'user_id' ), 'email_note_opened', array( 'note_name' => $note->get_name() ) );
 	}
 
 	/**

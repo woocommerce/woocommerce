@@ -53,11 +53,7 @@ class MerchantEmailNotifications {
 			return;
 		}
 
-		// We need to set the current user for tracking reasons. And unset user after tracking.
-		wp_set_current_user( $user_id );
 		Notes::trigger_note_action( $note, $triggered_action );
-		wp_set_current_user( 0 );
-
 		$url = $triggered_action->query;
 
 		// We will use "wp_safe_redirect" when it's an internal redirect.
