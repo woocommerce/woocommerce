@@ -28,15 +28,4 @@
 		display: flex;
 		justify-content: flex-start;
 	}
-
-	.woocommerce-task-payment__setup_required {
-		display: flex;
-		align-items: center;
-		font-size: 14px;
-		margin-left: $gap-small;
-		gap: 3px;
-		> svg {
-			fill: #efb854;
-		}
-	}
 }

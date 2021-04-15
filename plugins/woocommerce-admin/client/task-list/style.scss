@@ -213,6 +213,18 @@
 		margin-top: $gap-large;
 	}
 
+	.woocommerce-task-payment__setup_required {
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		margin-left: $gap-small;
+		font-weight: 400;
+		gap: 3px;
+		> svg {
+			fill: #efb854;
+		}
+	}
+
 	.components-card__header {
 		font-size: 20px;
 		font-weight: 400;

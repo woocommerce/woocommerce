@@ -10,14 +10,15 @@ import {
 	CardHeader,
 	CardDivider,
 } from '@wordpress/components';
-import { H } from '@woocommerce/components';
+import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { Action } from '../Action';
+import { PaymentAction } from '../PaymentAction';
 import { RecommendedRibbon } from '../RecommendedRibbon';
+import { SetupRequired } from '../SetupRequired';
 
 import './PaymentMethodList.scss';
 
@@ -33,6 +34,7 @@ export const PaymentMethodList = ( {
 			const {
 				before,
 				content,
+				isEnabled,
 				isConfigured,
 				key,
 				title,
@@ -65,15 +67,21 @@ export const PaymentMethodList = ( {
 						<CardMedia isBorderless>{ before }</CardMedia>
 						<div className="woocommerce-task-payment__description">
 							{ showRecommendedRibbon && <RecommendedRibbon /> }
-							<H className="woocommerce-task-payment__title">
+							<Text
+								as="h3"
+								className="woocommerce-task-payment__title"
+							>
 								{ title }
-							</H>
+								{ isEnabled && ! isConfigured && (
+									<SetupRequired />
+								) }
+							</Text>
 							<div className="woocommerce-task-payment__content">
 								{ content }
 							</div>
 						</div>
 						<div className="woocommerce-task-payment__footer">
-							<Action
+							<PaymentAction
 								manageUrl={ manageUrl }
 								methodKey={ key }
 								hasSetup={ !! method.container }

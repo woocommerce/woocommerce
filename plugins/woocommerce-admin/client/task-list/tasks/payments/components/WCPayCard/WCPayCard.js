@@ -1,25 +1,21 @@
 /**
  * External dependencies
  */
-import {
-	Card,
-	CardBody,
-	CardHeader,
-	CardFooter,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Card, CardBody, CardHeader, CardFooter } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
+
 import interpolateComponents from 'interpolate-components';
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import WCPayAcceptedMethods from '../WCPayAcceptedMethods';
+import { WCPayAcceptedMethods } from '../WCPayAcceptedMethods';
+import { SetupRequired } from '../SetupRequired';
+import { PaymentAction } from '../PaymentAction';
 import WCPayLogo from '../../images/wcpay-logo';
-import { Action } from '../Action';
 import './WCPayCard.scss';
 
 const TosPrompt = () =>
@@ -58,14 +54,7 @@ export const WCPayCard = ( props ) => {
 						{ __( 'Recommended', 'woocommerce-admin' ) }
 					</span>
 				) }
-				{ isEnabled && (
-					<span className="woocommerce-task-payment__setup_required">
-						<NoticeOutlineIcon />
-						<Text variant="small">
-							{ __( 'Setup required', 'woocommerce-admin' ) }
-						</Text>
-					</span>
-				) }
+				{ isEnabled && <SetupRequired /> }
 			</CardHeader>
 			<CardBody>
 				<Text className="woocommerce-task-payment-wcpay__description">
@@ -92,7 +81,7 @@ export const WCPayCard = ( props ) => {
 				<Text>
 					<TosPrompt />
 				</Text>
-				<Action
+				<PaymentAction
 					methodKey={ methodKey }
 					hasSetup={ !! container }
 					isConfigured={ isConfigured }
@@ -101,11 +90,7 @@ export const WCPayCard = ( props ) => {
 					isLoading={ loading }
 					onSetup={ () => {} }
 					onSetupCallback={ onClick }
-					setupButtonText={
-						isEnabled
-							? __( 'Finish setup', 'woocommerce-admin' )
-							: __( 'Get started', 'woocommerce-admin' )
-					}
+					setupButtonText={ __( 'Get started', 'woocommerce-admin' ) }
 				/>
 			</CardFooter>
 		</Card>

@@ -7,7 +7,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import { useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
-export const Action = ( {
+export const PaymentAction = ( {
 	hasSetup = false,
 	isConfigured = false,
 	isEnabled = false,
@@ -49,7 +49,38 @@ export const Action = ( {
 		} );
 	};
 
-	if ( hasSetup && ! isConfigured ) {
+	const ManageButton = () => (
+		<Button
+			className={ classes }
+			isSecondary
+			href={ manageUrl }
+			onClick={
+				methodKey === 'wcpay'
+					? () => recordEvent( 'tasklist_payment_manage' )
+					: () => {}
+			}
+		>
+			{ __( 'Manage', 'woocommerce-admin' ) }
+		</Button>
+	);
+
+	if ( ! hasSetup ) {
+		if ( ! isEnabled ) {
+			return (
+				<Button
+					className={ classes }
+					isSecondary
+					onClick={ () => markConfigured( methodKey ) }
+				>
+					{ __( 'Enable', 'woocommerce-admin' ) }
+				</Button>
+			);
+		}
+
+		return <ManageButton />;
+	}
+
+	if ( ! isEnabled ) {
 		return (
 			<div>
 				<Button
@@ -66,36 +97,22 @@ export const Action = ( {
 		);
 	}
 
-	if ( ( hasSetup && isConfigured ) || ( ! hasSetup && isEnabled ) ) {
-		if ( ! manageUrl ) {
-			return null;
-		}
-
+	if ( ! isConfigured ) {
 		return (
 			<div>
 				<Button
 					className={ classes }
-					isSecondary
-					href={ manageUrl }
-					onClick={
-						methodKey === 'wcpay'
-							? () => recordEvent( 'tasklist_payment_manage' )
-							: () => {}
-					}
+					isPrimary={ isRecommended }
+					isSecondary={ ! isRecommended }
+					isBusy={ isBusy }
+					disabled={ isBusy }
+					onClick={ () => handleClick() }
 				>
-					{ __( 'Manage', 'woocommerce-admin' ) }
+					{ __( 'Finish setup', 'woocommerce-admin' ) }
 				</Button>
 			</div>
 		);
 	}
 
-	return (
-		<Button
-			className={ classes }
-			isSecondary
-			onClick={ () => markConfigured( methodKey ) }
-		>
-			{ __( 'Enable', 'woocommerce-admin' ) }
-		</Button>
-	);
+	return <ManageButton />;
 };

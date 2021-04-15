@@ -43,6 +43,8 @@
 	}
 
 	.woocommerce-task-payment__title {
+		display: flex;
+		align-items: center;
 		font-size: 16px;
 		font-weight: 500;
 		color: $studio-gray-80;

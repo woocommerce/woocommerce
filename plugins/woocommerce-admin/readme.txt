@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Update: Adding setup required icon for non-configured payment methods #6811
 - Update: UI updates to Payment Task screen #6766
 - Dev: Add data source filter to remote inbox notification system #6794
 - Fix: Make pagination buttons height and width consistent #6725

@@ -43,6 +43,8 @@ const getPaymentsSettingsUrl = ( methodKey ) => {
 	);
 };
 
+const methodDefaults = { isConfigured: true };
+
 export function getPaymentMethods( {
 	activePlugins,
 	countryCode,
@@ -562,5 +564,7 @@ export function getPaymentMethods( {
 		} );
 	}
 
-	return methods.filter( ( method ) => method.visible );
+	return methods
+		.filter( ( method ) => method.visible )
+		.map( ( method ) => ( { ...methodDefaults, ...method } ) );
 }
