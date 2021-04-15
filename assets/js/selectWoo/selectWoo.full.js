@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 1.0.6
+ * SelectWoo 1.0.9
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
@@ -755,8 +755,8 @@ S2.define('select2/utils',[
     });
   };
 
-  Utils.entityDecode = function(html) {
-    var txt = document.createElement("textarea");
+  Utils.entityDecode = function (html) {
+    var txt = document.createElement('textarea');
     txt.innerHTML = html;
     return txt.value;
   }
@@ -1551,7 +1551,14 @@ S2.define('select2/selection/single',[
       .attr('id', id)
       .attr('role', 'textbox')
       .attr('aria-readonly', 'true');
-    this.$selection.attr('aria-labelledby', id);
+
+    var label = this.options.get( 'label' );
+
+    if ( typeof( label ) === 'string' ) {
+      this.$selection.attr( 'aria-label', label );
+    } else {
+      this.$selection.attr( 'aria-labelledby', id );
+    }
 
     // This makes single non-search selects work in screen readers. If it causes problems elsewhere, remove.
     this.$selection.attr('role', 'combobox');
@@ -4398,6 +4405,7 @@ S2.define('select2/dropdown/attachBody',[
 
     var parentOffset = $offsetParent.offset();
 
+    css.top -= parentOffset.top;
     css.left -= parentOffset.left;
 
     if (!isCurrentlyAbove && !isCurrentlyBelow) {
@@ -4412,7 +4420,7 @@ S2.define('select2/dropdown/attachBody',[
 
     if (newDirection == 'above' ||
       (isCurrentlyAbove && newDirection !== 'below')) {
-      css.top = container.top - dropdown.height;
+      css.top = container.top - parentOffset.top - dropdown.height;
     }
 
     if (newDirection != null) {

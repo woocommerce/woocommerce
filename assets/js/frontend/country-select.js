@@ -55,8 +55,11 @@ jQuery( function( $ ) {
 
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
+				var $this = $( this );
+
 				var select2_args = $.extend({
-					placeholder: $( this ).attr( 'data-placeholder' ) || $( this ).attr( 'placeholder' ) || '',
+					placeholder: $this.attr( 'data-placeholder' ) || $this.attr( 'placeholder' ) || '',
+					label: $this.attr( 'data-label' ) || null,
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
