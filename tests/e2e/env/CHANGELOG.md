@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+
+- `toBeInRange` expect numeric range matcher
 
 # 0.2.1
 

@@ -546,16 +546,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v4.7.2",
+            "version": "v4.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "942e58553b1a299ad04842e7f0d7465d9e029ac3"
+                "reference": "62f32bfb45dfcb2ba3ca349a6ed0a8cf48ddefce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/942e58553b1a299ad04842e7f0d7465d9e029ac3",
-                "reference": "942e58553b1a299ad04842e7f0d7465d9e029ac3",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/62f32bfb45dfcb2ba3ca349a6ed0a8cf48ddefce",
+                "reference": "62f32bfb45dfcb2ba3ca349a6ed0a8cf48ddefce",
                 "shasum": ""
             },
             "require": {
@@ -589,7 +589,11 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2021-04-13T16:06:16+00:00"
+            "support": {
+                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.9.1"
+            },
+            "time": "2021-04-13T16:11:16+00:00"
         }
     ],
     "packages-dev": [
