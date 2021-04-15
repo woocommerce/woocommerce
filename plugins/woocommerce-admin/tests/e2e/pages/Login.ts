@@ -11,8 +11,6 @@ export class Login extends BasePage {
 		await this.navigate();
 
 		await getElementByText( 'label', 'Username or Email Address' );
-		await expect( this.page.title() ).resolves.toMatch( 'Log In' );
-
 		await clearAndFillInput( '#user_login', ' ' );
 
 		await this.page.type(
@@ -26,7 +24,10 @@ export class Login extends BasePage {
 
 		await Promise.all( [
 			this.page.click( 'input[type=submit]' ),
-			this.page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			this.page.waitForNavigation( {
+				waitUntil: 'networkidle0',
+				timeout: 10000,
+			} ),
 		] );
 	}
 
@@ -42,6 +43,7 @@ export class Login extends BasePage {
 
 		await page.goto( logoutLinks[ 0 ], {
 			waitUntil: 'networkidle0',
+			timeout: 10000,
 		} );
 	}
 }

@@ -93,7 +93,7 @@
 		"@automattic/explat-client": "0.0.1",
 		"@automattic/explat-client-react-helpers": "0.0.1",
 		"@woocommerce/e2e-environment": "0.2.1",
-		"@woocommerce/e2e-utils": "0.1.2",
+		"@woocommerce/e2e-utils": "0.1.4",
 		"@wordpress/api-fetch": "2.2.8",
 		"@wordpress/base-styles": "3.3.0",
 		"@wordpress/components": "11.1.3",
