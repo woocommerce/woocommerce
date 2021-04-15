@@ -805,7 +805,7 @@ class WC_AJAX {
 
 			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
-					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $item->get_quantity(), $item );
+					$inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;
