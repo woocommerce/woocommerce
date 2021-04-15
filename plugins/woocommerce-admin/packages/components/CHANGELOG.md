@@ -1,3 +1,7 @@
+# 6.1.1
+
+-   Update dependencies.
+
 # 6.1.0
 
 -   Make pagination buttons height and width consistent. #6725
