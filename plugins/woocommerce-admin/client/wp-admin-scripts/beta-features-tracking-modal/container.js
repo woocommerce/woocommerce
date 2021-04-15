@@ -8,6 +8,7 @@ import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { initializeExPlat } from '@woocommerce/explat';
 
 const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -19,7 +20,9 @@ const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 	const setTracking = async ( allow ) => {
 		if ( typeof window.wcTracks.enable === 'function' ) {
 			if ( allow ) {
-				window.wcTracks.enable();
+				window.wcTracks.enable( () => {
+					initializeExPlat();
+				} );
 			} else {
 				window.wcTracks.isEnabled = false;
 			}

@@ -25,6 +25,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 
 const wcAdminPackages = [
+	'explat',
 	'components',
 	'csv-export',
 	'currency',

@@ -90,6 +90,8 @@
 		}
 	},
 	"dependencies": {
+		"@automattic/explat-client": "0.0.1",
+		"@automattic/explat-client-react-helpers": "0.0.1",
 		"@woocommerce/e2e-environment": "0.2.1",
 		"@woocommerce/e2e-utils": "0.1.2",
 		"@wordpress/api-fetch": "2.2.8",
@@ -151,6 +153,7 @@
 		"@testing-library/react": "11.2.6",
 		"@testing-library/react-hooks": "3.7.0",
 		"@testing-library/user-event": "12.8.3",
+		"@types/cookie": "0.4.0",
 		"@types/expect-puppeteer": "4.4.5",
 		"@types/history": "4.7.8",
 		"@types/jest": "26.0.22",
@@ -158,6 +161,7 @@
 		"@types/puppeteer": "5.4.3",
 		"@types/wordpress__components": "9.8.6",
 		"@typescript-eslint/eslint-plugin": "4.22.0",
+		"@woocommerce/explat": "file:packages/explat",
 		"@woocommerce/api": "0.1.2",
 		"@woocommerce/components": "file:packages/components",
 		"@woocommerce/csv-export": "file:packages/csv-export",

@@ -9,6 +9,7 @@ import interpolateComponents from 'interpolate-components';
 import { Button, Modal } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { initializeExPlat } from '@woocommerce/explat';
 
 class UsageModal extends Component {
 	constructor( props ) {
@@ -69,6 +70,8 @@ class UsageModal extends Component {
 				if ( ! this._isMounted ) {
 					return;
 				}
+
+				initializeExPlat();
 
 				this.setState( { isLoadingScripts: false } );
 			} );

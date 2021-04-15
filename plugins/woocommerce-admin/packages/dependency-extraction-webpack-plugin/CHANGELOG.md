@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Add `@woocommerce/explat` to list of packages.
+
 # 1.4.0
 
 -   Add `@woocommerce/settings` to list of packages.

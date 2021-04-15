@@ -23,6 +23,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
+import { Experiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -69,15 +70,24 @@ export const StatsOverview = () => {
 		( item ) => ! hiddenStats.includes( item.stat )
 	);
 
+	const HeaderText = (
+		<Text variant="title.small">
+			{ __( 'Stats overview', 'woocommerce-admin' ) }
+		</Text>
+	);
+
 	return (
 		<Card
 			size="large"
 			className="woocommerce-stats-overview woocommerce-homescreen-card"
 		>
 			<CardHeader size="medium">
-				<Text variant="title.small">
-					{ __( 'Stats overview', 'woocommerce-admin' ) }
-				</Text>
+				<Experiment
+					name="woocommerce_test_experiment"
+					defaultExperience={ HeaderText }
+					treatmentExperience={ HeaderText }
+					loadingExperience={ HeaderText }
+				/>
 				<EllipsisMenu
 					label={ __(
 						'Choose which values to display',

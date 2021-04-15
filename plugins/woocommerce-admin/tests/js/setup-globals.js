@@ -27,6 +27,10 @@ const wooCommercePackages = [
 	'data',
 ];
 
+global.wcTracks = {
+	isEnabled: false,
+};
+
 // aliases
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
@@ -63,7 +67,7 @@ global.wcSettings = {
 		woocommerce_excluded_report_order_statuses: [],
 	},
 	dataEndpoints: {
-    countries: [],
+		countries: [],
 		performanceIndicators: [
 			{
 				chart: 'total_sales',

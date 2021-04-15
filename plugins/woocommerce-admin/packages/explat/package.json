@@ -1,0 +1,36 @@
+{
+	"name": "@woocommerce/explat",
+	"version": "1.0.0",
+	"description": "WooCommerce component and utils for A/B testing.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"abtest",
+		"explat"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/explat/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@automattic/explat-client": "0.0.1",
+		"@automattic/explat-client-react-helpers": "0.0.1",
+		"cookie": "^0.4.1",
+		"qs": "6.9.6"
+	},
+	"devDependencies": {
+		"@types/cookie": "^0.4.0"
+	}
+}

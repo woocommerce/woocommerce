@@ -339,6 +339,7 @@ class Loader {
 		$css_file_version = self::get_file_version( 'css' );
 
 		$scripts = array(
+			'wc-explat',
 			'wc-customer-effort-score',
 			// NOTE: This should be removed when Gutenberg is updated and the notices package is removed from WooCommerce Admin.
 			'wc-notices',

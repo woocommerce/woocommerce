@@ -9,6 +9,7 @@ module.exports = [
 	'@woocommerce/dependency-extraction-webpack-plugin',
 	'@woocommerce/eslint-plugin',
 	'@woocommerce/experimental',
+	'@woocommerce/explat',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
