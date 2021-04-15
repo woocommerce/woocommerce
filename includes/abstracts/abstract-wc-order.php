@@ -1633,6 +1633,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				continue;
 			}
 			$saved_rate_ids[] = $tax->get_rate_id();
+			$tax->set_rate( $tax->get_rate_id() );
 			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
 			$tax->set_label( WC_Tax::get_rate_label( $tax->get_rate_id() ) );
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );

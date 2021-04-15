@@ -401,7 +401,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		}
 
 		return ( this.listHook as ListChildFn< T > )(
-			paramsOrParent as ParentID< T >,
+			( paramsOrParent as unknown ) as ParentID< T >,
 			params,
 		);
 	}
@@ -428,7 +428,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		}
 
 		return ( this.createHook as CreateChildFn< T > )(
-			propertiesOrParent as ParentID<T>,
+			( propertiesOrParent as unknown ) as ParentID<T>,
 			properties as Partial< ModelClass<T> >,
 		);
 	}
@@ -455,7 +455,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		}
 
 		return ( this.readHook as ReadChildFn< T > )(
-			idOrParent as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			childID,
 		);
 	}
@@ -480,14 +480,14 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		if ( properties === undefined ) {
 			return ( this.updateHook as UpdateFn< T > )(
 				idOrParent as ModelID,
-				propertiesOrChildID as UpdateParams< T >,
+				( propertiesOrChildID as unknown ) as UpdateParams< T >,
 			);
 		}
 
 		return ( this.updateHook as UpdateChildFn< T > )(
-			idOrParent as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			propertiesOrChildID as ModelID,
-			properties,
+			( properties as unknown ) as UpdateParams< T >,
 		);
 	}
 
@@ -513,7 +513,7 @@ export class ModelRepository< T extends ModelRepositoryParams > implements
 		}
 
 		return ( this.deleteHook as DeleteChildFn< T > )(
-			idOrParent as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			childID,
 		);
 	}

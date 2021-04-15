@@ -84,7 +84,7 @@ class WC_Shortcode_Products {
 	 * Get shortcode type.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return string
 	 */
 	public function get_type() {
 		return $this->type;

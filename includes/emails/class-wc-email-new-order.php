@@ -100,7 +100,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			 * Controls if new order emails can be resend multiple times.
 			 *
 			 * @since 5.0.0
-			 * @param bool $allows Defaults to true.
+			 * @param bool $allows Defaults to false.
 			 */
 			if ( 'true' === $email_already_sent && ! apply_filters( 'woocommerce_new_order_email_allows_resend', false ) ) {
 				return;

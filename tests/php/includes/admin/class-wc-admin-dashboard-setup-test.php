@@ -14,10 +14,20 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * Set up
 	 */
 	public function setUp() {
-		// set default country to US so that 'payments' task does not get added.
-		// we want to remove payment tasks as they depend on installation & activation.
-		update_option( 'woocommerce_default_country', 'US' );
+		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
+		// by default it won't be considered completed but we can manually change that as needed.
+		update_option( 'woocommerce_default_country', 'JP' );
+
 		parent::setUp();
+	}
+
+	/**
+	 * Tear down
+	 */
+	public function tearDown() {
+		remove_all_filters( 'woocommerce_available_payment_gateways' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -75,13 +85,21 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the widget output when 0 task has been completed.
+	 * Tests the widget output when 1 task has been completed.
 	 */
 	public function test_initial_widget_output() {
+		// Force the "payments" task to be considered incomplete.
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function() {
+				return array();
+			}
+		);
+
 		$html = $this->get_widget_output();
 
 		$required_strings = array(
-			'Step 0 of 5',
+			'Step 0 of 6',
 			'You&#039;re almost there! Once you complete store setup you can start receiving orders.',
 			'Start selling',
 			'admin.php\?page=wc-admin&amp;path=%2Fsetup-wizard',
@@ -96,9 +114,22 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * Tests completed task count as it completes one by one
 	 */
 	public function test_widget_renders_completed_task_count() {
-		$completed_tasks = array();
+		// Force the "payments" task to be considered completed
+		// by faking a valid payment gateway.
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function() {
+				return array(
+					new class() extends WC_Payment_Gateway {
+					},
+				);
+			}
+		);
+
+		$completed_tasks = array( 'payments' );
 		$tasks           = $this->get_widget()->get_tasks();
 		$tasks_count     = count( $tasks );
+		unset( $tasks['payments'] ); // That one is completed already.
 		foreach ( $tasks as $key => $task ) {
 			array_push( $completed_tasks, $key );
 			update_option( 'woocommerce_task_list_tracked_completed_tasks', $completed_tasks );
@@ -108,7 +139,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			if ( $completed_tasks_count === $tasks_count ) {
 				$this->assertEmpty( $this->get_widget_output() );
 			} else {
-				$this->assertRegexp( "/Step ${completed_tasks_count} of 5/", $this->get_widget_output() );
+				$this->assertRegexp( "/Step ${completed_tasks_count} of 6/", $this->get_widget_output() );
 			}
 		}
 	}
@@ -122,13 +153,13 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			array(
 				array(
 					'woocommerce_task_list_complete' => 'yes',
-					'woocommerce_task_list_hidden' => 'no',
+					'woocommerce_task_list_hidden'   => 'no',
 				),
 			),
 			array(
 				array(
 					'woocommerce_task_list_complete' => 'no',
-					'woocommerce_task_list_hidden' => 'yes',
+					'woocommerce_task_list_hidden'   => 'yes',
 				),
 			),
 		);

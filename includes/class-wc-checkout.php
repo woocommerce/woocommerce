@@ -747,7 +747,7 @@ class WC_Checkout {
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
 				if ( $validate_fieldset &&
-					( isset( $field['type'] ) && 'country' === $field['type'] ) &&
+					( isset( $field['type'] ) && 'country' === $field['type'] && '' !== $data[ $key ] ) &&
 					! WC()->countries->country_exists( $data[ $key ] ) ) {
 						/* translators: ISO 3166-1 alpha-2 country code */
 						$errors->add( $key . '_validation', sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $data[ $key ] ) );
@@ -972,10 +972,13 @@ class WC_Checkout {
 
 		// Redirect to success/confirmation/payment page.
 		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
+			$result['order_id'] = $order_id;
+
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 			if ( ! is_ajax() ) {
-				wp_safe_redirect( $result['redirect'] );
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+				wp_redirect( $result['redirect'] );
 				exit;
 			}
 
