@@ -20,6 +20,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 
 * [ ] Run `npm ci`
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
+  *  Note: The zip file is functionally equivalent to what gets released except the version bump.
 * [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. 
   * [ ] Add the notes to `docs/testing/releases`
   * [ ] Update the `docs/testing/releases/README.md` file index.
@@ -49,9 +50,11 @@ Additionally, make sure to differentiate between things in the testing notes tha
 ## Push the button - Deploy!
 
 * [ ] Execute `npm run deploy`
-  * Note: the script automatically updates version numbers (commits on your behalf).
-  * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release. A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
-* [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version (i.e. the one we're releasing right now). Do not publish any dev tags as a release.
+  * The script will ask you to enter the version number to tag. Please enter the version we're releasing right now. Do not publish any dev tags as a release.
+  * Note: the script automatically updates version numbers on Github (commits on your behalf).
+  * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release. 
+  * A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
+* [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version, the one you entered above.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
 
 ## After Workflow completes
