@@ -3,6 +3,7 @@
 ## Added
 
 - Support for re-running setup and shopper tests
+- Shopper Order Email Receiving
 
 ## Fixed
 
