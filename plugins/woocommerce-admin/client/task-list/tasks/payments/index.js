@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
-import { Card, CardBody, CardMedia, CardFooter } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { H } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
@@ -18,11 +16,12 @@ import { useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Action } from './action';
+import { WCPayCard } from './components/WCPayCard';
+import { PaymentMethodList } from './components/PaymentMethodList';
 import { getCountryCode } from '../../../dashboard/utils';
 import { getPaymentMethods } from './methods';
-import { RecommendedRibbon } from './recommended-ribbon';
-import { Setup } from './setup';
+import { Setup } from './components/Setup';
+import { sift } from '../../../utils';
 
 export const setMethodEnabledOption = async (
 	optionName,
@@ -127,13 +126,6 @@ export const Payments = ( { query } ) => {
 		};
 	} );
 
-	const [ enabledMethods, setEnabledMethods ] = useState(
-		methods.reduce( ( acc, method ) => {
-			acc[ method.key ] = method.isEnabled;
-			return acc;
-		}, {} )
-	);
-
 	const recommendedMethod = useMemo( () => {
 		const method = methods.find(
 			( m ) =>
@@ -194,86 +186,57 @@ export const Payments = ( { query } ) => {
 		return method;
 	}, [ query ] );
 
+	const [ enabledMethods, setEnabledMethods ] = useState(
+		methods.reduce( ( acc, method ) => {
+			acc[ method.key ] = method.isEnabled;
+			return acc;
+		}, {} )
+	);
+
 	if ( currentMethod ) {
 		return (
 			<Setup method={ currentMethod } markConfigured={ markConfigured } />
 		);
 	}
 
+	// Group by enabled vs the rest, with exception for WCPay which must be configured as well
+	const [ enabledCardMethods, additionalCardMethods ] = sift(
+		methods,
+		( method ) =>
+			method.isEnabled &&
+			( method.key !== 'wcpay' ||
+				( method.key === 'wcpay' && method.isConfigured ) )
+	);
+
+	const wcPayIndex = additionalCardMethods.findIndex(
+		( m ) => m.key === 'wcpay'
+	);
+
+	const wcPayMethod =
+		wcPayIndex === -1
+			? null
+			: additionalCardMethods.splice( wcPayIndex, 1 );
+
 	return (
 		<div className="woocommerce-task-payments">
-			{ methods.map( ( method ) => {
-				const {
-					before,
-					container,
-					content,
-					isConfigured,
-					key,
-					manageUrl,
-					title,
-					visible,
-					loading,
-					onClick,
-				} = method;
+			{ !! wcPayMethod && <WCPayCard method={ wcPayMethod[ 0 ] } /> }
 
-				if ( ! visible ) {
-					return null;
-				}
+			{ !! enabledCardMethods.length && (
+				<PaymentMethodList
+					recommendedMethod={ recommendedMethod }
+					heading={ __( 'Enabled payment methods', 'wc-admin' ) }
+					methods={ enabledCardMethods }
+				/>
+			) }
 
-				const classes = classnames(
-					'woocommerce-task-payment',
-					'woocommerce-task-card',
-					! isConfigured && 'woocommerce-task-payment-not-configured',
-					'woocommerce-task-payment-' + key
-				);
-
-				const isRecommended =
-					key === recommendedMethod && ! isConfigured;
-
-				return (
-					<Card key={ key } className={ classes }>
-						{ isRecommended && key !== 'wcpay' && (
-							<RecommendedRibbon methodKey={ key } />
-						) }
-						<CardMedia isBorderless>{ before }</CardMedia>
-						<CardBody>
-							<H className="woocommerce-task-payment__title">
-								{ title }
-								{ isRecommended && key === 'wcpay' && (
-									<RecommendedRibbon
-										isPill
-										methodKey={ key }
-									/>
-								) }
-							</H>
-							<div className="woocommerce-task-payment__content">
-								{ content }
-							</div>
-						</CardBody>
-						<CardFooter isBorderless>
-							<Action
-								manageUrl={ manageUrl }
-								methodKey={ key }
-								hasSetup={ !! container }
-								isConfigured={ isConfigured }
-								isEnabled={ enabledMethods[ key ] }
-								isRecommended={ isRecommended }
-								isLoading={ loading }
-								markConfigured={ markConfigured }
-								onSetup={ () =>
-									recordEvent( 'tasklist_payment_setup', {
-										options: methods.map(
-											( option ) => option.key
-										),
-										selected: key,
-									} )
-								}
-								onSetupCallback={ onClick }
-							/>
-						</CardFooter>
-					</Card>
-				);
-			} ) }
+			{ !! additionalCardMethods.length && (
+				<PaymentMethodList
+					recommendedMethod={ recommendedMethod }
+					heading={ __( 'Additional payment methods', 'wc-admin' ) }
+					methods={ additionalCardMethods }
+					markConfigured={ markConfigured }
+				/>
+			) }
 		</div>
 	);
 };

@@ -4,6 +4,12 @@
 	}
 
 	.woocommerce-task-dashboard__container {
+		.woocommerce-task-payments {
+			width: 680px;
+			margin: auto;
+			max-width: 100%;
+		}
+
 		.woocommerce-task-card {
 			.wooocommerce-task-card__header {
 				display: flex;
@@ -202,33 +208,16 @@
 	}
 }
 
-.woocommerce-task-payment {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	position: relative;
-	overflow: hidden;
-	box-shadow: $muriel-box-shadow-1dp;
+.woocommerce-task-payments {
+	.components-card + .components-card {
+		margin-top: $gap-large;
+	}
 
-	.woocommerce-task-payment__recommended-ribbon {
-		position: absolute;
-		transform: rotate(-45deg) translate(-50%, -50%);
-		background: $studio-gray-80;
-		color: $studio-white;
-		font-size: 11px;
-		line-height: 20px;
-		position: absolute;
-		top: 0;
-		left: 0;
-		line-height: 1;
-		padding: 7px $gap-largest;
-		transform-origin: top left;
-		margin-top: 36px;
-		margin-left: 36px;
-
-		span {
-			max-width: 70px;
-		}
+	.components-card__header {
+		font-size: 20px;
+		font-weight: 400;
+		line-height: 28px;
+		margin: 0;
 	}
 
 	.woocommerce-task-payment__recommended-pill {
@@ -241,85 +230,6 @@
 
 		span {
 			max-width: 70px;
-		}
-	}
-
-	.components-card__media {
-		margin: $gap-large $gap-larger;
-
-		img {
-			max-width: 100px;
-		}
-	}
-
-	.woocommerce-task-payment__title {
-		font-size: 16px;
-		font-weight: 400;
-		color: $studio-gray-80;
-		margin-top: 0;
-		margin-bottom: $gap-smaller;
-	}
-
-	.woocommerce-task-payment__content {
-		font-size: 14px;
-		color: $studio-gray-60;
-		margin: 0;
-		margin-right: $gap-larger;
-
-		.text-style-strong {
-			font-weight: bold;
-		}
-
-		p {
-			font-size: 12px;
-		}
-	}
-
-	.components-card__body {
-		padding: $gap-large 0;
-		flex: 1;
-	}
-
-	.components-card__footer {
-		margin-left: auto;
-		width: auto;
-
-		.components-button.is-button {
-			margin: 0;
-		}
-	}
-
-	@include breakpoint( '<600px' ) {
-		flex-direction: column;
-
-		.woocommerce-task-payment__recommended-ribbon {
-			display: none;
-		}
-
-		.woocommerce-task-payment__recommended-pill {
-			display: none;
-		}
-
-		.components-card__media {
-			order: 1;
-			margin-right: auto;
-		}
-
-		.components-card__footer {
-			position: absolute;
-			right: $gap-larger;
-			top: $gap-smaller;
-
-			.components-form-toggle {
-				margin-top: $gap-smallest;
-			}
-		}
-
-		.components-card__body {
-			order: 3;
-			margin-right: auto;
-			margin-left: $gap-larger;
-			padding-top: $gap-smaller;
 		}
 	}
 }
@@ -368,20 +278,6 @@
 .woocommerce-task-payments__paypal-auto-create-account {
 	margin-top: $gap;
 	margin-bottom: $gap;
-}
-
-.woocommerce-task-payment-wcpay.woocommerce-task-payment-not-configured {
-	background-color: $studio-woocommerce-purple-80;
-
-	.woocommerce-task-payment__title {
-		color: $studio-white;
-	}
-	.woocommerce-task-payment__content {
-		color: $studio-white;
-		a {
-			color: $studio-white;
-		}
-	}
 }
 
 .woocommerce-task-card__prompt {

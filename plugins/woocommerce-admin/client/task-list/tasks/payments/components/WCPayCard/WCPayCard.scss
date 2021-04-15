@@ -1,0 +1,42 @@
+.woocommerce-task-payment-wcpay {
+	.woocommerce-task-payment-wcpay__description {
+		font-size: 16px;
+		margin-bottom: $gap-large;
+	}
+
+	> .components-card__footer {
+		flex-direction: column;
+		align-items: flex-start;
+
+		.components-button {
+			margin-top: $gap;
+		}
+	}
+
+	.woocommerce-task-payment-wcpay__accepted {
+		display: flex;
+		margin-top: $gap-small;
+		flex-wrap: wrap;
+		gap: $gap-small;
+
+		h3 {
+			color: #40464d;
+		}
+	}
+
+	> h2 {
+		display: flex;
+		justify-content: flex-start;
+	}
+
+	.woocommerce-task-payment__setup_required {
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		margin-left: $gap-small;
+		gap: 3px;
+		> svg {
+			fill: #efb854;
+		}
+	}
+}

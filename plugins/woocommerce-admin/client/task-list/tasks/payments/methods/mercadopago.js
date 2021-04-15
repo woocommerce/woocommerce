@@ -26,6 +26,7 @@ export const MercadoPago = ( { installStep, markConfigured } ) => {
 			),
 		};
 	} );
+
 	return (
 		<Stepper
 			isVertical

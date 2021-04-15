@@ -3,9 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { updateQueryString } from '@woocommerce/navigation';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 export const Action = ( {
 	hasSetup = false,
@@ -18,6 +18,7 @@ export const Action = ( {
 	methodKey,
 	onSetUp = () => {},
 	onSetupCallback,
+	setupButtonText = __( 'Set up', 'woocommerce-admin' ),
 } ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 
@@ -59,7 +60,7 @@ export const Action = ( {
 					disabled={ isBusy }
 					onClick={ () => handleClick() }
 				>
-					{ __( 'Set up', 'woocommerce-admin' ) }
+					{ setupButtonText }
 				</Button>
 			</div>
 		);
@@ -75,10 +76,12 @@ export const Action = ( {
 				<Button
 					className={ classes }
 					isSecondary
-					href={ getAdminLink(
-						'admin.php?page=wc-settings&tab=checkout&section=' +
-							methodKey
-					) }
+					href={ manageUrl }
+					onClick={
+						methodKey === 'wcpay'
+							? () => recordEvent( 'tasklist_payment_manage' )
+							: () => {}
+					}
 				>
 					{ __( 'Manage', 'woocommerce-admin' ) }
 				</Button>
