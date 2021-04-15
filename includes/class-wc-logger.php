@@ -139,11 +139,23 @@ class WC_Logger implements WC_Logger_Interface {
 		}
 
 		if ( $this->should_handle( $level ) ) {
-			$timestamp = current_time( 'timestamp', 1 );
-			$message   = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context );
+			$timestamp = time();
 
 			foreach ( $this->handlers as $handler ) {
-				$handler->handle( $timestamp, $level, $message, $context );
+				/**
+				 * Filter the logging message. Returning null will prevent logging from occuring since 5.3.
+				 *
+				 * @since 3.1
+				 * @param string $message Log message.
+				 * @param string $level   One of: emergency, alert, critical, error, warning, notice, info, or debug.
+				 * @param array  $context Additional information for log handlers.
+				 * @param object $handler The handler object, such as WC_Log_Handler_File. Available since 5.3.
+				 */
+				$message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context, $handler );
+
+				if ( null !== $message ) {
+					$handler->handle( $timestamp, $level, $message, $context );
+				}
 			}
 		}
 	}
