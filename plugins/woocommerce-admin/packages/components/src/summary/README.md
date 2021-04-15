@@ -15,7 +15,9 @@ A container element for a list of SummaryNumbers. This component handles detecti
 				label="Total Sales"
 				delta={ 29 }
 				href="/analytics/report"
-			/>,
+			>
+				<span>27 orders</span>
+			</SummaryNumber>,
 			<SummaryNumber
 				key="refunds"
 				value={ '$24.00' }
@@ -40,7 +42,7 @@ Name | Type | Default | Description
 SummaryNumber
 ===
 
-A component to show a value, label, and an optional change percentage. Can also act as a link to a specific report focus.
+A component to show a value, label, and optionally a change percentage and children node. Can also act as a link to a specific report focus.
 
 ## Usage
 

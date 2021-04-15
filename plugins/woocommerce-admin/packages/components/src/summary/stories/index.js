@@ -13,7 +13,9 @@ export const Basic = () => (
 					label="Total Sales"
 					delta={ 29 }
 					href="/analytics/report"
-				/>,
+				>
+					<span>27 orders</span>
+				</SummaryNumber>,
 				<SummaryNumber
 					key="refunds"
 					value={ '$24.00' }

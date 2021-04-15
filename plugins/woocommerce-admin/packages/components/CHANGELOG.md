@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Add optional `children` prop to `<SummaryNumber>`.
+
 # 6.0.0
 
 -   Change styling of `<ProductImage />`.

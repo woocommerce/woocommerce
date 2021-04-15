@@ -93,6 +93,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Remove no-reply from inbox notification emails #6644
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Fix: Set up shipping costs task, redirect to shipping settings after completion. #6791
+- Add: Optional children prop to SummaryNumber component #6748
 
 == 2.2.0 3/30/2021 ==
 

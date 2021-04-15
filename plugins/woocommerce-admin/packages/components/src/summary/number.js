@@ -15,9 +15,10 @@ import { Text } from '@woocommerce/experimental';
 import Link from '../link';
 
 /**
- * A component to show a value, label, and an optional change percentage. Can also act as a link to a specific report focus.
+ * A component to show a value, label, and optionally a change percentage and children node. Can also act as a link to a specific report focus.
  *
  * @param {Object} props
+ * @param {Node} props.children
  * @param {number} props.delta Change percentage. Float precision is rendered as given.
  * @param {string} props.href
  * @param {string} props.hrefType
@@ -33,6 +34,7 @@ import Link from '../link';
  * @return {Object} -
  */
 const SummaryNumber = ( {
+	children,
 	delta,
 	href,
 	hrefType,
@@ -143,6 +145,7 @@ const SummaryNumber = ( {
 						size={ 24 }
 					/>
 				) : null }
+				{ children }
 			</Container>
 		</li>
 	);
