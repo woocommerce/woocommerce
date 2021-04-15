@@ -3,6 +3,7 @@
 ## Added
 
 - `takeScreenshotFor` utility function to take screenshots within tests
+- `toBeInRange` expect numeric range matcher
 
 # 0.2.1
 

@@ -1,11 +1,20 @@
 # Unreleased
 
+## Added
+
+- Support for re-running setup and shopper tests
+
+## Fixed
+
+- Checkout create account test would fail if configuration value `addresses.customer.billing.email` was not `john.doe@example.com` 
+
 # 0.1.3
 
 ## Added
 
 - Shopper Checkout Login Account
 - Shopper My Account Create Account
+- Shopper Cart Redirection
 
 ## Fixed
 
