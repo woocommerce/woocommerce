@@ -94,6 +94,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Fix: Set up shipping costs task, redirect to shipping settings after completion. #6791
 - Add: Optional children prop to SummaryNumber component #6748
+- Fix: Onboarding logic on WooCommerce update to keep task list present. #6803
 
 == 2.2.0 3/30/2021 ==
 

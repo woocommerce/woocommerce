@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin\Notes;
 
+use Automattic\WooCommerce\Admin\WCAdminHelper;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,16 +22,7 @@ trait NoteTraits {
 	 * @return bool Whether or not WooCommerce admin has been active for $seconds.
 	 */
 	public static function wc_admin_active_for( $seconds ) {
-		// Getting install timestamp reference class-wc-admin-install.php.
-		$wc_admin_installed = get_option( 'woocommerce_admin_install_timestamp', false );
-
-		if ( false === $wc_admin_installed ) {
-			update_option( 'woocommerce_admin_install_timestamp', time() );
-
-			return false;
-		}
-
-		return ( ( time() - $wc_admin_installed ) >= $seconds );
+		return WCAdminHelper::is_wc_admin_active_for( $seconds );
 	}
 
 	/**

@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
-use \Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -1094,13 +1094,19 @@ class Onboarding {
 		}
 
 		$onboarding_data = get_option( self::PROFILE_DATA_OPTION, array() );
-		// Don't make updates if the profiler is completed, but task list is potentially incomplete.
-		if ( isset( $onboarding_data['completed'] ) && $onboarding_data['completed'] ) {
+		// Don't make updates if the profiler is completed or skipped, but task list is potentially incomplete.
+		if (
+			( isset( $onboarding_data['completed'] ) && $onboarding_data['completed'] ) ||
+			( isset( $onboarding_data['skipped'] ) && $onboarding_data['skipped'] )
+		) {
 			return;
 		}
 
 		$onboarding_data['completed'] = true;
 		update_option( self::PROFILE_DATA_OPTION, $onboarding_data );
-		update_option( 'woocommerce_task_list_hidden', 'yes' );
+
+		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS ) ) {
+			update_option( 'woocommerce_task_list_hidden', 'yes' );
+		}
 	}
 }
