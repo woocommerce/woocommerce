@@ -427,6 +427,8 @@ class Install {
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
+				$completed_version_updates = 0;
+
 				foreach ( $update_callbacks as $update_callback ) {
 					$pending_jobs = WC()->queue()->search(
 						array(
@@ -448,6 +450,8 @@ class Install {
 						)
 					);
 
+					$completed_version_updates += count( $complete_jobs );
+
 					if ( empty( $pending_jobs ) && empty( $complete_jobs ) ) {
 						WC()->queue()->schedule_single(
 							time() + $loop,
@@ -459,6 +463,15 @@ class Install {
 					}
 
 					$loop++;
+
+				}
+
+				// Users have experienced concurrency issues where all update callbacks
+				// have run but the version option hasn't been updated. If all the updates
+				// for a version are complete, update the version option to reflect that.
+				// See: https:// github.com/woocommerce/woocommerce-admin/issues/5058.
+				if ( count( $update_callbacks ) === $completed_version_updates ) {
+					self::update_db_version( $version );
 				}
 			}
 		}

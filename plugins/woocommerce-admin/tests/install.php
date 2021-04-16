@@ -49,4 +49,28 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 			$this->assertContains( $table, $result );
 		}
 	}
+
+	/**
+	 * Test missed DB version number update.
+	 * See: https:// github.com/woocommerce/woocommerce-admin/issues/5058
+	 */
+	public function test_missed_version_number_update() {
+		$old_version = '1.6.0'; // This should get updated to later versions as we add more migrations.
+
+		// Simulate an upgrade from an older version.
+		update_option( Install::VERSION_OPTION, '1.6.0' );
+		Install::install();
+		WC_Helper_Queue::run_all_pending();
+
+		// Simulate a collision/failure in version updating.
+		update_option( Install::VERSION_OPTION, '1.6.0' );
+
+		// The next update check should force update the skipped version number.
+		Install::install();
+		$this->assertTrue( version_compare( $old_version, get_option( Install::VERSION_OPTION ), '<' ) );
+
+		// The following update check should bump the version to the current (no migrations left).
+		Install::install();
+		$this->assertEquals( get_option( Install::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER );
+	}
 }
