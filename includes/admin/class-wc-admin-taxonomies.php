@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+
 /**
  * WC_Admin_Taxonomies class.
  */
@@ -49,7 +51,7 @@ class WC_Admin_Taxonomies {
 
 		// Category/term ordering.
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
-		add_action( 'delete_product_cat', array( $this, 'maybe_assign_default_product_cat' ) );
+		add_action( 'delete_product_cat', array( $this, 'assign_default_product_cat' ) );
 
 		// Add form.
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
@@ -118,19 +120,9 @@ class WC_Admin_Taxonomies {
 	 * @since 5.4
 	 * @return void
 	 */
-	public function maybe_assign_default_product_cat() {
-		/*
-		 * When a product category is deleted, we need to check
-		 * if the product has no categories assigned. Then assign
-		 * it a default category. We delay this with a scheduled
-		 * action job to not block the response.
-		 */
-		WC()->queue()->schedule_single(
-			time(),
-			'wc_schedule_update_product_default_cat',
-			array(),
-			'wc_update_product_default_cat'
-		);
+	public function assign_default_product_cat() {
+		// Schedule action to assign default category.
+		wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 	}
 
 	/**

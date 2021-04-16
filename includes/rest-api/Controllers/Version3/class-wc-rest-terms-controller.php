@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+
 /**
  * Terms controller class.
  */
@@ -563,18 +565,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		/*
-		 * When a product category is deleted, we need to check
-		 * if the product has no categories assigned. Then assign
-		 * it a default category. We delay this with a scheduled
-		 * action job to not block the response.
-		 */
-		WC()->queue()->schedule_single(
-			time(),
-			'wc_schedule_update_product_default_cat',
-			array(),
-			'wc_update_product_default_cat'
-		);
+		// Schedule action to assign default category.
+		wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 
 		/**
 		 * Fires after a single term is deleted via the REST API.

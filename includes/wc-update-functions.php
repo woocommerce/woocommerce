@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+
 /**
  * Update file paths for 2.0
  *
@@ -1572,7 +1574,7 @@ function wc_update_330_set_default_product_cat() {
 	 * if the product has no categories assigned. Then assign
 	 * it a default category.
 	 */
-	_wc_maybe_assign_default_product_cat();
+	wc_get_container()->get( AssignDefaultCategory::class )->maybe_assign_default_product_cat();
 }
 
 /**
