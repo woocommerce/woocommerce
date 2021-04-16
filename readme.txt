@@ -211,75 +211,75 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Payment methods implementing the `savedTokenComponent` configuration property will now have the `onPaymentProcessing` event available to the registered component. #3982
 
 ** WooCommerce Admin - 2.2.0 & 2.2.1 **
-- Add: Next new novel navigation nudge note #6610
-- Add: Add legacy report items to new navigation #6507
-- Add: Add preview site button on the appearance task #6457
-- Add: Back button to go to home screen from tasks in the task list. #6397
-- Add: Add a "rather not say" option to revenue in the profile wizard. #6475
-- Add: Remove Mollie promo note on install #6510
-- Add: Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
-- Add: CES survey for search product, order, customer #6420
-- Add: CES survey for importing products #6419
-- Add: CES survey for adding product categories, tags, and attributes #6418
-- Add: Additional analytics tracking for the business details step. #6575
-- Add: Include tracking for mail poet installs in the selective bundle install #6603
-- Add: Paystack payment provider to several african countries. #6579
-- Dev: Close activity panel tabs by default and track #6566
-- Dev: Update undefined task name properties for help panel tracks #6565
-- Dev: Refactor profile wizard benefits step and add tests #6583
-- Dev: Add filter to profile wizard steps #6564
-- Dev: Add nav intro modal tests #6518
-- Dev: Use wc filter to get status tabs for tools category #6525
-- Dev: Add nav header component tests #6509
-- Dev: Add initial tests for navigation Menu class #6492
-- Dev: Remove active item from navigation store #6486
-- Dev: Add navigation container tests #6464
-- Dev: Add nav favorite button tests #6446
-- Dev: Add a changelog lint check to PRs. #6414
-- Dev: Add navigation favorites tests #6409
-- Dev: support use of Array.flat in client and packages. #6411
-- Dev: Deprecate Onboarding::has_woocommerce_support. #6401
-- Dev: Add Dependency Extraction Webpack Plugin #5762
-- Dev: Add client-side filter for Navigation rootBackUrl #6505
-- Dev: Remove `items_purchased` and `account_type` props from onboarding profile API. #6520
-- Dev: Added warning when WC-Admin is active but not being used #6453
-- Dev: Store profiler - Added MailPoet to Business Details step  #6503
-- Dev: Store profiler - Added MailPoet to new Business Details step  #6515
-- Dev: Add tilde (~) to represent client root directory for imports. #6517
-- Dev: Add script automation for gathering hooks and filters. #6454
-- Dev: Add TypeScript and page objects to the E2E test suite. #6582
-- Dev: Introduce Typescript to Navigation utils #6477
-- Dev: Payments task: include Mercado Pago #6572
-- Dev: Ensure script asset.php files are included in builds #6635
-- Dev: Ensure production script asset names don't include .min suffix #6681
-- Fix: Add check for navigating being enabled. #6462
-- Fix: Move the shipping input and text 1px lower. #6408
-- Fix: Correct the Klarna slug #6440
-- Fix: Broken link anchors to online documentation. #6455
-- Fix: Update payment card style on mobile #6413
-- Fix: Missing i18n in Welcome modal. #6456
-- Fix: Restore visual styles back to Analytics tabs. #5913
-- Fix: Update contrast and hover / active colors for analytics dropdown buttons #6504
-- Fix: Associated Order Number for refunds was hidden #6428
-- Fix: Fix issue where Loader::is_admin_page() would error if WooCommerce admin is disabled. #6563
-- Fix: Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
-- Fix: Show management links when the task list is complete (even if its not hidden). #6657
-- Fix: Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
-- Fix: Update the Mercado option used for enabling/disabling. #6677
-- Fix: Improve AddFirstProduct email note contents. #6617
-- Fix: Check if features are currently being enabled #6688
-- Fix: Fix the activity panel toggle not closing on click #6679
-- Fix: Fix use of feature checks and remove deprecated method calls #6687
-- Fix: Allow the manager role to query certain options #6577
-- Fix: Delete customer data on network user deletion #6574
-- Fix: Fix Themes step visibility in IE 11 #6578
-- Fix: Fix hidden menu title on smaller screens #6562
-- Fix: Add gross sales column to CSV export #6567
-- Tweak: Add default value for contains op #6622
-- Tweak: Adjust targeting store age for the Add First Product note #6554
-- Tweak: Improve WC Shipping & Tax logic #6547
-- Tweak: Update Insight inbox note content #6555
-- Tweak: Remove mobile activity panel toggle #6539
-- Tweak: Refactor autoloader to remove global variable. #6412
+* Add - Next new novel navigation nudge note #6610
+* Add - Add legacy report items to new navigation #6507
+* Add - Add preview site button on the appearance task #6457
+* Add - Back button to go to home screen from tasks in the task list. #6397
+* Add - Add a "rather not say" option to revenue in the profile wizard. #6475
+* Add - Remove Mollie promo note on install #6510
+* Add - Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
+* Add - CES survey for search product, order, customer #6420
+* Add - CES survey for importing products #6419
+* Add - CES survey for adding product categories, tags, and attributes #6418
+* Add - Additional analytics tracking for the business details step. #6575
+* Add - Include tracking for mail poet installs in the selective bundle install #6603
+* Add - Paystack payment provider to several african countries. #6579
+* Dev - Close activity panel tabs by default and track #6566
+* Dev - Update undefined task name properties for help panel tracks #6565
+* Dev - Refactor profile wizard benefits step and add tests #6583
+* Dev - Add filter to profile wizard steps #6564
+* Dev - Add nav intro modal tests #6518
+* Dev - Use wc filter to get status tabs for tools category #6525
+* Dev - Add nav header component tests #6509
+* Dev - Add initial tests for navigation Menu class #6492
+* Dev - Remove active item from navigation store #6486
+* Dev - Add navigation container tests #6464
+* Dev - Add nav favorite button tests #6446
+* Dev - Add a changelog lint check to PRs. #6414
+* Dev - Add navigation favorites tests #6409
+* Dev - support use of Array.flat in client and packages. #6411
+* Dev - Deprecate Onboarding -:has_woocommerce_support. #6401
+* Dev - Add Dependency Extraction Webpack Plugin #5762
+* Dev - Add client-side filter for Navigation rootBackUrl #6505
+* Dev - Remove `items_purchased` and `account_type` props from onboarding profile API. #6520
+* Dev - Added warning when WC-Admin is active but not being used #6453
+* Dev - Store profiler - Added MailPoet to Business Details step  #6503
+* Dev - Store profiler - Added MailPoet to new Business Details step  #6515
+* Dev - Add tilde (~) to represent client root directory for imports. #6517
+* Dev - Add script automation for gathering hooks and filters. #6454
+* Dev - Add TypeScript and page objects to the E2E test suite. #6582
+* Dev - Introduce Typescript to Navigation utils #6477
+* Dev - Payments task - include Mercado Pago #6572
+* Dev - Ensure script asset.php files are included in builds #6635
+* Dev - Ensure production script asset names don't include .min suffix #6681
+* Fix - Add check for navigating being enabled. #6462
+* Fix - Move the shipping input and text 1px lower. #6408
+* Fix - Correct the Klarna slug #6440
+* Fix - Broken link anchors to online documentation. #6455
+* Fix - Update payment card style on mobile #6413
+* Fix - Missing i18n in Welcome modal. #6456
+* Fix - Restore visual styles back to Analytics tabs. #5913
+* Fix - Update contrast and hover / active colors for analytics dropdown buttons #6504
+* Fix - Associated Order Number for refunds was hidden #6428
+* Fix - Fix issue where Loader -:is_admin_page() would error if WooCommerce admin is disabled. #6563
+* Fix - Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
+* Fix - Show management links when the task list is complete (even if its not hidden). #6657
+* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
+* Fix - Update the Mercado option used for enabling/disabling. #6677
+* Fix - Improve AddFirstProduct email note contents. #6617
+* Fix - Check if features are currently being enabled #6688
+* Fix - Fix the activity panel toggle not closing on click #6679
+* Fix - Fix use of feature checks and remove deprecated method calls #6687
+* Fix - Allow the manager role to query certain options #6577
+* Fix - Delete customer data on network user deletion #6574
+* Fix - Fix Themes step visibility in IE 11 #6578
+* Fix - Fix hidden menu title on smaller screens #6562
+* Fix - Add gross sales column to CSV export #6567
+* Tweak - Add default value for contains op #6622
+* Tweak - Adjust targeting store age for the Add First Product note #6554
+* Tweak - Improve WC Shipping & Tax logic #6547
+* Tweak - Update Insight inbox note content #6555
+* Tweak - Remove mobile activity panel toggle #6539
+* Tweak - Refactor autoloader to remove global variable. #6412
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
