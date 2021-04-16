@@ -21,7 +21,7 @@ jobs:
         --location $GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/assign-milestone-to-merged-pr.php
       env:
         GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
-    - name: Install PHP
+    - name: "Install PHP"
       uses: shivammathur/setup-php@v2
       with:
         php-version: '7.4'
