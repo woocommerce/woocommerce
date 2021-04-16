@@ -18,5 +18,17 @@ export async function insertBlockDontWaitForInsertClose( searchTerm ) {
 }
 
 export const closeInserter = async () => {
-	await page.click( '.edit-post-header [aria-label="Add block"]' );
+	if (
+		await page.evaluate( () => {
+			return !! document.querySelector(
+				'.edit-post-header [aria-label="Add block"]'
+			);
+		} )
+	) {
+		await page.click( '.edit-post-header [aria-label="Add block"]' );
+		return;
+	}
+	await page.click(
+		'.edit-post-header [aria-label="Toggle block inserter"]'
+	);
 };

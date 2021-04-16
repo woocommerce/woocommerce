@@ -32,7 +32,21 @@ describe( `${ block.name } Block`, () => {
 		await page.waitForSelector(
 			`${ block.class } .woocommerce-search-list__item`
 		);
-		await page.click( `${ block.class } .woocommerce-search-list__item` );
+		do {
+			await page.click(
+				`${ block.class } .woocommerce-search-list__item`
+			);
+		} while (
+			await page.evaluate(
+				( blockClass ) =>
+					document
+						.querySelector(
+							`${ blockClass } .woocommerce-search-list__item`
+						)
+						.getAttribute( 'aria-checked' ) === 'false',
+				block.class
+			)
+		);
 		await clickButton( 'Done' );
 		// Selected.
 		await page.waitForSelector(
