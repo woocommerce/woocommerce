@@ -14,9 +14,9 @@ To enable the new onboarding experience manually, log-in to `wp-admin`, and go t
 
 To power the new onboarding flow client side, new REST API endpoints have been introduced. These are purpose built endpoints that exist under the `/wc-admin/onboarding/` namespace, and are not meant to be shipped in the core rest API package. The source is stored in `src/API/Plugins.php`, `src/API/OnboardingProfile.php`, and `src/API/OnboardingTasks.php` respectively.
 
-* POST `/wc-admin/plugins/install` - Installs a requested plugin, if present in the `woocommerce_admin_plugins_whitelist` array.
+* POST `/wc-admin/plugins/install` - Install requested plugins.
 * GET `/wc-admin/plugins/active` - Returns a list of the currently active plugins.
-* POST `/wc-admin/plugins/activate` - Activates the requested plugins,  if present in the `woocommerce_admin_plugins_whitelist` array. Multiple plugins can be passed to activate at once.
+* POST `/wc-admin/plugins/activate` - Activates the requested plugins. Multiple plugins can be passed to activate at once.
 * GET `/wc-admin/plugins/connect-jetpack` - Generates a URL for connecting to Jetpack. A `redirect_url` is accepted, which is used upon a successful connection.
 * POST `/wc-admin/plugins/request-wccom-connect` - Generates a URL for the WooCommerce.com connection process.
 * POST `/wc-admin/plugins/finish-wccom-connect` - Finishes the WooCommerce.com connection process by storing the received access token.

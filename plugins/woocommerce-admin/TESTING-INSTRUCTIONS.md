@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Add plugin installer to allow installation of plugins via URL #6805
+
+1. Visit any admin page with the params `plugin_action` (`install`, `activate`, or `install-activate`) and `plugins` (list of comma separated plugins). `wp-admin/admin.php?page=wc-admin&plugin_action=install&plugins=jetpack`
+2. If visiting this URL from a link, make sure you are sent back to the referer.
+3. Check that the plugins provided are installed, activated, or both depending on your query.
+
 ### Retain persisted queries when navigating to Homescreen #6614
 
 1. Go to Analytics Report.

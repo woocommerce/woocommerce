@@ -25,26 +25,10 @@ class ShippingLabelBanner {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_admin_plugins_whitelist', array( $this, 'get_shipping_banner_allowed_plugins' ), 10, 2 );
-
 		if ( ! is_admin() ) {
 			return;
 		}
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 6, 2 );
-	}
-
-	/**
-	 * Gets an array of plugins that can be installed & activated via shipping label prompt.
-	 *
-	 * @param array $plugins Array of plugin slugs to be allowed.
-	 *
-	 * @return array
-	 */
-	public static function get_shipping_banner_allowed_plugins( $plugins ) {
-		$shipping_banner_plugins = array(
-			'woocommerce-services' => 'woocommerce-services/woocommerce-services.php',
-		);
-		return array_merge( $plugins, $shipping_banner_plugins );
 	}
 
 	/**

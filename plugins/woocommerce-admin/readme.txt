@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Add: Add plugin installer to allow installation of plugins via URL #6805
 - Update: Adding setup required icon for non-configured payment methods #6811
 - Update: UI updates to Payment Task screen #6766
 - Dev: Add data source filter to remote inbox notification system #6794

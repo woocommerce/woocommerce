@@ -176,6 +176,7 @@ class FeaturePlugin {
 		Events::instance()->init();
 		API\Init::instance();
 		ReportExporter::init();
+		PluginsInstaller::init();
 
 		// CRUD classes.
 		Notes::init();

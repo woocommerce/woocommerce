@@ -61,6 +61,24 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Get an array of installed plugins with their file paths as a key value pair.
+	 *
+	 * @return array
+	 */
+	public static function get_installed_plugins_paths() {
+		$plugins           = get_plugins();
+		$installed_plugins = array();
+
+		foreach ( $plugins as $path => $plugin ) {
+			$path_parts                 = explode( '/', $path );
+			$slug                       = $path_parts[0];
+			$installed_plugins[ $slug ] = $path;
+		}
+
+		return $installed_plugins;
+	}
+
+	/**
 	 * Get an array of active plugin slugs.
 	 *
 	 * @return array

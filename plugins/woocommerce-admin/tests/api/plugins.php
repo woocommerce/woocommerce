@@ -109,44 +109,4 @@ class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'woocommerce_rest_invalid_plugins', $data['code'] );
 	}
-
-	/**
-	 * Test that installing a non-whitelisted plugin fails, but installs the whitelisted.
-	 */
-	public function test_install_non_allowed_plugins() {
-		wp_set_current_user( $this->user );
-
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'plugins' => 'facebook-for-woocommerce,hello-dolly',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( false, $data['success'] );
-		$this->assertArrayHasKey( 'hello-dolly', $data['errors']->errors );
-		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['installed'] );
-	}
-
-	/**
-	 * Test that activating a non-whitelisted plugin fails, but activates the whitelisted.
-	 */
-	public function test_activate_non_allowed_plugins() {
-		wp_set_current_user( $this->user );
-
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
-		$request->set_query_params(
-			array(
-				'plugins' => 'facebook-for-woocommerce,hello-dolly',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( false, $data['success'] );
-		$this->assertArrayHasKey( 'hello-dolly', $data['errors']->errors );
-		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['activated'] );
-	}
 }

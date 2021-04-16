@@ -204,8 +204,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Plugin Status
 	 */
 	public function install_plugins( $request ) {
-		$allowed_plugins = self::get_allowed_plugins();
-		$plugins         = explode( ',', $request['plugins'] );
+		$plugins = explode( ',', $request['plugins'] );
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
@@ -218,25 +217,15 @@ class Plugins extends \WC_REST_Data_Controller {
 		include_once ABSPATH . '/wp-admin/includes/class-wp-upgrader.php';
 		include_once ABSPATH . '/wp-admin/includes/class-plugin-upgrader.php';
 
-		$existing_plugins  = get_plugins();
+		$existing_plugins  = PluginsHelper::get_installed_plugins_paths();
 		$installed_plugins = array();
 		$results           = array();
 		$errors            = new \WP_Error();
 
 		foreach ( $plugins as $plugin ) {
 			$slug = sanitize_key( $plugin );
-			$path = isset( $allowed_plugins[ $slug ] ) ? $allowed_plugins[ $slug ] : false;
 
-			if ( ! $path ) {
-				$errors->add(
-					$plugin,
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s` is not in the list of allowed plugins.', 'woocommerce-admin' ), $slug )
-				);
-				continue;
-			}
-
-			if ( in_array( $path, array_keys( $existing_plugins ), true ) ) {
+			if ( isset( $existing_plugins[ $slug ] ) ) {
 				$installed_plugins[] = $plugin;
 				continue;
 			}
@@ -319,24 +308,13 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Gets an array of plugins that can be installed & activated.
-	 *
-	 * @return array
-	 */
-	public static function get_allowed_plugins() {
-		return apply_filters( 'woocommerce_admin_plugins_whitelist', array() );
-	}
-
-	/**
 	 * Returns a list of active plugins in API format.
 	 *
 	 * @return array Active plugins
 	 */
 	public static function active_plugins() {
-		$allowed = self::get_allowed_plugins();
-		$plugins = array_values( array_intersect( PluginsHelper::get_active_plugin_slugs(), array_keys( $allowed ) ) );
 		return( array(
-			'plugins' => array_values( $plugins ),
+			'plugins' => PluginsHelper::get_active_plugin_slugs(),
 		) );
 	}
 	/**
@@ -367,7 +345,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
-		$allowed_plugins   = self::get_allowed_plugins();
+		$plugin_paths      = PluginsHelper::get_installed_plugins_paths();
 		$plugins           = explode( ',', $request['plugins'] );
 		$errors            = new \WP_Error();
 		$activated_plugins = array();
@@ -383,18 +361,9 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		foreach ( $plugins as $plugin ) {
 			$slug = $plugin;
-			$path = isset( $allowed_plugins[ $slug ] ) ? $allowed_plugins[ $slug ] : false;
+			$path = isset( $plugin_paths[ $slug ] ) ? $plugin_paths[ $slug ] : false;
 
 			if ( ! $path ) {
-				$errors->add(
-					$plugin,
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s`. is not in the list of allowed plugins.', 'woocommerce-admin' ), $slug )
-				);
-				continue;
-			}
-
-			if ( ! PluginsHelper::is_plugin_installed( $path ) ) {
 				$errors->add(
 					$plugin,
 					/* translators: %s: plugin slug (example: woocommerce-services) */
