@@ -18,11 +18,21 @@ import { STORE_NAME } from './constants';
 const getWooCommerceMeta = ( user ) => {
 	const wooMeta = user.woocommerce_meta || {};
 
-	const userData = mapValues( wooMeta, ( data ) => {
+	const userData = mapValues( wooMeta, ( data, key ) => {
 		if ( ! data || data.length === 0 ) {
 			return '';
 		}
-		return JSON.parse( data );
+		try {
+			return JSON.parse( data );
+		} catch ( e ) {
+			/* eslint-disable no-console */
+			console.error(
+				`Error parsing value '${ data }' for ${ key }`,
+				e.message
+			);
+			/* eslint-enable no-console */
+			return '';
+		}
 	} );
 
 	return userData;

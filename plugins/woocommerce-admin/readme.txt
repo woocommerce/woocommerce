@@ -104,6 +104,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Pause inbox message "GivingFeedbackNotes" #6802
 - Tweak: Sort the extension task list by completion status and allow toggling visibility. #6792
 - Fix: Missed DB version number updates causing unnecessary upgrades. #6818
+- Fix: Parsing bad JSON string data from user WooCommerce meta. #6819
 
 == 2.2.0 3/30/2021 ==
 

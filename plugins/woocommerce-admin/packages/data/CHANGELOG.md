@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Fix parsing bad JSON string data in useUserPreferences hook. #6819
+
 # 1.2.0
 
 -   Add management of persisted queries to navigation data store.
