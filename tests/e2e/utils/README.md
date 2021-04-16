@@ -31,6 +31,50 @@ describe( 'Cart page', () => {
 } );
 ~~~
 
+### Retries
+
+This package provides support for enabling retries in tests:
+
+- In the test environment set `E2E_RETEST=1`.
+- To add conditional logic to your tests use the boolean constant `IS_RETEST_MODE`.
+
+### Available constants
+
+#### Dashboard
+
+- `WP_ADMIN_LOGIN` - WordPress login
+- `WP_ADMIN_DASHBOARD` - WordPress dashboard
+- `WP_ADMIN_PLUGINS` - Plugin list
+- `WP_ADMIN_PERMALINK_SETTINGS` - Permalink settings  
+- `WP_ADMIN_ALL_USERS_VIEW` - WordPress user list
+- `WP_ADMIN_POST_TYPE` - Post listing
+- `WP_ADMIN_NEW_POST_TYPE` - New post
+- `WP_ADMIN_ALL_COUPONS_VIEW` - Coupons list
+- `WP_ADMIN_NEW_COUPON` - New coupon
+- `WP_ADMIN_ALL_ORDERS_VIEW` - Orders list
+- `WP_ADMIN_NEW_ORDER` - New Order
+- `WP_ADMIN_ALL_PRODUCTS_VIEW` - Products list
+- `WP_ADMIN_NEW_PRODUCT` - New product
+- `WP_ADMIN_IMPORT_PRODUCTS` - Import products
+- `WP_ADMIN_PLUGIN_PAGE` - Plugin settings page root
+- `WP_ADMIN_WC_HOME` - WooCommerce home screen
+- `WP_ADMIN_SETUP_WIZARD` - WooCommerce setup/onboarding wizard
+- `WP_ADMIN_ANALYTICS_PAGES` - WooCommerce analytics page root
+- `WP_ADMIN_WC_SETTINGS` - WooCommerce settings page root
+- `WP_ADMIN_NEW_SHIPPING_ZONE` - WooCommerce new shipping zone
+
+#### Front end
+
+- `SHOP_PAGE` - Shop page
+- `SHOP_PRODUCT_PAGE` - Single product page 
+- `SHOP_CART_PAGE` - Cart page
+- `SHOP_CHECKOUT_PAGE` - Checkout page
+- `SHOP_MY_ACCOUNT_PAGE` - Customer account page
+- `MY_ACCOUNT_ORDERS` - Customer orders
+- `MY_ACCOUNT_DOWNLOADS` - Customer downloads
+- `MY_ACCOUNT_ADDRESSES` - Customer addresses
+- `MY_ACCOUNT_ACCOUNT_DETAILS` - Customer account details
+
 ## Test Function
 
 ### Merchant `merchant`
@@ -82,6 +126,17 @@ describe( 'Cart page', () => {
 | `searchForProduct` | | Searching for a product name and landing on its detail page |
 |  `emptyCart` | | Removes any products and coupons that are in the cart |
 
+### REST API `withRestApi`
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `resetOnboarding` | | Reset onboarding settings |
+| `deleteAllCoupons` | | Permanently delete all coupons |
+| `deleteAllProducts` | | Permanently delete all products |
+| `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
+| `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
+| `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
+
 ### Page Utilities
 
 | Function | Parameters | Description |
@@ -125,6 +180,7 @@ describe( 'Cart page', () => {
 | `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
+| `deleteAllShippingZones` | | Delete all the existing shipping zones |
 
 ### Test Utilities
 
