@@ -99,6 +99,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Optional children prop to SummaryNumber component #6748
 - Fix: Onboarding logic on WooCommerce update to keep task list present. #6803
 - Fix: Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin #6710
+- Fix: Pause inbox message "GivingFeedbackNotes" #6802
 
 == 2.2.0 3/30/2021 ==
 
