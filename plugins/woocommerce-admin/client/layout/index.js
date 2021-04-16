@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import { Component, lazy, Suspense } from '@wordpress/element';
@@ -145,31 +146,33 @@ class _Layout extends Component {
 		const query = this.getQuery( location && location.search );
 
 		return (
-			<div className="woocommerce-layout">
-				<Header
-					sections={
-						isFunction( breadcrumbs )
-							? breadcrumbs( this.props )
-							: breadcrumbs
-					}
-					isEmbedded={ isEmbedded }
-					query={ query }
-				/>
-				<TransientNotices />
-				{ ! isEmbedded && (
-					<PrimaryLayout>
-						<div className="woocommerce-layout__main">
-							<Controller { ...restProps } query={ query } />
-						</div>
-					</PrimaryLayout>
-				) }
+			<SlotFillProvider>
+				<div className="woocommerce-layout">
+					<Header
+						sections={
+							isFunction( breadcrumbs )
+								? breadcrumbs( this.props )
+								: breadcrumbs
+						}
+						isEmbedded={ isEmbedded }
+						query={ query }
+					/>
+					<TransientNotices />
+					{ ! isEmbedded && (
+						<PrimaryLayout>
+							<div className="woocommerce-layout__main">
+								<Controller { ...restProps } query={ query } />
+							</div>
+						</PrimaryLayout>
+					) }
 
-				{ isEmbedded && this.isWCPaySettingsPage() && (
-					<Suspense fallback={ null }>
-						<WCPayUsageModal />
-					</Suspense>
-				) }
-			</div>
+					{ isEmbedded && this.isWCPaySettingsPage() && (
+						<Suspense fallback={ null }>
+							<WCPayUsageModal />
+						</Suspense>
+					) }
+				</div>
+			</SlotFillProvider>
 		);
 	}
 }

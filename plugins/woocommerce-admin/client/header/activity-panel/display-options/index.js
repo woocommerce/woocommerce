@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	createSlotFill,
 	DropdownMenu,
 	MenuGroup,
 	MenuItemsChoice,
@@ -17,6 +18,12 @@ import { recordEvent } from '@woocommerce/tracks';
 import { DisplayIcon } from './icons/display';
 import { SingleColumnIcon } from './icons/single-column';
 import { TwoColumnsIcon } from './icons/two-columns';
+
+const { Fill, Slot } = createSlotFill( 'DisplayOptions' );
+
+Fill.Slot = Slot;
+
+export { Fill as DisplayOption };
 
 const LAYOUTS = [
 	{
@@ -40,51 +47,64 @@ const LAYOUTS = [
 ];
 
 export const DisplayOptions = () => {
-	const defaultHomescreenLayout = useSelect( ( select ) => {
+	const { defaultHomescreenLayout } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
-		return (
-			getOption( 'woocommerce_default_homepage_layout' ) ||
-			'single_column'
-		);
+		return {
+			defaultHomescreenLayout:
+				getOption( 'woocommerce_default_homepage_layout' ) ||
+				'single_column',
+		};
 	} );
 	const {
 		updateUserPreferences,
 		homepage_layout: layout,
 	} = useUserPreferences();
+
 	return (
-		<DropdownMenu
-			icon={ <DisplayIcon /> }
-			/* translators: button label text should, if possible, be under 16 characters. */
-			label={ __( 'Display options', 'woocommerce-admin' ) }
-			toggleProps={ {
-				className:
-					'woocommerce-layout__activity-panel-tab display-options',
-				onClick: () => recordEvent( 'homescreen_display_click' ),
-			} }
-			popoverProps={ {
-				className: 'woocommerce-layout__activity-panel-popover',
-			} }
-		>
-			{ ( { onClose } ) => (
-				<MenuGroup
-					className="woocommerce-layout__homescreen-display-options"
-					label={ __( 'Layout', 'woocommerce-admin' ) }
+		<Slot>
+			{ ( fills ) => (
+				<DropdownMenu
+					icon={ <DisplayIcon /> }
+					/* translators: button label text should, if possible, be under 16 characters. */
+					label={ __( 'Display options', 'woocommerce-admin' ) }
+					toggleProps={ {
+						className:
+							'woocommerce-layout__activity-panel-tab display-options',
+						onClick: () =>
+							recordEvent( 'homescreen_display_click' ),
+					} }
+					popoverProps={ {
+						className: 'woocommerce-layout__activity-panel-popover',
+					} }
 				>
-					<MenuItemsChoice
-						choices={ LAYOUTS }
-						onSelect={ ( newLayout ) => {
-							updateUserPreferences( {
-								homepage_layout: newLayout,
-							} );
-							onClose();
-							recordEvent( 'homescreen_display_option', {
-								display_option: newLayout,
-							} );
-						} }
-						value={ layout || defaultHomescreenLayout }
-					/>
-				</MenuGroup>
+					{ ( { onClose } ) => (
+						<>
+							{ fills }
+							<MenuGroup
+								className="woocommerce-layout__homescreen-display-options"
+								label={ __( 'Layout', 'woocommerce-admin' ) }
+							>
+								<MenuItemsChoice
+									choices={ LAYOUTS }
+									onSelect={ ( newLayout ) => {
+										updateUserPreferences( {
+											homepage_layout: newLayout,
+										} );
+										onClose();
+										recordEvent(
+											'homescreen_display_option',
+											{
+												display_option: newLayout,
+											}
+										);
+									} }
+									value={ layout || defaultHomescreenLayout }
+								/>
+							</MenuGroup>
+						</>
+					) }
+				</DropdownMenu>
 			) }
-		</DropdownMenu>
+		</Slot>
 	);
 };

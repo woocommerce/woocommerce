@@ -8,8 +8,10 @@ import {
 	fireEvent,
 	queryByTestId,
 } from '@testing-library/react';
-import apiFetch from '@wordpress/api-fetch';
 import userEvent from '@testing-library/user-event';
+import apiFetch from '@wordpress/api-fetch';
+import { SlotFillProvider } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,9 +19,14 @@ import userEvent from '@testing-library/user-event';
 import { TaskDashboard } from '../index.js';
 import { TaskList } from '../list';
 import { getAllTasks } from '../tasks';
+import { DisplayOption } from '../../header/activity-panel/display-options';
 
 jest.mock( '@wordpress/api-fetch' );
 jest.mock( '../tasks' );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+
+const TASK_LIST_HEADING = 'Get ready to start selling';
+const EXTENDED_TASK_LIST_HEADING = 'Things to do next';
 
 describe( 'TaskDashboard and TaskList', () => {
 	afterEach( () => jest.clearAllMocks() );
@@ -103,8 +110,18 @@ describe( 'TaskDashboard and TaskList', () => {
 		time: '2 minute',
 		isDismissable: true,
 	};
+	const completedExtensionTask = {
+		key: 'extension2',
+		title: 'This completed task is an extension',
+		container: null,
+		completed: true,
+		visible: true,
+		time: '2 minutes',
+		isDismissable: true,
+		type: 'extension',
+	};
 
-	it( 'renders the "Get ready to start selling" and "Extensions setup" tasks lists', async () => {
+	it( 'renders the "Get ready to start selling" and "Things to do next" tasks lists', async () => {
 		apiFetch.mockResolvedValue( {} );
 		getAllTasks.mockReturnValue( tasks );
 		const { container } = render(
@@ -118,12 +135,12 @@ describe( 'TaskDashboard and TaskList', () => {
 
 		// Wait for the setup task list to render.
 		expect(
-			await findByText( container, 'Get ready to start selling' )
+			await findByText( container, TASK_LIST_HEADING )
 		).toBeDefined();
 
 		// Wait for the extension task list to render.
 		expect(
-			await findByText( container, 'Extensions setup' )
+			await findByText( container, EXTENDED_TASK_LIST_HEADING )
 		).toBeDefined();
 	} );
 
@@ -185,9 +202,9 @@ describe( 'TaskDashboard and TaskList', () => {
 			/>
 		);
 
-		expect( queryByText( 'Get ready to start selling' ) ).toBeNull();
+		expect( queryByText( TASK_LIST_HEADING ) ).toBeNull();
 
-		expect( queryByText( 'Extensions setup' ) ).not.toBeNull();
+		expect( queryByText( EXTENDED_TASK_LIST_HEADING ) ).not.toBeNull();
 	} );
 
 	it( 'sets homescreen layout default when dismissed', () => {
@@ -251,7 +268,7 @@ describe( 'TaskDashboard and TaskList', () => {
 			/>
 		);
 
-		expect( queryByText( 'Get ready to start selling' ) ).toBeNull();
+		expect( queryByText( TASK_LIST_HEADING ) ).toBeNull();
 	} );
 
 	it( 'hides the extended task list if there are no visible tasks', () => {
@@ -270,7 +287,7 @@ describe( 'TaskDashboard and TaskList', () => {
 			/>
 		);
 
-		expect( queryByText( 'Extensions setup' ) ).toBeNull();
+		expect( queryByText( EXTENDED_TASK_LIST_HEADING ) ).toBeNull();
 	} );
 
 	it( 'sets setup tasks list as completed', () => {
@@ -551,5 +568,64 @@ describe( 'TaskDashboard and TaskList', () => {
 
 		fireEvent.click( getByText( 'Dismiss' ) );
 		expect( callback ).toHaveBeenCalledWith();
+	} );
+
+	it( 'sorts the extended task list tasks by completion status', () => {
+		apiFetch.mockResolvedValue( {} );
+		getAllTasks.mockReturnValue( {
+			extension: [ completedExtensionTask, ...tasks.extension ],
+		} );
+		const { queryAllByRole, queryByText } = render(
+			<TaskDashboard
+				dismissedTasks={ [] }
+				isSetupTaskListHidden={ true }
+				profileItems={ {} }
+				query={ {} }
+				updateOptions={ () => {} }
+			/>
+		);
+
+		expect( queryByText( EXTENDED_TASK_LIST_HEADING ) ).not.toBeNull();
+
+		const visibleTasks = queryAllByRole( 'menuitem' );
+		expect( visibleTasks ).toHaveLength( 2 );
+		expect( visibleTasks[ 0 ] ).toHaveTextContent(
+			'This task is an extension'
+		);
+		expect( visibleTasks[ 1 ] ).toHaveTextContent(
+			'This completed task is an extension'
+		);
+	} );
+
+	it( 'correctly toggles the extension task list', () => {
+		const updateOptions = jest.fn();
+
+		const { getByText } = render(
+			<SlotFillProvider>
+				<DisplayOption.Slot />
+				<TaskDashboard
+					dismissedTasks={ [] }
+					isSetupTaskListHidden={ true }
+					profileItems={ {} }
+					query={ {} }
+					updateOptions={ updateOptions }
+				/>
+			</SlotFillProvider>
+		);
+
+		// Verify the task list is initially shown.
+		expect(
+			getByText( 'Show things to do next', { selector: 'button' } )
+		).toBeChecked();
+		// Toggle it off.
+		fireEvent.click(
+			getByText( 'Show things to do next', { selector: 'button' } )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_hide' );
+
+		expect( updateOptions ).toHaveBeenCalledWith( {
+			woocommerce_extended_task_list_hidden: 'yes',
+		} );
 	} );
 } );

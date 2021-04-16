@@ -233,10 +233,13 @@ export class TaskList extends Component {
 			return;
 		}
 
-		const { profileItems } = this.props;
+		const { name = 'task_list', profileItems } = this.props;
+		const isCoreTaskList = name === 'task_list';
+		const taskListName = isCoreTaskList ? 'tasklist' : 'extended_tasklist';
+
 		const tasks = this.getVisibleTasks();
 
-		recordEvent( 'tasklist_view', {
+		recordEvent( `${ taskListName }_view`, {
 			number_tasks: tasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -299,7 +302,7 @@ export class TaskList extends Component {
 	}
 
 	render() {
-		const { name, query, title: listTitle } = this.props;
+		const { query, title: listTitle } = this.props;
 		const { task: theTask } = query;
 		const currentTask = this.getCurrentTask();
 
@@ -399,7 +402,7 @@ export class TaskList extends Component {
 											}
 										/>
 									</div>
-									{ this.renderMenu( ! name ) }
+									{ this.renderMenu() }
 								</CardHeader>
 								<CardBody>
 									<List items={ listTasks } />
