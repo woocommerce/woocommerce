@@ -11,6 +11,7 @@ const {
 	clearAndFillInput,
 	uiUnblocked,
 	selectOptionInSelect2,
+	deleteAllShippingZones,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -43,6 +44,7 @@ const runCartCalculateShippingTest = () => {
 			await merchant.login();
 			await createSimpleProduct(firstProductName);
 			await createSimpleProduct(secondProductName, secondProductPrice);
+			await deleteAllShippingZones();
 			await merchant.openNewShipping();
 
 			// Add a new shipping zone Germany with Free shipping
