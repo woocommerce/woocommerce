@@ -238,7 +238,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Add a changelog lint check to PRs. #6414
 * Dev - Add navigation favorites tests #6409
 * Dev - support use of Array.flat in client and packages. #6411
-* Dev - Deprecate Onboarding -:has_woocommerce_support. #6401
+* Dev - Deprecate Onboarding::has_woocommerce_support. #6401
 * Dev - Add Dependency Extraction Webpack Plugin #5762
 * Dev - Add client-side filter for Navigation rootBackUrl #6505
 * Dev - Remove `items_purchased` and `account_type` props from onboarding profile API. #6520
@@ -249,7 +249,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Add script automation for gathering hooks and filters. #6454
 * Dev - Add TypeScript and page objects to the E2E test suite. #6582
 * Dev - Introduce Typescript to Navigation utils #6477
-* Dev - Payments task - include Mercado Pago #6572
+* Dev - Payments task: include Mercado Pago #6572
 * Dev - Ensure script asset.php files are included in builds #6635
 * Dev - Ensure production script asset names don't include .min suffix #6681
 * Fix - Add check for navigating being enabled. #6462
@@ -261,7 +261,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Restore visual styles back to Analytics tabs. #5913
 * Fix - Update contrast and hover / active colors for analytics dropdown buttons #6504
 * Fix - Associated Order Number for refunds was hidden #6428
-* Fix - Fix issue where Loader -:is_admin_page() would error if WooCommerce admin is disabled. #6563
+* Fix - Fix issue where Loader::is_admin_page() would error if WooCommerce admin is disabled. #6563
 * Fix - Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
 * Fix - Show management links when the task list is complete (even if its not hidden). #6657
 * Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
