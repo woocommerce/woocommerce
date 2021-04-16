@@ -27,6 +27,7 @@ class CartRemoveItem extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
+				'validate_callback'   => [ $this, 'validate_callback' ],
 				'args'                => [
 					'key' => [
 						'description' => __( 'Unique identifier (key) for the cart item.', 'woo-gutenberg-products-block' ),
@@ -34,7 +35,8 @@ class CartRemoveItem extends AbstractCartRoute {
 					],
 				],
 			],
-			'schema' => [ $this->schema, 'get_public_item_schema' ],
+			'schema'      => [ $this->schema, 'get_public_item_schema' ],
+			'allow_batch' => [ 'v1' => true ],
 		];
 	}
 

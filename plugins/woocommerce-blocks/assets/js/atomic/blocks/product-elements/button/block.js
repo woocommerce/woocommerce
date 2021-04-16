@@ -4,13 +4,11 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef } from '@wordpress/element';
 import {
 	useStoreEvents,
 	useStoreAddToCart,
 } from '@woocommerce/base-context/hooks';
 import { decodeEntities } from '@wordpress/html-entities';
-import { triggerFragmentRefresh } from '@woocommerce/base-utils';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -54,7 +52,6 @@ const Block = ( { className } ) => {
 };
 
 const AddToCartButton = ( { product } ) => {
-	const firstMount = useRef( true );
 	const {
 		id,
 		permalink,
@@ -65,15 +62,6 @@ const AddToCartButton = ( { product } ) => {
 	} = product;
 	const { dispatchStoreEvent } = useStoreEvents();
 	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
-
-	useEffect( () => {
-		// Avoid running on first mount when cart quantity is first set.
-		if ( firstMount.current ) {
-			firstMount.current = false;
-			return;
-		}
-		triggerFragmentRefresh();
-	}, [ cartQuantity ] );
 
 	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
 	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
