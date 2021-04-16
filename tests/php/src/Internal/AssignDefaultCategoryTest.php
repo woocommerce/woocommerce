@@ -1,16 +1,24 @@
 <?php
 /**
- * Unit tests for wc-term-functions.php.
- *
- * @package WooCommerce\Tests\Functions\Term
+ * AssignDefaultCategoryTest class file.
  */
 
-// phpcs:disable WordPress.Files.FileName
+namespace Automattic\WooCommerce\Tests\Internal;
+
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
- * Class WC_Term_Functions_Tests.
+ * Tests for AssignDefaultCategory.
  */
-class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
+class AssignDefaultCategoryTest extends \WC_Unit_Test_Case {
+	/**
+	 * The system under test.
+	 *
+	 * @var AssignDefaultCategory
+	 */
+	private $sut;
+
 	/**
 	 * Test to make sure products without categories will be
 	 * assigned a default category always.
@@ -18,9 +26,10 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_products_are_assigned_a_default_category() {
 		global $wpdb;
 
-		$product1         = WC_Helper_Product::create_simple_product();
-		$product2         = WC_Helper_Product::create_simple_product();
-		$product3         = WC_Helper_Product::create_simple_product();
+		$this->sut        = new AssignDefaultCategory();
+		$product1         = ProductHelper::create_simple_product();
+		$product2         = ProductHelper::create_simple_product();
+		$product3         = ProductHelper::create_simple_product();
 		$default_category = (int) get_option( 'default_product_cat', 0 );
 
 		$products = array( $product1, $product2, $product3 );
@@ -44,7 +53,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 
 		// Add in default category.
-		_wc_maybe_assign_default_product_cat();
+		$this->sut->maybe_assign_default_product_cat();
 
 		// Ensure default category are now assigned to products.
 		foreach ( $products as $product ) {
