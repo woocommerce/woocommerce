@@ -110,7 +110,7 @@
 		"@wordpress/components": "11.1.1",
 		"@wordpress/data-controls": "1.20.8",
 		"@wordpress/dependency-extraction-webpack-plugin": "2.8.0",
-		"@wordpress/e2e-test-utils": "4.3.1",
+		"@wordpress/e2e-test-utils": "5.1.2",
 		"@wordpress/editor": "9.22.0",
 		"@wordpress/element": "2.17.1",
 		"@wordpress/env": "4.0.0",
