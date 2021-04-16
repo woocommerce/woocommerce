@@ -10,9 +10,17 @@ const {
 	addShippingZoneAndMethod,
 	clearAndFillInput,
 	selectOptionInSelect2,
-	evalAndClick,
-	uiUnblocked,
+	deleteAllShippingZones,
 } = require( '@woocommerce/e2e-utils' );
+
+/**
+ * External dependencies
+ */
+const {
+	it,
+	describe,
+	beforeAll,
+} = require( '@jest/globals' );
 
 const config = require( 'config' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
@@ -28,27 +36,7 @@ const runAddNewShippingZoneTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 			await createSimpleProduct();
-			await merchant.openSettings('shipping');
-
-			// Delete existing shipping zones.
-			try {
-				let zone = await page.$( '.wc-shipping-zone-delete' );
-				if ( zone ) {
-					// WP action links aren't clickable because they are hidden with a left=-9999 style.
-					await page.evaluate(() => {
-						document.querySelector('.wc-shipping-zone-name .row-actions')
-							.style
-							.left = '0';
-					});
-					while ( zone ) {
-						await evalAndClick( '.wc-shipping-zone-delete' );
-						await uiUnblocked();
-						zone = await page.$( '.wc-shipping-zone-delete' );
-					}
-				}
-			} catch (error) {
-				// Prevent an error here causing the test to fail.
-			}
+			await deleteAllShippingZones();
 		});
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
