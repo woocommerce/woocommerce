@@ -61,6 +61,10 @@ class FeaturePlugin {
 	 * Init the feature plugin, only if we can detect both Gutenberg and WooCommerce.
 	 */
 	public function init() {
+		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
+		$this->define_constants();
+		require_once WC_ADMIN_ABSPATH . '/includes/page-controller-functions.php';
+
 		/**
 		 * Filter allowing WooCommerce Admin to be disabled.
 		 *
@@ -70,12 +74,9 @@ class FeaturePlugin {
 			return;
 		}
 
-		$this->define_constants();
-
 		require_once WC_ADMIN_ABSPATH . '/src/Notes/DeprecatedNotes.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/core-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/page-controller-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/wc-admin-update-functions.php';
 
 		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
