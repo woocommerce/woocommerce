@@ -416,6 +416,29 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Maybe add a nonce to a URL.
+	 *
+	 * @link https://codex.wordpress.org/WordPress_Nonces
+	 *
+	 * @param string $url The URL needing a nonce.
+	 * @param string $action The nonce action.
+	 * @param string $name The nonce anme.
+	 * @return string A fully formed URL.
+	 */
+	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ) : string {
+		if ( empty( $action ) ) {
+			return $url;
+		}
+
+		if ( empty( $name ) ) {
+			// Default paramater name.
+			$name = '_wpnonce';
+		}
+
+		return add_query_arg( $name, wp_create_nonce( $action ), $url );
+	}
+
+	/**
 	 * Prepare a note object for serialization.
 	 *
 	 * @param array           $data Note data.
@@ -435,7 +458,11 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$data['is_deleted']        = (bool) $data['is_deleted'];
 		foreach ( (array) $data['actions'] as $key => $value ) {
 			$data['actions'][ $key ]->label  = stripslashes( $data['actions'][ $key ]->label );
-			$data['actions'][ $key ]->url    = $this->prepare_query_for_response( $data['actions'][ $key ]->query );
+			$data['actions'][ $key ]->url    = $this->maybe_add_nonce_to_url(
+				$this->prepare_query_for_response( $data['actions'][ $key ]->query ),
+				(string) $data['actions'][ $key ]->nonce_action,
+				(string) $data['actions'][ $key ]->nonce_name
+			);
 			$data['actions'][ $key ]->status = stripslashes( $data['actions'][ $key ]->status );
 		}
 		$data = $this->filter_response_by_context( $data, $context );

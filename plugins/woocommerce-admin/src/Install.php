@@ -298,6 +298,8 @@ class Install {
 			status varchar(255) NOT NULL,
 			is_primary boolean DEFAULT 0 NOT NULL,
 			actioned_text varchar(255) NOT NULL,
+			nonce_action varchar(255) NULL DEFAULT NULL,
+			nonce_name varchar(255) NULL DEFAULT NULL,
 			PRIMARY KEY (action_id),
 			KEY note_id (note_id)
 		) $collate;

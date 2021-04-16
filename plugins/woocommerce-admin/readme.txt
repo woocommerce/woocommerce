@@ -91,6 +91,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add A/A test #6669
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Check active plugins before getting the PayPal onboarding status #6625
+- Dev: Add support for nonces in note actions #6726
 - Dev: Add support for running php unit tests in PHP 8. #6678
 - Fix: Remove no-reply from inbox notification emails #6644
 - Performance: Avoid updating customer info synchronously from the front end. #6765

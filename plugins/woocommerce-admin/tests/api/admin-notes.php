@@ -88,6 +88,52 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test support for nonces in actions.
+	 */
+	public function test_nonce() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Admin_Notes::reset_notes_dbs();
+
+		// Create a new note containing an action with a nonce.
+		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
+		$note->set_name( 'nonce-note' );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://woocommerce.com/', 'unactioned', true );
+		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
+		$note->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$note     = $response->get_data();
+
+		$expected_url = 'https://woocommerce.com/?bar=' . wp_create_nonce( 'foo' );
+
+		$this->assertSame( $expected_url, $note['actions'][0]->url );
+	}
+
+	/**
+	 * Tests support for nonces in actions when the URL has existing paarams.
+	 */
+	public function test_nonce_when_url_has_params() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Admin_Notes::reset_notes_dbs();
+
+		// Create a new note containing an action with a nonce.
+		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
+		$note->set_name( 'nonce-note' );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/?x=1&y=2', 'unactioned', true );
+		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
+		$note->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$note     = $response->get_data();
+
+		$expected_url = 'https://example.com/?x=1&y=2&bar=' . wp_create_nonce( 'foo' );
+
+		$this->assertSame( $expected_url, $note['actions'][0]->url );
+	}
+
+	/**
 	 * Test getting a 404 from invalid ID.
 	 *
 	 * @since 3.5.0
