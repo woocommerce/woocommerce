@@ -8,6 +8,8 @@ import { parse } from 'qs';
 
 export const isoDateFormat = 'YYYY-MM-DD';
 
+export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
+
 /**
  * DateValue Object
  *
@@ -61,17 +63,16 @@ export const periods = [
  * @return {string} - String date with timestamp attached.
  */
 export const appendTimestamp = ( date, timeOfDay ) => {
-	date = date.format( isoDateFormat );
 	if ( timeOfDay === 'start' ) {
-		return date + 'T00:00:00';
+		return date.startOf( 'day' ).format( defaultDateTimeFormat );
 	}
 	if ( timeOfDay === 'now' ) {
 		// Set seconds to 00 to avoid consecutives calls happening before the previous
 		// one finished.
-		return date + 'T' + moment().format( 'HH:mm:00' );
+		return date.format( defaultDateTimeFormat );
 	}
 	if ( timeOfDay === 'end' ) {
-		return date + 'T23:59:59';
+		return date.endOf( 'day' ).format( defaultDateTimeFormat );
 	}
 	throw new Error(
 		'appendTimestamp requires second parameter to be either `start`, `now` or `end`'
@@ -129,6 +130,23 @@ export function getRangeLabel( after, before ) {
 }
 
 /**
+ * Gets the current time in the store time zone if set.
+ *
+ * @return {string} - Datetime string.
+ */
+export function getStoreTimeZoneMoment() {
+	if ( ! window.wcSettings || ! window.wcSettings.timeZone ) {
+		return moment();
+	}
+
+	if ( [ '+', '-' ].includes( window.wcSettings.timeZone.charAt( 0 ) ) ) {
+		return moment().utcOffset( window.wcSettings.timeZone );
+	}
+
+	return moment().tz( window.wcSettings.timeZone );
+}
+
+/**
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {string} period - the chosen period
@@ -136,7 +154,9 @@ export function getRangeLabel( after, before ) {
  * @return {DateValue} -  DateValue data about the selected period
  */
 export function getLastPeriod( period, compare ) {
-	const primaryStart = moment().startOf( period ).subtract( 1, period );
+	const primaryStart = getStoreTimeZoneMoment()
+		.startOf( period )
+		.subtract( 1, period );
 	const primaryEnd = primaryStart.clone().endOf( period );
 	let secondaryStart;
 	let secondaryEnd;
@@ -180,8 +200,9 @@ export function getLastPeriod( period, compare ) {
  * @return {DateValue} -  DateValue data about the selected period
  */
 export function getCurrentPeriod( period, compare ) {
-	const primaryStart = moment().startOf( period );
-	const primaryEnd = moment();
+	const primaryStart = getStoreTimeZoneMoment().startOf( period );
+	const primaryEnd = getStoreTimeZoneMoment();
+
 	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
 	let secondaryStart;
 	let secondaryEnd;

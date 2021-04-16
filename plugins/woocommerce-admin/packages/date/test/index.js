@@ -22,7 +22,15 @@ import {
 	getPreviousDate,
 	getChartTypeForQuery,
 	getAllowedIntervalsForQuery,
+	getStoreTimeZoneMoment,
 } from '../src';
+
+jest.mock( 'moment', () => {
+	const m = jest.requireActual( 'moment' );
+	m.prototype.tz = jest.fn().mockImplementation( () => m() );
+
+	return m;
+} );
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
@@ -33,9 +41,9 @@ describe( 'appendTimestamp', () => {
 
 	it( 'should append `now` timestamp', () => {
 		const nowTimestamp = moment().format( 'HH:mm:00' );
-		expect( appendTimestamp( moment( '2018-01-01' ), 'now' ) ).toEqual(
-			'2018-01-01T' + nowTimestamp
-		);
+		expect(
+			appendTimestamp( moment( '2018-01-01 ' + nowTimestamp ), 'now' )
+		).toEqual( '2018-01-01T' + nowTimestamp );
 	} );
 
 	it( 'should append `end` timestamp', () => {
@@ -935,5 +943,54 @@ describe( 'getChartTypeForQuery', () => {
 			chartType: 'burrito',
 		};
 		expect( getChartTypeForQuery( query ) ).toBe( 'line' );
+	} );
+} );
+
+describe( 'getStoreTimeZoneMoment', () => {
+	it( 'should return the default moment when no timezone exists', () => {
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
+
+		expect( mockTz ).not.toHaveBeenCalled();
+		expect( utcOffset ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should use the timezone string when one is set', () => {
+		global.window.wcSettings = {
+			timeZone: 'Asia/Taipei',
+		};
+
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
+		expect( utcOffset ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should use the utc offest when it is set', () => {
+		global.window.wcSettings = {
+			timeZone: '+06:00',
+		};
+
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).not.toHaveBeenCalled();
+		expect( utcOffset ).toHaveBeenCalledWith( '+06:00' );
+
+		global.window.wcSettings = {
+			timeZone: '-04:00',
+		};
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).not.toHaveBeenCalled();
+		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
 	} );
 } );

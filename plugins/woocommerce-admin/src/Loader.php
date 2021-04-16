@@ -1040,6 +1040,7 @@ class Loader {
 		$settings['shopUrl']         = get_permalink( wc_get_page_id( 'shop' ) );
 		$settings['homeUrl']         = home_url();
 		$settings['dateFormat']      = get_option( 'date_format' );
+		$settings['timeZone']        = wc_timezone_string();
 		$settings['plugins']         = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
 			'activePlugins'    => Plugins::get_active_plugins(),
