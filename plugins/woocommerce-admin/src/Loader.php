@@ -340,6 +340,7 @@ class Loader {
 
 		$scripts = array(
 			'wc-explat',
+			'wc-experimental',
 			'wc-customer-effort-score',
 			// NOTE: This should be removed when Gutenberg is updated and the notices package is removed from WooCommerce Admin.
 			'wc-notices',

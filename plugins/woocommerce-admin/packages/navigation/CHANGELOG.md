@@ -1,3 +1,7 @@
+# 6.0.1
+
+-   Update dependencies.
+
 # 6.0.0
 
 -   Moving `addHistoryListener()` to this package, which supports adding a listener that is executed for history changes.

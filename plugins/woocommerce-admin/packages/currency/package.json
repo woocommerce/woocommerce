@@ -21,7 +21,7 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@woocommerce/number": "2.1.0",
+		"@woocommerce/number": "file:../number",
 		"@wordpress/deprecated": "^2.9.0",
 		"@wordpress/html-entities": "2.10.0"
 	},

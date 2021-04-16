@@ -1,6 +1,7 @@
-# Unreleased
+# 1.5.0
 
 -   Add `@woocommerce/explat` to list of packages.
+-   Add `@woocommerce/experimental` to list of packages.
 
 # 1.4.0
 

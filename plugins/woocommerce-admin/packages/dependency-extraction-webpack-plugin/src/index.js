@@ -25,11 +25,6 @@ const wooRequestToExternal = ( request ) => {
 			settings: [ 'wc', 'wcSettings' ],
 		};
 
-		const excludedExternals = [ 'experimental' ];
-		if ( excludedExternals.includes( handle ) ) {
-			return;
-		}
-
 		if ( irregularExternalMap[ handle ] ) {
 			return irregularExternalMap[ handle ];
 		}

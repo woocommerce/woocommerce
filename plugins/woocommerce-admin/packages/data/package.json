@@ -21,8 +21,8 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@woocommerce/date": "2.1.0",
-		"@woocommerce/navigation": "5.2.0",
+		"@woocommerce/date": "file:../date",
+		"@woocommerce/navigation": "file:../navigation",
 		"rememo": "^3.0.0"
 	},
 	"publishConfig": {

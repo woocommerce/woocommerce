@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/dependency-extraction-webpack-plugin",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "WooCommerce Dependency Extraction Webpack Plugin",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
