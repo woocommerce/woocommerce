@@ -90,7 +90,8 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				$result = (  $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() ) ) ? TRUE : FALSE;
+				do_action('woocommerce_email_trigger_customer_processing_order', $result, $this);
 			}
 
 			$this->restore_locale();
