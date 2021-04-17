@@ -18,10 +18,13 @@ const {
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
+	WP_ADMIN_WC_HOME,
 	WP_ADMIN_WC_SETTINGS,
 	WP_ADMIN_NEW_SHIPPING_ZONE,
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
+	WP_ADMIN_IMPORT_PRODUCTS,
+	IS_RETEST_MODE,
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );
@@ -119,7 +122,8 @@ const merchant = {
 	},
 
 	runSetupWizard: async () => {
-		await page.goto( WP_ADMIN_SETUP_WIZARD, {
+			const setupWizard = IS_RETEST_MODE ? WP_ADMIN_SETUP_WIZARD : WP_ADMIN_WC_HOME;
+			await page.goto( setupWizard, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -193,6 +197,12 @@ const merchant = {
 
 	openAllUsersView: async () => {
 		await page.goto( WP_ADMIN_ALL_USERS_VIEW, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+  openImportProducts: async () => {
+		await page.goto( WP_ADMIN_IMPORT_PRODUCTS , {
 			waitUntil: 'networkidle0',
 		} );
 	},

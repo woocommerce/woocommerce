@@ -348,8 +348,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_base_location() {
 		$default = wc_get_base_location();
 
-		$this->assertEquals( 'GB', $default['country'] );
-		$this->assertEquals( '', $default['state'] );
+		$this->assertEquals( 'US', $default['country'] );
+		$this->assertEquals( 'CA', $default['state'] );
 	}
 
 	/**

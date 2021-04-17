@@ -79,6 +79,12 @@ The test sequencer provides a screenshot function for test failures. To enable s
 WC_E2E_SCREENSHOTS=1 npx wc-e2e test:e2e
 ```
 
+To take adhoc in test screenshots use
+
+```js
+await takeScreenshotFor( 'name of current step' );
+```
+
 Screenshots will be saved to `tests/e2e/screenshots`. This folder is cleared at the beginning of each test run.
 
 ### Jest Puppeteer Config
@@ -147,6 +153,7 @@ To implement the Slackbot in your CI:
   - `files:write`
   - `incoming-webhook`
 - Add the app to your channel
+- Invite the Slack app user to your channel `/invite @your-slackbot-user`
 - In your CI environment
   - Add the environment variable `WC_E2E_SCREENSHOTS=1`
   - Add your app Oauth token to a CI secret `E2E_SLACK_TOKEN`
