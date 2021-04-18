@@ -68,8 +68,6 @@ class RoutesController {
 	 * Load route class instances.
 	 */
 	protected function initialize() {
-		global $wp_version;
-
 		$cart_controller  = new CartController();
 		$order_controller = new OrderController();
 
@@ -98,10 +96,5 @@ class RoutesController {
 			'products'                  => new Routes\Products( $this->schemas->get( 'product' ) ),
 			'products-by-id'            => new Routes\ProductsById( $this->schemas->get( 'product' ) ),
 		];
-
-		// Batching requires WP 5.6.
-		if ( version_compare( $wp_version, '5.6', '>=' ) ) {
-			$this->routes['batch'] = new Routes\Batch();
-		}
 	}
 }

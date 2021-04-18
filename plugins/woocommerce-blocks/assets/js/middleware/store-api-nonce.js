@@ -37,14 +37,8 @@ const isStoreApiGetRequest = ( options ) => {
  * @param {Object} headers Headers object.
  */
 const setNonce = ( headers ) => {
-	const nonce =
-		typeof headers?.get === 'function'
-			? headers.get( 'X-WC-Store-API-Nonce' )
-			: headers[ 'X-WC-Store-API-Nonce' ];
-	const timestamp =
-		typeof headers?.get === 'function'
-			? headers.get( 'X-WC-Store-API-Nonce-Timestamp' )
-			: headers[ 'X-WC-Store-API-Nonce-Timestamp' ];
+	const nonce = headers?.get( 'X-WC-Store-API-Nonce' ) || '';
+	const timestamp = headers?.get( 'X-WC-Store-API-Nonce-Timestamp' ) || 0;
 
 	if ( nonce ) {
 		updateNonce( nonce, timestamp );

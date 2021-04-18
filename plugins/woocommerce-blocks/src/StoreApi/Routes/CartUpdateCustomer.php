@@ -42,7 +42,6 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
-				'validate_callback'   => [ $this, 'validate_callback' ],
 				'args'                => [
 					'billing_address'  => [
 						'description'       => __( 'Billing address.', 'woo-gutenberg-products-block' ),
@@ -62,8 +61,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 					],
 				],
 			],
-			'schema'      => [ $this->schema, 'get_public_item_schema' ],
-			'allow_batch' => [ 'v1' => true ],
+			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
 	}
 

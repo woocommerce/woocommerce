@@ -57,6 +57,9 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$this->calculate_totals();
 
 		try {
+			if ( $this->requires_nonce( $request ) ) {
+				$this->check_nonce( $request );
+			}
 			$response = parent::get_response( $request );
 		} catch ( RouteException $error ) {
 			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
@@ -73,19 +76,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'X-WC-Store-API-User', get_current_user_id() );
 
 		return $response;
-	}
-
-	/**
-	 * Validation before the route returns a response.
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return \WP_Error|bool
-	 */
-	public function validate_callback( \WP_REST_Request $request ) {
-		if ( $this->requires_nonce( $request ) ) {
-			return $this->check_nonce( $request );
-		}
-		return true;
 	}
 
 	/**
@@ -129,25 +119,26 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * Nonces will mismatch if the logged in session cookie is different! If using a client to test, set this cookie
 	 * to match the logged in cookie in your browser.
 	 *
+	 * @throws RouteException On error.
+	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_Error|boolean
 	 */
 	protected function check_nonce( \WP_REST_Request $request ) {
 		$nonce = $request->get_header( 'X-WC-Store-API-Nonce' );
 
 		if ( apply_filters( 'woocommerce_store_api_disable_nonce_check', false ) ) {
-			return true;
+			return;
 		}
 
 		if ( null === $nonce ) {
-			return $this->get_route_error_response( 'woocommerce_rest_missing_nonce', __( 'Missing the X-WC-Store-API-Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 401 );
+			throw new RouteException( 'woocommerce_rest_missing_nonce', __( 'Missing the X-WC-Store-API-Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 401 );
 		}
 
-		if ( ! wp_verify_nonce( $nonce, 'wc_store_api' ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_invalid_nonce', __( 'X-WC-Store-API-Nonce is invalid.', 'woo-gutenberg-products-block' ), 403 );
-		}
+		$valid_nonce = wp_verify_nonce( $nonce, 'wc_store_api' );
 
-		return true;
+		if ( ! $valid_nonce ) {
+			throw new RouteException( 'woocommerce_rest_invalid_nonce', __( 'X-WC-Store-API-Nonce is invalid.', 'woo-gutenberg-products-block' ), 403 );
+		}
 	}
 
 	/**

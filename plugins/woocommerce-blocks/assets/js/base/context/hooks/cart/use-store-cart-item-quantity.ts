@@ -73,7 +73,9 @@ export const useStoreCartItemQuantity = (
 			Number.isFinite( previousDebouncedQuantity ) &&
 			previousDebouncedQuantity !== debouncedQuantity
 		) {
-			changeCartItemQuantity( cartItemKey, debouncedQuantity );
+			changeCartItemQuantity( cartItemKey, debouncedQuantity ).then(
+				triggerFragmentRefresh
+			);
 		}
 	}, [
 		cartItemKey,
