@@ -126,7 +126,7 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"babel-plugin-transform-runtime": "6.23.0",
 		"chalk": "4.1.0",
-		"circular-dependency-plugin": "^5.2.2",
+		"circular-dependency-plugin": "5.2.2",
 		"commander": "6.2.1",
 		"core-js": "3.8.3",
 		"create-file-webpack": "1.0.2",
