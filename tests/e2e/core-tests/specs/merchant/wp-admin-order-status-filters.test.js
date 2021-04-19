@@ -57,7 +57,7 @@ const runOrderStatusFiltersTest = () => {
 			await createSimpleOrder(orderStatus.cancelled.description.text);
 			await createSimpleOrder(orderStatus.refunded.description.text);
 			await createSimpleOrder(orderStatus.failed.description.text);
-		}, 40000);
+		}, 60000);
 
 		afterAll( async () => {
 			// Make sure we're on the all orders view and cleanup the orders we created
