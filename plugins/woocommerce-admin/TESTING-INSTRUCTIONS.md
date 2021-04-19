@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Remove PayPal for India #6828
+
+-  Setup a new store and set your country to `India`.
+-  Go to 'Choose Payment method' Checklist on the home page.
+-  Verify that PayPal is not presented as a payment method.
+
 ### Add event recording to start of gateway connections #6801
 
 -   Enable debug messages inside browser devtools, you can do it by running `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser console. And don't forget to enable all log levels.

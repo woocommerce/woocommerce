@@ -264,7 +264,7 @@ export function getPaymentMethods( {
 				</>
 			),
 			before: <img src={ wcAssetUrl + 'images/paypal.png' } alt="" />,
-			visible: ! hasCbdIndustry,
+			visible: countryCode !== 'IN' && ! hasCbdIndustry,
 			plugins: [ PAYPAL_PLUGIN ],
 			container: <PayPal />,
 			isConfigured:

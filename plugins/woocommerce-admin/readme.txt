@@ -106,6 +106,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Missed DB version number updates causing unnecessary upgrades. #6818
 - Fix: Parsing bad JSON string data from user WooCommerce meta. #6819
 - Dev: Add event recording to start of gateway connections #6801
+- Fix: Remove PayPal for India #6828
 
 == 2.2.0 3/30/2021 ==
 
