@@ -43,6 +43,7 @@ class Square extends Component {
 			createNotice,
 			hasCbdIndustry,
 			options,
+			recordConnectStartEvent,
 			updateOptions,
 		} = this.props;
 		this.setState( { isPending: true } );
@@ -58,6 +59,8 @@ class Square extends Component {
 			'There was an error connecting to Square. Please try again or skip to connect later in store settings.',
 			'woocommerce-admin'
 		);
+
+		recordConnectStartEvent( 'square' );
 
 		try {
 			let newWindow = null;

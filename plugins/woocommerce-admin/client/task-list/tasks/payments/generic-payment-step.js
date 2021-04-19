@@ -12,6 +12,7 @@ export function GenericPaymentStep( {
 	installStep,
 	markConfigured,
 	methodConfig,
+	recordConnectStartEvent,
 } ) {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -129,7 +130,10 @@ export function GenericPaymentStep( {
 							<Button
 								isPrimary
 								isBusy={ isOptionsRequesting }
-								onClick={ handleSubmit }
+								onClick={ ( event ) => {
+									recordConnectStartEvent( methodConfig.key );
+									handleSubmit( event );
+								} }
 							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>

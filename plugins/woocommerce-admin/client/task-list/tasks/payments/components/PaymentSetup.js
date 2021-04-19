@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Card, CardBody } from '@wordpress/components';
-import { cloneElement, useMemo } from '@wordpress/element';
+import { cloneElement, useEffect, useMemo } from '@wordpress/element';
 import { Plugins } from '@woocommerce/components';
 import { PLUGINS_STORE_NAME, pluginNames } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -14,7 +14,18 @@ import { useSelect } from '@wordpress/data';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 
-export const PaymentSetup = ( { method, markConfigured, query } ) => {
+export const PaymentSetup = ( {
+	method,
+	markConfigured,
+	query,
+	recordConnectStartEvent,
+} ) => {
+	useEffect( () => {
+		recordEvent( 'payments_task_stepper_view', {
+			payment_method: method.key,
+		} );
+	}, [] );
+
 	const { activePlugins } = useSelect( ( select ) => {
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
@@ -73,6 +84,7 @@ export const PaymentSetup = ( { method, markConfigured, query } ) => {
 					query,
 					installStep,
 					markConfigured,
+					recordConnectStartEvent,
 					hasCbdIndustry: method.hasCbdIndustry,
 				} ) }
 			</CardBody>

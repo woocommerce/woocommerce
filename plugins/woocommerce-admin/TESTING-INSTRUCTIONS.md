@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Add event recording to start of gateway connections #6801
+
+-   Enable debug messages inside browser devtools, you can do it by running `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser console. And don't forget to enable all log levels.
+-   Create a new store with event tracking enabled.
+-   Select `United States` or `UK` as the store country.
+-   Visit the Payments task and click to setup `Stripe` and `PayPal`.
+-   Verify the event `wcadmin_payments_task_stepper_view` with the right `payment_method was recorded correctly.
+-   Press `Proceed` and verify the event `wcadmin_tasklist_payment_connect_start` with the right `payment_method` was recorded.
+-   Verify that the event `wcadmin_tasklist_payment_connect_start` also is recorded for the payment gateways: Square, eWAY (for AU and NZ) and generic gateways like PayFast (for ZA) and PayStack (for ZA, GH, and NG).
+
 ### Use the store timezone to make time data requests #6632
 
 1. Go to Settings -> General.

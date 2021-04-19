@@ -172,6 +172,12 @@ export const Payments = ( { query } ) => {
 		);
 	};
 
+	const recordConnectStartEvent = ( methodName ) => {
+		recordEvent( 'tasklist_payment_connect_start', {
+			payment_method: methodName,
+		} );
+	};
+
 	const currentMethod = useMemo( () => {
 		if ( ! query.method ) {
 			return null;
@@ -198,6 +204,7 @@ export const Payments = ( { query } ) => {
 			<PaymentSetup
 				method={ currentMethod }
 				markConfigured={ markConfigured }
+				recordConnectStartEvent={ recordConnectStartEvent }
 			/>
 		);
 	}

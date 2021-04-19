@@ -67,7 +67,7 @@ class EWay extends Component {
 	};
 
 	renderConnectStep() {
-		const { isOptionsRequesting } = this.props;
+		const { isOptionsRequesting, recordConnectStartEvent } = this.props;
 		const helpText = interpolateComponents( {
 			mixedString: __(
 				'Your API details can be obtained from your {{link}}eWAY account{{/link}}',
@@ -112,7 +112,10 @@ class EWay extends Component {
 							<Button
 								isPrimary
 								isBusy={ isOptionsRequesting }
-								onClick={ handleSubmit }
+								onClick={ ( event ) => {
+									recordConnectStartEvent( 'eway' );
+									handleSubmit( event );
+								} }
 							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>

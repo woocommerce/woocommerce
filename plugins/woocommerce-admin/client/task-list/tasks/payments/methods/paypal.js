@@ -43,7 +43,7 @@ function loadOnboardingScript( url, data, onLoad ) {
 	}
 }
 
-function PaypalConnectButton( { connectUrl } ) {
+function PaypalConnectButton( { connectUrl, recordConnectStartEvent } ) {
 	useEffect( () => {
 		// eslint-disable-next-line camelcase
 		if ( ppcp_onboarding ) {
@@ -61,6 +61,7 @@ function PaypalConnectButton( { connectUrl } ) {
 			data-paypal-onboard-button="true"
 			data-paypal-button="true"
 			data-paypal-onboard-complete="ppcp_onboarding_productionCallback"
+			onClick={ () => recordConnectStartEvent( 'paypal' ) }
 		>
 			{ __( 'Connect', 'woocommerce-admin' ) }
 		</a>
@@ -438,11 +439,15 @@ class PayPal extends Component {
 
 	renderConnectFields() {
 		const { autoConnectFailed, connectURL } = this.state;
+		const { recordConnectStartEvent } = this.props;
 
 		if ( ! autoConnectFailed && connectURL ) {
 			return (
 				<>
-					<PaypalConnectButton connectUrl={ connectURL } />
+					<PaypalConnectButton
+						connectUrl={ connectURL }
+						recordConnectStartEvent={ recordConnectStartEvent }
+					/>
 					<p>
 						{ __(
 							'You will be redirected to the PayPal website to create the connection.',

@@ -192,7 +192,7 @@ class Stripe extends Component {
 	}
 
 	renderManualConfig() {
-		const { isOptionsUpdating } = this.props;
+		const { isOptionsUpdating, recordConnectStartEvent } = this.props;
 		const stripeHelp = interpolateComponents( {
 			mixedString: __(
 				'Your API details can be obtained from your {{docsLink}}Stripe account{{/docsLink}}. Don’t have a Stripe account? {{registerLink}}Create one.{{/registerLink}}',
@@ -245,7 +245,10 @@ class Stripe extends Component {
 							<Button
 								isPrimary
 								isBusy={ isOptionsUpdating }
-								onClick={ handleSubmit }
+								onClick={ ( event ) => {
+									recordConnectStartEvent( 'stripe' );
+									handleSubmit( event );
+								} }
 							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>
@@ -259,6 +262,7 @@ class Stripe extends Component {
 	}
 
 	renderOauthConfig() {
+		const { recordConnectStartEvent } = this.props;
 		const tosPrompt = interpolateComponents( {
 			mixedString: __(
 				'By clicking "Connect," you agree to the {{tosLink}}Terms of Service{{/tosLink}}. Or {{manualConfigLink}}manually enter your Stripe API details{{/manualConfigLink}} instead.',
@@ -279,6 +283,7 @@ class Stripe extends Component {
 							this.setState( {
 								connectURL: null,
 							} );
+							recordConnectStartEvent( 'stripe' );
 						} }
 					/>
 				),
