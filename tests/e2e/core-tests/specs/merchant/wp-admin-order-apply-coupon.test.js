@@ -11,6 +11,8 @@ const {
 	uiUnblocked,
 	addProductToOrder,
 	evalAndClick,
+	takeScreenshotFor,
+	sendFailedTestScreenshotToSlack,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -64,6 +66,12 @@ const runOrderApplyCouponTest = () => {
 		});
 
 		it('can remove a coupon', async () => {
+			// Temporarily add screenshot
+			const screenshot = await takeScreenshotFor( 'before removing a coupon' );
+			if ( screenshot.filePath ) {
+				await sendFailedTestScreenshotToSlack( screenshot.filePath );
+			}
+
 			// Make sure we have a coupon on the page to use
 			await page.waitForSelector('.wc-used-coupons');
 			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
