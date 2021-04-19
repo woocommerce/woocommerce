@@ -314,7 +314,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public static function active_plugins() {
 		return( array(
-			'plugins' => PluginsHelper::get_active_plugin_slugs(),
+			'plugins' => array_values( PluginsHelper::get_active_plugin_slugs() ),
 		) );
 	}
 	/**
