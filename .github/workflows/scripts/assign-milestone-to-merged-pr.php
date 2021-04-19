@@ -35,7 +35,7 @@ echo "Getting the list of milestones...\n";
 
 $query      = "
   repository(owner:\"$repo_owner\", name:\"$repo_name\") {
-    milestones(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
+    milestones(first: 10, states: [OPEN], orderBy: {field: CREATED_AT, direction: DESC}) {
       nodes {
         id
         title
@@ -48,7 +48,7 @@ $json       = do_graphql_api_request( $query );
 $milestones = $json['data']['repository']['milestones']['nodes'];
 $milestones = array_map(
 	function( $x ) {
-		return 'OPEN' === $x['state'] && 1 === preg_match( '/^\d+\.\d+\.\d+$/D', $x['title'] ) ? $x : null;
+		return 1 === preg_match( '/^\d+\.\d+\.\d+$/D', $x['title'] ) ? $x : null;
 	},
 	$milestones
 );
