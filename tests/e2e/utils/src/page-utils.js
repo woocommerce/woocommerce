@@ -221,9 +221,8 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
 export const searchForOrder = async (value, orderId, customerName) => {
 	await clearAndFillInput('#post-search-input', value);
 	await expect(page).toMatchElement('#post-search-input', value);
-	await expect(page).toClick('#search-submit');
+	await expect(page).toClick('#search-submit', { waitUntil: 'networkidle0' } );
 	await page.waitForSelector('#the-list');
-	await page.waitFor(1000);
 	await expect(page).toMatchElement('.order_number > a.order-view', {text: `#${orderId} ${customerName}`});
 };
 
