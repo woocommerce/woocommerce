@@ -30,6 +30,11 @@ runShopperTests();
 
 ```
 
+## Retrying/Re-running tests
+
+On a new site, the setup and activation tests prepare the site for the remainder of the tests. To retry/rerun the test suite on a site where setup/onboarding test have already run use the environment variable `E2E_RETEST=1`.
+
+
 ## Test functions
 
 The functions to access the core tests are:
@@ -80,7 +85,9 @@ The functions to access the core tests are:
   - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
   - `runCheckoutLoginAccountTest` - Shopper can login to an account during checkout
   - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
+  - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
   - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
+  - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
 
 ### REST API
 

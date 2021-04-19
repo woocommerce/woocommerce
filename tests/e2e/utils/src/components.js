@@ -5,14 +5,16 @@
 /**
  * Internal dependencies
  */
-import { merchant } from './flows';
+import { merchant, IS_RETEST_MODE } from './flows';
 import {
 	clickTab,
 	uiUnblocked,
 	verifyCheckboxIsUnset,
 	selectOptionInSelect2,
 	setCheckbox,
-	unsetCheckbox
+	unsetCheckbox,
+	evalAndClick,
+	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
 
@@ -81,23 +83,20 @@ const completeOnboardingWizard = async () => {
 	// Click on "Continue" button to move to the next step
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
-	// Wait for usage tracking pop-up window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
-	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a better WooCommerce' }
-	);
+	// Wait for usage tracking pop-up window to appear on a new site
+	if ( ! IS_RETEST_MODE ) {
+		await page.waitForSelector('.components-modal__header-heading');
+		await expect(page).toMatchElement(
+			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
+		);
 
-	// Query for "Continue" buttons
-	const continueButtons = await page.$$( 'button.is-primary' );
-	expect( continueButtons ).toHaveLength( 2 );
+		// Query for "Continue" buttons
+		const continueButtons = await page.$$( 'button.is-primary' );
+		expect( continueButtons ).toHaveLength( 2 );
 
-	await Promise.all( [
-		// Click on "Continue" button of the usage pop-up window to move to the next step
-		continueButtons[1].click(),
-
-		// Wait for "In which industry does the store operate?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+		await continueButtons[1].click();
+	}
+	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
 
@@ -158,6 +157,10 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary();
 
 	// End of onboarding wizard
+	if ( IS_RETEST_MODE ) {
+		// Home screen modal can't be reset via the rest api.
+		return;
+	}
 
 	// Wait for homescreen welcome modal to appear
 	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );
@@ -540,6 +543,33 @@ const deleteAllEmailLogs = async () => {
 	}
 };
 
+/**
+ * Delete all the existing shipping zones.
+ */
+const deleteAllShippingZones = async () => {
+	await merchant.openSettings('shipping');
+
+	// Delete existing shipping zones.
+	try {
+		let zone = await page.$( '.wc-shipping-zone-delete' );
+		if ( zone ) {
+			// WP action links aren't clickable because they are hidden with a left=-9999 style.
+			await page.evaluate(() => {
+				document.querySelector('.wc-shipping-zone-name .row-actions')
+					.style
+					.left = '0';
+			});
+			while ( zone ) {
+				await evalAndClick( '.wc-shipping-zone-delete' );
+				await uiUnblocked();
+				zone = await page.$( '.wc-shipping-zone-delete' );
+			};
+		};
+	} catch (error) {
+		// Prevent an error here causing the test to fail.
+	};
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -553,4 +583,5 @@ export {
 	createSimpleProductWithCategory,
 	clickUpdateOrder,
 	deleteAllEmailLogs,
+	deleteAllShippingZones,
 };
