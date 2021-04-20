@@ -41,7 +41,6 @@ const runOnboardingFlowTest = () => {
 		}
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
-			await merchant.runSetupWizard();
 			await completeOnboardingWizard();
 		});
 	});

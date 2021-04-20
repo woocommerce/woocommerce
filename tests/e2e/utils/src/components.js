@@ -14,7 +14,6 @@ import {
 	setCheckbox,
 	unsetCheckbox,
 	evalAndClick,
-	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
 
@@ -57,6 +56,7 @@ const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
  * Complete onboarding wizard.
  */
 const completeOnboardingWizard = async () => {
+	await merchant.runSetupWizard();
 	// Store Details section
 
 	// Fill store's address - first line
@@ -82,10 +82,11 @@ const completeOnboardingWizard = async () => {
 
 	// Click on "Continue" button to move to the next step
 	await page.click( 'button.is-primary', { text: 'Continue' } );
+	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Wait for usage tracking pop-up window to appear on a new site
-	if ( ! IS_RETEST_MODE ) {
-		await page.waitForSelector('.components-modal__header-heading');
+	const usageTrackingHeader = await page.$('.components-modal__header-heading');
+	if ( usageTrackingHeader ) {
 		await expect(page).toMatchElement(
 			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
 		);
@@ -95,11 +96,10 @@ const completeOnboardingWizard = async () => {
 		expect( continueButtons ).toHaveLength( 2 );
 
 		await continueButtons[1].click();
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	}
-	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
-
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
 	expect( industryCheckboxes ).toHaveLength( 8 );
@@ -116,7 +116,6 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary();
 
 	// Product types section
-
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
 	expect( productTypesCheckboxes ).toHaveLength( 7 );
