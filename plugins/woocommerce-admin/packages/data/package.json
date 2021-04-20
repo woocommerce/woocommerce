@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@woocommerce/date": "file:../date",
 		"@woocommerce/navigation": "file:../navigation",
+		"@wordpress/i18n": "3.17.0",
 		"rememo": "^3.0.0"
 	},
 	"publishConfig": {

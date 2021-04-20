@@ -18,12 +18,15 @@ import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
 import { OnboardingSelectors } from './onboarding/selectors';
 import { WPDataSelectors } from './types';
+import { PluginSelectors } from './plugins/selectors';
 
+export * from './types';
 export { SETTINGS_STORE_NAME } from './settings';
 export { withSettingsHydration } from './settings/with-settings-hydration';
 export { useSettings } from './settings/use-settings';
 
 export { PLUGINS_STORE_NAME } from './plugins';
+export type { Plugin } from './plugins/types';
 export { pluginNames } from './plugins/constants';
 export { withPluginsHydration } from './plugins/with-plugins-hydration';
 
@@ -36,7 +39,10 @@ export { useUser } from './user/use-user';
 export { useUserPreferences } from './user/use-user-preferences';
 
 export { OPTIONS_STORE_NAME } from './options';
-export { withOptionsHydration } from './options/with-options-hydration';
+export {
+	withOptionsHydration,
+	useOptionsHydration,
+} from './options/with-options-hydration';
 
 export { REVIEWS_STORE_NAME } from './reviews';
 
@@ -77,7 +83,7 @@ export { EXPORT_STORE_NAME } from './export';
 
 export { IMPORT_STORE_NAME } from './import';
 
-type WCDataStoreName =
+export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
 	| typeof SETTINGS_STORE_NAME
 	| typeof PLUGINS_STORE_NAME
@@ -91,12 +97,12 @@ type WCDataStoreName =
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
-type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
+export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof SETTINGS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof PLUGINS_STORE_NAME
-	? WPDataSelectors
+	? PluginSelectors
 	: T extends typeof ONBOARDING_STORE_NAME
 	? OnboardingSelectors
 	: T extends typeof USER_STORE_NAME

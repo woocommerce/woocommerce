@@ -14,6 +14,7 @@ import {
 import './stylesheets/_index.scss';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
+import { EmbeddedBodyLayout } from './embedded-body-layout';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -71,6 +72,11 @@ if ( appRoot ) {
 			<NoticeArea />
 		</div>,
 		wpBody.insertBefore( noticeContainer, wrap )
+	);
+	const embeddedBodyContainer = document.createElement( 'div' );
+	render(
+		<EmbeddedBodyLayout />,
+		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
 	);
 }
 

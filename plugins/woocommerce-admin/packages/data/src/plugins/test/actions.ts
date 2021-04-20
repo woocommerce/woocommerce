@@ -28,7 +28,11 @@ import {
 import { STORE_NAME } from '../constants';
 
 // Tests run faster in node env, and we just need access to the window global for this test
-global.window = { location: '' };
+global.window = {
+	location: {
+		href: '',
+	} as Location,
+} as Window & typeof globalThis;
 
 describe( 'installJetPackAndConnect', () => {
 	beforeEach( () => {
@@ -36,7 +40,7 @@ describe( 'installJetPackAndConnect', () => {
 	} );
 
 	it( 'installs jetpack, then activates it', () => {
-		const installer = installJetpackAndConnect( () => {}, getAdminLink );
+		const installer = installJetpackAndConnect( () => '', getAdminLink );
 
 		// Run to first yield
 		installer.next();
@@ -75,7 +79,7 @@ describe( 'installJetPackAndConnect', () => {
 	} );
 
 	it( 'redirects to the connect url if there are no errors', () => {
-		const installer = installJetpackAndConnect( undefined, getAdminLink );
+		const installer = installJetpackAndConnect( jest.fn(), getAdminLink );
 
 		// Run to yield any errors from getJetpackConnectUrl
 		installer.next();
@@ -84,7 +88,7 @@ describe( 'installJetPackAndConnect', () => {
 		installer.next( 'https://example.com' );
 		installer.next();
 
-		expect( global.window.location ).toBe( 'https://example.com' );
+		expect( global.window.location.href ).toBe( 'https://example.com' );
 	} );
 } );
 
@@ -92,7 +96,7 @@ describe( 'connectToJetpack', () => {
 	it( 'redirects to the failure url if there is an error', () => {
 		const connect = connectToJetpackWithFailureRedirect(
 			'https://example.com/failure',
-			() => {},
+			jest.fn(),
 			getAdminLink
 		);
 
@@ -100,13 +104,15 @@ describe( 'connectToJetpack', () => {
 		connect.throw( 'Failed' );
 		connect.next();
 
-		expect( global.window.location ).toBe( 'https://example.com/failure' );
+		expect( global.window.location.href ).toBe(
+			'https://example.com/failure'
+		);
 	} );
 
 	it( 'redirects to the jetpack url if there is no error', () => {
 		const connect = connectToJetpackWithFailureRedirect(
 			'https://example.com/failure',
-			() => {},
+			jest.fn(),
 			getAdminLink
 		);
 
@@ -115,7 +121,9 @@ describe( 'connectToJetpack', () => {
 		connect.next();
 		connect.next();
 
-		expect( global.window.location ).toBe( 'https://example.com/success' );
+		expect( global.window.location.href ).toBe(
+			'https://example.com/success'
+		);
 	} );
 
 	it( 'calls the passed error handler if an exception is thrown into the generator', () => {

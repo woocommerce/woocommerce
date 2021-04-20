@@ -4,9 +4,9 @@
 
 ### Remove PayPal for India #6828
 
--  Setup a new store and set your country to `India`.
--  Go to 'Choose Payment method' Checklist on the home page.
--  Verify that PayPal is not presented as a payment method.
+-   Setup a new store and set your country to `India`.
+-   Go to 'Choose Payment method' Checklist on the home page.
+-   Verify that PayPal is not presented as a payment method.
 
 ### Add event recording to start of gateway connections #6801
 
@@ -23,7 +23,7 @@
 1. Go to Settings -> General.
 2. Set your store timezone significantly ahead of or behind the timezone you currently reside in.
 3. Create a test order and mark complete.
-4. Navigate to various analytics reports and note the time filter is based on the current store time.  E.g., If your store timezone is 12 hours ahead of your current time, you may see `1st - 23rd` instead of `1st - 22nd` for "Month to date" depending on your time of day.
+4. Navigate to various analytics reports and note the time filter is based on the current store time. E.g., If your store timezone is 12 hours ahead of your current time, you may see `1st - 23rd` instead of `1st - 22nd` for "Month to date" depending on your time of day.
 5. Note that the recently added order shows up in analytics reports.
 6. Change your timezone and repeat, testing with both locations (e.g., `Amsterdam`) and also UTC offsets (e.g., `UTC-6`).
 
@@ -47,6 +47,7 @@
 5. Navigate to Homescreen.
 6. Navigate back to previous Analytics Report.
 7. Ensure that the time period is _still_ what you set on step 2.
+
 ### Refactor payments to allow management of methods #6786
 
 1. Do not select "CBD industry" as a store industry during onboarding.
@@ -54,8 +55,6 @@
 3. Attempt to set up various payment methods.
 4. Make sure that after setup, a `Manage` link is shown that links to the payment method settings page.
 5. Check that simple methods like, cash delivery or bank transfer initially have an `Enable` option.
-
-### Fix varation bug with Products reports #6647
 
 ### Fix varation bug with Products reports #6647
 
@@ -98,6 +97,21 @@ In case the report shows "no data", please reimport historical data by following
 -   Once on home screen the **Set up shipping costs** task should show as finished
 -   Click on the task again
 -   It should now redirect to the shipping settings page.
+
+### Add recommended payment methods in payment settings. #6760
+
+-   Create a new store and finish the onboarding flow, making sure your store location is filled out and within US | PR | AU | CA | GB | IE | NZ
+-   Visit **Woocommerce > Settings > Payments** you might have to wait a couple seconds, but it should show a card with **Recommended ways to get paid** listing 3 different payment providers (WC Payments, Stripe, and Paypal).
+-   Click `Get started` on one of the providers, it will show a loading icon (installing the plugin), once done it should redirect you to the plugin set up page.
+-   Check if the plugin is installed and activated.
+-   Go back to the payment settings page
+-   Notice how the plugin you had previously installed and activated does not display anymore.
+-   Go to **WooCommerce > Settings > Advanced > WooCommerce.com** and un-select **Show Suggestions** and save
+-   Go to the payments setting screen again, the card should not be displayed.
+-   Enable the **Show Suggestions** again in **WooCommerce > Settings > Advanced > WooCommerce.com**
+-   Go to the payments setting screen again, the card should be displayed.
+-   Click on the 3 dots of the card, click `Hide this`, it should make the card disappear, it should also not show on refresh.
+    This can't be shown again unless the `woocommerce_show_marketplace_suggestions` option is deleted (through PHPMyAdmin or using `wp option delete woocommerce_show_marketplace_suggestions`).
 
 ## 2.2.0
 

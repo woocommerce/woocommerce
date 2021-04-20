@@ -1,0 +1,8 @@
+.woocommerce-embedded-layout__primary {
+	padding: 0 20px;
+}
+@media (max-width: #{ ($break-medium) }) {
+	.woocommerce-embedded-layout__primary {
+		padding: 0;
+	}
+}

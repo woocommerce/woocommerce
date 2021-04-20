@@ -34,6 +34,9 @@ module.exports = {
 				'no-use-before-define': 'off',
 				'@typescript-eslint/no-use-before-define': [ 'error' ],
 				'jsdoc/require-param': 'off',
+				// Making use of typescript no-shadow instead, fixes issues with enum.
+				'no-shadow': 'off',
+				'@typescript-eslint/no-shadow': [ 'error' ],
 			},
 		},
 	],

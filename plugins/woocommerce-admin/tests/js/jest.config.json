@@ -22,9 +22,9 @@
 		"<rootDir>/tests/js/setup-react-testing-library.js"
 	],
 	"testMatch": [
-		"**/__tests__/**/*.[jt]s",
-		"**/test/*.[jt]s",
-		"**/?(*.)test.[jt]s"
+		"**/__tests__/**/*.[jt]s?(x)",
+		"**/test/*.[jt]s?(x)",
+		"**/?(*.)test.[jt]s?(x)"
 	],
 	"transform": {
 		"^.+\\.[jt]sx?$": "babel-jest"

@@ -6,19 +6,22 @@
  * Internal dependencies
  */
 import reducer from '../reducer';
-import TYPES from '../action-types';
+import { ACTION_TYPES as TYPES } from '../action-types';
+import { PluginsState } from '../types';
+import { Actions } from '../actions';
 
-const defaultState = {
+const defaultState: PluginsState = {
 	active: [],
 	installed: [],
 	requesting: {},
 	errors: {},
 	jetpackConnectUrls: {},
+	recommended: {},
 };
 
 describe( 'plugins reducer', () => {
 	it( 'should return a default state', () => {
-		const state = reducer( undefined, {} );
+		const state = reducer( undefined );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
 	} );
@@ -26,13 +29,14 @@ describe( 'plugins reducer', () => {
 	it( 'should handle UPDATE_ACTIVE_PLUGINS with replace', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				active: [ 'plugins', 'to', 'overwrite' ],
 			},
 			{
 				type: TYPES.UPDATE_ACTIVE_PLUGINS,
 				active: [ 'jetpack' ],
 				replace: true,
-			}
+			} as Actions
 		);
 
 		/* eslint-disable dot-notation */
@@ -48,6 +52,7 @@ describe( 'plugins reducer', () => {
 	it( 'should handle UPDATE_ACTIVE_PLUGINS with active plugins', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				active: [ 'jetpack' ],
 				installed: [ 'jetpack' ],
 				requesting: {},
@@ -55,9 +60,8 @@ describe( 'plugins reducer', () => {
 			},
 			{
 				type: TYPES.UPDATE_ACTIVE_PLUGINS,
-				installed: null,
 				active: [ 'woocommerce-services' ],
-			}
+			} as Actions
 		);
 
 		/* eslint-disable dot-notation */
@@ -73,13 +77,14 @@ describe( 'plugins reducer', () => {
 	it( 'should handle UPDATE_INSTALLED_PLUGINS with replace', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				active: [ 'plugins', 'to', 'overwrite' ],
 			},
 			{
 				type: TYPES.UPDATE_INSTALLED_PLUGINS,
 				installed: [ 'jetpack' ],
 				replace: true,
-			}
+			} as Actions
 		);
 
 		/* eslint-disable dot-notation */
@@ -95,6 +100,7 @@ describe( 'plugins reducer', () => {
 	it( 'should handle UPDATE_INSTALLED_PLUGINS with installed plugins', () => {
 		const state = reducer(
 			{
+				...defaultState,
 				active: [ 'jetpack' ],
 				installed: [ 'jetpack' ],
 				requesting: {},
@@ -103,7 +109,7 @@ describe( 'plugins reducer', () => {
 			{
 				type: TYPES.UPDATE_INSTALLED_PLUGINS,
 				installed: [ 'woocommerce-services' ],
-			}
+			} as Actions
 		);
 
 		/* eslint-disable dot-notation */
@@ -121,7 +127,7 @@ describe( 'plugins reducer', () => {
 			type: TYPES.SET_IS_REQUESTING,
 			selector: 'getInstalledPlugins',
 			isRequesting: true,
-		} );
+		} as Actions );
 
 		/* eslint-disable dot-notation */
 
@@ -133,12 +139,17 @@ describe( 'plugins reducer', () => {
 		const state = reducer( defaultState, {
 			type: TYPES.SET_ERROR,
 			selector: 'getInstalledPlugins',
-			error: { code: 'error' },
-		} );
+			error: { jetpack: [ 'error' ] },
+		} as Actions );
 
 		/* eslint-disable dot-notation */
 
-		expect( state.errors[ 'getInstalledPlugins' ].code ).toBe( 'error' );
+		expect(
+			( state.errors[ 'getInstalledPlugins' ] as Record<
+				string,
+				string[]
+			> ).jetpack[ 0 ]
+		).toBe( 'error' );
 		expect( state.requesting[ 'getInstalledPlugins' ] ).toBe( false );
 		/* eslint-enable dot-notation */
 	} );
@@ -147,7 +158,7 @@ describe( 'plugins reducer', () => {
 		const state = reducer( defaultState, {
 			type: TYPES.UPDATE_JETPACK_CONNECTION,
 			jetpackConnection: true,
-		} );
+		} as Actions );
 
 		expect( state.jetpackConnection ).toBe( true );
 	} );
@@ -157,7 +168,7 @@ describe( 'plugins reducer', () => {
 			type: TYPES.UPDATE_JETPACK_CONNECT_URL,
 			jetpackConnectUrl: 'http://connect.com',
 			redirectUrl: 'http://redirect.com',
-		} );
+		} as Actions );
 
 		expect( state.jetpackConnectUrls[ 'http://redirect.com' ] ).toBe(
 			'http://connect.com'
