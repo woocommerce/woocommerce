@@ -53,7 +53,7 @@
 	 */
 	VariationForm.prototype.onReset = function( event ) {
 		event.preventDefault();
-		event.data.variationForm.$attributeFields.val( '' ).change();
+		event.data.variationForm.$attributeFields.val( '' ).trigger( 'change' );
 		event.data.variationForm.$form.trigger( 'reset_data' );
 	};
 
@@ -286,11 +286,11 @@
 		$template_html = $template_html.replace( '/*]]>*/', '' );
 
 		form.$singleVariation.html( $template_html );
-		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).change();
+		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).trigger( 'change' );
 
 		// Hide or show qty input
 		if ( variation.is_sold_individually === 'yes' ) {
-			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).change();
+			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).trigger( 'change' );
 			$qty.hide();
 		} else {
 
@@ -304,7 +304,7 @@
 				qty_val = qty_val < parseFloat( variation.min_qty ) ? variation.min_qty : qty_val;
 			}
 
-			$qty_input.attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty ).val( qty_val ).change();
+			$qty_input.attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty ).val( qty_val ).trigger( 'change' );
 			$qty.show();
 		}
 
@@ -314,7 +314,7 @@
 		}
 
 		// Reveal
-		if ( $.trim( form.$singleVariation.text() ) ) {
+		if ( form.$singleVariation.text().trim() ) {
 			form.$singleVariation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
 		} else {
 			form.$singleVariation.show().trigger( 'show_variation', [ variation, purchasable ] );
@@ -327,7 +327,7 @@
 	VariationForm.prototype.onChange = function( event ) {
 		var form = event.data.variationForm;
 
-		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).change();
+		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
 		form.$form.find( '.wc-no-matching-variations' ).remove();
 
 		if ( form.useAjax ) {
@@ -379,7 +379,7 @@
 			if ( ! current_attr_select.data( 'attribute_html' ) ) {
 				var refSelect = current_attr_select.clone();
 
-				refSelect.find( 'option' ).removeAttr( 'disabled attached' ).removeAttr( 'selected' );
+				refSelect.find( 'option' ).prop( 'disabled attached', false ).prop( 'selected', false );
 
 				// Legacy data attribute.
 				current_attr_select.data(
@@ -484,7 +484,7 @@
 				if ( selected_attr_val_valid ) {
 					current_attr_select.val( selected_attr_val );
 				} else {
-					current_attr_select.val( '' ).change();
+					current_attr_select.val( '' ).trigger( 'change' );
 				}
 			} else {
 				current_attr_select.val( '' ); // No change event to prevent infinite loop.

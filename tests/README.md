@@ -1,22 +1,34 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
-
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
 
 ## Table of contents
 
-- [WooCommerce Unit Tests](#woocommerce-unit-tests)
+- [WooCommerce Tests](#woocommerce-tests)
+  - [Table of contents](#table-of-contents)
   - [Initial Setup](#initial-setup)
+    - [MySQL database](#mysql-database)
+    - [Setup instructions](#setup-instructions)
   - [Running Tests](#running-tests)
+    - [Running tests in PHP 8](#running-tests-in-php-8)
   - [Writing Tests](#writing-tests)
   - [Automated Tests](#automated-tests)
   - [Code Coverage](#code-coverage)
-- [WooCommerce E2E Tests](#woocommerce-e2e-tests)
 
 
 ## Initial Setup
 
-From the WooCommerce root directory (if you are using VVV you might need to `vagrant ssh` first), run the following:
+### MySQL database
+
+To run the tests, you need to create a test database. You can:
+- Access a database on a server
+- Connect to your local database on your machine
+- Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step) 
+
+### Setup instructions
+
+Once you have database, from the WooCommerce root directory run the following:
 
 1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
     ```
@@ -37,7 +49,6 @@ Example:
     #  woocommerce_tests is the database name and root is both the MySQL user and its password.
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
-
 
 ## Running Tests
 
@@ -65,9 +76,9 @@ WooCommerce currently supports PHP versions from 7.0 up to 8.0, and this poses a
 To workaround this, the testing strategy used by WooCommerce is as follows:
 
 * We normally use PHPUnit 6.5.14
-* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). The Travis build is configured to use this fork instead of the old version 6 when running in PHP 8.
+* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). WooCommerce's GitHub Actions CI workflow is configured to use this fork instead of the old version 6 when running in PHP 8.
 
-If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the Travis setup script does. These are the commands that you'll need (run them after a regular `composer install`):
+If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the GitHub Actions CI workflow file does. These are the commands that you'll need (run them after a regular `composer install`):
 
 ```shell
 curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
@@ -78,7 +89,6 @@ composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-req
 ```
 
 Just remember that you can't include the modified `composer.json` in any commit!
-
 
 ## Writing Tests
 
@@ -95,7 +105,7 @@ Each test file should correspond to an associated source file and be named accor
         * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
 
 
-See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/master/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/master/includes/README.md#writing-unit-tests). 
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests). 
 
 General guidelines for all the unit tests:
 
@@ -109,12 +119,10 @@ General guidelines for all the unit tests:
 * Filters persist between test cases so be sure to remove them in your test method or in the `tearDown()` method.
 * Use data providers where possible. Be sure that their name is like `data_provider_function_to_test` (i.e. the data provider for `test_is_postcode` would be `data_provider_test_is_postcode`). Read more about data providers [here](https://phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers).
 
-
 ## Automated Tests
 
-Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
-
+Tests are automatically run with [GitHub Actions](https://github.com/woocommerce/woocommerce/actions/workflows/ci.yml) for each commit and pull request.
 
 ## Code Coverage
 
-Code coverage is available on [Codecov](https://codecov.io/gh/woocommerce/woocommerce/) which receives updated data after each Travis build.
+Code coverage is available on [Codecov](https://codecov.io/gh/woocommerce/woocommerce/) which receives updated data after each build.

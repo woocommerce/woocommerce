@@ -696,6 +696,7 @@ abstract class WC_Settings_API {
 		);
 
 		$data = wp_parse_args( $data, $defaults );
+		$value = $this->get_option( $key );
 
 		ob_start();
 		?>
@@ -708,7 +709,15 @@ abstract class WC_Settings_API {
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_html( $option_value ); ?></option>
+							<?php if ( is_array( $option_value ) ) : ?>
+								<optgroup label="<?php echo esc_attr( $option_key ); ?>">
+									<?php foreach ( $option_value as $option_key_inner => $option_value_inner ) : ?>
+										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( (string) $option_key_inner, esc_attr( $value ) ); ?>><?php echo esc_html( $option_value_inner ); ?></option>
+									<?php endforeach; ?>
+								</optgroup>
+							<?php else : ?>
+								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( (string) $option_key, esc_attr( $value ) ); ?>><?php echo esc_html( $option_value ); ?></option>
+							<?php endif; ?>
 						<?php endforeach; ?>
 					</select>
 					<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>

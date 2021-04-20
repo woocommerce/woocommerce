@@ -28,7 +28,28 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Init - hook into events.
 	 */
 	public function __construct() {
-		parent::__construct( __( 'WooCommerce', 'woocommerce' ) );
+		parent::__construct();
+
+		// Initialize data exporters and erasers.
+		add_action( 'plugins_loaded', array( $this, 'register_erasers_exporters' ) );
+
+		// Cleanup orders daily - this is a callback on a daily cron event.
+		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
+
+		// Handles custom anonomization types not included in core.
+		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
+
+		// When this is fired, data is removed in a given order. Called from bulk actions.
+		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
+	}
+
+	/**
+	 * Initial registration of privacy erasers and exporters.
+	 *
+	 * Due to the use of translation functions, this should run only after plugins loaded.
+	 */
+	public function register_erasers_exporters() {
+		$this->name = __( 'WooCommerce', 'woocommerce' );
 
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Privacy_Background_Process();
@@ -49,15 +70,6 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		$this->add_eraser( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
 		$this->add_eraser( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
 		$this->add_eraser( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
-
-		// Cleanup orders daily - this is a callback on a daily cron event.
-		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
-
-		// Handles custom anonomization types not included in core.
-		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
-
-		// When this is fired, data is removed in a given order. Called from bulk actions.
-		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
 	}
 
 	/**

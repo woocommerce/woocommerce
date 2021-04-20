@@ -301,6 +301,12 @@ function wc_generator_tag( $gen, $type ) {
 function wc_body_class( $classes ) {
 	$classes = (array) $classes;
 
+	if ( is_shop() ) {
+
+		$classes[] = 'woocommerce-shop';
+
+	}
+
 	if ( is_woocommerce() ) {
 
 		$classes[] = 'woocommerce';
@@ -352,7 +358,7 @@ function wc_no_js() {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
-		})()
+		})();
 	</script>
 	<?php
 }
@@ -881,7 +887,7 @@ function wc_terms_and_conditions_page_content() {
 	$page = get_post( $terms_page_id );
 
 	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
-		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wc_format_content( wp_kses_post( $page->post_content ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -1234,8 +1240,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 			$term = get_queried_object();
 
 			if ( $term && ! empty( $term->description ) ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo '<div class="term-description">' . wc_format_content( $term->description ) . '</div>';
+				echo '<div class="term-description">' . wc_format_content( wp_kses_post( $term->description ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 	}
@@ -1254,10 +1259,9 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_post_type_archive( 'product' ) && in_array( absint( get_query_var( 'paged' ) ), array( 0, 1 ), true ) ) {
 			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
-				$description = wc_format_content( $shop_page->post_content );
+				$description = wc_format_content( wp_kses_post( $shop_page->post_content ) );
 				if ( $description ) {
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo '<div class="page-description">' . $description . '</div>';
+					echo '<div class="page-description">' . $description . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 			}
 		}
@@ -2292,12 +2296,14 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * Output the Coupon form for the checkout.
 	 */
 	function woocommerce_checkout_coupon_form() {
-		wc_get_template(
-			'checkout/form-coupon.php',
-			array(
-				'checkout' => WC()->checkout(),
-			)
-		);
+		if ( is_user_logged_in() || WC()->checkout()->is_registration_enabled() || ! WC()->checkout()->is_registration_required() ) {
+			wc_get_template(
+				'checkout/form-coupon.php',
+				array(
+					'checkout' => WC()->checkout(),
+				)
+			);
+		}
 	}
 }
 
@@ -3564,19 +3570,37 @@ function wc_empty_cart_message() {
 /**
  * Disable search engines indexing core, dynamic, cart/checkout pages.
  *
+ * @todo Deprecated this function after dropping support for WP 5.6.
  * @since 3.2.0
  */
 function wc_page_noindex() {
+	// wp_no_robots is deprecated since WP 5.7.
+	if ( function_exists( 'wp_robots_no_robots' ) ) {
+		return;
+	}
+
 	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		// Adds support for WP 5.7.
-		if ( function_exists( 'wp_robots_no_robots' ) ) {
-			wp_robots_no_robots();
-		} else {
-			wp_no_robots();
-		}
+		wp_no_robots();
 	}
 }
 add_action( 'wp_head', 'wc_page_noindex' );
+
+/**
+ * Disable search engines indexing core, dynamic, cart/checkout pages.
+ * Uses "wp_robots" filter introduced in WP 5.7.
+ *
+ * @since 5.0.0
+ * @param array $robots Associative array of robots directives.
+ * @return array Filtered robots directives.
+ */
+function wc_page_no_robots( $robots ) {
+	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
+		return wp_robots_no_robots( $robots );
+	}
+
+	return $robots;
+}
+add_filter( 'wp_robots', 'wc_page_no_robots' );
 
 /**
  * Get a slug identifying the current theme.

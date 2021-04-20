@@ -14,12 +14,33 @@ const {
 	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
 
+const { waitForSelector } = require( '@woocommerce/e2e-environment' );
+
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 let orderId;
 let currencySymbol;
+
+/**
+ * Evaluate and click a button selector then wait for a result selector.
+ * This is a work around for what appears to be intermittent delays in handling confirm dialogs.
+ *
+ * @param buttonSelector
+ * @param resultSelector
+ * @returns {Promise<void>}
+ */
+const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
+	await evalAndClick( buttonSelector );
+	await waitForSelector(
+		page,
+		resultSelector,
+		{
+			timeout: 5000
+		}
+	);
+};
 
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
@@ -56,8 +77,7 @@ const runRefundOrderTest = () => {
 				expect(page).toMatchElement('.do-manual-refund', { text: `Refund ${currencySymbol + simpleProductPrice} manually` }),
 			]);
 
-			await expect(page).toClick('.do-manual-refund');
-
+			await clickAndWaitForSelector( '.do-manual-refund', '.quantity .refunded' );
 			await uiUnblocked();
 
 			await Promise.all([
@@ -76,14 +96,13 @@ const runRefundOrderTest = () => {
 		});
 
 		it('can delete an issued refund', async () => {
-			await evalAndClick( 'a.delete_refund' );
+			await clickAndWaitForSelector( 'a.delete_refund', '.refund-items' );
 			await uiUnblocked();
 
-			// Verify the refunded row item is no longer showing
-			await page.waitForSelector('tr.refund', { visible: false });
-
 			await Promise.all([
-				// Verify the product line item shows the refunded quantity and amount
+				// Verify the refunded row item is no longer showing
+				expect(page).not.toMatchElement('tr.refund', { visible: true }),
+				// Verify the product line item doesn't show the refunded quantity and amount
 				expect(page).not.toMatchElement('.quantity .refunded', { text: '-1' }),
 				expect(page).not.toMatchElement('.line_cost .refunded', { text: `-${currencySymbol + simpleProductPrice}` }),
 

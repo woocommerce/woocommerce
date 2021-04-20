@@ -7,6 +7,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
         wp: [ "latest" ]

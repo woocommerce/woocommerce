@@ -641,7 +641,7 @@ class WC_Admin_Addons {
 					self::install_woocommerce_services_addon();
 					break;
 				case 'woocommerce-payments':
-					self::install_woocommerce_payments_addon();
+					self::install_woocommerce_payments_addon( $section );
 					break;
 				default:
 					// Do nothing.
@@ -693,9 +693,11 @@ class WC_Admin_Addons {
 	/**
 	 * Install WooCommerce Payments from the Extensions screens.
 	 *
+	 * @param string $section Optional. Extenstions tab.
+	 *
 	 * @return void
 	 */
-	public static function install_woocommerce_payments_addon() {
+	public static function install_woocommerce_payments_addon( $section = '_featured' ) {
 		check_admin_referer( 'install-addon_woocommerce-payments' );
 
 		$wcpay_plugin_id = 'woocommerce-payments';
@@ -704,7 +706,9 @@ class WC_Admin_Addons {
 			'repo-slug' => 'woocommerce-payments',
 		);
 
-		WC_Install::background_installer( $services_plugin_id, $wcpay_plugin );
+		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
+
+		do_action( 'woocommerce_addon_installed', $wcpay_plugin_id, $section );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;

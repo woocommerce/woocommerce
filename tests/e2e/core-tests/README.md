@@ -16,7 +16,7 @@ This package contains the automated end-to-end tests for WooCommerce.
 
 ### Setting up the test environment
 
-Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/master/tests/e2e/README.md).
+Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/trunk/tests/e2e/README.md).
 
 ### Setting up core tests
 
@@ -29,6 +29,11 @@ const { runShopperTests } = require( '@woocommerce/e2e-core-tests' );
 runShopperTests();
 
 ```
+
+## Retrying/Re-running tests
+
+On a new site, the setup and activation tests prepare the site for the remainder of the tests. To retry/rerun the test suite on a site where setup/onboarding test have already run use the environment variable `E2E_RETEST=1`.
+
 
 ## Test functions
 
@@ -45,24 +50,53 @@ The functions to access the core tests are:
 ### Merchant
 
 - `runMerchantTests` - Run all merchant tests
-  - `runCreateCouponTest` - Merchant can create coupon
-  - `runCreateOrderTest` - Merchant can create order
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runAddSimpleProductTest` - Merchant can create a simple product
   - `runAddVariableProductTest` - Merchant can create a variable product
-  - `runUpdateGeneralSettingsTest` - Merchant can update general settings
-  - `runProductSettingsTest` - Merchant can update product settings
-  - `runTaxSettingsTest` - Merchant can update tax settings
+  - `runCreateCouponTest` - Merchant can create coupon
+  - `runCreateOrderTest` - Merchant can create order
+  - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
+  - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
+  - `runOrderSearchingTest` - Merchant can search for order via different terms
+  - `runProductEditDetailsTest` - Merchant can edit an existing product
+  - `runProductSearchTest` - Merchant can search for a product and view it
+  - `runProductSettingsTest` - Merchant can update product settings
+  - `runTaxSettingsTest` - Merchant can update tax settings
+  - `runUpdateGeneralSettingsTest` - Merchant can update general settings
+  - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
+  - `runImportProductsTest` - Merchant can import products via CSV file
 
 ### Shopper
 
 - `runShopperTests` - Run all shopper tests
+  - `runCartApplyCouponsTest` - Shopper can use coupons on cart
   - `runCartPageTest` - Shopper can view and update cart
+  - `runCheckoutApplyCouponsTest` - Shopper can use coupons on checkout
   - `runCheckoutPageTest` - Shopper can complete checkout
   - `runMyAccountPageTest` - Shopper can access my account page
-  - `runSingleProductPageTest` - Shopper can view single product page
+  - `runMyAccountPayOrderTest` - Shopper can pay for their order in My Account
+  - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
+  - `runSingleProductPageTest` - Shopper can view single product page in many variations (simple, variable, grouped)
+  - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
+  - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
+  - `runCheckoutLoginAccountTest` - Shopper can login to an account during checkout
+  - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
+  - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
+  - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
+  - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
+
+### REST API
+
+- `runApiTests` - Run all API tests
+  - `runExternalProductAPITest` - Can create, read, and delete an external product
+  - `runGroupedProductAPITest` - Can create, read, and delete a grouped product
+  - `runVariableProductAPITest` - Can create, read, and delete a variable product and its variations
+  - `runCouponApiTest` - Can create, read, and delete a coupon
+
 
 ## Contributing a new test
 

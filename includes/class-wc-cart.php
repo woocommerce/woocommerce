@@ -1120,6 +1120,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 
+			// Validate variation ID.
+			if (
+				0 < $variation_id && // Only check if there's any variation_id.
+				(
+					! $product_data->is_type( 'variation' ) || // Check if isn't a variation, it suppose to be a variation at this point.
+					$product_data->get_parent_id() !== $product_id // Check if belongs to the selected variable product.
+				)
+			) {
+				$product = wc_get_product( $product_id );
+
+				/* translators: 1: product link, 2: product name */
+				throw new Exception( sprintf( __( 'The selected product isn\'t a variation of %2$s, please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( $product->get_permalink() ), esc_html( $product->get_name() ) ) );
+			}
+
 			// Load cart item data - may be added by other plugins.
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
@@ -1204,15 +1218,30 @@ class WC_Cart extends WC_Legacy_Cart {
 				$products_qty_in_cart = $this->get_cart_item_quantities();
 
 				if ( isset( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] ) && ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
-					throw new Exception(
-						sprintf(
-							'<a href="%s" class="button wc-forward">%s</a> %s',
-							wc_get_cart_url(),
-							__( 'View cart', 'woocommerce' ),
-							/* translators: 1: quantity in stock 2: current quantity */
-							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ), wc_format_stock_quantity_for_display( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ], $product_data ) )
-						)
+					$stock_quantity         = $product_data->get_stock_quantity();
+					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
+
+					$message = sprintf(
+						'<a href="%s" class="button wc-forward">%s</a> %s',
+						wc_get_cart_url(),
+						__( 'View cart', 'woocommerce' ),
+						/* translators: 1: quantity in stock 2: current quantity */
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) )
 					);
+
+					/**
+					 * Filters message about product not having enough stock accounting for what's already in the cart.
+					 *
+					 * @param string $message Message.
+					 * @param WC_Product $product_data Product data.
+					 * @param int $stock_quantity Quantity remaining.
+					 * @param int $stock_quantity_in_cart
+					 *
+					 * @since 5.3.0
+					 */
+					$message = apply_filters( 'woocommerce_cart_product_not_enough_stock_already_in_cart_message', $message, $product_data, $stock_quantity, $stock_quantity_in_cart );
+
+					throw new Exception( $message );
 				}
 			}
 

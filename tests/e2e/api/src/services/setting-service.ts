@@ -1,4 +1,4 @@
-import { Setting, UpdatesSettings } from '../models/settings/setting';
+import { Setting, UpdatesSettings } from '../models';
 
 /**
  * A service that wraps setting changes in convenient methods.

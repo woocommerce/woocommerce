@@ -32,7 +32,7 @@ jQuery( function( $ ) {
 
 	// Handle locale
 	$( document.body )
-		.bind( 'country_to_state_changing', function( event, country, wrapper ) {
+		.on( 'country_to_state_changing', function( event, country, wrapper ) {
 			var thisform = wrapper, thislocale;
 
 			if ( typeof locale[ country ] !== 'undefined' ) {

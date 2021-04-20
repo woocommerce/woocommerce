@@ -1,10 +1,48 @@
 # Unreleased
 
+## Added
+
+- `emptyCart()` Shopper flow helper that empties the cart
+- `deleteAllShippingZones` Delete all the existing shipping zones
+- constants
+  - `WP_ADMIN_POST_TYPE`
+  - `WP_ADMIN_NEW_POST_TYPE`
+  - `WP_ADMIN_ALL_COUPONS_VIEW`
+  - `WP_ADMIN_WC_HOME`
+  - `IS_RETEST_MODE`
+- `withRestApi` flow containing utility functions that manage data with the rest api
+
+# 0.1.4
+
+## Fixed
+
+- build issue with faker import
+
+# 0.1.3
+
+## Added
+
+- `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
+- `searchForOrder( value, orderId, customerName )` util helper method that search order with different terms
+- `addShippingZoneAndMethod( zoneName, zoneLocation, zipCode, zoneMethod )` util helper method for adding shipping zones with shipping methods
+- `createSimpleProductWithCategory` component which creates a simple product with categories, containing three parameters for title, price and category name.
+- `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
+- `removeCoupon()` util helper method that removes a single coupon within cart or checkout
+- `selectOrderAction( action )` util helper method to select and initiate an order action in the Order Action postbox
+- `merchant.openEmailLog()` go to the WP Mail Log page
+- `deleteAllEmailLogs` delete all email logs in the WP Mail Log plugin
+- `clickUpdateOrder( noticeText, waitForSave )` util helper that clicks the `Update` button on an order
+
+## Changed
+
+- Added coupon type parameter to `createCoupon( couponAmount, couponType )`. Default coupon type is fixed cart.
+
 # 0.1.2
 
 ## Fixed
 
 - Missing `config` package dependency
+- Added `page.removeAllListeners('dialog')` to `createVariableProduct()` to fix dialog already handled errors
 
 ## Added
 
@@ -21,6 +59,7 @@
 - Deprecated `StoreOwnerFlow`, `CustomerFlow` in favour of `merchant`,`shopper`
 - `createSimpleOrder( status )` returns the ID of the order that was created
 - Updated `createCoupon( couponAmount )` component by adding a new parameter `discountType` which allows you to use any coupon discount type in tests
+- Updated `verifyAndPublish( noticeText )` component by add a new parameter, `noticeText`, that allows passing in the accepted update notice text. For example, with variations on creation or update.
 
 # 0.1.1
 

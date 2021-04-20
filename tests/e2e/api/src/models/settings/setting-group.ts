@@ -1,7 +1,7 @@
 import { Model, ModelID } from '../model';
 import { HTTPClient } from '../../http';
-import { settingGroupRESTRepository } from '../../repositories/rest/settings/setting-group';
-import { ListsModels, ModelRepositoryParams } from '../../framework/model-repository';
+import { settingGroupRESTRepository } from '../../repositories';
+import { ListsModels, ModelRepositoryParams } from '../../framework';
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give

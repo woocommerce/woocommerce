@@ -1,6 +1,5 @@
 import { ModelTransformation, ModelTransformer, TransformationOrder } from '../model-transformer';
-import { Model } from '../../models/model';
-import { ModelConstructor } from '../../models/shared-types';
+import { Model, ModelConstructor } from '../../models';
 
 /**
  * A model transformation that applies another transformer to a property.

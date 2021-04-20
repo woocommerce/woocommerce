@@ -1,0 +1,42 @@
+name: Run code sniff on PR
+on:
+  pull_request
+jobs:
+  test:
+    name: Code sniff (PHP 7.4, WP Latest)
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer, cs2pr
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Get cached composer directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+
+      - name: Setup and install composer
+        run: composer install
+
+      - name: Run code sniff
+        continue-on-error: true
+        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
+      
+      - name: Show PHPCS results in PR
+        run: cs2pr ./phpcs-report.xml

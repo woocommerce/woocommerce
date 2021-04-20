@@ -32,7 +32,7 @@ jQuery( function ( $ ) {
 			$( $( this ).attr( 'href' ) ).show();
 		});
 		$( 'div.panel-wrap' ).each( function() {
-			$( this ).find( 'ul.wc-tabs li' ).eq( 0 ).find( 'a' ).click();
+			$( this ).find( 'ul.wc-tabs li' ).eq( 0 ).find( 'a' ).trigger( 'click' );
 		});
 	}).trigger( 'wc-init-tabbed-panels' );
 

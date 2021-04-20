@@ -1,5 +1,6 @@
 /** @format */
-const { useE2EEsLintConfig } = require( '@woocommerce/e2e-environment' );
+
+const { useE2EEsLintConfig } = require( './tests/e2e/env/config/use-config' );
 
 module.exports = useE2EEsLintConfig( {
 	root: true,

@@ -1,19 +1,60 @@
 # Unreleased
 
+## Added
+
+- Support for re-running setup and shopper tests
+- Shopper Order Email Receiving
+
+## Fixed
+
+- Checkout create account test would fail if configuration value `addresses.customer.billing.email` was not `john.doe@example.com` 
+
+# 0.1.3
+
+## Added
+
+- Shopper Checkout Login Account
+- Shopper My Account Create Account
+- Shopper Cart Calculate Shipping
+- Shopper Cart Redirection
+
+## Fixed
+
+- removed use of ES6 `import`
+
+# 0.1.2
+
+## Added
+
+- api package test for variable products and product variations
+- api package test for grouped products
+- api package test for external products
+- api package test for coupons
+- Registered Shopper Checkout tests
+- Merchant Product Edit tests
+- Merchant Product Search tests
+- Shopper Single Product tests
+- Shopper My Account Pay Order
+- Shopper Shop Browse Search Sort
+- Merchant Orders Customer Checkout Page
+- Shopper Cart Apply Coupon
+- Merchant Order Searching
+- Merchant Settings Shipping Zones
+- Shopper Variable product info updates on different variations
+- Merchant order emails flow
+- Merchant analytics page load tests
+- Shopper Checkout Create Account
+- Merchant import products via CSV
+
 # 0.1.1
 
 ## Added
 
-- Registered Shopper Checkout tests
 - Merchant Order Status Filter tests
 - Merchant Order Refund tests
 - Merchant Apply Coupon tests
 - Added new config variable for Simple Product price to `tests/e2e/env/config/default.json`. Defaults to 9.99
-
 - Shopper Checkout Apply Coupon
-
-
-- Shopper Cart Apply Coupon
 
 ## Fixed
 

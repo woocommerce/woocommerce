@@ -398,7 +398,12 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-single-product' );
 		}
 
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+		// Only enqueue the geolocation script if the Default Current Address is set to "Geolocate
+		// (with Page Caching Support) and outside of the cart, checkout, account and customizer preview.
+		if (
+			'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' )
+			&& ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() )
+		) {
 			$ua = strtolower( wc_get_user_agent() ); // Exclude common bots from geolocation by user agent.
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
@@ -473,8 +478,6 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
-					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
-					'hash'         => isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : '', // WPCS: input var ok, CSRF ok.
 				);
 				break;
 			case 'wc-single-product':

@@ -1,5 +1,5 @@
 import { mock, MockProxy } from 'jest-mock-extended';
-import { UpdatesSettings } from '../../models/settings/setting';
+import { UpdatesSettings } from '../../models';
 import { SettingService } from '../setting-service';
 
 describe( 'SettingService', () => {

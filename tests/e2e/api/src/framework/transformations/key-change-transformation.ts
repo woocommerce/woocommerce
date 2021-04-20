@@ -1,5 +1,5 @@
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
-import { Model } from '../../models/model';
+import { Model } from '../../models';
 
 /**
  * @typedef KeyChanges

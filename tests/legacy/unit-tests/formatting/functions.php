@@ -618,7 +618,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Ex tax label.
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
@@ -926,7 +926,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_sale_price() {
-		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>10.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>5.00</bdi></span></ins>', wc_format_sale_price( '10', '5' ) );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>10.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>5.00</bdi></span></ins>', wc_format_sale_price( '10', '5' ) );
 	}
 
 	/**

@@ -13,7 +13,7 @@
 				$( this ).closest('tr').next( 'tr' ).hide();
 				$( this ).closest('tr').next().next( 'tr' ).hide();
 			}
-		}).change();
+		}).trigger( 'change' );
 
 		// Ship Countries
 		$( 'select#woocommerce_ship_to_countries' ).change( function() {
@@ -22,7 +22,7 @@
 			} else {
 				$( this ).closest('tr').next( 'tr' ).hide();
 			}
-		}).change();
+		}).trigger( 'change' );
 
 		// Stock management
 		$( 'input#woocommerce_manage_stock' ).change( function() {
@@ -31,7 +31,7 @@
 			} else {
 				$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).hide();
 			}
-		}).change();
+		}).trigger( 'change' );
 
 		// Color picker
 		$( '.colorpick' )
@@ -56,9 +56,9 @@
 					var original_value = $( this ).data( 'original-value' );
 
 					if ( original_value.match( /^\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/ ) ) {
-						$( this ).val( $( this ).data( 'original-value' ) ).change();
+						$( this ).val( $( this ).data( 'original-value' ) ).trigger( 'change' );
 					} else {
-						$( this ).val( '' ).change();
+						$( this ).val( '' ).trigger( 'change' );
 					}
 				}
 			});

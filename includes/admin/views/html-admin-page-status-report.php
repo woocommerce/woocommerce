@@ -5,15 +5,11 @@
  * @package WooCommerce
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
-
-if ( ! defined( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) ) {
-	// Define if we're checking against major or minor versions.
-	// Since 5.0 all versions are backwards compatible, so there's no more check.
-	define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
-}
 
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
@@ -27,7 +23,7 @@ $security           = $report['security'];
 $settings           = $report['settings'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
-$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE );
+$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) );
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -518,7 +514,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, WC_S
 	<tbody>
 		<tr>
 			<td data-export-label="WC Database Version"><?php esc_html_e( 'WooCommerce database version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce version.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The database version for WooCommerce. Note that it may not match WooCommerce core version and that is normal.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
 		</tr>
 		<tr>
@@ -1018,3 +1014,19 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 </table>
 
 <?php do_action( 'woocommerce_system_status_report' ); ?>
+
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+	<tr>
+		<th colspan="3" data-export-label="Status report information"><h2><?php esc_html_e( 'Status report information', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows information about this status report.', 'woocommerce' ) ); ?></h2></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td data-export-label="Generated at"><?php esc_html_e( 'Generated at', 'woocommerce' ); ?>:</td>
+		<td class="help">&nbsp;</td>
+		<td><?php echo esc_html( current_time( 'Y-m-d H:i:s P' ) ); ?></td>
+
+	</tr>
+	</tbody>
+</table>
