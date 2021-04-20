@@ -48,7 +48,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	public function get_settings() {
 		$desc_help_text = sprintf(
 		/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
-			__( 'To ensure your store’s notifications arrive in your and your customers’ inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn’t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
+			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://docs.woocommerce.com/document/email-faq'
 		);
