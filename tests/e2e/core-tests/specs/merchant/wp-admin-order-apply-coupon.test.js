@@ -11,9 +11,8 @@ const {
 	uiUnblocked,
 	addProductToOrder,
 	evalAndClick,
-	takeScreenshotFor,
-	sendFailedTestScreenshotToSlack,
 } = require( '@woocommerce/e2e-utils' );
+const { takeScreenshotFor, sendFailedTestScreenshotToSlack } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -47,7 +46,6 @@ const runOrderApplyCouponTest = () => {
 			const couponDialog = await expect(page).toDisplayDialog(async () => {
 				await expect(page).toClick('button.add-coupon');
 			});
-
 			expect(couponDialog.message()).toMatch(couponDialogMessage);
 
 			// Accept the dialog with the coupon code
