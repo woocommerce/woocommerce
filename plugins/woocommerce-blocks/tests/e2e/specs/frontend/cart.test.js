@@ -92,8 +92,10 @@ describe( `${ block.name } Block (frontend)`, () => {
 
 		await page.waitForResponse(
 			( response ) =>
-				response.url().includes( '/wc/store/cart/update-item' ) &&
-				response.status() === 200
+				( response.url().includes( '/wc/store/cart/update-item' ) &&
+					response.status() === 200 ) ||
+				( response.url().includes( '/wc/store/batch' ) &&
+					response.status() === 207 )
 		);
 
 		const selectedValue = parseInt(

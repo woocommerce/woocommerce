@@ -42,7 +42,8 @@ class CartCoupons extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'callback'            => [ $this, 'get_response' ],
 			],
-			'schema' => [ $this->schema, 'get_public_item_schema' ],
+			'schema'      => [ $this->schema, 'get_public_item_schema' ],
+			'allow_batch' => [ 'v1' => true ],
 		];
 	}
 

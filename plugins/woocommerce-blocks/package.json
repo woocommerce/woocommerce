@@ -183,6 +183,7 @@
 		"classnames": "2.2.6",
 		"compare-versions": "3.6.0",
 		"config": "3.3.3",
+		"dataloader": "^2.0.0",
 		"dinero.js": "1.8.1",
 		"downshift": "6.1.0",
 		"github-label-sync": "2.0.0",
