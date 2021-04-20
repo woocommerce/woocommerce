@@ -84,6 +84,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add event recording to start of gateway connections #6801
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Use the store timezone to make time data requests #6632
+- Fix: Update the checked input radio button margin style #6701
 - Fix: Make pagination buttons height and width consistent #6725
 - Fix: Retain persisted queries when navigating to Homescreen #6614
 - Fix: Update folded header style #6724

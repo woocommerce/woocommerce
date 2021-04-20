@@ -32,6 +32,11 @@
 1. Visit any admin page with the params `plugin_action` (`install`, `activate`, or `install-activate`) and `plugins` (list of comma separated plugins). `wp-admin/admin.php?page=wc-admin&plugin_action=install&plugins=jetpack`
 2. If visiting this URL from a link, make sure you are sent back to the referer.
 3. Check that the plugins provided are installed, activated, or both depending on your query.
+### Update the checked input radio button margin style #6701
+1. Go to Home.
+2. Click on 'Add my products'.
+3. Select 'Start with a template'.
+4. Click on the input radio button and see that render as expected.
 
 ### Retain persisted queries when navigating to Homescreen #6614
 

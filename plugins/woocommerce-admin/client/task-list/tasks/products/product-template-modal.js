@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal } from '@wordpress/components';
+import { Button, Modal, RadioControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
-import { List } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -48,7 +47,7 @@ const PRODUCT_TEMPLATES = [
 ];
 
 export default function ProductTemplateModal( { onClose } ) {
-	const [ selectedTemplate, setSelectedTemplate ] = useState();
+	const [ selectedTemplate, setSelectedTemplate ] = useState( null );
 	const [ isRedirecting, setIsRedirecting ] = useState( false );
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 
@@ -85,11 +84,6 @@ export default function ProductTemplateModal( { onClose } ) {
 		}
 	};
 
-	const onSelectTemplateClick = ( event ) => {
-		const val = event.target && event.target.value;
-		setSelectedTemplate( val );
-	};
-
 	const templates = applyFilters(
 		ONBOARDING_PRODUCT_TEMPLATES_FILTER,
 		PRODUCT_TEMPLATES
@@ -104,36 +98,25 @@ export default function ProductTemplateModal( { onClose } ) {
 		>
 			<div className="woocommerce-product-template-modal__wrapper">
 				<div className="woocommerce-product-template-modal__list">
-					<List items={ templates }>
-						{ ( item, index ) => (
-							<div className="woocommerce-list__item-inner">
-								<input
-									id={ `product-templates-${
-										item.key || index
-									}` }
-									className="components-radio-control__input"
-									type="radio"
-									name="product-template-options"
-									value={ item.key }
-									onChange={ onSelectTemplateClick }
-									checked={ item.key === selectedTemplate }
-								/>
-								<label
-									className="woocommerce-list__item-text"
-									htmlFor={ `product-templates-${
-										item.key || index
-									}` }
-								>
-									<div className="woocommerce-list__item-label">
-										{ item.title }
-									</div>
-									<div className="woocommerce-list__item-subtitle">
-										{ item.subtitle }
-									</div>
-								</label>
-							</div>
-						) }
-					</List>
+					<RadioControl
+						selected={ selectedTemplate }
+						options={ templates.map( ( item ) => {
+							return {
+								label: (
+									<>
+										<span className="woocommerce-product-template-modal__list-title">
+											{ item.title }
+										</span>
+										<span className="woocommerce-product-template-modal__list-subtitle">
+											{ item.subtitle }
+										</span>
+									</>
+								),
+								value: item.key,
+							};
+						} ) }
+						onChange={ setSelectedTemplate }
+					/>
 				</div>
 				<div className="woocommerce-product-template-modal__actions">
 					<Button
