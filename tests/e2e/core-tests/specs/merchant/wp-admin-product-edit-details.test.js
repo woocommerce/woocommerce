@@ -35,7 +35,6 @@ const runProductEditDetailsTest = () => {
 			await expect(page).toFill('#_regular_price', '100.05');
 
 			// Save the changes
-			await expect(page).toClick('#publish');
 			await verifyAndPublish('Product updated.');
 			await uiUnblocked();
 
