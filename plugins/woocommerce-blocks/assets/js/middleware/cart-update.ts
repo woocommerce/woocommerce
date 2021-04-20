@@ -12,11 +12,35 @@ import { LAST_CART_UPDATE_TIMESTAMP_KEY } from '../data/cart/constants';
  * Checks if this request is a POST to the wc/store/cart endpoint.
  */
 const isCartUpdatePostRequest = ( options: APIFetchOptions ) => {
-	const url = options.url || options.path;
-	if ( ! url || ! options.method || options.method !== 'POST' ) {
+	const url = options.url || options.path || '';
+	const method = options.method || 'GET';
+
+	// Return false if there is no endpoint provided, or the request is not a POST request.
+	if ( ! url || method !== 'POST' ) {
 		return false;
 	}
-	return /wc\/store\/cart\//.exec( url ) !== null;
+
+	const cartRegExp = /wc\/store\/cart\//;
+	const batchRegExp = /wc\/store\/batch/;
+
+	const isCart = cartRegExp.exec( url ) !== null;
+	const isBatch = batchRegExp.exec( url ) !== null;
+
+	if ( isCart ) {
+		return true;
+	}
+
+	if ( isBatch ) {
+		const requests = options?.data?.requests || [];
+
+		return requests.some( ( request: { path: string } ) => {
+			const requestUrl = request.path || '';
+
+			return cartRegExp.exec( requestUrl ) !== null;
+		} );
+	}
+
+	return false;
 };
 
 /**

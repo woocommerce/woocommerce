@@ -17,13 +17,13 @@ try {
 }
 
 /**
- * Returns whether or not this is a non GET wc/store API request.
+ * Returns whether or not this is a wc/store API request.
  *
  * @param {Object} options Fetch options.
  *
  * @return {boolean} Returns true if this is a store request.
  */
-const isStoreApiGetRequest = ( options ) => {
+const isStoreApiRequest = ( options ) => {
 	const url = options.url || options.path;
 	if ( ! url || ! options.method || options.method === 'GET' ) {
 		return false;
@@ -37,8 +37,14 @@ const isStoreApiGetRequest = ( options ) => {
  * @param {Object} headers Headers object.
  */
 const setNonce = ( headers ) => {
-	const nonce = headers?.get( 'X-WC-Store-API-Nonce' ) || '';
-	const timestamp = headers?.get( 'X-WC-Store-API-Nonce-Timestamp' ) || 0;
+	const nonce =
+		typeof headers?.get === 'function'
+			? headers.get( 'X-WC-Store-API-Nonce' )
+			: headers[ 'X-WC-Store-API-Nonce' ];
+	const timestamp =
+		typeof headers?.get === 'function'
+			? headers.get( 'X-WC-Store-API-Nonce-Timestamp' )
+			: headers[ 'X-WC-Store-API-Nonce-Timestamp' ];
 
 	if ( nonce ) {
 		updateNonce( nonce, timestamp );
@@ -75,21 +81,32 @@ const updateNonce = ( nonce, timestamp ) => {
 	);
 };
 
+const appendNonceHeader = ( request ) => {
+	const headers = request.headers || {};
+	request.headers = {
+		...headers,
+		'X-WC-Store-API-Nonce': currentNonce,
+	};
+	return request;
+};
+
 /**
- * Nonce middleware which updates the nonce after a request, if given.
+ * Nonce middleware which appends the current nonce to store API requests.
  *
  * @param {Object}   options Fetch options.
  * @param {Function} next    The next middleware or fetchHandler to call.
- *
  * @return {*} The evaluated result of the remaining middleware chain.
  */
 const storeNonceMiddleware = ( options, next ) => {
-	if ( isStoreApiGetRequest( options ) ) {
-		const existingHeaders = options.headers || {};
-		options.headers = {
-			...existingHeaders,
-			'X-WC-Store-API-Nonce': currentNonce,
-		};
+	if ( isStoreApiRequest( options ) ) {
+		options = appendNonceHeader( options );
+
+		// Add nonce to sub-requests
+		if ( Array.isArray( options?.data?.requests ) ) {
+			options.data.requests = options.data.requests.map(
+				appendNonceHeader
+			);
+		}
 	}
 	return next( options, next );
 };

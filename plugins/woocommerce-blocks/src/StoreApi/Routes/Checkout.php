@@ -120,7 +120,8 @@ class Checkout extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => $this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			],
-			'schema' => [ $this->schema, 'get_public_item_schema' ],
+			'schema'      => [ $this->schema, 'get_public_item_schema' ],
+			'allow_batch' => [ 'v1' => true ],
 		];
 	}
 

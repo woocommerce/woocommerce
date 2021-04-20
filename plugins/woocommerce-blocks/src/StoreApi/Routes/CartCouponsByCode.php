@@ -23,7 +23,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 */
 	public function get_args() {
 		return [
-			'args'   => [
+			'args'        => [
 				'code' => [
 					'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
@@ -42,7 +42,8 @@ class CartCouponsByCode extends AbstractCartRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 			],
-			'schema' => [ $this->schema, 'get_public_item_schema' ],
+			'schema'      => [ $this->schema, 'get_public_item_schema' ],
+			'allow_batch' => [ 'v1' => true ],
 		];
 	}
 
