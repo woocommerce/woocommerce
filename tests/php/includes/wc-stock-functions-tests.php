@@ -193,6 +193,17 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Assert that a value is equal to another one and is of integer type.
+	 *
+	 * @param mixed $expected The value $actual must be equal to.
+	 * @param mixed $actual The value to check for equality to $expected and for type.
+	 */
+	private function assertIsIntAndEquals( $expected, $actual ) {
+		$this->assertEquals( $expected, $actual );
+		$this->assertIsInt( $actual );
+	}
+
+	/**
 	 * Test wc_get_low_stock_amount with a simple product which has low stock amount set.
 	 */
 	public function test_wc_get_low_stock_amount_simple_set() {
@@ -200,7 +211,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$site_wide_low_stock_amount = 3;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Simple product, set low stock amount.
 		$product = WC_Helper_Product::create_simple_product(
@@ -212,7 +223,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( $product_low_stock_amount, wc_get_low_stock_amount( $product ) );
+		$this->assertIsIntAndEquals( $product_low_stock_amount, wc_get_low_stock_amount( $product ) );
 	}
 
 	/**
@@ -222,7 +233,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$site_wide_low_stock_amount = 3;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Simple product, don't set low stock amount.
 		$product = WC_Helper_Product::create_simple_product(
@@ -233,7 +244,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $product ) );
+		$this->assertIsIntAndEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $product ) );
 	}
 
 	/**
@@ -245,7 +256,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$variation_low_stock_amount = 7;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Parent low stock amount NOT set.
 		$variable_product = WC_Helper_Product::create_variation_product();
@@ -259,17 +270,17 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$var1->set_low_stock_amount( $variation_low_stock_amount );
 		$var1->save();
 
-		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 
 		// Even after turning on manage stock on the parent, but with no value.
 		$variable_product->set_manage_stock( true );
 		$variable_product->save();
-		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 
 		// Ans also after turning the manage stock off again on the parent.
 		$variable_product->set_manage_stock( false );
 		$variable_product->save();
-		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
 
 	/**
@@ -282,7 +293,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$variation_low_stock_amount = 7;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Set the parent low stock amount.
 		$variable_product = WC_Helper_Product::create_variation_product();
@@ -297,7 +308,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$var1->set_low_stock_amount( $variation_low_stock_amount );
 		$var1->save();
 
-		$this->assertEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $variation_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
 
 	/**
@@ -309,7 +320,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$parent_low_stock_amount    = 5;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Set the parent low stock amount.
 		$variable_product = WC_Helper_Product::create_variation_product();
@@ -321,7 +332,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$variations = $variable_product->get_available_variations( 'objects' );
 		$var1       = $variations[0];
 
-		$this->assertEquals( $parent_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $parent_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
 
 	/**
@@ -332,7 +343,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$site_wide_low_stock_amount = 3;
 
 		// Set the store-wide default.
-		update_option( 'woocommerce_notify_low_stock_amount', $site_wide_low_stock_amount );
+		update_option( 'woocommerce_notify_low_stock_amount', strval( $site_wide_low_stock_amount ) );
 
 		// Set the parent low stock amount.
 		$variable_product = WC_Helper_Product::create_variation_product();
@@ -343,7 +354,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$var1       = $variations[0];
 		$var1->set_manage_stock( false );
 
-		$this->assertEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
+		$this->assertIsIntAndEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
 
 }
