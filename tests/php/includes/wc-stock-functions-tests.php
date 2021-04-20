@@ -228,8 +228,8 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
-				'manage_stock'     => true,
-				'stock_quantity'   => 10,
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
 			)
 		);
 
@@ -254,7 +254,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Set the variation low stock amount.
 		$variations = $variable_product->get_available_variations( 'objects' );
-		$var1 = $variations[0];
+		$var1       = $variations[0];
 		$var1->set_manage_stock( true );
 		$var1->set_low_stock_amount( $variation_low_stock_amount );
 		$var1->save();
@@ -292,7 +292,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Set the variation low stock amount.
 		$variations = $variable_product->get_available_variations( 'objects' );
-		$var1 = $variations[0];
+		$var1       = $variations[0];
 		$var1->set_manage_stock( true );
 		$var1->set_low_stock_amount( $variation_low_stock_amount );
 		$var1->save();
@@ -319,7 +319,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Don't set the variation low stock amount.
 		$variations = $variable_product->get_available_variations( 'objects' );
-		$var1 = $variations[0];
+		$var1       = $variations[0];
 
 		$this->assertEquals( $parent_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
@@ -340,7 +340,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Don't set the variation low stock amount.
 		$variations = $variable_product->get_available_variations( 'objects' );
-		$var1 = $variations[0];
+		$var1       = $variations[0];
 		$var1->set_manage_stock( false );
 
 		$this->assertEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
