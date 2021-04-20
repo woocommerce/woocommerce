@@ -411,5 +411,5 @@ function wc_get_low_stock_amount( WC_Product $product ) {
 		$low_stock_amount = get_option( 'woocommerce_notify_low_stock_amount', 2 );
 	}
 
-	return intval( $low_stock_amount );
+	return (int) $low_stock_amount;
 }
