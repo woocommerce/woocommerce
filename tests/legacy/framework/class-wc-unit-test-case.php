@@ -246,4 +246,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function register_legacy_proxy_class_mocks( array $mocks ) {
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
 	}
+
+	/**
+	 * Check if a value is of integer type.
+	 * This function is already built-in in PHPUnit 8 so this one can be removed once we upgrade to that version of newer.
+	 *
+	 * @param mixed $value The value to check.
+	 * @return bool mixed True if the value is of integer type, false otherwise.
+	 */
+	protected function assertIsInt( $value ) {
+		return $this->assertInternalType( 'int', $value );
+	}
 }
