@@ -51,7 +51,12 @@ class WC_Admin_Taxonomies {
 
 		// Category/term ordering.
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
-		add_action( 'delete_product_cat', array( $this, 'assign_default_product_cat' ) );
+		add_action(
+			'delete_product_cat',
+			function() {
+				wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
+			}
+		);
 
 		// Add form.
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
@@ -111,18 +116,6 @@ class WC_Admin_Taxonomies {
 	 */
 	public function delete_term( $term_id ) {
 		wc_deprecated_function( 'delete_term', '3.6' );
-	}
-
-	/**
-	 * Assigns default product category. This is done when the product
-	 * has no assgined product category.
-	 *
-	 * @since 5.4
-	 * @return void
-	 */
-	public function assign_default_product_cat() {
-		// Schedule action to assign default category.
-		wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 	}
 
 	/**
