@@ -167,7 +167,7 @@
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
-		"node": "12.21.0",
+		"node": "12.22.1",
 		"npm": "6.14.8"
 	},
 	"dependencies": {
