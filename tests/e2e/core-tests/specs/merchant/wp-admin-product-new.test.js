@@ -84,12 +84,19 @@ const runAddSimpleProductTest = () => {
 
 const runAddVariableProductTest = () => {
 	describe('Add New Variable Product Page', () => {
-		it('can create product with variations', async () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+
+		it('can create variable product', async () => {
 			await openNewProductAndVerify();
 
 			// Set product data
 			await expect(page).toFill('#title', 'Variable Product with Three Variations');
 			await expect(page).toSelect('#product-type', 'Variable product');
+		});
+
+		it('can create set variable product attributes', async () => {
 
 			// Create attributes for variations
 			await waitAndClick( page, '.attribute_tab a' );
@@ -111,7 +118,9 @@ const runAddVariableProductTest = () => {
 			// Wait for attribute form to save (triggers 2 UI blocks)
 			await uiUnblocked();
 			await uiUnblocked();
+		});
 
+		it('can create variable product variations', async () => {
 			// Create variations from attributes
 			await waitForSelector( page, '.variations_tab' );
 			await waitAndClick( page, '.variations_tab a' );
@@ -129,8 +138,11 @@ const runAddVariableProductTest = () => {
 			// Set some variation data
 			await uiUnblocked();
 			await uiUnblocked();
+		});
 
+		it('can create variation attributes', async () => {
 			await waitAndClick( page, '.variations_tab a' );
+			await uiUnblocked();
 			await waitForSelector(
 				page,
 				'select[name="attribute_attr-1[0]"]',
