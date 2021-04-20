@@ -200,7 +200,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	private function assertIsIntAndEquals( $expected, $actual ) {
 		$this->assertEquals( $expected, $actual );
-		$this->assertIsInt( $actual );
+		self::assertIsInteger( $actual );
 	}
 
 	/**
