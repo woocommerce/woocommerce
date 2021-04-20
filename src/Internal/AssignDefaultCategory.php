@@ -25,6 +25,8 @@ class AssignDefaultCategory {
 	 * if the product has no categories assigned. Then assign
 	 * it a default category. We delay this with a scheduled
 	 * action job to not block the response.
+	 *
+	 * @return void
 	 */
 	public function schedule_action() {
 		WC()->queue()->schedule_single(
@@ -39,7 +41,6 @@ class AssignDefaultCategory {
 	 * Assigns default product category for products
 	 * that have no categories.
 	 *
-	 * @since 5.4
 	 * @return void
 	 */
 	public function maybe_assign_default_product_cat() {
