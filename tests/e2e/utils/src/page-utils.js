@@ -79,7 +79,14 @@ export const unsetCheckbox = async( selector ) => {
  * Wait for UI blocking to end.
  */
 export const uiUnblocked = async () => {
-	await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
+	await elementUnblocked( '.blockUI' );
+};
+
+/**
+ * Wait for element to close.
+ */
+export const elementUnblocked = async ( selector ) => {
+	await page.waitForFunction( ( selector ) => ! Boolean( document.querySelector( selector ) ) );
 };
 
 /**
