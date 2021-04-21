@@ -28,6 +28,20 @@ export function setLoadingState( isLoading ) {
 	};
 }
 
+export function setOptionForEditing( editingOption ) {
+	return {
+		type: TYPES.SET_OPTION_FOR_EDITING,
+		editingOption,
+	};
+}
+
+export function setNotice( notice ) {
+	return {
+		type: TYPES.SET_NOTICE,
+		notice,
+	};
+}
+
 export function* deleteOptionById( optionId ) {
 	try {
 		yield apiFetch( {
@@ -39,6 +53,29 @@ export function* deleteOptionById( optionId ) {
 			optionId,
 		};
 	} catch {
+		throw new Error();
+	}
+}
+
+export function* saveOption( optionName, newOptionValue ) {
+	try {
+		const payload = {};
+		payload[ optionName ] = JSON.parse( newOptionValue );
+		yield apiFetch( {
+			method: 'POST',
+			path: '/wc-admin/options',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify( payload ),
+		} );
+		yield setNotice( {
+			status: 'success',
+			message: optionName + ' has been saved.',
+		} );
+	} catch {
+		yield setNotice( {
+			status: 'error',
+			message: 'Unable to save ' + optionName,
+		} );
 		throw new Error();
 	}
 }
