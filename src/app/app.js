@@ -11,26 +11,23 @@ import { AdminNotes } from '../admin-notes';
 import { Tools } from '../tools';
 import { default as Options } from '../options';
 
-const tabs = applyFilters(
-	'woocommerce_admin_test_helper_tabs',
-	[
-		{
-			name: 'options',
-			title: 'Options',
-			content: <Options/>,
-		},
-		{
-			name: 'admin-notes',
-			title: 'Admin notes',
-			content: <AdminNotes/>,
-		},
-		{
-			name: 'tools',
-			title: 'Tools',
-			content: <Tools/>,
-		},
-	]
-);
+const tabs = applyFilters('woocommerce_admin_test_helper_tabs', [
+	{
+		name: 'options',
+		title: 'Options',
+		content: <Options />,
+	},
+	{
+		name: 'admin-notes',
+		title: 'Admin notes',
+		content: <AdminNotes />,
+	},
+	{
+		name: 'tools',
+		title: 'Tools',
+		content: <Tools />,
+	},
+]);
 
 export function App() {
 	return (
@@ -39,18 +36,18 @@ export function App() {
 			<TabPanel
 				className="woocommerce-admin-test-helper__main-tab-panel"
 				activeClass="active-tab"
-				tabs={ tabs }
-				initialTabName={ tabs[ 0 ].name }
+				tabs={tabs}
+				initialTabName={tabs[0].name}
 			>
-				{ ( tab ) => (
+				{(tab) => (
 					<>
-						{ tab.content }
-						{ applyFilters(
-							`woocommerce_admin_test_helper_tab_${ tab.name }`,
+						{tab.content}
+						{applyFilters(
+							`woocommerce_admin_test_helper_tab_${tab.name}`,
 							[]
-						) }
+						)}
 					</>
-				) }
+				)}
 			</TabPanel>
 		</div>
 	);
