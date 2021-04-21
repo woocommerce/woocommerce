@@ -77,15 +77,21 @@ describe( `${ block.name } Block (frontend)`, () => {
 	} );
 
 	it( 'Shows the freshest cart data when using browser navigation buttons', async () => {
-		await jest.setTimeout( 60000 );
 		await page.goto( cartBlockPermalink );
-		await page.waitForFunction( () => {
-			const wcCartStore = wp.data.select( 'wc/store/cart' );
-			return (
-				! wcCartStore.isResolving( 'getCartData' ) &&
-				wcCartStore.hasFinishedResolution( 'getCartData', [] )
-			);
-		} );
+
+		await page
+			.waitForFunction( () => {
+				const wcCartStore = wp.data.select( 'wc/store/cart' );
+				return (
+					! wcCartStore.isResolving( 'getCartData' ) &&
+					wcCartStore.hasFinishedResolution( 'getCartData', [] )
+				);
+			} )
+			.catch( ( err ) => {
+				throw new Error(
+					'Waiting for the wc/store/cart to not be resolving and to have finished resolution failed. This probably means the block did not load correctly.'
+				);
+			} );
 		await page.click(
 			'.wc-block-cart__main .wc-block-components-quantity-selector__button--plus'
 		);
@@ -112,12 +118,21 @@ describe( `${ block.name } Block (frontend)`, () => {
 		await page.waitForSelector( '.wc-block-checkout' );
 		await page.goBack( { waitUntil: 'networkidle0' } );
 
-		await page.waitForFunction( () => {
-			const timeStamp = window.localStorage.getItem(
-				'wc-blocks_cart_update_timestamp'
-			);
-			return typeof timeStamp === 'string' && timeStamp;
-		} );
+		await page
+			.waitForFunction(
+				() => {
+					const timeStamp = window.localStorage.getItem(
+						'wc-blocks_cart_update_timestamp'
+					);
+					return typeof timeStamp === 'string' && timeStamp;
+				},
+				{ timeout: 5000 }
+			)
+			.catch( ( err ) => {
+				throw new Error(
+					'Could not get the wc-blocks_cart_update_timestamp item from local storage. It must not have been set by the cartUpdateMiddleware.'
+				);
+			} );
 
 		const timestamp = await page.evaluate( () => {
 			return window.localStorage.getItem(
@@ -127,19 +142,31 @@ describe( `${ block.name } Block (frontend)`, () => {
 		expect( timestamp ).not.toBeNull();
 
 		// We need this to check if the block is done loading.
-		await page.waitForFunction( () => {
-			const wcCartStore = wp.data.select( 'wc/store/cart' );
-			return (
-				! wcCartStore.isResolving( 'getCartData' ) &&
-				wcCartStore.hasFinishedResolution( 'getCartData', [] )
-			);
-		} );
+		await page
+			.waitForFunction( () => {
+				const wcCartStore = wp.data.select( 'wc/store/cart' );
+				return (
+					! wcCartStore.isResolving( 'getCartData' ) &&
+					wcCartStore.hasFinishedResolution( 'getCartData', [] )
+				);
+			} )
+			.catch( ( err ) => {
+				throw new Error(
+					'Waiting for the wc/store/cart to not be resolving and to have finished resolution failed. This probably means the block did not load correctly.'
+				);
+			} );
 
 		// Then we check to ensure the stale cart action has been emitted, so it'll fetch the cart from the API.
-		await page.waitForFunction( () => {
-			const wcCartStore = wp.data.select( 'wc/store/cart' );
-			return wcCartStore.isCartDataStale() === true;
-		} );
+		await page
+			.waitForFunction( () => {
+				const wcCartStore = wp.data.select( 'wc/store/cart' );
+				return wcCartStore.isCartDataStale() === true;
+			} )
+			.catch( ( err ) => {
+				throw new Error(
+					'isCartDataStale on the wc/store/cart store is not true. The cart contents were not correctly marked as stale.'
+				);
+			} );
 
 		const value = parseInt(
 			await page.$eval(
