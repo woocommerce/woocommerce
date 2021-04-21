@@ -5,7 +5,7 @@
  * @package Automattic\WooCommerce\ThemeManagement
  */
 
-namespace Automattic\WooCommerce\ThemeManagement;
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;

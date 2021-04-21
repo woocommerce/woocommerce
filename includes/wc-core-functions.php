@@ -9,7 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {

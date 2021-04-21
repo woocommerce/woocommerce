@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Tests\ThemeManagement;
 
-use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 
 /**
  * Tests for ThemeSupport

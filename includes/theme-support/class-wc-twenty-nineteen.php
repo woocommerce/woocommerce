@@ -7,7 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 
 defined( 'ABSPATH' ) || exit;
 
