@@ -34,15 +34,15 @@ const runOrderApplyCouponTest = () => {
 			await Promise.all([
 				addProductToOrder(orderId, simpleProductName),
 
-				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
-				page.removeAllListeners('dialog'),
-			]);
+			// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
+			await page.removeAllListeners('dialog');
 
 			// Make sure the simple product price is greater than the coupon amount
 			await expect(Number(simpleProductPrice)).toBeGreaterThan(5.00);
 		} );
 
 		it('can apply a coupon', async () => {
+			await page.waitForSelector('button.add-coupon');
 			const couponDialog = await expect(page).toDisplayDialog(async () => {
 				await evalAndClick('button.add-coupon');
 			});
@@ -50,7 +50,6 @@ const runOrderApplyCouponTest = () => {
 
 			// Accept the dialog with the coupon code
 			await couponDialog.accept(couponCode);
-
 			await uiUnblocked();
 
 			// Verify the coupon list is showing
@@ -64,12 +63,6 @@ const runOrderApplyCouponTest = () => {
 		});
 
 		it('can remove a coupon', async () => {
-			// Temporarily add screenshot
-			const screenshot = await takeScreenshotFor( 'before removing a coupon' );
-			if ( screenshot.filePath ) {
-				await sendFailedTestScreenshotToSlack( screenshot.filePath );
-			}
-
 			// Make sure we have a coupon on the page to use
 			await page.waitForSelector('.wc-used-coupons');
 			await expect(page).toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });
