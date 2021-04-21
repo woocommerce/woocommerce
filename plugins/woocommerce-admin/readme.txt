@@ -86,6 +86,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Use the store timezone to make time data requests #6632
 - Fix: Update the checked input radio button margin style #6701
+- Fix: Convert date to timestamp before passing to set_date_prop to persist timezone #6795
 - Fix: Make pagination buttons height and width consistent #6725
 - Fix: Retain persisted queries when navigating to Homescreen #6614
 - Fix: Update folded header style #6724
@@ -94,7 +95,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Remove no-reply from inbox notification emails #6644
 - Fix: Set up shipping costs task, redirect to shipping settings after completion. #6791
 - Fix: Onboarding logic on WooCommerce update to keep task list present. #6803
-- Fix: Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin #6710
 - Fix: Pause inbox message “GivingFeedbackNotes” #6802
 - Fix: Missed DB version number updates causing unnecessary upgrades. #6818
 - Fix: Parsing bad JSON string data from user WooCommerce meta. #6819
