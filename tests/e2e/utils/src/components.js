@@ -17,7 +17,9 @@ import {
 	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
+import { Coupon } from '@woocommerce/api';
 
+const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
@@ -452,23 +454,29 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param discountType Type of a coupon. Defaults to Fixed cart discount.
  */
 const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart discount' ) => {
-	await merchant.openNewCoupon();
+	let couponType;
+	switch ( discountType ) {
+		case "Fixed cart discount":
+			couponType = 'fixed_cart';
+			break;
+		case "Fixed product discount":
+			couponType = 'fixed_product';
+			break;
+		case "Percentage discount":
+			couponType = 'percent';
+			break;
+		default:
+			return '';
+	}
 
 	// Fill in coupon code
-	let couponCode = 'Code-' + discountType + new Date().getTime().toString();
-	await expect(page).toFill( '#title', couponCode );
-
-	// Set general coupon data
-	await clickTab( 'General' );
-	await expect(page).toSelect( '#discount_type', discountType );
-	await expect(page).toFill( '#coupon_amount', couponAmount );
-
-	// Publish coupon
-	await expect( page ).toClick( '#publish' );
-	await page.waitForSelector( '.updated.notice' );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+	let couponCode = 'code-' + couponType + new Date().getTime().toString();
+	const repository = Coupon.restRepository( client );
+	await repository.create( {
+		code: couponCode,
+		discountType: couponType,
+		amount: couponAmount,
+	});
 
 	return couponCode;
 };
