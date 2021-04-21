@@ -3,7 +3,7 @@
  * Tests for WC_Shop_Customizer
  */
 
-use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 
 require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 require_once ABSPATH . WPINC . '/class-wp-customize-control.php';

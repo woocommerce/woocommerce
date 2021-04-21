@@ -6,7 +6,7 @@
  * @package WooCommerce
  */
 
-use Automattic\WooCommerce\ThemeManagement\ThemeSupport;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 
 defined( 'ABSPATH' ) || exit;
 
