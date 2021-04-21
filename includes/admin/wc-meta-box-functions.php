@@ -55,6 +55,8 @@ function woocommerce_wp_text_input( $field ) {
 	// Custom attribute handling
 	$custom_attributes = array();
 
+	$field = apply_filters( 'woocommerce_input_text_filter', $field );
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
@@ -90,6 +92,8 @@ function woocommerce_wp_hidden_input( $field ) {
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
+	$field = apply_filters( 'woocommerce_input_hidden_filter', $field );
+
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 }
 
@@ -114,6 +118,8 @@ function woocommerce_wp_textarea_input( $field ) {
 
 	// Custom attribute handling
 	$custom_attributes = array();
+
+	$field = apply_filters( 'woocommerce_input_textarea_filter', $field );
 
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
@@ -158,6 +164,8 @@ function woocommerce_wp_checkbox( $field ) {
 	// Custom attribute handling
 	$custom_attributes = array();
 
+	$field = apply_filters( 'woocommerce_input_checkbox_filter', $field );
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
@@ -201,6 +209,8 @@ function woocommerce_wp_select( $field ) {
 			'custom_attributes' => array(),
 		)
 	);
+
+	$field = apply_filters( 'woocommerce_input_select_filter', $field );
 
 	$wrapper_attributes = array(
 		'class' => $field['wrapper_class'] . " form-field {$field['id']}_field",
