@@ -55,14 +55,14 @@
 		// Custom attribute handling
 		$custom_attributes = array();
 
+		$field = apply_filters( 'woocommerce_input_text_filter', $field );
+
 		if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 			foreach ( $field['custom_attributes'] as $attribute => $value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 			}
 		}
-
-		$field = apply_filters( 'woocommerce_input_text_filter', $field );
 
 		echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
         <label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
@@ -92,6 +92,8 @@
 		$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 		$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
+		$field = apply_filters( 'woocommerce_input_hidden_filter', $field );
+
 		echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 	}
 
@@ -117,14 +119,14 @@
 		// Custom attribute handling
 		$custom_attributes = array();
 
+		$field = apply_filters( 'woocommerce_input_textarea_filter', $field );
+
 		if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 			foreach ( $field['custom_attributes'] as $attribute => $value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 			}
 		}
-
-		$field = apply_filters( 'woocommerce_input_textarea_filter', $field );
 
 		echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
         <label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
@@ -162,14 +164,14 @@
 		// Custom attribute handling
 		$custom_attributes = array();
 
+		$field = apply_filters( 'woocommerce_input_checkbox_filter', $field );
+
 		if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 			foreach ( $field['custom_attributes'] as $attribute => $value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
 			}
 		}
-
-		$field = apply_filters( 'woocommerce_input_checkbox_filter', $field );
 
 		echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
         <label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
