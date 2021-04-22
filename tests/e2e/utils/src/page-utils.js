@@ -243,16 +243,22 @@ export const searchForOrder = async (value, orderId, customerName) => {
  */
 export const applyCoupon = async ( couponCode ) => {
 	try {
-		await expect(page).toClick('a', {text: 'Click here to enter your code'});
-		await uiUnblocked();
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
-		await uiUnblocked();
-	} catch (error) {
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
-		await uiUnblocked();
-	};
+		const addCouponButton = await page.waitForSelector(
+			'a',
+			{
+				text: 'Click here to enter your code',
+				timeout: 5000,
+			}
+		);
+		if ( addCouponButton ) {
+			await expect(page).toClick('a', {text: 'Click here to enter your code'});
+			await uiUnblocked();
+		}
+	} catch (error) {}
+
+	await clearAndFillInput('#coupon_code', couponCode);
+	await expect(page).toClick('button', {text: 'Apply coupon'});
+	await uiUnblocked();
 };
 
 /**
