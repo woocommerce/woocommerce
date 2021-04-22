@@ -86,6 +86,8 @@ const runCheckoutApplyCouponsTest = () => {
 		});
 
 		it('allows customer to apply multiple coupons', async () => {
+			await page.reload();
+			await page.waitForSelector('.woocommerce-notices-wrapper');
 			await applyCoupon(couponFixedProduct);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
