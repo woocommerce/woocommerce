@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { HOME_URL } from '@woocommerce/block-settings';
+import { HOME_URL } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

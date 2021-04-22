@@ -13,6 +13,7 @@ import ProductCategoryControl from '@woocommerce/editor-components/product-categ
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { Icon, tag } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
@@ -54,6 +55,10 @@ class ProductOnSaleBlock extends Component {
 						rows={ rows }
 						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
+						minColumns={ getSetting( 'min_columns', 1 ) }
+						maxColumns={ getSetting( 'max_columns', 6 ) }
+						minRows={ getSetting( 'min_rows', 1 ) }
+						maxRows={ getSetting( 'max_rows', 6 ) }
 					/>
 				</PanelBody>
 				<PanelBody

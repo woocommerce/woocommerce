@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	TAXES_ENABLED,
-	DISPLAY_CART_PRICES_INCLUDING_TAX,
-} from '@woocommerce/block-settings';
 import { createInterpolateElement } from 'wordpress-element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
@@ -15,13 +11,16 @@ import {
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const SHOW_TAXES = TAXES_ENABLED && DISPLAY_CART_PRICES_INCLUDING_TAX;
+const SHOW_TAXES =
+	getSetting( 'taxesEnabled', true ) &&
+	getSetting( 'displayCartPricesIncludingTax', false );
 
 const TotalsFooterItem = ( { currency, values } ) => {
 	const { total_price: totalPrice, total_tax: totalTax } = values;

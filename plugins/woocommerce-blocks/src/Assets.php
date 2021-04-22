@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry as AssetDataRegistry;
 
 /**
  * Assets class.
@@ -23,7 +24,6 @@ class Assets {
 		add_action( 'init', array( __CLASS__, 'register_assets' ) );
 		add_action( 'body_class', array( __CLASS__, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( __CLASS__, 'add_theme_admin_body_class' ), 1 );
-		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'get_wc_block_data' ) );
 		add_action( 'woocommerce_login_form_end', array( __CLASS__, 'redirect_to_field' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
@@ -61,8 +61,10 @@ class Assets {
 		wp_add_inline_script(
 			'wc-blocks-middleware',
 			"
-			var wcStoreApiNonce = '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "';
-			var wcStoreApiNonceTimestamp = '" . esc_js( time() ) . "';
+			var wcBlocksMiddlewareConfig = {
+				storeApiNonce: '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "',
+				wcStoreApiNonceTimestamp: '" . esc_js( time() ) . "'
+			};
 			",
 			'before'
 		);
@@ -109,98 +111,6 @@ class Assets {
 	}
 
 	/**
-	 * Returns block-related data for enqueued wc-block-settings script.
-	 *
-	 * This is used to map site settings & data into JS-accessible variables.
-	 *
-	 * @param array $settings The original settings array from the filter.
-	 *
-	 * @since 2.4.0
-	 * @since 2.5.0 returned merged data along with incoming $settings
-	 */
-	public static function get_wc_block_data( $settings ) {
-		$tag_count      = wp_count_terms( 'product_tag' );
-		$product_counts = wp_count_posts( 'product' );
-		$page_ids       = [
-			'myaccount' => wc_get_page_id( 'myaccount' ),
-			'shop'      => wc_get_page_id( 'shop' ),
-			'cart'      => wc_get_page_id( 'cart' ),
-			'checkout'  => wc_get_page_id( 'checkout' ),
-			'privacy'   => wc_privacy_policy_page_id(),
-			'terms'     => wc_terms_and_conditions_page_id(),
-		];
-		$checkout       = WC()->checkout();
-
-		// Global settings used in each block.
-		return array_merge(
-			$settings,
-			[
-				'currentUserIsAdmin'            => is_user_logged_in() && current_user_can( 'manage_woocommerce' ),
-				'min_columns'                   => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
-				'max_columns'                   => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
-				'default_columns'               => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
-				'min_rows'                      => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
-				'max_rows'                      => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
-				'default_rows'                  => wc_get_theme_support( 'product_blocks::default_rows', 3 ),
-				'thumbnail_size'                => wc_get_theme_support( 'thumbnail_image_width', 300 ),
-				'placeholderImgSrc'             => wc_placeholder_img_src(),
-				'min_height'                    => wc_get_theme_support( 'featured_block::min_height', 500 ),
-				'default_height'                => wc_get_theme_support( 'featured_block::default_height', 500 ),
-				'isLargeCatalog'                => $product_counts->publish > 100,
-				'limitTags'                     => $tag_count > 100,
-				'hasTags'                       => $tag_count > 0,
-				'taxesEnabled'                  => wc_tax_enabled(),
-				'couponsEnabled'                => wc_coupons_enabled(),
-				'shippingEnabled'               => wc_shipping_enabled(),
-				'displayItemizedTaxes'          => 'itemized' === get_option( 'woocommerce_tax_total_display' ),
-				'displayShopPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
-				'displayCartPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
-				'checkoutShowLoginReminder'     => 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ),
-				'showAvatars'                   => '1' === get_option( 'show_avatars' ),
-				'reviewRatingsEnabled'          => wc_review_ratings_enabled(),
-				'productCount'                  => array_sum( (array) $product_counts ),
-				'attributes'                    => array_values( wc_get_attribute_taxonomies() ),
-				'isShippingCalculatorEnabled'   => filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ),
-				'shippingCostRequiresAddress'   => filter_var( get_option( 'woocommerce_shipping_cost_requires_address' ), FILTER_VALIDATE_BOOLEAN ),
-				'wcBlocksAssetUrl'              => plugins_url( 'assets/', __DIR__ ),
-				'wcBlocksBuildUrl'              => plugins_url( 'build/', __DIR__ ),
-				'restApiRoutes'                 => [
-					'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
-				],
-				'homeUrl'                       => esc_url( home_url( '/' ) ),
-				'storePages'                    => [
-					'myaccount' => self::format_page_resource( $page_ids['myaccount'] ),
-					'shop'      => self::format_page_resource( $page_ids['shop'] ),
-					'cart'      => self::format_page_resource( $page_ids['cart'] ),
-					'checkout'  => self::format_page_resource( $page_ids['checkout'] ),
-					'privacy'   => self::format_page_resource( $page_ids['privacy'] ),
-					'terms'     => self::format_page_resource( $page_ids['terms'] ),
-				],
-				'checkoutAllowsGuest'           => $checkout instanceof \WC_Checkout && false === filter_var(
-					$checkout->is_registration_required(),
-					FILTER_VALIDATE_BOOLEAN
-				),
-				'checkoutAllowsSignup'          => $checkout instanceof \WC_Checkout && filter_var(
-					$checkout->is_registration_enabled(),
-					FILTER_VALIDATE_BOOLEAN
-				),
-				'baseLocation'                  => wc_get_base_location(),
-				'woocommerceBlocksPhase'        => Package::feature()->get_flag(),
-				'hasDarkEditorStyleSupport'     => current_theme_supports( 'dark-editor-style' ),
-				'loginUrl'                      => wp_login_url(),
-
-				/*
-				 * translators: If your word count is based on single characters (e.g. East Asian characters),
-				 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
-				 * Do not translate into your own language.
-				 */
-				'wordCountType'                 => _x( 'words', 'Word count type. Do not translate!', 'woo-gutenberg-products-block' ),
-				'hideOutOfStockItems'           => 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ),
-			]
-		);
-	}
-
-	/**
 	 * Adds a redirect field to the login form so blocks can redirect users after login.
 	 */
 	public static function redirect_to_field() {
@@ -209,30 +119,6 @@ class Assets {
 			return;
 		}
 		echo '<input type="hidden" name="redirect" value="' . esc_attr( esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) ) . '" />'; // phpcs:ignore WordPress.Security.NonceVerification
-	}
-
-	/**
-	 * Format a page object into a standard array of data.
-	 *
-	 * @param WP_Post|int $page Page object or ID.
-	 * @return array
-	 */
-	protected static function format_page_resource( $page ) {
-		if ( is_numeric( $page ) && $page > 0 ) {
-			$page = get_post( $page );
-		}
-		if ( ! is_a( $page, '\WP_Post' ) || 'publish' !== $page->post_status ) {
-			return [
-				'id'        => 0,
-				'title'     => '',
-				'permalink' => false,
-			];
-		}
-		return [
-			'id'        => $page->ID,
-			'title'     => $page->post_title,
-			'permalink' => get_permalink( $page->ID ),
-		];
 	}
 
 	/**

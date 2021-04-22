@@ -7,7 +7,7 @@ import {
 	__experimentalUseSlot,
 	useSlot as __useSlot,
 } from 'wordpress-components';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { Children, cloneElement } from '@wordpress/element';
 
 /**

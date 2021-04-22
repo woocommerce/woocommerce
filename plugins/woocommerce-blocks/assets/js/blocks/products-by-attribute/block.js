@@ -20,6 +20,7 @@ import GridLayoutControl from '@woocommerce/editor-components/grid-layout-contro
 import ProductAttributeTermControl from '@woocommerce/editor-components/product-attribute-term-control';
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Component to handle edit mode of "Products by Attribute".
@@ -48,6 +49,10 @@ class ProductsByAttributeBlock extends Component {
 						rows={ rows }
 						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
+						minColumns={ getSetting( 'min_columns', 1 ) }
+						maxColumns={ getSetting( 'max_columns', 6 ) }
+						minRows={ getSetting( 'min_rows', 1 ) }
+						maxRows={ getSetting( 'max_rows', 6 ) }
 					/>
 				</PanelBody>
 				<PanelBody

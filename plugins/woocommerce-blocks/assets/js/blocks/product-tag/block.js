@@ -14,13 +14,13 @@ import {
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { HAS_TAGS } from '@woocommerce/block-settings';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import { Icon, more } from '@woocommerce/icons';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Component to handle edit mode of "Products by Tag".
@@ -123,6 +123,10 @@ class ProductsByTagBlock extends Component {
 						rows={ rows }
 						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
+						minColumns={ getSetting( 'min_columns', 1 ) }
+						maxColumns={ getSetting( 'max_columns', 6 ) }
+						minRows={ getSetting( 'min_rows', 1 ) }
+						maxRows={ getSetting( 'max_rows', 6 ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -260,7 +264,7 @@ class ProductsByTagBlock extends Component {
 			return gridBlockPreview;
 		}
 
-		return HAS_TAGS ? (
+		return getSetting( 'hasTags', true ) ? (
 			<>
 				<BlockControls>
 					<ToolbarGroup

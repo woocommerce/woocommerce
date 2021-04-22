@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { REVIEW_RATINGS_ENABLED } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
 import {
 	ReviewList,
@@ -34,9 +34,11 @@ const FrontendBlock = ( {
 		return null;
 	}
 
+	const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
+
 	return (
 		<>
-			{ attributes.showOrderby !== 'false' && REVIEW_RATINGS_ENABLED && (
+			{ attributes.showOrderby !== 'false' && reviewRatingsEnabled && (
 				<ReviewSortSelect
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }

@@ -7,7 +7,7 @@ import { debounce, find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
-import { LIMIT_TAGS } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -123,6 +123,8 @@ class ProductTagControl extends Component {
 			),
 		};
 
+		const limitTags = getSetting( 'limitTags', false );
+
 		return (
 			<>
 				<SearchListControl
@@ -133,7 +135,7 @@ class ProductTagControl extends Component {
 						.map( ( id ) => find( list, { id } ) )
 						.filter( Boolean ) }
 					onChange={ onChange }
-					onSearch={ LIMIT_TAGS ? this.debouncedOnSearch : null }
+					onSearch={ limitTags ? this.debouncedOnSearch : null }
 					renderItem={ this.renderItem }
 					messages={ messages }
 					isHierarchical

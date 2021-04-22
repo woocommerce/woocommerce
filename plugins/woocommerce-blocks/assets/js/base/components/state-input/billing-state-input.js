@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ALLOWED_STATES } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,7 +10,9 @@ import { ALLOWED_STATES } from '@woocommerce/block-settings';
 import StateInput from './state-input.js';
 
 const BillingStateInput = ( props ) => {
-	return <StateInput states={ ALLOWED_STATES } { ...props } />;
+	return (
+		<StateInput states={ getSetting( 'allowedStates', {} ) } { ...props } />
+	);
 };
 
 BillingStateInput.propTypes = {

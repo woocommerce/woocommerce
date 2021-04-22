@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
-import { DEFAULT_HEIGHT } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import { Icon, star } from '@woocommerce/icons';
 
 /**
@@ -72,7 +72,7 @@ registerBlockType( 'woocommerce/featured-product', {
 		 */
 		height: {
 			type: 'number',
-			default: DEFAULT_HEIGHT,
+			default: getSetting( 'default_height', 500 ),
 		},
 
 		/**

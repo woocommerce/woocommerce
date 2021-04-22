@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { CHECKOUT_SHOW_LOGIN_REMINDER } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
 
 /**
@@ -13,7 +13,7 @@ import { LOGIN_TO_CHECKOUT_URL } from '../utils';
 const LoginPrompt = () => {
 	const { customerId } = useCheckoutContext();
 
-	if ( ! CHECKOUT_SHOW_LOGIN_REMINDER || customerId ) {
+	if ( ! getSetting( 'checkoutShowLoginReminder', true ) || customerId ) {
 		return null;
 	}
 

@@ -17,13 +17,10 @@ import {
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useShippingDataContext } from '@woocommerce/base-context';
 import {
-	COUPONS_ENABLED,
-	DISPLAY_CART_PRICES_INCLUDING_TAX,
-} from '@woocommerce/block-settings';
-import {
 	useStoreCartCoupons,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
+import { getSetting } from '@woocommerce/settings';
 
 const CheckoutSidebar = ( {
 	cartCoupons = [],
@@ -70,13 +67,13 @@ const CheckoutSidebar = ( {
 					currency={ totalsCurrency }
 				/>
 			) }
-			{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
+			{ ! getSetting( 'displayCartPricesIncludingTax', false ) && (
 				<TotalsTaxes
 					currency={ totalsCurrency }
 					values={ cartTotals }
 				/>
 			) }
-			{ COUPONS_ENABLED && (
+			{ getSetting( 'couponsEnabled', true ) && (
 				<TotalsCoupon
 					onSubmit={ applyCoupon }
 					initialOpen={ false }

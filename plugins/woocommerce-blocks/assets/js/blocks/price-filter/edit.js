@@ -10,8 +10,8 @@ import {
 	ToggleControl,
 	Button,
 } from '@wordpress/components';
-import { PRODUCT_COUNT } from '@woocommerce/block-settings';
 import { getAdminLink } from '@woocommerce/settings';
+import { blocksConfig } from '@woocommerce/block-settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
@@ -152,7 +152,7 @@ export default function ( { attributes, setAttributes } ) {
 
 	return (
 		<>
-			{ PRODUCT_COUNT === 0 ? (
+			{ blocksConfig.productCount === 0 ? (
 				noProductsPlaceholder()
 			) : (
 				<div className={ className }>

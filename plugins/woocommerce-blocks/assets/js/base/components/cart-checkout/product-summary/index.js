@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import Summary from '@woocommerce/base-components/summary';
-import { getSetting } from '@woocommerce/settings';
+import { blocksConfig } from '@woocommerce/block-settings';
 
 /**
  * Returns an element containing a summary of the product.
@@ -29,7 +29,7 @@ const ProductSummary = ( {
 			className={ className }
 			source={ source }
 			maxLength={ 15 }
-			countType={ getSetting( 'wordCountType', 'words' ) }
+			countType={ blocksConfig.wordCountType || 'words' }
 		/>
 	);
 };

@@ -2,9 +2,11 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Blocks\RestApi;
 
 /**
  * AbstractBlock class.
@@ -321,7 +323,7 @@ abstract class AbstractBlock {
 	}
 
 	/**
-	 * Extra data passed through from server to client for block.
+	 * Data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
 	 *                           Note, this will be empty in the editor context when the block is
@@ -334,6 +336,27 @@ abstract class AbstractBlock {
 			if ( ! $this->asset_data_registry->exists( $asset_data_key ) ) {
 				$this->asset_data_registry->add( $asset_data_key, $asset_data_value );
 			}
+		}
+
+		if ( ! $this->asset_data_registry->exists( 'wcBlocksConfig' ) ) {
+			$this->asset_data_registry->add(
+				'wcBlocksConfig',
+				[
+					'buildPhase'    => Package::feature()->get_flag(),
+					'pluginUrl'     => plugins_url( '/', dirname( __DIR__ ) ),
+					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
+					'restApiRoutes' => [
+						'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
+					],
+
+					/*
+					 * translators: If your word count is based on single characters (e.g. East Asian characters),
+					 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
+					 * Do not translate into your own language.
+					 */
+					'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woo-gutenberg-products-block' ),
+				]
+			);
 		}
 	}
 

@@ -2,13 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	SHIPPING_COST_REQUIRES_ADDRESS,
-	SHIPPING_METHODS_EXIST,
-	WC_BLOCKS_ASSET_URL,
-	SHIPPING_ENABLED,
-} from '@woocommerce/block-settings';
+import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
 import { CartResponse } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -20,7 +16,9 @@ import { previewShippingRates } from './shipping-rates';
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi#cart-api
 export const previewCart: CartResponse = {
 	coupons: [],
-	shipping_rates: SHIPPING_METHODS_EXIST ? previewShippingRates : [],
+	shipping_rates: getSetting( 'shippingMethodsExist', false )
+		? previewShippingRates
+		: [],
 	items: [
 		{
 			key: '1',
@@ -164,8 +162,8 @@ export const previewCart: CartResponse = {
 	items_count: 3,
 	items_weight: 0,
 	needs_payment: true,
-	needs_shipping: SHIPPING_ENABLED,
-	has_calculated_shipping: ! SHIPPING_COST_REQUIRES_ADDRESS,
+	needs_shipping: getSetting( 'shippingEnabled', true ),
+	has_calculated_shipping: true,
 	extensions: {},
 	shipping_address: {
 		first_name: '',

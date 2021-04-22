@@ -4,8 +4,8 @@
 	"include": [
 		".",
 		"../../blocks-registry/index.js",
-		"../../settings/shared/index.js",
-		"../../settings/blocks/index.js",
+		"../../settings/shared/index.ts",
+		"../../settings/blocks/index.ts",
 		"../../type-defs"
 	],
 	"exclude": [ "**/test/**" ]

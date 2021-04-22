@@ -114,6 +114,9 @@ const storeNonceMiddleware = ( options, next ) => {
 apiFetch.use( storeNonceMiddleware );
 apiFetch.setNonce = setNonce;
 
-// @ts-ignore wcStoreApiNonce is window global cache for the initial nonce initialized from hydration.
-// @ts-ignore wcStoreApiNonceTimestamp is window global cache for the initial nonce initialized from hydration.
-updateNonce( wcStoreApiNonce, wcStoreApiNonceTimestamp );
+updateNonce(
+	// @ts-ignore wcBlocksMiddlewareConfig is window global cache for the initial nonce initialized from hydration.
+	wcBlocksMiddlewareConfig.storeApiNonce,
+	// @ts-ignore wcBlocksMiddlewareConfig is window global cache for the initial nonce initialized from hydration.
+	wcBlocksMiddlewareConfig.storeApiNonceTimestamp
+);

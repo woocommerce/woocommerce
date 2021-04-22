@@ -16,9 +16,8 @@ import {
 	PRIVACY_URL,
 	TERMS_URL,
 	CHECKOUT_PAGE_ID,
-	CHECKOUT_ALLOWS_SIGNUP,
 } from '@woocommerce/block-settings';
-import { isWcVersion, getAdminLink } from '@woocommerce/settings';
+import { isWcVersion, getAdminLink, getSetting } from '@woocommerce/settings';
 import { createInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
 import {
@@ -62,7 +61,8 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 	// Also implicitly gated to feature plugin, because Checkout
 	// block is gated to plugin
 	const showCreateAccountOption =
-		CHECKOUT_ALLOWS_SIGNUP && isWcVersion( '4.7.0', '>=' );
+		getSetting( 'checkoutAllowsSignup', false ) &&
+		isWcVersion( '4.7.0', '>=' );
 	return (
 		<InspectorControls>
 			{ currentPostId !== CHECKOUT_PAGE_ID && (

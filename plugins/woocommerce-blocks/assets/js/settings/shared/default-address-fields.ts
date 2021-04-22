@@ -5,20 +5,43 @@
  */
 import { __ } from '@wordpress/i18n';
 
+export interface AddressField {
+	// The label for the field.
+	label: string;
+	// The label for the field if made optional.
+	optionalLabel: string;
+	// The HTML autocomplete attribute value. See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
+	autocomplete: string;
+	// How this field value is capitalized.
+	autocapitalize?: string;
+	// Set to true if the field is required.
+	required: boolean;
+	// Set to true if the field should not be rendered.
+	hidden: boolean;
+	// Fields will be sorted and render in this order, lowest to highest.
+	index: number;
+}
+
+export interface AddressFields {
+	// eslint-disable-next-line camelcase
+	first_name: AddressField;
+	// eslint-disable-next-line camelcase
+	last_name: AddressField;
+	company: AddressField;
+	// eslint-disable-next-line camelcase
+	address_1: AddressField;
+	// eslint-disable-next-line camelcase
+	address_2: AddressField;
+	country: AddressField;
+	city: AddressField;
+	state: AddressField;
+	postcode: AddressField;
+}
+
 /**
  * Default address field properties.
- *
- * @property {AddressField} first_name Customer first name.
- * @property {AddressField} last_name  Customer last name.
- * @property {AddressField} company    Company name.
- * @property {AddressField} address_1  Street address.
- * @property {AddressField} address_2  Second line of address.
- * @property {AddressField} country    Country code.
- * @property {AddressField} city       City name.
- * @property {AddressField} state      State name or code.
- * @property {AddressField} postcode   Postal code.
  */
-export const defaultAddressFields = {
+export const defaultAddressFields: AddressFields = {
 	first_name: {
 		label: __( 'First name', 'woo-gutenberg-products-block' ),
 		optionalLabel: __(

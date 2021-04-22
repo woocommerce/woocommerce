@@ -5,7 +5,8 @@
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { flatten, uniqBy } from 'lodash';
-import { IS_LARGE_CATALOG, LIMIT_TAGS } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
+import { blocksConfig } from '@woocommerce/block-settings';
 
 /**
  * Get product query requests for the Store API.
@@ -20,8 +21,9 @@ const getProductsRequests = ( {
 	search = '',
 	queryArgs = [],
 } ) => {
+	const isLargeCatalog = blocksConfig.productCount > 100;
 	const defaultArgs = {
-		per_page: IS_LARGE_CATALOG ? 100 : 0,
+		per_page: isLargeCatalog ? 100 : 0,
 		catalog_visibility: 'any',
 		search,
 		orderby: 'title',
@@ -32,7 +34,7 @@ const getProductsRequests = ( {
 	];
 
 	// If we have a large catalog, we might not get all selected products in the first page.
-	if ( IS_LARGE_CATALOG && selected.length ) {
+	if ( isLargeCatalog && selected.length ) {
 		requests.push(
 			addQueryArgs( '/wc/store/products', {
 				catalog_visibility: 'any',
@@ -112,17 +114,18 @@ export const getTerms = ( attribute ) => {
  * @param {string} request.search Search string.
  */
 const getProductTagsRequests = ( { selected = [], search } ) => {
+	const limitTags = getSetting( 'limitTags', false );
 	const requests = [
 		addQueryArgs( `wc/store/products/tags`, {
-			per_page: LIMIT_TAGS ? 100 : 0,
-			orderby: LIMIT_TAGS ? 'count' : 'name',
-			order: LIMIT_TAGS ? 'desc' : 'asc',
+			per_page: limitTags ? 100 : 0,
+			orderby: limitTags ? 'count' : 'name',
+			order: limitTags ? 'desc' : 'asc',
 			search,
 		} ),
 	];
 
 	// If we have a large catalog, we might not get all selected products in the first page.
-	if ( LIMIT_TAGS && selected.length ) {
+	if ( limitTags && selected.length ) {
 		requests.push(
 			addQueryArgs( `wc/store/products/tags`, {
 				include: selected,

@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Assets;
 
+use Automattic\WooCommerce\Blocks\Package;
+
 use Exception;
 use InvalidArgumentException;
 
@@ -63,35 +65,106 @@ class AssetDataRegistry {
 	}
 
 	/**
-	 * Exposes core asset data
+	 * Exposes core data via the wcSettings global. This data is shared throughout the client.
+	 *
+	 * Settings that are used by various components or multiple blocks should be added here. Note, that settings here are
+	 * global so be sure not to add anything heavy if possible.
 	 *
 	 * @return array  An array containing core data.
 	 */
 	protected function get_core_data() {
-		global $wp_locale;
-		$currency = get_woocommerce_currency();
 		return [
-			'wpVersion'     => get_bloginfo( 'version' ),
-			'wcVersion'     => defined( 'WC_VERSION' ) ? WC_VERSION : '',
-			'adminUrl'      => admin_url(),
-			'countries'     => WC()->countries->get_countries(),
-			'currency'      => [
-				'code'              => $currency,
-				'precision'         => wc_get_price_decimals(),
-				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
-				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-				'decimalSeparator'  => wc_get_price_decimal_separator(),
-				'thousandSeparator' => wc_get_price_thousand_separator(),
-				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
-			],
-			'locale'        => [
-				'siteLocale'    => get_locale(),
-				'userLocale'    => get_user_locale(),
-				'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
-			],
-			'orderStatuses' => $this->get_order_statuses( wc_get_order_statuses() ),
-			'siteTitle'     => get_bloginfo( 'name ' ),
-			'wcAssetUrl'    => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+			'adminUrl'           => admin_url(),
+			'countries'          => WC()->countries->get_countries(),
+			'currency'           => $this->get_currency_data(),
+			'currentUserIsAdmin' => current_user_can( 'manage_woocommerce' ),
+			'homeUrl'            => esc_url( home_url( '/' ) ),
+			'locale'             => $this->get_locale_data(),
+			'orderStatuses'      => $this->get_order_statuses(),
+			'placeholderImgSrc'  => wc_placeholder_img_src(),
+			'siteTitle'          => get_bloginfo( 'name' ),
+			'storePages'         => $this->get_store_pages(),
+			'wcAssetUrl'         => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+			'wcVersion'          => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+			'wpLoginUrl'         => wp_login_url(),
+			'wpVersion'          => get_bloginfo( 'version' ),
+		];
+	}
+
+	/**
+	 * Get currency data to include in settings.
+	 *
+	 * @return array
+	 */
+	protected function get_currency_data() {
+		$currency = get_woocommerce_currency();
+
+		return [
+			'code'              => $currency,
+			'precision'         => wc_get_price_decimals(),
+			'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
+			'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
+			'decimalSeparator'  => wc_get_price_decimal_separator(),
+			'thousandSeparator' => wc_get_price_thousand_separator(),
+			'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
+		];
+	}
+
+	/**
+	 * Get locale data to include in settings.
+	 *
+	 * @return array
+	 */
+	protected function get_locale_data() {
+		global $wp_locale;
+
+		return [
+			'siteLocale'    => get_locale(),
+			'userLocale'    => get_user_locale(),
+			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
+		];
+	}
+
+	/**
+	 * Get store pages to include in settings.
+	 *
+	 * @return array
+	 */
+	protected function get_store_pages() {
+		return array_map(
+			[ $this, 'format_page_resource' ],
+			[
+				'myaccount' => wc_get_page_id( 'myaccount' ),
+				'shop'      => wc_get_page_id( 'shop' ),
+				'cart'      => wc_get_page_id( 'cart' ),
+				'checkout'  => wc_get_page_id( 'checkout' ),
+				'privacy'   => wc_privacy_policy_page_id(),
+				'terms'     => wc_terms_and_conditions_page_id(),
+			]
+		);
+	}
+
+	/**
+	 * Format a page object into a standard array of data.
+	 *
+	 * @param WP_Post|int $page Page object or ID.
+	 * @return array
+	 */
+	protected function format_page_resource( $page ) {
+		if ( is_numeric( $page ) && $page > 0 ) {
+			$page = get_post( $page );
+		}
+		if ( ! is_a( $page, '\WP_Post' ) || 'publish' !== $page->post_status ) {
+			return [
+				'id'        => 0,
+				'title'     => '',
+				'permalink' => false,
+			];
+		}
+		return [
+			'id'        => $page->ID,
+			'title'     => $page->post_title,
+			'permalink' => get_permalink( $page->ID ),
 		];
 	}
 
@@ -99,12 +172,11 @@ class AssetDataRegistry {
 	 * Returns block-related data for enqueued wc-settings script.
 	 * Format order statuses by removing a leading 'wc-' if present.
 	 *
-	 * @param array $statuses Order statuses.
 	 * @return array formatted statuses.
 	 */
-	protected function get_order_statuses( $statuses ) {
+	protected function get_order_statuses() {
 		$formatted_statuses = array();
-		foreach ( $statuses as $key => $value ) {
+		foreach ( wc_get_order_statuses() as $key => $value ) {
 			$formatted_key                        = preg_replace( '/^wc-/', '', $key );
 			$formatted_statuses[ $formatted_key ] = $value;
 		}
@@ -174,17 +246,21 @@ class AssetDataRegistry {
 	/**
 	 * Interface for adding data to the registry.
 	 *
-	 * @param string $key  The key used to reference the data being registered.
-	 *                     You can only register data that is not already in the
-	 *                     registry identified by the given key.
-	 * @param mixed  $data If not a function, registered to the registry as is.
-	 *                     If a function, then the callback is invoked right
-	 *                     before output to the screen.
+	 * You can only register data that is not already in the registry identified by the given key. If there is a
+	 * duplicate found, unless $ignore_duplicates is true, an exception will be thrown.
 	 *
-	 * @throws InvalidArgumentException  Only throws when site is in debug mode.
-	 *                                   Always logs the error.
+	 * @param string  $key               The key used to reference the data being registered.
+	 * @param mixed   $data              If not a function, registered to the registry as is. If a function, then the
+	 *                                   callback is invoked right before output to the screen.
+	 * @param boolean $check_key_exists If set to true, duplicate data will be ignored if the key exists.
+	 *                                  If false, duplicate data will cause an exception.
+	 *
+	 * @throws InvalidArgumentException  Only throws when site is in debug mode. Always logs the error.
 	 */
-	public function add( $key, $data ) {
+	public function add( $key, $data, $check_key_exists = false ) {
+		if ( $check_key_exists && $this->exists( $key ) ) {
+			return;
+		}
 		try {
 			$this->add_data( $key, $data );
 		} catch ( Exception $e ) {
@@ -193,6 +269,19 @@ class AssetDataRegistry {
 				throw $e;
 			}
 			wc_caught_exception( $e, __METHOD__, [ $key, $data ] );
+		}
+	}
+
+	/**
+	 * Adds a page permalink to the data registry.
+	 *
+	 * @param integer $page_id Page ID to add to the registry.
+	 */
+	public function register_page_id( $page_id ) {
+		$permalink = $page_id ? get_permalink( $page_id ) : false;
+
+		if ( $permalink ) {
+			$this->data[ 'page-' . $page_id ] = $permalink;
 		}
 	}
 

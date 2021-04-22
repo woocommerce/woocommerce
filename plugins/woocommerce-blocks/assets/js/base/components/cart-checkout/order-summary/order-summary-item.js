@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
-import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import { useCallback, useMemo } from '@wordpress/element';
 
 /**
@@ -79,7 +79,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 
 	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
-	if ( DISPLAY_CART_PRICES_INCLUDING_TAX ) {
+	if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 	}
 	const subtotalPrice = Dinero( {

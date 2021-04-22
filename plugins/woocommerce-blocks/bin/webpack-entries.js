@@ -102,7 +102,7 @@ const entries = {
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
-		wcSettings: './assets/js/settings/shared/index.js',
+		wcSettings: './assets/js/settings/shared/index.ts',
 		wcBlocksData: './assets/js/data/index.js',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
 		wcSharedContext: './assets/js/shared/context/index.js',

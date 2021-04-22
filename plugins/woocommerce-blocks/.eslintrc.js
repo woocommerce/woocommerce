@@ -4,8 +4,7 @@ module.exports = {
 		'plugin:you-dont-need-lodash-underscore/compatible',
 	],
 	globals: {
-		wcStoreApiNonce: 'readonly',
-		wcStoreApiNonceTimestamp: 'readonly',
+		wcBlocksMiddlewareConfig: 'readonly',
 		fetchMock: true,
 		jQuery: 'readonly',
 		IntersectionObserver: 'readonly',

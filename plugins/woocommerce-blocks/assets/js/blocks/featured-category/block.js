@@ -26,7 +26,7 @@ import {
 import classnames from 'classnames';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { MIN_HEIGHT } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import { Icon, folderStarred } from '@woocommerce/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
@@ -303,7 +303,7 @@ const FeaturedCategory = ( {
 			<ResizableBox
 				className={ classes }
 				size={ { height } }
-				minHeight={ MIN_HEIGHT }
+				minHeight={ getSetting( 'min_height', 500 ) }
 				enable={ { bottom: true } }
 				onResizeStop={ onResizeStop }
 				style={ style }
