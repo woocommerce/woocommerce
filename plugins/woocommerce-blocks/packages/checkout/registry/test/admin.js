@@ -10,7 +10,7 @@ import {
 	__experimentalApplyCheckoutFilter,
 } from '../';
 
-jest.mock( '@woocommerce/block-settings', () => {
+jest.mock( '@woocommerce/settings', () => {
 	const originalModule = jest.requireActual( '@woocommerce/settings' );
 	return {
 		// @ts-ignore We know @woocommerce/settings is an object.

@@ -11,6 +11,7 @@ import GridContentControl from '@woocommerce/editor-components/grid-content-cont
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Component to handle edit mode of "Newest Products".
@@ -38,6 +39,10 @@ class ProductNewestBlock extends Component {
 						rows={ rows }
 						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
+						minColumns={ getSetting( 'min_columns', 1 ) }
+						maxColumns={ getSetting( 'max_columns', 6 ) }
+						minRows={ getSetting( 'min_rows', 1 ) }
+						maxRows={ getSetting( 'max_rows', 6 ) }
 					/>
 				</PanelBody>
 				<PanelBody

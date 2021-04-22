@@ -11,11 +11,7 @@ import {
 	SelectControl,
 } from '@wordpress/components';
 import { BlockControls } from '@wordpress/block-editor';
-import { getAdminLink } from '@woocommerce/settings';
-import {
-	REVIEW_RATINGS_ENABLED,
-	SHOW_AVATARS,
-} from '@woocommerce/block-settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 
 export const getBlockControls = ( editMode, setAttributes ) => (
@@ -34,6 +30,8 @@ export const getBlockControls = ( editMode, setAttributes ) => (
 );
 
 export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
+	const showAvatars = getSetting( 'showAvatars', true );
+	const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
 	return (
 		<>
 			<ToggleControl
@@ -45,7 +43,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					} )
 				}
 			/>
-			{ attributes.showReviewRating && ! REVIEW_RATINGS_ENABLED && (
+			{ attributes.showReviewRating && ! reviewRatingsEnabled && (
 				<Notice
 					className="wc-block-base-control-notice"
 					isDismissible={ false }
@@ -134,7 +132,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 							setAttributes( { imageType: value } )
 						}
 					/>
-					{ attributes.imageType === 'reviewer' && ! SHOW_AVATARS && (
+					{ attributes.imageType === 'reviewer' && ! showAvatars && (
 						<Notice
 							className="wc-block-base-control-notice"
 							isDismissible={ false }

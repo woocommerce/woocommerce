@@ -16,8 +16,7 @@ import {
 import { Icon, server, external } from '@woocommerce/icons';
 import { SearchListControl } from '@woocommerce/components';
 import { mapValues, toArray, sortBy, find } from 'lodash';
-import { ATTRIBUTES } from '@woocommerce/block-settings';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
@@ -27,6 +26,8 @@ import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-co
  */
 import Block from './block.js';
 import './editor.scss';
+
+const ATTRIBUTES = getSetting( 'attributes', [] );
 
 const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	const {

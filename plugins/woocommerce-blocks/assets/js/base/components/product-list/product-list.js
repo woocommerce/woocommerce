@@ -17,7 +17,6 @@ import {
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { speak } from '@wordpress/a11y';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -28,7 +27,12 @@ import ProductSortSelect from './product-sort-select';
 import ProductListItem from './product-list-item';
 import './style.scss';
 
-const generateQuery = ( { sortValue, currentPage, attributes } ) => {
+const generateQuery = ( {
+	sortValue,
+	currentPage,
+	attributes,
+	hideOutOfStockItems,
+} ) => {
 	const { columns, rows } = attributes;
 	const getSortArgs = ( orderName ) => {
 		switch ( orderName ) {
@@ -52,8 +56,6 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 				};
 		}
 	};
-
-	const hideOutOfStockItems = getSetting( 'hideOutOfStockItems', false );
 
 	return {
 		...getSortArgs( sortValue ),
@@ -116,12 +118,14 @@ const ProductList = ( {
 	onSortChange,
 	sortValue,
 	scrollToTop,
+	hideOutOfStockItems = false,
 } ) => {
 	const [ queryState ] = useSynchronizedQueryState(
 		generateQuery( {
 			attributes,
 			sortValue,
 			currentPage,
+			hideOutOfStockItems,
 		} )
 	);
 	const { products, totalProducts, productsLoading } = useStoreProducts(
@@ -250,6 +254,7 @@ const ProductList = ( {
 
 ProductList.propTypes = {
 	attributes: PropTypes.object.isRequired,
+	hideOutOfStockItems: PropTypes.bool,
 	// From withScrollToTop.
 	scrollToTop: PropTypes.func,
 };

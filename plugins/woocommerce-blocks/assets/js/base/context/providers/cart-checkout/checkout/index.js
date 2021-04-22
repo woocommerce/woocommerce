@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { PluginArea } from '@wordpress/plugins';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 

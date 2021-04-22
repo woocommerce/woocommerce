@@ -8,10 +8,7 @@ import {
 } from '@woocommerce/blocks-registry';
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { useShallowEqual } from '@woocommerce/base-hooks';
-import {
-	CURRENT_USER_IS_ADMIN,
-	PAYMENT_GATEWAY_SORT_ORDER,
-} from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -185,10 +182,10 @@ export const usePaymentMethods = (
 	const standardMethods: PaymentMethods = getPaymentMethods() as PaymentMethods;
 	const { noticeContexts } = useEmitResponse();
 	// Ensure all methods are present in order.
-	// Some payment methods may not be present in PAYMENT_GATEWAY_SORT_ORDER if they
+	// Some payment methods may not be present in paymentGatewaySortOrder if they
 	// depend on state, e.g. COD can depend on shipping method.
 	const displayOrder = new Set( [
-		...PAYMENT_GATEWAY_SORT_ORDER,
+		...( getSetting( 'paymentGatewaySortOrder', [] ) as [  ] ),
 		...Object.keys( standardMethods ),
 	] );
 	return usePaymentMethodRegistration(

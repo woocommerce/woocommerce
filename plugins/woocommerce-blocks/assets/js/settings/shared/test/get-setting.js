@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getSetting } from '../get-setting';
+import { getSetting } from '../utils';
 import { ADMIN_URL } from '../default-constants';
 
 describe( 'getSetting', () => {

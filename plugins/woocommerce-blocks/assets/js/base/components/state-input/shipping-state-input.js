@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { SHIPPING_STATES } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,7 +10,12 @@ import { SHIPPING_STATES } from '@woocommerce/block-settings';
 import StateInput from './state-input.js';
 
 const ShippingStateInput = ( props ) => {
-	return <StateInput states={ SHIPPING_STATES } { ...props } />;
+	return (
+		<StateInput
+			states={ getSetting( 'shippingStates', {} ) }
+			{ ...props }
+		/>
+	);
 };
 
 ShippingStateInput.propTypes = {

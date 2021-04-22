@@ -3,12 +3,12 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
 import type { Currency } from '@woocommerce/price-format';
 import type { ReactElement } from 'react';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -133,7 +133,10 @@ const TotalsShipping = ( {
 		shippingRatesLoading,
 	} = useStoreCart();
 
-	const totalShippingValue = DISPLAY_CART_PRICES_INCLUDING_TAX
+	const totalShippingValue = getSetting(
+		'displayCartPricesIncludingTax',
+		false
+	)
 		? parseInt( values.total_shipping, 10 ) +
 		  parseInt( values.total_shipping_tax, 10 )
 		: parseInt( values.total_shipping, 10 );

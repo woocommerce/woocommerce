@@ -18,9 +18,9 @@ import {
 	useShippingDataContext,
 } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
-import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -33,7 +33,7 @@ import NoShippingPlaceholder from './no-shipping-placeholder';
  * @param {Object} option Shipping Rate.
  */
 const renderShippingRatesControlOption = ( option ) => {
-	const priceWithTaxes = DISPLAY_CART_PRICES_INCLUDING_TAX
+	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: parseInt( option.price, 10 );
 	return {

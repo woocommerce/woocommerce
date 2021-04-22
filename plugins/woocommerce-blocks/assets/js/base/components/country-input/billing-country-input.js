@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ALLOWED_COUNTRIES } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,7 +10,12 @@ import { ALLOWED_COUNTRIES } from '@woocommerce/block-settings';
 import CountryInput from './country-input.js';
 
 const BillingCountryInput = ( props ) => {
-	return <CountryInput countries={ ALLOWED_COUNTRIES } { ...props } />;
+	return (
+		<CountryInput
+			countries={ getSetting( 'allowedCountries', {} ) }
+			{ ...props }
+		/>
+	);
 };
 
 BillingCountryInput.propTypes = {

@@ -2,12 +2,12 @@
  * External dependencies
  */
 import {
-	withRestApiHydration,
 	withStoreCartApiHydration,
+	withRestApiHydration,
 } from '@woocommerce/block-hocs';
 import { __ } from '@wordpress/i18n';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { createInterpolateElement } from 'wordpress-element';
 import {
 	renderFrontend,

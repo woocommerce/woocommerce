@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import ViewSwitcher from '@woocommerce/editor-components/view-switcher';
 import PageSelector from '@woocommerce/editor-components/page-selector';
-import { SHIPPING_ENABLED, CART_PAGE_ID } from '@woocommerce/block-settings';
+import { CART_PAGE_ID } from '@woocommerce/block-settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import {
 	EditorProvider,
@@ -24,7 +24,7 @@ import {
 } from '@woocommerce/base-context';
 import { createInterpolateElement } from 'wordpress-element';
 import { useRef } from '@wordpress/element';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**
@@ -70,7 +70,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					) }
 				</Notice>
 			) }
-			{ SHIPPING_ENABLED && (
+			{ getSetting( 'shippingEnabled', true ) && (
 				<PanelBody
 					title={ __(
 						'Shipping rates',

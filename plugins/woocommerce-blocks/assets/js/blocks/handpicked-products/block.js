@@ -16,7 +16,7 @@ import {
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
 import ProductsControl from '@woocommerce/editor-components/products-control';
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
@@ -51,8 +51,8 @@ class ProductsBlock extends Component {
 						onChange={ ( value ) =>
 							setAttributes( { columns: value } )
 						}
-						min={ MIN_COLUMNS }
-						max={ MAX_COLUMNS }
+						min={ getSetting( 'min_columns', 1 ) }
+						max={ getSetting( 'max_columns', 6 ) }
 					/>
 					<ToggleControl
 						label={ __(

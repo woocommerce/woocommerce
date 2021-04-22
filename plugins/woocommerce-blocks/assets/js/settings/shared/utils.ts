@@ -6,11 +6,22 @@ import compareVersions from 'compare-versions';
 /**
  * Internal dependencies
  */
-import { getSetting } from './get-setting';
-import '../../filters/exclude-draft-status-from-analytics';
+import { allSettings } from './settings-init';
 
-export * from './default-constants';
-export * from './default-address-fields';
+/**
+ * Retrieves a setting value from the setting state.
+ *
+ * If a setting with key `name` does not exist, the `fallback` will be returned instead. An optional `filter` callback
+ * can be passed to format the returned value.
+ */
+export const getSetting = (
+	name: string,
+	fallback: unknown = false,
+	filter = ( val: unknown, fb: unknown ) => val || fb
+): unknown => {
+	const value = name in allSettings ? allSettings[ name ] : fallback;
+	return filter( value, fallback );
+};
 
 /**
  * Note: this attempts to coerce the wpVersion to a semver for comparison
@@ -25,17 +36,15 @@ export * from './default-address-fields';
  *
  * @param {string} setting Setting name (e.g. wpVersion or wcVersion).
  * @param {string} version Version to compare.
- * @param {string} operator Comparison operator.
+ * @param {compareVersions.CompareOperator} operator Comparison operator.
  */
 const compareVersionSettingIgnorePrerelease = (
-	setting,
-	version,
-	operator
-) => {
-	let replacement = getSetting( setting, '' ).replace(
-		/-[a-zA-Z0-9]*[\-]*/,
-		'.0-rc.'
-	);
+	setting: string,
+	version: string,
+	operator: compareVersions.CompareOperator
+): boolean => {
+	const settingValue = getSetting( setting, '' ) as string;
+	let replacement = settingValue.replace( /-[a-zA-Z0-9]*[\-]*/, '.0-rc.' );
 	replacement = replacement.endsWith( '.' )
 		? replacement.substring( 0, replacement.length - 1 )
 		: replacement;
@@ -48,11 +57,11 @@ const compareVersionSettingIgnorePrerelease = (
  *
  * For example `isWpVersion( '5.6', '<=' )` returns true if the site WP version
  * is smaller or equal than `5.6` .
- *
- * @param {string} version Version to use to compare against the current wpVersion.
- * @param {string} [operator='='] Operator to use in the comparison.
  */
-export const isWpVersion = ( version, operator = '=' ) => {
+export const isWpVersion = (
+	version: string,
+	operator: compareVersions.CompareOperator = '='
+): boolean => {
 	return compareVersionSettingIgnorePrerelease(
 		'wpVersion',
 		version,
@@ -66,11 +75,11 @@ export const isWpVersion = ( version, operator = '=' ) => {
  *
  * For example `isWcVersion( '4.9.0', '<=' )` returns true if the site WC version
  * is smaller or equal than `4.9`.
- *
- * @param {string} version Version to use to compare against the current wcVersion.
- * @param {string} [operator='='] Operator to use in the comparison.
  */
-export const isWcVersion = ( version, operator = '=' ) => {
+export const isWcVersion = (
+	version: string,
+	operator: compareVersions.CompareOperator = '='
+): boolean => {
 	return compareVersionSettingIgnorePrerelease(
 		'wcVersion',
 		version,
@@ -78,12 +87,11 @@ export const isWcVersion = ( version, operator = '=' ) => {
 	);
 };
 
-export { compareVersions, getSetting };
-
 /**
  * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
  *
  * @param {string} path Relative path.
  * @return {string} Full admin URL.
  */
-export const getAdminLink = ( path ) => getSetting( 'adminUrl' ) + path;
+export const getAdminLink = ( path: string ): string =>
+	getSetting( 'adminUrl' ) + path;

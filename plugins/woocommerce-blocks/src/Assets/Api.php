@@ -79,17 +79,22 @@ class Api {
 	 * @throws Exception If the registered script has a dependency on itself.
 	 */
 	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
-		$src        = $this->get_asset_url( $relative_src );
-		$asset_path = $this->package->get_path(
-			str_replace( '.js', '.asset.php', $relative_src )
-		);
+		$src     = '';
+		$version = '1';
 
-		if ( file_exists( $asset_path ) ) {
-			$asset        = require $asset_path;
-			$dependencies = isset( $asset['dependencies'] ) ? array_merge( $asset['dependencies'], $dependencies ) : $dependencies;
-			$version      = ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src );
-		} else {
-			$version = $this->get_file_version( $relative_src );
+		if ( $relative_src ) {
+			$src        = $this->get_asset_url( $relative_src );
+			$asset_path = $this->package->get_path(
+				str_replace( '.js', '.asset.php', $relative_src )
+			);
+
+			if ( file_exists( $asset_path ) ) {
+				$asset        = require $asset_path;
+				$dependencies = isset( $asset['dependencies'] ) ? array_merge( $asset['dependencies'], $dependencies ) : $dependencies;
+				$version      = ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src );
+			} else {
+				$version = $this->get_file_version( $relative_src );
+			}
 		}
 
 		if ( in_array( $handle, $dependencies, true ) ) {

@@ -24,6 +24,8 @@ global.wcSettings = {
 		refunded: 'Refunded',
 		failed: 'Failed',
 	},
+	placeholderImgSrc: 'placeholder.jpg',
+	productCount: 101,
 	locale: {
 		siteLocale: 'en_US',
 		userLocale: 'en_US',
@@ -37,6 +39,38 @@ global.wcSettings = {
 	shippingStates: {
 		CA: {
 			ON: 'Ontario',
+		},
+	},
+	storePages: {
+		myaccount: {
+			id: 0,
+			title: '',
+			permalink: '',
+		},
+		shop: {
+			id: 0,
+			title: '',
+			permalink: '',
+		},
+		cart: {
+			id: 0,
+			title: '',
+			permalink: '',
+		},
+		checkout: {
+			id: 0,
+			title: '',
+			permalink: '',
+		},
+		privacy: {
+			id: 0,
+			title: '',
+			permalink: '',
+		},
+		terms: {
+			id: 0,
+			title: '',
+			permalink: '',
 		},
 	},
 	countryLocale: {

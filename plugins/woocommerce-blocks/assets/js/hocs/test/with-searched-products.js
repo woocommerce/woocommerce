@@ -11,10 +11,13 @@ import * as mockUtils from '@woocommerce/editor-components/utils';
 import withSearchedProducts from '../with-searched-products';
 
 jest.mock( '@woocommerce/block-settings', () => ( {
-	IS_LARGE_CATALOG: true,
+	__esModule: true,
+	blocksConfig: {
+		productCount: 101,
+	},
 } ) );
 
-// Mock the getProducts and isLargeCatalog values for tests.
+// Mock the getProducts values for tests.
 mockUtils.getProducts = jest.fn().mockImplementation( () =>
 	Promise.resolve( [
 		{ id: 10, name: 'foo', parent: 0 },

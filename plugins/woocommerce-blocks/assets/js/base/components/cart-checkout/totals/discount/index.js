@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip } from '@woocommerce/base-components/chip';
 import PropTypes from 'prop-types';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -31,7 +31,10 @@ const TotalsDiscount = ( {
 	}
 
 	const discountTaxValue = parseInt( totalDiscountTax, 10 );
-	const discountTotalValue = DISPLAY_CART_PRICES_INCLUDING_TAX
+	const discountTotalValue = getSetting(
+		'displayCartPricesIncludingTax',
+		false
+	)
 		? discountValue + discountTaxValue
 		: discountValue;
 

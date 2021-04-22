@@ -11,7 +11,7 @@ import {
 	useEditorContext,
 } from '@woocommerce/base-context';
 import Title from '@woocommerce/base-components/title';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

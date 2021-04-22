@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, tags } from '@woocommerce/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -57,7 +57,7 @@ registerBlockType( blockTypeName, {
 		 */
 		columns: {
 			type: 'number',
-			default: DEFAULT_COLUMNS,
+			default: getSetting( 'default_columns', 3 ),
 		},
 
 		/**
@@ -94,7 +94,7 @@ registerBlockType( blockTypeName, {
 		 */
 		rows: {
 			type: 'number',
-			default: DEFAULT_ROWS,
+			default: getSetting( 'default_rows', 3 ),
 		},
 
 		/**

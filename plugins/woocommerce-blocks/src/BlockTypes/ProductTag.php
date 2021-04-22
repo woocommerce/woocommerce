@@ -50,4 +50,20 @@ class ProductTag extends AbstractProductGrid {
 			'isPreview'         => $this->get_schema_boolean( false ),
 		);
 	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		$tag_count = wp_count_terms( 'product_tag' );
+
+		$this->asset_data_registry->add( 'hasTags', $tag_count > 0, true );
+		$this->asset_data_registry->add( 'limitTags', $tag_count > 100, true );
+	}
 }

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useState, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/block-settings';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,

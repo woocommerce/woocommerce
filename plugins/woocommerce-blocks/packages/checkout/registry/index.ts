@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
-import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

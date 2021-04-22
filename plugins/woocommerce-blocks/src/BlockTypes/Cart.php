@@ -87,33 +87,45 @@ class Cart extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		if ( ! $this->asset_data_registry->exists( 'shippingCountries' ) ) {
-			$this->asset_data_registry->add( 'shippingCountries', $this->deep_sort_with_accents( WC()->countries->get_shipping_countries() ) );
-		}
+		$this->asset_data_registry->add(
+			'shippingCountries',
+			function() {
+				return $this->deep_sort_with_accents( WC()->countries->get_shipping_countries() );
+			},
+			true
+		);
+		$this->asset_data_registry->add(
+			'shippingStates',
+			function() {
+				return $this->deep_sort_with_accents( WC()->countries->get_shipping_country_states() );
+			},
+			true
+		);
+		$this->asset_data_registry->add(
+			'countryLocale',
+			function() {
+				// Merge country and state data to work around https://github.com/woocommerce/woocommerce/issues/28944.
+				$country_locale = wc()->countries->get_country_locale();
+				$states         = wc()->countries->get_states();
 
-		if ( ! $this->asset_data_registry->exists( 'shippingStates' ) ) {
-			$this->asset_data_registry->add( 'shippingStates', $this->deep_sort_with_accents( WC()->countries->get_shipping_country_states() ) );
-		}
-
-		if ( ! $this->asset_data_registry->exists( 'countryLocale' ) ) {
-			// Merge country and state data to work around https://github.com/woocommerce/woocommerce/issues/28944.
-			$country_locale = wc()->countries->get_country_locale();
-			$states         = wc()->countries->get_states();
-
-			foreach ( $states as $country => $states ) {
-				if ( empty( $states ) ) {
-					$country_locale[ $country ]['state']['required'] = false;
-					$country_locale[ $country ]['state']['hidden']   = true;
+				foreach ( $states as $country => $states ) {
+					if ( empty( $states ) ) {
+						$country_locale[ $country ]['state']['required'] = false;
+						$country_locale[ $country ]['state']['hidden']   = true;
+					}
 				}
-			}
-			$this->asset_data_registry->add( 'countryLocale', $country_locale );
-		}
-
-		$permalink = ! empty( $attributes['checkoutPageId'] ) ? get_permalink( $attributes['checkoutPageId'] ) : false;
-
-		if ( $permalink && ! $this->asset_data_registry->exists( 'page-' . $attributes['checkoutPageId'] ) ) {
-			$this->asset_data_registry->add( 'page-' . $attributes['checkoutPageId'], $permalink );
-		}
+				return $country_locale;
+			},
+			true
+		);
+		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
+		$this->asset_data_registry->add( 'isShippingCalculatorEnabled', filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ), true );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ), true );
+		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled(), true );
+		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled(), true );
+		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
+		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
+		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {

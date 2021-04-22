@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { SHIPPING_COUNTRIES } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,7 +10,12 @@ import { SHIPPING_COUNTRIES } from '@woocommerce/block-settings';
 import CountryInput from './country-input.js';
 
 const ShippingCountryInput = ( props ) => {
-	return <CountryInput countries={ SHIPPING_COUNTRIES } { ...props } />;
+	return (
+		<CountryInput
+			countries={ getSetting( 'shippingCountries', {} ) }
+			{ ...props }
+		/>
+	);
 };
 
 ShippingCountryInput.propTypes = {

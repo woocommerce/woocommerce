@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { DEFAULT_COLUMNS } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import { Icon, widgets } from '@woocommerce/icons';
 
 /**
@@ -49,7 +49,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 		 */
 		columns: {
 			type: 'number',
-			default: DEFAULT_COLUMNS,
+			default: getSetting( 'default_columns', 3 ),
 		},
 
 		/**

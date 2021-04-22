@@ -30,7 +30,7 @@ import { Component } from '@wordpress/element';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
-import { MIN_HEIGHT } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import { withProduct } from '@woocommerce/block-hocs';
@@ -296,7 +296,7 @@ const FeaturedProduct = ( {
 			<ResizableBox
 				className={ classes }
 				size={ { height } }
-				minHeight={ MIN_HEIGHT }
+				minHeight={ getSetting( 'min_height', 500 ) }
 				enable={ { bottom: true } }
 				onResizeStop={ onResizeStop }
 				style={ style }
