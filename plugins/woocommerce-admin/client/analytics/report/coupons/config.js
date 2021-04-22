@@ -3,16 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { getCouponLabels } from '../../../lib/async-requests';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const COUPON_REPORT_CHARTS_FILTER = 'woocommerce_admin_coupons_report_charts';
 const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupons_report_filters';
 const COUPON_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_coupon_report_advanced_filters';
+
+const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	{
@@ -85,6 +89,7 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 							'woocommerce-admin'
 						),
 					},
+					onClick: addCesSurveyForAnalytics,
 				},
 			},
 		],

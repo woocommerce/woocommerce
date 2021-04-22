@@ -6,7 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -19,7 +19,6 @@ import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from '../variations/table';
 import ReportFilters from '../../components/report-filters';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 class ProductsReport extends Component {
 	getChartMeta() {
@@ -61,7 +60,6 @@ class ProductsReport extends Component {
 			isError,
 			isRequesting,
 			isSingleProductVariable,
-			addCesSurveyForAnalytics,
 		} = this.props;
 
 		if ( isError ) {
@@ -76,10 +74,6 @@ class ProductsReport extends Component {
 			chartQuery.segmentby =
 				compareObject === 'products' ? 'product' : 'variation';
 		}
-
-		filters[ 0 ].filters.find(
-			( item ) => item.value === 'compare-products'
-		).settings.onClick = addCesSurveyForAnalytics;
 
 		return (
 			<Fragment>
@@ -193,9 +187,5 @@ export default compose(
 			query,
 			isSingleProductView,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
-		return { addCesSurveyForAnalytics };
 	} )
 )( ProductsReport );

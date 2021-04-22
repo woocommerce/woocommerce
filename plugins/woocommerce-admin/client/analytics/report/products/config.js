@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -11,6 +12,7 @@ import {
 	getProductLabels,
 	getVariationLabels,
 } from '../../../lib/async-requests';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const PRODUCTS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_products_report_charts';
@@ -18,6 +20,8 @@ const PRODUCTS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_products_report_filters';
 const PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_products_report_advanced_filters';
+
+const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
 export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 	{
@@ -95,6 +99,7 @@ const filterConfig = {
 					title: __( 'Compare Products', 'woocommerce-admin' ),
 					update: __( 'Compare', 'woocommerce-admin' ),
 				},
+				onClick: addCesSurveyForAnalytics,
 			},
 		},
 	],

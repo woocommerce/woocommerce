@@ -4,17 +4,21 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { NAMESPACE } from '@woocommerce/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { getRequestByIdString } from '../../../lib/async-requests';
 import { getTaxCode } from './utils';
+import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const TAXES_REPORT_CHARTS_FILTER = 'woocommerce_admin_taxes_report_charts';
 const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';
 const TAXES_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_taxes_report_advanced_filters';
+
+const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
 export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
@@ -82,6 +86,7 @@ export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 						title: __( 'Compare Tax Codes', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),
 					},
+					onClick: addCesSurveyForAnalytics,
 				},
 			},
 		],
