@@ -69,18 +69,20 @@ const runAddSimpleProductTest = () => {
 			// Set product data and publish the product
 			await expect(page).toFill('#title', VirtualProductName);
 			await expect(page).toClick('#_virtual');
-
 			await clickTab('General');
 			await expect(page).toFill('#_regular_price', simpleProductPrice);
 			await verifyAndPublish();
 
 			await merchant.logout();
 
-			// See product in the shop end and add to the cart
+			// See product in the shop and add it to the cart
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(VirtualProductName);
 			await shopper.goToCart();
 			await shopper.productIsInCart(VirtualProductName);
+
+			// Assert that the page does not contain shipping calculation button
+			await expect(page).not.toMatchElement('a.shipping-calculator-button');
 
 			// Remove product from cart
 			await shopper.removeFromCart(VirtualProductName);
@@ -96,11 +98,17 @@ const runAddSimpleProductTest = () => {
 			await expect(page).toFill('#_regular_price', simpleProductPrice);
 			await verifyAndPublish();
 
-			// See product in the shop end and add to the cart
+			await merchant.logout();
+
+			// See product in the shop and add it to the cart
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(NonVirtualProductName);
 			await shopper.goToCart();
 			await shopper.productIsInCart(NonVirtualProductName);
+
+			// Assert that the page does contain shipping calculation button
+			await page.waitForSelector('a.shipping-calculator-button');
+			await expect(page).toMatchElement('a.shipping-calculator-button');
 
 			// Remove product from cart
 			await shopper.removeFromCart(NonVirtualProductName);
