@@ -61,6 +61,8 @@ const runCartCalculateShippingTest = () => {
 			await page.select('select[name="add_method_id"]', 'local_pickup');
 			await page.click('button#btn-ok');
 			await page.waitForSelector('#zone_locations');
+			await merchant.logout();
+			await shopper.emptyCart();
 		});
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
