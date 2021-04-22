@@ -437,6 +437,7 @@ export const SelectiveExtensionsBundle = ( {
 							onSubmit( values );
 						} }
 						isBusy={ isInstallingActivating }
+						disabled={ isInstallingActivating }
 						isPrimary
 					>
 						Continue

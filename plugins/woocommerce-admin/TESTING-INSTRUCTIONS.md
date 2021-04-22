@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Disable the continue btn when plugins are being installed/activated #6838
+
+1. In OBW fill out store details with a USA address 
+2. Click Continue and select Fashion, apparel, and accessories, 
+3. Click Continue, and select Physical products, and continue.
+4. The business details tab should show a Business details tab, and a Free features tab (disabled at first)
+5. Select 1-10 for the first dropdown, and No for the second, and click Continue.
+6. Make sure the "Add recommended business features to my site is ticked
+7. Click Continue, before the page redirects click Continue again
+8. Confirm no error has been recorded in your browser console.
+
 ### Remove PayPal for India #6828
 
 -   Setup a new store and set your country to `India`.

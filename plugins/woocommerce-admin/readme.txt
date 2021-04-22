@@ -83,6 +83,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add support for running php unit tests in PHP 8. #6678
 - Dev: Add event recording to start of gateway connections #6801
 - Feature: Add recommended payment methods in payment settings. #6760
+- Fix: Disable the continue btn on OBW when requested are being made #6838
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Use the store timezone to make time data requests #6632
 - Fix: Update the checked input radio button margin style #6701
