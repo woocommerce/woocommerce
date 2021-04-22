@@ -59,6 +59,7 @@
 		"start": "cross-env WC_ADMIN_PHASE=development npm run build:packages && cross-env WC_ADMIN_PHASE=development npm run build:feature-config && concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"node ./bin/packages/watch.js\"",
 		"pretest": "npm run -s install-if-no-packages",
 		"test": "./node_modules/jest-24.9.0/bin/jest.js --config tests/js/jest.config.json",
+		"test:debug": "node --inspect-brk ./node_modules/jest-24.9.0/bin/jest.js --config tests/js/jest.config.json --watch --runInBand --no-cache",
 		"test:e2e": "WP_VERSION=latest npm run build && npx wc-e2e docker:down && npx wc-e2e docker:up && npx wc-e2e test:e2e",
 		"test-staged": "./node_modules/jest-24.9.0/bin/jest.js --bail --config tests/js/jest.config.json --findRelatedTests",
 		"test:help": "wp-scripts test-unit-js --help",
