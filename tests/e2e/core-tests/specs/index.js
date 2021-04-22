@@ -90,6 +90,7 @@ const runMerchantTests = () => {
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
 	runAnalyticsPageLoadsTest();
+	runInitiateWccomConnectionTest();
 }
 
 const runApiTests = () => {
