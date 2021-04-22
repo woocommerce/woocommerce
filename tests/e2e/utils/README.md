@@ -62,6 +62,7 @@ This package provides support for enabling retries in tests:
 - `WP_ADMIN_ANALYTICS_PAGES` - WooCommerce analytics page root
 - `WP_ADMIN_WC_SETTINGS` - WooCommerce settings page root
 - `WP_ADMIN_NEW_SHIPPING_ZONE` - WooCommerce new shipping zone
+- `WP_ADMIN_WC_EXTENSIONS` - WooCommerce extensions page
 
 #### Front end
 
@@ -100,6 +101,7 @@ This package provides support for enabling retries in tests:
 | `openAnalyticsPage` | | Open any Analytics page |
 | `openAllUsersView` | | Open the All Users page |
 | `openImportProducts` | | Open the Import Products page |
+| `openExtensions` | | Go to WooCommerce -> Extensions |
 
 ### Shopper `shopper`
 
