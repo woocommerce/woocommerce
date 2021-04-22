@@ -6,6 +6,8 @@
  * @package WooCommerce
  */
 
+use Automattic\WooCommerce\Internal\ThemeSupport;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -14,9 +16,18 @@ defined( 'ABSPATH' ) || exit;
 class WC_Shop_Customizer {
 
 	/**
+	 * Holds the instance of ThemeSupport to use.
+	 *
+	 * @var ThemeSupport $theme_support The instance of ThemeSupport to use.
+	 */
+	private $theme_support;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->theme_support = wc_get_container()->get( ThemeSupport::class );
+
 		add_action( 'customize_register', array( $this, 'add_sections' ) );
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
@@ -102,7 +113,7 @@ class WC_Shop_Customizer {
 		$max_notice = __( 'The maximum allowed setting is %d', 'woocommerce' );
 		?>
 		<script type="text/javascript">
-			jQuery( document ).ready( function( $ ) {
+			jQuery( function( $ ) {
 				$( document.body ).on( 'change', '.woocommerce-cropping-control input[type="radio"]', function() {
 					var $wrapper = $( this ).closest( '.woocommerce-cropping-control' ),
 						value    = $wrapper.find( 'input:checked' ).val();
@@ -545,11 +556,11 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		if ( ! wc_get_theme_support( 'single_image_width' ) ) {
+		if ( ! $this->theme_support->has_option( 'single_image_width', false ) ) {
 			$wp_customize->add_setting(
 				'woocommerce_single_image_width',
 				array(
-					'default'              => 600,
+					'default'              => $this->theme_support->get_option( 'single_image_width', 600 ),
 					'type'                 => 'option',
 					'capability'           => 'manage_woocommerce',
 					'sanitize_callback'    => 'absint',
@@ -573,11 +584,11 @@ class WC_Shop_Customizer {
 			);
 		}
 
-		if ( ! wc_get_theme_support( 'thumbnail_image_width' ) ) {
+		if ( ! $this->theme_support->has_option( 'thumbnail_image_width', false ) ) {
 			$wp_customize->add_setting(
 				'woocommerce_thumbnail_image_width',
 				array(
-					'default'              => 300,
+					'default'              => $this->theme_support->get_option( 'thumbnail_image_width', 300 ),
 					'type'                 => 'option',
 					'capability'           => 'manage_woocommerce',
 					'sanitize_callback'    => 'absint',
@@ -769,7 +780,7 @@ class WC_Shop_Customizer {
 			);
 		} else {
 			$choose_pages = array(
-				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+				'woocommerce_terms_page_id' => __( 'Terms and conditions', 'woocommerce' ),
 			);
 		}
 		$pages        = get_pages(
@@ -818,7 +829,7 @@ class WC_Shop_Customizer {
 				'description'     => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
 				'section'         => 'woocommerce_checkout',
 				'settings'        => 'woocommerce_checkout_privacy_policy_text',
-				'active_callback' => 'wc_privacy_policy_page_id',
+				'active_callback' => array( $this, 'has_privacy_policy_page_id' ),
 				'type'            => 'textarea',
 			)
 		);
@@ -830,7 +841,7 @@ class WC_Shop_Customizer {
 				'description'     => __( 'Optionally add some text for the terms checkbox that customers must accept.', 'woocommerce' ),
 				'section'         => 'woocommerce_checkout',
 				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
-				'active_callback' => 'wc_terms_and_conditions_page_id',
+				'active_callback' => array( $this, 'has_terms_and_conditions_page_id' ),
 				'type'            => 'text',
 			)
 		);
@@ -864,6 +875,24 @@ class WC_Shop_Customizer {
 	public function sanitize_checkout_field_display( $value ) {
 		$options = array( 'hidden', 'optional', 'required' );
 		return in_array( $value, $options, true ) ? $value : '';
+	}
+
+	/**
+	 * Whether or not a page has been chose for the privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function has_privacy_policy_page_id() {
+		return wc_privacy_policy_page_id() > 0;
+	}
+
+	/**
+	 * Whether or not a page has been chose for the terms and conditions.
+	 *
+	 * @return bool
+	 */
+	public function has_terms_and_conditions_page_id() {
+		return wc_terms_and_conditions_page_id() > 0;
 	}
 }
 

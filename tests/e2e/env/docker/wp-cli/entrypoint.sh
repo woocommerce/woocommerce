@@ -66,6 +66,7 @@ then
     echo "Ready page already exists..."
 else
     wp post create \
+        --url=${URL} \
         --post_type=page \
         --post_status=publish \
         --post_title='Ready' \

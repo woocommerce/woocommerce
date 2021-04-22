@@ -6,6 +6,8 @@
  * @since   3.2.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -230,7 +232,7 @@ class WC_Discounts {
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return absint( round( $item->price - $this->get_discount( $item->key, true ) ) );
+		return absint( NumberUtil::round( $item->price - $this->get_discount( $item->key, true ) ) );
 	}
 
 	/**
@@ -359,7 +361,7 @@ class WC_Discounts {
 			$discounted_price = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : round( $item->price );
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : NumberUtil::round( $item->price );
 
 			// See how many and what price to apply to.
 			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
@@ -597,11 +599,40 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_usage_limit( $coupon ) {
-		if ( $coupon->get_usage_limit() > 0 && $coupon->get_usage_count() >= $coupon->get_usage_limit() ) {
-			throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
+		if ( ! $coupon->get_usage_limit() ) {
+			return true;
 		}
-
-		return true;
+		$usage_count           = $coupon->get_usage_count();
+		$data_store            = $coupon->get_data_store();
+		$tentative_usage_count = is_callable( array( $data_store, 'get_tentative_usage_count' ) ) ? $data_store->get_tentative_usage_count( $coupon->get_id() ) : 0;
+		if ( $usage_count + $tentative_usage_count < $coupon->get_usage_limit() ) {
+			// All good.
+			return true;
+		}
+		// Coupon usage limit is reached. Let's show as informative error message as we can.
+		if ( 0 === $tentative_usage_count ) {
+			// No held coupon, usage limit is indeed reached.
+			$error_code = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED;
+		} elseif ( is_user_logged_in() ) {
+			$recent_pending_orders = wc_get_orders(
+				array(
+					'limit'       => 1,
+					'post_status' => array( 'wc-failed', 'wc-pending' ),
+					'customer'    => get_current_user_id(),
+					'return'      => 'ids',
+				)
+			);
+			if ( count( $recent_pending_orders ) > 0 ) {
+				// User logged in and have a pending order, maybe they are trying to use the coupon.
+				$error_code = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK;
+			} else {
+				$error_code = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED;
+			}
+		} else {
+			// Maybe this user was trying to use the coupon but got stuck. We can't know for sure (performantly). Show a slightly better error message.
+			$error_code = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST;
+		}
+		throw new Exception( $coupon->get_coupon_error( $error_code ), $error_code );
 	}
 
 	/**
@@ -629,7 +660,14 @@ class WC_Discounts {
 			$data_store  = $coupon->get_data_store();
 			$usage_count = $data_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
-				throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
+				if ( $data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $user_id ) ) > 0 ) {
+					$error_message = $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK );
+					$error_code    = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK;
+				} else {
+					$error_message = $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+					$error_code    = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED;
+				}
+				throw new Exception( $error_message, $error_code );
 			}
 		}
 
@@ -910,7 +948,7 @@ class WC_Discounts {
 
 			if ( $this->object->get_prices_include_tax() ) {
 				// Add tax to tax-exclusive subtotal.
-				$subtotal = $subtotal + wc_add_number_precision( round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
+				$subtotal = $subtotal + wc_add_number_precision( NumberUtil::round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
 			}
 
 			return $subtotal;

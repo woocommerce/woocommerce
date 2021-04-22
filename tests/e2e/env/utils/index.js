@@ -1,7 +1,13 @@
 const getAppRoot = require( './app-root' );
-const getTestConfig = require( './test-config' );
+const { getAppName, getAppBase } = require( './app-name' );
+const { getTestConfig, getAdminConfig } = require( './test-config' );
+const takeScreenshotFor = require( './take-screenshot' );
 
 module.exports = {
-    getAppRoot,
-    getTestConfig,
+	getAppBase,
+	getAppRoot,
+	getAppName,
+	getTestConfig,
+	getAdminConfig,
+	takeScreenshotFor,
 };

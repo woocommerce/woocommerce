@@ -7,6 +7,7 @@ project.properties
 .settings*
 .idea
 .vscode
+.eslintcache
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
@@ -24,8 +25,7 @@ none
 /assets/css/photoswipe/**/*.min.css
 
 # Minified JS
-/assets/js/admin/*.min.js
-/assets/js/frontend/*.min.js
+/assets/js/**/*.min.js
 
 # OS X metadata
 .DS_Store
@@ -51,6 +51,7 @@ tests/cli/vendor
 /tests/e2e/env/docker/wp-cli/initialize.sh
 /tests/e2e/env/build/
 /tests/e2e/env/build-module/
+/tests/e2e/screenshots
 /tests/e2e/utils/build/
 /tests/e2e/utils/build-module/
 
@@ -59,6 +60,8 @@ tests/cli/vendor
 
 # Composer
 /vendor/
+/bin/composer/**/vendor/
+/lib/vendor/
 contributors.md
 contributors.html
 
@@ -74,3 +77,4 @@ i18n/languages/woocommerce.pot
 
 # Build
 build/
+woocommerce.zip

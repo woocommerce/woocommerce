@@ -150,10 +150,15 @@ class WC_Plugin_Updates {
 	 * with the $new_version.
 	 *
 	 * @param string $new_version WooCommerce version to test against.
-	 * @param string $release 'major' or 'minor'.
+	 * @param string $release 'major', 'minor', or 'none'.
 	 * @return array of plugin info arrays
 	 */
 	public function get_untested_plugins( $new_version, $release ) {
+		// Since 5.0 all versions are backwards compatible.
+		if ( 'none' === $release ) {
+			return array();
+		}
+
 		$extensions        = array_merge( $this->get_plugins_with_header( self::VERSION_TESTED_HEADER ), $this->get_plugins_for_woocommerce() );
 		$untested          = array();
 		$new_version_parts = explode( '.', $new_version );
@@ -161,15 +166,6 @@ class WC_Plugin_Updates {
 
 		if ( 'minor' === $release ) {
 			$version .= '.' . $new_version_parts[1];
-		}
-
-		if ( 'major' === $release ) {
-			$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
-
-			// If user has already moved to the major version, we don't need to flag up anything.
-			if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
-				return array();
-			}
 		}
 
 		foreach ( $extensions as $file => $plugin ) {

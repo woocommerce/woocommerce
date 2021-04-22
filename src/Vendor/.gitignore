@@ -1,0 +1,5 @@
+# Prevent anyone from accidentally adding code to these directories.
+# This will break any PRs that do, revealing the mistake they made.
+*
+!.gitignore
+!README.md

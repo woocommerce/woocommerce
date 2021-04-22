@@ -179,7 +179,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del>' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}
@@ -426,7 +426,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_base_data() {
 		return array_merge(
-			array( 'id'     => $this->get_id() ),
+			array( 'id' => $this->get_id() ),
 			$this->data,
 			array( 'number' => $this->get_order_number() )
 		);
@@ -907,7 +907,7 @@ class WC_Order extends WC_Abstract_Order {
 		$address     = WC()->countries->get_formatted_address( $raw_address );
 
 		/**
-		 * Filter orders formatterd billing address.
+		 * Filter orders formatted billing address.
 		 *
 		 * @since 3.8.0
 		 * @param string   $address     Formatted billing address string.
@@ -933,7 +933,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		/**
-		 * Filter orders formatterd shipping address.
+		 * Filter orders formatted shipping address.
 		 *
 		 * @since 3.8.0
 		 * @param string   $address     Formatted billing address string.
@@ -983,7 +983,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value Value of the prop.
 	 */
-	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+	protected function set_address_prop( $prop, $address, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
 			if ( true === $this->object_read ) {
 				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {

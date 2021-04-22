@@ -1,0 +1,41 @@
+{
+  "name": "woocommerce/woocommerce-lib",
+  "description": "A package for hiding re-namespaced dependencies and executing them",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=7.0",
+    "psr/container": "^1.0"
+  },
+  "require-dev": {
+    "league/container": "3.3.5"
+  },
+  "config": {
+    "platform": {
+      "php": "7.0"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "\"../vendor/bin/mozart\" compose"
+    ],
+    "post-update-cmd": [
+      "\"../vendor/bin/mozart\" compose"
+    ]
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
+      "dep_directory": "/packages/",
+      "packages": [
+        "league/container"
+      ],
+      "excluded_packages": [
+        "psr/container"
+      ],
+      "classmap_directory": "/classes/",
+      "classmap_prefix": "WC_Vendor_",
+      "delete_vendor_directories": true
+    } 
+  }
+}

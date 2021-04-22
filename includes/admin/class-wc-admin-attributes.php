@@ -462,7 +462,7 @@ class WC_Admin_Attributes {
 			<script type="text/javascript">
 			/* <![CDATA[ */
 
-				jQuery( 'a.delete' ).click( function() {
+				jQuery( 'a.delete' ).on( 'click', function() {
 					if ( window.confirm( '<?php esc_html_e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>' ) ) {
 						return true;
 					}

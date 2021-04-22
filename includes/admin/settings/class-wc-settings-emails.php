@@ -46,12 +46,19 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
+		$desc_help_text = sprintf(
+		/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
+			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/wp-mail-logging/',
+			'https://docs.woocommerce.com/document/email-faq'
+		);
 		$settings = apply_filters(
 			'woocommerce_email_settings',
 			array(
 				array(
 					'title' => __( 'Email notifications', 'woocommerce' ),
-					'desc'  => __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.', 'woocommerce' ),
+					/* translators: %s: help description with link to WP Mail logging and support page. */
+					'desc'  => sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text ),
 					'type'  => 'title',
 					'id'    => 'email_notification_settings',
 				),
@@ -191,6 +198,26 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'id'   => 'email_template_options',
 				),
 
+				array(
+					'title' => __( 'Store management insights', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'email_merchant_notes',
+				),
+
+				array(
+					'title'         => __( 'Enable email insights', 'woocommerce' ),
+					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
+					'id'            => 'woocommerce_merchant_email_notifications',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
+					'autoload'      => false,
+				),
+
+				array(
+					'type' => 'sectionend',
+					'id'   => 'email_merchant_notes',
+				),
 			)
 		);
 

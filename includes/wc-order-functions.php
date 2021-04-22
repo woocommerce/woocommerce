@@ -71,7 +71,7 @@ function wc_get_orders( $args ) {
  *
  * @since  2.2
  *
- * @param  mixed $the_order Post object or post ID of the order.
+ * @param mixed $the_order       Post object or post ID of the order.
  *
  * @return bool|WC_Order|WC_Order_Refund
  */
@@ -366,9 +366,10 @@ function wc_orders_count( $status ) {
  * @param  int|WC_Product $product     Product instance or ID.
  * @param  WC_Order       $order       Order data.
  * @param  int            $qty         Quantity purchased.
+ * @param  WC_Order_Item  $item        Item of the order.
  * @return int|bool insert id or false on failure.
  */
-function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1 ) {
+function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1, $item = null ) {
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
 	}
@@ -390,7 +391,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
-	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty );
+	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty, $item );
 
 	return $download->save();
 }
@@ -420,7 +421,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 				$downloads = $product->get_downloads();
 
 				foreach ( array_keys( $downloads ) as $download_id ) {
-					wc_downloadable_file_permission( $download_id, $product, $order, $item->get_quantity() );
+					wc_downloadable_file_permission( $download_id, $product, $order, $item->get_quantity(), $item );
 				}
 			}
 		}
@@ -456,11 +457,12 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		delete_transient( $transient );
 	}
 
-	// Clear money spent for user associated with order.
+	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
 		delete_user_meta( $order->get_customer_id(), '_money_spent' );
 		delete_user_meta( $order->get_customer_id(), '_order_count' );
+		delete_user_meta( $order->get_customer_id(), '_last_order' );
 	} else {
 		$order_id = 0;
 	}
@@ -924,7 +926,8 @@ function wc_cancel_unpaid_orders() {
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
+	wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 

@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Orders
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 /**
  * Order coupon tests.
  */
@@ -194,7 +196,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		 * Coupon will therefore discount 200. Compare the total without tax so we can compare the ex tax price and avoid rounding mishaps.
 		 */
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( 401, round( $order->get_total_discount( false ), 2 ), $order->get_total_discount( false ) );
+		$this->assertEquals( 401, NumberUtil::round( $order->get_total_discount( false ), 2 ), $order->get_total_discount( false ) );
 		$this->assertEquals( 598.99, $order->get_total(), $order->get_total() );
 	}
 

@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+
 /**
  * Class WC_Tests_API_Orders
  */
@@ -51,7 +54,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create 10 orders.
 		for ( $i = 0; $i < 10; $i++ ) {
-			$this->orders[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+			$this->orders[] = OrderHelper::create_order( $this->user );
 		}
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
@@ -67,8 +70,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_get_items_ordered_by_modified() {
 		wp_set_current_user( $this->user );
 
-		$order1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
-		$order2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order1 = OrderHelper::create_order( $this->user );
+		$order2 = OrderHelper::create_order( $this->user );
 
 		$order1->set_status( 'completed' );
 		$order1->save();
@@ -80,7 +83,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'orderby' => 'modified',
-				'order' => 'asc',
+				'order'   => 'asc',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -90,7 +93,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'orderby' => 'modified',
-				'order' => 'desc',
+				'order'   => 'desc',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -105,7 +108,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
-		$this->orders[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$this->orders[] = OrderHelper::create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -116,7 +119,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item() {
 		wp_set_current_user( $this->user );
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'key', 'value' );
 		$order->add_meta_data( 'key2', 'value2' );
 		$order->save();
@@ -140,10 +143,96 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order          = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order          = OrderHelper::create_order();
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Tests line items have the expected meta_data properties when getting a single order.
+	 */
+	public function test_get_item_with_line_items_meta_data() {
+		wp_set_current_user( $this->user );
+
+		$attribute_name            = 'Site Level Type';
+		$site_level_attribute_id   = wc_create_attribute( array( 'name' => $attribute_name ) );
+		$site_level_attribute_slug = wc_attribute_taxonomy_name_by_id( $site_level_attribute_id );
+
+		// Register the attribute so that wp_insert_term will be successful.
+		register_taxonomy( $site_level_attribute_slug, array( 'product' ), array() );
+
+		$term_name                        = 'Site Level Value - Wood';
+		$site_level_term_insertion_result = wp_insert_term( $term_name, $site_level_attribute_slug );
+		$site_level_term                  = get_term( $site_level_term_insertion_result['term_id'] );
+
+		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+		$line_item->set_props(
+			array( 'variation' => array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug ) )
+		);
+
+		$order = OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		$size_meta_data = $last_line_item['meta_data'][0];
+		$this->assertEquals( $line_item->get_meta_data()[0]->id, $size_meta_data['id'] );
+		$this->assertEquals( 'pa_size', $size_meta_data['key'] );
+		$this->assertEquals( 'size', $size_meta_data['display_key'] );
+		$this->assertEquals( 'small', $size_meta_data['value'] );
+		$this->assertEquals( 'small', $size_meta_data['display_value'] );
+
+		$color_meta_data = $last_line_item['meta_data'][1];
+		$this->assertEquals( $line_item->get_meta_data()[1]->id, $color_meta_data['id'] );
+		$this->assertEquals( $site_level_attribute_slug, $color_meta_data['key'] );
+		$this->assertEquals( $attribute_name, $color_meta_data['display_key'] );
+		$this->assertEquals( $site_level_term->slug, $color_meta_data['value'] );
+		$this->assertEquals( $term_name, $color_meta_data['display_value'] );
+	}
+
+	/**
+	 * Tests that line items for variations includes the parent product name.
+	 */
+	public function test_get_item_with_variation_parent_name() {
+		wp_set_current_user( $this->user );
+
+		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $variation );
+
+		$order = OrderHelper::create_order();
+		$order->add_item( $line_item );
+		$order->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_id(), $data['id'] );
+
+		$last_line_item = array_slice( $data['line_items'], -1 )[0];
+
+		// The name property contains the parent product name and the attribute value (ex. "Dummy Variable Product - small").
+		$this->assertEquals( $variation->get_name(), $last_line_item['name'] );
+		$this->assertTrue( false !== strpos( $last_line_item['name'], $variation->get_attribute( 'pa_size' ) ) );
+		// The parent_name property only contains the parent product name (ex. "Dummy Variable Product").
+		$this->assertEquals( $product->get_name(), $last_line_item['parent_name'] );
+		$this->assertNotEquals( $variation->get_name(), $last_line_item['parent_name'] );
+		$this->assertTrue( false === strpos( $last_line_item['parent_name'], $variation->get_attribute( 'pa_size' ) ) );
 	}
 
 	/**
@@ -162,7 +251,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_refund_id() {
 		wp_set_current_user( $this->user );
-		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order    = OrderHelper::create_order();
 		$refund   = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
@@ -265,8 +354,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
-		$shipping = current( $order->get_items( 'shipping' ) );
-		$expected = array(
+
+		$shipping               = current( $order->get_items( 'shipping' ) );
+		$expected_shipping_line = array(
 			'id'           => $shipping->get_id(),
 			'method_title' => $shipping->get_method_title(),
 			'method_id'    => $shipping->get_method_id(),
@@ -274,9 +364,20 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'total'        => wc_format_decimal( $shipping->get_total(), '' ),
 			'total_tax'    => wc_format_decimal( $shipping->get_total_tax(), '' ),
 			'taxes'        => array(),
-			'meta_data'    => $shipping->get_meta_data(),
 		);
-		$this->assertEquals( $expected, $data['shipping_lines'][0] );
+		foreach ( $expected_shipping_line as $key => $value ) {
+			$this->assertEquals( $value, $data['shipping_lines'][0][ $key ] );
+		}
+
+		$actual_shipping_line_meta_data = $data['shipping_lines'][0]['meta_data'];
+		$this->assertCount( 3, $actual_shipping_line_meta_data );
+		foreach ( $shipping->get_meta_data() as $index => $expected_meta_item ) {
+			$this->assertEquals( $expected_meta_item->id, $actual_shipping_line_meta_data[ $index ]['id'] );
+			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['key'] );
+			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['value'] );
+			$this->assertEquals( $expected_meta_item->key, $actual_shipping_line_meta_data[ $index ]['display_key'] );
+			$this->assertEquals( $expected_meta_item->value, $actual_shipping_line_meta_data[ $index ]['display_value'] );
+		}
 	}
 
 	/**
@@ -444,7 +545,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order() {
 		wp_set_current_user( $this->user );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = OrderHelper::create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -471,7 +572,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_remove_items() {
 		wp_set_current_user( $this->user );
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = OrderHelper::create_order();
 		$fee   = new WC_Order_Item_Fee();
 		$fee->set_props(
 			array(
@@ -512,7 +613,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_update_order_after_delete_product() {
 		wp_set_current_user( $this->user );
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
+		$order   = OrderHelper::create_order( 1, $product );
 		$product->delete( true );
 
 		$request    = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
@@ -523,8 +624,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			array(
 				'line_items' => array(
 					array(
-						'id' => $item->get_id(),
-						'quantity'   => 10,
+						'id'       => $item->get_id(),
+						'quantity' => 10,
 					),
 				),
 			)
@@ -547,6 +648,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'meta_data'    => array(),
 			'sku'          => null,
 			'price'        => 4,
+			'parent_name'  => null,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -554,35 +656,273 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_update_order_add_coupons.
+	 *
+	 * @return array Data for test_update_order_add_coupons.
+	 */
+	public function data_provider_for_test_update_order_add_coupons() {
+		return array(
+
+			// Successful case, no previous coupon, it gets created.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'code' => 'fake-coupon-2',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code' => 200,
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon-2',
+			),
+
+			// Successful case with previous coupon, it gets replaced.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'code' => 'fake-coupon-2',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code' => 200,
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon-2',
+			),
+
+			// Bad request: invalid coupon name, no previous coupon, it doesn't get added.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'code' => 'not-existing-coupon',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon "not-existing-coupon" does not exist!',
+				),
+				'expected_order_coupon_code_after_request' => null,
+			),
+
+			// Bad request: invalid coupon name, coupon existed, it's kept.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'code' => 'not-existing-coupon',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon "not-existing-coupon" does not exist!',
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon',
+			),
+
+			// Bad request: has coupon id, no previous coupon, it doesn't get added.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'id'   => '1234',
+							'code' => 'fake-coupon-2',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon item ID is readonly.',
+				),
+				'expected_order_coupon_code_after_request' => null,
+			),
+
+			// Bad request: has coupon id, previous coupon existed, it's kept.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(
+							'id'   => '1234',
+							'code' => 'fake-coupon-2',
+						),
+					),
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon item ID is readonly.',
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon',
+			),
+
+			// Bad request: no coupon code, no previous coupon, it doesn't get added.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(),
+					),
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon code is required.',
+				),
+				'expected_order_coupon_code_after_request' => null,
+			),
+
+			// Bad request: no coupon code, previous coupon existed, it's kept.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array(
+						array(),
+					),
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Coupon code is required.',
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon',
+			),
+
+			// Bad request: invalid input ('coupon_lines' is not an array), no previous coupon, it doesn't get added.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => 1234,
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Invalid parameter(s): coupon_lines',
+				),
+				'expected_order_coupon_code_after_request' => null,
+			),
+
+			// Bad request: invalid input ('coupon_lines' is not an array), previous coupon existed, it's kept.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => 1234,
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Invalid parameter(s): coupon_lines',
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon',
+			),
+
+			// Bad request: invalid input ('coupon_lines' has non-array elements), no previous coupon, it doesn't get added.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array( 1234 ),
+				),
+				'order_has_coupon_before_request'          => false,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Invalid parameter(s): coupon_lines',
+				),
+				'expected_order_coupon_code_after_request' => null,
+			),
+
+			// Bad request: invalid input ('coupon_lines' has non-array elements), previous coupon existed, it's kept.
+			array(
+				'request_body'                             => array(
+					'coupon_lines' => array( 1234 ),
+				),
+				'order_has_coupon_before_request'          => true,
+				'expected_request_result'                  => array(
+					'code'    => 400,
+					'message' => 'Invalid parameter(s): coupon_lines',
+				),
+				'expected_order_coupon_code_after_request' => 'fake-coupon',
+			),
+		);
+	}
+
+
+	/**
 	 * Tests updating an order and adding a coupon.
+	 *
+	 * @dataProvider data_provider_for_test_update_order_add_coupons
+	 *
+	 * @param array  $request_body The body for the API request.
+	 * @param bool   $order_has_coupon_before_request If true, the order will have 'fake-coupon' applied before the API request.
+	 * @param array  $expected_request_result Expected result from the API request, with 'code' and optionally 'message'.
+	 * @param string $expected_order_coupon_code_after_request Code of the expected applied coupon after the API request, null if it shouldn't have a coupon applied.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_update_order_add_coupons() {
+	public function test_update_order_add_coupons( $request_body, $order_has_coupon_before_request, $expected_request_result, $expected_order_coupon_code_after_request ) {
 		wp_set_current_user( $this->user );
 
-		$order      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$order_item = current( $order->get_items() );
-		$coupon     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
+		// Create order and coupons.
+
+		$order                 = OrderHelper::create_order();
+		$original_order_amount = $order->get_total();
+
+		$coupons = array();
+
+		$coupon = CouponHelper::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
+		$coupons['fake-coupon'] = $coupon;
+
+		$coupon = CouponHelper::create_coupon( 'fake-coupon-2' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+		$coupons['fake-coupon-2'] = $coupon;
+
+		if ( $order_has_coupon_before_request ) {
+			$order->apply_coupon( $coupons['fake-coupon'] );
+		}
+
+		// Perform the request.
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'fake-coupon',
-					),
-				),
-			)
-		);
+		$request->set_body_params( $request_body );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $data['coupon_lines'] );
-		$this->assertEquals( '45.00', $data['total'] );
+		// Check the response and the actual order data after the operation.
+
+		$this->assertEquals( $expected_request_result['code'], $response->get_status() );
+
+		$order         = wc_get_order( $order->get_id() );
+		$order_coupons = array_values( $order->get_coupons() );
+		if ( is_null( $expected_order_coupon_code_after_request ) ) {
+			$expected_coupon       = null;
+			$expected_order_amount = $original_order_amount;
+		} else {
+			$expected_coupon       = $coupons[ $expected_order_coupon_code_after_request ];
+			$expected_order_amount = number_format( 50 - $expected_coupon->get_amount(), 2 );
+		}
+
+		$is_ok_status = $response->get_status() < 300;
+		if ( $is_ok_status ) {
+			$this->assertEquals( $expected_order_amount, $data['total'] );
+			$this->assertCount( 1, $data['coupon_lines'] );
+		} else {
+			$this->assertEquals( $expected_request_result['message'], $data['message'] );
+		}
+
+		if ( is_null( $expected_order_coupon_code_after_request ) ) {
+			$this->assertEquals( '50.00', $order->get_total() );
+			$this->assertCount( 0, $order_coupons );
+		} else {
+			$this->assertEquals( number_format( $expected_order_amount, 2 ), $order->get_total() );
+			$this->assertCount( 1, $order_coupons );
+			$this->assertEquals( $expected_coupon->get_code(), $order_coupons[0]->get_code() );
+		}
 	}
 
 	/**
@@ -592,9 +932,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_remove_coupons() {
 		wp_set_current_user( $this->user );
-		$order      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order      = OrderHelper::create_order();
 		$order_item = current( $order->get_items() );
-		$coupon     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
+		$coupon     = CouponHelper::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
 
@@ -604,17 +944,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		// Check that the coupon is applied.
 		$this->assertEquals( '45.00', $order->get_total() );
 
-		$request     = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$coupon_data = current( $order->get_items( 'coupon' ) );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 
 		$request->set_body_params(
 			array(
-				'coupon_lines' => array(
-					array(
-						'id'   => $coupon_data->get_id(),
-						'code' => null,
-					),
-				),
+				'coupon_lines' => array(),
 				'line_items'   => array(
 					array(
 						'id'         => $order_item->get_id(),
@@ -639,7 +973,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_invalid_coupon() {
 		wp_set_current_user( $this->user );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = OrderHelper::create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 
 		$request->set_body_params(
@@ -666,7 +1000,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = OrderHelper::create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -709,7 +1043,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order() {
 		wp_set_current_user( $this->user );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = OrderHelper::create_order();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -724,7 +1058,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = OrderHelper::create_order();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -752,9 +1086,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_orders_batch() {
 		wp_set_current_user( $this->user );
 
-		$order1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$order2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$order3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+		$order3 = OrderHelper::create_order();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/batch' );
 		$request->set_body_params(
@@ -791,7 +1125,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_order_schema() {
 		wp_set_current_user( $this->user );
-		$order      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order      = OrderHelper::create_order();
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/orders/' . $order->get_id() );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
@@ -799,5 +1133,27 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
+	}
+
+	/**
+	 * Test the order line items schema.
+	 */
+	public function test_order_line_items_schema() {
+		wp_set_current_user( $this->user );
+		$order    = OrderHelper::create_order();
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v3/orders/' . $order->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+
+		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
+		$this->assertEquals( 15, count( $line_item_properties ) );
+		$this->assertArrayHasKey( 'id', $line_item_properties );
+		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
+		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
+
+		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
+		$this->assertEquals( 5, count( $meta_data_item_properties ) );
+		$this->assertEquals( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $meta_data_item_properties ) );
 	}
 }

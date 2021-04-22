@@ -36,12 +36,22 @@ async function fetchLatestTagFromPage( image, nameSearch, page ) {
 					if ( ! data.count ) {
 						reject( "No image '" + image + '" found' );
 					} else {
+						// Implement a 12 hour delay on pulling newly released docker tags.
+						const delayMilliseconds = 12 * 3600 * 1000;
+						const currentTime = Date.now();
 						let latestTag = null;
+						let lastUpdated = null;
 						for ( let tag of data.results ) {
 							tag.semver = tag.name.match( /^\d+\.\d+(.\d+)*$/ );
 							if ( ! tag.semver ) {
 								continue;
 							}
+
+							lastUpdated = Date.parse( tag.last_updated );
+							if ( currentTime - lastUpdated < delayMilliseconds ) {
+								continue;
+							}
+
 							tag.semver = semver.coerce( tag.semver[0] );
 							if ( ! latestTag || semver.gt( tag.semver, latestTag.semver ) ) {
 								latestTag = tag;

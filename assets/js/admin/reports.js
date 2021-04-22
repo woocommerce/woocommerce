@@ -10,7 +10,7 @@ jQuery(function( $ ) {
 	var prev_data_index = null;
 	var prev_series_index = null;
 
-	$( '.chart-placeholder' ).bind( 'plothover', function ( event, pos, item ) {
+	$( '.chart-placeholder' ).on( 'plothover', function ( event, pos, item ) {
 		if ( item ) {
 			if ( prev_data_index !== item.dataIndex || prev_series_index !== item.seriesIndex ) {
 				prev_data_index   = item.dataIndex;
@@ -130,7 +130,7 @@ jQuery(function( $ ) {
 	}
 
 	// Export
-	$( '.export_csv' ).click( function() {
+	$( '.export_csv' ).on( 'click', function() {
 		var exclude_series = $( this ).data( 'exclude_series' ) || '';
 		exclude_series    = exclude_series.toString();
 		exclude_series    = exclude_series.split( ',' );

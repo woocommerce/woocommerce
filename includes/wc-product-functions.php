@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -650,7 +651,7 @@ function wc_get_product_id_by_sku( $sku ) {
 }
 
 /**
- * Get attibutes/data for an individual variation from the database and maintain it's integrity.
+ * Get attributes/data for an individual variation from the database and maintain it's integrity.
  *
  * @since  2.4.0
  * @param  int $variation_id Variation ID.
@@ -948,7 +949,7 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
- * @return float
+ * @return float|string Price with tax included, or an empty string if price calculation failed.
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
@@ -982,7 +983,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 				$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
 			}
 
-			$return_price = round( $line_price + $taxes_total, wc_get_price_decimals() );
+			$return_price = NumberUtil::round( $line_price + $taxes_total, wc_get_price_decimals() );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
@@ -1000,7 +1001,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 					$remove_taxes_total = array_sum( array_map( 'wc_round_tax_total', $remove_taxes ) );
 				}
 
-				$return_price = round( $line_price - $remove_taxes_total, wc_get_price_decimals() );
+				$return_price = NumberUtil::round( $line_price - $remove_taxes_total, wc_get_price_decimals() );
 
 				/**
 			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
@@ -1019,7 +1020,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 					$modded_taxes_total = array_sum( array_map( 'wc_round_tax_total', $modded_taxes ) );
 				}
 
-				$return_price = round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
+				$return_price = NumberUtil::round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
 			}
 		}
 	}
@@ -1032,7 +1033,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
- * @return float
+ * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args(

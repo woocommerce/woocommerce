@@ -84,5 +84,4 @@ class WC_AJAX_Test extends \WC_Unit_Test_Case {
 			}
 		}
 	}
-
 }

@@ -230,7 +230,7 @@ class WC_Shortcodes {
 			woocommerce_product_loop_end();
 		}
 
-		woocommerce_reset_loop();
+		wc_reset_loop();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}
@@ -565,7 +565,7 @@ class WC_Shortcodes {
 			$single_product = new WP_Query( $args );
 			?>
 			<script type="text/javascript">
-				jQuery( document ).ready( function( $ ) {
+				jQuery( function( $ ) {
 					var $variations_form = $( '[data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>"]' ).find( 'form.variations_form' );
 
 					<?php foreach ( $attributes as $attr => $value ) { ?>

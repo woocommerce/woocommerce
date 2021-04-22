@@ -2,6 +2,7 @@
  * External Dependencies
  */
 const { jestConfig } = require( '@automattic/puppeteer-utils' );
+const { WC_E2E_SCREENSHOTS } = process.env;
 const path = require( 'path' );
 const fs = require( 'fs' );
 
@@ -10,8 +11,13 @@ const fs = require( 'fs' );
  */
 const { getAppRoot } = require( '../utils' );
 
+let failureSetup = [];
+if ( WC_E2E_SCREENSHOTS ) {
+	failureSetup.push( path.resolve( __dirname, '../build/setup/jest.failure.js' ) );
+}
 let setupFilesAfterEnv = [
 	path.resolve( __dirname, '../build/setup/jest.setup.js' ),
+	...failureSetup,
 	'expect-puppeteer',
 ];
 
@@ -20,10 +26,11 @@ const localJestSetupFile = path.resolve( appPath, 'tests/e2e/config/jest.setup.j
 if (fs.existsSync( localJestSetupFile ) ) {
 	setupFilesAfterEnv.push( localJestSetupFile );
 }
-module.exports = {
+
+let combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
-		'@woocommerce/e2e-tests/(.*)':
+		'@woocommerce/e2e/tests/(.*)':
 			'<rootDir>/tests/e2e/$1',
 	},
 
@@ -42,3 +49,11 @@ module.exports = {
 		'node_modules/(?!(woocommerce)/)'
 	],
 };
+
+if ( process.env.jest_test_spec ) {
+	combinedConfig.testMatch = [
+		process.env.jest_test_spec
+	];
+}
+
+module.exports = combinedConfig;

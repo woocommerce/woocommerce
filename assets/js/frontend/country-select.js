@@ -70,14 +70,14 @@ jQuery( function( $ ) {
 
 		wc_country_select_select2();
 
-		$( document.body ).bind( 'country_to_state_changed', function() {
+		$( document.body ).on( 'country_to_state_changed', function() {
 			wc_country_select_select2();
 		});
 	}
 
 	/* State/Country select boxes */
 	var states_json       = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
-		states            = $.parseJSON( states_json ),
+		states            = JSON.parse( states_json ),
 		wrapper_selectors = '.woocommerce-billing-fields,' +
 			'.woocommerce-shipping-fields,' +
 			'.woocommerce-address-fields,' +
@@ -142,7 +142,7 @@ jQuery( function( $ ) {
 					$statebox.append( $option );
 				} );
 
-				$statebox.val( value ).change();
+				$statebox.val( value ).trigger( 'change' );
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 			}

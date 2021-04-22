@@ -6,6 +6,8 @@
  * @version 3.9.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -56,7 +58,7 @@ trait WC_Item_Totals {
 	 */
 	public static function round_item_subtotal( $value ) {
 		if ( ! self::round_at_subtotal() ) {
-			$value = round( $value );
+			$value = NumberUtil::round( $value );
 		}
 		return $value;
 	}

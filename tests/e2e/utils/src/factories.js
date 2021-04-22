@@ -1,24 +1,26 @@
-import {
-	AdapterTypes,
-	initializeUsingBasicAuth,
-	ModelRegistry,
-	registerSimpleProduct,
-} from '@woocommerce/model-factories';
-
+import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
+import { simpleProductFactory } from './factories/simple-product';
 
-const modelRegistry = new ModelRegistry()
+const apiUrl = config.get( 'url' );
+const adminUsername = config.get( 'users.admin.username' );
+const adminPassword = config.get( 'users.admin.password' );
+const withDefaultPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.create();
+const withIndexPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.withIndexPermalinks()
+	.create();
 
-// Register all of the different factories that we're going to need.
-registerSimpleProduct( modelRegistry );
+const factories = {
+	api: {
+		withDefaultPermalinks,
+		withIndexPermalinks,
+	},
+	products: {
+		simple: simpleProductFactory( withDefaultPermalinks ),
+	},
+};
 
-// Make sure to perform the initialization AFTER registering all of the factories, otherwise the adapters might be
-// missed on subsequent registrations.
-initializeUsingBasicAuth( modelRegistry,
-	config.get( 'url' ) + '/wp-json',
-	config.get( 'users.admin.username' ),
-	config.get( 'users.admin.password' )
-);
-modelRegistry.changeAllFactoryAdapters( AdapterTypes.API );
-
-export default modelRegistry;
+export default factories;

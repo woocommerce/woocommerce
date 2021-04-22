@@ -611,6 +611,17 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Determine if the current product should trigger a low stock notification
+		 *
+		 * @param int $product_id - The low stock product id
+		 *
+		 * @since 4.7.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_low_stock_notification', true, $product->get_id() ) ) {
+			return;
+		}
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
 			/* translators: 1: product name 2: items in stock */

@@ -16,7 +16,7 @@ wp post create --post_type=page --post_status=publish --post_title='Ready' --pos
 
 ### Project Initialization
 
-Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/master/sample-data) have already been imported. Below is the WP CLI equivalent initialization script for WooCommerce Core E2E testing:
+Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/trunk/sample-data) have already been imported. Below is the WP CLI equivalent initialization script for WooCommerce Core E2E testing:
 
 
 ```
@@ -66,7 +66,7 @@ version: ~> 1.0
 script:
   - npm install jest --global
 # add your initialization script here
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
+  - npx wc-e2e test:e2e
 
 ....
 

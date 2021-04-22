@@ -667,15 +667,18 @@ class WC_Checkout {
 	 * @return array of data.
 	 */
 	public function get_posted_data() {
-		$skipped = array();
-		$data    = array(
-			'terms'                              => (int) isset( $_POST['terms'] ), // WPCS: input var ok, CSRF ok.
-			'createaccount'                      => (int) ! empty( $_POST['createaccount'] ), // WPCS: input var ok, CSRF ok.
-			'payment_method'                     => isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'shipping_method'                    => isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'ship_to_different_address'          => ! empty( $_POST['ship_to_different_address'] ) && ! wc_ship_to_billing_address_only(), // WPCS: input var ok, CSRF ok.
-			'woocommerce_checkout_update_totals' => isset( $_POST['woocommerce_checkout_update_totals'] ), // WPCS: input var ok, CSRF ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$data = array(
+			'terms'                              => (int) isset( $_POST['terms'] ),
+			'createaccount'                      => (int) ( $this->is_registration_enabled() ? ! empty( $_POST['createaccount'] ) : false ),
+			'payment_method'                     => isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : '',
+			'shipping_method'                    => isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : '',
+			'ship_to_different_address'          => ! empty( $_POST['ship_to_different_address'] ) && ! wc_ship_to_billing_address_only(),
+			'woocommerce_checkout_update_totals' => isset( $_POST['woocommerce_checkout_update_totals'] ),
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$skipped = array();
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
 				$skipped[] = $fieldset_key;
@@ -685,23 +688,25 @@ class WC_Checkout {
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
+				// phpcs:disable WordPress.Security.NonceVerification.Missing
 				switch ( $type ) {
 					case 'checkbox':
-						$value = isset( $_POST[ $key ] ) ? 1 : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_POST[ $key ] ) ? 1 : '';
 						break;
 					case 'multiselect':
-						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : '';
 						break;
 					case 'textarea':
-						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : '';
 						break;
 					case 'password':
-						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						break;
 					default:
-						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : '';
 						break;
 				}
+				// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
 			}
@@ -740,6 +745,13 @@ class WC_Checkout {
 				$required    = ! empty( $field['required'] );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
+
+				if ( $validate_fieldset &&
+					( isset( $field['type'] ) && 'country' === $field['type'] && '' !== $data[ $key ] ) &&
+					! WC()->countries->country_exists( $data[ $key ] ) ) {
+						/* translators: ISO 3166-1 alpha-2 country code */
+						$errors->add( $key . '_validation', sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $data[ $key ] ) );
+				}
 
 				switch ( $fieldset_key ) {
 					case 'shipping':
@@ -827,18 +839,21 @@ class WC_Checkout {
 		$this->validate_posted_data( $data, $errors );
 		$this->check_cart_items();
 
-		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) { // WPCS: input var ok, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) {
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
-			$shipping_country = WC()->customer->get_shipping_country();
+			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
-			} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
-				/* translators: %s: shipping location */
-				$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
+			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
+				if ( WC()->countries->country_exists( $shipping_country ) ) {
+					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
+					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . $shipping_country ) );
+				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -957,9 +972,12 @@ class WC_Checkout {
 
 		// Redirect to success/confirmation/payment page.
 		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
+			$result['order_id'] = $order_id;
+
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 			if ( ! is_ajax() ) {
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
 				exit;
 			}
@@ -1155,7 +1173,16 @@ class WC_Checkout {
 
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
-				if ( WC()->cart->needs_payment() ) {
+				/**
+				 * Note that woocommerce_cart_needs_payment is only used in
+				 * WC_Checkout::process_checkout() to keep backwards compatibility.
+				 * Use woocommerce_order_needs_payment instead.
+				 *
+				 * Note that at this point you can't rely on the Cart Object anymore,
+				 * since it could be empty see:
+				 * https://github.com/woocommerce/woocommerce/issues/24631
+				 */
+				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
 					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 				} else {
 					$this->process_order_without_payment( $order_id );
@@ -1191,8 +1218,8 @@ class WC_Checkout {
 	 */
 	public function get_value( $input ) {
 		// If the form was posted, get the posted value. This will only tend to happen when JavaScript is disabled client side.
-		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
-			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
+		if ( ! empty( $_POST[ $input ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 
 		// Allow 3rd parties to short circuit the logic and return their own default value.

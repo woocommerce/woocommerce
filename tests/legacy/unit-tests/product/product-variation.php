@@ -114,20 +114,4 @@ class WC_Tests_Product_Variation extends WC_Unit_Test_Case {
 		$actual = $sut->get_variation_attributes( $with_prefix );
 		$this->assertEquals( $expected, $actual );
 	}
-
-	/**
-	 * @testdox Test that the delete method removes the attribute terms for the variation.
-	 */
-	public function test_delete_removes_attribute_terms() {
-		$product = WC_Helper_Product::create_variation_product();
-		$sut     = wc_get_product( $product->get_children()[2] );
-		$id      = $sut->get_id();
-
-		$sut->delete( true );
-
-		$attribute_names           = wc_get_attribute_taxonomy_names();
-		$variation_attribute_terms = wp_get_post_terms( $id, $attribute_names );
-
-		$this->assertEmpty( $variation_attribute_terms );
-	}
 }

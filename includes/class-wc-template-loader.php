@@ -83,7 +83,12 @@ class WC_Template_Loader {
 			$template     = locate_template( $search_files );
 
 			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
-				$template = WC()->plugin_path() . '/templates/' . $default_file;
+				if ( false !== strpos( $default_file, 'product_cat' ) || false !== strpos( $default_file, 'product_tag' ) ) {
+					$cs_template = str_replace( '_', '-', $default_file );
+					$template    = WC()->plugin_path() . '/templates/' . $cs_template;
+				} else {
+					$template = WC()->plugin_path() . '/templates/' . $default_file;
+				}
 			}
 		}
 
@@ -134,7 +139,7 @@ class WC_Template_Loader {
 				if ( 0 === $validated_file ) {
 					$templates[] = $page_template;
 				} else {
-					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." );
+					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 			}
 		}
@@ -149,14 +154,28 @@ class WC_Template_Loader {
 		}
 
 		if ( is_product_taxonomy() ) {
-			$object      = get_queried_object();
+			$object = get_queried_object();
+
 			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+
+			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
+				$cs_default  = str_replace( '_', '-', $default_file );
+				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
+				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
+				$templates[] = $cs_default;
+			}
 		}
 
 		$templates[] = $default_file;
+		if ( isset( $cs_default ) ) {
+			$templates[] = WC()->template_path() . $cs_default;
+		}
 		$templates[] = WC()->template_path() . $default_file;
 
 		return array_unique( $templates );
@@ -275,8 +294,8 @@ class WC_Template_Loader {
 		}
 
 		// Description handling.
-		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			$prefix = '<div class="term-description">' . wc_format_content( $queried_object->description ) . '</div>'; // WPCS: XSS ok.
+		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$prefix = '<div class="term-description">' . wc_format_content( wp_kses_post( $queried_object->description ) ) . '</div>';
 		} else {
 			$prefix = '';
 		}

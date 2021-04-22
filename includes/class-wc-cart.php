@@ -9,6 +9,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
@@ -208,7 +210,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Get subtotal.
+	 * Get subtotal_tax.
 	 *
 	 * @since 3.2.0
 	 * @return float
@@ -660,10 +662,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get weight of items in the cart.
 	 *
 	 * @since 2.5.0
-	 * @return int
+	 * @return float
 	 */
 	public function get_cart_contents_weight() {
-		$weight = 0;
+		$weight = 0.0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			if ( $values['data']->has_weight() ) {
@@ -858,8 +860,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_totals() {
 		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
-		$taxes = $this->get_taxes();
-		$tax_totals = array();
+		$taxes          = $this->get_taxes();
+		$tax_totals     = array();
 
 		foreach ( $taxes as $key => $tax ) {
 			$code = WC_Tax::get_rate_code( $key );
@@ -877,7 +879,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
-					$tax += round( $shipping_taxes[ $key ], wc_get_price_decimals() );
+					$tax += NumberUtil::round( $shipping_taxes[ $key ], wc_get_price_decimals() );
 					unset( $shipping_taxes[ $key ] );
 				}
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
@@ -1118,6 +1120,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 
+			// Validate variation ID.
+			if (
+				0 < $variation_id && // Only check if there's any variation_id.
+				(
+					! $product_data->is_type( 'variation' ) || // Check if isn't a variation, it suppose to be a variation at this point.
+					$product_data->get_parent_id() !== $product_id // Check if belongs to the selected variable product.
+				)
+			) {
+				$product = wc_get_product( $product_id );
+
+				/* translators: 1: product link, 2: product name */
+				throw new Exception( sprintf( __( 'The selected product isn\'t a variation of %2$s, please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( $product->get_permalink() ), esc_html( $product->get_name() ) ) );
+			}
+
 			// Load cart item data - may be added by other plugins.
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
@@ -1202,15 +1218,30 @@ class WC_Cart extends WC_Legacy_Cart {
 				$products_qty_in_cart = $this->get_cart_item_quantities();
 
 				if ( isset( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] ) && ! $product_data->has_enough_stock( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ] + $quantity ) ) {
-					throw new Exception(
-						sprintf(
-							'<a href="%s" class="button wc-forward">%s</a> %s',
-							wc_get_cart_url(),
-							__( 'View cart', 'woocommerce' ),
-							/* translators: 1: quantity in stock 2: current quantity */
-							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ), wc_format_stock_quantity_for_display( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ], $product_data ) )
-						)
+					$stock_quantity         = $product_data->get_stock_quantity();
+					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
+
+					$message = sprintf(
+						'<a href="%s" class="button wc-forward">%s</a> %s',
+						wc_get_cart_url(),
+						__( 'View cart', 'woocommerce' ),
+						/* translators: 1: quantity in stock 2: current quantity */
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) )
 					);
+
+					/**
+					 * Filters message about product not having enough stock accounting for what's already in the cart.
+					 *
+					 * @param string $message Message.
+					 * @param WC_Product $product_data Product data.
+					 * @param int $stock_quantity Quantity remaining.
+					 * @param int $stock_quantity_in_cart
+					 *
+					 * @since 5.3.0
+					 */
+					$message = apply_filters( 'woocommerce_cart_product_not_enough_stock_already_in_cart_message', $message, $product_data, $stock_quantity, $stock_quantity_in_cart );
+
+					throw new Exception( $message );
 				}
 			}
 
@@ -1619,7 +1650,11 @@ class WC_Cart extends WC_Legacy_Cart {
 					$coupon_data_store = $coupon->get_data_store();
 					$billing_email     = strtolower( sanitize_email( $billing_email ) );
 					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
-						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+						if ( $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( $billing_email ) ) ) {
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST );
+						} else {
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+						}
 					}
 				}
 			}

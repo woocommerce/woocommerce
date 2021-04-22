@@ -279,11 +279,11 @@ a.button {
 
 .woocommerce-store-notice__dismiss-link {
 	float: right;
-	color: #fff;
+	color: #000;
 
 	&:hover {
-		text-decoration: underline;
-		color: #fff;
+		text-decoration: none;
+		color: #000;
 	}
 }
 
@@ -1661,6 +1661,16 @@ a.reset_variations {
 		}
 	}
 
+	form[name="checkout"] {
+		display: table;
+	}
+
+	.blockUI.blockOverlay {
+		position: relative;
+
+		@include loader();
+	}
+
 	form {
 
 		.col2-set {
@@ -2462,6 +2472,12 @@ a.reset_variations {
 				padding-right: 0.5em;
 				width: 100%;
 				margin: 1.5rem 0;
+			}
+		}
+
+		.woocommerce-ResetPassword {
+			.woocommerce-form-row--first {
+				float: none;
 			}
 		}
 	}

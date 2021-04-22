@@ -44,6 +44,20 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	protected $rest_base = '';
 
 	/**
+	 * Used to cache computed return fields.
+	 *
+	 * @var null|array
+	 */
+	private $_fields = null;
+
+	/**
+	 * Used to verify if cached fields are for correct request object.
+	 *
+	 * @var null|WP_REST_Request
+	 */
+	private $_request = null;
+
+	/**
 	 * Add the schema from additional fields to an schema array.
 	 *
 	 * The type of object is inferred from the passed schema.
@@ -513,10 +527,19 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return array Fields to be included in the response.
 	 */
 	public function get_fields_for_response( $request ) {
+		// From xdebug profiling, this method could take upto 25% of request time in index calls.
+		// Cache it and make sure _fields was cached on current request object!
+		// TODO: Submit this caching behavior in core.
+		if ( isset( $this->_fields ) && is_array( $this->_fields ) && $request === $this->_request ) {
+			return $this->_fields;
+		}
+		$this->_request = $request;
+
 		$schema     = $this->get_item_schema();
 		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
 
 		$additional_fields = $this->get_additional_fields();
+
 		foreach ( $additional_fields as $field_name => $field_options ) {
 			// For back-compat, include any field with an empty schema
 			// because it won't be present in $this->get_item_schema().
@@ -538,10 +561,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$fields = array_keys( $properties );
 
 		if ( ! isset( $request['_fields'] ) ) {
+			$this->_fields = $fields;
 			return $fields;
 		}
 		$requested_fields = wp_parse_list( $request['_fields'] );
 		if ( 0 === count( $requested_fields ) ) {
+			$this->_fields = $fields;
 			return $fields;
 		}
 		// Trim off outside whitespace from the comma delimited list.
@@ -551,7 +576,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			$requested_fields[] = 'id';
 		}
 		// Return the list of all requested fields which appear in the schema.
-		return array_reduce(
+		$this->_fields = array_reduce(
 			$requested_fields,
 			function( $response_fields, $field ) use ( $fields ) {
 				if ( in_array( $field, $fields, true ) ) {
@@ -560,8 +585,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 				// Check for nested fields if $field is not a direct match.
 				$nested_fields = explode( '.', $field );
-				// A nested field is included so long as its top-level property is
-				// present in the schema.
+				// A nested field is included so long as its top-level property
+				// is present in the schema.
 				if ( in_array( $nested_fields[0], $fields, true ) ) {
 					$response_fields[] = $field;
 				}
@@ -569,5 +594,6 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			},
 			array()
 		);
+		return $this->_fields;
 	}
 }

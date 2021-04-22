@@ -235,7 +235,7 @@
 			$( this ).focus();
 		} );
 
-		$( '.wc_input_table .remove_rows' ).click( function() {
+		$( '.wc_input_table .remove_rows' ).on( 'click', function() {
 			var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
 			if ( $tbody.find( 'tr.current' ).length > 0 ) {
 				var $current = $tbody.find( 'tr.current' );
@@ -250,7 +250,7 @@
 		var shifted    = false;
 		var hasFocus   = false;
 
-		$( document.body ).bind( 'keyup keydown', function( e ) {
+		$( document.body ).on( 'keyup keydown', function( e ) {
 			shifted    = e.shiftKey;
 			controlled = e.ctrlKey || e.metaKey;
 		});
@@ -315,7 +315,7 @@
 			} else {
 				$( this ).closest( 'tr' ).next( 'tr' ).show();
 			}
-		}).change();
+		}).trigger( 'change' );
 
 		// Hidden options
 		$( '.hide_options_if_checked' ).each( function() {
@@ -331,7 +331,7 @@
 						.nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option' )
 						.show();
 				}
-			}).change();
+			}).trigger( 'change' );
 		});
 
 		$( '.show_options_if_checked' ).each( function() {
@@ -347,7 +347,7 @@
 						.nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option' )
 						.hide();
 				}
-			}).change();
+			}).trigger( 'change' );
 		});
 
 		// Reviews.
@@ -357,7 +357,7 @@
 			} else {
 				$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).hide();
 			}
-		}).change();
+		}).trigger( 'change' );
 
 		// Attribute term table
 		$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );

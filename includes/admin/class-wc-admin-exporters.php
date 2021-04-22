@@ -191,6 +191,30 @@ class WC_Admin_Exporters {
 			);
 		}
 	}
+
+	/**
+	 * Gets the product types that can be exported.
+	 *
+	 * @since 5.1.0
+	 * @return array The product types keys and labels.
+	 */
+	public static function get_product_types() {
+		$product_types = wc_get_product_types();
+		$product_types['variation'] = __( 'Product variations', 'woocommerce' );
+
+		/**
+		 * Allow third-parties to filter the exportable product types.
+		 *
+		 * @since 5.1.0
+		 * @param array $product_types {
+		 *     The product type key and label.
+		 *
+		 *     @type string Product type key - eg 'variable', 'simple' etc.
+		 *     @type string A translated product label which appears in the export product type dropdown.
+		 * }
+		 */
+		return apply_filters( 'woocommerce_exporter_product_types', $product_types );
+	}
 }
 
 new WC_Admin_Exporters();

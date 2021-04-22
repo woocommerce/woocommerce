@@ -5,14 +5,26 @@ const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { getAppRoot } = require( '../utils' );
-const { JEST_PUPPETEER_CONFIG } = process.env;
+const { WC_E2E_SCREENSHOTS, JEST_PUPPETEER_CONFIG } = process.env;
 
 program
 	.usage( '<file ...> [options]' )
 	.option( '--dev', 'Development mode' )
+	.option( '--debug', 'Debug mode' )
 	.parse( process.argv );
 
 const appPath = getAppRoot();
+
+// clear the screenshots folder before running tests.
+if ( WC_E2E_SCREENSHOTS ) {
+	const screenshotPath = path.resolve(appPath, 'tests/e2e/screenshots');
+	if (fs.existsSync(screenshotPath)) {
+		fs.readdirSync(screenshotPath).forEach((file, index) => {
+			const filename = path.join(screenshotPath, file);
+			fs.unlinkSync(filename);
+		});
+	}
+}
 
 const nodeConfigDirs = [
 	path.resolve( __dirname, '../config' ),
@@ -40,6 +52,18 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 	testEnvVars.JEST_PUPPETEER_CONFIG = fs.existsSync( localJestConfigFile ) ? localJestConfigFile : jestConfigFile;
 }
 
+// Check for running a specific script
+if ( program.args.length == 1 ) {
+	// Check for both absolute and relative paths
+	const testSpecAbs = path.resolve( program.args[0] );
+	const testSpecRel = path.resolve( appPath, program.args[0] );
+	if ( fs.existsSync( testSpecAbs ) ) {
+		process.env.jest_test_spec = testSpecAbs;
+	} else if ( fs.existsSync( testSpecRel ) ) {
+			process.env.jest_test_spec = testSpecRel;
+	}
+}
+
 let jestCommand = 'jest';
 const jestArgs = [
 	'--maxWorkers=1',
@@ -48,7 +72,7 @@ const jestArgs = [
 	...program.args,
 ];
 
-if ( program.dev ) {
+if ( program.debug ) {
 	jestCommand = 'npx';
 	jestArgs.unshift( 'ndb', 'jest' );
 }

@@ -35,7 +35,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',			
+			'city'       => '',
 			'postcode'   => '',
 			'country'    => '',
 			'state'      => '',
@@ -48,7 +48,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			'company'    => '',
 			'address_1'  => '',
 			'address_2'  => '',
-			'city'       => '',			
+			'city'       => '',
 			'postcode'   => '',
 			'country'    => '',
 			'state'      => '',
@@ -111,7 +111,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		// If this is a session, set or change the data store to sessions. Changes do not persist in the database.
-		if ( $is_session ) {
+		if ( $is_session && isset( WC()->session ) ) {
 			$this->data_store = WC_Data_Store::load( 'customer-session' );
 			$this->data_store->read( $this );
 		}
@@ -240,6 +240,27 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function has_calculated_shipping() {
 		return $this->get_calculated_shipping();
+	}
+
+	/**
+	 * Indicates if the customer has a non-empty shipping address.
+	 *
+	 * Note that this does not indicate if the customer's shipping address
+	 * is complete, only that one or more fields are populated.
+	 *
+	 * @since 5.3.0
+	 *
+	 * @return bool
+	 */
+	public function has_shipping_address() {
+		foreach ( $this->get_shipping() as $address_field ) {
+			// Trim guards against a case where a subset of saved shipping address fields contain whitespace.
+			if ( strlen( trim( $address_field ) ) > 0 ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -449,7 +470,19 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return array
 	 */
 	public function get_billing( $context = 'view' ) {
-		return $this->get_prop( 'billing', $context );
+		$value = null;
+		$prop  = 'billing';
+
+		if ( array_key_exists( $prop, $this->data ) ) {
+			$changes = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : array();
+			$value   = array_merge( $this->data[ $prop ], $changes );
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -580,7 +613,19 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return array
 	 */
 	public function get_shipping( $context = 'view' ) {
-		return $this->get_prop( 'shipping', $context );
+		$value = null;
+		$prop  = 'shipping';
+
+		if ( array_key_exists( $prop, $this->data ) ) {
+			$changes = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : array();
+			$value   = array_merge( $this->data[ $prop ], $changes );
+
+			if ( 'view' === $context ) {
+				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -859,7 +904,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $address Name of address to set. billing or shipping.
 	 * @param mixed  $value   Value of the prop.
 	 */
-	protected function set_address_prop( $prop, $address = 'billing', $value ) {
+	protected function set_address_prop( $prop, $address, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
 			if ( true === $this->object_read ) {
 				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {

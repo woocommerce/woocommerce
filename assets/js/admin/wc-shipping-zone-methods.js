@@ -62,6 +62,9 @@
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
 							shippingMethod.trigger( 'saved:methods' );
+
+							// Overrides the onbeforeunload callback added by settings.js.
+							window.onbeforeunload = null;
 						} else {
 							window.alert( data.strings.save_failed );
 						}
@@ -354,7 +357,7 @@
 						}
 					});
 
-					$( '.wc-shipping-zone-method-selector select' ).change();
+					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {

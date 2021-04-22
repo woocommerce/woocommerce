@@ -64,6 +64,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 		$settings = $this->get_settings( $current_section );
 		WC_Admin_Settings::save_fields( $settings );
 
+		/*
+		 * Product->Inventory has a setting `Out of stock visibility`.
+		 * Because of this, we need to recount the terms to keep them in-sync.
+		 */
+		wc_recount_all_terms();
+
 		if ( $current_section ) {
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
@@ -304,6 +310,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 							'id'       => 'woocommerce_shop_page_id',
 							'type'     => 'single_select_page',
 							'default'  => '',
+							'args'     => array( 'post_status' => 'publish,private' ),
 							'class'    => 'wc-enhanced-select-nostd',
 							'css'      => 'min-width:300px;',
 							'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),

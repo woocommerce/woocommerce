@@ -1,9 +1,14 @@
 <?php
+/**
+ * Tests for the WooCommerce instance and general constants.
+ *
+ * @package WooCommerce\Tests\Util
+ */
 
 use Automattic\Jetpack\Constants;
 
 /**
- * WooCommerce class.
+ * WC_Test_WooCommerce class.
  *
  * @package WooCommerce\Tests\Util
  */
@@ -51,7 +56,6 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertEquals( '|', WC_DELIMITER );
 		$this->assertNotEquals( WC_LOG_DIR, '' );
 		$this->assertEquals( false, WC_TEMPLATE_DEBUG_MODE );
-		$this->assertLessThanOrEqual( 2, WC_TAX_ROUNDING_MODE );
 		$this->assertEquals( $this->wc->template_path(), WC_TEMPLATE_PATH );
 	}
 
