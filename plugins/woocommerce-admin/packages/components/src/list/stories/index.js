@@ -7,7 +7,7 @@ import { withConsole } from '@storybook/addon-console';
 /**
  * Internal dependencies
  */
-import List from '../';
+import List, { ExperimentalList, ExperimentalListItem } from '../';
 import './style.scss';
 
 function logItemClick( event ) {
@@ -62,6 +62,8 @@ export const Default = () => {
 	return <List items={ listItems } />;
 };
 
+Default.storyName = 'Default (deprecated)';
+
 export const BeforeAndAfter = () => {
 	const listItems = [
 		{
@@ -97,6 +99,8 @@ export const BeforeAndAfter = () => {
 
 	return <List items={ listItems } />;
 };
+
+BeforeAndAfter.storyName = 'Before and after (deprecated)';
 
 export const CustomStyleAndTags = () => {
 	const listItems = [
@@ -135,3 +139,26 @@ export const CustomStyleAndTags = () => {
 
 	return <List items={ listItems } className="storybook-custom-list" />;
 };
+
+CustomStyleAndTags.storyName = 'Custom style and tags (deprecated)';
+
+export const ExperimentalListExample = () => {
+	return (
+		<ExperimentalList>
+			<ExperimentalListItem disableGutters onClick={ () => {} }>
+				<div>Without gutters no padding is added to the list item.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+		</ExperimentalList>
+	);
+};
+
+ExperimentalList.storyName = 'ExperimentalList / ExperimentalListItem.';

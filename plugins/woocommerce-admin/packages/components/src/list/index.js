@@ -4,11 +4,12 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
-import ListItem from './list-item';
+import LegacyListItem from './list-item';
 
 /**
  * List component to display a list of items.
@@ -18,6 +19,11 @@ import ListItem from './list-item';
 function List( props ) {
 	const { className, items, children } = props;
 	const listClassName = classnames( 'woocommerce-list', className );
+
+	deprecated( 'List with items prop is deprecated', {
+		hint:
+			'See ExperimentalList / ExperimentalListItem for the new API that will replace this component in future versions.',
+	} );
 
 	return (
 		<TransitionGroup component="ul" className={ listClassName } role="menu">
@@ -42,7 +48,7 @@ function List( props ) {
 							{ children ? (
 								children( item, index )
 							) : (
-								<ListItem item={ item } />
+								<LegacyListItem item={ item } />
 							) }
 						</li>
 					</CSSTransition>
@@ -102,7 +108,10 @@ List.propTypes = {
 			 */
 			key: PropTypes.string,
 		} )
-	).isRequired,
+	),
 };
 
 export default List;
+
+export { ExperimentalListItem } from './experimental-list-item';
+export { ExperimentalList } from './experimental-list';

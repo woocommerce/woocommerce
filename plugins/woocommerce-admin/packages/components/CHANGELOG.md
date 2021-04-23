@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Add new (experimental) list, and add depreciation notice for the current list. #6787
+
 # 6.1.2
 
 -   Update dependencies.
