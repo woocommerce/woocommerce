@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 
 /**
@@ -57,7 +58,7 @@ const getCheckoutFilters = ( filterName: string ): CheckoutFilterFunction[] => {
 /**
  * Apply a filter.
  */
-export const __experimentalApplyCheckoutFilter = ( {
+export const __experimentalApplyCheckoutFilter = < T >( {
 	filterName,
 	defaultValue,
 	extensions,
@@ -67,14 +68,14 @@ export const __experimentalApplyCheckoutFilter = ( {
 	/** Name of the filter to apply. */
 	filterName: string;
 	/** Default value to filter. */
-	defaultValue: unknown;
+	defaultValue: T;
 	/** Values extend to REST API response. */
 	extensions: Record< string, unknown >;
 	/** Object containing arguments for the filter function. */
 	arg: CheckoutFilterArguments;
 	/** Function that needs to return true when the filtered value is passed in order for the filter to be applied. */
 	validation: ( value: unknown ) => true | Error;
-} ): unknown => {
+} ): T => {
 	return useMemo( () => {
 		const filters = getCheckoutFilters( filterName );
 
@@ -82,6 +83,19 @@ export const __experimentalApplyCheckoutFilter = ( {
 		filters.forEach( ( filter ) => {
 			try {
 				const newValue = filter( value, extensions, arg );
+				if ( typeof newValue !== typeof value ) {
+					throw new Error(
+						sprintf(
+							/* translators: %1$s is the type of the variable passed to the filter function, %2$s is the type of the value returned by the filter function. */
+							__(
+								'The type returned by checkout filters must be the same as the type they receive. The function received %1$s but returned %2$s.',
+								'woo-gutenberg-products-block'
+							),
+							typeof value,
+							typeof newValue
+						)
+					);
+				}
 				value = validation( newValue ) ? newValue : value;
 			} catch ( e ) {
 				if ( CURRENT_USER_IS_ADMIN ) {

@@ -6,6 +6,8 @@
 		"../../blocks-registry/index.js",
 		"../../settings/shared/index.ts",
 		"../../settings/blocks/index.ts",
+		"../../base/hooks/index.js",
+		"../utils/type-guards.ts",
 		"../../type-defs"
 	],
 	"exclude": [ "**/test/**" ]

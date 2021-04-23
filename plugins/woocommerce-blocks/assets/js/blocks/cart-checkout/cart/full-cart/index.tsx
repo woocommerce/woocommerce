@@ -1,8 +1,6 @@
-// @ts-nocheck
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import {
 	TotalsCoupon,
@@ -45,21 +43,23 @@ import { CartExpressPayment } from '../../payment-methods';
 
 import './style.scss';
 
-const Block = ( props ) => {
-	return (
-		<CartProvider>
-			<Cart { ...props } />
-		</CartProvider>
-	);
-};
+interface CartAttributes {
+	hasDarkControls: boolean;
+	isShippingCalculatorEnabled: boolean;
+	checkoutPageId: number;
+	isPreview: boolean;
+}
 
+interface CartProps {
+	attributes: CartAttributes;
+}
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
  *
  * @param {Object} props Incoming props for the component.
  * @param {Object} props.attributes Incoming attributes for block.
  */
-const Cart = ( { attributes } ) => {
+const Cart = ( { attributes }: CartProps ) => {
 	const { isShippingCalculatorEnabled, hasDarkControls } = attributes;
 
 	const {
@@ -103,7 +103,7 @@ const Cart = ( { attributes } ) => {
 	// Prepare props to pass to the ExperimentalOrderMeta slot fill.
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
-	const { extensions, receiveCart, ...cart } = useStoreCart();
+	const { extensions, ...cart } = useStoreCart();
 	const slotFillProps = {
 		extensions,
 		cart,
@@ -184,8 +184,12 @@ const Cart = ( { attributes } ) => {
 	);
 };
 
-Cart.propTypes = {
-	attributes: PropTypes.object.isRequired,
+const Block = ( props: CartProps ): JSX.Element => {
+	return (
+		<CartProvider>
+			<Cart { ...props } />
+		</CartProvider>
+	);
 };
 
 export default Block;

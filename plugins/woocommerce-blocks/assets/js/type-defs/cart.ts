@@ -108,17 +108,20 @@ export interface CartItemTotals extends CurrencyInfo {
 	line_total_tax: string;
 }
 
+export type CatalogVisibility = 'catalog' | 'hidden' | 'search' | 'visible';
+
 export interface CartItem {
 	key: string;
 	id: number;
 	quantity: number;
+	catalog_visibility: CatalogVisibility;
 	quantity_limit: number;
 	name: string;
 	summary: string;
 	short_description: string;
 	description: string;
 	sku: string;
-	low_stock_remaining: string;
+	low_stock_remaining: null | number;
 	backorders_allowed: boolean;
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
@@ -128,6 +131,7 @@ export interface CartItem {
 	prices: CartItemPrices;
 	totals: CartItemTotals;
 	extensions: ExtensionsData;
+	item_data: Record< string, unknown >[];
 }
 
 export interface CartTotalsTaxLineItem {

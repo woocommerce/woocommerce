@@ -14,6 +14,24 @@ import type { CartItem, StoreCartItemQuantity } from '@woocommerce/types';
  */
 import { useStoreCart } from './use-store-cart';
 import { useCheckoutContext } from '../../providers/cart-checkout';
+import {
+	isNumber,
+	isObject,
+	isString,
+	objectHasProp,
+} from '../../../utils/type-guards';
+
+/**
+ * Ensures the object passed has props key: string and quantity: number
+ */
+const cartItemHasQuantityAndKey = (
+	cartItem: unknown /* Object that may have quantity and key */
+): cartItem is Partial< CartItem > =>
+	isObject( cartItem ) &&
+	objectHasProp( cartItem, 'key' ) &&
+	objectHasProp( cartItem, 'quantity' ) &&
+	isString( cartItem.key ) &&
+	isNumber( cartItem.quantity );
 
 /**
  * This is a custom hook for loading the Store API /cart/ endpoint and actions for removing or changing item quantity.
@@ -24,9 +42,18 @@ import { useCheckoutContext } from '../../providers/cart-checkout';
  * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
  */
 export const useStoreCartItemQuantity = (
-	cartItem: CartItem
+	cartItem: CartItem | Record< string, unknown >
 ): StoreCartItemQuantity => {
-	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } = cartItem;
+	const verifiedCartItem = { key: '', quantity: 1 };
+
+	if ( cartItemHasQuantityAndKey( cartItem ) ) {
+		verifiedCartItem.key = cartItem.key;
+		verifiedCartItem.quantity = cartItem.quantity;
+	}
+	const {
+		key: cartItemKey = '',
+		quantity: cartItemQuantity = 1,
+	} = verifiedCartItem;
 	const { cartErrors } = useStoreCart();
 	const { dispatchActions } = useCheckoutContext();
 
@@ -70,6 +97,7 @@ export const useStoreCartItemQuantity = (
 	useEffect( () => {
 		if (
 			cartItemKey &&
+			isNumber( previousDebouncedQuantity ) &&
 			Number.isFinite( previousDebouncedQuantity ) &&
 			previousDebouncedQuantity !== debouncedQuantity
 		) {
