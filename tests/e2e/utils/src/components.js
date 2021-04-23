@@ -85,21 +85,19 @@ const completeOnboardingWizard = async () => {
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
 	// Wait for usage tracking pop-up window to appear on a new site
-	try {
-		const headerPresent = await page.waitForSelector('h1.components-modal__header-heading', {timeout: 10000});
-		if (headerPresent) {
-			// @todo: determine why the string isn't being matched when it is present.
-			/*
-			await expect(headerPresent).toMatchElement(
-				'.components-modal__header-heading', {text: 'Build a better WooCommerce' }
-			);
-	*/
-			await evalAndClick('.woocommerce-usage-modal__actions .is-primary');
-			await page.waitForNavigation({waitUntil: 'networkidle0'});
-		}
-	} catch (e) {
-		// noop
+	const usageTrackingHeader = await page.$('.components-modal__header-heading');
+	if ( usageTrackingHeader ) {
+		await expect(page).toMatchElement(
+			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
+		);
+
+		// Query for "Continue" buttons
+		const continueButtons = await page.$$( 'button.is-primary' );
+		expect( continueButtons ).toHaveLength( 2 );
+
+		await continueButtons[1].click();
 	}
+	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
 	// Query for the industries checkboxes
