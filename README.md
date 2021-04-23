@@ -104,3 +104,26 @@ const response = await apiFetch( {
     method: 'POST',
 } );
 ```
+
+### Deploying
+
+Prerequisites:
+
+- [Hub](https://github.com/github/hub)
+- Write access to this repository
+
+You can create a test ZIP of the plugin using this command:
+
+```
+npm run build
+```
+
+This creates `woocommerce-admin-test-helper.zip` in the project root.
+
+We release the plugin using GitHub Releases. There is a script to automate this:
+
+0. Make sure the version is updated in `woocommerce-admin-test-helper.php`
+1. Commit and push to `trunk`
+2. Run `npm run release`
+3. Make sure you provide the correct version number when prompted
+4. That's it!
