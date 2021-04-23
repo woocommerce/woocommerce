@@ -243,21 +243,13 @@ export const searchForOrder = async (value, orderId, customerName) => {
  */
 export const applyCoupon = async ( couponCode ) => {
 	try {
-		const addCouponButton = await page.waitForSelector(
-			'a',
-			{
-				text: 'Click here to enter your code',
-				timeout: 5000,
-			}
-		);
-		if ( addCouponButton ) {
-			await expect(page).toClick('a', {text: 'Click here to enter your code'});
-			await uiUnblocked();
-		}
+		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await uiUnblocked();
 	} catch (error) {}
 
 	await clearAndFillInput('#coupon_code', couponCode);
 	await expect(page).toClick('button', {text: 'Apply coupon'});
+	await page.waitFor( 2000 );
 	await uiUnblocked();
 };
 
@@ -269,6 +261,7 @@ export const applyCoupon = async ( couponCode ) => {
  */
 export const removeCoupon = async ( couponCode ) => {
 	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await page.waitFor( 2000 );
 	await uiUnblocked();
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
 };

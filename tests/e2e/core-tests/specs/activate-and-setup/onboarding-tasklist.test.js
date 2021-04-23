@@ -61,7 +61,6 @@ const runTaskListTest = () => {
 				// Click on "Set up shipping" task to move to the next step
 				const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
 				await setupTaskListItem.click();
-				await page.waitForNavigation({waitUntil: 'networkidle0'});
 
 				// Wait for "Proceed" button to become active
 				await page.waitForSelector('button.is-primary:not(:disabled)');
