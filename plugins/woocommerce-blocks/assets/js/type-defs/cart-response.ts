@@ -1,4 +1,15 @@
 /* eslint-disable camelcase -- API responses have camelcase properties */
+/**
+ * External dependencies
+ */
+import {
+	CartImageItem,
+	CartItemPrices,
+	CartItemTotals,
+	CartVariationItem,
+	CatalogVisibility,
+} from '@woocommerce/type-defs/cart';
+
 export interface CurrencyResponseInfo {
 	currency_code: string;
 	currency_symbol: string;
@@ -122,21 +133,24 @@ export interface CartResponseItem {
 	key: string;
 	id: number;
 	quantity: number;
+	catalog_visibility: CatalogVisibility;
 	quantity_limit: number;
 	name: string;
 	summary: string;
 	short_description: string;
 	description: string;
 	sku: string;
-	low_stock_remaining: string;
+	low_stock_remaining: null | number;
 	backorders_allowed: boolean;
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
 	permalink: string;
-	images: Array< CartResponseImageItem >;
-	variation: Array< CartResponseVariationItem >;
-	prices: CartResponseItemPrices;
-	totals: CartResponseItemTotals;
+	images: Array< CartImageItem >;
+	variation: Array< CartVariationItem >;
+	prices: CartItemPrices;
+	totals: CartItemTotals;
+	extensions: ExtensionsData;
+	item_data: Record< string, unknown >[];
 }
 
 export interface CartResponseTotalsTaxLineItem {

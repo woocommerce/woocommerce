@@ -3,7 +3,6 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
@@ -18,15 +17,20 @@ import {
 	ProductMetadata,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
-import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { __experimentalApplyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import {
+	getCurrencyFromPriceResponse,
+	Currency,
+} from '@woocommerce/price-format';
+import {
+	__experimentalApplyCheckoutFilter,
+	mustBeString,
+	mustContain,
+} from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { useCallback, useMemo } from '@wordpress/element';
+import type { CartItem } from '@woocommerce/type-defs/cart';
+import { objectHasProp } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
-
-/**
- * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
- */
 
 /**
  * Convert a Dinero object with precision to store currency minor unit.
@@ -35,7 +39,10 @@ import { getSetting } from '@woocommerce/settings';
  * @param {Object} currency    Currency data.
  * @return {number} Amount with new minor unit precision.
  */
-const getAmountFromRawPrice = ( priceObject, currency ) => {
+const getAmountFromRawPrice = (
+	priceObject: Dinero.Dinero,
+	currency: Currency
+) => {
 	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
 };
 
@@ -45,10 +52,14 @@ const getAmountFromRawPrice = ( priceObject, currency ) => {
  * @param {Object} props
  * @param {CartItem|Object} props.lineItem
  */
-const CartLineItemRow = ( { lineItem = {} } ) => {
+const CartLineItemRow = ( {
+	lineItem,
+}: {
+	lineItem: CartItem | Record< string, never >;
+} ): JSX.Element => {
 	const {
 		name: initialName = '',
-		catalog_visibility: catalogVisibility = '',
+		catalog_visibility: catalogVisibility = 'visible',
 		short_description: shortDescription = '',
 		description: fullDescription = '',
 		low_stock_remaining: lowStockRemaining = null,
@@ -110,11 +121,11 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 
 	const regularAmountSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: parseInt( prices.raw_prices.precision, 10 ),
+		precision: prices.raw_prices.precision,
 	} );
 	const purchaseAmountSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: parseInt( prices.raw_prices.precision, 10 ),
+		precision: prices.raw_prices.precision,
 	} );
 	const saleAmountSingle = regularAmountSingle.subtract(
 		purchaseAmountSingle
@@ -169,7 +180,9 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
 			<td
 				className="wc-block-cart-item__image"
-				aria-hidden={ ! firstImage.alt }
+				aria-hidden={
+					! objectHasProp( firstImage, 'alt' ) || ! firstImage.alt
+				}
 			>
 				{ /* We don't need to make it focusable, because product name has the same link. */ }
 				{ isProductHiddenFromCatalog ? (
@@ -279,9 +292,4 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		</tr>
 	);
 };
-
-CartLineItemRow.propTypes = {
-	lineItem: PropTypes.object,
-};
-
 export default CartLineItemRow;

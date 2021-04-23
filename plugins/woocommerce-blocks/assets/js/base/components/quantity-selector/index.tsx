@@ -3,7 +3,6 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { useCallback } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
@@ -12,16 +11,29 @@ import { DOWN, UP } from '@wordpress/keycodes';
  * Internal dependencies
  */
 import './style.scss';
+import { isNumber } from '../../utils/type-guards';
+
+interface QuantitySelectorProps {
+	className?: string;
+	quantity?: number;
+	minimum?: number;
+	maximum: number;
+	onChange: ( newQuantity: number ) => void;
+	itemName?: string;
+	disabled: boolean;
+}
 
 const QuantitySelector = ( {
 	className,
 	quantity = 1,
 	minimum = 1,
 	maximum,
-	onChange = () => null,
+	onChange = () => {
+		/* Do nothing. */
+	},
 	itemName = '',
 	disabled,
-} ) => {
+}: QuantitySelectorProps ): JSX.Element => {
 	const classes = classNames(
 		'wc-block-components-quantity-selector',
 		className
@@ -72,7 +84,7 @@ const QuantitySelector = ( {
 				onKeyDown={ quantityInputOnKeyDown }
 				onChange={ ( event ) => {
 					let value =
-						isNaN( event.target.value ) || ! event.target.value
+						! isNumber( event.target.value ) || ! event.target.value
 							? 0
 							: parseInt( event.target.value, 10 );
 					if ( hasMaximum ) {
@@ -142,16 +154,6 @@ const QuantitySelector = ( {
 			</button>
 		</div>
 	);
-};
-
-QuantitySelector.propTypes = {
-	className: PropTypes.string,
-	quantity: PropTypes.number,
-	minimum: PropTypes.number,
-	maximum: PropTypes.number,
-	onChange: PropTypes.func,
-	itemName: PropTypes.string,
-	disabled: PropTypes.bool,
 };
 
 export default QuantitySelector;

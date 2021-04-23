@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -13,9 +12,13 @@ import ProductBadge from '../product-badge';
  * Returns a low stock badge.
  *
  * @param {Object}  props                   Incoming props for the component.
- * @param {boolean} props.lowStockRemaining Whether or not there is low stock remaining.
+ * @param {number} props.lowStockRemaining Whether or not there is low stock remaining.
  */
-const ProductLowStockBadge = ( { lowStockRemaining } ) => {
+const ProductLowStockBadge = ( {
+	lowStockRemaining,
+}: {
+	lowStockRemaining: number;
+} ): JSX.Element | null => {
 	if ( ! lowStockRemaining ) {
 		return null;
 	}
@@ -29,10 +32,6 @@ const ProductLowStockBadge = ( { lowStockRemaining } ) => {
 			) }
 		</ProductBadge>
 	);
-};
-
-ProductLowStockBadge.propTypes = {
-	lowStockRemaining: PropTypes.number,
 };
 
 export default ProductLowStockBadge;
