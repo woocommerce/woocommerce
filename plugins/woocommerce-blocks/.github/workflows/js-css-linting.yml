@@ -52,7 +52,7 @@ jobs:
           name: eslint_report.json
           path: eslint_report.json
       - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@1.1.2
+        uses: ataylorme/eslint-annotate-action@1.2.0
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           report-json: "eslint_report.json"
