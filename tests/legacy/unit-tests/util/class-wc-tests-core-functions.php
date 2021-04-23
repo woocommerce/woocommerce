@@ -222,10 +222,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_get_woocommerce_currency_symbol() {
 
 		// Default currency.
-		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol() );
+		$this->assertEquals( '&#36;', get_woocommerce_currency_symbol() );
 
 		// Given specific currency.
-		$this->assertEquals( '&#36;', get_woocommerce_currency_symbol( 'USD' ) );
+		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol( 'GBP' ) );
 
 		// Each case.
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
