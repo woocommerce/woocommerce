@@ -715,9 +715,13 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
 
 		if ( 0 < $item_stock_reduced ) {
+			// Keeps track of total running tally of reduced stock.
 			$item->update_meta_data( '_reduced_stock', $item_stock_reduced );
+			// Keeps track of only refunded items that needs restock.
+			$item->update_meta_data( '_restock_refunded_items', $qty_to_refund );
 		} else {
 			$item->delete_meta_data( '_reduced_stock' );
+			$item->delete_meta_data( '_restock_refunded_items' );
 		}
 
 		/* translators: 1: product ID 2: old stock level 3: new stock level */
