@@ -229,7 +229,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Currency', 'woocommerce' ),
 					'desc'     => __( 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ),
 					'id'       => 'woocommerce_currency',
-					'default'  => 'GBP',
+					'default'  => 'USD',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
 					'desc_tip' => true,
