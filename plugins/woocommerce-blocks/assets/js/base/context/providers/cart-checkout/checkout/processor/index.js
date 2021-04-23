@@ -10,7 +10,10 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import { formatStoreApiErrorMessage } from '@woocommerce/base-utils';
+import {
+	emptyHiddenAddressFields,
+	formatStoreApiErrorMessage,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -164,8 +167,12 @@ const CheckoutProcessor = () => {
 		setIsProcessingOrder( true );
 		removeNotice( 'checkout' );
 		let data = {
-			billing_address: currentBillingData.current,
-			shipping_address: currentShippingAddress.current,
+			billing_address: emptyHiddenAddressFields(
+				currentBillingData.current
+			),
+			shipping_address: emptyHiddenAddressFields(
+				currentShippingAddress.current
+			),
 			customer_note: orderNotes,
 			should_create_account: shouldCreateAccount,
 		};

@@ -8,6 +8,8 @@
 		"../../settings/blocks/index.ts",
 		"../../base/hooks/index.js",
 		"../utils/type-guards.ts",
+	  	"../../base/utils/",
+	  	"../../data/",
 		"../../type-defs"
 	],
 	"exclude": [ "**/test/**" ]

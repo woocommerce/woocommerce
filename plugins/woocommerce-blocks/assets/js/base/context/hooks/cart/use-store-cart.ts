@@ -15,7 +15,10 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 } from '@woocommerce/types';
-import { fromEntriesPolyfill } from '@woocommerce/base-utils';
+import {
+	emptyHiddenAddressFields,
+	fromEntriesPolyfill,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -171,6 +174,7 @@ export const useStoreCart = (
 			const cartFees = cartData.fees.map( ( fee: CartResponseFeeItem ) =>
 				decodeValues( fee )
 			);
+
 			return {
 				cartCoupons: cartData.coupons,
 				cartItems: cartData.items || [],
@@ -183,8 +187,8 @@ export const useStoreCart = (
 				cartTotals,
 				cartIsLoading,
 				cartErrors,
-				billingAddress,
-				shippingAddress,
+				billingAddress: emptyHiddenAddressFields( billingAddress ),
+				shippingAddress: emptyHiddenAddressFields( shippingAddress ),
 				extensions: cartData.extensions || {},
 				shippingRates: cartData.shippingRates || [],
 				shippingRatesLoading,
