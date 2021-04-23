@@ -222,6 +222,10 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
  */
 export const applyCoupon = async ( couponCode ) => {
 	try {
+		await Promise.all([
+			page.reload(),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		]);
 		await expect(page).toClick('a', {text: 'Click here to enter your code'});
 		await uiUnblocked();
 		await clearAndFillInput('#coupon_code', couponCode);
@@ -241,6 +245,10 @@ export const applyCoupon = async ( couponCode ) => {
  * @returns {Promise<void>}
  */
 export const removeCoupon = async ( couponCode ) => {
+	await Promise.all([
+		page.reload(),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	]);
 	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
 	await uiUnblocked();
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
