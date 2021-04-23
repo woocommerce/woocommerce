@@ -691,19 +691,34 @@ class WC_Checkout {
 				// phpcs:disable WordPress.Security.NonceVerification.Missing
 				switch ( $type ) {
 					case 'checkbox':
-						$value = isset( $_POST[ $key ] ) ? 1 : '';
+						$value = isset( $field['default'] ) && ! empty( $field['default'] ) ? 1 : '';
+						if ( isset( $_POST[ $key ] ) ) {
+							$value = 1;
+						}
 						break;
 					case 'multiselect':
-						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : '';
+						$value = isset( $field['default'] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : '';
+						if ( isset( $_POST[ $key ] ) ) {
+							$value = implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) );
+						}
 						break;
 					case 'textarea':
-						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : '';
+						$value = isset( $field['default'] ) ? wc_sanitize_textarea( wp_unslash( $field['default'] ) ) : '';
+						if ( isset( $_POST[ $key ] ) ) {
+							$value = wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) );
+						}
 						break;
 					case 'password':
-						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						$value = isset( $field['default'] ) ? wp_unslash( $field['default'] ) : '';
+						if ( isset( $_POST[ $key ] ) ) {
+							$value = wp_unslash( $_POST[ $key ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						}
 						break;
 					default:
-						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : '';
+						$value = isset( $field['default'] ) ? wc_clean( wp_unslash( $field['default'] ) ) : '';
+						if ( isset( $_POST[ $key ] ) ) {
+							$value = wc_clean( wp_unslash( $_POST[ $key ] ) );
+						}
 						break;
 				}
 				// phpcs:enable WordPress.Security.NonceVerification.Missing
