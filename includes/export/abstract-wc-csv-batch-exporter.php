@@ -111,7 +111,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		if ( 1 === $this->get_page() ) {
 			@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged,
 
-			// we need to initialize the file here
+			// We need to initialize the file here.
 			$this->get_file();
 		}
 		$this->prepare_data_to_export();
