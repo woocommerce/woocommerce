@@ -9,8 +9,10 @@ const {
 	setCheckbox,
 	settingsPageSaveChanges,
 	uiUnblocked,
-	verifyCheckboxIsSet
+	verifyCheckboxIsSet,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
+//const { takeScreenshotFor } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -26,10 +28,11 @@ let customerOrderId;
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await merchant.login();
+			await withRestApi.deleteAllProducts();
 			await createSimpleProduct();
 
 			// Go to general settings page
+			await merchant.login();
 			await merchant.openSettings('general');
 
 			// Set base location with state CA.
@@ -119,17 +122,16 @@ const runCheckoutPageTest = () => {
 		});
 
 		it('allows guest customer to place order', async () => {
+			await shopper.logout();
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
-
-			await uiUnblocked();
 
 			await expect(page).toClick('.wc_payment_method label', {text: 'Cash on delivery'});
 			await expect(page).toMatchElement('.payment_method_cod', {text: 'Pay with cash upon delivery.'});
-			await uiUnblocked();
+
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 			await shopper.placeOrder();
 
 			await expect(page).toMatch('Order received');
@@ -137,7 +139,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('allows existing customer to place order', async () => {
@@ -146,13 +148,10 @@ const runCheckoutPageTest = () => {
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
-
-			await uiUnblocked();
 
 			await expect(page).toClick('.wc_payment_method label', {text: 'Cash on delivery'});
 			await expect(page).toMatchElement('.payment_method_cod', {text: 'Pay with cash upon delivery.'});
-			await uiUnblocked();
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
 			await shopper.placeOrder();
 
 			await expect(page).toMatch('Order received');
@@ -160,7 +159,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('store owner can confirm the order was received', async () => {

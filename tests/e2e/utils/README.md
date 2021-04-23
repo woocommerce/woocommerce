@@ -119,6 +119,7 @@ This package provides support for enabling retries in tests:
 | `goToProduct` | `productId` | Go to a single product in the shop |
 | `goToShop` |  | Go to the shop page |
 | `login` |  | Log in as the shopper |
+| `logout` | | Log out of `customer` account if logged in |
 | `placeOrder` |  | Place an order from the checkout page |
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
 | `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
@@ -181,6 +182,7 @@ This package provides support for enabling retries in tests:
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
+| `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 
 ### Test Utilities
 

@@ -15,8 +15,10 @@ import {
 	unsetCheckbox,
 	evalAndClick,
 	elementUnblocked,
+	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
+//const { takeScreenshotFor } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -162,20 +164,15 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for homescreen welcome modal to appear
-	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );
-	await expect( page ).toMatchElement(
-		'.woocommerce__welcome-modal__page-content__header', { text: 'Welcome to your WooCommerce store\’s online HQ!' }
-	);
+	let welcomeHeader = await waitForSelectorWithoutThrow( '.woocommerce__welcome-modal__page-content' );
+	if ( ! welcomeHeader ) {
+		return;
+	}
 
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
-
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
+	for ( let b = 0; b < 2; b++ ) {
+		await page.waitForSelector('button.components-guide__forward-button');
+		await page.click('button.components-guide__forward-button');
+	}
 
 	// Wait for "Let's go" button to become active
 	await page.waitForSelector( 'button.components-guide__finish-button' );

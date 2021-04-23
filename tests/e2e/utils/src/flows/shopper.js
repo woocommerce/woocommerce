@@ -13,23 +13,23 @@ const {
 	getRemoveExpression
 } = require( './expressions' );
 const {
-	MY_ACCOUNT_ADDRESSES,
-	MY_ACCOUNT_ACCOUNT_DETAILS,
-	MY_ACCOUNT_DOWNLOADS,
-	MY_ACCOUNT_ORDERS,
 	SHOP_MY_ACCOUNT_PAGE,
 	SHOP_CART_PAGE,
 	SHOP_CHECKOUT_PAGE,
 	SHOP_PAGE,
-	SHOP_PRODUCT_PAGE
+	SHOP_PRODUCT_PAGE,
+	MY_ACCOUNT_ORDERS,
+	MY_ACCOUNT_ADDRESSES,
+	MY_ACCOUNT_ACCOUNT_DETAILS,
+	MY_ACCOUNT_DOWNLOADS,
 } = require( './constants' );
 
 const { uiUnblocked } = require( '../page-utils' );
+//const { takeScreenshotFor } = require( '@woocommerce/e2e-environment' );
 
 const gotoMyAccount = async () => {
-	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
-		waitUntil: 'networkidle0',
-	} );
+	await page.goto( SHOP_MY_ACCOUNT_PAGE );
+	await page.waitForNavigation();
 };
 
 const shopper = {
@@ -71,7 +71,7 @@ const shopper = {
 	placeOrder: async () => {
 		await Promise.all( [
 			expect( page ).toClick( '#place_order' ),
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			page.waitForNavigation(),
 		] );
 	},
 
@@ -137,7 +137,7 @@ const shopper = {
 		// Remove products if they exist
 		if ( await page.$( '.remove' ) !== null ) {
 			products = await page.$( '.remove' );
-			while ( products.length > 0 ) {
+			while ( products && products.length > 0 ) {
 				for (let p = 0; p < products.length; p++ ) {
 					await page.click( p );
 					await uiUnblocked();
@@ -209,8 +209,6 @@ const shopper = {
 	login: async () => {
 		await gotoMyAccount();
 
-		await expect( page.title() ).resolves.toMatch( 'My account' );
-
 		await page.type( '#username', config.get('users.customer.username') );
 		await page.type( '#password', config.get('users.customer.password') );
 
@@ -218,6 +216,15 @@ const shopper = {
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			page.click( 'button[name="login"]' ),
 		] );
+	},
+
+	logout: async () => {
+		await gotoMyAccount();
+		const menuItem = await page.$( '.woocommerce-MyAccount-navigation-link--customer-logout' );
+		if ( menuItem ) {
+			await page.click('.woocommerce-MyAccount-navigation-link--customer-logout a');
+			await page.waitForNavigation();
+		}
 	},
 };
 
