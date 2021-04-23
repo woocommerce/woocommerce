@@ -193,6 +193,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Lost password form alignment issues. #29496
 * Tweak - Improve accessibility by adding `aria-hidden="true"` on strikethrough prices. #29603
 * Tweak - Default store location to US California. #29654
+* Tweak - Default store currency to USD. #29752
 
 ** WooCommerce Blocks - 4.8.0 & 4.9.0 & 4.9.1 **
 
