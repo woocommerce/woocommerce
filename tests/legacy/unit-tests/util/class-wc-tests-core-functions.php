@@ -30,7 +30,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_get_woocommerce_currency() {
 
-		$this->assertEquals( 'GBP', get_woocommerce_currency() );
+		$this->assertEquals( 'USD', get_woocommerce_currency() );
 	}
 
 	/**
