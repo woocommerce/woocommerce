@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { NavigationItem } from '@woocommerce/experimental';
+import { NavigationItem, useSlot } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
-import { WooNavigationItem, useNavSlot } from '@woocommerce/navigation';
+import { WooNavigationItem } from '@woocommerce/navigation';
 
 const Item = ( { item } ) => {
-	const slot = useNavSlot( 'woocommerce_navigation_' + item.id );
+	const slot = useSlot( 'woocommerce_navigation_' + item.id );
 	const hasFills = Boolean( slot.fills && slot.fills.length );
 
 	const trackClick = ( id ) => {

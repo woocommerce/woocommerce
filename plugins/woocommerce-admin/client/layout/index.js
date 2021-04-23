@@ -20,6 +20,7 @@ import {
 } from '@woocommerce/data';
 import { recordPageView } from '@woocommerce/tracks';
 import '@woocommerce/notices';
+import { PluginArea } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -172,6 +173,7 @@ class _Layout extends Component {
 						</Suspense>
 					) }
 				</div>
+				<PluginArea scope="woocommerce-admin" />
 			</SlotFillProvider>
 		);
 	}

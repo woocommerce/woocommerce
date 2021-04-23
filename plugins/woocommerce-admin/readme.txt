@@ -96,6 +96,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Check active plugins before getting the PayPal onboarding status #6625
 - Fix: Remove no-reply from inbox notification emails #6644
 - Fix: Set up shipping costs task, redirect to shipping settings after completion. #6791
+- Fix: Remove Navigation's uneeded SlotFill context #6832
 - Fix: Onboarding logic on WooCommerce update to keep task list present. #6803
 - Fix: Pause inbox message “GivingFeedbackNotes” #6802
 - Fix: Missed DB version number updates causing unnecessary upgrades. #6818

@@ -262,22 +262,3 @@ export const WooNavigationItem = ( { children, item } ) => {
 WooNavigationItem.Slot = ( { name } ) => (
 	<Slot name={ 'woocommerce_navigation_' + name } />
 );
-
-/**
- * Export @wordpress/components SlotFillProvider so that Slots, Fills, and useSlot
- * have access to the same context.
- *
- * This is a workaround because components exported from this package do not have
- * the same `context` as those created in the /client folder. This problem is due
- * to WC Admin bundling @wordpress/components instead of enqueuing and using
- * wp.components from the window.
- */
-export { SlotFillProvider as NavSlotFillProvider } from '@wordpress/components';
-
-/**
- * Similar to NavSlotFillProvider above, this is a workaround because components
- * exported from this package do not have the same `context` as those created
- * in the /client folder. This problem is due to WC Admin bundling @wordpress/components
- * instead of enqueuing and using wp.components from the window.
- */
-export { useSlot as useNavSlot } from '@woocommerce/experimental';

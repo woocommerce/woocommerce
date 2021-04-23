@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { PluginArea } from '@wordpress/plugins';
-import { NavSlotFillProvider } from '@woocommerce/navigation';
 import { withNavigationHydration } from '@woocommerce/data';
 
 /**
@@ -11,15 +9,8 @@ import { withNavigationHydration } from '@woocommerce/data';
 import './style.scss';
 import Container from './components/container';
 
-const Navigation = () => (
-	<NavSlotFillProvider>
-		<Container />
-		<PluginArea />
-	</NavSlotFillProvider>
-);
-
 const HydratedNavigation = withNavigationHydration( window.wcNavigation )(
-	Navigation
+	Container
 );
 
 export default HydratedNavigation;
