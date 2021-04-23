@@ -45,16 +45,16 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		$upload_dir = wp_upload_dir();
 		return trailingslashit( $upload_dir['basedir'] ) . $this->get_filename();
 	}
-	
+
 	/**
 	 * Get CSV headers row file path to export to.
 	 *
 	 * @return string
 	 */
 	protected function get_headers_row_file_path() {
-		return $this->get_file_path().".headers";
+		return $this->get_file_path() . '.headers';
 	}
-	
+
 	/**
 	 * Get the contents of the CSV headers row file. Defaults to the original known headers.
 	 *
@@ -63,7 +63,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function get_headers_row_file() {
 
-		$file =  chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+		$file = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
 		if ( @file_exists( $this->get_headers_row_file_path() ) ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			$file = @file_get_contents( $this->get_headers_row_file_path() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
@@ -111,7 +111,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		if ( 1 === $this->get_page() ) {
 			@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged,
 
-			//we need to initialize the file here
+			// we need to initialize the file here
 			$this->get_file();
 		}
 		$this->prepare_data_to_export();
@@ -125,14 +125,14 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @param string $data Data.
 	 */
 	protected function write_csv_data( $data ) {
-		
-		if( !file_exists( $this->get_file_path() ) || !is_writeable( $this->get_file_path() ) ) {
+
+		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
 			return false;
 		}
-		
-		$fp = fopen( $this->get_file_path() , "a+");
 
-		if( $fp ) {
+		$fp = fopen( $this->get_file_path(), 'a+' );
+
+		if ( $fp ) {
 			fwrite( $fp, $data );
 			fclose( $fp );
 		}
@@ -141,7 +141,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		if ( 100 === $this->get_percent_complete() ) {
 			$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
-			//We need to use a temporary file to store headers, this will make our life so much easier. 
+			// We need to use a temporary file to store headers, this will make our life so much easier.
 			@file_put_contents( $this->get_headers_row_file_path(), $header ); //phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents, Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		}
 
