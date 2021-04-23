@@ -17,6 +17,7 @@ const ShippingLocation = ( { address } ) => {
 	if ( Object.values( address ).length === 0 ) {
 		return null;
 	}
+
 	const shippingCountries = getSetting( 'shippingCountries', {} );
 	const shippingStates = getSetting( 'shippingStates', {} );
 	const formattedCountry =
