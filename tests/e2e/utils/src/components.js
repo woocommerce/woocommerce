@@ -13,6 +13,7 @@ import {
 	selectOptionInSelect2,
 	setCheckbox,
 	unsetCheckbox,
+	evalAndClick,
 	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
@@ -540,6 +541,33 @@ const deleteAllEmailLogs = async () => {
 	}
 };
 
+/**
+ * Delete all the existing shipping zones.
+ */
+const deleteAllShippingZones = async () => {
+	await merchant.openSettings('shipping');
+
+	// Delete existing shipping zones.
+	try {
+		let zone = await page.$( '.wc-shipping-zone-delete' );
+		if ( zone ) {
+			// WP action links aren't clickable because they are hidden with a left=-9999 style.
+			await page.evaluate(() => {
+				document.querySelector('.wc-shipping-zone-name .row-actions')
+					.style
+					.left = '0';
+			});
+			while ( zone ) {
+				await evalAndClick( '.wc-shipping-zone-delete' );
+				await uiUnblocked();
+				zone = await page.$( '.wc-shipping-zone-delete' );
+			};
+		};
+	} catch (error) {
+		// Prevent an error here causing the test to fail.
+	};
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -553,4 +581,5 @@ export {
 	createSimpleProductWithCategory,
 	clickUpdateOrder,
 	deleteAllEmailLogs,
+	deleteAllShippingZones,
 };
