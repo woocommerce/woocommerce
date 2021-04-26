@@ -1,10 +1,10 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
-use Automattic\WooCommerce\Blocks\Assets as BlockAssets;
+use Automattic\WooCommerce\Blocks\AssetsController as AssetsController;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Library;
+use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
@@ -81,7 +81,7 @@ class Bootstrap {
 			$this->add_build_notice();
 			$this->container->get( AssetDataRegistry::class );
 			$this->container->get( Installer::class );
-			BlockAssets::init();
+			$this->container->get( AssetsController::class );
 		}
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
@@ -89,7 +89,7 @@ class Bootstrap {
 		$this->container->get( PaymentsApi::class );
 		$this->container->get( RestApi::class );
 		$this->container->get( GoogleAnalytics::class );
-		Library::init();
+		$this->container->get( BlockTypesController::class );
 	}
 
 	/**
@@ -158,6 +158,12 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			AssetsController::class,
+			function( Container $container ) {
+				return new AssetsController( $container->get( AssetApi::class ) );
+			}
+		);
+		$this->container->register(
 			PaymentMethodRegistry::class,
 			function( Container $container ) {
 				return new PaymentMethodRegistry();
@@ -181,6 +187,14 @@ class Bootstrap {
 			Installer::class,
 			function ( Container $container ) {
 				return new Installer();
+			}
+		);
+		$this->container->register(
+			BlockTypesController::class,
+			function ( Container $container ) {
+				$asset_api           = $container->get( AssetApi::class );
+				$asset_data_registry = $container->get( AssetDataRegistry::class );
+				return new BlockTypesController( $asset_api, $asset_data_registry );
 			}
 		);
 		$this->container->register(
