@@ -52,37 +52,6 @@ async function setupBrowser() {
 }
 
 /**
- * Navigates to woocommerce import page and imports sample products.
- *
- * @return {Promise} Promise resolving once products have been imported.
- */
-async function importSampleProducts() {
-	await switchUserToAdmin();
-	// Visit Import Products page.
-	await visitAdminPage(
-		'edit.php',
-		'post_type=product&page=product_importer'
-	);
-	await page.click( 'a.woocommerce-importer-toggle-advanced-options' );
-	await page.focus( '#woocommerce-importer-file-url' );
-	// local path for sample data that is included with woo.
-	await page.keyboard.type(
-		'wp-content/plugins/woocommerce/sample-data/sample_products.csv'
-	);
-	await page.click( '.wc-actions .button-next' );
-	await page.waitForSelector( '.wc-importer-mapping-table' );
-	await page.select(
-		'.wc-importer-mapping-table tr:nth-child(29) select',
-		''
-	);
-	await page.click( '.wc-actions .button-next' );
-	await page.waitForXPath(
-		"//*[@class='woocommerce-importer-done' and contains(., 'Import complete! ')]"
-	);
-	await switchUserToTest();
-}
-
-/**
  * Adds an event listener to the page to handle additions of page event
  * handlers, to assure that they are removed at test teardown.
  */
