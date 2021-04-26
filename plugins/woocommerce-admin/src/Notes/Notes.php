@@ -34,7 +34,7 @@ class Notes {
 	 * @return array Array of arrays.
 	 */
 	public static function get_notes( $context = 'edit', $args = array() ) {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		$raw_notes  = $data_store->get_notes( $args );
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
@@ -90,7 +90,7 @@ class Notes {
 	 * @return int
 	 */
 	public static function get_notes_count( $type = array(), $status = array() ) {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		return $data_store->get_notes_count( $type, $status );
 	}
 
@@ -106,7 +106,7 @@ class Notes {
 			return;
 		}
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 
 		foreach ( $names as $name ) {
 			$note_ids = $data_store->get_notes_with_name( $name );
@@ -163,7 +163,7 @@ class Notes {
 	 * @return array Array of notes.
 	 */
 	public static function delete_all_notes() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		// Here we filter for the same params we are using to show the note list in client side.
 		$raw_notes = $data_store->get_notes(
 			array(
@@ -196,7 +196,7 @@ class Notes {
 	 * Clear note snooze status if the reminder date has been reached.
 	 */
 	public static function unsnooze_notes() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		$raw_notes  = $data_store->get_notes(
 			array(
 				'status' => array( Note::E_WC_ADMIN_NOTE_SNOOZED ),
@@ -247,7 +247,7 @@ class Notes {
 			return;
 		}
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		$notes      = $data_store->get_notes(
 			array(
 				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),
@@ -266,7 +266,7 @@ class Notes {
 	 * Delete actioned survey notes.
 	 */
 	public static function possibly_delete_survey_notes() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		$notes      = $data_store->get_notes(
 			array(
 				'type'   => array( Note::E_WC_ADMIN_NOTE_SURVEY ),
@@ -290,7 +290,7 @@ class Notes {
 	 * @return string|bool The note status.
 	 */
 	public static function get_note_status( $note_name ) {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = self::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( $note_name );
 
 		if ( empty( $note_ids ) ) {
@@ -433,5 +433,26 @@ class Notes {
 			$screen_name = $post;
 		}
 		return $screen_name;
+	}
+
+	/**
+	 * Loads the data store.
+	 *
+	 * If the "admin-note" data store is unavailable, attempts to load it
+	 * will result in an exception.
+	 * This method catches that exception and throws a custom one instead.
+	 *
+	 * @return \WC_Data_Store The "admin-note" data store.
+	 * @throws NotesUnavailableException Throws exception if data store loading fails.
+	 */
+	public static function load_data_store() {
+		try {
+			return \WC_Data_Store::load( 'admin-note' );
+		} catch ( \Exception $e ) {
+			throw new NotesUnavailableException(
+				'woocommerce_admin_notes_unavailable',
+				__( 'Notes are unavailable because the "admin-note" data store cannot be loaded.', 'woocommerce-admin' )
+			);
+		}
 	}
 }

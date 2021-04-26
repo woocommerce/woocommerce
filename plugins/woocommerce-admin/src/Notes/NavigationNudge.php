@@ -68,7 +68,7 @@ class NavigationNudge {
 			return;
 		}
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
 		if ( ! empty( $note_ids ) ) {

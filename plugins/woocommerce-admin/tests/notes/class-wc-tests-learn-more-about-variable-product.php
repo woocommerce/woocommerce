@@ -39,7 +39,7 @@ class WC_Tests_Learn_More_About_Variable_Product extends WC_Unit_Test_Case {
 		wp_insert_post( $product );
 
 		// Then we should have LearnMoreAboutVariableProducts note.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( LearnMoreAboutVariableProducts::NOTE_NAME );
 		$this->assertNotEmpty( $note_ids );
 		$this->assertCount( 1, $note_ids );
@@ -111,7 +111,7 @@ class WC_Tests_Learn_More_About_Variable_Product extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	protected function get_note_ids() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		return $data_store->get_notes_with_name( LearnMoreAboutVariableProducts::NOTE_NAME );
 	}
 

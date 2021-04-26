@@ -49,7 +49,7 @@ class WooCommercePayments {
 			return;
 		}
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 
 		// We already have this note? Then mark the note as actioned.
 		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );

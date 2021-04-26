@@ -69,7 +69,7 @@ class MerchantEmailNotifications {
 	 * Send all the notifications type `email`.
 	 */
 	public static function run() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$notes      = $data_store->get_notes(
 			array(
 				'type'   => array( Note::E_WC_ADMIN_NOTE_EMAIL ),

@@ -104,7 +104,7 @@ class WooSubscriptionsNotes {
 	 */
 	public function check_connection() {
 		if ( ! $this->is_connected() ) {
-			$data_store = \WC_Data_Store::load( 'admin-note' );
+			$data_store = Notes::load_data_store();
 			$note_ids   = $data_store->get_notes_with_name( self::CONNECTION_NOTE_NAME );
 			if ( ! empty( $note_ids ) ) {
 				// We already have a connection note. Exit early.
@@ -216,7 +216,7 @@ class WooSubscriptionsNotes {
 	public function prune_inactive_subscription_notes() {
 		$active_product_ids = $this->get_subscription_active_product_ids();
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::SUBSCRIPTION_NOTE_NAME );
 
 		foreach ( (array) $note_ids as $note_id ) {
@@ -239,7 +239,7 @@ class WooSubscriptionsNotes {
 	public function find_note_for_product_id( $product_id ) {
 		$product_id = intval( $product_id );
 
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::SUBSCRIPTION_NOTE_NAME );
 		foreach ( (array) $note_ids as $note_id ) {
 			$note             = Notes::get_note( $note_id );

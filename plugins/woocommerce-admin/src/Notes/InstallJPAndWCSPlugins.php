@@ -76,7 +76,7 @@ class InstallJPAndWCSPlugins {
 		}
 
 		// Action any notes with a matching name.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
 		foreach ( $note_ids as $note_id ) {

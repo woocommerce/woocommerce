@@ -18,7 +18,7 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 	 * Tests that a marketing note can be added.
 	 */
 	public function test_add_remove_marketing_note() {
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 
 		$note = new Note();
 		$note->set_title( 'PHPUNIT_TEST_MARKETING_NOTE' );
@@ -64,7 +64,7 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		WooCommercePayments::possibly_add_note();
 
 		// Load all marketing notes and check that the note was not added.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$data_store = Notes::load_data_store();
 		$notes      = $data_store->get_notes(
 			array(
 				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),

@@ -84,7 +84,7 @@ class Note extends \WC_Data {
 			$this->set_object_read( true );
 		}
 
-		$this->data_store = \WC_Data_Store::load( 'admin-note' );
+		$this->data_store = Notes::load_data_store();
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
