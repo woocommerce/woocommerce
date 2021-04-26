@@ -6,7 +6,7 @@ import {
 	getEditedPostContent,
 	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
-import { clearAndFillInput } from '@woocommerce/e2e-tests/utils';
+import { clearAndFillInput } from '@woocommerce/e2e-utils';
 import {
 	findLabelWithText,
 	visitBlockPage,

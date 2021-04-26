@@ -8,8 +8,6 @@ module.exports = {
 	moduleFileExtensions: [ 'js' ],
 
 	moduleNameMapper: {
-		'@woocommerce/e2e-tests/(.*)':
-			'<rootDir>/node_modules/woocommerce/tests/e2e/$1',
 		'@woocommerce/blocks-test-utils': '<rootDir>/tests/utils',
 	},
 
