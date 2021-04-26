@@ -1,8 +1,7 @@
 const path = require( 'path' );
-const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
 
-module.exports = {
-	...baseE2Econfig,
+const config = useE2EJestConfig( {
 	moduleFileExtensions: [ 'js', 'ts' ],
 	roots: [ path.resolve( __dirname, '../specs' ) ],
 	testMatch: [ '**/*.(test|spec).(j|t)s', '*.(test|spec).(j|t)s' ],
@@ -19,4 +18,6 @@ module.exports = {
 			},
 		],
 	},
-};
+} );
+
+module.exports = config;
