@@ -436,7 +436,7 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
 	await page.click( '.wc-backbone-modal-content #btn-ok' );
 
-	await uiUnblocked();
+	await backboneUnblocked();
 
 	// Verify the product we added shows as a line item now
 	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
