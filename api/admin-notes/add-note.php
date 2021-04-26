@@ -49,15 +49,16 @@ function possibly_add_action( $note ) {
 }
 
 function get_mock_note_data() {
+	$plugin_url = site_url() . '/wp-content/plugins/woocommerce-admin-test-helper/';
 	return array(
 		'content'   => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.',
 		'info'      => array(
-			'banner'    => 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAK9Xg4L6FGmDAW5UVtVEv1IXKtGV3-rxYLfAzOBF-fMUdmyWz&usqp=CAU',
-			'thumbnail' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTlm2mX1h6GfMnT9sDD9GsJB7of3MZw3UDzCAQM9EBepiJzyxXH&usqp=CAU',
+			'banner'    => $plugin_url . 'images/admin-notes/banner.jpeg',
+			'thumbnail' => $plugin_url . 'images/admin-notes/thumbnail.jpeg',
 			'plain'     => ''
 		),
 		'email'     => array(
-			'plain' => 'https://www.logosvgpng.com/wp-content/uploads/2018/10/woocommerce-logo-vector.png'
+			'plain' => $plugin_url . 'images/admin-notes/woocommerce-logo-vector.png'
 		),
 		'update'    => array(
 			'plain' => ''
