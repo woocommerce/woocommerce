@@ -16,7 +16,7 @@
 		"automattic/jetpack-autoloader": "^2.9.1"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "6.5.14",
+		"phpunit/phpunit": "7.5.20",
 		"woocommerce/woocommerce-sniffs": "0.1.0"
 	},
 	"autoload": {

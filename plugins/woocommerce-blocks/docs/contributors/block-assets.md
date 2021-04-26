@@ -10,7 +10,7 @@ Assets are needed when we know a block will be rendered.
 
 In the context of [Block Types](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/BlockTypes), assets and asset data is enqueued within the block `render()` method.
 
-In an admin editor context we must also ensure asset *data* is available when the `enqueue_block_editor_assets` hook is fired. That is because block scripts are enqueued ready for the Block Inserter, but the block may not be rendered.
+In an admin editor context we must also ensure asset _data_ is available when the `enqueue_block_editor_assets` hook is fired. That is because block scripts are enqueued ready for the Block Inserter, but the block may not be rendered.
 
 Note: `enqueue_block_editor_assets` fires regardless of whether or not a block has been rendered in the editor context, so unless handled correctly, block data may be loaded twice. The `AbstractBlock` class below handles this for you, or you can track whether or not assets have been loaded already with a class variable.
 
@@ -43,4 +43,20 @@ protected function enqueue_data( array $attributes = [] ) {
     );
     $data_registry->add( 'some-asset-data', 'data-value' );
 }
+```
+
+## woocommerce_shared_settings deprecated filter
+
+This filter was used as a workaround. Currently the best way to achieve data registration comes from using AssetsDataRegistry:
+
+```php
+	Automattic\WooCommerce\Blocks\Package::container()
+		->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )
+		->add( $key, $value );
+```
+
+On the client side the value will be available via:
+
+```js
+wc.wcSettings.getSetting( 'key' );
 ```

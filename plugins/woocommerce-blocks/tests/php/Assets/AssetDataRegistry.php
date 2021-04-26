@@ -62,9 +62,6 @@ class AssetDataRegistry extends WP_UnitTestCase {
 
 	/**
 	 * This tests the 'woocommerce_shared_settings' filter.
-	 * A reminder this filter is only temporary but just using this as for
-	 * testing with.
-	 * @group newTest
 	 */
 	public function test_woocommerce_filter_with_protected_data() {
 		$this->registry->initialize_core_data();
