@@ -83,6 +83,13 @@ export const uiUnblocked = async () => {
 };
 
 /**
+ * Wait for backbone blocking to end.
+ */
+export const backboneUnblocked = async () => {
+	await page.waitForFunction( () => ! Boolean( document.querySelector( '.wc-backbone-modal' ) ) );
+};
+
+/**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
  * @param {string} button (Publish)
