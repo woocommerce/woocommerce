@@ -430,7 +430,10 @@ class WC_Admin_Post_Types {
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$product->set_manage_stock( $manage_stock );
-		$product->set_backorders( $backorders );
+
+		if ( 'external' !== $product->get_type() ) {
+			$product->set_backorders( $backorders );
+		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
@@ -550,7 +553,10 @@ class WC_Admin_Post_Types {
 		$stock_amount = 'yes' === $manage_stock && ! empty( $request_data['change_stock'] ) && isset( $request_data['_stock'] ) ? wc_stock_amount( $request_data['_stock'] ) : $product->get_stock_quantity();
 
 		$product->set_manage_stock( $manage_stock );
-		$product->set_backorders( $backorders );
+
+		if ( 'external' !== $product->get_type() ) {
+			$product->set_backorders( $backorders );
+		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$change_stock = absint( $request_data['change_stock'] );
