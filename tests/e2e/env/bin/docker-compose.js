@@ -43,7 +43,10 @@ if ( appPath ) {
             if ( ! fs.existsSync( customInitFile ) ) {
                 customInitFile = '';
             }
+        } else {
+            customInitFile = '';
         }
+
         const appInitFile = customInitFile ? customInitFile : path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
         // If found, copy it into the wp-cli Docker context so
         // it gets picked up by the entrypoint script.
