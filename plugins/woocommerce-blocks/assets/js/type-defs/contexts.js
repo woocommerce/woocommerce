@@ -120,16 +120,16 @@
  *                                                                               have triggered a notice.
  * @property {string}                       redirectUrl                          This is the url that checkout will
  *                                                                               redirect to when it's ready.
+ * @property {function(function(),number=)} onCheckoutValidationBeforeProcessing Used to register a callback that will
+ *                                                                               fire when the validation of the submitted checkout
+ *                                                                               data happens, before it's sent off to the
+ *                                                                               server.
  * @property {function(function(),number=)} onCheckoutAfterProcessingWithSuccess Used to register a callback that will
  *                                                                               fire after checkout has been processed
  *                                                                               and there are no errors.
  * @property {function(function(),number=)} onCheckoutAfterProcessingWithError   Used to register a callback that will
  *                                                                               fire when the checkout has been
  *                                                                               processed and has an error.
- * @property {function(function(),number=)} onCheckoutBeforeProcessing           Used to register a callback that will
- *                                                                               fire when the checkout has been
- *                                                                               submitted before being sent off to the
- *                                                                               server.
  * @property {CheckoutDispatchActions}      dispatchActions                      Various actions that can be dispatched
  *                                                                               for the checkout context data.
  * @property {number}                       orderId                              This is the ID for the draft order if

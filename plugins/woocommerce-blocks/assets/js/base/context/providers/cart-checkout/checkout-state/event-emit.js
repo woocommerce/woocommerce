@@ -9,7 +9,8 @@ import {
 } from '../../../event-emit';
 
 const EMIT_TYPES = {
-	CHECKOUT_BEFORE_PROCESSING: 'checkout_before_processing',
+	CHECKOUT_VALIDATION_BEFORE_PROCESSING:
+		'checkout_validation_before_processing',
 	CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS:
 		'checkout_after_processing_with_success',
 	CHECKOUT_AFTER_PROCESSING_WITH_ERROR:
@@ -38,8 +39,8 @@ const emitterObservers = ( dispatcher ) => ( {
 		EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
 		dispatcher
 	),
-	onCheckoutBeforeProcessing: emitterCallback(
-		EMIT_TYPES.CHECKOUT_BEFORE_PROCESSING,
+	onCheckoutValidationBeforeProcessing: emitterCallback(
+		EMIT_TYPES.CHECKOUT_VALIDATION_BEFORE_PROCESSING,
 		dispatcher
 	),
 } );

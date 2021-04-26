@@ -4,21 +4,21 @@ This document gives an overview of the flow for the checkout in the WooCommerce 
 
 ## Table of Contents <!-- omit in toc -->
 
--   [General Concepts](#general-concepts)
-    -   [Tracking flow through status](#tracking-flow-through-status)
-        -   [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
-            -   [Special States:](#special-states)
-        -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-        -   [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
-    -   [Emitting Events](#emitting-events)
-        -   [`onCheckoutBeforeProcessing`](#oncheckoutbeforeprocessing)
-        -   [`onPaymentProcessing`](#onpaymentprocessing)
-        -   [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
-        -   [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
-        -   [`onShippingRateSuccess`](#onshippingratesuccess)
-        -   [`onShippingRateFail`](#onshippingratefail)
-        -   [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
-        -   [`onShippingRateSelectFail`](#onshippingrateselectfail)
+- [General Concepts](#general-concepts)
+  - [Tracking flow through status](#tracking-flow-through-status)
+    - [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
+      - [Special States:](#special-states)
+    - [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
+    - [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
+  - [Emitting Events](#emitting-events)
+    - [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
+    - [`onPaymentProcessing`](#onpaymentprocessing)
+    - [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
+    - [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
+    - [`onShippingRateSuccess`](#onshippingratesuccess)
+    - [`onShippingRateFail`](#onshippingratefail)
+    - [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
+    - [`onShippingRateSelectFail`](#onshippingrateselectfail)
 
 The architecture of the Checkout Block is derived from the following principles:
 
@@ -29,7 +29,7 @@ The architecture of the Checkout Block is derived from the following principles:
 
 Here's a high level overview of the flow:
 
-![checkout flow diagram](https://user-images.githubusercontent.com/1429108/79079697-7a05b600-7cde-11ea-987f-be016355ee93.png)
+![checkout flow diagram](https://user-images.githubusercontent.com/1628454/113739726-f8c9df00-96f7-11eb-80f1-78e25ccc88cb.png)
 
 ## General Concepts
 
@@ -134,16 +134,16 @@ One _**very important rule**_ when it comes to observers registered to any event
 const unsubscribe = emitter( myCallback );
 ```
 
-You could substitute in whatever emitter you are registering for for the `emitter` function. So for example if you are registering for the `onCheckoutBeforeProcessing` event emitter, you'd have something like:
+You could substitute in whatever emitter you are registering for the `emitter` function. So for example if you are registering for the `onCheckoutValidationBeforeProcessing` event emitter, you'd have something like:
 
 ```jsx
-const unsubscribe = onCheckoutBeforeProcessing( myCallback );
+const unsubscribe = onCheckoutValidationBeforeProcessing( myCallback );
 ```
 
 You can also indicate what priority you want your observer to execute at. Lower priority is run before higher priority, so you can affect when your observer will run in the stack of observers registered to an emitter. You indicate priority via an number on the second argument:
 
 ```jsx
-const unsubscribe = onCheckoutBeforeProcessing( myCallback, 10 );
+const unsubscribe = onCheckoutValidationBeforeProcessing( myCallback, 10 );
 ```
 
 In the examples, `myCallback`, is your subscriber function. The subscriber function could receive data from the event emitter (described in the emitter details below) and may be expected to return a response in a specific shape (also described in the specific emitter details). The subscriber function can be a `Promise` and when the event emitter cycles through the registered observers it will await for any registered Promise to resolve.
@@ -151,11 +151,11 @@ In the examples, `myCallback`, is your subscriber function. The subscriber funct
 Finally, the return value of the call to the emitter function is an unsubscribe function that can be used to unregister your observer. This is especially useful in a React component context where you need to make sure you unsubscribe the observer on component unmount. An example is usage in a `useEffect` hook:
 
 ```jsx
-const MyComponent = ( { onCheckoutBeforeProcessing } ) => {
+const MyComponent = ( { onCheckoutValidationBeforeProcessing } ) => {
 	useEffect( () => {
-		const unsubscribe = onCheckoutBeforeProcessing( () => true );
+		const unsubscribe = onCheckoutValidationBeforeProcessing( () => true );
 		return unsubscribe;
-	}, [ onCheckoutBeforeProcessing ] );
+	}, [ onCheckoutValidationBeforeProcessing ] );
 	return null;
 };
 ```
@@ -200,7 +200,7 @@ const MyPaymentMethodComponent = ( { emitResponse } ) => {
 
 The following event emitters are available to extensions to register observers to:
 
-#### `onCheckoutBeforeProcessing`
+#### `onCheckoutValidationBeforeProcessing`
 
 Observers registered to this event emitter will receive nothing as an argument. Also, all observers will be executed before the checkout handles the responses from the emitters. Observers registered to this emitter can return `true` if they have nothing to communicate back to checkout, `false` if they want checkout to go back to `IDLE` status state, or an object with any of the following properties:
 
@@ -208,7 +208,7 @@ Observers registered to this event emitter will receive nothing as an argument. 
 -   `validationErrors`: This will be set as inline validation errors on checkout fields. If your observer wants to trigger validation errors it can use the following shape for the errors:
     -   This is an object where keys are the property names the validation error is for (that correspond to a checkout field, eg `country` or `coupon`) and values are the error message describing the validation problem.
 
-This event is emitted when the checkout status is `BEFORE_PROCESSING` (which happens when the checkout form submission is triggered by the user - or Express Payment methods).
+This event is emitted when the checkout status is `BEFORE_PROCESSING` (which happens at validation time, after the checkout form submission is triggered by the user - or Express Payment methods).
 
 If all observers return `true` for this event, then the checkout status will be changed to `PROCESSING`.
 
@@ -221,11 +221,11 @@ import { useCheckoutContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onCheckoutBeforeProcessing } = useCheckoutContext();
+	const { onCheckoutValidationBeforeProcessing } = useCheckoutContext();
 	useEffect( () => {
-		const unsubscribe = onCheckoutBeforeProcessing( () => true );
+		const unsubscribe = onCheckoutValidationBeforeProcessing( () => true );
 		return unsubscribe;
-	}, [ onCheckoutBeforeProcessing ] );
+	}, [ onCheckoutValidationBeforeProcessing ] );
 	return null;
 };
 ```
@@ -236,11 +236,11 @@ _For registered payment method components:_
 import { useEffect } from '@wordpress/element';
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
-	const { onCheckoutBeforeProcessing } = eventRegistration;
+	const { onCheckoutValidationBeforeProcessing } = eventRegistration;
 	useEffect( () => {
-		const unsubscribe = onCheckoutBeforeProcessing( () => true );
+		const unsubscribe = onCheckoutValidationBeforeProcessing( () => true );
 		return unsubscribe;
-	}, [ onCheckoutBeforeProcessing ] );
+	}, [ onCheckoutValidationBeforeProcessing ] );
 };
 ```
 

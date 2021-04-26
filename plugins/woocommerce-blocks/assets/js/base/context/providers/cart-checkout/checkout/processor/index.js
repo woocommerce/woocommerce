@@ -37,7 +37,7 @@ import { useStoreNotices } from '../../../../hooks/use-store-notices';
 const CheckoutProcessor = () => {
 	const {
 		hasError: checkoutHasError,
-		onCheckoutBeforeProcessing,
+		onCheckoutValidationBeforeProcessing,
 		dispatchActions,
 		redirectUrl,
 		isProcessing: checkoutIsProcessing,
@@ -147,7 +147,7 @@ const CheckoutProcessor = () => {
 	useEffect( () => {
 		let unsubscribeProcessing;
 		if ( ! expressPaymentMethodActive ) {
-			unsubscribeProcessing = onCheckoutBeforeProcessing(
+			unsubscribeProcessing = onCheckoutValidationBeforeProcessing(
 				checkValidation,
 				0
 			);
@@ -158,7 +158,7 @@ const CheckoutProcessor = () => {
 			}
 		};
 	}, [
-		onCheckoutBeforeProcessing,
+		onCheckoutValidationBeforeProcessing,
 		checkValidation,
 		expressPaymentMethodActive,
 	] );

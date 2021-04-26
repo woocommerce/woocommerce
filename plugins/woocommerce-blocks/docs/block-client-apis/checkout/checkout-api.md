@@ -3,15 +3,16 @@
 This document gives an overview of some of the major architectural components/APIs for the checkout block. If you haven't already, you may also want to read about the [Checkout Flow and Events](../../extensibility/checkout-flow-and-events.md).
 
 ## Table of Contents <!-- omit in toc -->
-- [Checkout Block API overview](#checkout-block-api-overview)
-    - [Contexts](#contexts)
-      - [Notices Context](#notices-context)
-      - [Billing Data Context](#billing-data-context)
-      - [Shipping Method Data context](#shipping-method-data-context)
-      - [Payment Method Data Context](#payment-method-data-context)
-      - [Checkout Context](#checkout-context)
-  - [Hooks](#hooks)
-    - [`usePaymentMethodInterface`](#usepaymentmethodinterface)
+
+-   [Checkout Block API overview](#checkout-block-api-overview)
+    -   [Contexts](#contexts)
+        -   [Notices Context](#notices-context)
+        -   [Billing Data Context](#billing-data-context)
+        -   [Shipping Method Data context](#shipping-method-data-context)
+        -   [Payment Method Data Context](#payment-method-data-context)
+        -   [Checkout Context](#checkout-context)
+    -   [Hooks](#hooks)
+        -   [`usePaymentMethodInterface`](#usepaymentmethodinterface)
 
 ### Contexts
 
@@ -101,9 +102,9 @@ Via `useCheckoutContext`, the following are exposed:
 -   `isCalculating`: This is true when the total is being re-calculated for the order. There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. This flag consolidates all activity that might be occurring (including requests to the server that potentially affect calculation of totals). So instead of having to check each of those individual states you can reliably just check if this boolean is true (calculating) or false (not calculating).
 -   `hasError`: This is true when anything in the checkout has created an error condition state. This might be validation errors, request errors, coupon application errors, payment processing errors etc.
 -   `redirectUrl`: The current set url that the checkout will redirect to when it is complete.
+-   `onCheckoutValidationBeforeProcessing`: Used to register observers that will be invoked at validation time, after the checkout has been submitted but before the processing request is sent to the server.
 -   `onCheckoutAfterProcessingWithSuccess`: Used to register observers that will be invoked after checkout has been processed by the server successfully.
 -   `onCheckoutAfterProcessingWithError`: Used to register observers that will be invoked after checkout has been processed by the server and there was an error.
--   `onCheckoutBeforeProcessing`: Used to register observers that will be invoked after the checkout has been submitted but before the processing request is sent to the server.
 -   `dispatchActions`: This is an object with various functions for dispatching status in the checkout. It is not exposed to extensions but is for internal use only.
 -   `orderId`: The order id for the order attached to the current checkout.
 -   `isCart`: This is true if the cart is being viewed. Note: usage of `CheckoutProvider` will automatically set this to false. There is also a `CartProvider` that wraps children in the `ShippingDataProvider` and exposes the same api as checkout context. The `CartProvider` automatically sets `isCart` to true. This allows components that implement `useCheckoutContext` to use the same api in either the cart or checkout context but still have specific behaviour to whether `isCart` is true or not.
