@@ -9,14 +9,14 @@ register_woocommerce_admin_test_helper_rest_route(
 
 function admin_notes_add_note( $request ) {
 	$note = new Note();
-	$default_note_data = get_default_note_data();
+	$mock_note_data = get_mock_note_data();
 	$type = $request->get_param( 'type' );
 	$layout = $request->get_param( 'layout' );
 
 	$note->set_name( $request->get_param( 'name' ) );
 	$note->set_title( $request->get_param( 'title' ) );
-	$note->set_content( $default_note_data[ 'content' ] );
-	$note->set_image( $default_note_data[ $type ][ $layout ] );
+	$note->set_content( $mock_note_data[ 'content' ] );
+	$note->set_image( $mock_note_data[ $type ][ $layout ] );
 	$note->set_layout( $layout );
 	$note->set_type( $type );
 	possibly_add_action( $note );
@@ -48,7 +48,7 @@ function possibly_add_action( $note ) {
 	$note->add_action( $action_name, 'Test action', wc_admin_url() );
 }
 
-function get_default_note_data() {
+function get_mock_note_data() {
 	return array(
 		'content'   => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.',
 		'info'      => array(
