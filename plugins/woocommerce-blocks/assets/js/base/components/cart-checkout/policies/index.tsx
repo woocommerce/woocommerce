@@ -15,7 +15,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import './style.scss';
 
-const Policies = () => {
+const Policies = (): JSX.Element => {
 	return (
 		<ul className="wc-block-components-checkout-policies">
 			{ PRIVACY_URL && (

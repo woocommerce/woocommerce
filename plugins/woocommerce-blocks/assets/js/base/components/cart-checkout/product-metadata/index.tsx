@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
+import { ProductResponseItemData } from '@woocommerce/type-defs/product-response';
+import { CartVariationItem } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies
@@ -10,12 +11,19 @@ import ProductDetails from '../product-details';
 import ProductSummary from '../product-summary';
 import './style.scss';
 
+interface ProductMetadataProps {
+	shortDescription?: string;
+	fullDescription?: string;
+	itemData: ProductResponseItemData[];
+	variation?: CartVariationItem[];
+}
+
 const ProductMetadata = ( {
 	shortDescription = '',
 	fullDescription = '',
 	itemData = [],
 	variation = [],
-} ) => {
+}: ProductMetadataProps ): JSX.Element => {
 	return (
 		<div className="wc-block-components-product-metadata">
 			<ProductSummary
@@ -32,18 +40,6 @@ const ProductMetadata = ( {
 			/>
 		</div>
 	);
-};
-
-ProductMetadata.propTypes = {
-	shortDescription: PropTypes.string,
-	fullDescription: PropTypes.string,
-	itemData: PropTypes.array,
-	variation: PropTypes.arrayOf(
-		PropTypes.shape( {
-			attribute: PropTypes.string,
-			value: PropTypes.string.isRequired,
-		} )
-	),
 };
 
 export default ProductMetadata;

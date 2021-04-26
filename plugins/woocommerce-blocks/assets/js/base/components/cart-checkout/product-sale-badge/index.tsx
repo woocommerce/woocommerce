@@ -4,13 +4,18 @@
 import { createInterpolateElement } from 'wordpress-element';
 import { __, sprintf } from '@wordpress/i18n';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import PropTypes from 'prop-types';
+import type { Currency } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
  */
 import ProductBadge from '../product-badge';
 
+interface ProductSaleBadgeProps {
+	currency: Currency;
+	saleAmount: number;
+	format: string;
+}
 /**
  * ProductSaleBadge
  *
@@ -20,7 +25,11 @@ import ProductBadge from '../product-badge';
  * @param {string} [props.format]   Format to change the price.
  * @return {*} The component.
  */
-const ProductSaleBadge = ( { currency, saleAmount, format = '<price/>' } ) => {
+const ProductSaleBadge = ( {
+	currency,
+	saleAmount,
+	format = '<price/>',
+}: ProductSaleBadgeProps ): JSX.Element | null => {
 	if ( ! saleAmount || saleAmount <= 0 ) {
 		return null;
 	}
@@ -48,11 +57,6 @@ const ProductSaleBadge = ( { currency, saleAmount, format = '<price/>' } ) => {
 			} ) }
 		</ProductBadge>
 	);
-};
-
-ProductSaleBadge.propTypes = {
-	currency: PropTypes.object,
-	saleAmount: PropTypes.number,
 };
 
 export default ProductSaleBadge;

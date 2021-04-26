@@ -13,7 +13,7 @@ export const CURRENT_USER_IS_ADMIN = allSettings.currentUserIsAdmin;
 export const HOME_URL = allSettings.homeUrl;
 export const LOCALE = allSettings.locale;
 export const ORDER_STATUSES = allSettings.orderStatuses;
-export const PLACEHOLDER_IMG_SRC = allSettings.placeholderImgSrc;
+export const PLACEHOLDER_IMG_SRC = allSettings.placeholderImgSrc as string;
 export const SITE_TITLE = allSettings.siteTitle;
 export const STORE_PAGES = allSettings.storePages as Record<
 	string,

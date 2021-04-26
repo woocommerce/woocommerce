@@ -8,6 +8,9 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import ProductBadge from '../product-badge';
 
+interface ProductLowStockBadgeProps {
+	lowStockRemaining: number | null;
+}
 /**
  * Returns a low stock badge.
  *
@@ -16,9 +19,7 @@ import ProductBadge from '../product-badge';
  */
 const ProductLowStockBadge = ( {
 	lowStockRemaining,
-}: {
-	lowStockRemaining: number;
-} ): JSX.Element | null => {
+}: ProductLowStockBadgeProps ): JSX.Element | null => {
 	if ( ! lowStockRemaining ) {
 		return null;
 	}

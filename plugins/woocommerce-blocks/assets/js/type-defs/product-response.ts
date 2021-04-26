@@ -22,6 +22,13 @@ export interface ProductResponseItemPrices extends CurrencyResponseInfo {
 	};
 }
 
+export interface ProductResponseItemData {
+	name: string;
+	value: string;
+	display?: string;
+	hidden?: boolean;
+}
+
 export interface ProductResponseImageItem {
 	id: number;
 	src: string;

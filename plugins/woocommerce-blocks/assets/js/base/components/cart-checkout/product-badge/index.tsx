@@ -2,14 +2,21 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const ProductBadge = ( { children, className } ) => {
+interface ProductBadgeProps {
+	children?: ReactNode;
+	className?: string;
+}
+const ProductBadge = ( {
+	children,
+	className,
+}: ProductBadgeProps ): JSX.Element => {
 	return (
 		<div
 			className={ classNames(
@@ -20,10 +27,6 @@ const ProductBadge = ( { children, className } ) => {
 			{ children }
 		</div>
 	);
-};
-
-ProductBadge.propTypes = {
-	className: PropTypes.string,
 };
 
 export default ProductBadge;
