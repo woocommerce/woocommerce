@@ -2,27 +2,29 @@
  * External dependencies
  */
 import { Button as WPButton } from 'wordpress-components';
-import PropTypes from 'prop-types';
+import type { ReactNode } from 'react';
 import classNames from 'classnames';
-
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-/** @typedef {import('react')} React */
+interface ButtonProps extends WPButton.ButtonProps {
+	className?: string;
+	showSpinner?: boolean;
+	children?: ReactNode;
+}
 
 /**
  * Component that visually renders a button but semantically might be `<button>` or `<a>` depending
  * on the props.
- *
- * @param {Object}              props             Incoming props for the component.
- * @param {string}              props.className   CSS classname used.
- * @param {boolean}             props.showSpinner Whether to show spinner or not.
- * @param {React.ReactChildren} props.children    Child components passed in.
- * @param {Object}              props.props       Rest of incoming props.
  */
-const Button = ( { className, showSpinner = false, children, ...props } ) => {
+const Button = ( {
+	className,
+	showSpinner = false,
+	children,
+	...props
+}: ButtonProps ): JSX.Element => {
 	const buttonClassName = classNames(
 		'wc-block-components-button',
 		className,
@@ -44,12 +46,6 @@ const Button = ( { className, showSpinner = false, children, ...props } ) => {
 			</span>
 		</WPButton>
 	);
-};
-
-Button.propTypes = {
-	className: PropTypes.string,
-	showSpinner: PropTypes.bool,
-	children: PropTypes.node,
 };
 
 export default Button;
