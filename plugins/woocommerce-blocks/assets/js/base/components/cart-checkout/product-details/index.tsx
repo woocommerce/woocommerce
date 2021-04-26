@@ -1,17 +1,22 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { kebabCase } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
+import type { ProductResponseItemData } from '@woocommerce/type-defs/product-response';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+interface ProductDetailsProps {
+	details: ProductResponseItemData[];
+}
 // Component to display cart item data and variations.
-const ProductDetails = ( { details = [] } ) => {
+const ProductDetails = ( {
+	details = [],
+}: ProductDetailsProps ): JSX.Element | null => {
 	if ( ! Array.isArray( details ) ) {
 		return null;
 	}
@@ -50,16 +55,6 @@ const ProductDetails = ( { details = [] } ) => {
 			} ) }
 		</ul>
 	);
-};
-
-ProductDetails.propTypes = {
-	details: PropTypes.arrayOf(
-		PropTypes.shape( {
-			display: PropTypes.string,
-			name: PropTypes.string,
-			value: PropTypes.string.isRequired,
-		} )
-	),
 };
 
 export default ProductDetails;
