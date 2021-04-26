@@ -85,9 +85,10 @@ export const usePaymentMethodInterface = () => {
 		isComplete,
 		isIdle,
 		isProcessing,
+		onCheckoutBeforeProcessing,
+		onCheckoutValidationBeforeProcessing,
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
-		onCheckoutBeforeProcessing,
 		onSubmit,
 		customerId,
 	} = useCheckoutContext();
@@ -175,9 +176,10 @@ export const usePaymentMethodInterface = () => {
 			customerId,
 		},
 		eventRegistration: {
+			onCheckoutBeforeProcessing,
+			onCheckoutValidationBeforeProcessing,
 			onCheckoutAfterProcessingWithSuccess,
 			onCheckoutAfterProcessingWithError,
-			onCheckoutBeforeProcessing,
 			onShippingRateSuccess,
 			onShippingRateFail,
 			onShippingRateSelectSuccess,

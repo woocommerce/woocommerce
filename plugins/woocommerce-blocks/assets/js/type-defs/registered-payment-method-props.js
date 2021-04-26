@@ -132,16 +132,15 @@
 /**
  * @typedef EventRegistrationProps
  *
+ * @property {function(function())} onCheckoutValidationBeforeProcessing Used to subscribe callbacks firing when
+ *                                                              validation of the submitted checkout data happens,
+ *                                                              before it's sent off to the server.
  * @property {function(function())} onCheckoutAfterProcessingWithSuccess Used to subscribe callbacks
  *                                                              firing when checkout has completed
  *                                                              processing successfully.
  * @property {function(function())} onCheckoutAfterProcessingWithError Used to subscribe callbacks
  *                                                              firing when checkout has completed
  *                                                              processing with an error.
- * @property {function(function())} onCheckoutBeforeProcessing  Used to subscribe callbacks that
- *                                                              will fire when checkout begins
- *                                                              processing (as a part of the
- *                                                              processing process).
  * @property {function(function())} onShippingRateSuccess       Used to subscribe callbacks that
  *                                                              will fire when shipping rates for a
  *                                                              given address have been received
