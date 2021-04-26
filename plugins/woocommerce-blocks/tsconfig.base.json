@@ -47,7 +47,6 @@
 			"@woocommerce/blocks-checkout": [ "packages/checkout" ],
 			"@woocommerce/price-format": [ "packages/prices" ],
 			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
-			"@woocommerce/e2e-tests": [ "node_modules/woocommerce/tests/e2e" ],
 			"@woocommerce/icons": [ "assets/js/icons" ],
 			"@woocommerce/resource-previews": [ "assets/js/previews" ],
 			"@woocommerce/knobs": [ "storybook/knobs" ],
