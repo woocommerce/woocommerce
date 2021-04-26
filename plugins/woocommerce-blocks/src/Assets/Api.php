@@ -122,29 +122,6 @@ class Api {
 	}
 
 	/**
-	 * Queues a block script in the frontend.
-	 *
-	 * @since 2.5.0
-	 * @since 2.6.0 Changed $name to $script_name and added $handle argument.
-	 * @since 2.9.0 Made it so scripts are not loaded in admin pages.
-	 * @deprecated 4.5.0 Block types register the scripts themselves.
-	 *
-	 * @param string $script_name  Name of the script used to identify the file inside build folder.
-	 * @param string $handle       Optional. Provided if the handle should be different than the script name. `wc-` prefix automatically added.
-	 * @param array  $dependencies Optional. An array of registered script handles this script depends on. Default empty array.
-	 */
-	public function register_block_script( $script_name, $handle = '', $dependencies = [] ) {
-		_deprecated_function( 'register_block_script', '4.5.0' );
-		if ( is_admin() ) {
-			return;
-		}
-		$relative_src = $this->get_block_asset_build_path( $script_name );
-		$handle       = '' !== $handle ? 'wc-' . $handle : 'wc-' . $script_name;
-		$this->register_script( $handle, $relative_src, $dependencies );
-		wp_enqueue_script( $handle );
-	}
-
-	/**
 	 * Registers a style according to `wp_register_style`.
 	 *
 	 * @since 2.5.0
