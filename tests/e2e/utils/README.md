@@ -181,6 +181,7 @@ This package provides support for enabling retries in tests:
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
+| `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 
 ### Test Utilities
 
