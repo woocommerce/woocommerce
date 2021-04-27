@@ -37,14 +37,13 @@ final class AssetsController {
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
 	/**
 	 * Register block scripts & styles.
 	 */
 	public function register_assets() {
+		$this->register_style( 'wc-block-vendors-style', plugins_url( $this->api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ) );
 		$this->register_style( 'wc-block-editor', plugins_url( $this->api->get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
 		$this->register_style( 'wc-block-style', plugins_url( $this->api->get_block_asset_build_path( 'style', 'css' ), __DIR__ ), array( 'wc-block-vendors-style' ) );
 
@@ -74,17 +73,6 @@ final class AssetsController {
 			",
 			'before'
 		);
-	}
-
-	/**
-	 * Register the vendors style file. We need to do it after the other files
-	 * because we need to check if `wp-edit-post` has been enqueued.
-	 */
-	public function enqueue_scripts() {
-		// @todo Remove fix to load our stylesheets after editor CSS.
-		// See #3068 and #3898 for the rationale of this fix. It should be no
-		// longer necessary when the editor is loaded in an iframe (https://github.com/WordPress/gutenberg/issues/20797).
-		$this->register_style( 'wc-block-vendors-style', plugins_url( $this->api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), wp_style_is( 'wp-edit-post' ) ? [ 'wp-edit-post' ] : [] );
 	}
 
 	/**
