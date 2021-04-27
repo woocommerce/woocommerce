@@ -1,0 +1,54 @@
+$foreground-color: var(--wp-admin-theme-color);
+
+.woocommerce-task-list__item {
+	.woocommerce-task-list__item-title {
+		color: $foreground-color;
+	}
+
+	.woocommerce-task-list__item-before {
+		margin-right: 20px;
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-task-list__item-after {
+		margin-left: $gap;
+		display: flex;
+		align-items: center;
+		margin-left: auto;
+	}
+
+	.woocommerce-task-list__item-before .woocommerce-task__icon {
+		border-radius: 50%;
+		width: 32px;
+		height: 32px;
+	}
+
+	.woocommerce-task-list__item-before .woocommerce-task__icon svg {
+		fill: $white;
+		position: relative;
+		top: 4px;
+		left: 5px;
+	}
+
+	.woocommerce-task-list__item-text {
+		.woocommerce-pill {
+			padding: 1px $gap-smaller;
+			margin-left: $gap-smaller;
+		}
+	}
+
+	&.is-complete {
+		.woocommerce-task__icon {
+			background-color: var(--wp-admin-theme-color);
+		}
+
+		.woocommerce-task-list__item-title {
+			color: $gray-700;
+		}
+
+		.woocommerce-task-list__item-content {
+			display: none;
+		}
+	}
+}

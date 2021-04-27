@@ -3,10 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
 import { check } from '@wordpress/icons';
+import { useState, useEffect } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -24,25 +23,78 @@ import { getAllTasks } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
 import TaskList from './list';
 import { DisplayOption } from '../header/activity-panel/display-options';
+import { TaskStep } from './task-step';
 
-export class TaskDashboard extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isCartModalOpen: false,
-		};
+const taskDashboardSelect = ( select ) => {
+	const { getProfileItems, getTasksStatus } = select( ONBOARDING_STORE_NAME );
+	const { getSettings } = select( SETTINGS_STORE_NAME );
+	const { getOption } = select( OPTIONS_STORE_NAME );
+	const {
+		getActivePlugins,
+		getInstalledPlugins,
+		isJetpackConnected,
+	} = select( PLUGINS_STORE_NAME );
+	const profileItems = getProfileItems();
 
-		this.toggleExtensionTaskList = this.toggleExtensionTaskList.bind(
-			this
-		);
-	}
-	componentDidMount() {
+	const trackedCompletedTasks =
+		getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
+
+	const { general: generalSettings = {} } = getSettings( 'general' );
+	const countryCode = getCountryCode(
+		generalSettings.woocommerce_default_country
+	);
+
+	const activePlugins = getActivePlugins();
+	const installedPlugins = getInstalledPlugins();
+	const onboardingStatus = getTasksStatus();
+
+	return {
+		activePlugins,
+		countryCode,
+		dismissedTasks: getOption( 'woocommerce_task_list_dismissed_tasks' ),
+		isExtendedTaskListComplete:
+			getOption( 'woocommerce_extended_task_list_complete' ) === 'yes',
+		isExtendedTaskListHidden:
+			getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
+		isJetpackConnected: isJetpackConnected(),
+		isSetupTaskListHidden:
+			getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+		isTaskListComplete:
+			getOption( 'woocommerce_task_list_complete' ) === 'yes',
+		installedPlugins,
+		onboardingStatus,
+		profileItems,
+		trackedCompletedTasks,
+	};
+};
+
+const TaskDashboard = ( { userPreferences, query } ) => {
+	const { createNotice } = useDispatch( 'core/notices' );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const {
+		trackedCompletedTasks,
+		activePlugins,
+		countryCode,
+		installedPlugins,
+		isJetpackConnected,
+		onboardingStatus,
+		profileItems,
+		isSetupTaskListHidden,
+		dismissedTasks,
+		isTaskListComplete,
+		isExtendedTaskListHidden,
+		isExtendedTaskListComplete,
+	} = useSelect( taskDashboardSelect );
+
+	const [ isCartModalOpen, setIsCartModalOpen ] = useState( false );
+
+	useEffect( () => {
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
-	}
+	}, [] );
 
-	getTaskStartedCount = ( taskName ) => {
-		const { userPreferences } = this.props;
+	const getTaskStartedCount = ( taskName ) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
 		if ( ! trackedStartedTasks || ! trackedStartedTasks[ taskName ] ) {
@@ -51,8 +103,7 @@ export class TaskDashboard extends Component {
 		return trackedStartedTasks[ taskName ];
 	};
 
-	updateTrackStartedCount = ( taskName, newCount ) => {
-		const { userPreferences } = this.props;
+	const updateTrackStartedCount = ( taskName, newCount ) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 		userPreferences.updateUserPreferences( {
@@ -63,26 +114,24 @@ export class TaskDashboard extends Component {
 		} );
 	};
 
-	isTaskCompleted = ( taskName ) => {
-		const { trackedCompletedTasks } = this.props;
+	const isTaskCompleted = ( taskName ) => {
 		if ( ! trackedCompletedTasks ) {
 			return false;
 		}
 		return trackedCompletedTasks.includes( taskName );
 	};
 
-	onTaskSelect = ( taskName ) => {
-		const trackStartedCount = this.getTaskStartedCount( taskName );
+	const onTaskSelect = ( taskName ) => {
+		const trackStartedCount = getTaskStartedCount( taskName );
 		recordEvent( 'tasklist_click', {
 			task_name: taskName,
 		} );
-		if ( ! this.isTaskCompleted( taskName ) ) {
-			this.updateTrackStartedCount( taskName, trackStartedCount + 1 );
+		if ( ! isTaskCompleted( taskName ) ) {
+			updateTrackStartedCount( taskName, trackStartedCount + 1 );
 		}
 	};
 
-	toggleExtensionTaskList = () => {
-		const { isExtendedTaskListHidden, updateOptions } = this.props;
+	const toggleExtensionTaskList = () => {
 		const newValue = ! isExtendedTaskListHidden;
 
 		recordEvent(
@@ -93,184 +142,121 @@ export class TaskDashboard extends Component {
 		} );
 	};
 
-	getAllTasks() {
-		const {
-			activePlugins,
-			countryCode,
-			createNotice,
-			installAndActivatePlugins,
-			installedPlugins,
-			isJetpackConnected,
-			onboardingStatus,
-			profileItems,
-			query,
-		} = this.props;
-
-		return getAllTasks( {
-			activePlugins,
-			countryCode,
-			createNotice,
-			installAndActivatePlugins,
-			installedPlugins,
-			isJetpackConnected,
-			onboardingStatus,
-			profileItems,
-			query,
-			toggleCartModal: this.toggleCartModal.bind( this ),
-			onTaskSelect: this.onTaskSelect,
-		} );
-	}
-
-	toggleCartModal() {
-		const { isCartModalOpen } = this.state;
-
+	const toggleCartModal = () => {
 		if ( ! isCartModalOpen ) {
 			recordEvent( 'tasklist_purchase_extensions' );
 		}
 
-		this.setState( { isCartModalOpen: ! isCartModalOpen } );
-	}
+		setIsCartModalOpen( ! isCartModalOpen );
+	};
 
-	render() {
-		const {
-			dismissedTasks,
-			isExtendedTaskListComplete,
-			isExtendedTaskListHidden,
-			isSetupTaskListHidden,
-			isTaskListComplete,
-			query,
-			trackedCompletedTasks,
-		} = this.props;
-		const { isCartModalOpen } = this.state;
-		const allTasks = this.getAllTasks();
-		const { extension, setup: setupTasks } = allTasks;
+	const getCurrentTask = ( tasks ) => {
 		const { task } = query;
+		const currentTask = tasks.find( ( s ) => s.key === task );
 
-		const extensionTasks =
-			Array.isArray( extension ) &&
-			extension.sort( ( a, b ) => {
-				if ( Boolean( a.completed ) === Boolean( b.completed ) ) {
-					return 0;
-				}
+		if ( ! currentTask ) {
+			return null;
+		}
 
-				return a.completed ? 1 : -1;
-			} );
+		return currentTask;
+	};
 
+	const allTasks = getAllTasks( {
+		activePlugins,
+		countryCode,
+		createNotice,
+		installAndActivatePlugins,
+		installedPlugins,
+		isJetpackConnected,
+		onboardingStatus,
+		profileItems,
+		query,
+		toggleCartModal,
+		onTaskSelect,
+	} );
+
+	const { extension, setup: setupTasks } = allTasks;
+	const { task } = query;
+
+	const extensionTasks =
+		Array.isArray( extension ) &&
+		extension.sort( ( a, b ) => {
+			if ( Boolean( a.completed ) === Boolean( b.completed ) ) {
+				return 0;
+			}
+
+			return a.completed ? 1 : -1;
+		} );
+
+	const currentTask = getCurrentTask( [
+		...( extensionTasks || [] ),
+		...( setupTasks || [] ),
+	] );
+
+	if ( task && ! currentTask ) {
+		return null;
+	}
+	if ( currentTask ) {
 		return (
-			<>
-				{ setupTasks && ( ! isSetupTaskListHidden || task ) && (
-					<TaskList
-						dismissedTasks={ dismissedTasks || [] }
-						isComplete={ isTaskListComplete }
-						query={ query }
-						tasks={ setupTasks }
-						title={ __(
-							'Get ready to start selling',
-							'woocommerce-admin'
-						) }
-						trackedCompletedTasks={ trackedCompletedTasks || [] }
-					/>
-				) }
-				{ extensionTasks && (
-					<DisplayOption>
-						<MenuGroup
-							className="woocommerce-layout__homescreen-display-options"
-							label={ __( 'Display', 'woocommerce-admin' ) }
-						>
-							<MenuItem
-								className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-								icon={ ! isExtendedTaskListHidden && check }
-								isSelected={ ! isExtendedTaskListHidden }
-								role="menuitemcheckbox"
-								onClick={ this.toggleExtensionTaskList }
-							>
-								{ __(
-									'Show things to do next',
-									'woocommerce-admin'
-								) }
-							</MenuItem>
-						</MenuGroup>
-					</DisplayOption>
-				) }
-				{ extensionTasks && ! isExtendedTaskListHidden && (
-					<TaskList
-						dismissedTasks={ dismissedTasks || [] }
-						isComplete={ isExtendedTaskListComplete }
-						name={ 'extended_task_list' }
-						query={ query }
-						tasks={ extensionTasks }
-						title={ __( 'Things to do next', 'woocommerce-admin' ) }
-						trackedCompletedTasks={ trackedCompletedTasks || [] }
-					/>
-				) }
-				{ isCartModalOpen && (
-					<CartModal
-						onClose={ () => this.toggleCartModal() }
-						onClickPurchaseLater={ () => this.toggleCartModal() }
-					/>
-				) }
-			</>
+			<TaskStep taskContainer={ currentTask.container } query={ query } />
 		);
 	}
-}
 
-export default compose(
-	withSelect( ( select ) => {
-		const { getProfileItems, getTasksStatus } = select(
-			ONBOARDING_STORE_NAME
-		);
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
-		const profileItems = getProfileItems();
+	return (
+		<>
+			{ setupTasks && ( ! isSetupTaskListHidden || task ) && (
+				<TaskList
+					dismissedTasks={ dismissedTasks || [] }
+					isComplete={ isTaskListComplete }
+					query={ query }
+					tasks={ setupTasks }
+					title={ __(
+						'Get ready to start selling',
+						'woocommerce-admin'
+					) }
+					trackedCompletedTasks={ trackedCompletedTasks || [] }
+				/>
+			) }
+			{ extensionTasks && (
+				<DisplayOption>
+					<MenuGroup
+						className="woocommerce-layout__homescreen-display-options"
+						label={ __( 'Display', 'woocommerce-admin' ) }
+					>
+						<MenuItem
+							className="woocommerce-layout__homescreen-extension-tasklist-toggle"
+							icon={ ! isExtendedTaskListHidden && check }
+							isSelected={ ! isExtendedTaskListHidden }
+							role="menuitemcheckbox"
+							onClick={ toggleExtensionTaskList }
+						>
+							{ __(
+								'Show things to do next',
+								'woocommerce-admin'
+							) }
+						</MenuItem>
+					</MenuGroup>
+				</DisplayOption>
+			) }
+			{ extensionTasks && ! isExtendedTaskListHidden && (
+				<TaskList
+					dismissedTasks={ dismissedTasks || [] }
+					isComplete={ isExtendedTaskListComplete }
+					name={ 'extended_task_list' }
+					query={ query }
+					tasks={ extensionTasks }
+					title={ __( 'Things to do next', 'woocommerce-admin' ) }
+					trackedCompletedTasks={ trackedCompletedTasks || [] }
+				/>
+			) }
+			{ isCartModalOpen && (
+				<CartModal
+					onClose={ () => toggleCartModal() }
+					onClickPurchaseLater={ () => toggleCartModal() }
+				/>
+			) }
+		</>
+	);
+};
 
-		const trackedCompletedTasks =
-			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
-
-		const { general: generalSettings = {} } = getSettings( 'general' );
-		const countryCode = getCountryCode(
-			generalSettings.woocommerce_default_country
-		);
-
-		const activePlugins = getActivePlugins();
-		const installedPlugins = getInstalledPlugins();
-		const onboardingStatus = getTasksStatus();
-
-		return {
-			activePlugins,
-			countryCode,
-			dismissedTasks: getOption(
-				'woocommerce_task_list_dismissed_tasks'
-			),
-			isExtendedTaskListComplete:
-				getOption( 'woocommerce_extended_task_list_complete' ) ===
-				'yes',
-			isExtendedTaskListHidden:
-				getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
-			isJetpackConnected: isJetpackConnected(),
-			isSetupTaskListHidden:
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
-			isTaskListComplete:
-				getOption( 'woocommerce_task_list_complete' ) === 'yes',
-			installedPlugins,
-			onboardingStatus,
-			profileItems,
-			trackedCompletedTasks,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-
-		return {
-			createNotice,
-			installAndActivatePlugins,
-			updateOptions,
-		};
-	} )
-)( TaskDashboard );
+export default TaskDashboard;

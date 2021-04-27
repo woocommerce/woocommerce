@@ -27,8 +27,8 @@ export { default as ImageUpload } from './image-upload';
 export { default as Link } from './link';
 export {
 	default as List,
-	ExperimentalList,
-	ExperimentalListItem,
+	ExperimentalList as __experimentalList,
+	ExperimentalListItem as __experimentalListItem,
 } from './list';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';

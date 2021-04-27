@@ -26,7 +26,7 @@
 		"@wordpress/element": "2.19.0",
 		"@wordpress/i18n": "3.17.0",
 		"@wordpress/notices": "^2.11.0",
-		"classnames": "2.2.6",
+		"classnames": "2.3.1",
 		"prop-types": "15.7.2",
 		"react-transition-group": "4.4.1"
 	},
