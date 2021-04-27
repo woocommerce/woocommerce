@@ -120,7 +120,7 @@
 		"@wordpress/i18n": "3.15.0",
 		"@wordpress/is-shallow-equal": "3.0.1",
 		"@wordpress/scripts": "13.0.1",
-		"autoprefixer": "10.2.3",
+		"autoprefixer": "10.2.5",
 		"axios": "0.21.1",
 		"babel-plugin-transform-async-generator-functions": "6.24.1",
 		"babel-plugin-transform-object-rest-spread": "6.26.0",
