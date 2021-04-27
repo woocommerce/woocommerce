@@ -107,6 +107,7 @@ class WC_Post_Types {
 						'item_link'             => __( 'Product Category Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product category.', 'woocommerce' ),
 					),
+					'show_in_rest'          => true,
 					'show_ui'               => true,
 					'query_var'             => true,
 					'capabilities'          => array(
@@ -151,6 +152,7 @@ class WC_Post_Types {
 						'item_link'                  => __( 'Product Tag Link', 'woocommerce' ),
 						'item_link_description'      => __( 'A link to a product tag.', 'woocommerce' ),
 					),
+					'show_in_rest'          => true,
 					'show_ui'               => true,
 					'query_var'             => true,
 					'capabilities'          => array(
