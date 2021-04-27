@@ -85,7 +85,7 @@
 		"@storybook/addons": "6.1.18",
 		"@storybook/react": "6.1.18",
 		"@testing-library/jest-dom": "5.11.10",
-		"@testing-library/react": "11.2.5",
+		"@testing-library/react": "11.2.6",
 		"@testing-library/react-hooks": "5.1.0",
 		"@testing-library/user-event": "12.8.3",
 		"@types/classnames": "2.2.11",
