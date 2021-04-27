@@ -109,6 +109,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Report filters expecting specific ordering. #6847
 - Fix: Render bug with report comparison mode selections. #6862
 - Fix: Throw exception if the data store cannot be loaded when trying to use notes. #6771
+- Fix: Autocompleter for custom Search in FilterPicker #6880
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Tweak: Add settings_section event prop for CES #6762
 - Tweak: Refactor payments to allow management of methods #6786

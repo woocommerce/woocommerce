@@ -3,7 +3,6 @@
  */
 import { FilterPicker } from '@woocommerce/components';
 
-const path = new URL( document.location ).searchParams.get( 'path' );
 const query = {
 	meal: 'breakfast',
 };
@@ -50,9 +49,11 @@ const config = {
 	],
 };
 
-export const Basic = () => (
-	<FilterPicker config={ config } path={ path } query={ query } />
-);
+export const Basic = ( {
+	path = new URL( document.location ).searchParams.get( 'path' ),
+} ) => {
+	return <FilterPicker config={ config } path={ path } query={ query } />;
+};
 
 export default {
 	title: 'WooCommerce Admin/components/FilterPicker',

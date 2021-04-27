@@ -162,7 +162,7 @@ class FilterPicker extends Component {
 
 	renderButton( filter, onClose, config ) {
 		if ( filter.component ) {
-			const { type, labels } = filter.settings;
+			const { type, labels, autocompleter } = filter.settings;
 			const persistedFilter = this.getFilter();
 			const selectedTag =
 				persistedFilter.value === filter.value
@@ -171,6 +171,7 @@ class FilterPicker extends Component {
 
 			return (
 				<Search
+					autocompleter={ autocompleter }
 					className="woocommerce-filters-filter__search"
 					type={ type }
 					placeholder={ labels.placeholder }
