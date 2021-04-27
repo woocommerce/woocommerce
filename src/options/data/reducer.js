@@ -45,11 +45,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 					...action.notice,
 				},
 			};
-		case TYPES.DELETE_OPTION_BY_ID:
+		case TYPES.DELETE_OPTION:
 			return {
 				...state,
 				options: state.options.filter(
-					( item ) => item.option_id !== action.optionId
+					( item ) => item.option_name !== action.optionName
 				),
 			};
 		default:

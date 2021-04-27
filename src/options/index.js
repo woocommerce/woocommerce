@@ -16,7 +16,7 @@ import './data';
 function Options( {
 	options,
 	getOptions,
-	deleteOptionById,
+	deleteOption,
 	isLoading,
 	invalidateResolution,
 	getOptionForEditing,
@@ -27,10 +27,10 @@ function Options( {
 } ) {
 	const [ isEditModalOpen, setEditModalOpen ] = useState( false );
 
-	const deleteOption = ( optionId ) => {
+	const deleteOptionByName = ( optionName ) => {
 		// eslint-disable-next-line no-alert
 		if ( confirm( 'Are you sure you want to delete?' ) ) {
-			deleteOptionById( optionId );
+			deleteOption( optionName );
 		}
 	};
 
@@ -88,7 +88,7 @@ function Options( {
 					<td className="align-center" key={ 3 }>
 						<button
 							className="button btn-danger"
-							onClick={ () => deleteOption( optionId ) }
+							onClick={ () => deleteOptionByName( optionName ) }
 						>
 							Delete
 						</button>
@@ -227,13 +227,11 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { deleteOptionById, saveOption, setNotice } = dispatch(
-			STORE_KEY
-		);
+		const { deleteOption, saveOption, setNotice } = dispatch( STORE_KEY );
 		const { invalidateResolution } = dispatch( 'core/data' );
 
 		return {
-			deleteOptionById,
+			deleteOption,
 			invalidateResolution,
 			saveOption,
 			setNotice,

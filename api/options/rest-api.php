@@ -28,14 +28,13 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 register_woocommerce_admin_test_helper_rest_route(
-	'/options/(?P<option_id>\d+)',
+	'/options/(?P<option_names>(.*)+)',
 	'wca_test_helper_delete_option',
 	array(
 		'methods' => 'DELETE',
 		'args'                => array(
-			'option_id' => array(
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
+			'option_names' => array(
+				'type'              => 'string',
 			),
 		),
 	)
@@ -43,8 +42,13 @@ register_woocommerce_admin_test_helper_rest_route(
 
 function wca_test_helper_delete_option( $request ) {
 	global $wpdb;
-	$option_id = $request->get_param( 'option_id' );
-	$query     = $wpdb->prepare( "delete from {$wpdb->prefix}options where option_id = %d", $option_id );
+	$option_names = explode(',', $request->get_param( 'option_names' ));
+    $option_names = array_map(function($option_name) {
+        return "'".$option_name."'";
+    }, $option_names);
+
+    $option_names = implode( ',', $option_names );
+    $query = "delete from {$wpdb->prefix}options where option_name in ({$option_names})";
 	$wpdb->query( $query );
 
 	return new WP_REST_RESPONSE( null, 204 );
