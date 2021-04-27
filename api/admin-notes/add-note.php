@@ -53,8 +53,8 @@ function get_mock_note_data() {
 	return array(
 		'content'   => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.',
 		'info'      => array(
-			'banner'    => $plugin_url . 'images/admin-notes/banner.jpeg',
-			'thumbnail' => $plugin_url . 'images/admin-notes/thumbnail.jpeg',
+			'banner'    => $plugin_url . 'images/admin-notes/banner.jpg',
+			'thumbnail' => $plugin_url . 'images/admin-notes/thumbnail.jpg',
 			'plain'     => ''
 		),
 		'email'     => array(
