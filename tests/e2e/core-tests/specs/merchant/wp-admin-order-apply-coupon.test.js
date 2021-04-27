@@ -12,7 +12,6 @@ const {
 	addProductToOrder,
 	evalAndClick,
 } = require( '@woocommerce/e2e-utils' );
-const { takeScreenshotFor, sendFailedTestScreenshotToSlack } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );

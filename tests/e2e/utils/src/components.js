@@ -435,11 +435,8 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'button.add-order-item' );
 	await page.waitForSelector( '.wc-backbone-modal-header' );
 	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
-	await expect( page ).toFill(
-		'#wc-backbone-modal-dialog + .select2-container .select2-search__field',
-		productName,
-		{ waitUntil: 'networkidle0' }
-	);
+	await expect( page ).toFill('#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName);
+	await page.waitForSelector( 'li[aria-selected="true"]', { timeout: 10000 } );
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
 	await page.click( '.wc-backbone-modal-content #btn-ok', { waitUntil: 'networkidle0' } );
 
@@ -466,7 +463,7 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 			couponType = 'percent';
 			break;
 		default:
-			return '';
+			couponType = discountType;
 	}
 
 	// Fill in coupon code
