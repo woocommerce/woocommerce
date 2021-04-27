@@ -7,4 +7,26 @@ export default [
     run tasks such as removing obsolete admin notes.`,
 		action: 'triggerWcaInstall',
 	},
+	{
+		command: 'Reset Onboarding Wizard',
+		description: 'Resets Onboarding Wizard progress.',
+		action: 'resetOnboardingWizard',
+	},
+	{
+		command: 'Reset Jetpack Connection',
+		description: 'Resets Jepack Connection options.',
+		action: 'resetJetpackConnection',
+	},
+	{
+		command: 'Enable wc-admin* Traccking',
+		description:
+			'Enable Tracking Debug mode. You should change your console level to verbose.',
+		action: 'enableTrackingDebug',
+	},
+	{
+		command: 'Update WC installation timestamp',
+		description:
+			'Updates woocommerce_admin_install_timestamp to certain date',
+		action: 'updateStoreAge',
+	},
 ];
