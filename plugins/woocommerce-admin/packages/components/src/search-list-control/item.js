@@ -39,6 +39,7 @@ const SearchListItem = ( {
 	countLabel,
 	className,
 	depth = 0,
+	controlId = '',
 	item,
 	isSelected,
 	isSingle,
@@ -56,14 +57,16 @@ const SearchListItem = ( {
 		classes.push( 'has-count' );
 	}
 	const hasBreadcrumbs = item.breadcrumbs && item.breadcrumbs.length;
+	const name = props.name || `search-list-item-${ controlId }`;
+	const id = `${ name }-${ item.id }`;
 
 	return (
-		<label htmlFor={ item.id } className={ classes.join( ' ' ) }>
+		<label htmlFor={ id } className={ classes.join( ' ' ) }>
 			{ isSingle ? (
 				<input
 					type="radio"
-					id={ item.id }
-					name={ item.name }
+					id={ id }
+					name={ name }
 					value={ item.value }
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
@@ -73,8 +76,8 @@ const SearchListItem = ( {
 			) : (
 				<input
 					type="checkbox"
-					id={ item.id }
-					name={ item.name }
+					id={ id }
+					name={ name }
 					value={ item.value }
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
@@ -113,6 +116,10 @@ SearchListItem.propTypes = {
 	 */
 	countLabel: PropTypes.node,
 	/**
+	 * Unique id of the parent control.
+	 */
+	controlId: PropTypes.node,
+	/**
 	 * Depth, non-zero if the list is hierarchical.
 	 */
 	depth: PropTypes.number,
@@ -120,6 +127,12 @@ SearchListItem.propTypes = {
 	 * Current item to display.
 	 */
 	item: PropTypes.object,
+	/**
+	 * Name of the inputs. Used to group input controls together. See:
+	 * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-name
+	 * If not provided, a default name will be generated using the controlId.
+	 */
+	name: PropTypes.string,
 	/**
 	 * Whether this item is selected.
 	 */

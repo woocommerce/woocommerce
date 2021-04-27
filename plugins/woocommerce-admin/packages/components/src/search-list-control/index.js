@@ -121,7 +121,7 @@ export class SearchListControl extends Component {
 	}
 
 	renderList( list, depth = 0 ) {
-		const { isSingle, search } = this.props;
+		const { isSingle, search, instanceId } = this.props;
 		const renderItem = this.props.renderItem || this.defaultRenderItem;
 		if ( ! list ) {
 			return null;
@@ -137,6 +137,7 @@ export class SearchListControl extends Component {
 						isSingle,
 						search,
 						depth,
+						controlId: instanceId,
 					} ) }
 				</li>
 				{ this.renderList( item.children, depth + 1 ) }

@@ -7,7 +7,7 @@ import { withState } from '@wordpress/compose';
 
 const SearchListControlExample = withState( {
 	selected: [],
-	loading: true,
+	loading: false,
 } )( ( { selected, loading, setState } ) => {
 	const showCount = boolean( 'Show count', false );
 	const isCompact = boolean( 'Compact', false );

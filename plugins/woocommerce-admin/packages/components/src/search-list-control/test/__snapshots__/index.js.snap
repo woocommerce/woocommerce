@@ -45,13 +45,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -69,13 +69,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-1"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -98,13 +98,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-1"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -127,13 +127,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-2"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -156,13 +156,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -180,13 +180,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -250,13 +250,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -274,13 +274,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -298,13 +298,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -322,13 +322,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -346,13 +346,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -370,13 +370,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -440,13 +440,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -464,13 +464,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -488,13 +488,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -512,13 +512,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -536,13 +536,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -560,13 +560,13 @@ exports[`SearchListControl should render a search box and list of options with a
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -712,13 +712,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -736,13 +736,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -760,13 +760,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -784,13 +784,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -808,13 +808,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -832,13 +832,13 @@ exports[`SearchListControl should render a search box and list of options, with 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1046,13 +1046,13 @@ exports[`SearchListControl should render a search box with a search term, and on
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1074,13 +1074,13 @@ exports[`SearchListControl should render a search box with a search term, and on
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1149,13 +1149,13 @@ exports[`SearchListControl should render a search box with a search term, and on
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1177,13 +1177,13 @@ exports[`SearchListControl should render a search box with a search term, and on
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1304,13 +1304,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1328,13 +1328,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={true}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1352,13 +1352,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1376,13 +1376,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1400,13 +1400,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1424,13 +1424,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1590,13 +1590,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={1}
+        htmlFor="search-list-item-1-1"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={1}
-          name="Apricots"
+          id="search-list-item-1-1"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1614,13 +1614,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={2}
+        htmlFor="search-list-item-1-2"
       >
         <input
           checked={true}
           className="woocommerce-search-list__item-input"
-          id={2}
-          name="Clementine"
+          id="search-list-item-1-2"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1638,13 +1638,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={3}
+        htmlFor="search-list-item-1-3"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={3}
-          name="Elderberry"
+          id="search-list-item-1-3"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1662,13 +1662,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={4}
+        htmlFor="search-list-item-1-4"
       >
         <input
           checked={true}
           className="woocommerce-search-list__item-input"
-          id={4}
-          name="Guava"
+          id="search-list-item-1-4"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1686,13 +1686,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={5}
+        htmlFor="search-list-item-1-5"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={5}
-          name="Lychee"
+          id="search-list-item-1-5"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />
@@ -1710,13 +1710,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     <li>
       <label
         className=" woocommerce-search-list__item depth-0"
-        htmlFor={6}
+        htmlFor="search-list-item-1-6"
       >
         <input
           checked={false}
           className="woocommerce-search-list__item-input"
-          id={6}
-          name="Mulberry"
+          id="search-list-item-1-6"
+          name="search-list-item-1"
           onChange={[Function]}
           type="checkbox"
         />

@@ -43,7 +43,7 @@
 }
 
 .woocommerce-search-list__list {
-	border: 1px solid $gray-100;
+	border: 1px solid $gray-200;
 	padding: 0;
 	max-height: 17em;
 	overflow-x: hidden;
@@ -100,7 +100,7 @@
 		padding: $gap-small $gap;
 		background: $studio-white;
 		// !important to keep the border around on hover
-		border-bottom: 1px solid $gray-100 !important;
+		border-bottom: 1px solid $gray-100;
 		color: $gray-700;
 
 		@include hover-state {
@@ -110,10 +110,6 @@
 		&:active,
 		&:focus {
 			box-shadow: none;
-		}
-
-		&:last-child {
-			border-bottom: none !important;
 		}
 
 		.woocommerce-search-list__item-input {
@@ -204,6 +200,10 @@
 			background: $studio-white;
 			white-space: nowrap;
 		}
+	}
+
+	li:last-child .woocommerce-search-list__item {
+		border-bottom: none;
 	}
 }
 
