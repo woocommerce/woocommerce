@@ -300,4 +300,18 @@ describe( 'SelectControl', () => {
 			} );
 		} );
 	} );
+
+	it( 'displays multiple selection not inline', async () => {
+		const { getByText } = render(
+			<SelectControl
+				isSearchable
+				options={ options }
+				selected={ [ options[ 1 ] ] }
+				multiple
+				inlineTags={ false }
+			/>
+		);
+
+		expect( getByText( options[ 1 ].label ) ).toBeInTheDocument();
+	} );
 } );

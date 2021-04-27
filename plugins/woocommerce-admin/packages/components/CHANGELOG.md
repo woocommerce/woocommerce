@@ -1,5 +1,6 @@
 # Unreleased
 
+-   SelectControl: fix display of multiple selections without inline tags. #6862
 -   Add new (experimental) list, and add depreciation notice for the current list. #6787
 -   Force `<SearchListItem>` form elements id to be unique. #6871
 -   Add `controlId` and `name` props to `<SearchListItem>`. #6871

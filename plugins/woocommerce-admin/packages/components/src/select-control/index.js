@@ -50,10 +50,10 @@ export class SelectControl extends Component {
 	}
 
 	reset( selected = this.getSelected() ) {
-		const { inlineTags } = this.props;
+		const { multiple } = this.props;
 		const newState = { ...initialState };
-		// Reset to the option label if not using tags.
-		if ( ! inlineTags && selected.length && selected[ 0 ].label ) {
+		// Reset to the option label if single selection.
+		if ( ! multiple && selected.length && selected[ 0 ].label ) {
 			newState.query = selected[ 0 ].label;
 		}
 
@@ -64,10 +64,10 @@ export class SelectControl extends Component {
 		this.reset();
 	}
 
-	hasTags() {
-		const { inlineTags, selected } = this.props;
+	hasMultiple() {
+		const { multiple, selected } = this.props;
 
-		if ( ! inlineTags ) {
+		if ( ! multiple ) {
 			return false;
 		}
 
@@ -306,7 +306,7 @@ export class SelectControl extends Component {
 		} = this.props;
 		const { isExpanded, isFocused, selectedIndex } = this.state;
 
-		const hasTags = this.hasTags();
+		const hasMultiple = this.hasMultiple();
 		const { key: selectedKey = '' } = options[ selectedIndex ] || {};
 		const listboxId = isExpanded
 			? `woocommerce-select-control__listbox-${ instanceId }`
@@ -321,7 +321,7 @@ export class SelectControl extends Component {
 					'woocommerce-select-control',
 					className,
 					{
-						'has-inline-tags': hasTags && inlineTags,
+						'has-inline-tags': hasMultiple && inlineTags,
 						'is-focused': isFocused,
 						'is-searchable': isSearchable,
 					}
@@ -343,7 +343,7 @@ export class SelectControl extends Component {
 					{ ...this.state }
 					activeId={ activeId }
 					className={ controlClassName }
-					hasTags={ hasTags }
+					hasTags={ hasMultiple }
 					isExpanded={ isExpanded }
 					listboxId={ listboxId }
 					onSearch={ this.search }
@@ -354,7 +354,7 @@ export class SelectControl extends Component {
 					decrementSelectedIndex={ this.decrementSelectedIndex }
 					incrementSelectedIndex={ this.incrementSelectedIndex }
 				/>
-				{ ! inlineTags && hasTags && (
+				{ ! inlineTags && hasMultiple && (
 					<Tags { ...this.props } selected={ this.getSelected() } />
 				) }
 				{ isExpanded && (
