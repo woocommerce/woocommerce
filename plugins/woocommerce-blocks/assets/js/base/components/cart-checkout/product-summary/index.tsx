@@ -5,6 +5,11 @@ import PropTypes from 'prop-types';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
 
+interface ProductSummaryProps {
+	className?: string;
+	shortDescription?: string;
+	fullDescription?: string;
+}
 /**
  * Returns an element containing a summary of the product.
  *
@@ -17,7 +22,7 @@ const ProductSummary = ( {
 	className,
 	shortDescription = '',
 	fullDescription = '',
-} ) => {
+}: ProductSummaryProps ): JSX.Element | null => {
 	const source = shortDescription ? shortDescription : fullDescription;
 
 	if ( ! source ) {
@@ -32,12 +37,6 @@ const ProductSummary = ( {
 			countType={ blocksConfig.wordCountType || 'words' }
 		/>
 	);
-};
-
-ProductSummary.propTypes = {
-	className: PropTypes.string,
-	shortDescription: PropTypes.string,
-	fullDescription: PropTypes.string,
 };
 
 export default ProductSummary;
