@@ -96,6 +96,11 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'shows empty cart when changing the view', async () => {
+			await page.waitForSelector( block.class ).catch( () => {
+				throw new Error(
+					`Could not find an element with class ${ block.class } - the block probably did not load correctly.`
+				);
+			} );
 			await page.click( block.class );
 			await expect( page ).toMatchElement(
 				'[hidden] .wc-block-cart__empty-cart__title'
