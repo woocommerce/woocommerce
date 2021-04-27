@@ -15,10 +15,12 @@ export const STATUS = {
 	AFTER_PROCESSING: 'after_processing',
 };
 
-const checkoutData = getSetting( 'checkoutData', {
+const preloadedApiRequests = getSetting( 'preloadedApiRequests', {} );
+const checkoutData = {
 	order_id: 0,
 	customer_id: 0,
-} );
+	...( preloadedApiRequests[ '/wc/store/checkout' ]?.body || {} ),
+};
 
 export const DEFAULT_STATE = {
 	redirectUrl: '',

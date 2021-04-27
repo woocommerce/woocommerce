@@ -216,14 +216,10 @@ class Checkout extends AbstractBlock {
 		// Controller and converted to exceptions.
 		wc_print_notices();
 
-		if ( ! $this->asset_data_registry->exists( 'cartData' ) ) {
-			$this->asset_data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
-		}
-		if ( ! $this->asset_data_registry->exists( 'checkoutData' ) ) {
-			add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
-			$this->asset_data_registry->add( 'checkoutData', WC()->api->get_endpoint_data( '/wc/store/checkout' ) );
-			remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
-		}
+		add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
+		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
+		$this->asset_data_registry->hydrate_api_request( '/wc/store/checkout' );
+		remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 	}
 
 	/**

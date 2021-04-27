@@ -17,13 +17,18 @@ import { LAST_CART_UPDATE_TIMESTAMP_KEY } from '../data/cart/constants';
  * Makes cart data available without an API request to wc/store/cart/.
  */
 const useStoreCartApiHydration = () => {
-	const cartData = useRef( getSetting( 'cartData' ) );
+	const preloadedApiRequests = useRef(
+		getSetting( 'preloadedApiRequests', {} )
+	);
 	const { setIsCartDataStale } = useDispatch( CART_STORE_KEY );
 
 	useSelect( ( select, registry ) => {
-		if ( ! cartData.current ) {
+		const cartData = preloadedApiRequests.current[ '/wc/store/cart' ]?.body;
+
+		if ( ! cartData ) {
 			return;
 		}
+
 		const { isResolving, hasFinishedResolution, isCartDataStale } = select(
 			CART_STORE_KEY
 		);
@@ -46,7 +51,7 @@ const useStoreCartApiHydration = () => {
 			if ( lastCartUpdateRaw ) {
 				const lastCartUpdate = parseFloat( lastCartUpdateRaw );
 				const cartGeneratedTimestamp = parseFloat(
-					cartData.current.generated_timestamp
+					cartData.generated_timestamp
 				);
 
 				const needsUpdateFromAPI =
@@ -72,10 +77,10 @@ const useStoreCartApiHydration = () => {
 			! hasFinishedResolution( 'getCartData', [] )
 		) {
 			startResolution( 'getCartData', [] );
-			if ( cartData.current?.code?.includes( 'error' ) ) {
-				receiveError( cartData.current );
+			if ( cartData?.code?.includes( 'error' ) ) {
+				receiveError( cartData );
 			} else {
-				receiveCart( cartData.current );
+				receiveCart( cartData );
 			}
 			finishResolution( 'getCartData', [] );
 		}

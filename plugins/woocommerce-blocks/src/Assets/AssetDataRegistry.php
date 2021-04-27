@@ -273,6 +273,20 @@ class AssetDataRegistry {
 	}
 
 	/**
+	 * Hydrate from API.
+	 *
+	 * @param string $path REST API path to preload.
+	 */
+	public function hydrate_api_request( $path ) {
+		if ( ! isset( $this->data['preloadedApiRequests'] ) ) {
+			$this->data['preloadedApiRequests'] = [];
+		}
+		if ( ! isset( $this->data['preloadedApiRequests'][ $path ] ) ) {
+			$this->data['preloadedApiRequests'] = rest_preload_api_request( $this->data['preloadedApiRequests'], $path );
+		}
+	}
+
+	/**
 	 * Adds a page permalink to the data registry.
 	 *
 	 * @param integer $page_id Page ID to add to the registry.
