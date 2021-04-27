@@ -10,6 +10,7 @@
   - `WP_ADMIN_WC_HOME`
   - `IS_RETEST_MODE`
 - `withRestApi` flow containing utility functions that manage data with the rest api
+- `waitForSelectorWithoutThrow` - conditionally wait for a selector without throwing an error
 
 # 0.1.4
 
