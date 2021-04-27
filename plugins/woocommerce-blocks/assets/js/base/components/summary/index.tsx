@@ -2,12 +2,19 @@
  * External dependencies
  */
 import { RawHTML, useMemo } from '@wordpress/element';
+import { WordCountType } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { generateSummary } from './utils';
 
+interface SummaryProps {
+	className?: string;
+	source: string;
+	maxLength?: number;
+	countType?: WordCountType;
+}
 /**
  * Summary component.
  *
@@ -22,7 +29,7 @@ export const Summary = ( {
 	maxLength = 15,
 	countType = 'words',
 	className = '',
-} ) => {
+}: SummaryProps ): JSX.Element => {
 	const summaryText = useMemo( () => {
 		return generateSummary( source, maxLength, countType );
 	}, [ source, maxLength, countType ] );
