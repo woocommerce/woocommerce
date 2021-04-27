@@ -3,6 +3,7 @@
 ## Added
 
 - `emptyCart()` Shopper flow helper that empties the cart
+- `deleteAllShippingZones` Delete all the existing shipping zones
 - constants
   - `WP_ADMIN_POST_TYPE`
   - `WP_ADMIN_NEW_POST_TYPE`
