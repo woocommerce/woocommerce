@@ -1,0 +1,108 @@
+.woocommerce-task-payment {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	position: relative;
+	overflow: hidden;
+
+	.woocommerce-task-payment__recommended-ribbon {
+		position: absolute;
+		transform: rotate(-45deg) translate(-50%, -50%);
+		background: $studio-gray-80;
+		color: $studio-white;
+		font-size: 11px;
+		line-height: 20px;
+		position: absolute;
+		top: 0;
+		left: 0;
+		line-height: 1;
+		padding: 7px $gap-largest;
+		transform-origin: top left;
+		margin-top: 32px;
+		margin-left: 32px;
+
+		span {
+			max-width: 70px;
+		}
+	}
+
+	.components-card__media {
+		width: 170px;
+		flex-shrink: 0;
+
+		img,
+		svg {
+			margin: auto;
+			max-width: 100px;
+			display: block;
+		}
+	}
+
+	> .components-form-toggle {
+		min-width: 52px;
+	}
+
+	.woocommerce-task-payment__title {
+		display: flex;
+		align-items: center;
+		font-size: 16px;
+		font-weight: 500;
+		color: $studio-gray-80;
+		margin-top: 0;
+		margin-bottom: $gap-smaller;
+	}
+
+	.woocommerce-task-payment__content {
+		font-size: 14px;
+		color: $studio-gray-60;
+		margin: 0;
+		margin-right: $gap-larger;
+
+		.text-style-strong {
+			font-weight: bold;
+		}
+
+		p {
+			font-size: 12px;
+		}
+	}
+	.woocommerce-task-payment__description {
+		flex: 1;
+	}
+
+	@include breakpoint( '<600px' ) {
+		flex-wrap: wrap;
+
+		.woocommerce-task-payment__recommended-ribbon {
+			margin-top: 24px;
+			margin-left: 24px;
+			font-size: 9px;
+		}
+
+		.woocommerce-task-payment__content {
+			margin: 0;
+		}
+
+		.components-card__media {
+			> svg,
+			> img {
+				margin: 0 0 0 $gap-large;
+			}
+
+			order: 1;
+			flex-basis: 50%;
+		}
+
+		.woocommerce-task-payment__description {
+			order: 3;
+			padding: $gap-large 0 0 $gap-large;
+		}
+
+		.woocommerce-task-payment__footer {
+			flex-basis: 50%;
+			align-self: flex-start;
+			order: 2;
+			text-align: right;
+		}
+	}
+}
