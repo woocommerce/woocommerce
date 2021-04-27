@@ -107,7 +107,7 @@ export function* updateStoreAge() {
 
 		// eslint-disable-next-line no-alert
 		const numberOfDays = window.prompt(
-			'Please a date in mm/dd/yyy format',
+			'Please enter a date in mm/dd/yyy format',
 			mm + '/' + dd + '/' + yyyy
 		);
 

@@ -26,7 +26,7 @@ export default [
 	{
 		command: 'Update WC installation timestamp',
 		description:
-			'Updates woocommerce_admin_install_timestamp to certain date',
+			'Updates woocommerce_admin_install_timestamp to a certain date',
 		action: 'updateStoreAge',
 	},
 ];
