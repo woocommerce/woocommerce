@@ -4,12 +4,15 @@
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { SelectControl } from '@wordpress/components';
 
 
 export const AddNote = () => {
 	const [ isAdding, setIsAdding ] = useState( false );
 	const [ hasAdded, setHasAdded ] = useState( false );
 	const [ errorMessage, setErrorMessage ] = useState( false );
+	const [ noteType, setNoteType ] = useState( 'info' );
+	const [ noteLayout, setNoteLayout ] = useState( 'plain' );
 
 	async function triggerAddNote() {
 		setIsAdding( true );
@@ -34,6 +37,8 @@ export const AddNote = () => {
 				method: 'POST',
 				data: {
 					name,
+					type: noteType,
+					layout: noteLayout,
 					title,
 				},
 			} );
@@ -46,20 +51,76 @@ export const AddNote = () => {
 		setIsAdding( false );
 	}
 
+	function onTypeChange( val ) {
+		setNoteType( val );
+		if ( val !== 'info' ) {
+			setNoteLayout( 'plain' );
+		}
+	}
+
+	function onLayoutChange( val ) {
+		setNoteLayout( val );
+	}
+
+	function getAddNoteDescription() {
+		switch ( noteType ){
+			case 'email':
+				return (
+					<>
+						This will add a new <strong>email</strong> note. Enable email insights{' '}
+						<a href="/wp-admin/admin.php?page=wc-settings&tab=email">
+							here
+						</a>{' '}
+						and run the cron to send the note by email.
+					</>);
+			default:
+				return (
+					<>
+						This will add a new note. Currently only the note name
+						and title will be used to create the note.
+					</>
+				);
+		}
+	}
+
 	return (
 		<>
 			<p><strong>Add a note</strong></p>
-			<p>
-				This will add a new note. Currently only the note name
-				and title will be used to create the note.
+			<div>
+				{ getAddNoteDescription() }
 				<br/>
-				<Button
-					onClick={ triggerAddNote }
-					disabled={ isAdding }
-					isPrimary
-				>
-					Add admin note
-				</Button>
+				<div className="woocommerce-admin-test-helper__add-notes">
+					<Button
+						onClick={ triggerAddNote }
+						disabled={ isAdding }
+						isPrimary
+					>
+						Add admin note
+					</Button>
+					<SelectControl
+						label="Type"
+						onChange={ onTypeChange }
+						labelPosition="side"
+						options={ [
+							{ label: 'Info', value: 'info' },
+							{ label: 'Update', value: 'update' },
+							{ label: 'Email', value: 'email' },
+						] }
+						value={ noteType }
+					/>
+					<SelectControl
+						label="Layout"
+						onChange={ onLayoutChange }
+						labelPosition="side"
+						options={ [
+							{ label: 'Plain', value: 'plain' },
+							{ label: 'Banner', value: 'banner' },
+							{ label: 'Thumbnail', value: 'thumbnail' },
+						] }
+						disabled={ noteType !== 'info' }
+						value={ noteLayout }
+					/>
+				</div>
 				<br/>
 				<span className="woocommerce-admin-test-helper__action-status">
 					{ isAdding && 'Adding, please wait' }
@@ -70,7 +131,7 @@ export const AddNote = () => {
 						</>
 					) }
 				</span>
-			</p>
+			</div>
 		</>
 	);
 };

@@ -11,6 +11,15 @@
     font-family: monospace;
 }
 
+.woocommerce-admin-test-helper__add-notes {
+    width: 410px;
+    display: flex;
+    justify-content: space-between;
+    .components-base-control__field {
+        margin-bottom: 0;
+        padding-top: 3px;
+    }
+}
 
 #wc-admin-test-helper-options {
     div.search-box {
