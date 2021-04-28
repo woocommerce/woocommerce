@@ -76,7 +76,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Add: Consume remote payment methods on frontend #6867
-- Dev: Fixed storybook build script #6875
 - Add: Add plugin installer to allow installation of plugins via URL #6805
 - Add: Optional children prop to SummaryNumber component #6748
 - Dev: Add data source filter to remote inbox notification system #6794
@@ -87,6 +86,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Update package-lock to fix versioning of local packages. #6843
 - Dev: Use rule processing for remote payment methods #6830
 - Dev: Update E2E jest config, so it correctly creates screenshots on failure. #6858
+- Dev: Fixed storybook build script #6875
 - Feature: Add recommended payment methods in payment settings. #6760
 - Fix: Disable the continue btn on OBW when requested are being made #6838
 - Fix: Event tracking for merchant email notes #6616
@@ -110,6 +110,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Render bug with report comparison mode selections. #6862
 - Fix: Throw exception if the data store cannot be loaded when trying to use notes. #6771
 - Fix: Autocompleter for custom Search in FilterPicker #6880
+- Fix: Get currency from CurrencyContext #6723
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Tweak: Add settings_section event prop for CES #6762
 - Tweak: Refactor payments to allow management of methods #6786

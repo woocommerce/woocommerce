@@ -363,7 +363,7 @@ class BusinessDetails extends Component {
 			hasInstallActivateError,
 			isUpdatingProfileItems,
 		} = this.props;
-		const { getCurrencyConfig } = this.context;
+		const { formatAmount, getCurrencyConfig } = this.context;
 
 		const productCountOptions = getProductCountOptions(
 			getCurrencyConfig()
@@ -371,7 +371,8 @@ class BusinessDetails extends Component {
 
 		const revenueOptions = getRevenueOptions(
 			getCurrencyConfig(),
-			this.props.settings.woocommerce_default_country
+			this.props.settings.woocommerce_default_country,
+			formatAmount
 		);
 
 		return (

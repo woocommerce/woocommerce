@@ -250,7 +250,7 @@ class BusinessDetails extends Component {
 			hasInstallActivateError,
 		} = this.props;
 
-		const { getCurrencyConfig } = this.context;
+		const { formatAmount, getCurrencyConfig } = this.context;
 
 		const productCountOptions = getProductCountOptions(
 			getCurrencyConfig()
@@ -330,7 +330,8 @@ class BusinessDetails extends Component {
 											options={ getRevenueOptions(
 												getCurrencyConfig(),
 												this.props.settings
-													.woocommerce_default_country
+													.woocommerce_default_country,
+												formatAmount
 											) }
 											required
 											{ ...getInputProps( 'revenue' ) }

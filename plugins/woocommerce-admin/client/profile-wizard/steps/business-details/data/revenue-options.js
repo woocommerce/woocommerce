@@ -2,16 +2,12 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
-import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { getCurrencyRegion } from '~/dashboard/utils';
 import { getNumberRangeString } from './product-options';
-
-const { formatAmount } = CurrencyFactory( CURRENCY );
 
 // These are rough exchange rates from USD.  Precision is not paramount.
 // The keys here should match the keys in `getCurrencyData`.
@@ -45,7 +41,7 @@ const convertCurrency = ( value, country ) => {
 	return Math.round( ( value * exchangeRate ) / multiplier ) * multiplier;
 };
 
-export const getRevenueOptions = ( numberConfig, country ) => [
+export const getRevenueOptions = ( numberConfig, country, formatAmount ) => [
 	{
 		key: 'none',
 		label: sprintf(
