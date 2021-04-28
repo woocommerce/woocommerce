@@ -28,4 +28,5 @@
 /globals.d.ts export-ignore
 /tsconfig.json export-ignore
 /tsconfig.base.json export-ignore
+/tsconfig.base export-ignore
 /webpack.config.js export-ignore
