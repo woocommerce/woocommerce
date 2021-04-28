@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Redirect users to WooCommerce Home after setting up a payment method #6891
+
+1. Navigate to WooCommerce -> Home and choose "Choose payment methods".
+2. Click one of the payment methods and go through the setup process.
+3. You should be redirected to WooCommerce Home with a notice when you are done. 
+
 ### Disable the continue btn when plugins are being installed/activated #6838
 
 1. In OBW fill out store details with a USA address 

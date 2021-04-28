@@ -167,9 +167,7 @@ export const LocalPayments = ( { query } ) => {
 			payment_method: methodKey,
 		} );
 
-		getHistory().push(
-			getNewPath( { ...queryParams, task: 'payments' }, '/', {} )
-		);
+		getHistory().push( getNewPath( { ...queryParams }, '/', {} ) );
 	};
 
 	const recordConnectStartEvent = ( methodName ) => {
