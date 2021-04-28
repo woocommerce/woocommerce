@@ -157,7 +157,7 @@
 		"@types/cookie": "0.4.0",
 		"@types/expect-puppeteer": "4.4.5",
 		"@types/history": "4.7.8",
-		"@types/jest": "26.0.22",
+		"@types/jest": "26.0.23",
 		"@types/lodash": "4.14.168",
 		"@types/puppeteer": "5.4.3",
 		"@types/react-router-dom": "^5.1.7",
