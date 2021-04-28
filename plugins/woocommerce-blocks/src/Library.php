@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 /**
  * Library class.
  *
- * @deprecated $VID:$ This class will be removed in a future release. This has been replaced by BlockTypesController.
+ * @deprecated 5.0.0 This class will be removed in a future release. This has been replaced by BlockTypesController.
  * @internal
  */
 class Library {
@@ -18,27 +18,27 @@ class Library {
 	/**
 	 * Initialize block library features.
 	 *
-	 * @deprecated $VID:$
+	 * @deprecated 5.0.0
 	 */
 	public static function init() {
-		_deprecated_function( 'Library::init', '$VID:$' );
+		_deprecated_function( 'Library::init', '5.0.0' );
 	}
 
 	/**
 	 * Register custom tables within $wpdb object.
 	 *
-	 * @deprecated $VID:$
+	 * @deprecated 5.0.0
 	 */
 	public static function define_tables() {
-		_deprecated_function( 'Library::define_tables', '$VID:$' );
+		_deprecated_function( 'Library::define_tables', '5.0.0' );
 	}
 
 	/**
 	 * Register blocks, hooking up assets and render functions as needed.
 	 *
-	 * @deprecated $VID:$
+	 * @deprecated 5.0.0
 	 */
 	public static function register_blocks() {
-		_deprecated_function( 'Library::register_blocks', '$VID:$' );
+		_deprecated_function( 'Library::register_blocks', '5.0.0' );
 	}
 }

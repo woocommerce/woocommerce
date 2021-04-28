@@ -29,3 +29,4 @@ Every release includes specific testing instructions for new features and bug fi
 -   [4.8.0](./480.md)
 -   [4.9.0](./490.md)
 -   [4.9.1](./491.md)
+-   [5.0.0](./500.md)
