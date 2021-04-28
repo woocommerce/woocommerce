@@ -102,8 +102,13 @@ class DataRegenerator {
 
 	/**
 	 * Delete all the existing data related to the lookup table, including the table itself.
+	 *
+	 * There's no UI to delete the lookup table and the related options, but wp cli can be used
+	 * as follows for that purpose:
+	 *
+	 * wp eval "wc_get_container()->get(Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator::class)->delete_all_attributes_lookup_data();"
 	 */
-	private function delete_all_attributes_lookup_data() {
+	public function delete_all_attributes_lookup_data() {
 		global $wpdb;
 
 		delete_option( 'woocommerce_attribute_lookup__enabled' );
