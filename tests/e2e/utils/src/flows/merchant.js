@@ -62,6 +62,7 @@ const merchant = {
 	},
 
 	openAllOrdersView: async () => {
+		console.log('all orders view url: ' + WP_ADMIN_ALL_ORDERS_VIEW );
 		await page.goto( WP_ADMIN_ALL_ORDERS_VIEW, {
 			waitUntil: 'networkidle0',
 		} );
