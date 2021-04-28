@@ -197,15 +197,22 @@ class AssetDataRegistry {
 		 *     ->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )
 		 *     ->add( $key, $value )
 		 */
-		$message = __(
-			'The filter should not be used for assets registration. Please read woocommerce-gutenberg-products-block/docs/contributors/block-assets.md for more information on how to proceed.',
-			'woo-gutenberg-products-block'
-		);
+		$settings = apply_filters( 'woocommerce_shared_settings', $this->data );
 
-		$settings = apply_filters_deprecated( 'woocommerce_shared_settings', [ $this->data ], '5.0.0', '', $message );
+		// Surface a deprecation warning in the error console.
+		if ( has_filter( 'woocommerce_shared_settings' ) ) {
+			$error_handle  = 'deprecated-shared-settings-error';
+			$error_message = '`woocommerce_shared_settings` filter in Blocks is deprecated. See https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/contributors/block-assets.md';
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			wp_register_script( $error_handle, '' );
+			wp_enqueue_script( $error_handle );
+			wp_add_inline_script(
+				$error_handle,
+				sprintf( 'console.warn( "%s" );', $error_message )
+			);
+		}
 
-		// note this WILL wipe any data already registered to these keys because
-		// they are protected.
+		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $this->get_core_data() );
 	}
 
