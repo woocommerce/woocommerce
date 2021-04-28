@@ -58,7 +58,7 @@ return array(
 		'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside %s Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ), '<code>' . WC_Log_Handler_File::get_log_file_path( 'paypal' ) . '</code>' ),
 	),
 	'ipn_notification'      => array(
-		'title'       => __( 'IPN Email Notifications', 'woocommerce' ),
+		'title'       => __( 'IPN email notifications', 'woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
 		'default'     => 'yes',
