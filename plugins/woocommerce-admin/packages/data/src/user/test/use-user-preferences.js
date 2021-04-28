@@ -140,14 +140,11 @@ describe( 'useUserPreferences() hook', () => {
 			'function'
 		);
 
-		const updateResult = await result.current.updateUserPreferences( {
-			banana: 'is not a valid meta key',
-		} );
+		// Passing an array, not an object.
+		const updateResult = await result.current.updateUserPreferences( [] );
 
 		expect( updateResult ).toMatchObject( {
-			error: new Error(
-				'No valid woocommerce_meta keys were provided for update.'
-			),
+			error: new Error( 'Invalid woocommerce_meta data for update.' ),
 			updatedUser: undefined,
 		} );
 	} );

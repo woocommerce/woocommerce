@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { mapValues, pick } from 'lodash';
+import { mapValues } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -48,39 +48,12 @@ async function updateUserPrefs(
 ) {
 	// @todo Handle unresolved getCurrentUser() here.
 
-	// Whitelist our meta fields.
-	const userDataFields = [
-		'categories_report_columns',
-		'coupons_report_columns',
-		'customers_report_columns',
-		'orders_report_columns',
-		'products_report_columns',
-		'revenue_report_columns',
-		'taxes_report_columns',
-		'variations_report_columns',
-		'dashboard_sections',
-		'dashboard_chart_type',
-		'dashboard_chart_interval',
-		'dashboard_leaderboard_rows',
-		'activity_panel_inbox_last_read',
-		'homepage_layout',
-		'homepage_stats',
-		'android_app_banner_dismissed',
-		'task_list_tracked_started_tasks',
-		'help_panel_highlight_shown',
-	];
-
-	// Prep valid fields for update.
-	const metaData = mapValues(
-		pick( userPrefs, userDataFields ),
-		JSON.stringify
-	);
+	// Prep fields for update.
+	const metaData = mapValues( userPrefs, JSON.stringify );
 
 	if ( Object.keys( metaData ).length === 0 ) {
 		return {
-			error: new Error(
-				'No valid woocommerce_meta keys were provided for update.'
-			),
+			error: new Error( 'Invalid woocommerce_meta data for update.' ),
 			updatedUser: undefined,
 		};
 	}
