@@ -44,5 +44,28 @@ class ArrayUtil {
 
 		return $value;
 	}
+
+	/**
+	 * Checks if a given key exists in an array and its value can be evaluated as 'true'.
+	 *
+	 * @param array  $array The array to check.
+	 * @param string $key The key for the value to check.
+	 * @return bool True if the key exists in the array and the value can be evaluated as 'true'.
+	 */
+	public static function is_truthy( array $array, string $key ) {
+		return isset( $array[ $key ] ) && $array[ $key ];
+	}
+
+	/**
+	 * Gets the value for a given key from an array, or a default value if the key doesn't exist in the array.
+	 *
+	 * @param array  $array The array to get the value from.
+	 * @param string $key The key to use to retrieve the value.
+	 * @param null   $default The default value to return if the key doesn't exist in the array.
+	 * @return mixed|null The value for the key, or the default value passed.
+	 */
+	public static function get_value_or_default( array $array, string $key, $default = null ) {
+		return isset( $array[ $key ] ) ? $array[ $key ] : $default;
+	}
 }
 
