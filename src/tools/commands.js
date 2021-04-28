@@ -29,4 +29,9 @@ export default [
 			'Updates woocommerce_admin_install_timestamp to a certain date',
 		action: 'updateStoreAge',
 	},
+	{
+		command: 'Run wc_admin_daily job',
+		description: 'Run wc_admin_daily job',
+		action: 'runWcAdminDailyJob',
+	},
 ];

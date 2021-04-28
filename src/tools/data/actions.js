@@ -129,3 +129,12 @@ export function* updateStoreAge() {
 		}
 	} );
 }
+
+export function* runWcAdminDailyJob() {
+	yield runCommand( 'Run wc_admin_daily job', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/run-wc-admin-daily/v1',
+			method: 'POST',
+		} );
+	} );
+}
