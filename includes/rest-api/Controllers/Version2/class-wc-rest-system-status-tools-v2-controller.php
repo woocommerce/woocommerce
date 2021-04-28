@@ -577,11 +577,20 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				$tools = $this->get_tools();
 				if ( isset( $tools[ $tool ]['callback'] ) ) {
 					$callback = $tools[ $tool ]['callback'];
-					$return   = call_user_func( $callback );
-					if ( is_string( $return ) ) {
+					try {
+						$return = call_user_func( $callback );
+					} catch ( Exception $exception ) {
+						$return = $exception;
+					}
+					if ( is_a( $return, Exception::class ) ) {
+						$callback_string = $this->get_printable_callback_name( $callback, $tool );
+						$ran             = false;
+						/* translators: %1$s: callback string, %2$s: error message */
+						$message = sprintf( __( 'There was an error calling %1$s: %2$s', 'woocommerce' ), $callback_string, $return->getMessage() );
+					} elseif ( is_string( $return ) ) {
 						$message = $return;
 					} elseif ( false === $return ) {
-						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
+						$callback_string = $this->get_printable_callback_name( $callback, $tool );
 						$ran             = false;
 						/* translators: %s: callback string */
 						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
@@ -599,5 +608,23 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			'success' => $ran,
 			'message' => $message,
 		);
+	}
+
+	/**
+	 * Get a printable name for a callback.
+	 *
+	 * @param mixed  $callback The callback to get a name for.
+	 * @param string $default The default name, to be returned when the callback is an inline function.
+	 * @return string A printable name for the callback.
+	 */
+	private function get_printable_callback_name( $callback, $default ) {
+		if ( is_array( $callback ) ) {
+			return get_class( $callback[0] ) . '::' . $callback[1];
+		}
+		if ( is_string( $callback ) ) {
+			return $callback;
+		}
+
+		return $default;
 	}
 }
