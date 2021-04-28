@@ -1333,6 +1333,10 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			'post_status'    => 'inherit',
 		);
 		$attach_id  = wp_insert_attachment( $attachment, $filename );
+		if ( is_wp_error( $attach_id ) ) {
+			update_option( 'woocommerce_placeholder_image', 0 );
+			return;
+		}
 
 		update_option( 'woocommerce_placeholder_image', $attach_id );
 
