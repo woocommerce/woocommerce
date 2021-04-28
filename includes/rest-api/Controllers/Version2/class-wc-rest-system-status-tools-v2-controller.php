@@ -143,7 +143,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'button' => __( 'Clean up download permissions', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
 			),
-			'regenerate_product_lookup_tables' => array(
+			'regenerate_product_lookup_tables'   => array(
 				'name'   => __( 'Product lookup tables', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
@@ -552,14 +552,14 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message = __( 'Template cache cleared.', 'woocommerce' );
 				} else {
 					$message = __( 'The active version of WooCommerce does not support template cache clearing.', 'woocommerce' );
-					$ran = false;
+					$ran     = false;
 				}
 				break;
 
 			case 'verify_db_tables':
 				if ( ! method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce' );
-					$ran = false;
+					$ran     = false;
 					break;
 				}
 				// Try to manually create table again.
@@ -567,9 +567,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				if ( 0 === count( $missing_tables ) ) {
 					$message = __( 'Database verified successfully.', 'woocommerce' );
 				} else {
-					$message = __( 'Verifying database... One or more tables are still missing: ', 'woocommerce' );
+					$message  = __( 'Verifying database... One or more tables are still missing: ', 'woocommerce' );
 					$message .= implode( ', ', $missing_tables );
-					$ran = false;
+					$ran      = false;
 				}
 				break;
 
