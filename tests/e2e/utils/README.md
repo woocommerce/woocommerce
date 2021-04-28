@@ -180,6 +180,7 @@ This package provides support for enabling retries in tests:
 | `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
+| `deleteAllShippingZones` | | Delete all the existing shipping zones |
 
 ### Test Utilities
 
