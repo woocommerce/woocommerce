@@ -179,7 +179,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del>' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}

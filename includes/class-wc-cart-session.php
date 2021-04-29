@@ -175,6 +175,10 @@ final class WC_Cart_Session {
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
 			WC()->session->set( 'cart', $this->get_cart_for_session() );
 			$this->cart->calculate_totals();
+
+			if ( $merge_saved_cart ) {
+				$this->persistent_cart_update();
+			}
 		}
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.

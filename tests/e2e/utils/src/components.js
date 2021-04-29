@@ -5,8 +5,18 @@
 /**
  * Internal dependencies
  */
-import { merchant } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset, evalAndClick, selectOptionInSelect2, setCheckbox } from './page-utils';
+import { merchant, IS_RETEST_MODE } from './flows';
+import {
+	clickTab,
+	uiUnblocked,
+	verifyCheckboxIsUnset,
+	selectOptionInSelect2,
+	setCheckbox,
+	unsetCheckbox,
+	evalAndClick,
+	backboneUnblocked,
+	waitForSelectorWithoutThrow,
+} from './page-utils';
 import factories from './factories';
 
 const config = require( 'config' );
@@ -49,6 +59,7 @@ const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
  */
 const completeOnboardingWizard = async () => {
 	// Store Details section
+	await merchant.runSetupWizard();
 
 	// Fill store's address - first line
 	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
@@ -74,23 +85,20 @@ const completeOnboardingWizard = async () => {
 	// Click on "Continue" button to move to the next step
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
-	// Wait for usage tracking pop-up window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
-	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a better WooCommerce' }
-	);
+	// Wait for usage tracking pop-up window to appear on a new site
+	const usageTrackingHeader = await page.$('.components-modal__header-heading');
+	if ( usageTrackingHeader ) {
+		await expect(page).toMatchElement(
+			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
+		);
 
-	// Query for "Continue" buttons
-	const continueButtons = await page.$$( 'button.is-primary' );
-	expect( continueButtons ).toHaveLength( 2 );
+		// Query for "Continue" buttons
+		const continueButtons = await page.$$( 'button.is-primary' );
+		expect( continueButtons ).toHaveLength( 2 );
 
-	await Promise.all( [
-		// Click on "Continue" button of the usage pop-up window to move to the next step
-		continueButtons[1].click(),
-
-		// Wait for "In which industry does the store operate?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
+		await continueButtons[1].click();
+	}
+	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
 
@@ -143,43 +151,45 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary( false );
 
 	// Skip installing extensions
-	await evalAndClick( '.components-checkbox-control__input' );
+	await unsetCheckbox( '.components-checkbox-control__input' );
+	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 	await waitAndClickPrimary();
 
 	// Theme section
 	await waitAndClickPrimary();
 
 	// End of onboarding wizard
+	if ( IS_RETEST_MODE ) {
+		// Home screen modal can't be reset via the rest api.
+		return;
+	}
 
 	// Wait for homescreen welcome modal to appear
-	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );
-	await expect( page ).toMatchElement(
-		'.woocommerce__welcome-modal__page-content__header', { text: 'Welcome to your WooCommerce store\’s online HQ!' }
-	);
+	let welcomeHeader = await waitForSelectorWithoutThrow( '.woocommerce__welcome-modal__page-content' );
+	if ( ! welcomeHeader ) {
+		return;
+	}
 
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
-
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
-
+	// Click two Next buttons
+	for ( let b = 0; b < 2; b++ ) {
+		await page.waitForSelector('button.components-guide__forward-button');
+		await page.click('button.components-guide__forward-button');
+	}
 	// Wait for "Let's go" button to become active
 	await page.waitForSelector( 'button.components-guide__finish-button' );
-	// Click on "Let's go" button to move to the next step
 	await page.click( 'button.components-guide__finish-button' );
 };
 
 /**
  * Create simple product.
+ *
+ * @param productTitle - Defaults to Simple Product. Customizable title.
+ * @param productPrice - Defaults to $9.99. Customizable pricing.
  */
-const createSimpleProduct = async () => {
+const createSimpleProduct = async ( productTitle = simpleProductName, productPrice = simpleProductPrice ) => {
 	const product = await factories.products.simple.create( {
-		name: simpleProductName,
-		regularPrice: simpleProductPrice
+		name: productTitle,
+		regularPrice: productPrice
 	} );
 	return product.id;
 } ;
@@ -192,34 +202,18 @@ const createSimpleProduct = async () => {
  * @param categoryName Product's category which can be changed when writing a test
  */
 const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
-	// Go to "add product" page
-	await merchant.openNewProduct();
+	const product = await factories.products.simple.create( {
+		name: productName,
+		regularPrice: productPrice,
+		categories: [
+			{
+				name: categoryName,
+			}
+		],
+		isVirtual: true,
+	} );
 
-	// Add title and regular price
-	await expect(page).toFill('#title', productName);
-	await expect(page).toClick('#_virtual');
-	await clickTab('General');
-	await expect(page).toFill('#_regular_price', productPrice);
-
-	// Try to select the existing category if present already, otherwise add a new and select it
-	try {
-		const [checkbox] = await page.$x('//label[contains(text(), "'+categoryName+'")]');
-		await checkbox.click();
-	} catch (error) {
-		await expect(page).toClick('#product_cat-add-toggle');
-		await expect(page).toFill('#newproduct_cat', categoryName);
-		await expect(page).toClick('#product_cat-add-submit');
-	}
-
-	// Publish the product
-	await expect(page).toClick('#publish');
-	await uiUnblocked();
-	await page.waitForSelector('.updated.notice', {text:'Product published.'});
-
-	// Get the product ID
-	const variablePostId = await page.$('#post_ID');
-	let variablePostIdValue = (await(await variablePostId.getProperty('value')).jsonValue());
-	return variablePostIdValue;
+	return product.id;
 };
 
 /**
@@ -439,7 +433,7 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
 	await page.click( '.wc-backbone-modal-content #btn-ok' );
 
-	await uiUnblocked();
+	await backboneUnblocked();
 
 	// Verify the product we added shows as a line item now
 	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
@@ -474,6 +468,40 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 };
 
 /**
+ * Adds a shipping zone along with a shipping method.
+ *
+ * @param zoneName Shipping zone name.
+ * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param zipCode Shipping zone zip code. Defaults to empty one space.
+ * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
+ */
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+	await merchant.openNewShipping();
+
+	// Fill shipping zone name
+	await page.waitForSelector('input#zone_name');
+	await expect(page).toFill('input#zone_name', zoneName);
+
+	// Select shipping zone location
+	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
+
+	// Fill shipping zone postcode if needed otherwise just put empty space
+	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toFill('#zone_postcodes', zipCode);
+	await expect(page).toMatchElement('#zone_postcodes', zipCode);
+	await expect(page).toClick('button#submit');
+
+	// Add shipping zone method
+	await page.waitFor(1000);
+	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await page.waitForSelector('.wc-shipping-zone-method-selector');
+	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
+	await expect(page).toClick('button#btn-ok');
+	await page.waitForSelector('#zone_locations');
+};
+
+/**
  * Click the Update button on the order details page.
  *
  * @param noticeText The text that appears in the notice after updating the order.
@@ -484,7 +512,7 @@ const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 		await page.waitFor( 2000 );
 	}
 
-	// PUpdate order
+	// Update order
 	await expect( page ).toClick( 'button.save_order' );
 	await page.waitForSelector( '.updated.notice' );
 
@@ -509,6 +537,33 @@ const deleteAllEmailLogs = async () => {
 	}
 };
 
+/**
+ * Delete all the existing shipping zones.
+ */
+const deleteAllShippingZones = async () => {
+	await merchant.openSettings('shipping');
+
+	// Delete existing shipping zones.
+	try {
+		let zone = await page.$( '.wc-shipping-zone-delete' );
+		if ( zone ) {
+			// WP action links aren't clickable because they are hidden with a left=-9999 style.
+			await page.evaluate(() => {
+				document.querySelector('.wc-shipping-zone-name .row-actions')
+					.style
+					.left = '0';
+			});
+			while ( zone ) {
+				await evalAndClick( '.wc-shipping-zone-delete' );
+				await uiUnblocked();
+				zone = await page.$( '.wc-shipping-zone-delete' );
+			};
+		};
+	} catch (error) {
+		// Prevent an error here causing the test to fail.
+	};
+};
+
 export {
 	completeOnboardingWizard,
 	createSimpleProduct,
@@ -518,7 +573,9 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
+	addShippingZoneAndMethod,
 	createSimpleProductWithCategory,
-  clickUpdateOrder,
+	clickUpdateOrder,
 	deleteAllEmailLogs,
+	deleteAllShippingZones,
 };

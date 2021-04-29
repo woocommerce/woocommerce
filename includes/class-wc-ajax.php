@@ -155,6 +155,7 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_pages',
 			'term_ordering',
 			'product_ordering',
 			'refund_line_items',
@@ -794,10 +795,14 @@ class WC_AJAX {
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
+		$items        = $order->get_items();
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
-			$files   = $product->get_downloads();
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+			if ( ! in_array( $product->get_id(), $product_ids, true ) ) {
+				continue;
+			}
+			$files = $product->get_downloads();
 
 			if ( ! $order->get_billing_email() ) {
 				wp_die();
@@ -805,7 +810,7 @@ class WC_AJAX {
 
 			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
-					$inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order );
+					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $item->get_quantity(), $item );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;
@@ -1767,6 +1772,47 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Ajax request handling for page searching.
+	 */
+	public static function json_search_pages() {
+		ob_start();
+
+		check_ajax_referer( 'search-pages', 'security' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : -1;
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
+		$args                 = array(
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'posts_per_page'         => $limit,
+			'post_type'              => 'page',
+			'post_status'            => array( 'publish', 'private', 'draft' ),
+			's'                      => $search_text,
+			'post__not_in'           => $exclude_ids,
+		);
+		$search_results_query = new WP_Query( $args );
+
+		$pages_results = array();
+		foreach ( $search_results_query->get_posts() as $post ) {
+			$pages_results[ $post->ID ] = sprintf(
+				/* translators: 1: page name 2: page ID */
+				__( '%1$s (ID: %2$s)', 'woocommerce' ),
+				get_the_title( $post ),
+				$post->ID
+			);
+		}
+
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_pages', $pages_results ) );
+	}
+
+	/**
 	 * Ajax request handling for categories ordering.
 	 */
 	public static function term_ordering() {
@@ -2302,6 +2348,32 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Low Stock Amount.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 */
+	private static function variation_bulk_action_variable_low_stock_amount( $variations, $data ) {
+		if ( ! isset( $data['value'] ) ) {
+			return;
+		}
+
+		$low_stock_amount = wc_stock_amount( wc_clean( $data['value'] ) );
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( $variation->managing_stock() ) {
+				$variation->set_low_stock_amount( $low_stock_amount );
+			} else {
+				$variation->set_low_stock_amount( '' );
+			}
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Weight.
 	 *
 	 * @param array $variations List of variations.
@@ -2547,6 +2619,7 @@ class WC_AJAX {
 	 * @uses WC_AJAX::variation_bulk_action_toggle_virtual()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_downloadable()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_enabled
+	 * @uses WC_AJAX::variation_bulk_action_variable_low_stock_amount()
 	 */
 	public static function bulk_edit_variations() {
 		ob_start();

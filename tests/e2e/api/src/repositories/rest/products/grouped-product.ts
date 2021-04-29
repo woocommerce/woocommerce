@@ -10,6 +10,7 @@ import {
 	UpdatesGroupedProducts,
 	baseProductURL,
 	buildProductURL,
+	deleteProductURL,
 } from '../../../models';
 import {
 	createProductTransformer,
@@ -55,6 +56,6 @@ export function groupedProductRESTRepository( httpClient: HTTPClient ): ListsGro
 		restCreate< GroupedProductRepositoryParams >( baseProductURL, GroupedProduct, httpClient, transformer ),
 		restRead< GroupedProductRepositoryParams >( buildProductURL, GroupedProduct, httpClient, transformer ),
 		restUpdate< GroupedProductRepositoryParams >( buildProductURL, GroupedProduct, httpClient, transformer ),
-		restDelete< GroupedProductRepositoryParams >( buildProductURL, httpClient ),
+		restDelete< GroupedProductRepositoryParams >( deleteProductURL, httpClient ),
 	);
 }

@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\ThemeSupport;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -390,7 +391,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	// Look within passed path within the theme - this is priority.
 	if ( false !== strpos( $template_name, 'product_cat' ) || false !== strpos( $template_name, 'product_tag' ) ) {
 		$cs_template = str_replace( '_', '-', $template_name );
-		$template = locate_template(
+		$template    = locate_template(
 			array(
 				trailingslashit( $template_path ) . $cs_template,
 				$cs_template,
@@ -879,38 +880,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  * @return mixed  Value of prop(s).
  */
 function wc_get_theme_support( $prop = '', $default = null ) {
-	$theme_support = get_theme_support( 'woocommerce' );
-	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
-	if ( ! $theme_support ) {
-		return $default;
-	}
-
-	if ( $prop ) {
-		$prop_stack = explode( '::', $prop );
-		$prop_key   = array_shift( $prop_stack );
-
-		if ( isset( $theme_support[ $prop_key ] ) ) {
-			$value = $theme_support[ $prop_key ];
-
-			if ( count( $prop_stack ) ) {
-				foreach ( $prop_stack as $prop_key ) {
-					if ( is_array( $value ) && isset( $value[ $prop_key ] ) ) {
-						$value = $value[ $prop_key ];
-					} else {
-						$value = $default;
-						break;
-					}
-				}
-			}
-		} else {
-			$value = $default;
-		}
-
-		return $value;
-	}
-
-	return $theme_support;
+	return wc_get_container()->get( ThemeSupport::class )->get_option( $prop, $default );
 }
 
 /**
@@ -1270,7 +1240,7 @@ function wc_format_country_state_string( $country_string ) {
  * @return array
  */
 function wc_get_base_location() {
-	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country' ) );
+	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country', 'US:CA' ) );
 
 	return wc_format_country_state_string( $default );
 }
@@ -1286,7 +1256,7 @@ function wc_get_base_location() {
  */
 function wc_get_customer_default_location() {
 	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
-	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
+	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', 'US:CA' );
 	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
 	// Geolocation takes priority if used and if geolocation is possible.
@@ -1801,10 +1771,26 @@ function wc_ascii_uasort_comparison( $a, $b ) {
 function wc_asort_by_locale( &$data, $locale = '' ) {
 	// Use Collator if PHP Internationalization Functions (php-intl) is available.
 	if ( class_exists( 'Collator' ) ) {
-		$locale   = $locale ? $locale : get_locale();
-		$collator = new Collator( $locale );
-		$collator->asort( $data, Collator::SORT_STRING );
-		return $data;
+		try {
+			$locale   = $locale ? $locale : get_locale();
+			$collator = new Collator( $locale );
+			$collator->asort( $data, Collator::SORT_STRING );
+			return $data;
+		} catch ( IntlException $e ) {
+			/*
+			 * Just skip if some error got caused.
+			 * It may be caused in installations that doesn't include ICU TZData.
+			 */
+			if ( Constants::is_true( 'WP_DEBUG' ) ) {
+				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					sprintf(
+						'An unexpected error occurred while trying to use PHP Intl Collator class, it may be caused by an incorrect installation of PHP Intl and ICU, and could be fixed by reinstallaing PHP Intl, see more details about PHP Intl installation: %1$s. Error message: %2$s',
+						'https://www.php.net/manual/en/intl.installation.php',
+						$e->getMessage()
+					)
+				);
+			}
+		}
 	}
 
 	$raw_data = $data;
@@ -2253,9 +2239,9 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
-	$new_version      = wc_clean( $plugin->new_version );
-	$plugin_updates   = new WC_Plugin_Updates();
-	$version_type = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
+	$new_version    = wc_clean( $plugin->new_version );
+	$plugin_updates = new WC_Plugin_Updates();
+	$version_type   = Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' );
 	if ( ! is_string( $version_type ) ) {
 		$version_type = 'none';
 	}

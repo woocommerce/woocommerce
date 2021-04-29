@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -23,7 +24,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '5.1.0';
+	public $version = '5.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -207,6 +208,7 @@ final class WooCommerce {
 
 		// These classes set up hooks on instantiation.
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
+		wc_get_container()->get( AssignDefaultCategory::class );
 	}
 
 	/**
