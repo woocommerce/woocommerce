@@ -289,6 +289,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test adjust line item function when order item is refunded with restock and then update order.
+	 * This only works with orders placed after WC 5.4.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
 	 */
@@ -301,6 +302,11 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
+
+		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
+			return;
+		}
+
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
@@ -335,10 +341,19 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Stocks should remain unchanged from after restocking via refund operation.
 		$this->assertEquals( 95, $product->get_stock_quantity() );
+
+		// Repeating steps above again to make sure nothing changes.
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from after restocking via refund operation.
+		$this->assertEquals( 95, $product->get_stock_quantity() );
 	}
 
 	/**
 	 * Test adjust line item function when order item is refunded without restock and then update order.
+	 * This only works with orders placed after WC 5.4.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
 	 */
@@ -351,6 +366,11 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
+
+		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
+			return;
+		}
+
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
 		$order_item = new WC_Order_Item_Product( $order_item_id );
@@ -379,6 +399,14 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_create_refund( $args );
 
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from the original order.
+		$this->assertEquals( 90, $product->get_stock_quantity() );
+
+		// Repeating steps above again to make sure nothing changes.
 		wc_maybe_adjust_line_item_product_stock( $order_item );
 
 		$product = wc_get_product( $product->get_id() );
