@@ -27,6 +27,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class DataRegenerator {
 
+	const PRODUCTS_PER_GENERATION_STEP = 10;
+
 	/**
 	 * The data store to use.
 	 *
@@ -215,7 +217,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 
 		$product_ids = wc_get_products(
 			array(
-				'limit'   => 10,
+				'limit'   => self::PRODUCTS_PER_GENERATION_STEP,
 				'page'    => $current_products_page,
 				'orderby' => array(
 					'ID' => 'ASC',
@@ -290,7 +292,11 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		);
 
 		if ( $generation_is_in_progress ) {
-			$entry['button'] = __( 'Filling in progress', 'woocommerce' );
+			$entry['button'] = sprintf(
+				/* translators: %d: How many products have been processed so far. */
+				__( 'Filling in progress (%d)', 'woocommerce' ),
+				get_option( 'woocommerce_attribute_lookup__last_products_page_processed', 0 ) * self::PRODUCTS_PER_GENERATION_STEP
+			);
 			$entry['disabled'] = true;
 		} else {
 			$entry['button'] = $generate_item_button;
