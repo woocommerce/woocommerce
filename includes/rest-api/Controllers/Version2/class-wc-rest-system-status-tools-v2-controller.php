@@ -587,6 +587,21 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 						$ran             = false;
 						/* translators: %1$s: callback string, %2$s: error message */
 						$message = sprintf( __( 'There was an error calling %1$s: %2$s', 'woocommerce' ), $callback_string, $return->getMessage() );
+
+						$logger = wc_get_logger();
+						$logger->error(
+							sprintf(
+								'Error running debug tool %s: %s',
+								$tool,
+								$return->getMessage()
+							),
+							array(
+								'source'   => 'run-debug-tool',
+								'tool'     => $tool,
+								'callback' => $callback,
+								'error'    => $return,
+							)
+						);
 					} elseif ( is_string( $return ) ) {
 						$message = $return;
 					} elseif ( false === $return ) {
