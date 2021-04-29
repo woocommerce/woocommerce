@@ -155,7 +155,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		$last_existing_product_id = current(
+		$last_existing_product_id =
 			wc_get_products(
 				array(
 					'return'  => 'ids',
@@ -163,14 +163,14 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 					'orderby' => 'id',
 					'order'   => 'DESC',
 				)
-			)
-		);
+			);
+
 		if ( false === $last_existing_product_id ) {
 			// No products exist, nothing to (re)generate.
 			return false;
 		}
 
-		update_option( 'woocommerce_attribute_lookup__last_product_id_to_process', $last_existing_product_id );
+		update_option( 'woocommerce_attribute_lookup__last_product_id_to_process', current( $last_existing_product_id ) );
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 0 );
 
 		return true;
