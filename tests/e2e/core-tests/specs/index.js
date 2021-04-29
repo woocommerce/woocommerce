@@ -73,7 +73,7 @@ const runShopperTests = () => {
 	runCheckoutCreateAccountTest();
 	runCheckoutLoginAccountTest();
 	runCartCalculateShippingTest();
-  runCartRedirectionTest();
+	runCartRedirectionTest();
 	runOrderEmailReceivingTest();
 };
 
