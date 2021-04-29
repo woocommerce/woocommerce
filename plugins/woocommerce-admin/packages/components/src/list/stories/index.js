@@ -7,7 +7,11 @@ import { withConsole } from '@storybook/addon-console';
 /**
  * Internal dependencies
  */
-import List, { ExperimentalList, ExperimentalListItem } from '../';
+import List, {
+	ExperimentalList,
+	ExperimentalListItem,
+	ExperimentalCollapsibleList,
+} from '../';
 import './style.scss';
 
 function logItemClick( event ) {
@@ -161,4 +165,47 @@ export const ExperimentalListExample = () => {
 	);
 };
 
-ExperimentalList.storyName = 'ExperimentalList / ExperimentalListItem.';
+ExperimentalListExample.storyName = 'ExperimentalList / ExperimentalListItem.';
+
+export const ExperimentalCollapsibleListExample = () => {
+	return (
+		<ExperimentalCollapsibleList
+			collapseLabel="Show less"
+			expandLabel="Show more items"
+			show={ 2 }
+			onCollapse={ () => {
+				// eslint-disable-next-line no-console
+				console.log( 'collapsed' );
+			} }
+			onExpand={ () => {
+				// eslint-disable-next-line no-console
+				console.log( 'expanded' );
+			} }
+		>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>
+					Any markup can go here.
+					<br />
+					Bigger task item
+					<br />
+					Another line
+				</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+			<ExperimentalListItem onClick={ () => {} }>
+				<div>Any markup can go here.</div>
+			</ExperimentalListItem>
+		</ExperimentalCollapsibleList>
+	);
+};
+
+ExperimentalCollapsibleListExample.storyName =
+	'ExperimentalList with ExperimentalCollapsibleListItem.';

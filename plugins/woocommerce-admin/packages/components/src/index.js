@@ -29,6 +29,8 @@ export {
 	default as List,
 	ExperimentalList as __experimentalList,
 	ExperimentalListItem as __experimentalListItem,
+	ExperimentalListItemCollapse as __experimentalListItemCollapse,
+	ExperimentalCollapsibleList as __experimentalCollapsibleList,
 } from './list';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';

@@ -11,7 +11,7 @@ import type { ListAnimation } from './experimental-list-item';
 
 type ListType = 'ol' | 'ul';
 
-type ListProps = {
+export type ListProps = {
 	listType?: ListType;
 	animation?: ListAnimation;
 } & React.HTMLAttributes< HTMLElement >;

@@ -1,0 +1,11 @@
+.woocommerce-list__item.list-item-collapse {
+	justify-content: space-between;
+
+	p {
+		margin: 0;
+	}
+
+	.list-item-collapse__icon-container {
+		justify-content: flex-end;
+	}
+}
