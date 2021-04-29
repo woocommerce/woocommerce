@@ -83,6 +83,32 @@ export const uiUnblocked = async () => {
 };
 
 /**
+ * Wait for backbone blocking to end.
+ */
+export const backboneUnblocked = async () => {
+	await page.waitForFunction( () => ! Boolean( document.querySelector( '.wc-backbone-modal' ) ) );
+};
+
+/**
+ * Conditionally wait for a selector without throwing an error.
+ *
+ * @param selector
+ * @param timeoutInSeconds
+ * @returns {Promise<boolean>}
+ */
+export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 5 ) => {
+	let selected = await page.$( selector );
+	for ( let s = 0; s < timeoutInSeconds; s++ ) {
+		if ( selected ) {
+			break;
+		}
+		await page.waitFor( 1000 );
+		selected = await page.$( selector );
+	}
+	return Boolean( selected );
+};
+
+/**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
  * @param {string} button (Publish)

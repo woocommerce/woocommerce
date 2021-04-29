@@ -30,10 +30,12 @@ const runOrderApplyCouponTest = () => {
 			await createSimpleProduct();
 			couponCode = await createCoupon();
 			orderId = await createSimpleOrder('Pending payment', simpleProductName);
-			await addProductToOrder(orderId, simpleProductName);
+			await Promise.all([
+				addProductToOrder(orderId, simpleProductName),
 
-			// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
-			await page.removeAllListeners('dialog');
+				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
+				page.removeAllListeners('dialog'),
+			]);
 
 			// Make sure the simple product price is greater than the coupon amount
 			await expect(Number(simpleProductPrice)).toBeGreaterThan(5.00);
