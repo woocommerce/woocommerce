@@ -69,7 +69,7 @@ const initializeSlack = () => {
  * @param testName
  * @returns {Promise<void>}
  */
-export async function sendFailedTestMessageToSlack( testName ) {
+async function sendFailedTestMessageToSlack( testName ) {
 	const { branch, commit, webUrl } = initializeSlack();
 	if ( ! branch ) {
 		return;
@@ -127,7 +127,7 @@ export async function sendFailedTestMessageToSlack( testName ) {
  * @param screenshotOfFailedTest
  * @returns {Promise<void>}
  */
-export async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {
+async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {
 	const pr = initializeSlack();
 	if ( ! pr ) {
 		return;
@@ -154,3 +154,8 @@ export async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) 
 		}
 	}
 }
+
+module.exports = {
+	sendFailedTestMessageToSlack,
+	sendFailedTestScreenshotToSlack,
+};
