@@ -18,7 +18,7 @@ export default [
 		action: 'resetJetpackConnection',
 	},
 	{
-		command: 'Enable wc-admin* Traccking',
+		command: 'Enable wc-admin* Tracking',
 		description:
 			'Enable Tracking Debug mode. You should change your console level to verbose.',
 		action: 'enableTrackingDebug',
