@@ -51,7 +51,7 @@
 * Enhancement - Registered payment methods now have access to the `shouldSavePayment` prop in their components (which indicates whether the shopper has checked the save payment method checkbox. #3990
 * Enhancement - Payment methods implementing the `savedTokenComponent` configuration property will now have the `onPaymentProcessing` event available to the registered component. #3982
 
-** WooCommerce Admin - 2.2.0 & 2.2.1 **
+** WooCommerce Admin - 2.2.0 & 2.2.1 & 2.2.2 **
 * Add - Next new novel navigation nudge note #6610
 * Add - Add legacy report items to new navigation #6507
 * Add - Add preview site button on the appearance task #6457
@@ -116,13 +116,16 @@
 * Fix - Fix Themes step visibility in IE 11 #6578
 * Fix - Fix hidden menu title on smaller screens #6562
 * Fix - Add gross sales column to CSV export #6567
+* Fix - Disable the continue btn on OBW when requested are being made #6838
 * Tweak - Add default value for contains op #6622
 * Tweak - Adjust targeting store age for the Add First Product note #6554
 * Tweak - Improve WC Shipping & Tax logic #6547
 * Tweak - Update Insight inbox note content #6555
 * Tweak - Remove mobile activity panel toggle #6539
 * Tweak - Refactor autoloader to remove global variable. #6412
-
+* Tweak - Revert WCPay international support for bundled package #6901
+* Tweak - Store profiler - Changed MailPoet's title and description #6886
+* Tweak - Update PayU logo #6829
 
 = 5.2.2 2021-04-15 =
 
