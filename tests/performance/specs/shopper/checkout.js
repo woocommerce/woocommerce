@@ -1,6 +1,7 @@
 import { sleep, check, group } from "k6";
 import http from "k6/http";
 import { Trend } from 'k6/metrics';
+import { randomIntBetween } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
 import { 
     base_url,
     base_host,
@@ -18,7 +19,9 @@ import {
     payment_method,
     product_sku,
     product_url,
-    product_id
+    product_id,
+    think_time_min,
+    think_time_max
    } from '../../config.js';
 
 /* add custom metrics for each step to the standard output */
@@ -33,7 +36,8 @@ let placeOrderTrend2 = new Trend('_step_08_place_order_checkout_duration');
 let orderReceivedTrend1 = new Trend('_step_09_order_received_duration');
 let orderReceivedTrend2 = new Trend('_step_10_order_received_duration');
 
-export default function main() {
+export function CheckoutFlow() {
+
   let response;
 
   const vars = {};
@@ -44,7 +48,7 @@ export default function main() {
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        //"accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         connection: "keep-alive",
         host: `${base_host}`,
@@ -61,12 +65,14 @@ export default function main() {
     homePageTrend.add(response.timings.duration);
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("Shop Page", function () {
     response = http.get(`${base_url}/shop`, {
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        //"accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         connection: "keep-alive",
         host: `${base_host}`,
@@ -83,12 +89,14 @@ export default function main() {
     shopPageTrend.add(response.timings.duration);
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("Product Page", function () {
     response = http.get(`${base_url}/product/${product_url}`, {
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        //"accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         connection: "keep-alive",
         host: `${base_host}`,
@@ -105,6 +113,8 @@ export default function main() {
     productPageTrend.add(response.timings.duration);
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("Product Page Add to cart", function () {
     response = http.post(
       `${base_url}/?wc-ajax=add_to_cart`,
@@ -116,7 +126,7 @@ export default function main() {
       {
         headers: {
           accept: "application/json, text/javascript, */*; q=0.01",
-          //"accept-encoding": "gzip, deflate, br",
+          "accept-encoding": "gzip, deflate, br",
           "accept-language": "en-US,en;q=0.9",
           connection: "keep-alive",
           "content-type":
@@ -136,12 +146,14 @@ export default function main() {
     addToCartTrend.add(response.timings.duration);
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("View Cart", function () {
     response = http.get(`${base_url}/cart`, {
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        //"accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         connection: "keep-alive",
         host: `${base_host}`,
@@ -162,12 +174,14 @@ export default function main() {
     });
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("Proceed to checkout", function () {
     response = http.get(`${base_url}/checkout`, {
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        //"accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         connection: "keep-alive",
         host: `${base_host}`,
@@ -183,6 +197,8 @@ export default function main() {
     });
     proceedCheckoutTrend.add(response.timings.duration);
   });
+
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
   vars["woocommerce-process-checkout-nonce"] = response
     .html()
@@ -214,7 +230,7 @@ export default function main() {
       {
         headers: {
           accept: "*//*",
-          //"accept-encoding": "gzip, deflate, br",
+          "accept-encoding": "gzip, deflate, br",
           "accept-language": "en-US,en;q=0.9",
           connection: "keep-alive",
           "content-type":
@@ -255,7 +271,7 @@ export default function main() {
       {
         headers: {
           accept: "application/json, text/javascript, *//*; q=0.01",
-          //"accept-encoding": "gzip, deflate, br",
+          "accept-encoding": "gzip, deflate, br",
           "accept-language": "en-US,en;q=0.9",
           connection: "keep-alive",
           "content-type":
@@ -275,6 +291,8 @@ export default function main() {
     placeOrderTrend2.add(response.timings.duration);
   });
 
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
   group("Order received", function () {
       response = http.get(
         `${base_url}/checkout/order-received/`,
@@ -282,7 +300,7 @@ export default function main() {
           headers: {
             accept:
               "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*//*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            //"accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br",
             "accept-language": "en-US,en;q=0.9",
             connection: "keep-alive",
             host: `${base_host}`,
@@ -308,7 +326,7 @@ export default function main() {
         {
           headers: {
             accept: "*//*",
-           // "accept-encoding": "gzip, deflate, br",
+            "accept-encoding": "gzip, deflate, br",
             "accept-language": "en-US,en;q=0.9",
             connection: "keep-alive",
             "content-type":
@@ -329,5 +347,9 @@ export default function main() {
     }
   );
 
-  sleep(1);
+  sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+}
+
+export default function () {
+	CheckoutFlow();
 }
