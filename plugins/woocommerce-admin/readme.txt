@@ -88,6 +88,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Update E2E jest config, so it correctly creates screenshots on failure. #6858
 - Dev: Fixed storybook build script #6875
 - Dev: Removed allowed keys list for adding woocommerce_meta data. #6889 🎉 @xristos3490
+- Dev: Delete all products when running product import tests, unskip previously skipped test. #6905
 - Feature: Add recommended payment methods in payment settings. #6760
 - Fix: Disable the continue btn on OBW when requested are being made #6838
 - Fix: Event tracking for merchant email notes #6616

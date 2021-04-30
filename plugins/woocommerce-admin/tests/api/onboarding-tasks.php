@@ -30,6 +30,13 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Empty the db of any products.
+		$query    = new \WC_Product_Query();
+		$products = $query->get_products();
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -57,7 +64,6 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 * Test that sample product data is imported.
 	 */
 	public function test_import_sample_products() {
-		$this->markTestSkipped( 'Skipped as test randomly fails on line 77.' );
 		wp_set_current_user( $this->user );
 
 		$this->remove_color_or_logo_attribute_taxonomy();
