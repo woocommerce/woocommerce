@@ -18,3 +18,6 @@ export const payment_method = 'cod';
 export const product_sku = 'woo-beanie';
 export const product_url = 'beanie';
 export const product_id = '13';
+
+export const think_time_min = '1';
+export const think_time_max = '4';
