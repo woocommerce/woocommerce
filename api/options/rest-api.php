@@ -42,10 +42,10 @@ register_woocommerce_admin_test_helper_rest_route(
 
 function wca_test_helper_delete_option( $request ) {
 	global $wpdb;
-	$option_names = explode(',', $request->get_param( 'option_names' ));
-    $option_names = array_map(function($option_name) {
-        return "'".$option_name."'";
-    }, $option_names);
+	$option_names = explode( ',', $request->get_param( 'option_names' ) );
+    $option_names = array_map( function( $option_name ) {
+        return "'" . $option_name . "'";
+    }, $option_names );
 
     $option_names = implode( ',', $option_names );
     $query = "delete from {$wpdb->prefix}options where option_name in ({$option_names})";
