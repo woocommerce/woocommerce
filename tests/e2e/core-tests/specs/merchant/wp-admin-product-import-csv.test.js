@@ -63,7 +63,7 @@ const runImportProductsTest = () => {
 			await expect(page).toClick('button[value="Run the importer"]');
 
 			// Waiting for importer to finish
-			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 60000});
+			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 120000});
 			await page.waitForSelector('.woocommerce-importer-done');
 			await expect(page).toMatchElement('.woocommerce-importer-done', {text: 'Import complete!'});
 		});

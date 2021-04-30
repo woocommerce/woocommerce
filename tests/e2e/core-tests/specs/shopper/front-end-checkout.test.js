@@ -9,7 +9,8 @@ const {
 	setCheckbox,
 	settingsPageSaveChanges,
 	uiUnblocked,
-	verifyCheckboxIsSet
+	verifyCheckboxIsSet,
+	addShippingZoneAndMethod,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -29,6 +30,8 @@ const runCheckoutPageTest = () => {
 			await merchant.login();
 			await createSimpleProduct();
 
+			// Set free shipping within California
+			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
 			// Go to general settings page
 			await merchant.openSettings('general');
 
