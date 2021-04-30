@@ -15,6 +15,22 @@ defined( 'ABSPATH' ) || exit;
 class LookupDataStore {
 
 	/**
+	 * The lookup table name.
+	 *
+	 * @var string
+	 */
+	private $lookup_table_name;
+
+	/**
+	 * LookupDataStore constructor.
+	 */
+	public function __construct() {
+		global $wpdb;
+
+		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
+	}
+
+	/**
 	 * Insert or update the lookup data for a given product or variation.
 	 * If a variable product is passed the information is updated for all of its variations.
 	 *
@@ -50,12 +66,14 @@ class LookupDataStore {
 	private function delete_lookup_table_entries_for( int $product_id ) {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM wp_wc_product_attributes_lookup WHERE product_or_parent_id = %d',
+				'DELETE FROM ' . $this->lookup_table_name . ' WHERE product_or_parent_id = %d',
 				$product_id
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -252,9 +270,10 @@ class LookupDataStore {
 	private function insert_lookup_table_data( int $product_id, int $product_or_parent_id, string $taxonomy, int $term_id, bool $is_variation_attribute, bool $has_stock ) {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
-				'INSERT INTO wp_wc_product_attributes_lookup (
+				'INSERT INTO ' . $this->lookup_table_name . ' (
 					  product_id,
 					  product_or_parent_id,
 					  taxonomy,
@@ -271,5 +290,6 @@ class LookupDataStore {
 				$has_stock ? 1 : 0
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 }
