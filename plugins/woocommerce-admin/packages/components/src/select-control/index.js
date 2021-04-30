@@ -298,6 +298,7 @@ export class SelectControl extends Component {
 			autofill,
 			children,
 			className,
+			disabled,
 			controlClassName,
 			inlineTags,
 			instanceId,
@@ -343,6 +344,7 @@ export class SelectControl extends Component {
 					{ ...this.state }
 					activeId={ activeId }
 					className={ controlClassName }
+					disabled={ disabled }
 					hasTags={ hasMultiple }
 					isExpanded={ isExpanded }
 					listboxId={ listboxId }
@@ -394,6 +396,10 @@ SelectControl.propTypes = {
 	 * Class name applied to control wrapper.
 	 */
 	controlClassName: PropTypes.string,
+	/**
+	 * Allow the select options to be disabled.
+	 */
+	disabled: PropTypes.bool,
 	/**
 	 * Exclude already selected options from the options list.
 	 */

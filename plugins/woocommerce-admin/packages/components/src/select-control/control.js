@@ -114,6 +114,7 @@ class Control extends Component {
 	renderInput() {
 		const {
 			activeId,
+			disabled,
 			hasTags,
 			inlineTags,
 			instanceId,
@@ -151,6 +152,7 @@ class Control extends Component {
 						? `search-inline-input-${ instanceId }`
 						: null
 				}
+				disabled={ disabled }
 			/>
 		);
 	}
@@ -182,6 +184,7 @@ class Control extends Component {
 	render() {
 		const {
 			className,
+			disabled,
 			hasTags,
 			help,
 			inlineTags,
@@ -210,6 +213,7 @@ class Control extends Component {
 						'has-tags': inlineTags && hasTags,
 						'with-value': this.getInputValue().length,
 						'has-error': !! help,
+						'is-disabled': disabled,
 					}
 				) }
 				onClick={ () => {

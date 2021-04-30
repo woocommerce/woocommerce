@@ -126,6 +126,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: UI updates to Payment Task screen #6766
 - Update: Adding setup required icon for non-configured payment methods #6811
 - Update: Task list component with new Experimental Task list. #6849
+- Dev: Add disabled prop to SelectControl #6902
 - Update: Redirect to WC Home after setting up a payment method #6891
 
 == 2.2.0 3/30/2021 ==

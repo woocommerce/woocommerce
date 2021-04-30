@@ -260,6 +260,16 @@ describe( 'SelectControl', () => {
 			);
 		} );
 
+		it( 'disables the component', async () => {
+			const { getByRole } = render(
+				<SelectControl disabled options={ options } />
+			);
+
+			await waitFor( () =>
+				expect( getByRole( 'combobox' ) ).toBeDisabled()
+			);
+		} );
+
 		describe( 'control onChange', () => {
 			it( 'should return array if selected is array and onChange triggered from control', () => {
 				const onChangeMock = jest.fn();

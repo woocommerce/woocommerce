@@ -74,6 +74,13 @@
 			font-size: 12px;
 			margin-top: -$gap-small;
 		}
+
+		&.is-disabled {
+			opacity: 0.5;
+			.components-base-control__label {
+				cursor: default;
+			}
+		}
 	}
 
 	.woocommerce-select-control__autofill-input {
