@@ -600,7 +600,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content_plain() {
-		return ''; }
+		return '';
+	}
 
 	/**
 	 * Get the email content in HTML format.
@@ -608,7 +609,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content_html() {
-		return ''; }
+		return '';
+	}
 
 	/**
 	 * Get the from name for outgoing emails.
