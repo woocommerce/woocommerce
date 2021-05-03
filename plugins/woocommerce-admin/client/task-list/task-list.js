@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
 import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -9,6 +9,7 @@ import {
 	EllipsisMenu,
 	Badge,
 	__experimentalList as List,
+	__experimentalCollapsibleList as CollapsibleList,
 } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
@@ -246,6 +247,31 @@ export const TaskList = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
+	const expandLabel = sprintf(
+		/* translators: %i = number of hidden tasks */
+		_n(
+			'Show %i more task.',
+			'Show %i more tasks.',
+			listTasks.length - 2,
+			'woocommerce-admin'
+		),
+		listTasks.length - 2
+	);
+	const collapseLabel = __( 'Show less', 'woocommerce-admin' );
+	const ListComp = name === 'task_list' ? List : CollapsibleList;
+
+	const listProps =
+		name === 'task_list'
+			? {}
+			: {
+					collapseLabel,
+					expandLabel,
+					show: 2,
+					onCollapse: () =>
+						recordEvent( 'extended_tasklist_collapse' ),
+					onExpand: () => recordEvent( 'extended_tasklist_expand' ),
+			  };
+
 	return (
 		<>
 			<div className="woocommerce-task-dashboard__container">
@@ -261,7 +287,7 @@ export const TaskList = ( {
 						{ renderMenu() }
 					</CardHeader>
 					<CardBody>
-						<List animation="slide-right">
+						<ListComp animation="slide-right" { ...listProps }>
 							{ listTasks.map( ( task ) => (
 								<TaskItem
 									key={ task.key }
@@ -274,7 +300,7 @@ export const TaskList = ( {
 									time={ task.time }
 								/>
 							) ) }
-						</List>
+						</ListComp>
 					</CardBody>
 				</Card>
 			</div>

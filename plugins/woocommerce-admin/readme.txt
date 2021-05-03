@@ -89,7 +89,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Fixed storybook build script #6875
 - Dev: Removed allowed keys list for adding woocommerce_meta data. #6889 🎉 @xristos3490
 - Dev: Delete all products when running product import tests, unskip previously skipped test. #6905
-- Feature: Add recommended payment methods in payment settings. #6760
+- Enhancement: Add recommended payment methods in payment settings. #6760
+- Enhancement: Add expand/collapse to extendable task list. #6910
 - Fix: Disable the continue btn on OBW when requested are being made #6838
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Use the store timezone to make time data requests #6632

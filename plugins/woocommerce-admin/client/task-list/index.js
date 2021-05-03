@@ -21,7 +21,7 @@ import './style.scss';
 import CartModal from '../dashboard/components/cart-modal';
 import { getAllTasks } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
-import TaskList from './list';
+import TaskList from './task-list';
 import { DisplayOption } from '../header/activity-panel/display-options';
 import { TaskStep } from './task-step';
 

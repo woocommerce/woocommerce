@@ -18,7 +18,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import TaskDashboard from '../';
-import { TaskList } from '../list';
+import { TaskList } from '../task-list';
 import { getAllTasks } from '../tasks';
 import { DisplayOption } from '../../header/activity-panel/display-options';
 
@@ -204,6 +204,28 @@ describe( 'TaskDashboard and TaskList', () => {
 		expect( queryByText( TASK_LIST_HEADING ) ).toBeNull();
 
 		expect( queryByText( EXTENDED_TASK_LIST_HEADING ) ).not.toBeNull();
+	} );
+
+	it( 'renders only the extended task list with expansion', () => {
+		useSelect.mockImplementation( () => ( {
+			dismissedTasks: [],
+			isSetupTaskListHidden: true,
+			profileItems: {},
+		} ) );
+		apiFetch.mockResolvedValue( {} );
+		getAllTasks.mockReturnValue( {
+			setup: [],
+			extension: [ ...tasks.setup, ...tasks.extension ],
+		} );
+		const { queryByText } = render( <TaskDashboard query={ {} } /> );
+
+		expect( queryByText( TASK_LIST_HEADING ) ).toBeNull();
+
+		expect( queryByText( EXTENDED_TASK_LIST_HEADING ) ).not.toBeNull();
+		const taskLength = tasks.setup.length + tasks.extension.length;
+		expect(
+			queryByText( `Show ${ taskLength - 2 } more tasks.` )
+		).toBeInTheDocument();
 	} );
 
 	it( 'sets homescreen layout default when dismissed', () => {
