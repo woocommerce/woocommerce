@@ -304,7 +304,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 
 		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
-			return;
+			$this->markTestSkipped( 'Requires WC 5.4+' );
 		}
 
 		$order->set_status( 'on-hold' );
@@ -368,7 +368,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 
 		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
-			return;
+			$this->markTestSkipped( 'Requires WC 5.4+' );
 		}
 
 		$order->set_status( 'on-hold' );
