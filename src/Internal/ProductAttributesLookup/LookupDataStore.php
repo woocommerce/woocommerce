@@ -41,7 +41,7 @@ class LookupDataStore {
 		// TODO: For now data is always deleted and fully regenerated, existing data should be updated instead.
 
 		if ( ! is_a( $product, \WC_Product::class ) ) {
-			$product = wc_get_product( $product );
+			$product = WC()->call_function( 'wc_get_product', $product );
 		}
 
 		if ( $this->is_variation( $product ) ) {
@@ -162,7 +162,8 @@ class LookupDataStore {
 	private function get_term_ids_by_slug_cache( $taxonomies ) {
 		$result = array();
 		foreach ( $taxonomies as $taxonomy ) {
-			$terms               = get_terms(
+			$terms               = WC()->call_function(
+				'get_terms',
 				array(
 					'taxonomy'   => $taxonomy,
 					'hide_empty' => false,
@@ -201,7 +202,12 @@ class LookupDataStore {
 	 */
 	private function get_variations_of( \WC_Product_Variable $product ) {
 		$variation_ids = $product->get_children();
-		return array_map( 'wc_get_product', $variation_ids );
+		return array_map(
+			function( $id ) {
+				return WC()->call_function( 'wc_get_product', $id );
+			},
+			$variation_ids
+		);
 	}
 
 	/**
