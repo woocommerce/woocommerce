@@ -129,7 +129,206 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$actual = $this->get_lookup_table_data();
 
-		$this->assertEquals( $expected, $actual );
+		$this->assertEquals( sort( $expected ), sort( $actual ) );
+	}
+
+	/**
+	 * @testdox `test_update_data_for_product` creates the appropriate entries for variable products.
+	 */
+	public function test_update_data_for_variable_product() {
+		$products = array();
+
+		/**
+		 * Create one normal attribute and two attributes used to define variations,
+		 * with 4 terms each.
+		 */
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_terms'      => function( $args ) use ( &$invokations_of_get_terms ) {
+					switch ( $args['taxonomy'] ) {
+						case 'non-variation-attribute':
+							return array(
+								10 => 'term_10',
+								20 => 'term_20',
+								30 => 'term_30',
+								40 => 'term_40',
+							);
+						case 'variation-attribute-1':
+							return array(
+								50 => 'term_50',
+								60 => 'term_60',
+								70 => 'term_70',
+								80 => 'term_80',
+							);
+						case 'variation-attribute-2':
+							return array(
+								90  => 'term_90',
+								100 => 'term_100',
+								110 => 'term_110',
+								120 => 'term_120',
+							);
+						default:
+							throw new \Exception( "Unexpected call to 'get_terms'" );
+					}
+				},
+				'wc_get_product' => function( $id ) use ( &$products ) {
+					return $products[ $id ];
+				},
+			)
+		);
+
+		/**
+		 * Create a variable product with:
+		 * - 3 of the 4 values of the regular attribute.
+		 * - A custom product attribute.
+		 * - The two variation attributes, with 3 of the 4 terms for each one.
+		 * - Variation 1 having one value for each of the variation attributes.
+		 * - Variation 2 having one value for variation-attribute-1
+		 *   but none for variation-attribute-2 (so the value for that one is "Any").
+		 */
+
+		$product = new \WC_Product_Variable();
+		$product->set_id( 1000 );
+		$this->set_product_attributes(
+			$product,
+			array(
+				'non-variation-attribute' => array(
+					'id'      => 100,
+					'options' => array( 10, 20, 30 ),
+				),
+				'pa_custom_attribute'     => array(
+					'id'      => 0,
+					'options' => array( 'foo', 'bar' ),
+				),
+				'variation-attribute-1'   => array(
+					'id'        => 200,
+					'options'   => array( 50, 60, 70 ),
+					'variation' => true,
+				),
+				'variation-attribute-2'   => array(
+					'id'        => 300,
+					'options'   => array( 90, 100, 110 ),
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( 'instock' );
+
+		$variation_1 = new \WC_Product_Variation();
+		$variation_1->set_id( 1001 );
+		$variation_1->set_attributes(
+			array(
+				'variation-attribute-1' => 'term_50',
+				'variation-attribute-2' => 'term_90',
+			)
+		);
+		$variation_1->set_stock_status( 'instock' );
+
+		$variation_2 = new \WC_Product_Variation();
+		$variation_2->set_id( 1002 );
+		$variation_2->set_attributes(
+			array(
+				'variation-attribute-1' => 'term_60',
+			)
+		);
+		$variation_2->set_stock_status( 'outofstock' );
+
+		$product->set_children( array( 1001, 1002 ) );
+		$products[1000] = $product;
+		$products[1001] = $variation_1;
+		$products[1002] = $variation_2;
+
+		$this->sut->update_data_for_product( $product );
+
+		$expected = array(
+			// Main product: one entry for each of the regular attribute values,
+				// excluding custom product attributes.
+
+				array(
+					'product_id'             => '1000',
+					'product_or_parent_id'   => '1000',
+					'taxonomy'               => 'non-variation-attribute',
+					'term_id'                => '10',
+					'is_variation_attribute' => '0',
+					'in_stock'               => '1',
+				),
+			array(
+				'product_id'             => '1000',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'non-variation-attribute',
+				'term_id'                => '20',
+				'is_variation_attribute' => '0',
+				'in_stock'               => '1',
+			),
+			array(
+				'product_id'             => '1000',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'non-variation-attribute',
+				'term_id'                => '30',
+				'is_variation_attribute' => '0',
+				'in_stock'               => '1',
+			),
+
+			// Variation 1: one entry for each of the defined variation attributes.
+
+			array(
+				'product_id'             => '1001',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'variation-attribute-1',
+				'term_id'                => '50',
+				'is_variation_attribute' => '1',
+				'in_stock'               => '1',
+			),
+			array(
+				'product_id'             => '1001',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'variation-attribute-2',
+				'term_id'                => '90',
+				'is_variation_attribute' => '1',
+				'in_stock'               => '1',
+			),
+
+			// Variation 2: one entry for the defined value for variation-attribute-1,
+				// then one for each of the possible values of variation-attribute-2
+				// (the values defined in the parent product).
+
+				array(
+					'product_id'             => '1002',
+					'product_or_parent_id'   => '1000',
+					'taxonomy'               => 'variation-attribute-1',
+					'term_id'                => '60',
+					'is_variation_attribute' => '1',
+					'in_stock'               => '0',
+				),
+			array(
+				'product_id'             => '1002',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'variation-attribute-2',
+				'term_id'                => '90',
+				'is_variation_attribute' => '1',
+				'in_stock'               => '0',
+			),
+			array(
+				'product_id'             => '1002',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'variation-attribute-2',
+				'term_id'                => '100',
+				'is_variation_attribute' => '1',
+				'in_stock'               => '0',
+			),
+			array(
+				'product_id'             => '1002',
+				'product_or_parent_id'   => '1000',
+				'taxonomy'               => 'variation-attribute-2',
+				'term_id'                => '110',
+				'is_variation_attribute' => '1',
+				'in_stock'               => '0',
+			),
+		);
+
+		$actual = $this->get_lookup_table_data();
+		$this->assertEquals( sort( $expected ), sort( $actual ) );
 	}
 
 	/**
