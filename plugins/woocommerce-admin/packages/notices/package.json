@@ -22,9 +22,9 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime": "^7.11.2",
-		"@wordpress/a11y": "^2.13.0",
-		"@wordpress/data": "^4.25.0"
+		"@babel/runtime": "7.13.17",
+		"@wordpress/a11y": "2.15.2",
+		"@wordpress/data": "4.26.1"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"

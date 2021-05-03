@@ -31,6 +31,6 @@
 		"qs": "6.9.6"
 	},
 	"devDependencies": {
-		"@types/cookie": "^0.4.0"
+		"@types/cookie": "0.4.0"
 	}
 }
