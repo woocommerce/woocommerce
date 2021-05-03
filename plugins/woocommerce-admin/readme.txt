@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
 - Add: Consume remote payment methods on frontend #6867
 - Add: Add plugin installer to allow installation of plugins via URL #6805
 - Add: Optional children prop to SummaryNumber component #6748

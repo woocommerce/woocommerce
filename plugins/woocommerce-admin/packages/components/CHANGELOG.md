@@ -1,5 +1,6 @@
 # Unreleased
 
+-   Make `Search` accept synchronous `autocompleter.options`. #6884
 -   Add new (experimental) collapsible list item to collapse list items. #6869
 -   SelectControl: fix display of multiple selections without inline tags. #6862
 -   Add new (experimental) list, and add depreciation notice for the current list. #6787

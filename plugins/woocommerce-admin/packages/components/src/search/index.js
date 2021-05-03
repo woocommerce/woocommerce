@@ -108,8 +108,15 @@ export class Search extends Component {
 			return [];
 		}
 
-		const autocompleter = this.getAutocompleter();
-		return autocompleter.options( query ).then( async ( response ) => {
+		const autocompleterOptions = this.getAutocompleter().options;
+
+		// Support arrays, sync- & async functions that returns an array.
+		const resolvedOptions = Promise.resolve(
+			typeof autocompleterOptions === 'function'
+				? autocompleterOptions( query )
+				: autocompleterOptions || []
+		);
+		return resolvedOptions.then( async ( response ) => {
 			const options = this.getFormattedOptions( response, query );
 			this.setState( { options } );
 			return options;
