@@ -98,6 +98,7 @@ const runApiTests = () => {
 	runGroupedProductAPITest();
 	runVariableProductAPITest();
 	runCouponApiTest();
+	runOrderApiTest();
 }
 
 module.exports = {
@@ -124,6 +125,7 @@ module.exports = {
 	runUpdateGeneralSettingsTest,
 	runProductSettingsTest,
 	runTaxSettingsTest,
+	runOrderApiTest,
 	runOrderStatusFiltersTest,
 	runOrderRefundTest,
 	runOrderApplyCouponTest,

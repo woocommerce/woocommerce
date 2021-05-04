@@ -11,7 +11,6 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
-const simpleProductName = config.get( 'products.simple.name' );
 const customerEmail = config.get( 'addresses.customer.billing.email' );
 const adminEmail = 'admin@woocommercecoree2etestsuite.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
