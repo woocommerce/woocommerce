@@ -686,27 +686,32 @@ class WC_Checkout {
 			}
 
 			foreach ( $fieldset as $key => $field ) {
+				if ( isset( $_POST[ $key ] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
+					$value = wp_unslash( $_POST[ $key ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				} elseif ( isset( $field['default'] ) ) {
+					$value = $field['default'];
+				} else {
+					$value = '';
+				}
+
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
-				// phpcs:disable WordPress.Security.NonceVerification.Missing
 				switch ( $type ) {
 					case 'checkbox':
-						$value = isset( $_POST[ $key ] ) ? 1 : '';
+						$value = 1;
 						break;
 					case 'multiselect':
-						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : '';
+						$value = implode( ', ', wc_clean( $value ) );
 						break;
 					case 'textarea':
-						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : '';
+						$value = wc_sanitize_textarea( $value );
 						break;
 					case 'password':
-						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						break;
 					default:
-						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : '';
+						$value = wc_clean( $value );
 						break;
 				}
-				// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
 			}
