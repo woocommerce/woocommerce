@@ -1,5 +1,5 @@
-//import { HTTPClient } from '../../http';
-//import { orderRESTRepository } from '../../repositories';
+import { HTTPClient } from '../../http';
+import { orderRESTRepository } from '../../repositories';
 import {
 	ModelRepositoryParams,
 	CreatesModels,
@@ -50,47 +50,47 @@ type OrderUpdateParams = OrderAddressUpdateParams
 export type OrderRepositoryParams = ModelRepositoryParams< Order, never, never, OrderUpdateParams >;
 
 /**
- * An interface for creating coupons using the repository.
+ * An interface for creating orders using the repository.
  *
- * @typedef CreatesCoupons
- * @alias CreatesModels.<Coupon>
+ * @typedef CreatesOrders
+ * @alias CreatesModels.<Order>
  */
-export type CreatesCoupons = CreatesModels< OrderRepositoryParams >;
+export type CreatesOrders = CreatesModels< OrderRepositoryParams >;
 
 /**
- * An interface for reading coupons using the repository.
+ * An interface for reading orders using the repository.
  *
- * @typedef ReadsCoupons
- * @alias ReadsModels.<Coupon>
+ * @typedef ReadsOrders
+ * @alias ReadsModels.<Order>
  */
-export type ReadsCoupons = ReadsModels< OrderRepositoryParams >;
+export type ReadsOrders = ReadsModels< OrderRepositoryParams >;
 
 /**
- * An interface for updating coupons using the repository.
+ * An interface for updating orders using the repository.
  *
- * @typedef UpdatesCoupons
- * @alias UpdatesModels.<Coupon>
+ * @typedef UpdatesOrders
+ * @alias UpdatesModels.<Order>
  */
-export type UpdatesCoupons = UpdatesModels< OrderRepositoryParams >;
+export type UpdatesOrders = UpdatesModels< OrderRepositoryParams >;
 
 /**
- * An interface for listing coupons using the repository.
+ * An interface for listing orders using the repository.
  *
- * @typedef ListsCoupons
- * @alias ListsModels.<Coupon>
+ * @typedef ListsOrders
+ * @alias ListsModels.<Order>
  */
-export type ListsCoupons = ListsModels< OrderRepositoryParams >;
+export type ListsOrders = ListsModels< OrderRepositoryParams >;
 
 /**
- * An interface for deleting coupons using the repository.
+ * An interface for deleting orders using the repository.
  *
- * @typedef DeletesCoupons
- * @alias DeletesModels.<Coupons>
+ * @typedef DeletesOrders
+ * @alias DeletesModels.<Orders>
  */
-export type DeletesCoupons = DeletesModels< OrderRepositoryParams >;
+export type DeletesOrders = DeletesModels< OrderRepositoryParams >;
 
 /**
- * A coupon object.
+ * An order object.
  */
 export class Order extends OrderItemMeta {
 	/**
@@ -290,6 +290,13 @@ export class Order extends OrderItemMeta {
 	public readonly currencySymbol: string = '';
 
 	/**
+	 * The order's paid state.
+	 *
+	 * @type {boolean}
+	 */
+	public readonly setPaid: boolean = false;
+
+	/**
 	 * The order's line items.
 	 *
 	 * @type {ReadonlyArray.<OrderLineItem>}
@@ -342,7 +349,7 @@ export class Order extends OrderItemMeta {
 	};
 
 	/**
-	 * Creates a new coupon instance with the given properties
+	 * Creates a new order instance with the given properties
 	 *
 	 * @param {Object} properties The properties to set in the object.
 	 */
@@ -350,15 +357,13 @@ export class Order extends OrderItemMeta {
 		super();
 		Object.assign( this, properties );
 	}
-	/*
+
 	/**
 	 * Returns the repository for interacting with this type of model.
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	/*
 	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof orderRESTRepository > {
 		return orderRESTRepository( httpClient );
 	}
-	 */
 }

@@ -180,6 +180,17 @@
       }
     }
   },
+  "orders": {
+    "basicPaidOrder": {
+      "paymentMethod": "cod",
+      "status": "processing",
+      "billing": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com"
+      }
+    }
+  },
   "onboardingwizard": {
     "industry": "Test industry",
     "numberofproducts": "1 - 10",
