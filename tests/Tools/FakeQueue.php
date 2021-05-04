@@ -33,7 +33,15 @@ class FakeQueue implements \WC_Queue_Interface {
 	}
 
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		$this->add_to_methods_called( 'schedule_single', $args, $group, array( 'hook' => $hook ) );
+		$this->add_to_methods_called(
+			'schedule_single',
+			$args,
+			$group,
+			array(
+				'timestamp' => $timestamp,
+				'hook'      => $hook,
+			)
+		);
 	}
 
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
