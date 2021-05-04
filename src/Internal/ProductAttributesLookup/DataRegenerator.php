@@ -60,14 +60,12 @@ class DataRegenerator {
 			999
 		);
 
-		if ( $this->regeneration_is_in_progress() ) {
-			add_action(
-				'woocommerce_run_product_attribute_lookup_update_callback',
-				function () {
-					$this->run_regeneration_step_callback();
-				}
-			);
-		}
+		add_action(
+			'woocommerce_run_product_attribute_lookup_update_callback',
+			function () {
+				$this->run_regeneration_step_callback();
+			}
+		);
 	}
 
 	/**
@@ -156,16 +154,18 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$last_existing_product_id =
-			wc_get_products(
+			WC()->call_function(
+				'wc_get_products',
 				array(
 					'return'  => 'ids',
 					'limit'   => 1,
-					'orderby' => 'id',
-					'order'   => 'DESC',
+					'orderby' => array(
+						'ID' => 'DESC',
+					),
 				)
 			);
 
-		if ( false === $last_existing_product_id ) {
+		if ( ! $last_existing_product_id ) {
 			// No products exist, nothing to (re)generate.
 			return false;
 		}
@@ -198,7 +198,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 */
 	private function enqueue_regeneration_step_run() {
 		WC()->queue()->schedule_single(
-			time() + 1,
+			WC()->call_function( 'time' ) + 1,
 			'woocommerce_run_product_attribute_lookup_update_callback',
 			array(),
 			'woocommerce-db-updates'
@@ -215,7 +215,8 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		$last_products_page_processed = get_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
 		$current_products_page        = (int) $last_products_page_processed + 1;
 
-		$product_ids = wc_get_products(
+		$product_ids = WC()->call_function(
+			'wc_get_products',
 			array(
 				'limit'   => self::PRODUCTS_PER_GENERATION_STEP,
 				'page'    => $current_products_page,
@@ -226,11 +227,16 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			)
 		);
 
+		if ( ! $product_ids ) {
+			return false;
+		}
+
 		foreach ( $product_ids as $id ) {
 			$this->data_store->update_data_for_product( $id );
 		}
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', $current_products_page );
+
 		$last_product_id_to_process = get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
 		return end( $product_ids ) < $last_product_id_to_process;
 	}
