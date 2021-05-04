@@ -36,7 +36,7 @@ export class OrderItemTax extends Model {
 /**
  * An order address.
  */
-export class OrderAddress {
+export class OrderAddress extends Model {
 	/**
 	 * The first name of the person in the address.
 	 *
@@ -131,7 +131,7 @@ export class OrderLineItem extends OrderItemMeta {
 	 *
 	 * @type {number}
 	 */
-	public readonly ProductId: number = -1;
+	public readonly productId: number = -1;
 
 	/**
 	 * The ID of the product variation.
