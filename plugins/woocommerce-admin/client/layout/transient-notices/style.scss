@@ -22,6 +22,10 @@
 			margin-right: auto;
 		}
 	}
+
+	.has-woocommerce-navigation & {
+		left: $navigation-width + $gap;
+	}
 }
 
 .components-snackbar {
