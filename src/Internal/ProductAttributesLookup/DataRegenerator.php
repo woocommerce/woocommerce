@@ -197,7 +197,8 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * Enqueue one regeneration step in action scheduler.
 	 */
 	private function enqueue_regeneration_step_run() {
-		WC()->queue()->schedule_single(
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->schedule_single(
 			WC()->call_function( 'time' ) + 1,
 			'woocommerce_run_product_attribute_lookup_update_callback',
 			array(),
