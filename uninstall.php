@@ -30,6 +30,8 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
 	\Automattic\WooCommerce\Admin\Install::drop_tables();
 
+	define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+	
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
 
 	// Roles + caps.
