@@ -1,0 +1,32 @@
+name: "Pull request post-merge processing"
+on: 
+  pull_request:
+    types: [closed]
+
+jobs:
+  assign-milestone:
+    name: "Assign milestone to merged pull request"
+    if: github.event.pull_request.merged == true && ! github.event.pull_request.milestone
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Get the milestone changer script"
+      run: |
+        curl \
+        --silent \
+        --fail \
+        --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
+        --header 'User-Agent: GitHub action to set the milestone for a pull request' \
+        --header 'Accept: application/vnd.github.v3.raw' \
+        --remote-name \
+        --location $GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/assign-milestone-to-merged-pr.php
+      env:
+        GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
+    - name: "Install PHP"
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+    - name: "Run the milestone changer script"
+      run: php assign-milestone-to-merged-pr.php
+      env:
+        PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

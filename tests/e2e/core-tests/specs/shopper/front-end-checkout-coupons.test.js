@@ -34,13 +34,14 @@ const runCheckoutApplyCouponsTest = () => {
 			couponPercentage = await createCoupon('50', 'Percentage discount');
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await merchant.logout();
+			await shopper.emptyCart();
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
 			await uiUnblocked();
 			await shopper.goToCheckout();
 		});
 
-		it('allows customer to apply fixed cart coupon', async () => {
+		it('allows checkout to apply fixed cart coupon', async () => {
 			await applyCoupon(couponFixedCart);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
@@ -53,7 +54,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await removeCoupon(couponFixedCart);
 		});
 
-		it('allows customer to apply percentage coupon', async () => {
+		it('allows checkout to apply percentage coupon', async () => {
 			await applyCoupon(couponPercentage);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
@@ -63,7 +64,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await removeCoupon(couponPercentage);
 		});
 
-		it('allows customer to apply fixed product coupon', async () => {
+		it('allows checkout to apply fixed product coupon', async () => {
 			await applyCoupon(couponFixedProduct);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
@@ -74,7 +75,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await removeCoupon(couponFixedProduct);
 		});
 
-		it('prevents customer applying same coupon twice', async () => {
+		it('prevents checkout applying same coupon twice', async () => {
 			await applyCoupon(couponFixedCart);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 			await applyCoupon(couponFixedCart);
@@ -84,7 +85,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
 		});
 
-		it('allows customer to apply multiple coupons', async () => {
+		it('allows checkout to apply multiple coupons', async () => {
 			await applyCoupon(couponFixedProduct);
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
@@ -93,7 +94,7 @@ const runCheckoutApplyCouponsTest = () => {
 			await expect(page).toMatchElement('.order-total .amount', {text: '$0.00'});
 		});
 
-		it('restores cart total when coupons are removed', async () => {
+		it('restores checkout total when coupons are removed', async () => {
 			await removeCoupon(couponFixedCart);
 			await removeCoupon(couponFixedProduct);
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});

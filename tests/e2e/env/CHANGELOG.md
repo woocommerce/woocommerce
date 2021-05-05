@@ -1,5 +1,11 @@
 # Unreleased
 
+## Added
+
+- `takeScreenshotFor` utility function to take screenshots within tests
+- `sendFailedTestScreenshotToSlack` to send the screenshot to the configured Slack channel
+- `sendFailedTestMessageToSlack` to send the context for screenshot to the configured Slack channel
+- `toBeInRange` expect numeric range matcher
 
 # 0.2.1
 

@@ -252,7 +252,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			if ( '' === get_option( 'permalink_structure' ) ) {
 				$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
 			} else {
-				$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
+				$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( user_trailingslashit( $wp->request ) ) );
 			}
 
 			echo '<form method="get" action="' . esc_url( $form_action ) . '" class="woocommerce-widget-layered-nav-dropdown">';

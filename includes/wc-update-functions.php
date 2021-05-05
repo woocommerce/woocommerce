@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+
 /**
  * Update file paths for 2.0
  *
@@ -1567,31 +1569,12 @@ function wc_update_330_webhooks() {
  * Assign default cat to all products with no cats.
  */
 function wc_update_330_set_default_product_cat() {
-	global $wpdb;
-
-	$default_category = get_option( 'default_product_cat', 0 );
-
-	if ( $default_category ) {
-		$wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
-				SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
-				LEFT JOIN
-					(
-						SELECT object_id FROM {$wpdb->term_relationships} term_relationships
-						LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
-						WHERE term_taxonomy.taxonomy = 'product_cat'
-					) AS tax_query
-				ON posts.ID = tax_query.object_id
-				WHERE posts.post_type = 'product'
-				AND tax_query.object_id IS NULL",
-				$default_category
-			)
-		);
-		wp_cache_flush();
-		delete_transient( 'wc_term_counts' );
-		wp_update_term_count_now( array( $default_category ), 'product_cat' );
-	}
+	/*
+	 * When a product category is deleted, we need to check
+	 * if the product has no categories assigned. Then assign
+	 * it a default category.
+	 */
+	wc_get_container()->get( AssignDefaultCategory::class )->maybe_assign_default_product_cat();
 }
 
 /**

@@ -139,7 +139,7 @@ class WC_Template_Loader {
 				if ( 0 === $validated_file ) {
 					$templates[] = $page_template;
 				} else {
-					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." );
+					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 			}
 		}
@@ -294,8 +294,8 @@ class WC_Template_Loader {
 		}
 
 		// Description handling.
-		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			$prefix = '<div class="term-description">' . wc_format_content( $queried_object->description ) . '</div>'; // WPCS: XSS ok.
+		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$prefix = '<div class="term-description">' . wc_format_content( wp_kses_post( $queried_object->description ) ) . '</div>';
 		} else {
 			$prefix = '';
 		}
