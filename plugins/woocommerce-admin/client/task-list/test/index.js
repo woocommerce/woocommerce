@@ -24,6 +24,7 @@ import { DisplayOption } from '../../header/activity-panel/display-options';
 
 jest.mock( '@wordpress/api-fetch' );
 jest.mock( '../tasks', () => ( {
+	...jest.requireActual( '../tasks' ),
 	recordTaskViewEvent: jest.fn(),
 	getAllTasks: jest.fn(),
 } ) );

@@ -298,6 +298,7 @@ export const TaskList = ( {
 									isDismissable={ task.isDismissable }
 									onDismiss={ () => dismissTask( task ) }
 									time={ task.time }
+									level={ task.level }
 								/>
 							) ) }
 						</ListComp>

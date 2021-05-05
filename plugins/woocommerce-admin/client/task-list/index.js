@@ -19,7 +19,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './style.scss';
 import CartModal from '../dashboard/components/cart-modal';
-import { getAllTasks } from './tasks';
+import { getAllTasks, taskSort } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
 import TaskList from './task-list';
 import { DisplayOption } from '../header/activity-panel/display-options';
@@ -179,14 +179,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 	const { task } = query;
 
 	const extensionTasks =
-		Array.isArray( extension ) &&
-		extension.sort( ( a, b ) => {
-			if ( Boolean( a.completed ) === Boolean( b.completed ) ) {
-				return 0;
-			}
-
-			return a.completed ? 1 : -1;
-		} );
+		Array.isArray( extension ) && extension.sort( taskSort );
 
 	const currentTask = getCurrentTask( [
 		...( extensionTasks || [] ),

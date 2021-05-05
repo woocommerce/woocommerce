@@ -19,14 +19,14 @@
 				}
 			}
 
-			.woocommerce-list__item:not(.is-complete) {
+			.woocommerce-list__item:not(.complete) {
 				.woocommerce-task__icon {
 					border: 1px solid $gray-100;
 					background: $white;
 				}
 			}
 
-			.woocommerce-list__item.is-complete {
+			.woocommerce-list__item.complete {
 				.woocommerce-list__item-title {
 					color: $gray-700;
 				}
