@@ -640,7 +640,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 *  TODO: Refactor to fix this behavior when DI gets included to make it obvious and clean.
 		*/
-		$request = func_num_args() >= 2 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
+		$request = func_num_args() >= 3 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
 		$fields  = $this->get_fields_for_response( $request );
 
 		$base_data = array();
