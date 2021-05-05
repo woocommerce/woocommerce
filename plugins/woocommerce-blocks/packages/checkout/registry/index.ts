@@ -11,7 +11,7 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { returnTrue } from '../utils';
 
 type CheckoutFilterFunction = < T >(
-	label: T,
+	value: T,
 	extensions: Record< string, unknown >,
 	args?: CheckoutFilterArguments
 ) => T;

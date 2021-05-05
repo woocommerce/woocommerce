@@ -8,3 +8,4 @@ These documents are all dealing with extensibility in the various WooCommerce Bl
 | ---------- | ---------- |
 [Payment Method Integration](./payment-method-integration.md) | Information about implementing payment methods.
 [Checkout Flow and Events](./checkout-flow-and-events.md) | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to.
+[Available Filters](./available-filters.md) | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.
