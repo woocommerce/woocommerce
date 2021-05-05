@@ -14,10 +14,13 @@ import {
 	setCheckbox,
 	unsetCheckbox,
 	evalAndClick,
-	clearAndFillInput,
+	backboneUnblocked,
+	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
+import { Coupon } from '@woocommerce/api';
 
+const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
@@ -58,6 +61,7 @@ const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
  */
 const completeOnboardingWizard = async () => {
 	// Store Details section
+	await merchant.runSetupWizard();
 
 	// Fill store's address - first line
 	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
@@ -84,8 +88,8 @@ const completeOnboardingWizard = async () => {
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
 	// Wait for usage tracking pop-up window to appear on a new site
-	if ( ! IS_RETEST_MODE ) {
-		await page.waitForSelector('.components-modal__header-heading');
+	const usageTrackingHeader = await page.$('.components-modal__header-heading');
+	if ( usageTrackingHeader ) {
 		await expect(page).toMatchElement(
 			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
 		);
@@ -163,24 +167,18 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for homescreen welcome modal to appear
-	await page.waitForSelector( '.woocommerce__welcome-modal__page-content__header' );
-	await expect( page ).toMatchElement(
-		'.woocommerce__welcome-modal__page-content__header', { text: 'Welcome to your WooCommerce store\’s online HQ!' }
-	);
+	let welcomeHeader = await waitForSelectorWithoutThrow( '.woocommerce__welcome-modal__page-content' );
+	if ( ! welcomeHeader ) {
+		return;
+	}
 
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
-
-	// Wait for "Next" button to become active
-	await page.waitForSelector( 'button.components-guide__forward-button' );
-	// Click on "Next" button to move to the next step
-	await page.click( 'button.components-guide__forward-button' );
-
+	// Click two Next buttons
+	for ( let b = 0; b < 2; b++ ) {
+		await page.waitForSelector('button.components-guide__forward-button');
+		await page.click('button.components-guide__forward-button');
+	}
 	// Wait for "Let's go" button to become active
 	await page.waitForSelector( 'button.components-guide__finish-button' );
-	// Click on "Let's go" button to move to the next step
 	await page.click( 'button.components-guide__finish-button' );
 };
 
@@ -433,11 +431,12 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'button.add-order-item' );
 	await page.waitForSelector( '.wc-backbone-modal-header' );
 	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
-	await expect( page ).toFill( '#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName );
+	await expect( page ).toFill('#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName);
+	await page.waitForSelector( 'li[aria-selected="true"]', { timeout: 10000 } );
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
 	await page.click( '.wc-backbone-modal-content #btn-ok' );
 
-	await uiUnblocked();
+	await backboneUnblocked();
 
 	// Verify the product we added shows as a line item now
 	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
@@ -450,23 +449,29 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param discountType Type of a coupon. Defaults to Fixed cart discount.
  */
 const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart discount' ) => {
-	await merchant.openNewCoupon();
+	let couponType;
+	switch ( discountType ) {
+		case "Fixed cart discount":
+			couponType = 'fixed_cart';
+			break;
+		case "Fixed product discount":
+			couponType = 'fixed_product';
+			break;
+		case "Percentage discount":
+			couponType = 'percent';
+			break;
+		default:
+			couponType = discountType;
+	}
 
 	// Fill in coupon code
-	let couponCode = 'Code-' + discountType + new Date().getTime().toString();
-	await expect(page).toFill( '#title', couponCode );
-
-	// Set general coupon data
-	await clickTab( 'General' );
-	await expect(page).toSelect( '#discount_type', discountType );
-	await expect(page).toFill( '#coupon_amount', couponAmount );
-
-	// Publish coupon
-	await expect( page ).toClick( '#publish' );
-	await page.waitForSelector( '.updated.notice' );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Coupon updated.' } );
+	let couponCode = 'code-' + couponType + new Date().getTime().toString();
+	const repository = Coupon.restRepository( client );
+	await repository.create( {
+		code: couponCode,
+		discountType: couponType,
+		amount: couponAmount,
+	});
 
 	return couponCode;
 };
