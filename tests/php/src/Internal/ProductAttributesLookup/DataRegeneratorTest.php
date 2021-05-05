@@ -94,9 +94,11 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		$this->sut->initiate_regeneration();
 
-		$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $this->lookup_table_name ) );
-
-		$this->assertEquals( $this->lookup_table_name, $wpdb->get_var( $query ) );
+		// Try to insert a row to verify that the table exists.
+		// We can't use the regular table existence detection mechanisms because PHPUnit creates all tables as temporary.
+		$wpdb->query( 'INSERT INTO ' . $this->lookup_table_name . " VALUES (1, 1, 'taxonomy', 1, 1, 1 )" );
+		$value = $wpdb->get_var( 'SELECT product_id FROM ' . $this->lookup_table_name . ' LIMIT 1' );
+		$this->assertEquals( 1, $value );
 
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
