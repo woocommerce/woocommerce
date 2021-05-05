@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Exclude WC Shipping for store that are only offering downloadable products #6917
+
+1. Start OBW and enter an address that is in the US.
+2. Choose "food and drink" from the Industry 
+3. Choose "Downloads" from the Product Types step.
+4. When you get to the Business Details step, expand "Add recommended business features to my site" by clicking the down arrow.
+5. Note that "WooCommerce Shipping" is not listed.
+
 ### Redirect users to WooCommerce Home after setting up a payment method #6891
 
 1. Navigate to WooCommerce -> Home and choose "Choose payment methods".
