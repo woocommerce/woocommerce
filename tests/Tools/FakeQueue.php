@@ -11,11 +11,18 @@ namespace Automattic\WooCommerce\Testing\Tools;
  * Fake scheduled actions queue for unit tests, it just records all the method calls
  * in a publicly accessible $methods_called property.
  *
- * To use, add this to the setUp method of the unit tests class:
+ * To use:
  *
- * add_filter( 'woocommerce_queue_class', function() { return FakeQueue::class; } );
+ * 1. The production class must get an instance of the queue in this way:
  *
- * then WC->queue() will return an instance of this class.
+ * WC()->get_instance_of(\WC_Queue::class)
+ *
+ * 2. Add the following in the setUp() method of the unit tests class:
+ *
+ * $this->register_legacy_proxy_class_mocks([\WC_Queue::class => new FakeQueue()]);
+ *
+ * 3. Get the instance of the fake queue with $this->get_legacy_instance_of(\WC_Queue::class)
+ *    and check its methods_called field as appropriate.
  */
 class FakeQueue implements \WC_Queue_Interface {
 

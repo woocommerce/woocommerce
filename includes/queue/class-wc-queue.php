@@ -49,14 +49,6 @@ class WC_Queue {
 	}
 
 	/**
-	 * Reset the singleton instance so that the next time instance() is invoked
-	 * the woocommerce_queue_class hook will be fired again.
-	 */
-	final public static function reset_instance() {
-		self::$instance = null;
-	}
-
-	/**
 	 * Get class to instantiate
 	 *
 	 * And make sure 3rd party code has the chance to attach a custom queue class.
