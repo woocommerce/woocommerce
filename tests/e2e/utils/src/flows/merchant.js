@@ -57,9 +57,11 @@ const merchant = {
 			( am ) => am.filter( ( e ) => e.href ).map( ( e ) => e.href )
 		);
 
-		await page.goto( logoutLinks[ 0 ], {
-			waitUntil: 'networkidle0',
-		} );
+		if ( logoutLinks && logoutLinks[0] ) {
+			await page.goto(logoutLinks[0], {
+				waitUntil: 'networkidle0',
+			});
+		}
 	},
 
 	openAllOrdersView: async () => {

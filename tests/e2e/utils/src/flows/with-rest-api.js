@@ -24,7 +24,10 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) 
 			if ( objects[ o ].id == defaultObjectId ) {
 				continue;
 			}
-			await repository.delete( objects[ o ].id );
+			// We may be getting a cached copy of the dataset and the object has already been deleted.
+			try {
+				await repository.delete(objects[o].id);
+			} catch (e) {}
 		}
 		objects = await repository.list();
 	}
