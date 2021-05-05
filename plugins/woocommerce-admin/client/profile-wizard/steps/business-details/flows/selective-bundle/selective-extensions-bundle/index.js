@@ -145,7 +145,7 @@ const installableExtensions = [
 				slug: 'mailpoet',
 				description: generatePluginDescriptionWithLink(
 					__(
-						'Level up your email marketing with {{link}}Mailpoet{{/link}}',
+						'Level up your email marketing with {{link}}MailPoet{{/link}}',
 						'woocommerce-admin'
 					),
 					'mailpoet',

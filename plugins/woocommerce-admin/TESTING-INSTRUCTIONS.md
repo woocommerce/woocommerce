@@ -14,12 +14,12 @@
 
 1. Navigate to WooCommerce -> Home and choose "Choose payment methods".
 2. Click one of the payment methods and go through the setup process.
-3. You should be redirected to WooCommerce Home with a notice when you are done. 
+3. You should be redirected to WooCommerce Home with a notice when you are done.
 
 ### Disable the continue btn when plugins are being installed/activated #6838
 
-1. In OBW fill out store details with a USA address 
-2. Click Continue and select Fashion, apparel, and accessories, 
+1. In OBW fill out store details with a USA address
+2. Click Continue and select Fashion, apparel, and accessories,
 3. Click Continue, and select Physical products, and continue.
 4. The business details tab should show a Business details tab, and a Free features tab (disabled at first)
 5. Select 1-10 for the first dropdown, and No for the second, and click Continue.
@@ -57,7 +57,9 @@
 1. Visit any admin page with the params `plugin_action` (`install`, `activate`, or `install-activate`) and `plugins` (list of comma separated plugins). `wp-admin/admin.php?page=wc-admin&plugin_action=install&plugins=jetpack`
 2. If visiting this URL from a link, make sure you are sent back to the referer.
 3. Check that the plugins provided are installed, activated, or both depending on your query.
+
 ### Update the checked input radio button margin style #6701
+
 1. Go to Home.
 2. Click on 'Add my products'.
 3. Select 'Start with a template'.
@@ -429,7 +431,7 @@ add_filter( 'woocommerce_admin_status_tabs', function ( array $tabs ) {
 -   Under `Free features` tab, verify that the displayed extensions are:
 
 ```
-Mailpoet
+MailPoet
 Facebook
 Google Ads
 Mailchimp
@@ -449,7 +451,7 @@ Creative Mail
 -   Verify that the displayed extensions are:
 
 ```
-Mailpoet
+MailPoet
 Facebook
 Google Ads
 Mailchimp
