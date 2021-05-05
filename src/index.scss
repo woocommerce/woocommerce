@@ -50,3 +50,19 @@
 .wca-test-helper-edit-btn-save {
     float: right;
 }
+
+#wc-admin-test-helper-tools {
+    table.tools {
+        thead th {
+            text-align: center;
+        }
+        tbody td {
+            &.command {
+                white-space: nowrap;
+            }
+        }
+    }
+    .components-notice {
+        margin: 0px 0px 10px 0px;
+    }    
+}

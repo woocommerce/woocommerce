@@ -42,15 +42,15 @@ export function setNotice( notice ) {
 	};
 }
 
-export function* deleteOptionById( optionId ) {
+export function* deleteOption( optionName ) {
 	try {
 		yield apiFetch( {
 			method: 'DELETE',
-			path: `${ API_NAMESPACE }/options/${ optionId }`,
+			path: `${ API_NAMESPACE }/options/${ optionName }`,
 		} );
 		yield {
-			type: TYPES.DELETE_OPTION_BY_ID,
-			optionId,
+			type: TYPES.DELETE_OPTION,
+			optionName,
 		};
 	} catch {
 		throw new Error();
