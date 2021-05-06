@@ -937,6 +937,15 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'CW' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'required' => false,
+						),
+					),
 					'CZ' => array(
 						'state' => array(
 							'required' => false,
