@@ -74,6 +74,7 @@ class WC_Payment_Tokens {
 			array(
 				'user_id'    => $customer_id,
 				'gateway_id' => $gateway_id,
+				'limit'      => apply_filters( 'woocommerce_get_customer_payment_tokens_limit', 10 ),
 			)
 		);
 
