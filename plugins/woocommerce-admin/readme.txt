@@ -90,6 +90,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Fixed storybook build script #6875
 - Dev: Removed allowed keys list for adding woocommerce_meta data. #6889 🎉 @xristos3490
 - Dev: Delete all products when running product import tests, unskip previously skipped test. #6905
+- Dev: Do a git clean before the core release. #6945
 - Enhancement: Add recommended payment methods in payment settings. #6760
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916

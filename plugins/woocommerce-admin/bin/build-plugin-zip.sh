@@ -111,6 +111,11 @@ status "Starting a Github release... 👷‍♀️"
 ./bin/github-deploy.sh ${PLUGIN_TAG} ${ZIP_FILE}
 
 if [ $IS_CUSTOM_BUILD = false ]; then
+	# Remove ignored files to reset repository to pristine condition. Previous
+	# test ensures that changed files abort the plugin build.
+	status "Cleaning working directory... 🛀"
+	git clean -xdf
+
 	# Install PHP dependencies
 	status "Gathering PHP dependencies... 🐿️"
 	composer install --no-dev
