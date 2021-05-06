@@ -50,7 +50,6 @@ class WC_Admin_Addons {
 
 		if ( is_object( $featured ) ) {
 			self::output_featured_sections( $featured->sections );
-
 			return $featured;
 		}
 	}
@@ -58,9 +57,9 @@ class WC_Admin_Addons {
 	/**
 	 * Build url parameter string
 	 *
-	 * @param string $category Addon (sub) category.
-	 * @param string $term     Search terms.
-	 * @param string $country  Store country.
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return string url parameter string
 	 */
@@ -78,14 +77,14 @@ class WC_Admin_Addons {
 	/**
 	 * Call API to get extensions
 	 *
-	 * @param string $category Addon (sub) category.
-	 * @param string $term     Search terms.
-	 * @param string $country  Store country.
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return array of extensions
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
-		$parameters = self::build_parameter_string( $category, $term, $country );
+		$parameters     = self::build_parameter_string( $category, $term, $country );
 
 		$headers = array();
 		$auth    = WC_Helper_Options::get( 'auth' );
@@ -102,7 +101,6 @@ class WC_Admin_Addons {
 		if ( ! is_wp_error( $raw_extensions ) ) {
 			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
 		}
-
 		return $addons;
 	}
 
@@ -124,14 +122,13 @@ class WC_Admin_Addons {
 				}
 			}
 		}
-
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
 	}
 
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param string $section_id Required section ID.
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return object|bool
 	 */
@@ -140,14 +137,13 @@ class WC_Admin_Addons {
 		if ( isset( $sections[ $section_id ] ) ) {
 			return $sections[ $section_id ];
 		}
-
 		return false;
 	}
 
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param string $section_id Required section ID.
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return array
 	 */
@@ -230,12 +226,12 @@ class WC_Admin_Addons {
 								<h3><?php echo esc_html( $item->title ); ?></h3>
 								<p><?php echo esc_html( $item->description ); ?></p>
 								<?php
-								self::output_button(
-									$item->href,
-									$item->button,
-									'addons-button-solid',
-									$item->plugin
-								);
+									self::output_button(
+										$item->href,
+										$item->button,
+										'addons-button-solid',
+										$item->plugin
+									);
 								?>
 							</div>
 						</div>
@@ -292,12 +288,12 @@ class WC_Admin_Addons {
 						<div class="addons-column-block-item-content">
 							<h2><?php echo esc_html( $item->title ); ?></h2>
 							<?php
-							self::output_button(
-								$item->href,
-								$item->button,
-								'addons-button-solid',
-								$item->plugin
-							);
+								self::output_button(
+									$item->href,
+									$item->button,
+									'addons-button-solid',
+									$item->plugin
+								);
 							?>
 							<p><?php echo esc_html( $item->description ); ?></p>
 						</div>
@@ -324,11 +320,11 @@ class WC_Admin_Addons {
 				<div class="addons-small-light-block-buttons">
 					<?php foreach ( $block->buttons as $button ) : ?>
 						<?php
-						self::output_button(
-							$button->href,
-							$button->text,
-							'addons-button-solid'
-						);
+							self::output_button(
+								$button->href,
+								$button->text,
+								'addons-button-solid'
+							);
 						?>
 					<?php endforeach; ?>
 				</div>
@@ -356,11 +352,11 @@ class WC_Admin_Addons {
 							</div>
 						<?php endif; ?>
 						<?php
-						self::output_button(
-							$item->href,
-							$item->button,
-							'addons-button-outline-white'
-						);
+							self::output_button(
+								$item->href,
+								$item->button,
+								'addons-button-outline-white'
+							);
 						?>
 					</div>
 				<?php endforeach; ?>
@@ -465,11 +461,11 @@ class WC_Admin_Addons {
 					<?php endforeach; ?>
 				</ul>
 				<?php
-				self::output_button(
-					$block_data['href'],
-					$block_data['button'],
-					'addons-button-outline-purple'
-				);
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
+					);
 				?>
 			</div>
 		</div>
@@ -527,17 +523,22 @@ class WC_Admin_Addons {
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
 				<?php
-				self::output_button(
-					$block_data['href'],
-					$block_data['button'],
-					'addons-button-outline-purple'
-				);
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
+					);
 				?>
 			</div>
 		</div>
 		<?php
 	}
 
+	/**
+	 * Handles the output of a full-width block.
+	 *
+	 * @param $section
+	 */
 	public static function output_ad_block( $section ) {
 		if (
 			! current_user_can( 'install_plugins' ) ||
@@ -642,7 +643,6 @@ class WC_Admin_Addons {
 		// Get url (from path onward) for the current page,
 		// so WCCOM "back" link returns user to where they were.
 		$back_admin_path = add_query_arg( array() );
-
 		return array(
 			'wccom-site'          => site_url(),
 			'wccom-back'          => rawurlencode( $back_admin_path ),
@@ -657,7 +657,7 @@ class WC_Admin_Addons {
 	 * Adds various url parameters to a url to support a streamlined
 	 * flow for obtaining and setting up WooCommerce extensons.
 	 *
-	 * @param string $url Destination URL.
+	 * @param string $url    Destination URL.
 	 */
 	public static function add_in_app_purchase_url_params( $url ) {
 		return add_query_arg(
@@ -698,7 +698,6 @@ class WC_Admin_Addons {
 
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			do_action( 'woocommerce_helper_output' );
-
 			return;
 		}
 
@@ -785,7 +784,6 @@ class WC_Admin_Addons {
 	 * Should an extension be shown on the featured page.
 	 *
 	 * @param object $item Item data.
-	 *
 	 * @return boolean
 	 */
 	public static function show_extension( $item ) {
