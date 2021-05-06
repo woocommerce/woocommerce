@@ -1,5 +1,7 @@
 # Unreleased
 
+-   SelectControl: automatically scroll to selected options when list is displayed. #6906
+-   SelectControl: no longer auto selects on rendering list. #6906
 -   Make `Search` accept synchronous `autocompleter.options`. #6884
 -   Add new (experimental) collapsible list item to collapse list items. #6869
 -   SelectControl: fix display of multiple selections without inline tags. #6862

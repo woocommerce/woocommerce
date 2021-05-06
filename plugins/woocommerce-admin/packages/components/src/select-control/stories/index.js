@@ -59,6 +59,7 @@ const SelectControlExample = withState( {
 	singleSelectedShowAll: [],
 	multipleSelected: [],
 	inlineSelected: [],
+	allOptionsIncludingSelected: options[ options.length - 1 ].key,
 } )(
 	( {
 		simpleSelected,
@@ -67,6 +68,7 @@ const SelectControlExample = withState( {
 		singleSelectedShowAll,
 		multipleSelected,
 		inlineSelected,
+		allOptionsIncludingSelected,
 		setState,
 	} ) => (
 		<div>
@@ -89,6 +91,19 @@ const SelectControlExample = withState( {
 				options={ options }
 				placeholder="Start typing to filter options..."
 				selected={ simpleMultipleSelected }
+			/>
+			<br />
+			<SelectControl
+				label="Show all options with default selected"
+				onChange={ ( selected ) =>
+					setState( { allOptionsIncludingSelected: selected } )
+				}
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ allOptionsIncludingSelected }
+				showAllOnFocus
+				isSearchable
+				excludeSelectedOptions={ false }
 			/>
 			<br />
 			<SelectControl

@@ -119,6 +119,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Get currency from CurrencyContext #6723
 - Fix: Correct the left position of transient notices when the new nav is used. #6914
 - Fix: Exclude WC Shipping for store that are only offering downloadable products #6917
+- Fix: SelectControl focus and de-focus bug #6906
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Tweak: Add settings_section event prop for CES #6762
 - Tweak: Refactor payments to allow management of methods #6786

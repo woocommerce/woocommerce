@@ -25,10 +25,15 @@ const initialState = { isExpanded: false, isFocused: false, query: '' };
 export class SelectControl extends Component {
 	constructor( props ) {
 		super( props );
+
+		const { selected, options, excludeSelectedOptions } = props;
 		this.state = {
 			...initialState,
 			searchOptions: [],
-			selectedIndex: 0,
+			selectedIndex:
+				selected && options?.length && ! excludeSelectedOptions
+					? options.findIndex( ( option ) => option.key === selected )
+					: null,
 		};
 
 		this.bindNode = this.bindNode.bind( this );
@@ -50,11 +55,16 @@ export class SelectControl extends Component {
 	}
 
 	reset( selected = this.getSelected() ) {
-		const { multiple } = this.props;
+		const { multiple, excludeSelectedOptions } = this.props;
 		const newState = { ...initialState };
-		// Reset to the option label if single selection.
+		// Reset to the option label and selectedIndex if single selection.
 		if ( ! multiple && selected.length && selected[ 0 ].label ) {
 			newState.query = selected[ 0 ].label;
+			newState.selectedIndex = ! excludeSelectedOptions
+				? this.props.options.findIndex(
+						( i ) => i.key === selected[ 0 ].key
+				  )
+				: null;
 		}
 
 		this.setState( newState );
@@ -107,6 +117,17 @@ export class SelectControl extends Component {
 		if ( isSelected === -1 ) {
 			this.setNewValue( newSelected );
 		}
+
+		// After selecting option, the list will reset and we'd need to correct selectedIndex.
+		const newSelectedIndex = this.props.excludeSelectedOptions
+			? // Since we're excluding the selected option, invalidate selection
+			  // so re-focusing wont immediately set it to the neigbouring option.
+			  null
+			: this.getOptions().findIndex( ( i ) => i.key === option.key );
+
+		this.setState( {
+			selectedIndex: newSelectedIndex,
+		} );
 	}
 
 	setNewValue( newValue ) {
@@ -233,8 +254,9 @@ export class SelectControl extends Component {
 			{
 				query,
 				isFocused: true,
-				selectedIndex: 0,
 				searchOptions,
+				selectedIndex:
+					query?.length > 0 ? null : this.state.selectedIndex, // Only reset selectedIndex if we're actually searching.
 			},
 			() => {
 				this.setState( {
@@ -268,8 +290,9 @@ export class SelectControl extends Component {
 
 			this.setState(
 				{
-					selectedIndex: 0,
 					searchOptions,
+					selectedIndex:
+						query?.length > 0 ? null : this.state.selectedIndex, // Only reset selectedIndex if we're actually searching.
 				},
 				() => {
 					this.setState( {
