@@ -539,7 +539,7 @@ class WC_Admin_Addons {
 	 *
 	 * @param array $section Section data.
 	 */
-	public static function output_ad_block( $section ) {
+	public static function output_promotion_block( $section ) {
 		if (
 			! current_user_can( 'install_plugins' ) ||
 			! current_user_can( 'activate_plugins' )
@@ -558,18 +558,18 @@ class WC_Admin_Addons {
 		}
 
 		?>
-		<div class="addons-banner-block addons-ad-block">
+		<div class="addons-banner-block addons-promotion-block">
 			<img
 				class="addons-img"
 				src="<?php echo esc_url( $section['image'] ); ?>"
 				alt="<?php echo esc_attr( $section['image_alt'] ); ?>"
 			/>
-			<div class="addons-ad-block-content">
-				<h1 class="addons-ad-block-title"><?php echo esc_html( $section['title'] ); ?></h1>
-				<div class="addons-ad-block-description">
+			<div class="addons-promotion-block-content">
+				<h1 class="addons-promotion-block-title"><?php echo esc_html( $section['title'] ); ?></h1>
+				<div class="addons-promotion-block-description">
 					<?php echo wp_kses_post( $section['description'] ); ?>
 				</div>
-				<div class="addons-ad-block-buttons">
+				<div class="addons-promotion-block-buttons">
 					<?php
 
 					if ( $section['button_1'] ) {
@@ -629,8 +629,8 @@ class WC_Admin_Addons {
 				case 'wcpay_banner_block':
 					self::output_wcpay_banner_block( (array) $section );
 					break;
-				case 'wcpay_global_banner_block':
-					self::output_ad_block( (array) $section );
+				case 'promotion_block':
+					self::output_promotion_block( (array) $section );
 					break;
 			}
 		}
