@@ -161,7 +161,7 @@
 		}
 	}
 
-	.addons-ad-block {
+	.addons-promotion-block {
 		display: flex;
 		padding: 20px;
 
@@ -171,22 +171,22 @@
 		}
 	}
 
-	.addons-ad-block-content {
+	.addons-promotion-block-content {
 		display: flex;
 		flex-direction: column;
 		margin-left: 24px;
 	}
 
-	.addons-ad-block-description {
+	.addons-promotion-block-description {
 		margin-bottom: 20px;
 	}
 
-	.addons-ad-block-title {
+	.addons-promotion-block-title {
 		margin: 0 0 16px;
 		padding: 0;
 	}
 
-	.addons-ad-block-buttons {
+	.addons-promotion-block-buttons {
 		margin-top: auto;
 
 		.addons-button {
@@ -2688,7 +2688,7 @@ ul.wc_coupon_list_block {
 
 	.wc_addons_wrap {
 
-		.addons-ad-block {
+		.addons-promotion-block {
 			flex-direction: column;
 			padding: 24px;
 
@@ -2700,12 +2700,12 @@ ul.wc_coupon_list_block {
 			}
 		}
 
-		.addons-ad-block-content {
+		.addons-promotion-block-content {
 			display: block;
 			margin-left: 0;
 		}
 
-		.addons-ad-block-title {
+		.addons-promotion-block-title {
 			margin-top: 4px;
 		}
 	}
