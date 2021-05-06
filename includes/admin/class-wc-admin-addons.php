@@ -537,7 +537,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the output of a full-width block.
 	 *
-	 * @param $section
+	 * array $section Section data for this block, which is a section itself.
 	 */
 	public static function output_ad_block( $section ) {
 		if (
