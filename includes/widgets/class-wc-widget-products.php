@@ -186,6 +186,8 @@ class WC_Widget_Products extends WC_Widget {
 
 		ob_start();
 
+		wc_set_loop_prop( 'name', 'widget' );
+
 		$products = $this->get_products( $args, $instance );
 		if ( $products && $products->have_posts() ) {
 			$this->widget_start( $args, $instance );
