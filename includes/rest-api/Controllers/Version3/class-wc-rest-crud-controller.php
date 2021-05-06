@@ -300,16 +300,11 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			$args['date_query'][0]['after'] = $request['after'];
 		}
 
-		// Set before_gmt into date query. Date query must be specified as an array of an array.
-		if ( isset( $request['before_gmt'] ) ) {
-			$args['date_query'][0]['before'] = $request['before_gmt'];
-			$args['date_query']['column']    = 'post_date_gmt';
-		}
-
-		// Set after_gmt into date query. Date query must be specified as an array of an array.
-		if ( isset( $request['after_gmt'] ) ) {
-			$args['date_query'][0]['after'] = $request['after_gmt'];
-			$args['date_query']['column']   = 'post_date_gmt';
+		// Check flag to use post_date vs post_date_gmt.
+		if ( true === $request['dates_are_gmt'] ) {
+			if ( isset( $request['before'] ) || isset( $request['after'] ) ) {
+				$args['date_query']['column'] = 'post_date_gmt';
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -573,6 +568,12 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'type'               => 'string',
 			'format'             => 'date-time',
 			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$params['dates_are_gmt'] = array(
+			'description'       => __( 'Whether to use GMT post dates.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
