@@ -59,7 +59,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '1575', wc_format_decimal( WC()->cart->get_discount_total(), 0 ) );
 		$this->assertEquals( '425', wc_format_decimal( WC()->cart->get_discount_tax(), 0 ) );
-		$this->assertEquals( '11070', wc_format_decimal( WC()->cart->get_total(), 0 ) );
+		$this->assertEquals( '11070', wc_format_decimal( WC()->cart->get_total( 'edit' ), 0 ) );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '1575', wc_format_decimal( WC()->cart->get_discount_total(), 0 ) );
 		$this->assertEquals( '425', wc_format_decimal( WC()->cart->get_discount_tax(), 0 ) );
-		$this->assertEquals( '11070', wc_format_decimal( WC()->cart->get_total(), 0 ) );
+		$this->assertEquals( '11070', wc_format_decimal( WC()->cart->get_total( 'edit' ), 0 ) );
 	}
 
 	/**
@@ -113,7 +113,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		// Notice how subtotal + tax does not equate to total here.
 		// This is feature of round at subtotal property, where since we are not rounding, displayed components of price may not add up to displayed total price.
 		$this->assertEquals( '245', wc_format_decimal( WC()->cart->get_subtotal(), 0 ) );
-		$this->assertEquals( '302', wc_format_decimal( WC()->cart->get_total(), 0 ) );
+		$this->assertEquals( '302', wc_format_decimal( WC()->cart->get_total( 'edit' ), 0 ) );
 		$this->assertEquals( '56', wc_format_decimal( WC()->cart->get_total_tax(), 0 ) );
 	}
 
