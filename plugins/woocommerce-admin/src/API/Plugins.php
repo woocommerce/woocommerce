@@ -220,6 +220,13 @@ class Plugins extends \WC_REST_Data_Controller {
 	public function install_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
 
+		/**
+		 * Filter the list of plugins to install.
+		 *
+		 * @param array $plugins A list of the plugins to install.
+		 */
+		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
+
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
 		}
@@ -372,6 +379,13 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		// the mollie-payments-for-woocommerce plugin calls `WP_Filesystem()` during it's activation hook, which crashes without this include.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		/**
+		 * Filter the list of plugins to activate.
+		 *
+		 * @param array $plugins A list of the plugins to activate.
+		 */
+		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
 
 		foreach ( $plugins as $plugin ) {
 			$slug = $plugin;

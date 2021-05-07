@@ -140,6 +140,12 @@ In case the report shows "no data", please reimport historical data by following
 -   Click on the 3 dots of the card, click `Hide this`, it should make the card disappear, it should also not show on refresh.
     This can't be shown again unless the `woocommerce_show_marketplace_suggestions` option is deleted (through PHPMyAdmin or using `wp option delete woocommerce_show_marketplace_suggestions`).
 
+### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
+
+- Complete the OBW until you get to the business details step.
+- Deselect "Add recommended business features to my site", and select only Jetpack and WooCommerce Payments for installation.
+- The plugins should be installed and activated correctly, and you should be able to continue in the flow.
+
 ## 2.2.0
 
 ### Fixed event tracking for merchant email notes #6616

@@ -138,6 +138,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Task list component with new Experimental Task list. #6849
 - Update: Redirect to WC Home after setting up a payment method #6891
 - Dev: Fix a bug where trying to load an asset registry causes a crash. #6951
+- Fix: Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 
 == 2.2.0 3/30/2021 ==
 
