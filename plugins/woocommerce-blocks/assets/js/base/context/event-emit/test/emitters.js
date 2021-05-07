@@ -30,6 +30,13 @@ describe( 'Testing emitters', () => {
 				'observerPromiseWithResolvedValue',
 				{ priority: 10, callback: observerPromiseWithResolvedValue },
 			],
+			[
+				'observerSuccessType',
+				{
+					priority: 10,
+					callback: jest.fn().mockReturnValue( { type: 'success' } ),
+				},
+			],
 		] );
 	} );
 	describe( 'Testing emitEvent()', () => {
@@ -39,11 +46,11 @@ describe( 'Testing emitters', () => {
 			expect( console ).toHaveErroredWith( 'an error' );
 			expect( observerA ).toHaveBeenCalledTimes( 1 );
 			expect( observerB ).toHaveBeenCalledWith( 'foo' );
-			expect( response ).toBe( true );
+			expect( response ).toEqual( [ { type: 'success' } ] );
 		} );
 	} );
 	describe( 'Testing emitEventWithAbort()', () => {
-		it( 'does not abort on any return value other than an object with a type property', async () => {
+		it( 'does not abort on any return value other than an object with an error or fail type property', async () => {
 			observerMocks.delete( 'observerPromiseWithReject' );
 			const observers = { test: observerMocks };
 			const response = await emitEventWithAbort(
@@ -54,17 +61,16 @@ describe( 'Testing emitters', () => {
 			expect( console ).not.toHaveErrored();
 			expect( observerB ).toHaveBeenCalledTimes( 1 );
 			expect( observerPromiseWithResolvedValue ).toHaveBeenCalled();
-			expect( response ).toBe( true );
+			expect( response ).toEqual( [ { type: 'success' } ] );
 		} );
-		it( 'Aborts on a return value with an object that has a type property', async () => {
+		it( 'Aborts on a return value with an object that has a a fail type property', async () => {
 			const validObjectResponse = jest
 				.fn()
-				.mockReturnValue( { type: 'success' } );
+				.mockReturnValue( { type: 'failure' } );
 			observerMocks.set( 'observerValidObject', {
 				priority: 5,
 				callback: validObjectResponse,
 			} );
-			observerMocks.delete( 'observerPromiseWithReject' );
 			const observers = { test: observerMocks };
 			const response = await emitEventWithAbort(
 				observers,
@@ -74,7 +80,7 @@ describe( 'Testing emitters', () => {
 			expect( console ).not.toHaveErrored();
 			expect( validObjectResponse ).toHaveBeenCalledTimes( 1 );
 			expect( observerPromiseWithResolvedValue ).not.toHaveBeenCalled();
-			expect( response ).toEqual( { type: 'success' } );
+			expect( response ).toEqual( [ { type: 'failure' } ] );
 		} );
 		it( 'throws an error on an object returned from observer without a type property', async () => {
 			const failingObjectResponse = jest.fn().mockReturnValue( {} );
@@ -91,7 +97,7 @@ describe( 'Testing emitters', () => {
 			expect( console ).toHaveErrored();
 			expect( failingObjectResponse ).toHaveBeenCalledTimes( 1 );
 			expect( observerPromiseWithResolvedValue ).not.toHaveBeenCalled();
-			expect( response ).toEqual( { type: 'error' } );
+			expect( response ).toEqual( [ { type: 'error' } ] );
 		} );
 	} );
 	describe( 'Test Priority', () => {

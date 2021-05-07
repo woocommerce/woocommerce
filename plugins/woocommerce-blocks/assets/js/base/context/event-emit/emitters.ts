@@ -3,6 +3,7 @@
  */
 import { getObserversByPriority } from './utils';
 import type { EventObserversType } from './types';
+import { isErrorResponse, isFailResponse } from '../hooks/use-emit-response';
 
 /**
  * Emits events on registered observers for the provided type and passes along
@@ -44,20 +45,24 @@ export const emitEvent = async (
 
 /**
  * Emits events on registered observers for the provided type and passes along
- * the provided data. This event emitter will abort and return any value from
- * observers that return an object which should contain a type property.
+ * the provided data. This event emitter will abort if an observer throws an
+ * error or if the response includes an object with an error type property.
+ *
+ * Any successful observer responses before abort will be included in the returned package.
  *
  * @param {Object} observers The registered observers to omit to.
  * @param {string} eventType The event type being emitted.
  * @param {*}      data      Data passed along to the observer when it is invoked.
  *
- * @return {Promise} Returns a promise that resolves to either boolean or the return value of the aborted observer.
+ * @return {Promise} Returns a promise that resolves to either boolean, or an array of responses
+ *                   from registered observers that were invoked up to the point of an error.
  */
 export const emitEventWithAbort = async (
 	observers: EventObserversType,
 	eventType: string,
 	data: unknown
-): Promise< unknown > => {
+): Promise< Array< unknown > > => {
+	const observerResponses = [];
 	const observersByType = getObserversByPriority( observers, eventType );
 	for ( const observer of observersByType ) {
 		try {
@@ -67,16 +72,24 @@ export const emitEventWithAbort = async (
 			}
 			if ( ! response.hasOwnProperty( 'type' ) ) {
 				throw new Error(
-					'If you want to abort event emitter processing, your observer must return an object with a type property'
+					'Returned objects from event emitter observers must return an object with a type property'
 				);
 			}
-			return response;
+			if ( isErrorResponse( response ) || isFailResponse( response ) ) {
+				observerResponses.push( response );
+				// early abort.
+				return observerResponses;
+			}
+			// all potential abort conditions have been considered push the
+			// response to the array.
+			observerResponses.push( response );
 		} catch ( e ) {
 			// We don't handle thrown errors but just console.log for troubleshooting.
 			// eslint-disable-next-line no-console
 			console.error( e );
-			return { type: 'error' };
+			observerResponses.push( { type: 'error' } );
+			return observerResponses;
 		}
 	}
-	return true;
+	return observerResponses;
 };

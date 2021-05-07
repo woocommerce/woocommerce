@@ -25,19 +25,19 @@ const noticeContexts = {
 	EXPRESS_PAYMENTS: 'wc/express-payment-area',
 };
 
-const isSuccessResponse = ( response ) => {
+export const isSuccessResponse = ( response ) => {
 	return isResponseOf( response, responseTypes.SUCCESS );
 };
 
-const isErrorResponse = ( response ) => {
+export const isErrorResponse = ( response ) => {
 	return isResponseOf( response, responseTypes.ERROR );
 };
 
-const isFailResponse = ( response ) => {
+export const isFailResponse = ( response ) => {
 	return isResponseOf( response, responseTypes.FAIL );
 };
 
-const shouldRetry = ( response ) => {
+export const shouldRetry = ( response ) => {
 	return typeof response.retry === 'undefined' || response.retry === true;
 };
 
