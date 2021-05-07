@@ -244,15 +244,30 @@ class Loader {
 	}
 
 	/**
-	 * Gets a script asset filename
+	 * Gets a script asset registry filename. The asset registry lists dependencies for the given script.
 	 *
+	 * @param  string $script_path_name Path to where the script asset registry is contained.
 	 * @param  string $file File name (without extension).
 	 * @return string complete asset filename.
+	 *
+	 * @throws Exception Throws an exception when a readable asset registry file cannot be found.
 	 */
-	public static function get_script_asset_filename( $file ) {
-		$minification_suffix = Features::exists( 'minified-js' ) ? '.min' : '';
+	public static function get_script_asset_filename( $script_path_name, $file ) {
+		$minification_supported = Features::exists( 'minified-js' );
+		$script_min_filename    = $file . '.min.asset.php';
+		$script_nonmin_filename = $file . '.asset.php';
+		$script_asset_path      = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/';
 
-		return $file . $minification_suffix . '.asset.php';
+		// Check minification is supported first, to avoid multiple is_readable checks when minification is
+		// not supported.
+		if ( $minification_supported && is_readable( $script_asset_path . $script_min_filename ) ) {
+			return $script_min_filename;
+		} elseif ( is_readable( $script_asset_path . $script_nonmin_filename ) ) {
+			return $script_nonmin_filename;
+		} else {
+			// could not find an asset file, throw an error.
+			throw new \Exception( 'Could not find asset registry for ' . $script_path_name );
+		}
 	}
 
 	/**
@@ -369,20 +384,26 @@ class Loader {
 		);
 
 		foreach ( $scripts as $script ) {
-			$script_path_name       = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
-			$script_assets_filename = self::get_script_asset_filename( 'index' );
-			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
+			$script_path_name = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
 
-			wp_register_script(
-				$script,
-				self::get_url( $script_path_name . '/index', 'js' ),
-				$script_assets ['dependencies'],
-				$js_file_version,
-				true
-			);
+			try {
+				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
+				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
-			if ( in_array( $script, $translated_scripts, true ) ) {
-				wp_set_script_translations( $script, 'woocommerce-admin' );
+				wp_register_script(
+					$script,
+					self::get_url( $script_path_name . '/index', 'js' ),
+					$script_assets ['dependencies'],
+					$js_file_version,
+					true
+				);
+
+				if ( in_array( $script, $translated_scripts, true ) ) {
+					wp_set_script_translations( $script, 'woocommerce-admin' );
+				}
+			} catch ( \Exception $e ) {
+				// Avoid crashing WordPress if an asset file could not be loaded.
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, $script_path_name );
 			}
 		}
 
