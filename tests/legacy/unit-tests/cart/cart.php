@@ -301,7 +301,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( 599, WC()->cart->subtotal );
+		$this->assertEquals( 599, wc_format_decimal( WC()->cart->subtotal, wc_get_price_decimals() ) );
 		$this->assertEquals( 599, WC()->cart->total );
 	}
 
