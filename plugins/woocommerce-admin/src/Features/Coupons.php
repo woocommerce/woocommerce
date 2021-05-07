@@ -129,7 +129,7 @@ class Coupons {
 			Loader::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'marketing-coupons' );
+		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'marketing-coupons' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
