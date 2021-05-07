@@ -260,6 +260,26 @@ export const CheckoutStateProvider = ( {
 		) {
 			return;
 		}
+
+		const handleErrorResponse = ( observerResponses ) => {
+			let errorResponse = null;
+			observerResponses.forEach( ( response ) => {
+				const { message, messageContext } = response;
+				if (
+					( isErrorResponse( response ) ||
+						isFailResponse( response ) ) &&
+					message
+				) {
+					const errorOptions = messageContext
+						? { context: messageContext }
+						: undefined;
+					errorResponse = response;
+					addErrorNotice( message, errorOptions );
+				}
+			} );
+			return errorResponse;
+		};
+
 		if ( checkoutState.status === STATUS.AFTER_PROCESSING ) {
 			const data = {
 				redirectUrl: checkoutState.redirectUrl,
@@ -275,21 +295,14 @@ export const CheckoutStateProvider = ( {
 					currentObservers.current,
 					EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
 					data
-				).then( ( response ) => {
-					if (
-						isErrorResponse( response ) ||
-						isFailResponse( response )
-					) {
-						if ( response.message ) {
-							const errorOptions = {
-								id: response?.messageContext,
-								context: response?.messageContext,
-							};
-							addErrorNotice( response.message, errorOptions );
-						}
+				).then( ( observerResponses ) => {
+					const errorResponse = handleErrorResponse(
+						observerResponses
+					);
+					if ( errorResponse !== null ) {
 						// irrecoverable error so set complete
-						if ( ! shouldRetry( response ) ) {
-							dispatch( actions.setComplete( response ) );
+						if ( ! shouldRetry( errorResponse ) ) {
+							dispatch( actions.setComplete( errorResponse ) );
 						} else {
 							dispatch( actions.setIdle() );
 						}
@@ -326,21 +339,34 @@ export const CheckoutStateProvider = ( {
 					currentObservers.current,
 					EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
 					data
-				).then( ( response ) => {
-					if ( isSuccessResponse( response ) ) {
-						dispatch( actions.setComplete( response ) );
-					} else if (
-						isErrorResponse( response ) ||
-						isFailResponse( response )
-					) {
-						if ( response.message ) {
-							const errorOptions = response.messageContext
-								? { context: response.messageContext }
-								: undefined;
-							addErrorNotice( response.message, errorOptions );
+				).then( ( observerResponses ) => {
+					let successResponse, errorResponse;
+					observerResponses.forEach( ( response ) => {
+						if ( isSuccessResponse( response ) ) {
+							// the last observer response always "wins" for success.
+							successResponse = response;
 						}
-						if ( ! shouldRetry( response ) ) {
-							dispatch( actions.setComplete( response ) );
+						if (
+							isErrorResponse( response ) ||
+							isFailResponse( response )
+						) {
+							errorResponse = response;
+						}
+					} );
+					if ( successResponse && ! errorResponse ) {
+						dispatch( actions.setComplete( successResponse ) );
+					} else if ( errorResponse ) {
+						if ( errorResponse.message ) {
+							const errorOptions = errorResponse.messageContext
+								? { context: errorResponse.messageContext }
+								: undefined;
+							addErrorNotice(
+								errorResponse.message,
+								errorOptions
+							);
+						}
+						if ( ! shouldRetry( errorResponse ) ) {
+							dispatch( actions.setComplete( errorResponse ) );
 						} else {
 							// this will set an error which will end up
 							// triggering the onCheckoutAfterProcessingWithError emitter.

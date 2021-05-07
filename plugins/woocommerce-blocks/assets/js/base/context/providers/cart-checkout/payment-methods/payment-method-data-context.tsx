@@ -362,40 +362,59 @@ export const PaymentMethodDataProvider = ( {
 				currentObservers.current,
 				EMIT_TYPES.PAYMENT_PROCESSING,
 				{}
-			).then( ( response ) => {
-				if ( isSuccessResponse( response ) ) {
+			).then( ( observerResponses ) => {
+				let successResponse, errorResponse;
+				observerResponses.forEach( ( response ) => {
+					if ( isSuccessResponse( response ) ) {
+						// the last observer response always "wins" for success.
+						successResponse = response;
+					}
+					if (
+						isErrorResponse( response ) ||
+						isFailResponse( response )
+					) {
+						errorResponse = response;
+					}
+				} );
+				if ( successResponse && ! errorResponse ) {
 					setPaymentStatus().success(
-						response?.meta?.paymentMethodData,
-						response?.meta?.billingData,
-						response?.meta?.shippingData
+						successResponse?.meta?.paymentMethodData,
+						successResponse?.meta?.billingData,
+						successResponse?.meta?.shippingData
 					);
-				} else if ( isFailResponse( response ) ) {
-					if ( response.message && response.message.length ) {
-						addErrorNotice( response.message, {
+				} else if ( errorResponse && isFailResponse( errorResponse ) ) {
+					if (
+						errorResponse.message &&
+						errorResponse.message.length
+					) {
+						addErrorNotice( errorResponse.message, {
 							id: 'wc-payment-error',
 							isDismissible: false,
 							context:
-								response?.messageContext ||
+								errorResponse?.messageContext ||
 								noticeContexts.PAYMENTS,
 						} );
 					}
 					setPaymentStatus().failed(
-						response?.message,
-						response?.meta?.paymentMethodData,
-						response?.meta?.billingData
+						errorResponse?.message,
+						errorResponse?.meta?.paymentMethodData,
+						errorResponse?.meta?.billingData
 					);
-				} else if ( isErrorResponse( response ) ) {
-					if ( response.message && response.message.length ) {
-						addErrorNotice( response.message, {
+				} else if ( errorResponse ) {
+					if (
+						errorResponse.message &&
+						errorResponse.message.length
+					) {
+						addErrorNotice( errorResponse.message, {
 							id: 'wc-payment-error',
 							isDismissible: false,
 							context:
-								response?.messageContext ||
+								errorResponse?.messageContext ||
 								noticeContexts.PAYMENTS,
 						} );
 					}
-					setPaymentStatus().error( response.message );
-					setValidationErrors( response?.validationErrors );
+					setPaymentStatus().error( errorResponse.message );
+					setValidationErrors( errorResponse?.validationErrors );
 				} else {
 					// otherwise there are no payment methods doing anything so
 					// just consider success
