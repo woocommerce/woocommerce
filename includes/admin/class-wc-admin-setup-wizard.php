@@ -481,7 +481,7 @@ class WC_Admin_Setup_Wizard {
 		$state          = WC()->countries->get_base_state();
 		$country        = WC()->countries->get_base_country();
 		$postcode       = WC()->countries->get_base_postcode();
-		$currency       = get_option( 'woocommerce_currency', 'GBP' );
+		$currency       = get_option( 'woocommerce_currency', 'USD' );
 		$product_type   = get_option( 'woocommerce_product_type', 'both' );
 		$sell_in_person = get_option( 'woocommerce_sell_in_person', 'none_selected' );
 

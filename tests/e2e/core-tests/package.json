@@ -11,7 +11,8 @@
   "main": "index.js",
   "dependencies": {
     "@jest/globals": "^26.4.2",
-    "config": "3.3.3"
+    "config": "3.3.3",
+    "faker": "^5.1.0"
   },
   "peerDependencies": {
     "@woocommerce/api": "^0.1.2",

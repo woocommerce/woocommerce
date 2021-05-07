@@ -9,6 +9,8 @@
 	uiUnblocked,
 	setCheckbox,
 	settingsPageSaveChanges,
+	addShippingZoneAndMethod,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -22,17 +24,23 @@ const {
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
+const customerBilling = config.get( 'addresses.customer.billing' );
 
 const runCheckoutCreateAccountTest = () => {
 	describe('Shopper Checkout Create Account', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
+			await withRestApi.deleteCustomerByEmail( customerBilling.email );
 
 			// Set checkbox for creating an account during checkout
+			await merchant.login();
 			await merchant.openSettings('account');
 			await setCheckbox('#woocommerce_enable_signup_and_login_from_checkout');
 			await settingsPageSaveChanges();
+
+			// Set free shipping within California
+			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
+
 			await merchant.logout();
 
 			// Add simple product to cart and proceed to checkout
@@ -44,7 +52,7 @@ const runCheckoutCreateAccountTest = () => {
 
 		it('can create an account during checkout', async () => {
 			// Fill all the details for a new customer
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.fillBillingDetails( customerBilling );
 			await uiUnblocked();
 
 			// Set checkbox for creating account during checkout
@@ -58,7 +66,7 @@ const runCheckoutCreateAccountTest = () => {
 		it('can verify that the customer has been created', async () => {
 			await merchant.login();
 			await merchant.openAllUsersView();
-			await expect(page).toMatchElement('td.email.column-email > a', {text: 'john.doe@example.com'});
+			await expect(page).toMatchElement('td.email.column-email > a', { text: customerBilling.email });
 		});
 	});
 };
