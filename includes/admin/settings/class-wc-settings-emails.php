@@ -217,7 +217,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_merchant_notes',
 				),
-			);
+			)
+		);
 
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
