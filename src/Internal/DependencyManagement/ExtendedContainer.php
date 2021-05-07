@@ -151,10 +151,10 @@ class ExtendedContainer extends BaseContainer {
 	}
 
 	/**
-	 * Check if a class name corresponds to an anonoymous class.
+	 * Check if a class name corresponds to an anonymous class.
 	 *
 	 * @param string $class_name The class name to check.
-	 * @return bool True if the name correspondos to an anynymous class.
+	 * @return bool True if the name corresponds to an anonymous class.
 	 */
 	protected function is_anonymous_class( string $class_name ): bool {
 		return StringUtil::starts_with( $class_name, 'class@anonymous' );
