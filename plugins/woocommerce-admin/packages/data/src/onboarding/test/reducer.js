@@ -47,6 +47,24 @@ describe( 'plugins reducer', () => {
 		expect( state.profileItems.propertyName ).toBe( 'value' );
 	} );
 
+	it( 'should handle GET_PAYMENT_METHODS_SUCCESS', () => {
+		const state = reducer(
+			{
+				paymentMethods: [ { previousItem: 'value' } ],
+			},
+			{
+				type: TYPES.GET_PAYMENT_METHODS_SUCCESS,
+				paymentMethods: [ { newItem: 'changed' } ],
+			}
+		);
+
+		expect( state.paymentMethods[ 0 ] ).not.toHaveProperty(
+			'previousItem'
+		);
+		expect( state.paymentMethods[ 0 ] ).toHaveProperty( 'newItem' );
+		expect( state.paymentMethods[ 0 ].newItem ).toBe( 'changed' );
+	} );
+
 	it( 'should handle SET_ERROR', () => {
 		const state = reducer( defaultState, {
 			type: TYPES.SET_ERROR,

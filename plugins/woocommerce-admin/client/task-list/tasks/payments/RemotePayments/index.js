@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -19,27 +18,22 @@ import { sift } from '../../../../utils';
 
 export const RemotePayments = ( { query } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { getOption } = useSelect( ( select ) => {
+	const {
+		getOption,
+		getPaymentMethodRecommendations,
+		isResolving,
+	} = useSelect( ( select ) => {
 		return {
 			getOption: select( OPTIONS_STORE_NAME ).getOption,
+			getPaymentMethodRecommendations: select( ONBOARDING_STORE_NAME )
+				.getPaymentMethodRecommendations,
+			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
+				'getPaymentMethodRecommendations'
+			),
 		};
 	} );
 
-	const [ methods, setMethods ] = useState( [] );
-	const [ isFetching, setIsFetching ] = useState( true );
-
-	useEffect( () => {
-		apiFetch( {
-			path: '/wc-admin/onboarding/payments',
-		} )
-			.then( ( results ) => {
-				setMethods( results );
-				setIsFetching( false );
-			} )
-			.catch( () => {
-				setIsFetching( false );
-			} );
-	}, [] );
+	const methods = getPaymentMethodRecommendations();
 
 	const recommendedMethod = useMemo( () => {
 		const method = methods.find(
@@ -73,6 +67,29 @@ export const RemotePayments = ( { query } ) => {
 		} );
 	};
 
+	const getInitiallyEnabledMethods = () =>
+		methods.reduce( ( acc, method ) => {
+			acc[ method.key ] = method.isEnabled;
+			return acc;
+		}, {} );
+
+	// TODO: Ideally when payments data store is merged https://github.com/woocommerce/woocommerce-admin/pull/6918
+	// we can utilize it for keeping track of enabled payment methods and optimistically update that
+	// store when enabling methods.
+	const [ enabledMethods, setEnabledMethods ] = useState(
+		getInitiallyEnabledMethods()
+	);
+
+	// Keeps enabledMethods up to date with methods fetched from API.
+	useMemo(
+		() =>
+			setEnabledMethods( {
+				...getInitiallyEnabledMethods(),
+				...enabledMethods,
+			} ),
+		[ methods ]
+	);
+
 	const markConfigured = async ( methodKey, queryParams = {} ) => {
 		const method = methods.find( ( option ) => option.key === methodKey );
 
@@ -103,7 +120,7 @@ export const RemotePayments = ( { query } ) => {
 	};
 
 	const currentMethod = useMemo( () => {
-		if ( ! query.method || isFetching ) {
+		if ( ! query.method || isResolving ) {
 			return null;
 		}
 
@@ -114,14 +131,7 @@ export const RemotePayments = ( { query } ) => {
 		}
 
 		return method;
-	}, [ isFetching, query ] );
-
-	const [ enabledMethods, setEnabledMethods ] = useState(
-		methods.reduce( ( acc, method ) => {
-			acc[ method.key ] = method.isEnabled;
-			return acc;
-		}, {} )
-	);
+	}, [ isResolving, query, methods ] );
 
 	if ( currentMethod ) {
 		return (

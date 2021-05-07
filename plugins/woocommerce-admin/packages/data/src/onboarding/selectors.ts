@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { WPDataSelectors } from '../types';
+import { WPDataSelectors, RuleProcessor } from '../types';
 
 export const getProfileItems = (
 	state: OnboardingState
@@ -13,6 +13,12 @@ export const getTasksStatus = (
 	state: OnboardingState
 ): TasksStatusState | Record< string, never > => {
 	return state.tasksStatus || {};
+};
+
+export const getPaymentMethodRecommendations = (
+	state: OnboardingState
+): PaymentMethodsState[] => {
+	return state.paymentMethods || [];
 };
 
 export const getOnboardingError = (
@@ -33,6 +39,9 @@ export const isOnboardingRequesting = (
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
 	getTasksStatus: () => ReturnType< typeof getTasksStatus >;
+	getPaymentMethodRecommendations: () => ReturnType<
+		typeof getPaymentMethodRecommendations
+	>;
 	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
 	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;
 } & WPDataSelectors;
@@ -40,6 +49,7 @@ export type OnboardingSelectors = {
 export type OnboardingState = {
 	profileItems: ProfileItemsState;
 	tasksStatus: TasksStatusState;
+	paymentMethods: PaymentMethodsState[];
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
@@ -111,4 +121,32 @@ export type ProfileItemsState = {
 	skipped: boolean | null;
 	theme: string | null;
 	wccom_connected: boolean | null;
+};
+
+export type FieldLocale = {
+	locale: string;
+	label: string;
+};
+
+export type MethodFields = {
+	name: string;
+	option?: string;
+	label?: string;
+	locales?: FieldLocale[];
+	type?: string;
+	value?: string;
+};
+
+export type PaymentMethodsState = {
+	locale: string;
+	title: string;
+	content: string;
+	key: string;
+	image: string;
+	is_visible: boolean | RuleProcessor[];
+	plugins: string[];
+	is_configured: boolean | RuleProcessor[];
+	fields: MethodFields[];
+	api_details_url: string;
+	manage_url: string;
 };

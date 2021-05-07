@@ -7,7 +7,12 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { setProfileItems, setError, setTasksStatus } from './actions';
+import {
+	setProfileItems,
+	setError,
+	setTasksStatus,
+	setPaymentMethods,
+} from './actions';
 
 export function* getProfileItems() {
 	try {
@@ -32,5 +37,18 @@ export function* getTasksStatus() {
 		yield setTasksStatus( results, true );
 	} catch ( error ) {
 		yield setError( 'getTasksStatus', error );
+	}
+}
+
+export function* getPaymentMethodRecommendations() {
+	try {
+		const results = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/payments',
+			method: 'GET',
+		} );
+
+		yield setPaymentMethods( results );
+	} catch ( error ) {
+		yield setError( 'getPaymentMethodRecommendations', error );
 	}
 }
