@@ -211,7 +211,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Registered payment methods now have access to the `shouldSavePayment` prop in their components (which indicates whether the shopper has checked the save payment method checkbox. #3990
 * Enhancement - Payment methods implementing the `savedTokenComponent` configuration property will now have the `onPaymentProcessing` event available to the registered component. #3982
 
-** WooCommerce Admin - 2.2.0 & 2.2.1 & 2.2.2 **
+** WooCommerce Admin - 2.2.0 & 2.2.1 & 2.2.2 & 2.2.3 & 2.2.4 & 2.2.5 & 2.2.6 **
 * Add - Next new novel navigation nudge note #6610
 * Add - Add legacy report items to new navigation #6507
 * Add - Add preview site button on the appearance task #6457
@@ -253,6 +253,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Payments task: include Mercado Pago #6572
 * Dev - Ensure script asset.php files are included in builds #6635
 * Dev - Ensure production script asset names don't include .min suffix #6681
+* Dev - Do a git clean before the core release. #6945
+* Dev - Fix a bug where trying to load an asset registry causes a crash. #6951
 * Fix - Add check for navigating being enabled. #6462
 * Fix - Move the shipping input and text 1px lower. #6408
 * Fix - Correct the Klarna slug #6440
@@ -277,6 +279,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix hidden menu title on smaller screens #6562
 * Fix - Add gross sales column to CSV export #6567
 * Fix - Disable the continue btn on OBW when requested are being made #6838
+* Fix - Calling of get_script_asset_filename with extra parameter #6955
+* Fix - Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 * Tweak - Add default value for contains op #6622
 * Tweak - Adjust targeting store age for the Add First Product note #6554
 * Tweak - Improve WC Shipping & Tax logic #6547
