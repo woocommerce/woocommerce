@@ -503,7 +503,7 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.2.2",
+            "version": "2.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
@@ -511,8 +511,8 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/161e6afa01a3fb69533cfa2b245a71df7512ec3f",
-                "reference": "161e6afa01a3fb69533cfa2b245a71df7512ec3f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
+                "reference": "65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
                 "shasum": ""
             },
             "require": {
