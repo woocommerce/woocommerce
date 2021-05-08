@@ -363,6 +363,10 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart' );
 		}
+		if ( is_customize_preview() ) {
+			self::enqueue_script( 'selectWoo' );
+			self::enqueue_style( 'select2' );
+		}
 		if ( is_cart() || is_checkout() || is_account_page() ) {
 			self::enqueue_script( 'selectWoo' );
 			self::enqueue_style( 'select2' );
@@ -372,6 +376,12 @@ class WC_Frontend_Scripts {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
 		}
+		$js_to_add_to_selectWoo = "
+				var event = document.createEvent('Event');
+				event.initEvent('SelectWooLoaded', true, true);
+				document.documentElement.dispatchEvent(event);
+			";
+		wp_add_inline_script('selectWoo', $js_to_add_to_selectWoo);
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
 		}

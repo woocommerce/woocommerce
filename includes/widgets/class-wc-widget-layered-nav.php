@@ -294,8 +294,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo wc_query_string_form_fields( null, array( 'filter_' . $taxonomy_filter_name, 'query_type_' . $taxonomy_filter_name ), '', true ); // @codingStandardsIgnoreLine
 			echo '</form>';
 
-			wc_enqueue_js(
-				"
+			$js = "
 				// Update value on change.
 				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).change( function() {
 					var slug = jQuery( this ).val();
@@ -307,25 +306,36 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					}
 				});
 
+				var wc_layered_nav_select = function() {
+					jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
+						placeholder: decodeURIComponent('" . rawurlencode( (string) wp_specialchars_decode( $any_label ) ) . "'),
+						minimumResultsForSearch: 5,
+						width: '100%',
+						allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+						language: {
+							noResults: function() {
+								return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+							}
+						}
+					} );
+				};
+
 				// Use Select2 enhancement if possible
 				if ( jQuery().selectWoo ) {
-					var wc_layered_nav_select = function() {
-						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
-							placeholder: decodeURIComponent('" . rawurlencode( (string) wp_specialchars_decode( $any_label ) ) . "'),
-							minimumResultsForSearch: 5,
-							width: '100%',
-							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
-							language: {
-								noResults: function() {
-									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
-								}
-							}
-						} );
-					};
 					wc_layered_nav_select();
+				} else {
+					document.documentElement.addEventListener('SelectWooLoaded', function() {
+						wc_layered_nav_select();
+					} );
 				}
-			"
-			);
+			";
+			if ( is_customize_preview() ) {
+				?>
+				<script><?php echo $js; ?></script>
+				<?php
+			} else {
+				wc_enqueue_js($js);
+			}
 		}
 
 		return $found;
