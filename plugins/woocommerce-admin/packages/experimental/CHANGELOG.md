@@ -1,7 +1,7 @@
-# Unreleased
+# 1.1.0
 
--   Add new (experimental) collapsible list item to collapse list items. #6869
--   Add new (experimental) list. #6787
+-   Add collapsible list item component. #6869
+-   Add new list component. #6787
 
 # 1.0.0
 
