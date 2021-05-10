@@ -37,7 +37,6 @@ use \Automattic\WooCommerce\Admin\Notes\NeedSomeInspiration;
 use \Automattic\WooCommerce\Admin\Notes\OnlineClothingStore;
 use \Automattic\WooCommerce\Admin\Notes\FirstProduct;
 use \Automattic\WooCommerce\Admin\Notes\CustomizeStoreWithBlocks;
-use \Automattic\WooCommerce\Admin\Notes\GoogleAdsAndMarketing;
 use \Automattic\WooCommerce\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Admin\Notes\PerformanceOnMobile;
@@ -129,7 +128,6 @@ class Events {
 		ChooseNiche::possibly_add_note();
 		RealTimeOrderAlerts::possibly_add_note();
 		CustomizeStoreWithBlocks::possibly_add_note();
-		GoogleAdsAndMarketing::possibly_add_note();
 		TestCheckout::possibly_add_note();
 		EditProductsOnTheMove::possibly_add_note();
 		PerformanceOnMobile::possibly_add_note();

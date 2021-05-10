@@ -332,7 +332,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 						'mailchimp-for-woocommerce',
 						'creative-mail-by-constant-contact',
 						'facebook-for-woocommerce',
-						'kliken-marketing-for-google',
+						'google-listings-and-ads',
 						'mailpoet',
 					),
 					'type' => 'string',

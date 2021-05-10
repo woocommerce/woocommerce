@@ -14,7 +14,7 @@ export { default as facebookForWoocommerce } from './library/facebook';
 
 // Google Ads
 export { default as googleAds } from './library/google';
-export { default as klikenMarketingForGoogle } from './library/google';
+export { default as googleListingsAndAds } from './library/google';
 
 // Hubspot
 export { default as hubspotForWoocommerce } from './library/hubspot';

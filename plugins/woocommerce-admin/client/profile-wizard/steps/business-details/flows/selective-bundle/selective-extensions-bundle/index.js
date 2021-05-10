@@ -163,13 +163,13 @@ const installableExtensions = [
 				),
 			},
 			{
-				slug: 'kliken-marketing-for-google',
+				slug: 'google-listings-and-ads',
 				description: generatePluginDescriptionWithLink(
 					__(
-						'Drive sales with {{link}}Google Ads{{/link}}',
+						'Drive sales with {{link}}Google Listings and Ads{{/link}}',
 						'woocommerce-admin'
 					),
-					'google-ads-and-marketing'
+					'google-listings-and-ads'
 				),
 			},
 			{

@@ -64,7 +64,10 @@ export const pluginNames = {
 		'Mercado Pago payments for WooCommerce',
 		'woocommerce-admin'
 	),
-	'kliken-marketing-for-google': __( 'Google Ads', 'woocommerce-admin' ),
+	'google-listings-and-ads': __(
+		'Google Listings and Ads',
+		'woocommerce-admin'
+	),
 	'woo-razorpay': __( 'Razorpay', 'woocommerce-admin' ),
 	mailpoet: __( 'MailPoet', 'woocommerce-admin' ),
 };

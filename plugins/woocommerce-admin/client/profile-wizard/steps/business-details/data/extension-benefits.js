@@ -23,9 +23,9 @@ export const extensionBenefits = [
 		),
 	},
 	{
-		slug: 'kliken-marketing-for-google',
+		slug: 'google-listings-and-ads',
 		title: __(
-			'Drive traffic to your store with Google Ads & Marketing by Kliken',
+			'Drive traffic to your store with Google Listings and Ads',
 			'woocommerce-admin'
 		),
 		icon: 'onboarding/g-shopping.png',

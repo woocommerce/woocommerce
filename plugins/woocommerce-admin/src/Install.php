@@ -512,6 +512,7 @@ class Install {
 			'wc-admin-review-shipping-settings',
 			'wc-admin-home-screen-feedback',
 			'wc-admin-effortless-payments-by-mollie',
+			'wc-admin-google-ads-and-marketing',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(

@@ -104,7 +104,7 @@ class BusinessDetails extends Component {
 			install_mailpoet: extensionInstallationOptions.mailpoet,
 			install_jetpack: extensionInstallationOptions.jetpack,
 			install_google_ads:
-				extensionInstallationOptions[ 'kliken-marketing-for-google' ],
+				extensionInstallationOptions[ 'google-listings-and-ads' ],
 			install_facebook:
 				extensionInstallationOptions[ 'facebook-for-woocommerce' ],
 			install_wcpay:
