@@ -39,5 +39,4 @@ jobs:
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
         run: |
-          npx wc-e2e docker:up
           npx wc-e2e test:e2e
