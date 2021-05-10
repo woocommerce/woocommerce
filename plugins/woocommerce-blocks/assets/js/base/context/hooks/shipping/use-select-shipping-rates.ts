@@ -16,7 +16,7 @@ import { useThrowError } from '@woocommerce/base-hooks';
 export const useSelectShippingRates = (): {
 	selectShippingRate: (
 		newShippingRateId: string,
-		packageId: string
+		packageId: string | number
 	) => unknown;
 	isSelectingRate: boolean;
 } => {
@@ -26,7 +26,7 @@ export const useSelectShippingRates = (): {
 	} ) as {
 		selectShippingRate: (
 			newShippingRateId: string,
-			packageId: string
+			packageId: string | number
 		) => Promise< unknown >;
 	};
 

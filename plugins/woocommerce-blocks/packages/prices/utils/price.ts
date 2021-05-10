@@ -3,7 +3,7 @@
  */
 import { CURRENCY } from '@woocommerce/settings';
 import type { CurrencyResponseInfo } from '@woocommerce/type-defs/cart-response';
-import type { Rate } from '@woocommerce/type-defs/shipping';
+import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 
 /**
  * Internal dependencies
@@ -72,7 +72,10 @@ const siteCurrencySettings: Currency = {
  */
 export const getCurrencyFromPriceResponse = (
 	// Currency data object, for example an API response containing currency formatting data.
-	currencyData: CurrencyResponseInfo | Record< string, never > | Rate
+	currencyData:
+		| CurrencyResponseInfo
+		| Record< string, never >
+		| CartShippingPackageShippingRate
 ): Currency => {
 	if ( ! currencyData || typeof currencyData !== 'object' ) {
 		return siteCurrencySettings;
