@@ -696,21 +696,23 @@ class WC_Checkout {
 
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
-				switch ( $type ) {
-					case 'checkbox':
-						$value = 1;
-						break;
-					case 'multiselect':
-						$value = implode( ', ', wc_clean( $value ) );
-						break;
-					case 'textarea':
-						$value = wc_sanitize_textarea( $value );
-						break;
-					case 'password':
-						break;
-					default:
-						$value = wc_clean( $value );
-						break;
+				if ( '' !== $value ) {
+					switch ( $type ) {
+						case 'checkbox':
+							$value = 1;
+							break;
+						case 'multiselect':
+							$value = implode( ', ', wc_clean( $value ) );
+							break;
+						case 'textarea':
+							$value = wc_sanitize_textarea( $value );
+							break;
+						case 'password':
+							break;
+						default:
+							$value = wc_clean( $value );
+							break;
+					}
 				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
