@@ -16,18 +16,21 @@ const userEndpoint = '/wp/v2/users';
 const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
+	const statuses = ['publish','trash'];
 
-	objects = await repository.list();
-	while ( objects.length > minimum ) {
-		for (let o = 0; o < objects.length; o++ ) {
-			// Skip default data store object
-			if ( objects[ o ].id == defaultObjectId ) {
-				continue;
+	statuses.forEach( async ( status ) => {
+		objects = await repository.list( { status } );
+		while (objects.length > minimum) {
+			for (let o = 0; o < objects.length; o++) {
+				// Skip default data store object
+				if (objects[o].id == defaultObjectId) {
+					continue;
+				}
+				await repository.delete(objects[o].id);
 			}
-			await repository.delete( objects[ o ].id );
+			objects = await repository.list( { status } );
 		}
-		objects = await repository.list();
-	}
+	} );
 };
 
 /**
