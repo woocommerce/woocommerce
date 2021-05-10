@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { useShippingDataContext } from '@woocommerce/base-context';
+import type { EnteredAddress } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,10 +10,17 @@ import { useShippingDataContext } from '@woocommerce/base-context';
 import ShippingCalculatorAddress from './address';
 import './style.scss';
 
+interface ShippingCalculatorProps {
+	onUpdate?: ( newAddress: EnteredAddress ) => void;
+	addressFields?: Partial< keyof EnteredAddress >[];
+}
+
 const ShippingCalculator = ( {
-	onUpdate = () => {},
+	onUpdate = () => {
+		/* Do nothing */
+	},
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
-} ) => {
+}: ShippingCalculatorProps ): JSX.Element => {
 	const { shippingAddress, setShippingAddress } = useShippingDataContext();
 	return (
 		<div className="wc-block-components-shipping-calculator">
@@ -27,11 +34,6 @@ const ShippingCalculator = ( {
 			/>
 		</div>
 	);
-};
-
-ShippingCalculator.propTypes = {
-	onUpdate: PropTypes.func,
-	addressFields: PropTypes.array,
 };
 
 export default ShippingCalculator;

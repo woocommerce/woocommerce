@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useValidationContext } from '@woocommerce/base-context';
+import type { EnteredAddress, AddressFields } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -14,11 +14,16 @@ import { useValidationContext } from '@woocommerce/base-context';
 import './style.scss';
 import { AddressForm } from '../address-form';
 
+interface ShippingCalculatorAddressProps {
+	address: EnteredAddress;
+	onUpdate: ( address: EnteredAddress ) => void;
+	addressFields: Partial< keyof AddressFields >[];
+}
 const ShippingCalculatorAddress = ( {
 	address: initialAddress,
 	onUpdate,
 	addressFields,
-} ) => {
+}: ShippingCalculatorAddressProps ): JSX.Element => {
 	const [ address, setAddress ] = useState( initialAddress );
 	const {
 		hasValidationErrors,
@@ -53,12 +58,6 @@ const ShippingCalculatorAddress = ( {
 			</Button>
 		</form>
 	);
-};
-
-ShippingCalculatorAddress.propTypes = {
-	address: PropTypes.object.isRequired,
-	onUpdate: PropTypes.func.isRequired,
-	addressFields: PropTypes.array.isRequired,
 };
 
 export default ShippingCalculatorAddress;

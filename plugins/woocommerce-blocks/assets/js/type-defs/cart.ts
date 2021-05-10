@@ -5,7 +5,7 @@
  */
 import {
 	MetaKeyValue,
-	ShippingRateItemItem,
+	ShippingRateItem,
 	ExtensionsData,
 } from './cart-response';
 export interface CurrencyInfo {
@@ -43,7 +43,7 @@ export interface BaseAddress {
 	country: string;
 }
 
-export interface CartShippingRateItemShippingRate extends CurrencyInfo {
+export interface CartShippingPackageShippingRate extends CurrencyInfo {
 	rate_id: string;
 	name: string;
 	description: string;
@@ -56,12 +56,12 @@ export interface CartShippingRateItemShippingRate extends CurrencyInfo {
 	selected: boolean;
 }
 
-export interface CartShippingRateItem {
+export interface CartShippingRate {
 	package_id: number;
 	name: string;
 	destination: BaseAddress;
-	items: Array< ShippingRateItemItem >;
-	shipping_rates: Array< CartShippingRateItemShippingRate >;
+	items: Array< ShippingRateItem >;
+	shipping_rates: Array< CartShippingPackageShippingRate >;
 }
 
 export interface CartShippingAddress extends BaseAddress, FirstNameLastName {
@@ -171,7 +171,7 @@ export interface CartErrorItem {
 
 export interface Cart {
 	coupons: Array< CartCouponItem >;
-	shippingRates: Array< CartShippingRateItem >;
+	shippingRates: Array< CartShippingRate >;
 	shippingAddress: CartShippingAddress;
 	billingAddress: CartBillingAddress;
 	items: Array< CartItem >;
