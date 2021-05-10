@@ -61,7 +61,7 @@ jQuery(function( $ ) {
 				);
 			}
 			$result = woocommerce_admin_meta_boxes_coupon.prefix + $result + woocommerce_admin_meta_boxes_coupon.suffix;
-			$coupon_code_field.focus().val( $result );
+			$coupon_code_field.trigger( 'focus' ).val( $result );
 			$coupon_code_label.addClass( 'screen-reader-text' );
 		}
 	};

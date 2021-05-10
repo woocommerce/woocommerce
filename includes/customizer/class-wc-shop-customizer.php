@@ -128,7 +128,7 @@ class WC_Shop_Customizer {
 				} );
 
 				wp.customize.bind( 'ready', function() { // Ready?
-					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
+					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).trigger( 'change' );
 				} );
 
 				wp.customize( 'woocommerce_demo_store', function( setting ) {
