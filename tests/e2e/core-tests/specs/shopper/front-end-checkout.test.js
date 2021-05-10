@@ -140,7 +140,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('allows existing customer to place order', async () => {
@@ -163,7 +163,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('store owner can confirm the order was received', async () => {
