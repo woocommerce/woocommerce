@@ -21,7 +21,7 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime": "7.13.17",
+		"@babel/runtime": "7.14.0",
 		"@wordpress/components": "10.2.0"
 	},
 	"publishConfig": {
