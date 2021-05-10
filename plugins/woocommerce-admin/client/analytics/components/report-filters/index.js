@@ -58,10 +58,18 @@ class ReportFilters extends Component {
 		if ( triggerCesFor.includes( filterName ) ) {
 			addCesSurveyForAnalytics();
 		}
-		recordEvent( 'analytics_filter', {
+
+		const eventProperties = {
 			report,
 			filter: data.filter || 'all',
-		} );
+		};
+
+		if ( data.filter === 'single_product' ) {
+			eventProperties.filter_variation =
+				data[ 'filter-variations' ] || 'all';
+		}
+
+		recordEvent( 'analytics_filter', eventProperties );
 	}
 
 	onAdvancedFilterAction( action, data ) {
