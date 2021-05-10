@@ -22,12 +22,43 @@ class LookupDataStore {
 	private $lookup_table_name;
 
 	/**
-	 * LookupDataStore constructor.
+	 * Is the feature visible?
+	 *
+	 * @var bool
+	 */
+	private $is_feature_visible;
+
+	/**
+	 * LookupDataStore constructor. Makes the feature hidden by default.
 	 */
 	public function __construct() {
 		global $wpdb;
 
-		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
+		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
+		$this->is_feature_visible = false;
+	}
+
+	/**
+	 * Checks if the feature is visible (so that dedicated entries will be added to the debug tools page).
+	 *
+	 * @return bool True if the feature is visible.
+	 */
+	public function is_feature_visible() {
+		return $this->is_feature_visible;
+	}
+
+	/**
+	 * Makes the feature visible, so that dedicated entries will be added to the debug tools page.
+	 */
+	public function show_feature() {
+		$this->is_feature_visible = true;
+	}
+
+	/**
+	 * Hides the feature, so that no entries will be added to the debug tools page.
+	 */
+	public function hide_feature() {
+		$this->is_feature_visible = false;
 	}
 
 	/**

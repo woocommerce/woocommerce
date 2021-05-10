@@ -271,6 +271,10 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @return array The tools array with the entry added.
 	 */
 	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ) {
+		if ( ! $this->data_store->is_feature_visible() ) {
+			return $tools_array;
+		}
+
 		$lookup_table_exists       = $this->lookup_table_exists();
 		$generation_is_in_progress = $this->regeneration_is_in_progress();
 
