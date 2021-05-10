@@ -22,7 +22,11 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@babel/runtime": "7.14.0",
-		"@wordpress/components": "10.2.0"
+		"@wordpress/components": "10.2.0",
+		"@wordpress/element": "2.19.0",
+		"@wordpress/keycodes": "2.18.0",
+		"classnames": "^2.3.1",
+		"react-transition-group": "4.4.1"
 	},
 	"publishConfig": {
 		"access": "public"

@@ -5,16 +5,11 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
 import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	EllipsisMenu,
-	Badge,
-	__experimentalList as List,
-	__experimentalCollapsibleList as CollapsibleList,
-} from '@woocommerce/components';
+import { EllipsisMenu, Badge } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
+import { Text, List, CollapsibleList } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies

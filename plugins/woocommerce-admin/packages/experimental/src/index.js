@@ -32,3 +32,7 @@ export const NavigationItem =
 	NavigationItemComponent || __experimentalNavigationItem;
 export const Text = TextComponent || __experimentalText;
 export const useSlot = useSlotHook || __experimentalUseSlot;
+
+export { ExperimentalListItem as ListItem } from './experimental-list/experimental-list-item';
+export { ExperimentalList as List } from './experimental-list/experimental-list';
+export { ExperimentalCollapsibleList as CollapsibleList } from './experimental-list/collapsible-list';

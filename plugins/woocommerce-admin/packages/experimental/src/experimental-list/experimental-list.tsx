@@ -26,7 +26,7 @@ export const ExperimentalList: React.FC< ListProps > = ( {
 	return (
 		<TransitionGroup
 			component={ listType }
-			className="woocommerce-list"
+			className="woocommerce-experimental-list"
 			{ ...otherProps }
 		>
 			{ /* Wrapping all children in a CSS Transition means no invalid props are passed to children and that anything can be animated. */ }

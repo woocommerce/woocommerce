@@ -2,12 +2,19 @@
  * External dependencies
  */
 import { CSSTransition } from 'react-transition-group';
+import { ENTER } from '@wordpress/keycodes';
 import classnames from 'classnames';
 
-/**
- * Internal dependencies
- */
-import { handleKeyDown } from './list-item';
+function handleKeyDown(
+	event: React.KeyboardEvent< HTMLElement >,
+	onClick?:
+		| React.MouseEventHandler< HTMLElement >
+		| React.KeyboardEventHandler< HTMLElement >
+) {
+	if ( typeof onClick === 'function' && event.keyCode === ENTER ) {
+		( onClick as React.KeyboardEventHandler< HTMLElement > )( event );
+	}
+}
 
 type CSSTransitionProps = {
 	in: boolean;
@@ -73,7 +80,7 @@ export const ExperimentalListItem: React.FC< ListItemProps > = ( {
 				// spread role props first, in case it is desired to override them
 				{ ...roleProps }
 				{ ...otherProps }
-				className={ `woocommerce-list__item ${ tagClasses } ${ className }` }
+				className={ `woocommerce-experimental-list__item ${ tagClasses } ${ className }` }
 			>
 				{ children }
 			</li>
