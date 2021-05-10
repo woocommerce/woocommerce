@@ -86,10 +86,12 @@ class Bootstrap {
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ExtendRestApi::class );
-		$this->container->get( PaymentsApi::class );
 		$this->container->get( RestApi::class );
 		$this->container->get( GoogleAnalytics::class );
 		$this->container->get( BlockTypesController::class );
+		if ( $this->package->feature()->is_feature_plugin_build() ) {
+			$this->container->get( PaymentsApi::class );
+		}
 	}
 
 	/**
@@ -170,14 +172,6 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			PaymentsApi::class,
-			function ( Container $container ) {
-				$payment_method_registry = $container->get( PaymentMethodRegistry::class );
-				$asset_data_registry     = $container->get( AssetDataRegistry::class );
-				return new PaymentsApi( $payment_method_registry, $asset_data_registry );
-			}
-		);
-		$this->container->register(
 			RestApi::class,
 			function ( Container $container ) {
 				return new RestApi( $container->get( RoutesController::class ) );
@@ -248,6 +242,16 @@ class Bootstrap {
 				return new GoogleAnalytics( $asset_api );
 			}
 		);
+		if ( $this->package->feature()->is_feature_plugin_build() ) {
+			$this->container->register(
+				PaymentsApi::class,
+				function ( Container $container ) {
+					$payment_method_registry = $container->get( PaymentMethodRegistry::class );
+					$asset_data_registry     = $container->get( AssetDataRegistry::class );
+					return new PaymentsApi( $payment_method_registry, $asset_data_registry );
+				}
+			);
+		}
 	}
 
 	/**
