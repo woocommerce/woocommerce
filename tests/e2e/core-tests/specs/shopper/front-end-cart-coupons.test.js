@@ -28,12 +28,10 @@ const runCartApplyCouponsTest = () => {
 		let couponFixedProduct;
 
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 			couponFixedCart = await createCoupon();
 			couponPercentage = await createCoupon('50', 'Percentage discount');
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
-			await merchant.logout();
 			await shopper.emptyCart();
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage('Simple product');
