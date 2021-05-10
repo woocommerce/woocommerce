@@ -21,4 +21,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         labels: |
           'needs feedback'
-          'stale'
+          'Stale'
