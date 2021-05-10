@@ -156,8 +156,8 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_item_schema() {
 		$data_values = array(
 			'items_sold'   => array(
-				'title'       => __( 'Items Sold', 'woocommerce-admin' ),
-				'description' => __( 'Number of items sold.', 'woocommerce-admin' ),
+				'title'       => __( 'Products Sold', 'woocommerce-admin' ),
+				'description' => __( 'Number of product items sold.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
