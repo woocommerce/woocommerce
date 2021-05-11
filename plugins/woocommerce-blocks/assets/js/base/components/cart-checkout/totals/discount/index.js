@@ -5,7 +5,11 @@ import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip } from '@woocommerce/base-components/chip';
 import PropTypes from 'prop-types';
-import { TotalsItem } from '@woocommerce/blocks-checkout';
+import {
+	__experimentalApplyCheckoutFilter,
+	mustBeString,
+	TotalsItem,
+} from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -53,34 +57,48 @@ const TotalsDiscount = ( {
 						showSpinner={ false }
 					>
 						<ul className="wc-block-components-totals-discount__coupon-list">
-							{ cartCoupons.map( ( cartCoupon ) => (
-								<RemovableChip
-									key={ 'coupon-' + cartCoupon.code }
-									className="wc-block-components-totals-discount__coupon-list-item"
-									text={ cartCoupon.code }
-									screenReaderText={ sprintf(
-										/* translators: %s Coupon code. */
-										__(
-											'Coupon: %s',
-											'woo-gutenberg-products-block'
-										),
-										cartCoupon.code
-									) }
-									disabled={ isRemovingCoupon }
-									onRemove={ () => {
-										removeCoupon( cartCoupon.code );
-									} }
-									radius="large"
-									ariaLabel={ sprintf(
-										/* translators: %s is a coupon code. */
-										__(
-											'Remove coupon "%s"',
-											'woo-gutenberg-products-block'
-										),
-										cartCoupon.code
-									) }
-								/>
-							) ) }
+							{ cartCoupons.map( ( cartCoupon ) => {
+								const filteredCouponCode = __experimentalApplyCheckoutFilter(
+									{
+										validation: mustBeString,
+										arg: {
+											context: 'summary',
+											coupon: cartCoupon,
+										},
+										filterName: 'couponName',
+										defaultValue: cartCoupon.code,
+									}
+								);
+
+								return (
+									<RemovableChip
+										key={ 'coupon-' + cartCoupon.code }
+										className="wc-block-components-totals-discount__coupon-list-item"
+										text={ filteredCouponCode }
+										screenReaderText={ sprintf(
+											/* translators: %s Coupon code. */
+											__(
+												'Coupon: %s',
+												'woo-gutenberg-products-block'
+											),
+											filteredCouponCode
+										) }
+										disabled={ isRemovingCoupon }
+										onRemove={ () => {
+											removeCoupon( cartCoupon.code );
+										} }
+										radius="large"
+										ariaLabel={ sprintf(
+											/* translators: %s is a coupon code. */
+											__(
+												'Remove coupon "%s"',
+												'woo-gutenberg-products-block'
+											),
+											filteredCouponCode
+										) }
+									/>
+								);
+							} ) }
 						</ul>
 					</LoadingMask>
 				)
