@@ -92,12 +92,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Delete all products when running product import tests, unskip previously skipped test. #6905
 - Dev: Add payment method selector to onboarding store #6921
 - Dev: Add disabled prop to SelectControl #6902
-- Dev: Do a git clean before the core release. #6945
 - Dev: Add filter variation to tracks data in products analytics. #6913
 - Enhancement: Add recommended payment methods in payment settings. #6760
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916
-- Fix: Disable the continue btn on OBW when requested are being made #6838
 - Fix: Event tracking for merchant email notes #6616
 - Fix: Use the store timezone to make time data requests #6632
 - Fix: Update the checked input radio button margin style #6701
@@ -123,7 +121,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Correct the left position of transient notices when the new nav is used. #6914
 - Fix: Exclude WC Shipping for store that are only offering downloadable products #6917
 - Fix: SelectControl focus and de-focus bug #6906
-- Fix: Calling of get_script_asset_filename with extra parameter #6955
 - Performance: Avoid updating customer info synchronously from the front end. #6765
 - Tweak: Add settings_section event prop for CES #6762
 - Tweak: Refactor payments to allow management of methods #6786
@@ -131,8 +128,6 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Update WC Payments copy on the task list #6734
 - Tweak: Add check to see if value for contains is array, show warning if not. #6645
 - Tweak: Sort the extension task list by completion status and allow toggling visibility. #6792
-- Tweak: Update PayU logo #6829
-- Tweak: Store profiler - Changed MailPoet's title and description #6886
 - Update: Update choose niche note cta URL #6733
 - Update: UI updates to Payment Task screen #6766
 - Update: Adding setup required icon for non-configured payment methods #6811
@@ -140,8 +135,29 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
 - Update: Replace marketing extension - Google Listings and Ads. #6939
-- Dev: Fix a bug where trying to load an asset registry causes a crash. #6951
+
+== 2.2.6 5/7/2021 ==
+
 - Fix: Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
+
+== 2.2.5 5/7/2021 ==
+
+- Fix: Calling of get_script_asset_filename with extra parameter #6955
+
+== 2.2.4 5/7/2021 ==
+
+- Dev: Fix a bug where trying to load an asset registry causes a crash. #6951
+
+== 2.2.3 5/6/2021 ==
+
+- Dev: Do a git clean before the core release. #6945
+
+== 2.2.2 4/28/2021 ==
+
+- Fix: Disable the continue btn on OBW when requested are being made #6838
+- Tweak: Revert WCPay international support for bundled package #6901
+- Tweak: Store profiler - Changed MailPoet's title and description #6886
+- Tweak: Update PayU logo #6829
 
 == 2.2.0 3/30/2021 ==
 
