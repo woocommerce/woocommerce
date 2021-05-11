@@ -3,7 +3,7 @@
 read -p 'What date (YYYY-MM-DD) should we get contributions since? (i.e. date of previous release): ' from_date
 read -sp 'Provide a personal access token (you must): ' auth_token
 
-ignored_users="renovate-bot,apps/renovate,renovate,renovate[bot],github-actions[bot]"
+ignored_users="renovate-bot,apps/renovate,renovate,renovate[bot],github-actions[bot],dependabot,dependabot[bot]"
 output_file="contributors.html"
 common_arguments="--owner woocommerce --fromDate $from_date --authToken $auth_token --cols 6 --sortBy contributions --format html --sortOrder desc --showlogin true --filter $ignored_users"
 
