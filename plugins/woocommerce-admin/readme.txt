@@ -80,6 +80,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add plugin installer to allow installation of plugins via URL #6805
 - Add: Optional children prop to SummaryNumber component #6748
 - Add: Extend payment gateways REST endpoint #6919
+- Add: Add remote payment gateway recommendations initial docs #6962
 - Dev: Add data source filter to remote inbox notification system #6794
 - Dev: Add A/A test #6669
 - Dev: Add support for nonces in note actions #6726
